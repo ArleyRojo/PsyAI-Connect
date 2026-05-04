@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Auditoría y Logs</title>
+<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/components/components.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/responsive/aside.css">
+<link rel="stylesheet" href="/responsive/admin.css">
+<script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+
+<div class="d-flex">
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+        <nav class="nav flex-column mt-4">
+            <a href="../admin.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+            <a href="users.html" class="nav-link"><i class="fas fa-users me-2"></i> Usuarios <span id="sidebarBloqueados" class="badge rounded-pill ms-1" style="background:#ffebee;color:#c62828;font-size:.68rem;display:none;"></span></a>
+            <a href="roles.html" class="nav-link"><i class="fas fa-user-shield me-2"></i> Roles</a>
+            <a href="notifications.html" class="nav-link"><i class="fas fa-bell me-2"></i> Notificaciones</a>
+            <a href="logs.html" class="nav-link active"><i class="fas fa-clipboard-list me-2"></i> Logs</a>
+        </nav>
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+            <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+        </div>
+    </aside>
+
+  <main class="main-content flex-grow-1 ms-250 p-4">
+
+    <!-- Header -->
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-0"><i class="fas fa-clipboard-list me-2 text-primary"></i>Auditoría y Logs</h1>
+        <small class="text-muted">Registro de todas las acciones realizadas en el panel de administración.</small>
+      </div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
+    </header>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-stream"></i></div>
+          <div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Eventos hoy</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-users-cog"></i></div>
+          <div><div class="stat-value" id="statUsuarios">0</div><div class="stat-label">Acciones en usuarios</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-user-shield"></i></div>
+          <div><div class="stat-value" id="statRoles">0</div><div class="stat-label">Cambios de rol</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-bell"></i></div>
+          <div><div class="stat-value" id="statNotifs">0</div><div class="stat-label">Notificaciones enviadas</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="logs-tabs">
+      <button class="logs-tab active" onclick="mostrarTabLogs('todos', this)">
+        <i class="fas fa-list"></i> Todos <span class="tab-count" id="cntTodos">0</span>
+      </button>
+      <button class="logs-tab" onclick="mostrarTabLogs('usuarios', this)">
+        <i class="fas fa-users"></i> Usuarios <span class="tab-count" id="cntUsuarios">0</span>
+      </button>
+      <button class="logs-tab" onclick="mostrarTabLogs('roles', this)">
+        <i class="fas fa-user-shield"></i> Roles <span class="tab-count" id="cntRoles">0</span>
+      </button>
+      <button class="logs-tab" onclick="mostrarTabLogs('notificaciones', this)">
+        <i class="fas fa-bell"></i> Notificaciones <span class="tab-count" id="cntNotifs">0</span>
+      </button>
+    </div>
+
+    <!-- TAB: Todos -->
+    <div id="tab-log-todos">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select id="filtroAccion" class="form-control form-control-sm" style="width:160px;" onchange="filtrarLogs()">
+            <option value="">Todas las acciones</option>
+            <option value="crear">Crear</option>
+            <option value="editar">Editar</option>
+            <option value="eliminar">Eliminar</option>
+            <option value="bloquear">Bloquear</option>
+            <option value="desbloquear">Desbloquear</option>
+            <option value="reset">Reset contraseña</option>
+            <option value="rol">Cambio de rol</option>
+            <option value="notif">Notificación</option>
+          </select>
+          <input type="date" class="form-control form-control-sm" style="width:160px;">
+          <input type="text" id="filtroTexto" class="form-control form-control-sm" placeholder="Buscar usuario o detalle..." style="width:220px;" oninput="filtrarLogs()">
+        </div>
+        <div class="toolbar-right">
+          <button class="btn-export"><i class="fas fa-download"></i> Exportar CSV</button>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 d-flex flex-column" style="min-height: 500px;">
+        <div class="table-responsive flex-grow-1">
+          <table class="table table-clean mb-0">
+            <thead>
+              <tr>
+                <th class="ps-4" style="width:14px;"></th>
+                <th>Fecha y hora</th>
+                <th>Usuario</th>
+                <th>Módulo</th>
+                <th>Acción</th>
+                <th>Origen</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="tablaLogsTodos">
+              <!-- cargado por admin.logs.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top logs-pagination-fixed" style="font-size:.82rem;">
+          <span class="text-muted" id="contadorResultados">Mostrando <span id="mostrandoInicio">0</span>-<span id="mostrandoFin">0</span> de <span id="mostrandoTotal">0</span> eventos</span>
+          <div class="d-flex gap-1" id="paginacionLogs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Usuarios -->
+    <div id="tab-log-usuarios" style="display:none;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+           <select id="filtroAccionUsuarios" class="form-control form-control-sm" style="width:160px;" onchange="filtrarLogs()">
+             <option value="">Todas las acciones</option>
+             <option value="crear">Crear</option>
+             <option value="editar">Editar</option>
+             <option value="eliminar">Eliminar</option>
+             <option value="bloquear">Bloquear</option>
+             <option value="desbloquear">Desbloquear</option>
+             <option value="reset">Reset contraseña</option>
+             <option value="login">Login</option>
+           </select>
+          <input type="date" class="form-control form-control-sm" style="width:160px;">
+          <input type="text" id="filtroTextoUsuarios" class="form-control form-control-sm" placeholder="Buscar usuario..." style="width:220px;" oninput="filtrarLogs()">
+        </div>
+        <div class="toolbar-right">
+          <button class="btn-export"><i class="fas fa-download"></i> Exportar CSV</button>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 d-flex flex-column" style="min-height: 500px;">
+          <div class="table-responsive flex-grow-1">
+            <table class="table table-clean mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-4" style="width:14px;"></th>
+                  <th>Fecha y hora</th>
+                  <th>Acción</th>
+                  <th>Usuario afectado</th>
+                  <th>Origen</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody id="tablaLogsUsuarios">
+                <!-- cargado por admin.logs.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top logs-pagination-fixed" style="font-size:.82rem;">
+            <span class="text-muted">Mostrando <span id="mostrandoInicioUsuarios">0</span>-<span id="mostrandoFinUsuarios">0</span> de <span id="mostrandoTotalUsuarios">0</span> eventos</span>
+            <div class="d-flex gap-1" id="paginacionUsuarios"></div>
+          </div>
+        </div>
+      </div>
+
+    <!-- TAB: Roles -->
+    <div id="tab-log-roles" style="display:none;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select id="filtroAccionRoles" class="form-control form-control-sm" style="width:160px;" onchange="filtrarLogs()">
+            <option value="">Todas las acciones</option>
+            <option value="rol">Cambio de rol</option>
+            <option value="crear">Crear rol</option>
+            <option value="editar">Editar rol</option>
+            <option value="eliminar">Eliminar rol</option>
+          </select>
+          <input type="date" class="form-control form-control-sm" style="width:160px;">
+          <input type="text" id="filtroTextoRoles" class="form-control form-control-sm" placeholder="Buscar usuario..." style="width:220px;" oninput="filtrarLogs()">
+        </div>
+        <div class="toolbar-right">
+          <button class="btn-export"><i class="fas fa-download"></i> Exportar CSV</button>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 d-flex flex-column" style="min-height: 500px;">
+          <div class="table-responsive flex-grow-1">
+            <table class="table table-clean mb-0">
+              <thead>
+                 <tr>
+                   <th class="ps-4" style="width:14px;"></th>
+                   <th>Fecha y hora</th>
+                   <th>Acción</th>
+                   <th>Usuario afectado</th>
+                   <th>Origen</th>
+                   <th>Rol anterior</th>
+                   <th>Rol nuevo</th>
+                 </tr>
+              </thead>
+              <tbody id="tablaLogsRoles">
+                <!-- cargado por admin.logs.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top logs-pagination-fixed" style="font-size:.82rem;">
+            <span class="text-muted">Mostrando <span id="mostrandoInicioRoles">0</span>-<span id="mostrandoFinRoles">0</span> de <span id="mostrandoTotalRoles">0</span> eventos</span>
+            <div class="d-flex gap-1" id="paginacionRoles"></div>
+          </div>
+        </div>
+      </div>
+
+    <!-- TAB: Notificaciones -->
+    <div id="tab-log-notificaciones" style="display:none;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select id="filtroAccionNotifs" class="form-control form-control-sm" style="width:160px;" onchange="filtrarLogs()">
+            <option value="">Todas las acciones</option>
+             <option value="notif">Notificación</option>
+             <option value="crear">Crear notificación</option>
+             <option value="editar">Editar notificación</option>
+             <option value="eliminar">Eliminar notificación</option>
+             <option value="enviar">Enviar notificación</option>
+          </select>
+          <input type="date" class="form-control form-control-sm" style="width:160px;">
+          <input type="text" id="filtroTextoNotifs" class="form-control form-control-sm" placeholder="Buscar usuario..." style="width:220px;" oninput="filtrarLogs()">
+        </div>
+        <div class="toolbar-right">
+          <button class="btn-export"><i class="fas fa-download"></i> Exportar CSV</button>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 d-flex flex-column" style="min-height: 500px;">
+          <div class="table-responsive flex-grow-1">
+            <table class="table table-clean mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-4" style="width:14px;"></th>
+                  <th>Fecha y hora</th>
+                  <th>Acción</th>
+                  <th>Origen</th>
+                  <th>Usuario</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody id="tablaLogsNotifs">
+                <!-- cargado por admin.logs.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top logs-pagination-fixed" style="font-size:.82rem;">
+            <span class="text-muted">Mostrando <span id="mostrandoInicioNotifs">0</span>-<span id="mostrandoFinNotifs">0</span> de <span id="mostrandoTotalNotifs">0</span> eventos</span>
+            <div class="d-flex gap-1" id="paginacionNotifs"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/core/shared/aside.js"></script>
+<script src="/js/modules/admin/admin.logs.js"></script>
+<script src="/js/modules/auth/logout.js"></script>
+
+</body>               

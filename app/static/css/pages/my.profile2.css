@@ -1,0 +1,84 @@
+/* =======================================================
+   my.profile2.css – PsyAI Connect
+   Extraído de my.profile2.html
+   ======================================================= */
+
+/* ── Modal PsyAI (mismo que profile1) ───────────────────── */
+.psyai-modal .modal-dialog { max-width: 460px; }
+.psyai-modal__content {
+    border: none; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+}
+.psyai-modal__header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 22px 24px 18px;
+    background: linear-gradient(135deg, #1565C0 0%, #1976D2 60%, #42a5f5 100%);
+    position: relative;
+}
+.psyai-modal__header-icon {
+    width: 46px; height: 46px;
+    background: rgba(255,255,255,0.18); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: #fff; flex-shrink: 0;
+    backdrop-filter: blur(4px);
+}
+.psyai-modal__title { margin: 0; font-size: 1.1rem; font-weight: 700; color: #fff; }
+.psyai-modal__subtitle { margin: 2px 0 0; font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+.psyai-modal__close {
+    position: absolute; top: 14px; right: 16px;
+    background: rgba(255,255,255,0.15); border: none; border-radius: 8px;
+    width: 30px; height: 30px; color: #fff; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.2s;
+}
+.psyai-modal__close:hover { background: rgba(255,255,255,0.3); }
+.psyai-modal__body {
+    padding: 22px 24px 10px; background: #fff;
+    display: flex; flex-direction: column; gap: 16px;
+}
+.psyai-modal__field { display: flex; flex-direction: column; gap: 6px; }
+.psyai-modal__label {
+    font-size: 0.8rem; font-weight: 600; color: #1565C0;
+    letter-spacing: 0.02em; display: flex; align-items: center; gap: 6px;
+}
+.psyai-modal__label i { font-size: 0.75rem; opacity: 0.8; }
+.psyai-modal__input {
+    border: 1.5px solid #e3eaf3; border-radius: 10px;
+    padding: 10px 14px; font-size: 0.9rem; color: #1a2b40;
+    background: #f7faff; transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none; width: 100%;
+}
+.psyai-modal__input:focus {
+    border-color: #1565C0; box-shadow: 0 0 0 3px rgba(21,101,192,0.1); background: #fff;
+}
+.psyai-modal__footer {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 14px 24px 20px; background: #fff; border-top: 1px solid #f0f4fa;
+}
+.psyai-modal__btn {
+    padding: 9px 20px; border-radius: 10px;
+    font-size: 0.88rem; font-weight: 600; border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.psyai-modal__btn:hover { transform: translateY(-1px); }
+.psyai-modal__btn--cancel { background: #f0f4fa; color: #476080; }
+.psyai-modal__btn--cancel:hover { background: #e3eaf3; }
+.psyai-modal__btn--save {
+    background: linear-gradient(135deg, #1565C0, #42a5f5);
+    color: #fff; box-shadow: 0 4px 14px rgba(21,101,192,0.3);
+}
+.psyai-modal__btn--save:hover { box-shadow: 0 6px 20px rgba(21,101,192,0.4); }
+/* Dark mode */
+.dark-mode .psyai-modal__content { box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+.dark-mode .psyai-modal__body,
+.dark-mode .psyai-modal__footer { background: #0f1a29; border-top-color: #1a2b40; }
+.dark-mode .psyai-modal__input {
+    background: #152036; border-color: #1a2b40; color: #dce9f7;
+}
+.dark-mode .psyai-modal__input:focus {
+    border-color: #4a86f0; box-shadow: 0 0 0 3px rgba(74,134,240,0.15); background: #1a2b40;
+}
+.dark-mode .psyai-modal__label { color: #78a8ff; }
+.dark-mode .psyai-modal__btn--cancel { background: #152036; color: #8aaac6; }
+.dark-mode .psyai-modal__btn--cancel:hover { background: #1a2b40; }

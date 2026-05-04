@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Gestión de Roles</title>
+<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/components/components.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/responsive/aside.css">
+<link rel="stylesheet" href="/responsive/admin.css">
+<script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+
+<div class="d-flex">
+
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+    <nav class="nav flex-column mt-4">
+        <a href="../admin.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+        <a href="users.html" class="nav-link"><i class="fas fa-users me-2"></i> Usuarios <span id="sidebarBloqueados" class="badge rounded-pill ms-1" style="background:#ffebee;color:#c62828;font-size:.68rem;display:none;"></span></a>
+        <a href="roles.html" class="nav-link active"><i class="fas fa-user-shield me-2"></i> Roles</a>
+        <a href="notifications.html" class="nav-link"><i class="fas fa-bell me-2"></i> Notificaciones</a>
+        <a href="chatbot.config.html" class="nav-link"><i class="fas fa-robot me-2"></i> Chatbot</a>
+        <a href="logs.html" class="nav-link"><i class="fas fa-clipboard-list me-2"></i> Logs</a>
+    </nav>
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+            <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+        </div>
+    </aside>
+
+  <main class="main-content flex-grow-1 ms-250 p-4">
+
+    <!-- Header -->
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-0"><i class="fas fa-user-shield me-2 text-primary"></i>Gestión de Roles</h1>
+        <small class="text-muted">Administra los roles y permisos de los usuarios del sistema.</small>
+      </div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
+    </header>
+
+     <!-- Tabs de navegación -->
+     <div class="logs-tabs">
+       <button class="logs-tab active" onclick="mostrarTab('usuarios', this)">
+         <i class="fas fa-users"></i> Usuarios
+         <span class="tab-count" id="cntUsuarios">0</span>
+       </button>
+       <button class="logs-tab" onclick="mostrarTab('historial', this)">
+         <i class="fas fa-user-cog"></i> Actualización de Rangos
+         <span class="tab-count" id="cntHistorialTab">0</span>
+       </button>
+      <button class="logs-tab" onclick="mostrarTab('agregar', this)">
+        <i class="fas fa-plus-circle"></i> Nuevo Rol
+      </button>
+    </div>
+
+    <!-- TAB: Usuarios -->
+    <div id="tab-usuarios">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select id="filtroRol" class="form-control form-control-sm" style="width:160px;">
+            <option value="">Todos los roles</option>
+            <option value="paciente">Paciente</option>
+            <option value="profesional">Profesional</option>
+            <option value="admin">Administrador</option>
+          </select>
+          <select id="filtroEstado" class="form-control form-control-sm" style="width:160px;">
+    <option value="">Todos los estados</option>
+    <option value="activo">Activo</option>
+    <option value="inactivo">Inactivo</option>
+</select>
+          <input type="text" id="buscarUsuario" class="form-control form-control-sm" placeholder="&#xf002;  Buscar usuario..." style="width:220px;">
+        </div>
+        <div class="toolbar-right">
+          <span class="text-muted" style="font-size:.82rem; align-self:center;"><span id="cntUsuariosEncontrados">0</span> usuarios encontrados</span>
+        </div>
+      </div>
+
+<div class="card shadow-sm border-0 d-flex flex-column" style="min-height: 500px;">
+        <div class="table-responsive flex-grow-1">
+          <table class="table table-clean mb-0">
+            <thead>
+              <tr>
+                 <th>Usuario</th>
+                 <th>Rol</th>
+                 <th>Estado</th>
+                 <th>Última actividad</th>
+                 <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaUsuarios">
+              <!-- cargado por admin.roles.js -->
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top logs-pagination-fixed" style="font-size:.82rem;">
+          <span class="text-muted">Mostrando <span id="mostrandoInicioRoles">0</span>-<span id="mostrandoFinRoles">0</span> de <span id="mostrandoTotalRoles">0</span> usuarios</span>
+          <div class="d-flex gap-1" id="paginacionRoles"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Nuevo Rol -->
+    <div id="tab-agregar" style="display:none;">
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="card shadow-sm border-0 p-4">
+            <h6 class="fw-bold mb-4" style="color:#1a2b40;"><i class="fas fa-plus-circle me-2 text-primary"></i>Asignar nuevo rol a usuario</h6>
+            <div class="form-section">
+              <form id="formAsignarRol">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Seleccionar Usuario</label>
+                  <select id="selUsuario" class="form-control">
+                    <option value="">-- Seleccionar usuario --</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">O escribir email manualmente</label>
+                  <input type="email" id="emailUsuario" class="form-control" placeholder="correo@ejemplo.com">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Nuevo Rol</label>
+                  <select id="nuevoRol" class="form-control">
+                    <option value="">Seleccionar rol</option>
+                    <option value="paciente">Paciente</option>
+                    <option value="profesional">Profesional</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+                 <div class="mb-4">
+                   <label class="form-label fw-semibold">Motivo / Observación</label>
+                   <textarea id="motivoAsignacion" class="form-control" rows="3" placeholder="Describe brevemente el motivo del cambio de rol..."></textarea>
+                 </div>
+                <button type="button" id="btnAsignarRol" class="btn btn-primary w-100">
+                  <i class="fas fa-save me-2"></i>Asignar Rol
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card shadow-sm border-0 p-4 h-100">
+            <h6 class="fw-bold mb-3" style="color:#1a2b40;"><i class="fas fa-info-circle me-2 text-primary"></i>Información de Roles</h6>
+            <div class="alert alert-info mb-3">
+              <strong>Descripción de roles:</strong>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item d-flex align-items-center gap-2 border-0">
+                <span class="badge bg-primary">A</span>
+                <div>
+                  <strong>Administrador</strong>
+                  <small class="d-block text-muted">Acceso total al sistema</small>
+                </div>
+              </li>
+              <li class="list-group-item d-flex align-items-center gap-2 border-0">
+                <span class="badge bg-success">P</span>
+                <div>
+                  <strong>Profesional</strong>
+                  <small class="d-block text-muted">Gestiona pacientes y citas</small>
+                </div>
+              </li>
+              <li class="list-group-item d-flex align-items-center gap-2 border-0">
+                <span class="badge bg-warning text-dark">U</span>
+                <div>
+                  <strong>Paciente</strong>
+                  <small class="d-block text-muted">Acceso a servicios básicos</small>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Actualización de Rangos (Historial) -->
+    <div id="tab-historial" style="display:none;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select id="filtroHistorial" class="form-control form-control-sm" style="width:150px;">
+            <option value="">Todas las acciones</option>
+            <option value="agregado">Agregado</option>
+            <option value="editado">Editado</option>
+            <option value="eliminado">Eliminado</option>
+          </select>
+          <select id="filtroRolHistorial" class="form-control form-control-sm" style="width:150px;">
+            <option value="">Todos los roles</option>
+            <option value="paciente">Paciente</option>
+            <option value="profesional">Profesional</option>
+            <option value="admin">Administrador</option>
+          </select>
+          <input type="date" id="fechaHistorial" class="form-control form-control-sm" style="width:160px;">
+        </div>
+        <div class="toolbar-right">
+          <span class="text-muted" style="font-size:.82rem; align-self:center;"><span id="cntHistorial">0</span> registros</span>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+          <table class="table table-clean mb-0">
+            <thead>
+              <tr>
+                <th>Fecha y hora</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Rol anterior</th>
+                <th>Rol nuevo</th>
+                <th>Realizado por</th>
+              </tr>
+            </thead>
+            <tbody id="tablaHistorial">
+              <!-- cargado por admin.roles.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="text-center mt-3">
+        <p class="text-muted" style="font-size:.85rem;"><i class="fas fa-info-circle me-1"></i> El historial muestra todos los cambios de roles realizados en el sistema.</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL: Editar Rol -->
+<div class="modal fade" id="modalEditarRol" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2 text-primary"></i>Editar Rol</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <p class="text-muted mb-3" style="font-size:.875rem;">Usuario: <strong id="modalNombreUsuario" class="text-dark"></strong></p>
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:.82rem;">Nuevo Rol</label>
+          <select id="modalNuevoRol" class="form-control">
+            <option value="paciente">Paciente</option>
+            <option value="profesional">Profesional</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div>
+           <label class="form-label fw-semibold" style="font-size:.82rem;">Observación <span class="text-muted fw-normal">(opcional)</span></label>
+          <textarea id="modalObservacion" class="form-control" rows="2" placeholder="Motivo del cambio..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button id="btnGuardarRol" class="btn btn-primary"><i class="fas fa-save me-1"></i>Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Eliminar Rol -->
+<div class="modal fade" id="modalEliminarRol" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-trash me-2 text-danger"></i>Eliminar Rol</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+       <div class="modal-body" style="font-size:.875rem;">
+         ¿Eliminar el rol <strong id="modalRolEliminar"></strong> de <strong id="modalUsuarioEliminar"></strong>?<br>
+         <span class="text-muted">Esta acción quedará en el historial.</span>
+       </div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button id="btnConfirmarEliminarRol" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i>Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirmar -->
+<div class="modal fade" id="modalConfirmar" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Confirmar acción</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+       <div class="modal-body" id="modalConfirmarMensaje" style="font-size:.875rem;">¿Estás seguro?</div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button id="btnConfirmarAccion" class="btn btn-danger btn-sm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/core/shared/aside.js"></script>
+<script src="/js/modules/admin/admin.roles.js"></script>
+<script src="/js/modules/auth/logout.js"></script>
+
+</body>
+</html>

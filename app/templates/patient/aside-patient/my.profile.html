@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <title>PsyAI Connect | Mi Perfil</title>
+    <link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+    <script src="/js/core/shared/theme-inline.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/base/base.css">
+    <link rel="stylesheet" href="/css/layout/layout.css">
+    <link rel="stylesheet" href="/css/components/components.css">
+    <link rel="stylesheet" href="/css/themes/theme.css">
+    <link rel="stylesheet" href="/responsive/aside-patient.css">
+
+<script src="/js/core/shared/theme.js"></script>
+<script src="/js/core/shared/localStorage-detector.js"></script>
+<link rel="stylesheet" href="/css/pages/my.profile.css">
+</head>
+<body>
+<div class="d-flex">
+
+    <!-- Sidebar -->
+    <aside class="sidebar d-flex flex-column position-fixed">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+        <nav class="nav flex-column mt-4">
+            <a href="../patient.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+            <a href="chatbot.html" class="nav-link"><i class="fas fa-robot me-2"></i>Chatbot Emocional</a>
+            <a href="agenda-quotes.html" class="nav-link"><i class="fas fa-calendar-alt me-2"></i> Agenda de Citas</a>
+            <a href="evolution.html" class="nav-link"><i class="fas fa-chart-area me-2"></i> Mi Evolución</a>
+            <a href="my.profile.html" class="nav-link border-top pt-3 mt-3 active"><i class="fas fa-user-circle me-2"></i> Mi Perfil</a>
+        </nav>
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+            <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content flex-grow-1 ms-250 p-4">
+
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <h1>Mi Perfil</h1>
+            <div class="user-info">
+                <i class="fas fa-user-tie me-2"></i>
+                <span class="fw-semibold text-dark" id="nombrPaciente">Hola, </span>
+            </div>
+        </header>
+
+        <!-- Avatar -->
+        <div class="card p-4 mb-4 text-center">
+            <h5><i class="fas fa-user-circle me-2"></i>Mi Avatar</h5>
+            <div class="mb-3 d-flex justify-content-center">
+                <div data-avatar="inicial" style="width:150px;height:150px;"></div>
+            </div>
+            <p class="text-muted small">Avatar generado automáticamente a partir de tu nombre</p>
+        </div>
+
+        <!-- Información Personal -->
+        <div class="card p-4 mb-4">
+            <h5><i class="fas fa-id-card me-2"></i>Información Personal</h5>
+            <p><strong>Nombre:</strong> <span data-field="nombre">Cargando...</span></p>
+            <p><strong>Rol:</strong> <span data-field="rol">Cargando...</span></p>
+            <p><strong>Edad:</strong> <span data-field="edad">Cargando...</span></p>
+            <p><strong>Género:</strong> <span data-field="genero">No especificado</span></p>
+            <p><strong>Correo:</strong> <span data-field="email">Cargando...</span></p>
+            <p><strong>Teléfono:</strong> <span data-field="telefono">Cargando...</span></p>
+            <button class="button button--primary mt-3" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil"
+                style="background:#2196F3 !important;border-color:#2196F3 !important;color:#fff !important;">
+                Editar Perfil <i class="fas fa-edit"></i>
+            </button>
+        </div>
+
+        <!-- Preferencias -->
+        <div class="card p-4 mb-4">
+            <h5><i class="fas fa-cog me-2"></i>Preferencias</h5>
+            <p><strong>Notificaciones:</strong> <span data-field="pref_notificaciones">Activadas</span></p>
+            <p><strong>Recordatorios:</strong> <span data-field="pref_recordatorios">Activados</span></p>
+            <p><strong>Medio de contacto:</strong> <span data-field="pref_contacto">Correo</span></p>
+            <button class="button button--primary mt-3" data-bs-toggle="modal" data-bs-target="#modalEditarPreferencias"
+                style="background:#2196F3 !important;border-color:#2196F3 !important;color:#fff !important;">
+                Editar Preferencias <i class="fas fa-sliders-h"></i>
+            </button>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Editar Perfil -->
+<div class="modal fade psyai-modal" id="modalEditarPerfil" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content psyai-modal__content">
+
+            <!-- Header con gradiente -->
+            <div class="psyai-modal__header">
+                <div class="psyai-modal__header-icon">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <div>
+                    <h5 class="psyai-modal__title">Editar Perfil</h5>
+                    <p class="psyai-modal__subtitle">Actualiza tu información personal</p>
+                </div>
+                <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="psyai-modal__body">
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-birthday-cake"></i> Edad
+                    </label>
+                    <input type="number" class="psyai-modal__input" id="editEdad" placeholder="Ej: 28" min="1" max="120">
+                </div>
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-venus-mars"></i> Género
+                    </label>
+                    <select class="psyai-modal__select" id="editGenero">
+                        <option value="">Seleccionar género</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-phone"></i> Teléfono
+                    </label>
+                    <input type="text" class="psyai-modal__input" id="editTelefono" placeholder="Ej: +57 300 000 0000">
+                </div>
+            </div>
+
+            <div class="psyai-modal__footer">
+                <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <button type="button" class="psyai-modal__btn psyai-modal__btn--save" onclick="guardarPerfil()">
+                    <i class="fas fa-save me-1"></i> Guardar Cambios
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Editar Preferencias -->
+<div class="modal fade psyai-modal" id="modalEditarPreferencias" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content psyai-modal__content">
+
+            <div class="psyai-modal__header psyai-modal__header--pref">
+                <div class="psyai-modal__header-icon psyai-modal__header-icon--pref">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <div>
+                    <h5 class="psyai-modal__title">Preferencias</h5>
+                    <p class="psyai-modal__subtitle">Personaliza tu experiencia</p>
+                </div>
+                <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="psyai-modal__body">
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-bell"></i> Notificaciones
+                    </label>
+                    <select class="psyai-modal__select" id="prefNotificaciones">
+                        <option value="Activadas">✓ Activadas</option>
+                        <option value="Desactivadas">✗ Desactivadas</option>
+                    </select>
+                </div>
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-clock"></i> Recordatorios
+                    </label>
+                    <select class="psyai-modal__select" id="prefRecordatorios">
+                        <option value="Activados">✓ Activados</option>
+                        <option value="Desactivados">✗ Desactivados</option>
+                    </select>
+                </div>
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-paper-plane"></i> Medio de contacto
+                    </label>
+                    <select class="psyai-modal__select" id="prefContacto">
+                        <option value="Correo">✉ Correo</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Teléfono">☎ Teléfono</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="psyai-modal__footer">
+                <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <button type="button" class="psyai-modal__btn psyai-modal__btn--save psyai-modal__btn--pref" onclick="guardarPreferencias()">
+                    <i class="fas fa-check me-1"></i> Guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/modules/auth/auth-guard.js"></script>
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/patient/aside.js"></script>
+<script src="/js/modules/patient/my.profile.js"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/nombre.usuario.js"></script>
+</body>
+</html>

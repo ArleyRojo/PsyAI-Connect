@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Notificaciones del Sistema</title>
+<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/components/components.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/responsive/aside.css">
+<link rel="stylesheet" href="/responsive/admin.css">
+<script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+
+<div class="d-flex">
+
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+    <nav class="nav flex-column mt-4">
+        <a href="../admin.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+        <a href="users.html" class="nav-link"><i class="fas fa-users me-2"></i> Usuarios <span id="sidebarBloqueados" class="badge rounded-pill ms-1" style="background:#ffebee;color:#c62828;font-size:.68rem;display:none;"></span></a>
+        <a href="roles.html" class="nav-link"><i class="fas fa-user-shield me-2"></i> Roles</a>
+        <a href="notifications.html" class="nav-link active"><i class="fas fa-bell me-2"></i> Notificaciones</a>
+        <a href="chatbot.config.html" class="nav-link"><i class="fas fa-robot me-2"></i> Chatbot</a>
+        <a href="logs.html" class="nav-link"><i class="fas fa-clipboard-list me-2"></i> Logs</a>
+    </nav>
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+            <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesi&#243;n</a>
+        </div>
+    </aside>
+
+  <main class="main-content flex-grow-1 ms-250 p-4">
+
+    <!-- Header -->
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-0"><i class="fas fa-bell me-2 text-primary"></i>Notificaciones del Sistema</h1>
+        <small class="text-muted">Crea, programa y gestiona notificaciones para los usuarios.</small>
+      </div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
+    </header>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-paper-plane"></i></div>
+          <div><div class="stat-value" id="statEnviadas">0</div><div class="stat-label">Enviadas hoy</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+          <div><div class="stat-value" id="statProgramadas">0</div><div class="stat-label">Programadas</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-double"></i></div>
+          <div><div class="stat-value" id="statTasa">&#8212;</div><div class="stat-label">Tasa de entrega</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-users"></i></div>
+          <div><div class="stat-value" id="statAlcanzados">0</div><div class="stat-label">Usuarios alcanzados</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="logs-tabs">
+      <button class="logs-tab active" onclick="mostrarTab('historial', this)">
+        <i class="fas fa-list"></i> Historial
+        <span class="tab-count" id="cntHistorial">0</span>
+      </button>
+      <button class="logs-tab" onclick="mostrarTab('programadas', this)">
+        <i class="fas fa-clock"></i> Programadas
+        <span class="tab-count" id="cntProgramadas">0</span>
+      </button>
+      <button class="logs-tab" onclick="mostrarTab('nueva', this)">
+        <i class="fas fa-plus-circle"></i> Nueva Notificaci&#243;n
+      </button>
+    </div>
+
+    <!-- &#9608;&#9608; TAB: Historial &#9608;&#9608; -->
+    <div id="tab-historial">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select id="filtroTipo" class="form-control form-control-sm" style="width:160px;">
+  <option value="">Todos los tipos</option>
+  <option value="sistema">Sistema</option>
+  <option value="cita">Cita</option>
+  <option value="recordatorio">Recordatorio</option>
+  <option value="alerta">Alerta</option>
+  <option value="info">Info</option>
+</select>
+
+<select id="filtroDestinatario" class="form-control form-control-sm" style="width:160px;">
+  <option value="">Todos los destinatarios</option>
+  <option value="pacientes">Pacientes</option>
+  <option value="profesionales">Profesionales</option>
+  <option value="individual">Individual</option>
+</select>
+
+<select id="filtroEstado" class="form-control form-control-sm" style="width:140px;">
+  <option value="">Todos los estados</option>
+  <option value="enviado">Enviado</option>
+  <option value="pendiente">Pendiente</option>
+  <option value="fallido">Fallido</option>
+</select>
+
+<input id="filtroFecha" type="date" class="form-control form-control-sm" style="width:160px;">
+        </div>
+        <div class="toolbar-right">
+          <button class="btn-export"><i class="fas fa-download"></i> Exportar CSV</button>
+        </div>
+      </div>
+
+<div class="card shadow-sm border-0 d-flex flex-column" style="min-height: 500px;">
+        <div class="table-responsive flex-grow-1">
+          <table class="table table-clean mb-0">
+            <thead>
+               <tr>
+                 <th class="ps-4">Fecha y hora</th>
+                 <th>T&#237;tulo</th>
+                 <th>Tipo</th>
+                 <th>Destinatarios</th>
+                 <th>Estado</th>
+                 <th>Enviado por</th>
+                 <th class="text-end pe-4">Acciones</th>
+               </tr>
+            </thead>
+            <tbody id="tablaNotificaciones">
+              <!-- cargado por notifications.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top logs-pagination-fixed" style="font-size:.82rem;">
+          <span class="text-muted">Mostrando <span id="mostrandoInicioNotifs">0</span>-<span id="mostrandoFinNotifs">0</span> de <span id="mostrandoTotalNotifs">0</span> notificaciones</span>
+          <div class="d-flex gap-1" id="paginacionNotifsAdmin"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- &#9608;&#9608; TAB: Programadas &#9608;&#9608; -->
+    <div id="tab-programadas" style="display:none;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select class="form-control form-control-sm" style="width:160px;">
+            <option>Todos los tipos</option>
+            <option>Sistema</option><option>Cita</option><option>Recordatorio</option>
+          </select>
+          <input type="date" class="form-control form-control-sm" style="width:160px;">
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+          <table class="table table-clean mb-0">
+            <thead>
+              <tr>
+                <th class="ps-4">Env&#237;o programado</th>
+                <th>T&#237;tulo</th>
+                <th>Tipo</th>
+                <th>Destinatarios</th>
+                <th class="text-end pe-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- cargado por notifications.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- &#9608;&#9608; TAB: Nueva Notificaci&#243;n &#9608;&#9608; -->
+    <div id="tab-nueva" style="display:none;">
+      <div class="row g-4">
+
+        <!-- Formulario -->
+        <div class="col-lg-7">
+          <div class="card shadow-sm border-0 p-4">
+            <h6 class="fw-bold mb-4" style="color:#1a2b40;"><i class="fas fa-plus-circle me-2 text-primary"></i>Crear nueva notificaci&#243;n</h6>
+            <div class="form-section">
+              <form id="formNotificacion">
+                 <div class="mb-3">
+                   <label class="form-label">T&#237;tulo</label>
+                   <input type="text" id="notifTitulo" class="form-control" placeholder="Ej: Recordatorio de cita" oninput="actualizarPreview()">
+                 </div>
+                 <div class="mb-3">
+                   <label class="form-label">Mensaje</label>
+                   <textarea id="notifMensaje" class="form-control" rows="3" placeholder="Escribe el contenido de la notificaci&#243;n..." oninput="actualizarPreview()"></textarea>
+                 </div>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Tipo</label>
+                    <select id="notifTipo" class="form-control">
+                      <option value="">Seleccionar tipo</option>
+                      <option value="sistema">Sistema</option>
+                      <option value="cita">Cita</option>
+                      <option value="recordatorio">Recordatorio</option>
+                      <option value="alerta">Alerta</option>
+                      <option value="info">Info</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Destinatarios</label>
+                    <select id="notifDestinatario" class="form-control" onchange="toggleUsuarioIndividual()">
+                      <option value="">Seleccionar</option>
+                      <option value="todos">Todos los usuarios</option>
+                      <option value="pacientes">Solo pacientes</option>
+                      <option value="profesionales">Solo profesionales</option>
+                      <option value="individual">Usuario individual</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="mb-3" id="campoIndividual" style="display:none;">
+                  <label class="form-label">Email del usuario</label>
+                  <input type="email" id="notifEmail" class="form-control" placeholder="correo@ejemplo.com">
+                </div>
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                    <label class="form-label">Env&#237;o</label>
+                    <select id="notifEnvio" class="form-control" onchange="toggleFechaProgramada()">
+                      <option value="inmediato">Inmediato</option>
+                      <option value="programado">Programado</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6" id="campoFecha" style="display:none;">
+                    <label class="form-label">Fecha y hora</label>
+                    <input type="datetime-local" id="notifFecha" class="form-control">
+                  </div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-primary flex-grow-1" id="btnEnviarNotif">
+                    <i class="fas fa-paper-plane me-2"></i>Enviar ahora
+                  </button>
+                  <button type="button" class="btn btn-light" onclick="limpiarFormulario()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="col-lg-5">
+          <div class="card shadow-sm border-0 p-4 h-100">
+            <h6 class="fw-bold mb-3" style="color:#1a2b40;"><i class="fas fa-eye me-2 text-primary"></i>Vista previa</h6>
+            <div class="notif-preview">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <div class="notif-preview-icon" style="width:32px;height:32px;border-radius:8px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;">
+                  <i class="fas fa-bell" style="color:#1565C0;font-size:.85rem;"></i>
+                </div>
+                <div>
+                  <div class="preview-title" id="previewTitulo">T&#237;tulo de la notificaci&#243;n</div>
+                  <div class="preview-time" style="font-size:.72rem;color:#a0b8d0;">PsyAI Connect - Ahora</div>
+                </div>
+              </div>
+              <div class="preview-body" id="previewMensaje">El mensaje aparecer&#225; aqu&#237; mientras escribes.</div>
+            </div>
+            <div class="notif-info-box mt-3 p-3" style="background:#f0f4fb;border-radius:10px;font-size:.78rem;color:#5a7aaa;">
+              <i class="fas fa-info-circle me-1 text-primary"></i>
+              La notificaci&#243;n aparecer&#225; en el panel del usuario y, si est&#225; habilitado, tambi&#233;n como correo electr&#243;nico.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL: Ver detalle -->
+<div class="modal fade" id="modalDetalle" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-eye me-2 text-primary"></i>Detalle de Notificaci&#243;n</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="notif-preview mb-3">
+          <div class="preview-title" id="detalleTitle">Mantenimiento programado</div>
+          <div class="preview-body mt-1" id="detalleBody">El sistema estar&#225; inactivo 1h el s&#225;bado.</div>
+        </div>
+        <table class="table table-sm mb-0" style="font-size:.82rem;">
+          <tr><td class="text-muted fw-semibold" style="width:130px;">Tipo</td><td id="detalleTipo">&#8212;</td></tr>
+          <tr><td class="text-muted fw-semibold">Destinatarios</td><td id="detalleDestinatario">&#8212;</td></tr>
+          <tr><td class="text-muted fw-semibold">Enviado por</td><td id="detalleEnviadoPor">&#8212;</td></tr>
+          <tr><td class="text-muted fw-semibold">Fecha</td><td id="detalleFecha">&#8212;</td></tr>
+          <tr><td class="text-muted fw-semibold">Estado</td><td id="detalleEstado">&#8212;</td></tr>
+        </table>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirmar eliminar -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-trash me-2 text-danger"></i>Eliminar notificaci&#243;n</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+       <div class="modal-body" style="font-size:.875rem;">
+         &#191;Eliminar esta notificaci&#243;n del historial? Esta acci&#243;n no se puede deshacer.
+       </div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i>Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/core/shared/aside.js"></script>
+<script src="/js/modules/admin/admin.notifications.js"></script>
+<script src="/js/modules/auth/logout.js"></script>
+
+</body>
+</html>

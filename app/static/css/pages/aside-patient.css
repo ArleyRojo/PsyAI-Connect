@@ -1,0 +1,1190 @@
+/* ==================== RESPONSIVE ASIDE PATIENT - COMPLETO ==================== */
+
+/* ==================== CHATBOT - DISEÑO MEJORADO ==================== */
+#chatbot-section {
+    background: var(--cb-card-bg, #ffffff);
+    border: 1px solid var(--cb-border, #D4E2F0);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(13, 71, 161, 0.1);
+    padding: 24px;
+    transition: all 0.3s ease;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    height: calc(100vh - 140px);
+    display: flex;
+    flex-direction: column;
+}
+
+#chatbot-section h5 {
+    color: #0D47A1;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0;
+}
+
+#chatbot-section .chat-header {
+    flex-shrink: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cb-border, #D4E2F0);
+    margin-bottom: 16px;
+}
+
+#chatbot-section .chat-header .status-dot {
+    width: 8px;
+    height: 8px;
+    background: #4CAF50;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Botón pantalla completa */
+#chatbot-section .btn-fullscreen {
+    background: transparent;
+    border: 1px solid var(--cb-border, #D4E2F0);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#chatbot-section .btn-fullscreen:hover {
+    background: var(--cb-bg, #F4F8FC);
+    border-color: #1976D2;
+    color: #1976D2;
+}
+
+#chatbot-section .btn-fullscreen i {
+    font-size: 0.85rem;
+}
+
+/* Área de conversación */
+#chatbot-section .chat-area {
+    background: var(--cb-bg, #F4F8FC);
+    border: 1px solid var(--cb-border, #D4E2F0);
+    border-radius: 16px;
+    padding: 16px;
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    min-height: 0;
+}
+
+/* Scrollbar personalizado */
+#chatbot-section .chat-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatbot-section .chat-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#chatbot-section .chat-area::-webkit-scrollbar-thumb {
+    background: var(--cb-scrollbar, #B0BEC5);
+    border-radius: 3px;
+}
+
+#chatbot-section .chat-area::-webkit-scrollbar-thumb:hover {
+    background: var(--cb-scrollbar-hover, #78909C);
+}
+
+/* Mensajes */
+#chatbot-section .message {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    animation: messageSlide 0.4s ease-out;
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mensaje del Bot */
+#chatbot-section .message.bot {
+    justify-content: flex-start;
+}
+
+#chatbot-section .message.bot .avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+#chatbot-section .message.bot .avatar i {
+    color: #fff;
+    font-size: 16px;
+}
+
+#chatbot-section .message.bot .bubble {
+    background: var(--cb-bot-bubble, #E3F2FD);
+    color: var(--cb-bot-text, #0D47A1);
+    border-radius: 4px 16px 16px 16px;
+    padding: 12px 16px;
+    max-width: 75%;
+    line-height: 1.5;
+}
+
+#chatbot-section .message.bot .bubble strong {
+    color: #0D47A1;
+    font-weight: 600;
+    display: block;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+/* Mensaje del Usuario */
+#chatbot-section .message.user {
+    justify-content: flex-end;
+}
+
+#chatbot-section .message.user .bubble {
+    background: var(--cb-user-bubble, #1976D2);
+    color: var(--cb-user-text, #ffffff);
+    border-radius: 16px 4px 16px 16px;
+    padding: 12px 16px;
+    max-width: 75%;
+    line-height: 1.5;
+}
+
+#chatbot-section .message.user .bubble strong {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    display: block;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+/* Input area */
+#chatbot-section .chat-input-area {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+#chatbot-section .chat-input-area .form-control {
+    background: #fff;
+    border: 2px solid var(--cb-border, #D4E2F0);
+    color: #1e293b;
+    border-radius: 24px;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+#chatbot-section .chat-input-area .form-control:focus {
+    border-color: var(--cb-accent, #2196F3);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
+    outline: none;
+}
+
+#chatbot-section .chat-input-area .form-control::placeholder {
+    color: var(--cb-placeholder, #90A4AE);
+}
+
+#chatbot-section .chat-input-area .button {
+    background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+#chatbot-section .chat-input-area .button:hover {
+    background: linear-gradient(135deg, #1E88E5 0%, #1976D2 100%);
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.35);
+}
+
+#chatbot-section .chat-input-area .button i {
+    font-size: 1rem;
+    margin-left: 0;
+}
+
+/* Pantalla completa */
+#chatbot-section.fullscreen-active {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    z-index: 9999 !important;
+    padding: 20px !important;
+}
+
+#chatbot-section.fullscreen-active .chat-area {
+    height: calc(100vh - 180px) !important;
+}
+
+/* Typing indicator */
+.typing-indicator {
+    display: inline-flex;
+    gap: 3px;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background: #90CAF9;
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: 0s; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+    40% { transform: scale(1.2); opacity: 1; }
+}
+
+/* Overlay para móvil */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Botón hamburguesa */
+.menu-toggle,
+.toggle-btn {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: var(--color-secondary, #0D47A1);
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.3rem;
+    z-index: 1001;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.menu-toggle:hover,
+.toggle-btn:hover {
+    background-color: var(--color-primary, #90CAF9);
+    transform: scale(1.05);
+}
+
+/* ========== TABLETS (768px - 991px) ========== */
+@media (max-width: 991px) {
+    .menu-toggle,
+    .toggle-btn {
+        display: block;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 20px;
+        padding-top: 80px;
+    }
+
+    .main-header {
+        padding: 15px 20px;
+    }
+
+    .main-header h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Chatbot */
+    #chatbot-section {
+        padding: 20px !important;
+    }
+
+    #chatbot-section h5 {
+        font-size: 1.1rem;
+    }
+
+    /* Agenda - Tabla responsive */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table th,
+    .table td {
+        font-size: 0.9rem;
+        padding: 10px 8px;
+    }
+
+    /* Evolution */
+    #mi-estado,
+    #mi-evolucion {
+        padding: 20px !important;
+    }
+
+    /* My Profile */
+    #profilePhotoPreview {
+        width: 120px !important;
+        height: 120px !important;
+    }
+}
+
+/* ========== MÓVILES GRANDES (576px - 767px) ========== */
+@media (max-width: 767px) {
+    .menu-toggle,
+    .toggle-btn {
+        display: block;
+    }
+
+    /* Acordeón del sidebar */
+    .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-nav .nav-item {
+        width: 100%;
+    }
+
+    .sidebar-nav .nav-link {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sidebar-nav .nav-link::after {
+        content: '\f107';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-nav .nav-item.active .nav-link::after,
+    .sidebar-nav .nav-link[aria-expanded="true"]::after {
+        transform: rotate(180deg);
+    }
+
+    .sidebar-nav .nav-item .collapse,
+    .sidebar-nav .nav-item .collapsing {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        margin: 4px 0;
+    }
+
+    .sidebar-nav .nav-item .collapse .nav-link {
+        padding-left: 30px;
+        font-size: 0.85rem;
+    }
+
+    .sidebar {
+        width: 280px;
+    }
+
+    .sidebar__logo img {
+        width: 80px !important;
+    }
+
+    .sidebar__logo h5 {
+        font-size: 1rem;
+    }
+
+    .sidebar .nav-link {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    .sidebar__footer .btn {
+        font-size: 0.85rem;
+    }
+
+    .main-content {
+        padding: 15px !important;
+        padding-top: 70px !important;
+    }
+
+    .main-header {
+        padding: 12px 15px;
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+
+    .main-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .main-header h1 i {
+        font-size: 1.2rem;
+    }
+
+    .user-info {
+        font-size: 0.85rem;
+    }
+
+    /* Cards generales */
+    .card {
+        padding: 15px !important;
+        margin-bottom: 15px !important;
+    }
+
+    .card h5 {
+        font-size: 1rem;
+    }
+
+    /* Chatbot */
+    #chatbot-section {
+        padding: 15px !important;
+    }
+
+    #chatbot-section .border {
+        height: 300px !important;
+        padding: 15px !important;
+    }
+
+    #chatbot-section .text-muted,
+    #chatbot-section .text-primary {
+        font-size: 0.9rem;
+    }
+
+    #chatbot-section .form-control {
+        font-size: 0.9rem;
+    }
+
+    #chatbot-section .button {
+        padding: 10px 15px;
+        font-size: 1rem;
+    }
+
+    /* Agenda - Tabla */
+    .table th,
+    .table td {
+        font-size: 0.85rem;
+        padding: 8px 6px;
+    }
+
+    .table .btn {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+
+    /* Formularios */
+    .form-label {
+        font-size: 0.9rem;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 0.9rem;
+        padding: 8px 10px;
+    }
+
+    textarea.form-control {
+        font-size: 0.85rem;
+    }
+
+    .button {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+    }
+
+    /* Evolution */
+    #mi-estado p,
+    #mi-evolucion form {
+        font-size: 0.9rem;
+    }
+
+    /* My Profile */
+    #profilePhotoPreview {
+        width: 100px !important;
+        height: 100px !important;
+    }
+
+    /* Modales */
+    .modal-dialog {
+        margin: 10px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .modal-body label,
+    .modal-body input,
+    .modal-body select {
+        font-size: 0.9rem;
+    }
+}
+
+/* ========== MÓVILES (hasta 575px) ========== */
+@media (max-width: 575px) {
+    .menu-toggle,
+    .toggle-btn {
+        top: 12px;
+        left: 12px;
+        padding: 8px 12px;
+        font-size: 1.1rem;
+    }
+
+    /* Acordeón sidebar */
+    .sidebar-nav .nav-link {
+        padding: 12px 15px;
+    }
+
+    .sidebar-nav .nav-link::after {
+        font-size: 0.8rem;
+    }
+
+    .sidebar-nav .nav-item .collapse .nav-link {
+        padding-left: 25px;
+        font-size: 0.8rem;
+    }
+
+    .sidebar {
+        width: 85%;
+        max-width: 280px;
+    }
+
+    .sidebar__logo img {
+        width: 70px !important;
+    }
+
+    .sidebar__logo h5 {
+        font-size: 0.9rem;
+    }
+
+    .sidebar .nav-link {
+        padding: 9px 12px;
+        font-size: 0.85rem;
+    }
+
+    .sidebar .nav-link i {
+        font-size: 0.9rem;
+    }
+
+    .sidebar__footer .btn {
+        font-size: 0.8rem;
+        padding: 7px 10px;
+    }
+
+    .main-content {
+        padding: 12px !important;
+        padding-top: 65px !important;
+    }
+
+    .main-header {
+        padding: 10px 12px;
+        margin-bottom: 15px !important;
+    }
+
+    .main-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .main-header h1 i {
+        font-size: 1.1rem;
+    }
+
+    .user-info {
+        font-size: 0.8rem;
+    }
+
+    /* Cards */
+    .card {
+        padding: 12px !important;
+        border-radius: 10px;
+        margin-bottom: 12px !important;
+    }
+
+    .card h5 {
+        font-size: 0.95rem;
+    }
+
+    .card p {
+        font-size: 0.85rem;
+    }
+
+    /* Chatbot */
+    #chatbot-section {
+        padding: 12px !important;
+    }
+
+    #chatbot-section h5 {
+        font-size: 0.95rem;
+    }
+
+    #chatbot-section .border {
+        height: 250px !important;
+        padding: 12px !important;
+    }
+
+    #chatbot-section .text-muted,
+    #chatbot-section .text-primary {
+        font-size: 0.85rem;
+        margin-bottom: 10px !important;
+    }
+
+    #chatbot-section form {
+        gap: 8px;
+    }
+
+    #chatbot-section .form-control {
+        font-size: 0.85rem;
+        padding: 8px 10px;
+    }
+
+    #chatbot-section .button {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    #chatbot-section .button i {
+        font-size: 0.85rem;
+    }
+
+    /* Agenda - Hacer tabla más compacta */
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+
+    .table th {
+        font-size: 0.75rem;
+        padding: 8px 4px;
+    }
+
+    .table td {
+        font-size: 0.75rem;
+        padding: 8px 4px;
+    }
+
+    .table .btn {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+        margin: 2px 0;
+    }
+
+    /* Ocultar columnas menos importantes en móvil */
+    .table td:nth-child(4),
+    .table th:nth-child(4) {
+        display: none;
+    }
+
+    /* Formularios */
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+    }
+
+    .form-control,
+    .form-select,
+    select.form-control {
+        font-size: 0.85rem;
+        padding: 7px 8px;
+    }
+
+    textarea.form-control {
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+
+    .button {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+
+    /* Evolution */
+    #mi-estado,
+    #mi-evolucion {
+        padding: 12px !important;
+    }
+
+    #mi-estado h5,
+    #mi-evolucion h5 {
+        font-size: 0.95rem;
+    }
+
+    #mi-estado p {
+        font-size: 0.85rem;
+    }
+
+    /* My Profile */
+    #profilePhotoPreview {
+        width: 90px !important;
+        height: 90px !important;
+    }
+
+    /* Modales */
+    .modal-title {
+        font-size: 1rem;
+    }
+
+    .modal-body {
+        padding: 12px;
+    }
+
+    .modal-body label {
+        font-size: 0.85rem;
+    }
+
+    .modal-body input,
+    .modal-body select {
+        font-size: 0.85rem;
+        padding: 7px 8px;
+    }
+
+    .modal-footer .btn {
+        font-size: 0.85rem;
+        padding: 7px 12px;
+    }
+
+    /* Alertas */
+    .alert {
+        font-size: 0.85rem;
+        padding: 10px;
+    }
+}
+
+/* ========== MÓVILES MUY PEQUEÑOS (hasta 375px) ========== */
+@media (max-width: 375px) {
+    .menu-toggle,
+    .toggle-btn {
+        top: 10px;
+        left: 10px;
+        padding: 7px 10px;
+        font-size: 1rem;
+    }
+
+    .sidebar__logo img {
+        width: 60px !important;
+    }
+
+    .sidebar__logo h5 {
+        font-size: 0.85rem;
+    }
+
+    .sidebar .nav-link {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+
+    .sidebar .nav-link i {
+        font-size: 0.85rem;
+    }
+
+    .sidebar__footer .btn {
+        font-size: 0.75rem;
+        padding: 6px 8px;
+    }
+
+    .main-content {
+        padding: 10px !important;
+        padding-top: 60px !important;
+    }
+
+    .main-header h1 {
+        font-size: 1.1rem;
+    }
+
+    .user-info {
+        font-size: 0.75rem;
+    }
+
+    /* Cards */
+    .card {
+        padding: 10px !important;
+    }
+
+    .card h5 {
+        font-size: 0.9rem;
+    }
+
+    .card p {
+        font-size: 0.8rem;
+    }
+
+    /* Chatbot */
+    #chatbot-section .border {
+        height: 220px !important;
+        padding: 10px !important;
+    }
+
+    #chatbot-section .text-muted,
+    #chatbot-section .text-primary {
+        font-size: 0.8rem;
+    }
+
+    #chatbot-section .form-control {
+        font-size: 0.8rem;
+        padding: 7px 8px;
+    }
+
+    #chatbot-section .button {
+        padding: 7px 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Agenda */
+    .table th,
+    .table td {
+        font-size: 0.7rem;
+        padding: 6px 3px;
+    }
+
+    .table .btn {
+        font-size: 0.65rem;
+        padding: 2px 4px;
+    }
+
+    /* Formularios */
+    .form-label {
+        font-size: 0.8rem;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 0.8rem;
+        padding: 6px 7px;
+    }
+
+    .button {
+        font-size: 0.8rem;
+        padding: 7px 10px;
+    }
+
+    /* My Profile */
+    #profilePhotoPreview {
+        width: 80px !important;
+        height: 80px !important;
+    }
+}
+
+/* ========== MODO LANDSCAPE EN MÓVILES ========== */
+@media (max-height: 600px) and (orientation: landscape) {
+    .main-content {
+        padding: 10px !important;
+        padding-top: 60px !important;
+    }
+
+    .main-header {
+        margin-bottom: 10px !important;
+    }
+
+    .main-header h1 {
+        font-size: 1.1rem;
+    }
+
+    .card {
+        margin-bottom: 10px !important;
+    }
+
+    /* Chatbot - Área más pequeña en landscape */
+    #chatbot-section .border {
+        height: 180px !important;
+    }
+
+    #chatbot-section .text-muted,
+    #chatbot-section .text-primary {
+        font-size: 0.8rem;
+        margin-bottom: 8px !important;
+    }
+
+    /* My Profile */
+    #profilePhotoPreview {
+        width: 70px !important;
+        height: 70px !important;
+    }
+}
+
+/* ========== SCROLLBAR PERSONALIZADA ========== */
+#chatbot-section .border::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatbot-section .border::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 10px;
+}
+
+#chatbot-section .border::-webkit-scrollbar-thumb {
+    background: #90CAF9;
+    border-radius: 10px;
+}
+
+#chatbot-section .border::-webkit-scrollbar-thumb:hover {
+    background: #0D47A1;
+}
+
+/* Scrollbar para sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #90CAF9;
+    border-radius: 10px;
+}
+
+/* ========== MEJORAS GENERALES ========== */
+
+/* Botones más táctiles en móvil */
+@media (max-width: 767px) {
+    .button,
+    .btn {
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Inputs más grandes para mejor usabilidad */
+    .form-control,
+    .form-select,
+    select {
+        min-height: 40px;
+    }
+}
+
+/* Ocultar elementos innecesarios en móvil muy pequeño */
+@media (max-width: 375px) {
+    .main-header .user-info i {
+        display: none;
+    }
+}
+
+/* Animación al abrir el acordeón navbar */
+.navbar-collapse {
+    transition: all 0.4s ease;
+}
+
+.navbar-collapse.collapsing {
+    transition: height 0.4s ease !important;
+}
+
+.navbar-nav {
+    animation: none;
+}
+
+.navbar-collapse.show .nav-item {
+    animation: slideDown 0.3s ease forwards;
+    opacity: 0;
+}
+
+/* =======================================================
+    INDEX RESPONSIVE - PsyAI Connect landing page
+    ======================================================= */
+
+/* Custom FAQ Accordion using native details/summary */
+.faq-accordion {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    border-radius: 16px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(13, 71, 161, 0.12);
+    background: var(--color-background, #fff);
+    overflow: hidden;
+}
+
+.faq-item summary {
+    width: 100%;
+    padding: 20px 24px;
+    border: none;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text, #333);
+    text-align: left;
+    list-style: none;
+    transition: all 0.3s ease;
+}
+
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item summary::after {
+    content: '\f107';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    transition: transform 0.3s ease;
+    color: var(--color-secondary, #0D47A1);
+}
+
+.faq-item[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.faq-item summary:hover {
+    background: rgba(13, 71, 161, 0.05);
+}
+
+.faq-answer {
+    padding: 0 24px 20px;
+}
+
+.faq-answer p {
+    margin: 0;
+    color: var(--color-text-muted, #666);
+    line-height: 1.6;
+}
+
+html.dark-mode .faq-item {
+    background: var(--color-card, #1e1e1e);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .faq-item summary {
+    color: var(--color-text, #e0e0e0);
+}
+
+html.dark-mode .faq-item summary:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-mode .faq-answer p {
+    color: var(--color-text-muted, #aaa);
+}
+
+html {
+    scroll-padding-top: 100px;
+}
+
+#mainNav .navbar-collapse {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+@keyframes navbarItemIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#acerca,
+#beneficios,
+#servicios,
+#funciona,
+#privacidad,
+#profesional {
+    scroll-margin-top: 92px;
+}
+
+#mainNav .navbar-nav {
+    padding: 0.5rem 0;
+}
+
+#mainNav .navbar-nav .nav-link {
+    text-align: center;
+    justify-content: center;
+}
+
+#mainNav .navbar-nav .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
+.theme-switch-container {
+    width: 100%;
+    justify-content: center;
+}
+
+#mainNav .navbar-toggler {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 44px;
+    position: relative;
+    z-index: 1032;
+    visibility: visible !important;
+    opacity: 1 !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#mainNav .navbar-toggler-label {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+#mainNav .custom-toggler-icon {
+    width: 18px;
+    height: 14px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+#mainNav .custom-toggler-line {
+    display: block;
+    width: 100%;
+    height: 2.5px;
+    border-radius: 999px;
+    transform-origin: center;
+}

@@ -1,0 +1,137 @@
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem !important;
+        margin-left: 0 !important;
+    }
+
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
+
+    .card {
+        padding: 1rem !important;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .table th, .table td {
+        padding: 0.5rem 0.25rem !important;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    #btnGuardarEvolucion {
+        font-size: 0.9rem !important;
+        padding: 0.75rem 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 0.75rem !important;
+    }
+
+    .main-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .card {
+        padding: 0.75rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .card h4 {
+        font-size: 1rem;
+    }
+
+    .table {
+        font-size: 0.75rem;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-control, .form-select {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.5rem;
+    }
+
+    #btnGuardarEvolucion {
+        font-size: 0.85rem !important;
+        padding: 0.6rem !important;
+    }
+
+    .sidebar {
+        width: 200px !important;
+    }
+
+    .sidebar__logo img {
+        width: 70px !important;
+    }
+
+    .sidebar h5 {
+        font-size: 0.9rem;
+    }
+}
+
+/* Dark Mode - Evolución */
+.dark-mode #mi-estado,
+.dark-mode #mi-evolucion,
+.dark-mode .card {
+    background-color: var(--dm-mid) !important;
+    border-color: var(--dm-border) !important;
+}
+
+.dark-mode #mi-estado h5,
+.dark-mode #mi-evolucion h5,
+.dark-mode .card h5 {
+    color: var(--dm-text) !important;
+}
+
+.dark-mode #estadoActual {
+    color: var(--dm-muted) !important;
+}
+
+.dark-mode .form-label {
+    color: var(--dm-text) !important;
+}
+
+.dark-mode .table {
+    color: var(--dm-text) !important;
+}
+
+.dark-mode .table thead th {
+    background-color: var(--dm-deep) !important;
+    color: var(--dm-text) !important;
+    border-color: var(--dm-border) !important;
+}
+
+.dark-mode .table tbody td {
+    border-color: var(--dm-border) !important;
+    color: var(--dm-muted) !important;
+}
+
+.dark-mode .text-muted {
+    color: var(--dm-muted) !important;
+}
+
+.dark-mode .badge {
+    color: white !important;
+}

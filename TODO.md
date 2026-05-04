@@ -1,0 +1,1 @@
+- [✅] Paso 1: Editar HTML en app/templates/patient/aside-patient/chatbot.html (modal + CSS + hide input)\n

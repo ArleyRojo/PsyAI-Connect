@@ -1,0 +1,379 @@
+/* ══════════════════════════════════════════════════════
+   ADMIN DASHBOARD & ASIDE-ADMIN RESPONSIVE
+   PsyAI Connect
+   ══════════════════════════════════════════════════════ */
+
+/* ========== TABLETS (≤991px) ========== */
+@media (max-width: 991px) {
+    .main-content {
+        padding-top: 70px !important;
+    }
+    
+    .main-header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .stat-card {
+        padding: 12px;
+    }
+}
+
+/* ========== MÓVILES GRANDES (≤767px) ========== */
+@media (max-width: 767px) {
+    .main-content {
+        padding: 15px !important;
+        padding-top: 65px !important;
+    }
+    
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 15px !important;
+    }
+    
+    .main-header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .user-info {
+        font-size: 0.85rem;
+    }
+    
+    /* Stats: layout horizontal */
+    .stat-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+    
+    .stat-card .stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        font-size: 1.1rem;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    /* Cards */
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 15px !important;
+    }
+    
+    .btn-outline-primary {
+        align-self: flex-start;
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+    
+    .card-body {
+        padding: 12px !important;
+    }
+    
+    /* Actividad items */
+    .actividad-item {
+        padding: 10px;
+    }
+    
+    .actividad-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+    }
+    
+    .actividad-accion {
+        font-size: 0.8rem;
+    }
+    
+    .actividad-fecha {
+        font-size: 0.7rem;
+    }
+    
+    .actividad-detalle {
+        font-size: 0.75rem;
+    }
+    
+    /* Actividad cards (professional dashboard) */
+    .actividad-card {
+        margin-bottom: 10px;
+    }
+    
+    .actividad-card .d-flex {
+        padding: 10px;
+    }
+    
+    .actividad-icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .actividad-icon i {
+        font-size: 0.8rem;
+    }
+    
+    .actividad-card .fw-bold {
+        font-size: 0.85rem;
+    }
+    
+    .actividad-card small {
+        font-size: 0.7rem;
+    }
+    
+    /* Accesos Rápidos */
+    .card.p-4 {
+        padding: 15px !important;
+    }
+    
+    .card h5 {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    .d-flex.flex-wrap.gap-2 {
+        flex-direction: column;
+        gap: 8px !important;
+    }
+    
+    .card .btn {
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+    
+    /* Tables */
+    .table-clean {
+        font-size: 0.8rem;
+    }
+    
+    .table-clean th,
+    .table-clean td {
+        padding: 8px;
+    }
+    
+    .table-clean .btn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .user-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+    }
+    
+    .user-name {
+        font-size: 0.85rem;
+    }
+    
+    .user-email {
+        display: none;
+    }
+    
+    .action-btn {
+        padding: 4px 6px;
+        font-size: 0.7rem;
+    }
+    
+    /* Tabs admin */
+    .admin-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .admin-tab {
+        flex: 1 1 auto;
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+    
+    /* Toolbar */
+    .toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .toolbar .form-control,
+    .toolbar .form-select {
+        width: 100%;
+    }
+    
+    /* Pagination */
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination .page-link {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ========== MÓVILES PEQUEÑOS (≤480px) ========== */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 12px !important;
+        padding-top: 60px !important;
+    }
+    
+    .main-header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .user-info {
+        font-size: 0.75rem;
+    }
+    
+    /* Stats */
+    .stat-card {
+        padding: 8px 10px;
+    }
+    
+    .stat-value {
+        font-size: 1rem;
+    }
+    
+    .stat-label {
+        font-size: 0.65rem;
+    }
+    
+    /* Actividad Reciente */
+    .actividad-header-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+    
+    .actividad-header-title {
+        font-size: 0.9rem;
+    }
+    
+    .actividad-header-subtitle {
+        font-size: 0.7rem;
+    }
+    
+    .fw-bold {
+        font-size: 0.8rem;
+    }
+    
+    small {
+        font-size: 0.7rem;
+    }
+    
+    /* Tables - ocultar columnas */
+    .table-clean td:nth-child(3),
+    .table-clean th:nth-child(3),
+    .table-clean td:nth-child(4),
+    .table-clean th:nth-child(4) {
+        display: none;
+    }
+    
+    /* Modales */
+    .modal-dialog {
+        margin: 8px;
+    }
+    
+    .modal-body {
+        padding: 12px;
+    }
+    
+    .modal-header {
+        padding: 12px 15px;
+    }
+    
+    .modal-footer {
+        padding: 10px 15px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+
+/* ========== MUY PEQUEÑOS (≤375px) ========== */
+@media (max-width: 375px) {
+    .main-header h1 {
+        font-size: 1rem;
+    }
+    
+    .stat-card .stat-icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .stat-value {
+        font-size: 0.95rem;
+    }
+    
+    .card-header {
+        padding: 10px 12px !important;
+    }
+    
+    .card-header .d-flex {
+        margin-bottom: 8px;
+    }
+    
+    .table-clean th,
+    .table-clean td {
+        font-size: 0.7rem;
+        padding: 6px 4px;
+    }
+    
+    /* Action buttons - icons only */
+    .action-btn span {
+        display: none;
+    }
+    
+    .action-btn {
+        padding: 4px 6px;
+    }
+}
+
+/* ========== LANDSCAPE ========== */
+@media (max-height: 600px) and (orientation: landscape) {
+    .main-content {
+        padding-top: 50px !important;
+    }
+    
+    .main-header {
+        margin-bottom: 10px !important;
+    }
+    
+    .card {
+        margin-bottom: 10px;
+    }
+}
+
+/* ========== TOUCH DEVICES ========== */
+@media (hover: none) and (pointer: coarse) {
+    .stat-card,
+    .card,
+    .btn,
+    .action-btn,
+    .nav-link {
+        min-height: 44px;
+    }
+    
+    .form-control,
+    .form-select {
+        min-height: 44px;
+    }
+    
+    .action-btn {
+        padding: 8px 12px;
+    }
+}

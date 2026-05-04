@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+     <title>PsyAI Connect | Registrarse</title>
+     <link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+     <script src="/js/core/shared/theme-inline.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/pages/auth.css">
+<link rel="stylesheet" href="/responsive/auth.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+    
+<script src="/js/core/shared/theme.js"></script>
+<script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body>
+
+    <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+     <div class="back-index">
+         <a href="/index.html">&larr; Volver al Inicio</a>
+     </div>
+
+
+
+     <div class="d-flex justify-content-center align-items-center" style="min-height:calc(100vh - 60px); padding:1rem 0;">
+        <div class="login-card login-card--register">
+
+            <!-- Logo -->
+            <div class="login-header">
+                <img src="/img/Logo.jpg" alt="Logo">
+                <h1>Crear Cuenta</h1>
+            </div>
+
+            <!-- BARRA DE PROGRESO -->
+            <div class="reg-progress">
+                <div class="reg-progress__label">
+                    <span id="regProgressLabel">Tus datos</span>
+                    <span class="pct" id="regProgressPct">0%</span>
+                </div>
+                <div class="reg-progress__track">
+                    <div class="reg-progress__fill" id="regProgressFill"></div>
+                </div>
+                <div class="reg-progress__steps">
+                    <div class="reg-step active" id="regStep1">
+                        <i class="fas fa-user"></i>
+                        <span>Tus datos</span>
+                    </div>
+                    <div class="reg-step" id="regStep2">
+                        <i class="fas fa-lock"></i>
+                        <span>Seguridad</span>
+                    </div>
+                    <div class="reg-step" id="regStep3">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Confirmar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANELS WRAP -->
+            <div class="reg-panels-wrap">
+
+                <!-- PASO 1: Datos personales -->
+                <div class="reg-panel active" id="regPanel1">
+
+                    <div class="reg-field">
+                        <label for="nombre" class="form-label">Nombre completo</label>
+                        <div style="position:relative;">
+                            <i class="fas fa-user field-icon reg-icon" id="icon-nombre"></i>
+                            <input type="text" class="form-control" id="nombre"
+                                   placeholder="Ej: Ana García" oninput="recalcProgress()" required>
+                        </div>
+                    </div>
+
+                    <div class="reg-field">
+                        <label for="email" class="form-label">Correo electrónico</label>
+                        <div style="position:relative;">
+                            <i class="fas fa-envelope field-icon reg-icon" id="icon-email"></i>
+                            <input type="email" class="form-control" id="email"
+                                   placeholder="usuario@example.com" oninput="recalcProgress()" required>
+                        </div>
+                    </div>
+
+                    <div class="reg-field">
+                        <label for="genero" class="form-label">Género</label>
+                        <div class="gender-select-wrapper">
+                            <i class="fas fa-venus-mars gender-icon-select"></i>
+                            <select class="form-control" id="genero" onchange="recalcProgress()" required>
+                                <option value="">Seleccionar género</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                                <option value="Otro">Otro</option>
+                                <option value="Prefiero no decirlo">Prefiero no decirlo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="reg-nav">
+                        <button type="button" class="btn btn-primary w-100" onclick="regGoStep(2)">
+                            Continuar &nbsp;<i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASO 2: Seguridad -->
+                <div class="reg-panel" id="regPanel2">
+
+                    <div class="reg-field">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <div style="position:relative;">
+                            <i class="fas fa-lock field-icon reg-icon" id="icon-password"></i>
+                            <input type="password" class="form-control" id="password"
+                                   placeholder="Contraseña"
+                                   oninput="checkPwd(); recalcProgress()" required>
+                            <button type="button" class="pwd-toggle" onclick="togglePwd('password', this)" tabindex="-1" aria-label="Mostrar contraseña">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="pwd-strength" style="margin-top: 10px;">
+                            <div class="pwd-strength__fill" id="pwdFill"></div>
+                        </div>
+                        <small id="pwdHint" style="display:block;margin-top:4px;font-size:.72rem;font-weight:600;min-height:1rem;color:#7B92AC;"></small>
+                        <div class="pwd-rules" style="margin-top: 2px;">
+                            <div id="rule-len" class="pwd-rule"><i class="fas fa-circle"></i> <span>Mínimo 6 caracteres</span></div>
+                            <div id="rule-upper" class="pwd-rule"><i class="fas fa-circle"></i> <span>Al menos 1 mayúscula</span></div>
+                            <div id="rule-num" class="pwd-rule"><i class="fas fa-circle"></i> <span>Al menos 1 número</span></div>
+                        </div>
+                    </div>
+
+                    <div class="reg-field">
+                        <label for="confirm-password" class="form-label">Confirmar contraseña</label>
+                        <div style="position:relative;">
+                            <i class="fas fa-lock-open field-icon reg-icon" id="icon-confirm"></i>
+                            <input type="password" class="form-control" id="confirm-password"
+                                   placeholder="Repite tu contraseña" oninput="recalcProgress()" required>
+                            <button type="button" class="pwd-toggle" onclick="togglePwd('confirm-password', this)" tabindex="-1" aria-label="Mostrar contraseña">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="reg-nav">
+                        <button type="button" class="btn-back" onclick="regGoStep(1)">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Volver</span>
+                        </button>
+                        <button type="button" class="btn btn-primary flex-grow-1 ms-1" onclick="regGoStep(3)">
+                            Continuar &nbsp;<i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASO 3: Confirmar -->
+                <div class="reg-panel" id="regPanel3">
+                    <div class="reg-resumen-box" id="regResumen"></div>
+                    <div class="reg-nav">
+                        <button type="button" class="btn-back" onclick="regGoStep(2)">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Volver</span>
+                        </button>
+                        <button type="button" class="btn btn-primary flex-grow-1 ms-1"
+                                id="btnRegistrar" onclick="submitRegister()">
+                            <i class="fas fa-user-plus me-1"></i> Crear cuenta
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /reg-panels-wrap -->
+
+            <!-- Links fijos -->
+            <div class="text-center mt-3">
+                <a href="login.html" class="text-decoration-none link-action" style="font-size:.82rem">
+                    ¿Ya tienes cuenta? Iniciar Sesión
+                </a>
+            </div>
+            <div class="text-center mt-1">
+                <a href="recover.html" class="text-decoration-none link-action" style="font-size:.82rem">
+                    Olvidé mi contraseña
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+    <script src="/js/modules/auth/register.js"></script>
+
+</body>
+</html>

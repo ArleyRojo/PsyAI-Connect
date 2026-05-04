@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyAI Connect | Bienestar Emocional</title>
+    <link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Bootstrap 5.0.2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+<!-- CSS PROPIOS - Works with Flask and Live Server -->
+    <link rel="stylesheet" href="/css/base/base.css">
+    <link rel="stylesheet" href="/css/components/components.css">
+    <link rel="stylesheet" href="/css/layout/layout.css">
+    <link rel="stylesheet" href="/css/themes/theme.css">
+
+    <link rel="stylesheet" href="/css/pages/landing.css">
+    <link rel="stylesheet" href="/responsive/index.css">
+    <script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body data-aos="true">
+
+    
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="#" data-bs-toggle="modal" data-bs-target="#logoModal">
+            <img src="/img/Logo.jpg" alt="PsyAI Connect" width="100" height="100" decoding="async"> PsyAI Connect
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navmenu">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a href="#acerca" class="nav-link">Acerca</a></li>
+                <li class="nav-item"><a href="#beneficios" class="nav-link">Beneficios</a></li>
+                <li class="nav-item"><a href="#servicios" class="nav-link">Servicios</a></li>
+                <li class="nav-item"><a href="#funciona" class="nav-link">Cómo Funciona</a></li>
+                <li class="nav-item"><a href="#privacidad" class="nav-link">Privacidad</a></li>
+                
+
+                <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                    <a href="/login.html" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+                </li>
+
+                <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                    <a href="/register.html" class="btn btn-outline-primary btn-sm">Regístrate</a>
+                </li>
+                <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                    <div class="theme-switch-container">
+                        <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                        <button id="theme-toggle" title="Cambiar modo"></button>
+                        <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<!-- HERO -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1000">
+                <h1 class="hero-title">Tu bienestar emocional es nuestra prioridad.</h1>
+                <p class="hero-subtitle">
+                    Evalúa tu estado emocional con IA y recibe acompañamiento psicológico cuando lo necesites. 
+                    Una experiencia de cuidado emocional moderna y accesible.
+                </p>
+                <div class="hero-btn-wrapper">
+<a href="/register.html" class="btn btn-primary hero-btn"
+                        style="background:#0D47A1 !important;border-color:#0D47A1 !important;">
+                        Comenzar Ahora <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+                <div class="hero-image-wrapper">
+                    <div class="hero-image-card">
+                        <div id="heroCarousel" class="carousel slide">
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="/img/Psicologia2.png" alt="Terapia psicológica" class="d-block w-100" width="600" height="399" fetchpriority="high" decoding="async" style="display:block;">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="/img/Psicologia.jpg" alt="Relajación y mindfulness" class="d-block w-100" width="595" height="419" loading="lazy" decoding="async" style="display:block;">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="/img/psicologia1.jpg" alt="Gestión de emociones" class="d-block w-100" width="658" height="379" loading="lazy" decoding="async" style="display:block;">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Anterior</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Siguiente</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ¿QUÉ ES? -->
+<section id="acerca" class="about-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <h2 class="about-title">¿Qué es <span class="text-brand">PsyAI Connect?</span></h2>
+                <p class="about-text">
+                    Somos una <strong>plataforma digital de bienestar emocional</strong> que combina 
+                    <span class="highlight">inteligencia artificial</span> con principios psicológicos 
+                    especializados para ofrecerte una experiencia de acompañamiento único.
+                </p>
+                <div class="about-features">
+                    <div class="feature-item">
+                        <div class="feature-check"><i class="fa-solid fa-check"></i></div>
+                        <span>Evaluación emocional personalizada con IA</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-check"><i class="fa-solid fa-check"></i></div>
+                        <span>Soporte psicológico profesional</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-check"><i class="fa-solid fa-check"></i></div>
+                        <span>Seguimiento de tu progreso</span>
+                    </div>
+                </div>
+                </div>
+            <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left" data-aos-delay="200">
+                <div class="about-visual">
+                    <div class="about-card-float card-1">
+                        <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
+                        <div class="card-content">
+                            <h5>IA Terapéutica</h5>
+                            <p>Asesoría inteligente personalizada</p>
+                        </div>
+                    </div>
+                    <div class="about-card-float card-2">
+                        <div class="card-icon"><i class="fa-solid fa-heart"></i></div>
+                        <div class="card-content">
+                            <h5>Bienestar Integral</h5>
+                            <p>Enfoque holístico emocional</p>
+                        </div>
+                    </div>
+                    <div class="about-card-float card-3">
+                        <div class="card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="card-content">
+                            <h5>Privacidad Total</h5>
+                            <p>Tus datos protegidos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- BENEFICIOS -->
+<section id="beneficios" class="content-section section-white">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Beneficios</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+            Descubre cómo PsyAI Connect puede transformar tu bienestar emocional
+        </p>
+
+        <div class="row g-4">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-face-smile-beam"></i>
+                    </div>
+                    <h4>Bienestar Guiado</h4>
+                    <p>Comprende mejor tus emociones con herramientas de evaluación inteligente diseñadas por profesionales.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="250">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <h4>Disponible 24/7</h4>
+                    <p>Accede en cualquier momento, desde cualquier dispositivo. Tu bienestar no espera.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="350">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h4>Privado y Seguro</h4>
+                    <p>Tu información está protegida con estándares profesionales de seguridad y cifrado.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="servicios" class="content-section section-alt">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Servicios</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+            Herramientas especializadas para tu desarrollo emocional
+        </p>
+
+        <div class="row g-4">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
+                <div class="service-card">
+                    <i class="fa-solid fa-brain small-icon"></i>
+                    <h5>Evaluación Emocional</h5>
+                    <p>Un análisis inicial rápido mediante IA psicológica para entender tu estado actual.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="250">
+                <div class="service-card">
+                    <i class="fa-solid fa-message small-icon"></i>
+                    <h5>Chat IA Terapéutico</h5>
+                    <p>Expresa cómo te sientes y recibe guía emocional inmediata y personalizada.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="350">
+                <div class="service-card">
+                    <i class="fa-solid fa-chart-line small-icon"></i>
+                    <h5>Seguimiento</h5>
+                    <p>Monitorea tu estado emocional con registros visuales y tendencias.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section id="funciona" class="content-section section-white">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">¿Cómo Funciona?</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+            Cuatro simples pasos hacia tu bienestar emocional
+        </p>
+
+        <div class="row g-4 steps-container">
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="150">
+                <div class="step-item">
+                    <div class="step-circle">1</div>
+                    <p>Completa tu evaluación emocional</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="250">
+                <div class="step-item">
+                    <div class="step-circle">2</div>
+                    <p>Explora tu estado mental actual</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="350">
+                <div class="step-item">
+                    <div class="step-circle">3</div>
+                    <p>Interactúa con nuestro asistente</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="450">
+                <div class="step-item">
+                    <div class="step-circle">4</div>
+                    <p>Da seguimiento a tu bienestar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRIVACIDAD -->
+<section id="privacidad" class="content-section section-alt">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Privacidad y Seguridad</h2>
+        <div class="about-card" data-aos="fade-up" data-aos-delay="100">
+            <p>
+                Cuidamos tu salud emocional con cifrado de nivel bancario, protocolos de seguridad 
+                avanzados y total confidencialidad. Tus datos nunca se comparten con terceros y 
+                están protegidos bajo los más altos estándares de la industria.
+            </p>
+            <div class="privacy-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Tu privacidad es nuestra prioridad</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- INFORMACIÓN DE LA PROFESIONAL -->
+<section id="profesional" class="content-section section-white">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Nuestra Profesional</h2>
+        
+        <div class="professional-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <h4>Psicóloga Clínica</h4>
+            <p class="specialty">Especialista en Terapia Cognitivo-Conductual y manejo de ansiedad</p>
+            <p class="quote">
+                "Mi misión es guiarte en tu camino hacia el bienestar. La IA nos ayuda a ser más eficientes, 
+                pero la empatía y la conexión humana son el núcleo de mi trabajo."
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer-enhanced">
+    <div class="footer-content">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand">
+                        <img src="/img/Logo.jpg" alt="PsyAI Connect" id="footerLogo" width="50" height="50" decoding="async" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#logoModal">
+                        <div>
+                            <span class="brand-name">PsyAI Connect</span>
+                            <p class="brand-tagline">Bienestar emocional accesible y seguro.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-heading">Navegación</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#">Servicios</a></li>
+                        <li><a href="#">Sobre Nosotros</a></li>
+                        <li><a href="#">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-heading">Contáctanos</h5>
+                    <div class="footer-contact">
+                        <p><i class="fa-solid fa-envelope"></i> hola@psyaiconnect.com</p>
+                        <p><i class="fa-solid fa-phone"></i> +51 900 123 456</p>
+                        <p><i class="fa-solid fa-location-dot"></i> Bello, Colombia</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-social-section">
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 PsyAI Connect — Todos los derechos reservados.</p>
+                <div class="footer-legal">
+                    <a href="#">Términos</a>
+                    <a href="#">Privacidad</a>
+                    <a href="#">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Modal Logo -->
+<div class="modal fade" id="logoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content modal-logo-content">
+            <div class="modal-header modal-logo-header">
+                <h5 class="modal-title"><i class="fa-solid fa-heart-pulse me-2"></i>PsyAI Connect</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body modal-logo-body text-center py-4">
+                <div class="logo-modal-wrapper mb-4">
+                    <img src="/img/Logo.jpg" alt="Logo" class="logo-modal-img" width="180" height="180" decoding="async">
+                </div>
+                <h3 class="logo-modal-title">Bienestar Emocional Accesible</h3>
+                <p class="logo-modal-subtitle">Plataforma de acompañamiento psicológico con inteligencia artificial</p>
+                <div class="logo-modal-features">
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fa-solid fa-brain"></i></div>
+                        <span>IA Terapéutica</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fa-solid fa-shield-heart"></i></div>
+                        <span>100% Seguro</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fa-solid fa-clock"></i></div>
+                        <span>Disponible 24/7</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                        <span>Profesionales</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer modal-logo-footer">
+                <button type="button" class="btn btn-primary btn-lg px-5" data-bs-dismiss="modal">Comenzar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+    <script src="/js/core/shared/mobile-navbar-toggle.js"></script>
+    <script src="/js/base/index.js"></script>
+
+</body>
+
+</html>
+

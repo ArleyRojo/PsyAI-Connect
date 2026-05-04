@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <title>PsyAI Connect | Mi Agenda</title>
+    <link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+    <script src="/js/core/shared/theme-inline.js"></script>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- CSS propios -->
+    <link rel="stylesheet" href="/css/base/base.css">
+    <link rel="stylesheet" href="/css/layout/layout.css">
+    <link rel="stylesheet" href="/css/components/components.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+    <link rel="stylesheet" href="/responsive/aside.css">
+    <link rel="stylesheet" href="/responsive/professional.css">
+    
+    <script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+
+</head>
+<body class="aside-professional">
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+
+        <nav class="nav flex-column mt-4">
+            <a href="../professional.dashboard.html" class="nav-link">
+                <i class="fas fa-home me-2"></i> Dashboard
+            </a>
+            <a href="patients.html" class="nav-link">
+                <i class="fas fa-users me-2"></i>Pacientes y Diagnósticos
+            </a>
+            <a href="my.agenda.html" class="nav-link active">
+                <i class="fas fa-calendar-check me-2"></i> Mi Agenda
+            </a>
+            <a href="reports.html" class="nav-link">
+                <i class="fas fa-chart-line me-2"></i> Reportes
+            </a>
+            <a href="my.profile2.html" class="nav-link mt-3 border-top pt-3">
+                <i class="fas fa-user-circle me-2"></i> Mi Perfil
+            </a>
+        </nav>
+
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+          <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content flex-grow-1 ms-250 p-4 bg-light">
+        <!-- Header -->
+        <header class="main-header d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+            <h1 class="h3 fw-bold text-dark mb-0"><i class="fas fa-calendar-alt text-primary me-2"></i> Mi Agenda</h1>
+            <div class="user-info d-flex align-items-center">
+                <i class="fas fa-bell text-secondary fs-5 me-3"></i>
+                <span class="fw-semibold text-dark" id="nombreProfesional">Hola, Dr(a).</span>
+            </div>
+        </header>
+
+        <!-- Citas -->
+        <section class="card p-4 shadow-sm border-0 mb-4">
+            <div id="contenedorCitas">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-clock me-2 text-primary"></i> Citas</h5>
+                <ul class="list-group" id="listaCitas">
+                    <li class="list-group-item text-muted">Cargando citas...</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Formulario Mi Agenda -->
+        <section id="agenda" class="card p-4 shadow-sm border-0 mb-5">
+            <h5 class="fw-bold text-dark mb-3"><i class="fas fa-calendar-plus me-2 text-primary"></i> Registrar Disponibilidad</h5>
+           <form>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label for="fecha" class="form-label fw-semibold">Fecha:</label>
+      <input type="date" id="fecha" class="form-control" name="fecha">
+    </div>
+    <div class="col-md-8">
+      <label for="hora_disponible" class="form-label fw-semibold">Horario disponible:</label>
+      <select id="hora_disponible" class="form-control" name="hora_disponible">
+        <option value="">Seleccionar horario...</option>
+        <option value="08:00-08:30">08:00 AM - 08:30 AM</option>
+        <option value="08:30-09:00">08:30 AM - 09:00 AM</option>
+        <option value="09:00-09:30">09:00 AM - 09:30 AM</option>
+        <option value="09:30-10:00">09:30 AM - 10:00 AM</option>
+        <option value="10:00-10:30">10:00 AM - 10:30 AM</option>
+        <option value="10:30-11:00">10:30 AM - 11:00 AM</option>
+        <option value="11:00-11:30">11:00 AM - 11:30 AM</option>
+        <option value="11:30-12:00">11:30 AM - 12:00 PM</option>
+        <option value="12:00-12:30">12:00 PM - 12:30 PM</option>
+        <option value="12:30-13:00">12:30 PM - 01:00 PM</option>
+        <option value="13:00-13:30">01:00 PM - 01:30 PM</option>
+        <option value="13:30-14:00">01:30 PM - 02:00 PM</option>
+        <option value="14:00-14:30">02:00 PM - 02:30 PM</option>
+        <option value="14:30-15:00">02:30 PM - 03:00 PM</option>
+        <option value="15:00-15:30">03:00 PM - 03:30 PM</option>
+        <option value="15:30-16:00">03:30 PM - 04:00 PM</option>
+        <option value="16:00-16:30">04:00 PM - 04:30 PM</option>
+        <option value="16:30-17:00">04:30 PM - 05:00 PM</option>
+        <option value="17:00-17:30">05:00 PM - 05:30 PM</option>
+        <option value="17:30-18:00">05:30 PM - 06:00 PM</option>
+      </select>
+    </div>
+  </div>
+
+  <button type="button" id="btnDisponibilidad" class="button button--primary w-100 py-2 mt-3">
+    <i class="fas fa-plus me-2"></i>Agregar Disponibilidad
+  </button>
+</form>
+        </section>
+        <!-- Agendar Cita Manual -->
+<section id="agendarCita" class="card p-4 shadow-sm border-0 mb-4">
+  <h5 class="fw-bold text-dark mb-3">
+    <i class="fas fa-calendar-check me-2 text-success"></i> Agendar Cita con Paciente
+  </h5>
+  <form>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Profesional:</label>
+        <select id="citaProfesional" class="form-control">
+          <option value="">Seleccionar profesional...</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Paciente:</label>
+        <select id="citaPaciente" class="form-control">
+          <option value="">Seleccionar paciente...</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Fecha:</label>
+        <input type="date" id="citaFecha" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Hora:</label>
+        <select id="citaHora" class="form-control">
+          <option value="">Selecciona una hora</option>
+        </select>
+        <small class="text-muted">Duración: 30 minutos</small>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Tipo de Cita:</label>
+        <select id="citaTipo" class="form-control">
+          <option value="">Seleccionar</option>
+          <option value="Primera sesión">Primera sesión</option>
+          <option value="Seguimiento">Seguimiento</option>
+          <option value="Evaluación">Evaluación</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Motivo:</label>
+        <input type="text" id="citaMotivo" class="form-control" placeholder="Motivo">
+      </div>
+    </div>
+
+    <button type="button" id="btnAgendarCita" class="button button--success w-100 py-2 mt-3">
+    <i class="fas fa-save me-2"></i>Agendar Cita
+</button>
+  </form>
+</section>
+    </main>
+</div>
+
+
+<!-- Modal Cancelar Cita (Profesional) -->
+<div class="modal fade modal-cancel-custom" id="modalCancelarCitaPro" tabindex="-1" aria-labelledby="modalCancelarCitaProLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger" id="modalCancelarCitaProLabel">
+          <i class="fas fa-times-circle me-2"></i>Cancelar Cita
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-3">
+        <p class="text-muted mb-3">Por favor indica el motivo por el cual deseas cancelar esta cita. El paciente será notificado.</p>
+        <div class="mb-3">
+          <label for="motivoCancelacionPro" class="form-label fw-semibold">Motivo de cancelación <span class="text-danger">*</span></label>
+          <textarea id="motivoCancelacionPro" class="form-control" rows="4"
+            placeholder="Ej: Emergencia personal, reprogramación de agenda, etc."
+            maxlength="500"></textarea>
+          <div class="form-text text-end"><span id="charCountMotivo">0</span>/500 caracteres</div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Volver</button>
+        <button type="button" class="btn btn-danger px-4" id="btnConfirmarCancelarPro">
+          <i class="fas fa-ban me-1"></i>Confirmar Cancelación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/auth/auth-guard.js"></script>
+<script src="/js/modules/professional/aside.js"></script>
+<script src="/js/modules/auth/logout.js"></script>
+    <script src="/js/core/shared/nombre.usuario.js"></script>
+<script src="/js/modules/professional/my.agenda.js"></script>
+
+</body>
+</html>
+

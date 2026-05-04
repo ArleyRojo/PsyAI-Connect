@@ -1,0 +1,10 @@
+# PsyAI Connect - Dependencias directas (producción)
+# Instalar: pip install -r requirements.txt
+
+flask>=3.0.0
+flask-cors>=4.0.0
+flask-limiter>=3.0.0
+mysql-connector-python>=8.0.0
+python-dotenv>=1.0.0
+waitress>=2.1.0
+filetype>=1.2.0

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Gestión de Citas</title>
+<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- CSS propios -->
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/components/components.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/responsive/aside-patient.css">
+
+<script src="/js/core/shared/theme.js"></script>
+<script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body>
+
+<!-- Botón responsive -->
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+
+<div class="d-flex">
+  <!-- Sidebar -->
+  <aside class="sidebar d-flex flex-column position-fixed">
+    <div class="sidebar__logo text-center mt-3">
+      <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+      <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+    </div>
+
+    <nav class="nav flex-column mt-4">
+      <a href="../patient.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+      <a href="chatbot.html" class="nav-link"><i class="fas fa-robot me-2"></i>Chatbot Emocional</a>
+      <a href="agenda-quotes.html" class="nav-link active"><i class="fas fa-calendar-alt me-2"></i> Agenda de Citas</a>
+      <a href="evolution.html" class="nav-link"><i class="fas fa-chart-area me-2"></i> Mi Evolución</a>
+      <a href="my.profile.html" class="nav-link border-top pt-3 mt-3"><i class="fas fa-user-circle me-2"></i> Mi Perfil</a>
+    </nav>
+
+    <div class="sidebar__footer mt-auto mb-3 text-center">
+      <div class="theme-switch-container mb-2">
+          <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+          <button id="theme-toggle" title="Cambiar modo"></button>
+          <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+      </div>
+      <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="main-content flex-grow-1 ms-250 p-4">
+<header class="main-header d-flex justify-content-between align-items-center mb-4">
+       <h1 class="h3 fw-bold"><i class="fas fa-calendar-alt me-2 text-primary"></i>Gestión de Citas</h1>
+       <div class="user-info d-flex align-items-center">
+                 <i class="fas fa-bell text-secondary fs-5 me-3"></i>
+                 <span class="fw-semibold text-dark" id="nombrePaciente">Hola, </span>
+             </div>
+     </header>
+
+     <!-- Próximas Citas -->
+     <section class="card p-3 mb-4 shadow-sm border-0">
+       <div class="d-flex justify-content-between align-items-center mb-3">
+         <h5 class="fw-bold text-dark mb-0"><i class="fas fa-clock me-2 text-primary"></i>Próximas Citas</h5>
+         <button type="button" class="btn btn-outline-secondary btn-sm" id="btnVerHistorialPaciente" data-bs-toggle="modal" data-bs-target="#modalHistorialCitasPaciente">
+           <i class="fas fa-history me-2"></i>Historial (<span id="contadorHistorial">0</span>)
+         </button>
+       </div>
+       <div class="table-responsive">
+         <table class="table table-striped align-middle">
+           <thead class="table-light">
+             <tr>
+               <th>Fecha</th><th>Hora</th><th>Tipo de Cita</th><th>Detalles</th><th>Acciones</th>
+             </tr>
+           </thead>
+           <tbody id="tablaCitas">
+             <tr><td colspan="5" class="text-center">Cargando citas...</td></tr>
+           </tbody>
+         </table>
+       </div>
+</section>
+
+      <!-- Solicitar Nueva Cita -->
+    <section class="card p-4 shadow-sm border-0 mb-4">
+      <h5 class="fw-bold text-dark mb-3">    <i class="fas fa-plus-circle me-2 text-primary"></i>Solicitar Nueva Cita</h5>
+      <form id="formCita" class="mt-3">
+        <div class="mb-3">
+          <label for="tipoCita" class="form-label fw-semibold">Tipo de Cita</label>
+          <select id="tipoCita" class="form-control">
+            <option value="">Seleccionar tipo de cita</option>
+            <option>Ansiedad</option><option>Estrés</option><option>Depresión</option>
+            <option>Autoestima</option><option>Duelo</option><option>Trastornos del Sueño</option>
+            <option>Adicciones</option><option>Orientación Emocional</option>
+            <option>Terapia de Pareja</option><option>Otro</option>
+          </select>
+        </div>
+        <!-- AQUÍ VA EL SELECT DEL PROFESIONAL -->
+  <div class="mb-3">
+    <label for="profesional" class="form-label fw-semibold">Profesional</label>
+    <select id="profesional" class="form-control">
+      <option value="">Seleccionar profesional</option>
+      <option value="2">Psicólogo 1</option>
+    </select>
+  </div>
+        <div class="mb-3">
+  <label class="form-label fw-semibold">Fecha</label>
+  <div id="calendario-container" class="calendario-container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <button type="button" id="btnMesAnterior" class="btn-nav-calendar" title="Mes anterior">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <span id="labelMes" class="label-mes"></span>
+      <button type="button" id="btnMesSiguiente" class="btn-nav-calendar" title="Mes siguiente">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:2px;margin-bottom:4px;">
+      <span style="font-size:.75rem;" class="dia-semana">L</span><span style="font-size:.75rem;" class="dia-semana">M</span>
+      <span style="font-size:.75rem;" class="dia-semana">X</span><span style="font-size:.75rem;" class="dia-semana">J</span>
+      <span style="font-size:.75rem;" class="dia-semana">V</span><span style="font-size:.75rem;" class="dia-semana">S</span>
+      <span style="font-size:.75rem;" class="dia-semana">D</span>
+    </div>
+    <div id="diasCalendario" style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:3px;"></div>
+    <div style="margin-top:8px;font-size:.78rem;" class="leyenda-calendario">
+      <span class="dot-disponible"></span>Disponible
+    </div>
+    <input type="hidden" id="date" value="">
+    <div id="fechaSeleccionadaLabel" class="fecha-seleccionada"></div>
+  </div>
+</div>
+        <div class="mb-3">
+  <label for="time" class="form-label fw-semibold">Hora</label>
+  <select id="time" class="form-control">
+    <option value="">Selecciona profesional y fecha para ver si hay disponibilidad</option>
+  </select>
+</div>
+        <div class="mb-3"><label for="motivo" class="form-label fw-semibold">Detalles Adicionales</label><textarea id="motivo" class="form-control" rows="3" placeholder="Describe brevemente..."></textarea></div>
+        <button type="button" id="btnSolicitarCita" class="btn btn-primary w-100 py-2 fw-bold border-0 mb-4"
+            style="background:#2196F3 !important;border-color:#2196F3 !important;color:#fff !important;">
+            <i class="fas fa-calendar-plus me-2"></i>Solicitar Cita
+        </button>
+      </form>
+    </section>
+
+     <!-- Historial de Citas (oculto en modal) -->
+
+  </main>
+</div>
+
+<!-- MODAL 1: MONTO Y TIPO DE PAGO -->
+<div class="modal fade" id="facturaModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Confirmar Pago</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <label class="fw-semibold">Monto a pagar</label>
+        <input type="number" id="montoPagoModal" class="form-control mb-3">
+        <label class="fw-semibold">Método de pago</label>
+        <select id="metodoPagoModal" class="form-control">
+          <option value="">Seleccionar método</option>
+          <option value="banco">Transferencia Bancaria</option>
+          <option value="tarjeta">Tarjeta Crédito / Débito</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button id="btnContinuarPago" class="btn btn-primary">Continuar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2: DATOS SEGÚN MÓTODO -->
+<div class="modal fade" id="modalPagoFinal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="tituloMetodoPago"></h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="contenidoMetodoPago"></div>
+      <div class="modal-footer">
+        <button id="btnAtras" class="btn btn-secondary">Atrás</button>
+        <button id="btnFinalizarPago" class="btn btn-success">Finalizar Pago</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cancelar Cita -->
+<div class="modal fade modal-cancel-custom" id="modalCancelar" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>Cancelar Cita
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-4">
+        <p class="text-muted text-center mb-3">¿Estás seguro que deseas cancelar esta cita? Esta acción no se puede deshacer.</p>
+        <div class="form-group text-start">
+          <label for="motivoCancelacion" class="form-label fw-semibold">Motivo de cancelación <span class="text-danger">*</span></label>
+          <textarea class="form-control" id="motivoCancelacion" rows="3" placeholder="Ej: Me surgió un inconveniente familiar..." required maxlength="500"></textarea>
+          <div class="d-flex justify-content-between mt-1">
+            <small class="text-danger d-none" id="errorMotivoCancelacion">El motivo es obligatorio</small>
+            <small class="text-muted ms-auto" id="charCountCancelacion">0/500</small>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+          Volver
+        </button>
+        <button type="button" class="btn btn-danger px-4" id="btnConfirmarCancelar">
+          Sí, cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Historial de Citas Paciente -->
+<div class="modal fade" id="modalHistorialCitasPaciente" tabindex="-1" aria-labelledby="modalHistorialCitasPacienteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-dark" id="modalHistorialCitasPacienteLabel">
+          <i class="fas fa-history me-2 text-muted"></i>Historial de Citas
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-3">
+        <div id="listaHistorialCitasPaciente" class="list-group">
+          <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/modules/auth/auth-guard.js"></script>
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/patient/aside.js"></script>
+<script src="/js/modules/patient/agendaquotes.js"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/nombre.usuario.js"></script>
+</body>
+</html>

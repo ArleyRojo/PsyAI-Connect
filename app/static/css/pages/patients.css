@@ -1,0 +1,366 @@
+/* ============================================================
+   TABS
+   ============================================================ */
+.tabs-container {
+    margin-bottom: 1.5rem;
+}
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 0;
+}
+.tab {
+    padding: 10px 20px;
+    border: 1px solid #dee2e6;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    background: #f8f9fa;
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.tab:hover {
+    color: #1976D2;
+    background: #e9f0fb;
+}
+.tab.active {
+    color: #1976D2;
+    background: #fff;
+    border-bottom: 2px solid #fff;
+    margin-bottom: -2px;
+}
+
+/* ============================================================
+   PROGRESS NAV
+   ============================================================ */
+.progress-nav {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e9ecef;
+    margin-bottom: 1.5rem;
+}
+.progress-nav__label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #2D3748;
+}
+.progress-nav__label .pct {
+    color: #1976D2;
+}
+.progress-nav__bar {
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.progress-nav__fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1976D2, #42A5F5);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+.progress-nav__steps {
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+}
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #718096;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 8px 16px;
+    border-radius: 8px;
+    flex: 1;
+    text-align: center;
+}
+.progress-step i {
+    font-size: 1.1rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #E2E8F0;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+.progress-step span {
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+.progress-step:hover {
+    color: #1976D2;
+    background: rgba(25, 118, 210, 0.05);
+}
+.progress-step.active {
+    color: #1976D2;
+}
+.progress-step.active i {
+    background: #1976D2;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(25,118,210,0.3);
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.patient-selector-card {
+    background: linear-gradient(135deg, #fff 0%, #f8fbff 100%);
+    border: 1px solid rgba(25, 118, 210, 0.15);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+.patient-selector-card:hover {
+    border-color: rgba(25, 118, 210, 0.3);
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.1);
+}
+.btn-seleccionar {
+    background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    transition: all 0.3s ease;
+}
+.btn-seleccionar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+#paciente-seleccionado-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e3f2fd 100%);
+    border: 1px solid rgba(25, 118, 210, 0.2);
+    border-radius: 12px;
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+.dark-mode .tabs {
+    border-bottom-color: var(--dm-border);
+}
+.dark-mode .tab {
+    background: var(--dm-elevated);
+    color: var(--dm-muted);
+    border-color: var(--dm-border);
+}
+.dark-mode .tab:hover {
+    color: var(--dm-accent);
+    background: rgba(144, 202, 249, 0.08);
+}
+.dark-mode .tab.active {
+    color: var(--dm-accent);
+    background: var(--dm-card);
+    border-bottom-color: var(--dm-card);
+}
+.dark-mode .progress-nav {
+    background: var(--dm-card);
+    border-color: var(--dm-border);
+}
+.dark-mode .progress-nav__label {
+    color: var(--dm-heading);
+}
+.dark-mode .progress-nav__bar {
+    background: var(--dm-border);
+}
+.dark-mode .progress-step {
+    color: var(--dm-muted);
+}
+.dark-mode .progress-step i {
+    background: var(--dm-border);
+}
+.dark-mode .progress-step.active {
+    color: var(--dm-accent);
+}
+.dark-mode .progress-step.active i {
+    background: var(--dm-accent);
+    color: #fff;
+}
+.dark-mode .patient-selector-card {
+    background: linear-gradient(135deg, var(--dm-card) 0%, var(--dm-elevated) 100%);
+    border-color: var(--dm-border);
+}
+.dark-mode #paciente-seleccionado-card {
+    background: linear-gradient(135deg, var(--dm-elevated) 0%, rgba(25,118,210,0.1) 100%);
+    border-color: var(--dm-border);
+}
+
+/* ── Tabs ─────────────────────────────────────────── */
+.tabs-container { border-bottom: 2px solid #e8edf3; margin-bottom: 1.5rem; }
+.tabs { display: flex; gap: 0; }
+.tab {
+    padding: 12px 28px;
+    font-size: .9rem;
+    font-weight: 600;
+    color: #6c7a8d;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: color .2s, border-color .2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.tab:hover { color: #1565C0; }
+.tab.active { color: #1565C0; border-bottom-color: #1565C0; }
+
+/* ── Progress steps ───────────────────────────────── */
+.progress-nav { background: #fff; border-radius: 14px; padding: 20px 24px; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 1.5rem; }
+.progress-nav__label { display: flex; justify-content: space-between; font-size: .85rem; font-weight: 600; color: #4a5568; margin-bottom: 10px; }
+.progress-nav__label .pct { color: #1565C0; }
+.progress-nav__bar { background: #e8edf3; border-radius: 99px; height: 6px; margin-bottom: 20px; overflow: hidden; }
+.progress-nav__fill { background: linear-gradient(90deg, #1565C0, #42A5F5); height: 100%; border-radius: 99px; transition: width .4s cubic-bezier(.4,0,.2,1); }
+.progress-nav__steps { display: flex; justify-content: space-between; }
+.progress-step {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    font-size: .78rem; font-weight: 600; color: #9aa5b4; cursor: pointer;
+    transition: color .2s;
+}
+.progress-step i {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #e8edf3; color: #9aa5b4; font-size: .9rem;
+    transition: background .25s, color .25s, box-shadow .25s;
+}
+.progress-step.active { color: #1565C0; }
+.progress-step.active i { background: #1565C0; color: #fff; box-shadow: 0 4px 14px rgba(21,101,192,.35); }
+.progress-step.done { color: #388e3c; }
+.progress-step.done i { background: #e8f5e9; color: #388e3c; }
+
+/* ── Tabla pacientes ──────────────────────────────── */
+.patient-row { cursor: pointer; transition: background .15s; }
+.patient-row:hover td { background: #f0f7ff !important; }
+.patient-row.selected-patient td { background: #e3f0ff !important; }
+.patient-row.selected-patient { outline: 2px solid #1565C0; outline-offset: -2px; }
+
+.btn-seleccionar {
+    border-radius: 20px;
+    font-size: .8rem;
+    padding: 4px 14px;
+    font-weight: 600;
+    transition: all .2s;
+}
+.btn-seleccionar.active-btn {
+    background: #1565C0 !important;
+    border-color: #1565C0 !important;
+    color: #fff !important;
+}
+.btn-seleccionar.active-btn::before { content: "✓ "; }
+
+/* ── Card paciente seleccionado ───────────────────── */
+.selected-patient-banner {
+    display: flex; align-items: center; gap: 14px;
+    background: linear-gradient(135deg, #e3f0ff 0%, #f0f7ff 100%);
+    border: 1.5px solid #90caf9;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 16px;
+    animation: slideIn .25s ease;
+}
+@keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+.selected-patient-banner img { width: 46px; height: 46px; object-fit: cover; border-radius: 50%; border: 2px solid #1565C0; }
+.selected-patient-banner .info { flex: 1; }
+.selected-patient-banner .name { font-weight: 700; color: #1565C0; font-size: 1rem; }
+.selected-patient-banner .email { font-size: .82rem; color: #5c7a99; }
+.selected-patient-banner .actions { display: flex; gap: 8px; }
+
+/* ── Paso 2 header paciente ───────────────────────── */
+.step2-patient-header {
+    display: flex; align-items: center; gap: 12px;
+    background: #f0f7ff; border-radius: 10px; padding: 12px 16px;
+    margin-bottom: 20px; border: 1px solid #bbdefb;
+}
+.step2-patient-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #1565C0; }
+.step2-patient-header .name { font-weight: 700; color: #1a3c5e; }
+.step2-patient-header .change-link { font-size: .8rem; color: #1565C0; cursor: pointer; margin-left: auto; text-decoration: underline; }
+
+/* ── Resumen paso 3 ───────────────────────────────── */
+.resumen-grid { display: grid; gap: 10px; }
+.resumen-item { background: #f8fafc; border-radius: 8px; padding: 10px 14px; border-left: 3px solid #1565C0; }
+.resumen-item label { font-size: .75rem; font-weight: 700; color: #6c7a8d; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 2px; }
+.resumen-item span { font-size: .92rem; color: #1a2e44; }
+
+/* ── Badge energía / estado ───────────────────────── */
+.energia-bar { display: flex; align-items: center; gap: 8px; }
+.energia-bar .bar { height: 6px; width: 60px; background: #e8edf3; border-radius: 99px; overflow: hidden; }
+.energia-bar .fill { height: 100%; border-radius: 99px; }
+
+/* ── Animación panel ──────────────────────────────── */
+.panel-step { animation: fadePanel .22s ease; }
+@keyframes fadePanel { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ============================================================
+   DARK MODE ADDITIONS
+   ============================================================ */
+.dark-mode .btn-seleccionar.active-btn {
+    background: #1565C0 !important;
+    border-color: #1565C0 !important;
+    color: #fff !important;
+}
+
+.dark-mode .selected-patient-banner {
+    background: linear-gradient(135deg, var(--dm-elevated) 0%, rgba(144,202,249,0.1) 100%);
+    border-color: var(--dm-accent);
+    color: var(--dm-text1);
+}
+.dark-mode .selected-patient-banner img { border-color: var(--dm-accent); }
+.dark-mode .selected-patient-banner .name { color: var(--dm-heading); }
+.dark-mode .selected-patient-banner .email { color: var(--dm-muted); }
+
+.dark-mode .step2-patient-header {
+    background: var(--dm-elevated);
+    border-color: var(--dm-border);
+    color: var(--dm-text1);
+}
+.dark-mode .step2-patient-header img { border-color: var(--dm-accent); }
+.dark-mode .step2-patient-header .name { color: var(--dm-heading); }
+.dark-mode .step2-patient-header .change-link { color: var(--dm-soft); }
+
+.dark-mode .resumen-item { 
+    background: var(--dm-elevated); 
+    border-left-color: var(--dm-accent);
+}
+.dark-mode .resumen-item label { color: var(--dm-muted); }
+.dark-mode .resumen-item span { color: var(--dm-text1); }
+
+.dark-mode .energia-bar .bar { background: var(--dm-border); }
+
+.dark-mode .patient-row:hover td { background: rgba(144, 202, 249, 0.08) !important; }
+.dark-mode .patient-row.selected-patient td { background: rgba(144, 202, 249, 0.15) !important; }
+.dark-mode .patient-row.selected-patient { outline-color: var(--dm-accent); }
+
+.dark-mode .progress-step.done { color: var(--dm-success); }
+.dark-mode .progress-step.done i { background: rgba(61, 184, 122, 0.15); color: var(--dm-success); }
+
+.dark-mode .tab.active { border-bottom-color: var(--dm-accent); }
+
+.dark-mode .panel-step { background: var(--dm-card); border-color: var(--dm-border); }
+
+.dark-mode .btn-primary {
+    background: var(--dm-accent);
+    border-color: var(--dm-accent);
+    color: var(--dm-deep);
+}
+.dark-mode .btn-primary:hover {
+    background: var(--dm-soft);
+    border-color: var(--dm-soft);
+}
+
+
