@@ -209,56 +209,50 @@ async function cargarHorariosDisponibles() {
 
 // ── Agendar Cita ────────────────────────────────────────────
 async function agendarCita() {
-  const idPaciente = document.getElementById("citaPaciente").value;
-  const idProfesional = document.getElementById("citaProfesional").value;
-  const fecha = document.getElementById("citaFecha").value;
-  const hora = document.getElementById("citaHora").value;
-  const tipoCita = document.getElementById("citaTipo").value;
-  const modalidad = document.getElementById("citaModalidad").value;
-  const motivo = document.getElementById("citaMotivo").value;
-  const metodoPago = document.getElementById("citaMetodoPago").value;
+    const idPaciente = document.getElementById("citaPaciente").value;
+    const idProfesional = document.getElementById("citaProfesional").value;
+    const fecha = document.getElementById("citaFecha").value;
+    const hora = document.getElementById("citaHora").value;
+    const tipoCita = document.getElementById("citaTipo").value;
+    const motivo = document.getElementById("citaMotivo").value;
 
-  if (!idProfesional || !idPaciente || !fecha || !hora || !tipoCita || !modalidad || !motivo || !metodoPago) {
-    let camposFaltantes = [];
-    if (!idProfesional) camposFaltantes.push('Profesional');
-    if (!idPaciente) camposFaltantes.push('Paciente');
-    if (!fecha) camposFaltantes.push('Fecha');
-    if (!hora) camposFaltantes.push('Hora');
-    if (!tipoCita) camposFaltantes.push('Tipo de Cita');
-    if (!modalidad) camposFaltantes.push('Modalidad');
-    if (!motivo) camposFaltantes.push('Motivo');
-    if (!metodoPago) camposFaltantes.push('Método de pago');
-    PsyAIAlerts.warning('Campos Requeridos', `Falta: ${camposFaltantes.join(', ')}`);
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/citas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ idPaciente, idProfesional, fecha, hora, tipoCita, tipoSesion: modalidad, motivo, metodoPago, creado_por_profesional: true })
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      PsyAIAlerts.success('Cita Agendada', 'La cita ha sido creada correctamente.');
-      document.getElementById('citaProfesional').value = '';
-      document.getElementById('citaPaciente').value = '';
-      document.getElementById('citaFecha').value = '';
-      document.getElementById('citaHora').value = '';
-      document.getElementById('citaTipo').value = '';
-      document.getElementById('citaModalidad').value = '';
-      document.getElementById('citaMotivo').value = '';
-      document.getElementById('citaMetodoPago').value = '';
-      cargarCitasProfesional();
-    } else {
-      PsyAIAlerts.error('Error', data.message || 'No se pudo agendar la cita.');
+    if (!idProfesional || !idPaciente || !fecha || !hora || !tipoCita || !motivo) {
+        let camposFaltantes = [];
+        if (!idProfesional) camposFaltantes.push('Profesional');
+        if (!idPaciente) camposFaltantes.push('Paciente');
+        if (!fecha) camposFaltantes.push('Fecha');
+        if (!hora) camposFaltantes.push('Hora');
+        if (!tipoCita) camposFaltantes.push('Tipo de Cita');
+        if (!motivo) camposFaltantes.push('Motivo');
+        PsyAIAlerts.warning('Campos Requeridos', `Falta: ${camposFaltantes.join(', ')}`);
+        return;
     }
-  } catch(err) {
-    console.error(err);
-    PsyAIAlerts.error('Error', 'Error de conexión.');
-  }
+
+    try {
+        const res = await fetch("/api/citas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ idPaciente, idProfesional, fecha, hora, tipoCita, motivo, creado_por_profesional: true })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            PsyAIAlerts.success('Cita Agendada', 'La cita ha sido creada correctamente.');
+            document.getElementById('citaProfesional').value = '';
+            document.getElementById('citaPaciente').value = '';
+            document.getElementById('citaFecha').value = '';
+            document.getElementById('citaHora').value = '';
+            document.getElementById('citaTipo').value = '';
+            document.getElementById('citaMotivo').value = '';
+            cargarCitasProfesional();
+        } else {
+            PsyAIAlerts.error('Error', data.message || 'No se pudo agendar la cita.');
+        }
+    } catch(err) {
+        console.error(err);
+        PsyAIAlerts.error('Error', 'Error de conexión.');
+    }
 }
 
 // ── Cargar Citas del Profesional ────────────────────────────
@@ -315,26 +309,13 @@ async function cargarCitasProfesional() {
                 ? `<span class="badge bg-danger">Cancelada</span>`
                 : `<span class="badge bg-success">Confirmada</span>`;
 
-            const sesionIcon = c.tipoSesion === 'Presencial'
-                ? '<i class="fas fa-building text-secondary" title="Presencial"></i>'
-                : c.tipoSesion === 'Virtual'
-                  ? '<i class="fas fa-video text-secondary" title="Virtual"></i>'
-                  : '';
-
-            const pagoTag = c.estadoPago === 'Pagado'
-                ? '<span class="badge bg-success ms-1" style="font-size:.7rem;">Pagado</span>'
-                : c.metodoPago
-                  ? `<span class="badge bg-warning text-dark ms-1" style="font-size:.7rem;">${c.metodoPago}</span>`
-                  : '';
-
             return `
                 <li class="list-group-item d-flex align-items-center gap-2">
                     <img src="${fotoUrl}" alt="Foto" class="rounded-circle flex-shrink-0" style="width:35px;height:35px;object-fit:cover;">
                     <div class="flex-grow-1">
                         <strong>${c.paciente}</strong> — ${c.fecha} ${formatearHora(c.hora)}<br>
-                        <small class="text-muted">${c.tipoCita} ${sesionIcon}</small>
+                        <small class="text-muted">${c.tipoCita}</small>
                         ${estadoBadge}
-                        ${pagoTag}
                         ${agendoPor}
                         ${c.motivoCancelacion ? `<div class="mt-1"><small class="text-danger"><i class="fas fa-info-circle me-1"></i><strong>Motivo cancelación:</strong> ${c.motivoCancelacion}</small></div>` : ''}
                     </div>

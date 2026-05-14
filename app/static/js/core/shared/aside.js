@@ -54,20 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let closeTimer = null;
 
-    const setToggleIcon = (isOpen) => {
-        menuToggle.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
-        const icon = menuToggle.querySelector('i');
-
-        if (icon) {
-            icon.classList.toggle('fa-bars', !isOpen);
-            icon.classList.toggle('fa-xmark', isOpen);
-            icon.classList.remove('fa-times');
-            return;
-        }
-
-        menuToggle.innerHTML = isOpen ? '<i class="fas fa-xmark"></i>' : '<i class="fas fa-bars"></i>';
-    };
-
     const hideSidebarImmediately = () => {
         if (closeTimer) {
             clearTimeout(closeTimer);
@@ -78,7 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebar.classList.remove('active', 'closing');
         menuToggle.classList.remove('active');
         menuToggle.setAttribute('aria-expanded', 'false');
-        setToggleIcon(false);
         saveSidebarState(false);
     };
 
@@ -93,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.classList.add('active');
         menuToggle.classList.add('active');
         menuToggle.setAttribute('aria-expanded', 'true');
-        setToggleIcon(true);
         saveSidebarState(true);
     };
 
@@ -107,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.classList.add('closing');
         menuToggle.classList.remove('active');
         menuToggle.setAttribute('aria-expanded', 'false');
-        setToggleIcon(false);
 
         if (closeTimer) {
             clearTimeout(closeTimer);
@@ -126,8 +109,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
             openSidebar();
         }, 100);
-    } else {
-        setToggleIcon(false);
     }
 
     // Toggle sidebar al hacer clic en el botón
@@ -206,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const nav = document.createElement('nav');
         nav.className = 'mobile-bottom-nav';
         nav.dataset.role = 'professional';
-        nav.setAttribute('aria-label', 'Navegación profesional');
+        nav.setAttribute('aria-label', 'Navegacion profesional');
         nav.innerHTML = items.map(item => {
             const target = item.href.replace(/^\//, '');
             const active = current.endsWith(target) || (target === 'professional.dashboard.html' && current.endsWith('/professional.dashboard.html'));

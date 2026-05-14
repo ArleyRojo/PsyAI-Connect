@@ -277,54 +277,6 @@ def init_db():
         if foto_col and foto_col[0] and int(foto_col[0]) < 255:
             extra_alters.append("ALTER TABLE Register MODIFY COLUMN fotoPerfil VARCHAR(255) DEFAULT NULL")
 
-        # ── tipoSesion (Virtual/Presencial) en Citas ──
-        cursor.execute("""
-            SELECT COUNT(*) FROM information_schema.COLUMNS
-            WHERE TABLE_NAME = 'Citas' AND COLUMN_NAME = 'tipoSesion' AND TABLE_SCHEMA = DATABASE()
-        """)
-        if cursor.fetchone()[0] == 0:
-            extra_alters.append("ALTER TABLE Citas ADD COLUMN tipoSesion VARCHAR(20) DEFAULT NULL")
-
-        # ── notas en Citas ──
-        cursor.execute("""
-            SELECT COUNT(*) FROM information_schema.COLUMNS
-            WHERE TABLE_NAME = 'Citas' AND COLUMN_NAME = 'notas' AND TABLE_SCHEMA = DATABASE()
-        """)
-        if cursor.fetchone()[0] == 0:
-            extra_alters.append("ALTER TABLE Citas ADD COLUMN notas TEXT DEFAULT NULL")
-
-        # ── Facturas ──
-        cursor.execute("""
-            SELECT COUNT(*) FROM information_schema.TABLES
-            WHERE TABLE_NAME = 'Facturas' AND TABLE_SCHEMA = DATABASE()
-        """)
-        if cursor.fetchone()[0] == 0:
-            extra_alters.append("""
-                CREATE TABLE Facturas (
-                    idFactura INT AUTO_INCREMENT PRIMARY KEY,
-                    idPaciente INT NOT NULL,
-                    idProfesional INT NOT NULL,
-                    idCita INT DEFAULT NULL,
-                    monto DECIMAL(10,2) DEFAULT 100000.00,
-                    metodoPago ENUM('efectivo','transferencia','pse') DEFAULT NULL,
-                    estadoPago ENUM('Pendiente','Pagado','Reembolsado') DEFAULT 'Pendiente',
-                    referenciaPago VARCHAR(255) DEFAULT NULL,
-                    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (idPaciente) REFERENCES Register(idUsuario) ON DELETE CASCADE,
-                    FOREIGN KEY (idProfesional) REFERENCES Register(idUsuario) ON DELETE CASCADE,
-                    FOREIGN KEY (idCita) REFERENCES Citas(idCita) ON DELETE SET NULL
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            """)
-
-        # Agregar 'tarjeta' al enum si la tabla ya existe
-        cursor.execute("""
-            SELECT COLUMN_TYPE FROM information_schema.COLUMNS
-            WHERE TABLE_NAME = 'Facturas' AND COLUMN_NAME = 'metodoPago' AND TABLE_SCHEMA = DATABASE()
-        """)
-        row = cursor.fetchone()
-        if row and 'tarjeta' not in row[0]:
-            extra_alters.append("ALTER TABLE Facturas MODIFY COLUMN metodoPago ENUM('efectivo','transferencia','pse','tarjeta') DEFAULT NULL")
-
         for column_name, alter in (
             ("destinatario", "ALTER TABLE Notificaciones ADD COLUMN destinatario VARCHAR(80) DEFAULT NULL"),
             ("email_individual", "ALTER TABLE Notificaciones ADD COLUMN email_individual VARCHAR(120) DEFAULT NULL"),

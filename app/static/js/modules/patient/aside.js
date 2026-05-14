@@ -49,22 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let closeTimer = null;
 
-    const setToggleIcon = (isOpen) => {
-        if (!menuToggle) return;
-
-        menuToggle.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
-        const icon = menuToggle.querySelector('i');
-
-        if (icon) {
-            icon.classList.toggle('fa-bars', !isOpen);
-            icon.classList.toggle('fa-xmark', isOpen);
-            icon.classList.remove('fa-times');
-            return;
-        }
-
-        menuToggle.innerHTML = isOpen ? '<i class="fas fa-xmark"></i>' : '<i class="fas fa-bars"></i>';
-    };
-
     const hideSidebarImmediately = () => {
         if (closeTimer) {
             clearTimeout(closeTimer);
@@ -76,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (menuToggle) {
             menuToggle.classList.remove('active');
             menuToggle.setAttribute('aria-expanded', 'false');
-            setToggleIcon(false);
         }
     };
 
@@ -92,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (menuToggle) {
             menuToggle.classList.add('active');
             menuToggle.setAttribute('aria-expanded', 'true');
-            setToggleIcon(true);
         }
         saveSidebarState(true);
     };
@@ -108,7 +90,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (menuToggle) {
             menuToggle.classList.remove('active');
             menuToggle.setAttribute('aria-expanded', 'false');
-            setToggleIcon(false);
         }
 
         if (closeTimer) {
@@ -220,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const nav = document.createElement('nav');
         nav.className = 'mobile-bottom-nav';
         nav.dataset.role = 'patient';
-        nav.setAttribute('aria-label', 'Navegación paciente');
+        nav.setAttribute('aria-label', 'Navegacion paciente');
 
         nav.innerHTML = items.map(item => {
             const target = item.href.replace(/^\//, '');

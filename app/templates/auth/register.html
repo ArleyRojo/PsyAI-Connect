@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
 <head>
     <meta charset="UTF-8">
@@ -15,14 +15,13 @@
     
 <script src="/js/core/shared/theme.js"></script>
 <script src="/js/core/shared/localStorage-detector.js"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=sitewide-responsive-3">
 </head>
 <body>
 
     <canvas id="bgCanvas" class="canvas-bg"></canvas>
 
      <div class="back-index">
-         <a href="/index.html">&larr; Volver al inicio</a>
+         <a href="/index.html">&larr; Volver al Inicio</a>
      </div>
 
 
@@ -77,7 +76,7 @@
                     </div>
 
                     <div class="reg-field">
-                        <label for="email" class="form-label">Correo electrúnico</label>
+                        <label for="email" class="form-label">Correo electrónico</label>
                         <div style="position:relative;">
                             <i class="fas fa-envelope field-icon reg-icon" id="icon-email"></i>
                             <input type="email" class="form-control" id="email"
@@ -125,7 +124,7 @@
                         </div>
                         <small id="pwdHint" style="display:block;margin-top:4px;font-size:.72rem;font-weight:600;min-height:1rem;color:#7B92AC;"></small>
                         <div class="pwd-rules" style="margin-top: 2px;">
-                            <div id="rule-len" class="pwd-rule"><i class="fas fa-circle"></i> <span>Mánimo 6 caracteres</span></div>
+                            <div id="rule-len" class="pwd-rule"><i class="fas fa-circle"></i> <span>Mínimo 6 caracteres</span></div>
                             <div id="rule-upper" class="pwd-rule"><i class="fas fa-circle"></i> <span>Al menos 1 mayúscula</span></div>
                             <div id="rule-num" class="pwd-rule"><i class="fas fa-circle"></i> <span>Al menos 1 número</span></div>
                         </div>
@@ -186,9 +185,11 @@
         </div>
     </div>
 
-    <link rel="stylesheet" href="/css/components/custom-alerts.css">
-<script src="/js/core/shared/alerts.js"></script>
-<script src="/js/modules/auth/register.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/responsive/responsive-fix.css">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+    <script src="/js/modules/auth/register.js"></script>
 
 </body>
 </html>

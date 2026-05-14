@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
 <head>
 <meta charset="UTF-8">
@@ -134,13 +134,13 @@
                 <div class="dropdown-container" style="width: 150px;">
                   <select class="form-select risk-level-select" id="riskLevelSelect">
                     <option value="Alto" data-color="#dc3545" data-icon="fa-exclamation-triangle">
-                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#dc3545;margin-right:8px;"></span>?? Alto
+                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#dc3545;margin-right:8px;"></span>🔴 Alto
                     </option>
                     <option value="Medio" data-color="#f59e0b" data-icon="fa-exclamation-circle">
-                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:8px;"></span>?? Medio
+                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:8px;"></span>🟡 Medio
                     </option>
                     <option value="Bajo" data-color="#10b981" data-icon="fa-check-circle">
-                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:8px;"></span>?? Bajo
+                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:8px;"></span>🟢 Bajo
                     </option>
                   </select>
                 </div>
@@ -288,7 +288,8 @@
   </div>
 </div>
 
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=sitewide-responsive-3">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-fix.css">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
 <script src="/js/core/shared/aside.js"></script>

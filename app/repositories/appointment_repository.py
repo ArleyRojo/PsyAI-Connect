@@ -33,26 +33,15 @@ def appointment_exists(professional_id, fecha, hora):
         return cursor.fetchone() is not None
 
 
-def create_appointment(patient_id, professional_id, fecha, hora, tipo_cita, motivo, creado_por_profesional=False, tipo_sesion=None, metodo_pago=None, referencia_pago=None):
+def create_appointment(patient_id, professional_id, fecha, hora, tipo_cita, motivo, creado_por_profesional=False):
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
-            INSERT INTO Citas (idPaciente, idProfesional, fecha, hora, tipoCita, tipoSesion, motivo, estado, creado_por_profesional)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, 'Pendiente', %s)
+            INSERT INTO Citas (idPaciente, idProfesional, fecha, hora, tipoCita, motivo, estado, creado_por_profesional)
+            VALUES (%s, %s, %s, %s, %s, %s, 'Pendiente', %s)
             """,
-            (patient_id, professional_id, fecha, hora, tipo_cita, tipo_sesion, motivo, creado_por_profesional),
+            (patient_id, professional_id, fecha, hora, tipo_cita, motivo, creado_por_profesional),
         )
-        id_cita = cursor.lastrowid
-
-        if metodo_pago:
-            cursor.execute(
-                """
-                INSERT INTO Facturas (idPaciente, idProfesional, idCita, monto, metodoPago, referenciaPago, estadoPago)
-                VALUES (%s, %s, %s, 100000.00, %s, %s, 'Pendiente')
-                """,
-                (patient_id, professional_id, id_cita, metodo_pago, referencia_pago),
-            )
-
         conn.commit()
         # Increment logs version to notify SSE subscribers of new appointment log
         admin_repository.increment_logs_version()
@@ -94,11 +83,9 @@ def get_professional_appointments(professional_id, *, pending_only=False, page=1
         cursor.execute(
             f"""
             SELECT c.idCita, r.nombre as paciente, r.fotoPerfil, c.fecha, c.hora,
-                   c.tipoCita, c.tipoSesion, c.motivo, c.estado, c.creado_por_profesional,
-                   f.metodoPago, f.estadoPago, f.monto
+                   c.tipoCita, c.motivo, c.estado, c.creado_por_profesional
             FROM Citas c
             JOIN Register r ON c.idPaciente = r.idUsuario
-            LEFT JOIN Facturas f ON c.idCita = f.idCita
             WHERE c.idProfesional = %s AND c.estado {estado_clause} {fecha_clause}
             ORDER BY c.fecha ASC, c.hora ASC
             LIMIT %s OFFSET %s
@@ -128,11 +115,9 @@ def get_next_patient_appointment(patient_id):
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
-            SELECT c.fecha, c.hora, c.tipoCita, c.tipoSesion, r.nombre as profesional,
-                   f.metodoPago, f.estadoPago, f.monto
+            SELECT c.fecha, c.hora, c.tipoCita, r.nombre as profesional
             FROM Citas c
             JOIN Register r ON c.idProfesional = r.idUsuario
-            LEFT JOIN Facturas f ON c.idCita = f.idCita
             WHERE c.idPaciente = %s AND c.estado = 'Pendiente' AND c.fecha >= CURDATE()
             ORDER BY c.fecha ASC, c.hora ASC LIMIT 1
             """,
@@ -160,12 +145,10 @@ def get_patient_appointments(patient_id):
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
-            SELECT c.idCita, c.fecha, c.hora, c.tipoCita, c.tipoSesion, c.motivo, c.estado,
-                   c.motivoCancelacion, r.nombre as profesional, c.creado_por_profesional,
-                   f.metodoPago, f.estadoPago, f.monto, f.referenciaPago
+            SELECT c.idCita, c.fecha, c.hora, c.tipoCita, c.motivo, c.estado,
+                   c.motivoCancelacion, r.nombre as profesional, c.creado_por_profesional
             FROM Citas c
             JOIN Register r ON c.idProfesional = r.idUsuario
-            LEFT JOIN Facturas f ON c.idCita = f.idCita
             WHERE c.idPaciente = %s
             ORDER BY c.fecha DESC, c.hora DESC
             """,

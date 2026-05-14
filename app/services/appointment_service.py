@@ -9,9 +9,6 @@ def create_appointment(patient_id, data, *, created_by_professional=False):
     hora = data.get("hora")
     tipo_cita = data.get("tipoCita")
     motivo = data.get("motivo")
-    tipo_sesion = data.get("tipoSesion") or data.get("modalidad")
-    metodo_pago = data.get("metodoPago")
-    referencia_pago = data.get("referenciaPago")
 
     if not professional_id or not fecha or not hora:
         return {"success": False, "message": "Datos incompletos"}, 400
@@ -28,9 +25,6 @@ def create_appointment(patient_id, data, *, created_by_professional=False):
         tipo_cita,
         motivo,
         created_by_professional if created_by_professional else False,
-        tipo_sesion=tipo_sesion,
-        metodo_pago=metodo_pago,
-        referencia_pago=referencia_pago,
     )
     return {"success": True, "message": "Cita agendada correctamente"}, 200
 

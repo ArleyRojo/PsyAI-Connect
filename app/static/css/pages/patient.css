@@ -309,12 +309,12 @@
 }
 .resumen-item span { font-size: .92rem; color: #1a2e44; }
 
-/* -- Badge energ�a / estado ------------------------- */
+/* -- Badge energ�a / estado ------------------------- */
 .energia-bar { display: flex; align-items: center; gap: 8px; }
 .energia-bar .bar { height: 6px; width: 60px; background: #e8edf3; border-radius: 99px; overflow: hidden; }
 .energia-bar .fill { height: 100%; border-radius: 99px; }
 
-/* -- Animaci�n panel -------------------------------- */
+/* -- Animaci�n panel -------------------------------- */
 .panel-step { animation: fadePanel .22s ease; }
 @keyframes fadePanel { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
@@ -2231,7 +2231,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
 
 /* ==================== RESPONSIVE ASIDE PATIENT - COMPLETO ==================== */
 
-/* ==================== CHATBOT - DISE�O MEJORADO ==================== */
+/* ==================== CHATBOT - DISE�O MEJORADO ==================== */
 #chatbot-section {
     background: var(--cb-card-bg, #ffffff);
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -2274,7 +2274,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     50% { opacity: 0.5; }
 }
 
-/* Bot�n pantalla completa */
+/* Bot�n pantalla completa */
 #chatbot-section .btn-fullscreen {
     background: transparent;
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -2299,7 +2299,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     font-size: 0.85rem;
 }
 
-/* �rea de conversaci�n */
+/* �rea de conversaci�n */
 #chatbot-section .chat-area {
     background: var(--cb-bg, #F4F8FC);
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -2500,7 +2500,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     40% { transform: scale(1.2); opacity: 1; }
 }
 
-/* Overlay para m�vil */
+/* Overlay para m�vil */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -2519,7 +2519,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     opacity: 1;
 }
 
-/* Bot�n hamburguesa */
+/* Bot�n hamburguesa */
 .menu-toggle,
 .toggle-btn {
     display: none;
@@ -2608,14 +2608,14 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* ========== M�VILES GRANDES (576px - 767px) ========== */
+/* ========== M�VILES GRANDES (576px - 767px) ========== */
 @media (max-width: 767px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
     }
 
-    /* Acorde�n del sidebar */
+    /* Acorde�n del sidebar */
     .sidebar-nav {
         display: flex;
         flex-direction: column;
@@ -2794,7 +2794,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* ========== M�VILES (hasta 575px) ========== */
+/* ========== M�VILES (hasta 575px) ========== */
 @media (max-width: 575px) {
     .menu-toggle,
     .toggle-btn {
@@ -2804,7 +2804,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         font-size: 1.1rem;
     }
 
-    /* Acorde�n sidebar */
+    /* Acorde�n sidebar */
     .sidebar-nav .nav-link {
         padding: 12px 15px;
     }
@@ -2920,7 +2920,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         font-size: 0.85rem;
     }
 
-    /* Agenda - Hacer tabla m�s compacta */
+    /* Agenda - Hacer tabla m�s compacta */
     .table-responsive {
         font-size: 0.8rem;
     }
@@ -2941,7 +2941,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         margin: 2px 0;
     }
 
-    /* Ocultar columnas menos importantes en m�vil */
+    /* Ocultar columnas menos importantes en m�vil */
     .table td:nth-child(4),
     .table th:nth-child(4) {
         display: none;
@@ -3022,7 +3022,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* ========== M�VILES MUY PEQUE�OS (hasta 375px) ========== */
+/* ========== M�VILES MUY PEQUE�OS (hasta 375px) ========== */
 @media (max-width: 375px) {
     .menu-toggle,
     .toggle-btn {
@@ -3136,7 +3136,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* ========== MODO LANDSCAPE EN M�VILES ========== */
+/* ========== MODO LANDSCAPE EN M�VILES ========== */
 @media (max-height: 600px) and (orientation: landscape) {
     .main-content {
         padding: 10px !important;
@@ -3155,7 +3155,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         margin-bottom: 10px !important;
     }
 
-    /* Chatbot - �rea m�s peque�a en landscape */
+    /* Chatbot - �rea m�s peque�a en landscape */
     #chatbot-section .border {
         height: 180px !important;
     }
@@ -3208,7 +3208,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
 
 /* ========== MEJORAS GENERALES ========== */
 
-/* Botones m�s t�ctiles en m�vil */
+/* Botones m�s t�ctiles en m�vil */
 @media (max-width: 767px) {
     .button,
     .btn {
@@ -3218,7 +3218,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         justify-content: center;
     }
 
-    /* Inputs m�s grandes para mejor usabilidad */
+    /* Inputs m�s grandes para mejor usabilidad */
     .form-control,
     .form-select,
     select {
@@ -3226,14 +3226,14 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* Ocultar elementos innecesarios en m�vil muy peque�o */
+/* Ocultar elementos innecesarios en m�vil muy peque�o */
 @media (max-width: 375px) {
     .main-header .user-info i {
         display: none;
     }
 }
 
-/* Animaci�n al abrir el acorde�n navbar */
+/* Animaci�n al abrir el acorde�n navbar */
 .navbar-collapse {
     transition: all 0.4s ease;
 }
@@ -3421,7 +3421,7 @@ html {
 }
 
 /* =============================================
-   Estilos Modales de Pago � agenda-quotes
+   Estilos Modales de Pago � agenda-quotes
    Paleta: #0D47A1 / #90CAF9 (PsyAI Connect)
    ============================================= */
 
@@ -3465,7 +3465,7 @@ html {
   background: var(--color-bg-card, #fff);
 }
 
-/* -- M�todos de pago � tarjetas seleccionables -- */
+/* -- M�todos de pago � tarjetas seleccionables -- */
 .pay-methods { display: flex; gap: 12px; margin-bottom: 1.4rem; flex-wrap: wrap; }
 .pay-method-card {
   flex: 1; min-width: 90px;
@@ -3574,7 +3574,7 @@ html {
 }
 .pse-panel small { color: #1565C0; font-size: .78rem; }
 
-/* -- M�todos guardados -- */
+/* -- M�todos guardados -- */
 .saved-methods { margin-bottom: 1rem; }
 .saved-item {
   display: flex; align-items: center; gap: 12px;
@@ -3629,7 +3629,7 @@ html {
 .guardar-check label { font-size: .82rem; color: var(--color-text-muted, #7B92AC); cursor: pointer; }
 
 /* =============================================
-   DARK MODE � Sistema de Pago
+   DARK MODE � Sistema de Pago
    ============================================= */
 html.dark-mode #facturaModal .modal-content,
 html.dark-mode #modalPagoFinal .modal-content {
@@ -3651,7 +3651,7 @@ html.dark-mode #modalPagoFinal .modal-footer {
   border-top-color: var(--dm-border, #1a3555);
 }
 
-/* M�todos de pago - dark */
+/* M�todos de pago - dark */
 html.dark-mode .pay-method-card {
   background: var(--dm-elevated, #132843);
   border-color: var(--dm-border, #1a3555);
@@ -3680,7 +3680,7 @@ html.dark-mode .pse-panel .pse-logo {
 }
 html.dark-mode .pse-panel small { color: var(--dm-accent, #90CAF9); }
 
-/* M�todos guardados - dark */
+/* M�todos guardados - dark */
 html.dark-mode .saved-item {
   background: var(--dm-elevated, #132843);
   border-color: var(--dm-border, #1a3555);
@@ -3747,8 +3747,8 @@ html.dark-mode #modalPagoFinal select option {
 /* ===== Source: app\static\responsive\aside.css ===== */
 
 /* =======================================================
-   INDEX RESPONSIVE � PsyAI Connect landing page
-   �ltima actualizaci�n: 2026-04-06
+   INDEX RESPONSIVE � PsyAI Connect landing page
+   �ltima actualizaci�n: 2026-04-06
    ======================================================= */
 
 
@@ -3769,11 +3769,11 @@ html {
 
 
 /* --------------------------------------------------------
-   ACORDE�N FAQ � Bootstrap (.accordion)
+   ACORDE�N FAQ � Bootstrap (.accordion)
    Colores del tema PsyAI Connect en todos los estados
    -------------------------------------------------------- */
 
-/* � Variables Bootstrap sobreescritas globalmente � */
+/* � Variables Bootstrap sobreescritas globalmente � */
 .accordion-responsive {
     --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem rgba(144, 202, 249, 0.35);
     --bs-accordion-active-color:         #0D47A1;
@@ -3783,7 +3783,7 @@ html {
     --bs-accordion-btn-padding-y:        1.25rem;
 }
 
-/* � Item base � */
+/* � Item base � */
 .accordion-responsive .accordion-item,
 .accordion-item {
     border: 1px solid rgba(13, 71, 161, 0.15);
@@ -3813,7 +3813,7 @@ html {
     border-color: rgba(13, 71, 161, 0.28);
 }
 
-/* � Bot�n (collapsed = cerrado, estado por defecto) � */
+/* � Bot�n (collapsed = cerrado, estado por defecto) � */
 .accordion-responsive .accordion-button,
 .accordion-button {
     font-family: var(--font-body, 'Plus Jakarta Sans', system-ui, sans-serif);
@@ -3832,7 +3832,7 @@ html {
     color: #0D47A1;
 }
 
-/* � Bot�n abierto (active) � ? EL ESTADO QUE NO CAMBIABA � */
+/* � Bot�n abierto (active) � ? EL ESTADO QUE NO CAMBIABA � */
 .accordion-responsive .accordion-button:not(.collapsed),
 .accordion-button:not(.collapsed) {
     color:      #0D47A1 !important;
@@ -3841,7 +3841,7 @@ html {
     border-bottom: 1px solid rgba(13, 71, 161, 0.15);
 }
 
-/* � Icono flecha � */
+/* � Icono flecha � */
 .accordion-responsive .accordion-button::after,
 .accordion-button::after {
     width:            28px;
@@ -3856,7 +3856,7 @@ html {
     transition:       transform 0.3s ease, color 0.2s ease;
 }
 
-/* � Icono cuando est� abierto � */
+/* � Icono cuando est� abierto � */
 .accordion-responsive .accordion-button:not(.collapsed)::after,
 .accordion-button:not(.collapsed)::after {
     content: '\f00d' !important;
@@ -3864,7 +3864,7 @@ html {
     transform: rotate(0deg);
 }
 
-/* � Cuerpo del acorde�n � */
+/* � Cuerpo del acorde�n � */
 .accordion-responsive .accordion-body,
 .accordion-body {
     padding:     0.75rem 1.5rem 1.5rem;
@@ -3875,7 +3875,7 @@ html {
 }
 
 
-/* -- Dark mode � acorde�n Bootstrap -- */
+/* -- Dark mode � acorde�n Bootstrap -- */
 html.dark-mode .accordion-item {
     background:    linear-gradient(180deg, rgba(14,31,53,0.98) 0%, rgba(11,24,40,0.98) 100%) !important;
     border-color:  rgba(13, 71, 161, 0.5) !important;
@@ -3998,7 +3998,7 @@ html.dark-mode .accordion-body {
     line-height: 1.65;
 }
 
-/* � Dark mode � faq nativo � */
+/* � Dark mode � faq nativo � */
 html.dark-mode .faq-item {
     background: #1a1a2e !important;
     border-color: rgba(13, 71, 161, 0.5) !important;
@@ -4035,7 +4035,7 @@ html.dark-mode .faq-answer p {
 
 
 /* --------------------------------------------------------
-   NAVBAR � toggler + collapse
+   NAVBAR � toggler + collapse
    -------------------------------------------------------- */
 #mainNav .navbar-collapse {
     visibility: visible !important;
@@ -4080,7 +4080,7 @@ html.dark-mode .faq-answer p {
     transform-origin: center;
 }
 
-/* � Toggler lines: azul en modo claro y oscuro � */
+/* � Toggler lines: azul en modo claro y oscuro � */
 #mainNav .custom-toggler-line,
 html.dark-mode #mainNav .custom-toggler-line {
     background: #0D47A1 !important;
@@ -4115,7 +4115,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   ANIMACI�N ENTRADA NAVBAR ITEMS
+   ANIMACI�N ENTRADA NAVBAR ITEMS
    -------------------------------------------------------- */
 @keyframes navbarItemIn {
     from { opacity: 0; transform: translateY(-8px); }
@@ -4124,7 +4124,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 992px � DESKTOP
+   = 992px � DESKTOP
    -------------------------------------------------------- */
 @media (min-width: 992px) {
 
@@ -4132,7 +4132,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         display: flex !important;
     }
 
-    /* Acorde�n desktop */
+    /* Acorde�n desktop */
     .accordion-responsive {
         max-width: 800px;
         margin: 0 auto;
@@ -4170,7 +4170,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 991.98px � TABLET / M�VIL
+   = 991.98px � TABLET / M�VIL
    -------------------------------------------------------- */
 @media (max-width: 991.98px) {
 
@@ -4432,7 +4432,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         border: 1px solid rgba(61, 96, 126, 0.34);
     }
 
-    /* Acorde�n mobile */
+    /* Acorde�n mobile */
     .accordion-responsive {
         max-width: 100%;
         --bs-accordion-border-radius:    16px;
@@ -4566,7 +4566,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   1200px � XL ajustes
+   1200px � XL ajustes
    -------------------------------------------------------- */
 @media (max-width: 1199.98px) {
 
@@ -4579,7 +4579,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   768px � md tablet / m�vil grande (768 a 991)
+   768px � md tablet / m�vil grande (768 a 991)
    -------------------------------------------------------- */
 @media (min-width: 768px) and (max-width: 991.98px) {
 
@@ -4589,7 +4589,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 767.98px � M�VIL PORTRAIT
+   = 767.98px � M�VIL PORTRAIT
    -------------------------------------------------------- */
 @media (max-width: 767.98px) {
 
@@ -4668,7 +4668,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 575.98px � M�VIL PEQUE�O
+   = 575.98px � M�VIL PEQUE�O
    -------------------------------------------------------- */
 @media (max-width: 575.98px) {
 
@@ -4736,7 +4736,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 399.98px � M�VIL MUY PEQUE�O
+   = 399.98px � M�VIL MUY PEQUE�O
    -------------------------------------------------------- */
 @media (max-width: 399.98px) {
 
@@ -4763,7 +4763,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   LANDSCAPE M�VIL
+   LANDSCAPE M�VIL
    -------------------------------------------------------- */
 @media (max-height: 620px) and (orientation: landscape) and (max-width: 991.98px) {
 
@@ -4809,7 +4809,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 /* ==================== RESPONSIVE ASIDE PATIENT - COMPLETO ==================== */
 
-/* ==================== CHATBOT - DISE�O MEJORADO ==================== */
+/* ==================== CHATBOT - DISE�O MEJORADO ==================== */
 #chatbot-section {
     background: var(--cb-card-bg, #ffffff);
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -4852,7 +4852,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     50% { opacity: 0.5; }
 }
 
-/* Bot�n pantalla completa */
+/* Bot�n pantalla completa */
 #chatbot-section .chat-header__actions {
     gap: 10px;
 }
@@ -4918,7 +4918,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 }
 
 /* Dark mode */
-/* �rea de conversaci�n */
+/* �rea de conversaci�n */
 #chatbot-section .chat-area {
     background: var(--cb-bg, #F4F8FC);
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -5328,7 +5328,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
 }
 
-/* Overlay para m�vil */
+/* Overlay para m�vil */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -5347,7 +5347,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     opacity: 1;
 }
 
-/* Bot�n hamburguesa */
+/* Bot�n hamburguesa */
 .menu-toggle,
 .toggle-btn {
     display: none;
@@ -5436,14 +5436,14 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* ========== M�VILES GRANDES (576px - 767px) ========== */
+/* ========== M�VILES GRANDES (576px - 767px) ========== */
 @media (max-width: 767px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
     }
 
-    /* Acorde�n del sidebar */
+    /* Acorde�n del sidebar */
     .sidebar-nav {
         display: flex;
         flex-direction: column;
@@ -5622,7 +5622,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* ========== M�VILES (hasta 575px) ========== */
+/* ========== M�VILES (hasta 575px) ========== */
 @media (max-width: 575px) {
     .menu-toggle,
     .toggle-btn {
@@ -5632,7 +5632,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         font-size: 1.1rem;
     }
 
-    /* Acorde�n sidebar */
+    /* Acorde�n sidebar */
     .sidebar-nav .nav-link {
         padding: 12px 15px;
     }
@@ -5776,7 +5776,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         font-size: 0.85rem;
     }
 
-    /* Agenda - Hacer tabla m�s compacta */
+    /* Agenda - Hacer tabla m�s compacta */
     .table-responsive {
         font-size: 0.8rem;
     }
@@ -5797,7 +5797,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         margin: 2px 0;
     }
 
-    /* Ocultar columnas menos importantes en m�vil */
+    /* Ocultar columnas menos importantes en m�vil */
     .table td:nth-child(4),
     .table th:nth-child(4) {
         display: none;
@@ -5878,7 +5878,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* ========== M�VILES MUY PEQUE�OS (hasta 375px) ========== */
+/* ========== M�VILES MUY PEQUE�OS (hasta 375px) ========== */
 @media (max-width: 375px) {
     .menu-toggle,
     .toggle-btn {
@@ -5992,7 +5992,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* ========== MODO LANDSCAPE EN M�VILES ========== */
+/* ========== MODO LANDSCAPE EN M�VILES ========== */
 @media (max-height: 600px) and (orientation: landscape) {
     .main-content {
         padding: 10px !important;
@@ -6011,7 +6011,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         margin-bottom: 10px !important;
     }
 
-    /* Chatbot - �rea m�s peque�a en landscape */
+    /* Chatbot - �rea m�s peque�a en landscape */
     #chatbot-section .border {
         height: 180px !important;
     }
@@ -6064,7 +6064,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 /* ========== MEJORAS GENERALES ========== */
 
-/* Botones m�s t�ctiles en m�vil */
+/* Botones m�s t�ctiles en m�vil */
 @media (max-width: 767px) {
     .button,
     .btn {
@@ -6074,7 +6074,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         justify-content: center;
     }
 
-    /* Inputs m�s grandes para mejor usabilidad */
+    /* Inputs m�s grandes para mejor usabilidad */
     .form-control,
     .form-select,
     select {
@@ -6082,14 +6082,14 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* Ocultar elementos innecesarios en m�vil muy peque�o */
+/* Ocultar elementos innecesarios en m�vil muy peque�o */
 @media (max-width: 375px) {
     .main-header .user-info i {
         display: none;
     }
 }
 
-/* Animaci�n al abrir el acorde�n navbar */
+/* Animaci�n al abrir el acorde�n navbar */
 .navbar-collapse {
     transition: all 0.4s ease;
 }
@@ -6597,7 +6597,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* Dark Mode - Evoluci�n */
+/* Dark Mode - Evoluci�n */
 .dark-mode #mi-estado,
 .dark-mode #mi-evolucion,
 .dark-mode .card {
@@ -6648,7 +6648,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
 /* ===== Source: app\static\responsive\patient-responsive.css ===== */
 
 /* ============================================================
-   PATIENT RESPONSIVE � Mobile & Tablet styles for Patient Dashboard
+   PATIENT RESPONSIVE � Mobile & Tablet styles for Patient Dashboard
    extracted from patients.css
    ============================================================ */
 
@@ -7335,7 +7335,7 @@ html {
 }
 
 /* ============================================================
-   EVOLUTION RESPONSIVE � Mobile & Tablet styles for Evolution Page
+   EVOLUTION RESPONSIVE � Mobile & Tablet styles for Evolution Page
    extracted from evolution.css
    ============================================================ */
 
@@ -7432,7 +7432,7 @@ html {
     }
 }
 
-/* Dark Mode - Evoluci�n */
+/* Dark Mode - Evoluci�n */
 html.dark-mode #mi-estado,
 html.dark-mode #mi-evolucion,
 html.dark-mode .card {
@@ -7478,7 +7478,7 @@ html.dark-mode .badge {
 }
 
 /* ============================================================
-   MENSAJER�A DIRECTA � Chat estilo WhatsApp (Paciente)
+   MENSAJER�A DIRECTA � Chat estilo WhatsApp (Paciente)
    ============================================================ */
 
 /* Wrapper general */
@@ -7778,7 +7778,7 @@ button.chat-item {
   color: #22c55e;
 }
 
-/* -- �rea de mensajes -- */
+/* -- �rea de mensajes -- */
 .chat-messages-area {
   flex: 1;
   overflow-y: auto;
@@ -8057,206 +8057,3 @@ html.dark-mode .chat-skeleton-line {
   .chat-bubble { max-width: 90%; }
   .chat-input-bar textarea { font-size: 0.85rem; }
 }
-
-/* ══════════════════════════════════════════════════════════════
-   PAYMENT METHOD CARDS (modal de pago)
-   ══════════════════════════════════════════════════════════════ */
-.metodo-pago-card {
-  flex: 1;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 16px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: #fff;
-}
-.metodo-pago-card:hover {
-  border-color: #90CAF9;
-  background: #F5F9FF;
-}
-.metodo-pago-card.active {
-  border-color: #0D47A1;
-  background: #E3F2FD;
-  box-shadow: 0 2px 8px rgba(13,71,161,0.15);
-}
-.metodo-pago-card .mpc-icon {
-  font-size: 1.8rem;
-  margin-bottom: 6px;
-  color: #0D47A1;
-}
-.metodo-pago-card .mpc-label {
-  font-size: .8rem;
-  font-weight: 600;
-  color: #333;
-}
-.metodo-pago-card .mpc-badge {
-  font-size: .6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: #fff;
-  background: #0D47A1;
-  border-radius: 99px;
-  padding: 1px 6px;
-  margin-top: 3px;
-  display: inline-block;
-}
-.metodo-pago-card.disabled {
-  opacity: .4;
-  cursor: not-allowed;
-  pointer-events: none;
-  filter: grayscale(.6);
-}
-.dark-mode .metodo-pago-card .mpc-badge { background: #64B5F6; color: #0d2137; }
-.dark-mode .metodo-pago-card {
-  background: #1a2a40;
-  border-color: #2a3a55;
-}
-.dark-mode .metodo-pago-card:hover {
-  border-color: #64B5F6;
-  background: #1e3050;
-}
-.dark-mode .metodo-pago-card.active {
-  border-color: #64B5F6;
-  background: #0d2137;
-}
-.dark-mode .metodo-pago-card .mpc-icon { color: #64B5F6; }
-.dark-mode .metodo-pago-card .mpc-label { color: #e0e0e0; }
-
-/* ══════════════════════════════════════════════════════════════
-   PAYMENT FORM
-   ══════════════════════════════════════════════════════════════ */
-.pago-formulario {
-  animation: fadePanel .22s ease;
-}
-.pago-formulario .form-label-pay {
-  display: block;
-  font-size: .8rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-}
-.pago-formulario .form-control-pay {
-  font-size: .9rem;
-  border-radius: 8px;
-  border: 1.5px solid #d0d7e2;
-  padding: 10px 12px;
-  transition: border-color .2s;
-}
-.pago-formulario .form-control-pay:focus {
-  border-color: #0D47A1;
-  box-shadow: 0 0 0 3px rgba(13,71,161,0.1);
-}
-.dark-mode .pago-formulario .form-label-pay { color: #b0bec5; }
-.dark-mode .pago-formulario .form-control-pay {
-  background: #1a2a40;
-  border-color: #2a3a55;
-  color: #e0e0e0;
-}
-.dark-mode .pago-formulario .form-control-pay:focus {
-  border-color: #64B5F6;
-  box-shadow: 0 0 0 3px rgba(100,181,246,0.15);
-}
-
-.pago-proc-header {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #0D47A1;
-  margin-bottom: 10px;
-}
-.pago-proc-header i { margin-right: 8px; }
-.pago-proc-body p { margin-bottom: 8px; color: #444; font-size: .9rem; }
-.dark-mode .pago-proc-header { color: #64B5F6; }
-.dark-mode .pago-proc-body p { color: #b0bec5; }
-
-/* Cuenta bancaria (transferencia) */
-.cuenta-bancaria {
-  background: #F0F7FF;
-  border: 1px solid #D6E8FA;
-  border-radius: 10px;
-  padding: 12px 16px;
-}
-.cuenta-bancaria .cb-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 3px 0;
-  font-size: .85rem;
-  border-bottom: 1px dashed #e0ecf8;
-}
-.cuenta-bancaria .cb-row:last-child { border-bottom: none; }
-.cuenta-bancaria .cb-row span { color: #666; }
-.dark-mode .cuenta-bancaria {
-  background: #0d2137;
-  border-color: #1e3a5f;
-}
-.dark-mode .cuenta-bancaria .cb-row span { color: #90a4ae; }
-.dark-mode .cuenta-bancaria .cb-row { border-bottom-color: #1e3a5f; }
-
-/* ══════════════════════════════════════════════════════════════
-   SAVED ACCOUNTS
-   ══════════════════════════════════════════════════════════════ */
-.guardados-container {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.guardado-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: #F5F9FF;
-  border: 1.5px solid #D6E8FA;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all .15s;
-}
-.guardado-item:hover {
-  border-color: #0D47A1;
-  background: #E3F2FD;
-}
-.guardado-item .gi-icon {
-  font-size: 1.2rem;
-  color: #0D47A1;
-  width: 32px;
-  text-align: center;
-}
-.guardado-item .gi-info { flex: 1; min-width: 0; }
-.guardado-item .gi-nombre { font-size: .85rem; font-weight: 600; color: #1a2e44; }
-.guardado-item .gi-sub { font-size: .75rem; color: #78909C; }
-.guardado-item .gi-del {
-  color: #bbb;
-  cursor: pointer;
-  padding: 4px;
-  font-size: .85rem;
-  opacity: 0;
-  transition: opacity .15s;
-}
-.guardado-item:hover .gi-del { opacity: 1; }
-.guardado-item .gi-del:hover { color: #e53935; }
-.dark-mode .guardado-item { background: #0d2137; border-color: #1e3a5f; }
-.dark-mode .guardado-item:hover { border-color: #64B5F6; background: #0f2740; }
-.dark-mode .guardado-item .gi-nombre { color: #e0e0e0; }
-.dark-mode .guardado-item .gi-sub { color: #90a4ae; }
-.dark-mode .guardado-item .gi-icon { color: #64B5F6; }
-
-/* Guardar checkbox */
-.guardar-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.guardar-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #0D47A1;
-  cursor: pointer;
-}
-.guardar-checkbox label {
-  font-size: .82rem;
-  color: #555;
-  cursor: pointer;
-  user-select: none;
-}
-.dark-mode .guardar-checkbox label { color: #b0bec5; }

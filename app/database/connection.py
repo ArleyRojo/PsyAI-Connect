@@ -16,8 +16,8 @@ def init_pool(app):
     cfg = app.config
     pool_cfg = dict(
         pool_name=os.getenv("DB_POOL_NAME", "psyai_pool"),
-        pool_size=int(os.getenv("DB_POOL_SIZE", "20")),
-        pool_reset_session=False,
+        pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
+        pool_reset_session=os.getenv("DB_POOL_RESET_SESSION", "true").lower() == "true",
         host=cfg.get("DB_HOST", "localhost"),
         port=cfg.get("DB_PORT", 3306),
         user=cfg.get("DB_USER", "root"),

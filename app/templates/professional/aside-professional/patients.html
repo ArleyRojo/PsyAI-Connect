@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
 <head>
     <meta charset="UTF-8">
@@ -37,7 +37,7 @@
             <a href="my.agenda.html" class="nav-link"><i class="fas fa-calendar-check me-2"></i> Mi Agenda</a>
             <a href="mensajes.html" class="nav-link"><i class="fas fa-comments me-2"></i> Mensajes</a>
             <a href="reports.html" class="nav-link"><i class="fas fa-chart-line me-2"></i> Reportes</a>
-
+            <a href="../../admin/chatbot.config.html" class="nav-link"><i class="fas fa-robot me-2"></i> Chatbot</a>
             <a href="my.profile2.html" class="nav-link mt-3 border-top pt-3"><i class="fas fa-user-circle me-2"></i> Mi Perfil</a>
         </nav>
         <div class="sidebar__footer mt-auto mb-3 text-center">
@@ -72,13 +72,13 @@
                 </div>
             </div>
 
-            <!-- -- DIAGNÓSTICOS -- -->
+            <!-- ══ DIAGNÓSTICOS ══ -->
             <div id="pestana-diagnosticos">
 
                 <!-- Barra de progreso -->
                 <div class="progress-nav mb-4">
                     <div class="progress-nav__label">
-                        <span id="progressLabel">Paso 1 de 3 - Seleccionar paciente</span>
+                        <span id="progressLabel">Paso 1 de 3 — Seleccionar paciente</span>
                         <span class="pct" id="progressPct">33%</span>
                     </div>
                     <div class="progress-nav__bar">
@@ -97,11 +97,11 @@
                     </div>
                 </div>
 
-                <!-- -- Paso 1: Tabla de pacientes -- -->
+                <!-- ── Paso 1: Tabla de pacientes ── -->
                 <div id="panelStep1" class="card p-4 mb-4 panel-step">
                     <h4 class="fw-bold mb-3"><i class="fas fa-users me-2 text-primary"></i>Selecciona un Paciente</h4>
                     <input type="text" class="form-control mb-3" id="searchInput"
-                           placeholder="??  Buscar por nombre o correo..."
+                           placeholder="🔍  Buscar por nombre o correo..."
                            oninput="filtrarPacientes()">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
@@ -126,8 +126,8 @@
                         <div class="selected-patient-banner">
                             <img id="selectedPatientPhoto" src="" alt="Foto paciente">
                             <div class="info">
-                                <div class="name" id="selectedPatientName">-</div>
-                                <div class="email" id="selectedPatientEmail">-</div>
+                                <div class="name" id="selectedPatientName">—</div>
+                                <div class="email" id="selectedPatientEmail">—</div>
                             </div>
                             <div class="actions">
                                 <button class="btn btn-sm btn-outline-secondary" onclick="deseleccionarPaciente()">
@@ -150,14 +150,14 @@
                     <input type="hidden" id="idPacienteSeleccionado">
                 </div>
 
-                <!-- -- Paso 2: Formulario diagnóstico -- -->
+                <!-- ── Paso 2: Formulario diagnóstico ── -->
                 <div id="panelStep2" class="d-none card p-4 mb-4 panel-step">
                     <!-- Mini-header del paciente seleccionado -->
                     <div class="step2-patient-header">
                         <img id="step2Photo" src="" alt="Foto">
                         <div>
-                            <div class="name" id="step2Name">-</div>
-                            <small class="text-muted" id="step2Email">-</small>
+                            <div class="name" id="step2Name">—</div>
+                            <small class="text-muted" id="step2Email">—</small>
                         </div>
                         <span class="change-link" onclick="goToStep(1)"><i class="fas fa-exchange-alt me-1"></i>Cambiar paciente</span>
                     </div>
@@ -199,7 +199,7 @@
                     </form>
                 </div>
 
-                <!-- -- Paso 3: Confirmación -- -->
+                <!-- ── Paso 3: Confirmación ── -->
                 <div id="panelStep3" class="d-none card p-4 mb-4 panel-step">
                     <h4 class="fw-bold mb-4"><i class="fas fa-check-circle me-2 text-success"></i>Confirmar diagnóstico</h4>
                     <div id="resumenContent" class="resumen-grid mb-4"></div>
@@ -213,7 +213,7 @@
                     </div>
                 </div>
 
-                <!-- -- Historial -- -->
+                <!-- ── Historial ── -->
                 <div class="card p-4">
                     <h4 class="fw-bold mb-3"><i class="fas fa-history me-2 text-primary"></i>Historial de Diagnósticos</h4>
                     <div class="table-responsive">
@@ -229,7 +229,7 @@
                 </div>
             </div><!-- /pestana-diagnosticos -->
 
-            <!-- -- EVOLUCIÓN -- -->
+            <!-- ══ EVOLUCIÓN ══ -->
             <div id="pestana-evolucion" style="display:none;">
                 <div class="card p-4">
                     <h4 class="fw-bold mb-3"><i class="fas fa-chart-line me-2 text-success"></i>Evolución de Pacientes</h4>
@@ -259,7 +259,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=sitewide-responsive-3">
+<link rel="stylesheet" href="/responsive/responsive-fix.css">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
 <script src="/js/modules/professional/aside.js"></script>

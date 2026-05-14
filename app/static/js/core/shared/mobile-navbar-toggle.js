@@ -21,21 +21,9 @@
         toggler.setAttribute('data-bs-toggle', 'collapse');
         toggler.setAttribute('data-bs-target', '#navmenu');
         toggler.setAttribute('aria-controls', 'navmenu');
-        setTogglerState(toggler, false);
+        toggler.setAttribute('aria-expanded', 'false');
+        toggler.setAttribute('aria-label', 'Abrir navegacion');
         return toggler;
-    }
-
-    function setTogglerState(toggler, isOpen) {
-        if (!toggler) return;
-
-        toggler.classList.toggle('is-open', isOpen);
-        toggler.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        toggler.setAttribute('aria-label', isOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación');
-
-        const label = toggler.querySelector('.navbar-toggler-label');
-        if (label) {
-            label.textContent = isOpen ? 'Cerrar' : 'Menú';
-        }
     }
 
     function ensureMarkup(toggler) {
@@ -48,12 +36,8 @@
         toggler.setAttribute('aria-controls', 'navmenu');
 
         if (!toggler.getAttribute('aria-label')) {
-            toggler.setAttribute('aria-label', 'Abrir menú de navegación');
+            toggler.setAttribute('aria-label', 'Abrir navegacion');
         }
-
-        toggler.querySelectorAll('.navbar-toggler-icon').forEach((nativeIcon) => {
-            nativeIcon.remove();
-        });
 
         let icon = toggler.querySelector('.custom-toggler-icon');
         if (!icon) {
@@ -91,8 +75,6 @@
         if (!toggler.hasAttribute('aria-expanded')) {
             toggler.setAttribute('aria-expanded', 'false');
         }
-
-        setTogglerState(toggler, toggler.getAttribute('aria-expanded') === 'true');
 
         return toggler;
     }
@@ -174,7 +156,7 @@
 
     function syncExpandedState(navmenu, toggler) {
         if (!navmenu || !toggler) return;
-        setTogglerState(toggler, navmenu.classList.contains('show'));
+        toggler.setAttribute('aria-expanded', navmenu.classList.contains('show') ? 'true' : 'false');
     }
 
     function syncNavbar() {
