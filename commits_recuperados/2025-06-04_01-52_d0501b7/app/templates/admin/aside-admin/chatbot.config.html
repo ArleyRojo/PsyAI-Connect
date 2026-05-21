@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Configuración del Chatbot</title>
+<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/components/components.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+    <link rel="stylesheet" href="/css/pages/admin.css">
+    <link rel="stylesheet" href="/responsive/responsive-admin.css">
+<script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+<style>
+.main-header { position: relative; padding-bottom: 1rem; }
+.main-header::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 70px; height: 3px;
+    background: linear-gradient(135deg, #0D47A1, #1976D2);
+    border-radius: 3px;
+}
+/* Stat cards extra polish */
+.stat-card-modern { transition: transform .2s ease, box-shadow .2s ease; }
+.stat-card-modern:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.1); }
+.stat-card-modern .progress-stat { transition: opacity .3s ease; }
+/* Section card refinements */
+.section-card-custom { transition: box-shadow .22s ease; }
+.section-card-custom:hover { box-shadow: 0 6px 20px rgba(0,0,0,.07); }
+/* Buttons */
+.btn-primary { border-radius: 10px; font-weight: 700; }
+.btn-outline-secondary,
+.btn-outline-success,
+.btn-outline-danger { border-radius: 10px; font-weight: 600; transition: all .2s ease; }
+/* Table */
+.table-hover tbody tr { transition: background .15s ease; }
+.table-hover tbody tr:hover { background: rgba(21,101,192,.03); }
+/* Sliders */
+.form-range::-webkit-slider-thumb {
+    background: #1976D2; border: none; width: 18px; height: 18px; border-radius: 50%;
+    cursor: pointer; transition: transform .15s ease;
+}
+.form-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
+/* Modal */
+.modal-content {
+    border-radius: 16px; border: none;
+    box-shadow: 0 32px 80px rgba(0,0,0,.18);
+}
+/* Dark mode */
+html.dark-mode .stat-card-modern:hover { box-shadow: 0 10px 28px rgba(0,0,0,.4); }
+html.dark-mode .section-card-custom:hover { box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+html.dark-mode .table-hover tbody tr:hover { background: rgba(144,202,249,.04); }
+html.dark-mode .modal-content { background: var(--dm-card, #0e1f35); color: var(--dm-text1, #daeeff); }
+html.dark-mode .modal-header { border-color: var(--dm-border, #1a3555); }
+html.dark-mode .modal-title { color: var(--dm-heading, #90CAF9); }
+html.dark-mode .btn-close { filter: invert(.8); }
+html.dark-mode .form-range::-webkit-slider-runnable-track { background: var(--dm-border, #1a3555); }
+html.dark-mode .form-range::-webkit-slider-thumb { background: var(--dm-accent, #90CAF9); }
+html.dark-mode .form-control,
+html.dark-mode .form-select { background: var(--dm-elevated, #132843); border-color: var(--dm-border, #1a3555); color: var(--dm-text1, #daeeff); }
+</style>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+    <div class="sidebar__logo text-center mt-3">
+      <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+      <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+    </div>
+    <nav class="nav flex-column mt-4">
+        <a href="../admin.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+        <a href="users.html" class="nav-link"><i class="fas fa-users me-2"></i> Usuarios <span id="sidebarBloqueados" class="badge rounded-pill ms-1" style="background:#ffebee;color:#c62828;font-size:.68rem;display:none;"></span></a>
+        <a href="roles.html" class="nav-link"><i class="fas fa-user-shield me-2"></i> Roles</a>
+        <a href="notifications.html" class="nav-link"><i class="fas fa-bell me-2"></i> Notificaciones</a>
+        <a href="logs.html" class="nav-link"><i class="fas fa-clipboard-list me-2"></i> Logs</a>
+        <a href="chatbot.config.html" class="nav-link active"><i class="fas fa-robot me-2"></i> Chatbot</a>
+    </nav>
+    <div class="sidebar__footer mt-auto mb-3 text-center">
+        <div class="theme-switch-container mb-2">
+            <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+            <button id="theme-toggle" title="Cambiar modo"></button>
+            <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+        </div>
+      <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+    </div>
+  </aside>
+
+  <main class="main-content flex-grow-1 ms-250 p-4">
+
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-1 section-title-config"><i class="fas fa-robot me-2"></i>Configuración del Chatbot</h1>
+        <small class="text-muted" id="ultimaModificacion">Última modificación: -</small>
+      </div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
+    </header>
+
+    <!-- Estadísticas -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card-modern total">
+          <div class="stat-icon"><i class="fas fa-comments"></i></div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">Total Conversaciones</div>
+          <div class="progress-stat"><div class="progress-bar bg-primary" id="progressTotal" style="width: 0%"></div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card-modern alto">
+          <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-value" id="statAlto">0</div>
+          <div class="stat-label">Nivel Alto</div>
+          <div class="progress-stat"><div class="progress-bar bg-danger" id="progressAlto" style="width: 0%"></div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card-modern medio">
+          <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+          <div class="stat-value" id="statMedio">0</div>
+          <div class="stat-label">Nivel Medio</div>
+          <div class="progress-stat"><div class="progress-bar bg-warning" id="progressMedio" style="width: 0%"></div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card-modern bajo">
+          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-value" id="statBajo">0</div>
+          <div class="stat-label">Nivel Bajo</div>
+          <div class="progress-stat"><div class="progress-bar bg-success" id="progressBajo" style="width: 0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuración del Chatbot -->
+    <div class="section-card-custom">
+      <div class="section-header-custom">
+        <div class="header-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;">
+          <i class="fas fa-cog"></i>
+        </div>
+        <div>
+          <h5 class="mb-0 fw-bold section-title-config">Configuración del Chatbot</h5>
+          <small class="text-muted">Ajusta los parámetros del asistente</small>
+        </div>
+      </div>
+      <div class="section-body-custom">
+        <form id="formConfigChatbot">
+          <div class="mb-3">
+            <label for="systemPrompt" class="form-label section-title-config">Prompt del sistema</label>
+            <textarea class="form-control" id="systemPrompt" rows="5" placeholder="Define el comportamiento y personalidad del chatbot..."></textarea>
+            <small class="text-muted">Define el comportamiento y personalidad del chatbot</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="tone" class="form-label section-title-config">Tono del chatbot</label>
+            <input class="form-control" id="tone" type="text" placeholder="Ej. cálido y profesional">
+            <small class="text-muted">Este valor añade un matiz al estilo de comunicación del asistente.</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="interactionRules" class="form-label section-title-config">Reglas de interacción</label>
+            <textarea class="form-control" id="interactionRules" rows="3" placeholder="Ej. Mantén respuestas cortas, evita diagnósticos médicos..."></textarea>
+            <small class="text-muted">Define reglas adicionales de comunicación para el chatbot.</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold section-title-config"><i class="fas fa-shield-alt me-2"></i>Palabras de riesgo</label>
+            <div class="risk-input-group p-3 rounded-3">
+              <div class="d-flex gap-2 mb-2 align-items-stretch">
+                <input type="text" class="form-control" id="riskTermsInput" placeholder="Escribe una palabra o frase..." style="flex: 1; border-radius: 8px;">
+                <div class="dropdown-container" style="width: 150px;">
+                  <select class="form-select risk-level-select" id="riskLevelSelect">
+                    <option value="Alto" data-color="#dc3545" data-icon="fa-exclamation-triangle">
+                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#dc3545;margin-right:8px;"></span>🔴 Alto
+                    </option>
+                    <option value="Medio" data-color="#f59e0b" data-icon="fa-exclamation-circle">
+                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:8px;"></span>🟡 Medio
+                    </option>
+                    <option value="Bajo" data-color="#10b981" data-icon="fa-check-circle">
+                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:8px;"></span>🟢 Bajo
+                    </option>
+                  </select>
+                </div>
+                <button type="button" class="btn btn-primary px-3" id="btnAgregarPalabra" style="min-width: 42px; border-radius: 8px;">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger px-3" id="btnLimpiarPalabras" style="min-width: 42px; border-radius: 8px;" title="Eliminar todas las palabras">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+            <div id="riskTermsContainer" class="d-flex flex-wrap gap-1 mt-3 p-2 rounded-3" style="min-height: 50px;"></div>
+            <div class="mt-2 d-flex gap-3 flex-wrap">
+              <small class="text-danger fw-semibold"><i class="fas fa-exclamation-triangle me-1"></i>Alto: interrumpe y envía crisis</small>
+              <small class="text-warning fw-semibold"><i class="fas fa-exclamation-circle me-1"></i>Medio: responde normal + registra</small>
+              <small class="text-success fw-semibold"><i class="fas fa-check-circle me-1"></i>Bajo: solo registro</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="crisisResponse" class="form-label section-title-config">Respuesta ante crisis</label>
+            <textarea class="form-control" id="crisisResponse" rows="3" placeholder="Mensaje que envía el bot cuando detecta riesgo Alto..."></textarea>
+            <small class="text-muted">Mensaje que envía el bot cuando detecta riesgo Alto</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="fallbackResponse" class="form-label section-title-config">Respuesta por defecto</label>
+            <textarea class="form-control" id="fallbackResponse" rows="3" placeholder="Mensaje cuando el bot no entiende al paciente..."></textarea>
+            <small class="text-muted">Mensaje cuando el bot no entiende al paciente</small>
+          </div>
+
+          <div class="slider-param-custom mb-3">
+            <div class="slider-header-custom">
+              <span class="slider-label">Temperature</span>
+              <span class="slider-value-custom" id="tempValue">0.55</span>
+            </div>
+            <input type="range" class="form-range" id="temperature" min="0" max="1" step="0.05" value="0.55">
+            <small class="text-muted">Valores bajos = preciso, altos = creativo</small>
+          </div>
+
+          <div class="slider-param-custom mb-3">
+            <div class="slider-header-custom">
+              <span class="slider-label">Top P</span>
+              <span class="slider-value-custom" id="topPValue">0.9</span>
+            </div>
+            <input type="range" class="form-range" id="topP" min="0" max="1" step="0.05" value="0.9">
+            <small class="text-muted">Izquierda = respuestas enfocadas | Derecha = respuestas diversas</small>
+          </div>
+
+          <div class="slider-param-custom mb-3">
+            <div class="slider-header-custom">
+              <span class="slider-label">Max Tokens (Bot)</span>
+              <span class="slider-value-custom" id="maxTokensValue">600</span>
+            </div>
+            <input type="range" class="form-range" id="maxTokens" min="100" max="1000" step="10" value="600">
+            <small class="text-muted">Tokens máximos para la respuesta del bot (100-1000)</small>
+          </div>
+
+          <div class="slider-param-custom mb-3">
+            <div class="slider-header-custom">
+              <span class="slider-label">Max Tokens (Usuario)</span>
+              <span class="slider-value-custom" id="maxTokensUserValue">1000</span>
+            </div>
+            <input type="range" class="form-range" id="maxTokensUser" min="200" max="1000" step="10" value="1000">
+            <small class="text-muted">Límite de caracteres para el mensaje del usuario (200-1000)</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="dailyMessageLimit" class="form-label section-title-config">Límite diario de mensajes</label>
+            <input type="number" class="form-control" id="dailyMessageLimit" min="1" max="200" value="20">
+            <small class="text-muted">Mensajes diarios permitidos por paciente (1-200)</small>
+          </div>
+
+          <div class="text-muted small" id="fechaActualizacion"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Historial de Conversaciones -->
+    <div class="section-card-custom">
+      <div class="section-header-custom">
+        <div class="header-icon" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff;">
+          <i class="fas fa-history"></i>
+        </div>
+        <div class="flex-grow-1">
+          <h5 class="mb-0 fw-bold">Historial de Conversaciones</h5>
+          <small class="text-muted">Registro de todas las conversaciones</small>
+        </div>
+        <div class="d-flex gap-2">
+          <input type="text" class="form-control form-control-sm" id="buscarHistorial" placeholder="Buscar paciente o mensaje..." style="max-width: 260px;">
+          <select class="form-select form-select-sm" id="filtroNivel" style="width:auto;">
+            <option value="">Todos los niveles</option>
+            <option value="Alto">Nivel Alto</option>
+            <option value="Medio">Nivel Medio</option>
+            <option value="Bajo">Nivel Bajo</option>
+          </select>
+          <button class="btn btn-outline-secondary btn-sm" id="btnActualizarHistorial"><i class="fas fa-sync"></i></button>
+          <button class="btn btn-outline-success btn-sm" id="btnExportarCSV"><i class="fas fa-file-csv"></i></button>
+        </div>
+      </div>
+      <div class="section-body-custom p-0">
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
+          <small class="text-muted" id="historialContador">Mostrando 0-0 de 0</small>
+          <div class="d-flex gap-1" id="historialPaginacion"></div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0" id="tablaHistorial">
+            <thead>
+              <tr><th>Paciente</th><th>Mensaje</th><th>Respuesta</th><th>Nivel</th><th>Fecha</th><th>Acciones</th></tr>
+            </thead>
+            <tbody><tr><td colspan="6" class="text-center py-4">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+      <div class="text-muted small" id="saveInfo">Última modificación: -</div>
+      <button type="submit" class="btn btn-primary btn-lg px-4" form="formConfigChatbot" id="btnGuardar">
+        <i class="fas fa-save me-2"></i>Guardar Configuración
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal Ver Detalle -->
+<div class="modal fade" id="modalDetalleConversacion" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalDetalleLabel"><i class="fas fa-comments me-2"></i>Detalle de Conversación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+          <div><small class="text-muted">Paciente</small><div class="fw-semibold" id="detallePaciente">-</div></div>
+          <div><small class="text-muted">Nivel</small><div id="detalleNivel">-</div></div>
+          <div><small class="text-muted">Fecha</small><div class="text-muted" id="detalleFecha">-</div></div>
+        </div>
+        <div id="chatContainer">
+          <div class="chat-bubble-custom user-custom">
+            <div class="chat-label-custom">Paciente</div>
+            <div id="detalleMensaje">-</div>
+          </div>
+          <div class="chat-bubble-custom bot-custom">
+            <div class="chat-label-custom">PsyAI</div>
+            <div id="detalleRespuesta">-</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/core/shared/aside.js?v=20260522-5"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/modules/admin/admin.chatbot.config.js"></script>
+
+</body>
+</html>

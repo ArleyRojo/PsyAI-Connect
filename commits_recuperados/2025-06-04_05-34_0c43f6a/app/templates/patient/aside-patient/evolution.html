@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <title>PsyAI Connect | Mi Evolución</title>
+    <link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+    <script src="/js/core/shared/theme-inline.js"></script>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- CSS propios -->
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/components/components.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/css/pages/patient.css">
+<link rel="stylesheet" href="/responsive/general.css">
+<link rel="stylesheet" href="/responsive/responsive-patient.css">
+<script src="/js/core/shared/theme.js"></script>
+<script src="/js/core/shared/localStorage-detector.js"></script>
+
+<style>
+
+/* ── Page entrance animation ── */
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.main-content > * {
+    animation: pageFadeIn 0.4s ease both;
+}
+.main-content > *:nth-child(1) { animation-delay: 0.03s; }
+.main-content > *:nth-child(2) { animation-delay: 0.10s; }
+.main-content > *:nth-child(3) { animation-delay: 0.18s; }
+.main-content > *:nth-child(4) { animation-delay: 0.26s; }
+.main-content > *:nth-child(5) { animation-delay: 0.34s; }
+</style>
+</head>
+<body>
+    <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="d-flex w-100">
+        <!-- Sidebar -->
+    <aside class="sidebar d-flex flex-column position-fixed">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+        <nav class="nav flex-column mt-4">
+            <a href="../patient.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+            <a href="chatbot.html" class="nav-link"><i class="fas fa-robot me-2"></i>Chatbot Emocional</a>
+            <a href="agenda-quotes.html" class="nav-link"><i class="fas fa-calendar-alt me-2"></i> Agenda de Citas</a>
+            <a href="mensajes.html" class="nav-link"><i class="fas fa-comments me-2"></i> Mensajes</a>
+            <a href="evolution.html" class="nav-link active"><i class="fas fa-chart-area me-2"></i> Mi Evolución</a>
+            <a href="my.profile.html" class="nav-link border-top pt-3 mt-3"><i class="fas fa-user-circle me-2"></i> Mi Perfil</a>
+        </nav>
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+            <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+        </div>
+    </aside>
+
+        <!-- Main content -->
+        <main class="main-content flex-grow-1 ms-250 p-4">
+            <header class="main-header d-flex justify-content-between align-items-center mb-4">
+                <h1>Mi Evolución</h1>
+                <div class="user-info d-flex align-items-center">
+                <i class="fas fa-bell text-secondary fs-5 me-3"></i>
+                <span class="fw-semibold text-dark" id="nombrePaciente">Hola, </span>
+            </div>
+            </header>
+
+            <!-- Mi Estado Actual -->
+            <section id="mi-estado" class="card shadow-sm border-0 mb-4">
+                <div class="section-title">
+                    <i class="fas fa-heart icon-heart"></i>
+                    Mi Estado Actual
+                </div>
+                <div class="estado-actual-content">
+                    <div class="estado-actual-icon">
+                        <i class="fas fa-smile"></i>
+                    </div>
+                    <p id="estadoActual" class="text-muted">Cargando...</p>
+                    <div class="estado-pulse-dot"></div>
+                </div>
+            </section>
+
+            <!-- Registrar Mi Evolución -->
+            <section id="mi-evolucion" class="card shadow-sm border-0 mb-4">
+                <div class="section-title">
+                    <i class="fas fa-chart-line icon-chart"></i>
+                    Registrar Mi Evolución
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">¿Cómo te sientes hoy?</label>
+                    <div class="emotion-select-wrapper">
+                        <select id="estado_emocional" class="form-control">
+                            <option value="">Seleccionar</option>
+                            <option value="feliz">Feliz</option>
+                            <option value="tranquilo">Tranquilo</option>
+                            <option value="estresado">Estresado</option>
+                            <option value="ansioso">Ansioso</option>
+                            <option value="triste">Triste</option>
+                        </select>
+                        <div class="emotional-state-grid" id="emotionGrid">
+                            <div class="emotion-option" data-value="feliz">
+                                <span class="emotion-check"><i class="fas fa-check"></i></span>
+                                <span class="emoji-icon">😊</span>
+                                <span class="emotion-label">Feliz</span>
+                            </div>
+                            <div class="emotion-option" data-value="tranquilo">
+                                <span class="emotion-check"><i class="fas fa-check"></i></span>
+                                <span class="emoji-icon">😌</span>
+                                <span class="emotion-label">Tranquilo</span>
+                            </div>
+                            <div class="emotion-option" data-value="estresado">
+                                <span class="emotion-check"><i class="fas fa-check"></i></span>
+                                <span class="emoji-icon">😰</span>
+                                <span class="emotion-label">Estresado</span>
+                            </div>
+                            <div class="emotion-option" data-value="ansioso">
+                                <span class="emotion-check"><i class="fas fa-check"></i></span>
+                                <span class="emoji-icon">😟</span>
+                                <span class="emotion-label">Ansioso</span>
+                            </div>
+                            <div class="emotion-option" data-value="triste">
+                                <span class="emotion-check"><i class="fas fa-check"></i></span>
+                                <span class="emoji-icon">😢</span>
+                                <span class="emotion-label">Triste</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Nivel de Energía</label>
+                    <div class="energy-slider-container">
+                        <div class="energy-slider-labels">
+                            <span><i class="fas fa-battery-empty me-1"></i>Baja</span>
+                            <span>Media</span>
+                            <span>Alta <i class="fas fa-battery-full ms-1"></i></span>
+                        </div>
+                        <div class="energy-input-wrap">
+                            <input type="range" id="energySlider" min="1" max="10" value="5" step="1">
+                        </div>
+                        <div class="energy-value-display">
+                            <span class="energy-label-text">Tu energía:</span>
+                            <span class="energy-value-badge" id="energyValueBadge">5</span>
+                            <span class="energy-label-text">/ 10</span>
+                        </div>
+                    </div>
+                    <input type="number" id="nivel_energia" class="energy-input-hidden" min="1" max="10" value="5">
+                </div>
+
+                <div class="mb-4">
+                    <label for="notas_personales" class="form-label fw-semibold">
+                        <i class="fas fa-pen me-1"></i>Notas Personales
+                    </label>
+                    <textarea id="notas_personales" class="form-control notes-textarea" rows="3" placeholder="¿Cómo ha sido tu semana? Cuéntame cómo te has sentido..."></textarea>
+                </div>
+
+                <button type="button" id="btnGuardarEvolucion" class="btn btn-save-gradient w-100 py-2 fw-bold">
+                    <i class="fas fa-save me-2"></i>Guardar mi evolución
+                </button>
+            </section>
+
+            <!-- Historial -->
+            <section class="card history-card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="section-title">
+                        <i class="fas fa-history icon-history"></i>
+                        Historial de Evolución
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table history-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Energía</th>
+                                    <th>Notas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaHistorialEvolucion">
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">
+                                                <i class="fas fa-chart-area"></i>
+                                            </div>
+                                            <div class="empty-state-text">Cargando historial...</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastEvolucion" class="toast align-items-center text-white border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold" id="toastEvolucionMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>  
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/modules/auth/auth-guard.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/patient/aside.js?v=20260522-5"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/nombre.usuario.js"></script>
+<script src="/js/modules/patient/evolution.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Emotional state visual selector ---
+    var emotionOptions = document.querySelectorAll('.emotion-option');
+    var estadoSelect = document.getElementById('estado_emocional');
+
+    emotionOptions.forEach(function(opt) {
+        opt.addEventListener('click', function() {
+            emotionOptions.forEach(function(o) { o.classList.remove('selected'); });
+            this.classList.add('selected');
+            estadoSelect.value = this.dataset.value;
+        });
+    });
+
+    // Sync grid when select changes programmatically (e.g., form reset)
+    estadoSelect.addEventListener('change', function() {
+        emotionOptions.forEach(function(o) {
+            o.classList.remove('selected');
+            if (o.dataset.value === this.value) o.classList.add('selected');
+        }, this);
+    });
+
+    // --- Energy range slider sync ---
+    var energySlider = document.getElementById('energySlider');
+    var energyInput = document.getElementById('nivel_energia');
+    var energyBadge = document.getElementById('energyValueBadge');
+
+    function updateEnergy(val) {
+        energyInput.value = val;
+        energyBadge.textContent = val;
+
+        var color;
+        var num = parseInt(val);
+        if (num <= 3) color = '#ef5350';
+        else if (num <= 5) color = '#ffa726';
+        else if (num <= 7) color = '#42a5f5';
+        else color = '#66bb6a';
+
+        energyBadge.style.background = color;
+    }
+
+    energySlider.addEventListener('input', function() {
+        updateEnergy(this.value);
+    });
+
+    updateEnergy(energySlider.value);
+
+    // --- Observer: when historial re-renders, reset visual form ---
+    var tableObs = document.getElementById('tablaHistorialEvolucion');
+    if (tableObs) {
+        var obs = new MutationObserver(function() {
+            // Reset emotion grid
+            emotionOptions.forEach(function(o) { o.classList.remove('selected'); });
+            // Reset slider
+            energySlider.value = 5;
+            updateEnergy(5);
+        });
+        obs.observe(tableObs, { childList: true, subtree: true });
+    }
+});
+</script>
+
+</body>
+</html>

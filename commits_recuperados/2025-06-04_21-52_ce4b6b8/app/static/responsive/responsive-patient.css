@@ -1,0 +1,1320 @@
+/* ============================================================
+   RESPONSIVE-PATIENT.CSS - PsyAI Connect
+   Dashboard Paciente + Aside Patient
+
+   Breakpoints:
+     <= 1024px   Tablet + mobile base
+     769-1024px  Tablet refinements
+     <= 768px    Mobile
+     <= 480px    Small mobile
+     <= 375px    Very small mobile
+   ============================================================ */
+
+@media (max-width: 991px) {
+  :root {
+    --patient-sidebar-width: 300px;
+    --patient-toggle-size: 48px;
+    --patient-content-pt: 4rem;
+    --patient-card-radius: 14px;
+    --patient-card-pad: 1.1rem;
+    --patient-btn-min-h: 44px;
+    --patient-input-min-h: 46px;
+    --patient-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    transform: translateX(-100%);
+    width: var(--patient-sidebar-width, 300px) !important;
+    min-width: var(--patient-sidebar-width, 300px) !important;
+    max-width: var(--patient-sidebar-width, 300px) !important;
+    height: 100dvh;
+    z-index: 1100;
+    background: var(--color-bg-light, #fff);
+    border-radius: 0 20px 20px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    transition: transform var(--patient-transition), box-shadow 0.35s ease;
+    will-change: transform;
+  }
+
+  .sidebar.active,
+  .sidebar.show {
+    transform: translateX(0) !important;
+    box-shadow: 8px 0 40px rgba(13, 71, 161, 0.2);
+  }
+
+  html.dark-mode .sidebar {
+    background: var(--dm-card, #0b1429);
+  }
+
+  html.dark-mode .sidebar.active,
+  html.dark-mode .sidebar.show {
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.58);
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1099;
+    background: rgba(13, 47, 97, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+  }
+
+  .sidebar-overlay.active,
+  .sidebar-overlay.show {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar__logo {
+    padding: 1.35rem 1.15rem;
+    border-bottom: 1px solid var(--color-border, #d6e8fa);
+  }
+
+  .sidebar__logo img {
+    width: 66px !important;
+    height: 66px !important;
+    border: 2px solid var(--color-primary, #90caf9);
+    box-shadow: 0 0 0 4px var(--color-accent, #e3f2fd);
+  }
+
+  .sidebar__logo h5 {
+    margin-top: 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  .sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--patient-btn-min-h, 44px);
+    margin: 3px 12px;
+    padding: 11px 15px !important;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    white-space: normal;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .sidebar .nav-link i {
+    width: 20px;
+    flex: 0 0 20px;
+    text-align: center;
+  }
+
+  .sidebar__footer {
+    padding: 1rem 1.15rem;
+    border-top: 1px solid var(--color-border, #d6e8fa);
+  }
+
+  .sidebar__footer .btn {
+    width: 100% !important;
+    min-height: var(--patient-btn-min-h, 44px);
+  }
+
+  .ms-250,
+  .ms-280 {
+    margin-left: 0 !important;
+  }
+
+  .menu-toggle,
+  .toggle-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1101;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: var(--patient-toggle-size, 48px);
+    height: var(--patient-toggle-size, 48px);
+    min-width: var(--patient-toggle-size, 48px);
+    padding: 0 !important;
+    border: 0;
+    border-radius: 12px;
+    background: var(--color-secondary, #0d47a1);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(13, 71, 161, 0.25);
+    font-size: 1.18rem;
+  }
+
+  .main-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 1rem;
+    padding: 1rem 1.1rem !important;
+    margin-bottom: 1rem !important;
+    border: 1px solid var(--color-border, #d6e8fa) !important;
+    border-radius: var(--patient-card-radius, 14px);
+    background: #fff;
+  }
+
+  html.dark-mode .main-header {
+    background: var(--dm-card, #0b1429);
+    border-color: var(--dm-border, #1a2b4a) !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    margin: 0;
+    font-size: 1.32rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .main-header small {
+    display: block;
+    margin-top: 0.25rem;
+    line-height: 1.35;
+  }
+
+  .main-header .user-info {
+    min-width: 0;
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .card,
+  section.card,
+  .modal-content {
+    border-radius: var(--patient-card-radius, 14px) !important;
+  }
+
+  .card.p-4,
+  section.card.p-4 {
+    padding: var(--patient-card-pad, 1.1rem) !important;
+  }
+
+  .card.p-3,
+  section.card.p-3 {
+    padding: 0.95rem !important;
+  }
+
+  .card-header {
+    padding: 1rem var(--patient-card-pad, 1.1rem) 0.55rem !important;
+  }
+
+  .card-body {
+    padding: 0.9rem var(--patient-card-pad, 1.1rem) var(--patient-card-pad, 1.1rem) !important;
+  }
+
+  .btn,
+  .button,
+  .psyai-modal__btn {
+    min-height: var(--patient-btn-min-h, 44px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .form-control,
+  .form-select,
+  select,
+  textarea {
+    min-height: var(--patient-input-min-h, 46px);
+    font-size: 0.94rem;
+  }
+
+  textarea.form-control {
+    min-height: 92px;
+  }
+
+  .table-responsive {
+    max-width: 100%;
+  }
+
+  .table {
+    margin-bottom: 0;
+  }
+
+  .modal-dialog {
+    max-width: min(96vw, 720px);
+    margin-inline: auto;
+  }
+
+  .toast {
+    max-width: calc(100vw - 1.5rem);
+  }
+}
+
+@media (max-width: 991px) {
+
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 1.42rem;
+  }
+
+  body:has(#formCita) #formCita {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  body:has(#formCita) #formCita .mb-3,
+  body:has(#formCita) #formCita #btnSolicitarCita {
+    margin-bottom: 0 !important;
+  }
+
+  body:has(#formCita) #formCita .mb-3:has(textarea),
+  body:has(#formCita) #formCita button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --patient-sidebar-width: 300px;
+    --patient-content-pt: 4.45rem;
+    --patient-toggle-size: 46px;
+    --patient-card-pad: 0.95rem;
+    --patient-btn-min-h: 42px;
+    --patient-input-min-h: 42px;
+  }
+
+
+
+  .main-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.65rem;
+    padding: 0.85rem 0.95rem !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 1.02rem;
+  }
+
+  .main-header small {
+    max-width: 22rem;
+    font-size: 0.76rem;
+  }
+
+  .main-header .user-info {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.65rem !important;
+    text-align: left;
+    font-size: 0.84rem;
+  }
+
+  .main-header [data-avatar] {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .card h5,
+  section h5 {
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+
+  .actividad-header-title {
+    font-size: 0.9rem;
+  }
+
+  .actividad-header-subtitle,
+  .card p,
+  .text-muted,
+  .form-label,
+  .form-text {
+    font-size: 0.82rem;
+  }
+
+  .card-header .d-flex,
+  section.card > .d-flex {
+    flex-wrap: wrap;
+    align-items: flex-start !important;
+    gap: 0.65rem;
+  }
+
+  .btn,
+  .button {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .form-control,
+  .form-select,
+  select {
+    min-height: 42px;
+  }
+
+  textarea.form-control {
+    min-height: 84px;
+  }
+
+  /* Tables become readable cards instead of horizontal scroll. */
+  body:has(#tablaCitas) .table,
+  body:has(#tablaHistorialEvolucion) .table {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  body:has(#tablaCitas) .table thead,
+  body:has(#tablaHistorialEvolucion) .table thead {
+    display: none !important;
+  }
+
+  body:has(#tablaCitas) .table tbody,
+  body:has(#tablaHistorialEvolucion) .table tbody {
+    display: grid;
+    gap: 0.7rem;
+    width: 100%;
+  }
+
+  body:has(#tablaCitas) .table tbody tr,
+  body:has(#tablaHistorialEvolucion) .table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    padding: 0.82rem;
+    border: 1px solid rgba(13, 71, 161, 0.12);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(13, 71, 161, 0.06);
+  }
+
+  html.dark-mode body:has(#tablaCitas) .table tbody tr,
+  html.dark-mode body:has(#tablaHistorialEvolucion) .table tbody tr {
+    background: var(--dm-card, #0b1429);
+    border-color: var(--dm-border, #1a2b4a);
+    box-shadow: none;
+  }
+
+  body:has(#tablaCitas) .table tbody td,
+  body:has(#tablaHistorialEvolucion) .table tbody td {
+    display: grid;
+    grid-template-columns: minmax(6.7rem, 36%) minmax(0, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.45rem 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08) !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  body:has(#tablaCitas) .table tbody td:last-child,
+  body:has(#tablaHistorialEvolucion) .table tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body:has(#tablaCitas) .table tbody td::before,
+  body:has(#tablaHistorialEvolucion) .table tbody td::before {
+    color: var(--color-text-muted, #60758f);
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  #tablaCitas td:nth-child(1)::before { content: "Fecha"; }
+  #tablaCitas td:nth-child(2)::before { content: "Hora"; }
+  #tablaCitas td:nth-child(3)::before { content: "Tipo"; }
+  #tablaCitas td:nth-child(4)::before { content: "Detalles"; }
+  #tablaCitas td:nth-child(5)::before { content: "Acciones"; }
+
+  #tablaHistorialEvolucion td:nth-child(1)::before { content: "Fecha"; }
+  #tablaHistorialEvolucion td:nth-child(2)::before { content: "Estado"; }
+  #tablaHistorialEvolucion td:nth-child(3)::before { content: "Energia"; }
+  #tablaHistorialEvolucion td:nth-child(4)::before { content: "Notas"; }
+
+  body:has(#tablaCitas) .table tbody td[colspan],
+  body:has(#tablaHistorialEvolucion) .table tbody td[colspan] {
+    display: block;
+    text-align: center;
+  }
+
+  body:has(#tablaCitas) .table tbody td[colspan]::before,
+  body:has(#tablaHistorialEvolucion) .table tbody td[colspan]::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  body:has(#tablaCitas) .table-responsive,
+  body:has(#tablaHistorialEvolucion) .table-responsive {
+    overflow: visible !important;
+    border: 0;
+    background: transparent;
+  }
+
+  #tablaCitas td:last-child {
+    gap: 0.35rem;
+  }
+
+  #tablaCitas td:last-child .btn,
+  #tablaCitas td:last-child .button {
+    width: auto;
+    min-width: 38px;
+    min-height: 34px;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.76rem;
+  }
+
+  .calendario-container {
+    max-width: 100%;
+    padding: 0.75rem !important;
+    overflow: hidden;
+  }
+
+  #diasCalendario {
+    gap: 2px !important;
+  }
+
+  #diasCalendario button,
+  #diasCalendario .btn,
+  .btn-nav-calendar {
+    min-width: 0;
+    min-height: 34px;
+    padding: 0.25rem !important;
+    font-size: 0.78rem;
+  }
+
+  .label-mes {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  /* Chatbot */
+  #chatbot-section {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - 6rem);
+    padding: 0.75rem !important;
+  }
+
+  #chatbot-section .chat-header {
+    align-items: flex-start !important;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
+
+  #chatbot-section .chat-header h5 {
+    font-size: 0.95rem;
+  }
+
+  #chatbot-section .chat-header__actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  #chatbot-section .chat-header__actions > * {
+    margin-right: 0 !important;
+  }
+
+  #chatbot-section .btn-clear-chat,
+  #chatbot-section .btn-fullscreen,
+  #chatbot-section .btn-emoji-picker {
+    width: auto;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  #chatbot-section .btn-clear-chat span {
+    display: none;
+  }
+
+  #chatbot-section .chat-area {
+    flex: 1 1 auto;
+    min-height: 48dvh;
+    max-height: none;
+  }
+
+  #chatbot-section .chat-input-area {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 42px;
+    gap: 0.5rem;
+  }
+
+  #chatbot-section .chat-input-area .button {
+    width: 42px;
+    min-width: 42px;
+    padding: 0;
+  }
+
+  #chatbot-section .chat-message-field {
+    min-width: 0;
+  }
+
+  #chatbot-section .chat-message-field input {
+    min-width: 0;
+    font-size: 0.86rem;
+  }
+
+  .consent-modal .modal-dialog,
+  .modal .modal-dialog {
+    max-width: calc(100vw - 1rem);
+    margin: 0.5rem auto;
+  }
+
+  .consent-modal .modal-body,
+  .modal .modal-body {
+    max-height: 68dvh;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-footer .btn,
+  .modal-footer button {
+    width: 100%;
+  }
+
+  .pay-methods {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .pay-method-card {
+    min-width: 0;
+    padding: 0.75rem 0.45rem !important;
+  }
+
+  .card-visual-wrap {
+    transform-origin: top center;
+    transform: scale(0.88);
+    margin-bottom: -1rem;
+  }
+
+  body:has([data-field="nombre"]) .card p {
+    display: grid;
+    grid-template-columns: minmax(6.4rem, 34%) minmax(0, 1fr);
+    gap: 0.45rem;
+    margin-bottom: 0.55rem;
+    overflow-wrap: anywhere;
+  }
+
+  body:has([data-field="nombre"]) [data-avatar][style*="150px"] {
+    width: 104px !important;
+    height: 104px !important;
+  }
+
+  .psyai-modal__header,
+  .psyai-modal__body,
+  .psyai-modal__footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .psyai-modal__footer {
+    flex-direction: column-reverse;
+  }
+
+  .psyai-modal__btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --patient-sidebar-width: 85vw;
+    --patient-content-pt: 4.15rem;
+    --patient-toggle-size: 44px;
+    --patient-card-pad: 0.8rem;
+    --patient-btn-min-h: 40px;
+    --patient-input-min-h: 40px;
+  }
+
+
+
+  .main-header {
+    padding: 0.72rem 0.8rem !important;
+    border-radius: 12px;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 0.94rem;
+  }
+
+  .main-header .user-info {
+    font-size: 0.78rem;
+  }
+
+  .card.p-4,
+  section.card.p-4,
+  .card.p-3,
+  section.card.p-3,
+  .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .card-header {
+    padding: 0.75rem 0.75rem 0.35rem !important;
+  }
+
+  .actividad-header-icon {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+  }
+
+  .btn,
+  .button {
+    font-size: 0.82rem;
+  }
+
+  body:has(#tablaCitas) .table tbody td,
+  body:has(#tablaHistorialEvolucion) .table tbody td {
+    grid-template-columns: 1fr;
+    gap: 0.18rem;
+  }
+
+  #tablaCitas td:last-child .btn,
+  #tablaCitas td:last-child .button {
+    width: 100%;
+  }
+
+  .pay-methods {
+    grid-template-columns: 1fr;
+  }
+
+  .card-visual-wrap {
+    transform: scale(0.78);
+    margin-left: -1.2rem;
+    margin-right: -1.2rem;
+    margin-bottom: -2rem;
+  }
+
+  #chatbot-section {
+    min-height: calc(100dvh - 5rem);
+  }
+
+  #chatbot-section .chat-area {
+    min-height: 50dvh;
+  }
+
+  #chatbot-section .message .bubble {
+    max-width: 86%;
+    font-size: 0.84rem;
+  }
+
+  #chatbot-section .emoji-picker {
+    max-width: calc(100vw - 1.5rem);
+    left: 0;
+    right: auto;
+  }
+
+  body:has([data-field="nombre"]) .card p {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --patient-content-pt: 3.95rem;
+    --patient-toggle-size: 40px;
+  }
+
+  .toggle-btn,
+  .menu-toggle {
+    top: 0.75rem;
+    left: 0.75rem;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+
+  .sidebar__logo {
+    padding: 1rem;
+  }
+
+  .sidebar__logo img {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .sidebar__logo h5 {
+    font-size: 0.82rem;
+  }
+
+  .sidebar .nav-link {
+    min-height: 40px;
+    margin-inline: 8px;
+    padding: 9px 11px !important;
+    font-size: 0.8rem;
+    gap: 9px;
+  }
+
+
+
+  .main-header .user-info i.fa-bell {
+    display: none;
+  }
+
+  #diasCalendario button,
+  #diasCalendario .btn,
+  .btn-nav-calendar {
+    min-height: 30px;
+    font-size: 0.72rem;
+  }
+
+  #chatbot-section .chat-input-area {
+    grid-template-columns: minmax(0, 1fr) 38px;
+  }
+
+  #chatbot-section .chat-input-area .button {
+    width: 38px;
+    min-width: 38px;
+  }
+
+  .card-visual-wrap {
+    transform: scale(0.7);
+    margin-left: -2rem;
+    margin-right: -2rem;
+    margin-bottom: -2.8rem;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+
+
+  .main-header {
+    margin-bottom: 0.6rem !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 1rem;
+  }
+
+  .sidebar__logo {
+    padding: 0.85rem 1rem;
+  }
+
+  .sidebar__logo img {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .sidebar .nav-link {
+    min-height: 38px;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  #chatbot-section {
+    min-height: calc(100dvh - 4.3rem);
+  }
+
+  #chatbot-section .chat-area {
+    min-height: 42dvh;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .card,
+  .btn,
+  .button,
+  .nav-link {
+    min-height: 44px;
+  }
+
+  .form-control,
+  .form-select,
+  select {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 991px) {
+  .main-content .card,
+  .main-content section {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ============================================================
+   Patient final responsive layer
+   Loaded before responsive-fix.css, so selectors are intentionally
+   scoped and specific enough for patient pages.
+   ============================================================ */
+
+@media (max-width: 991px) {
+  body:has(.sidebar) .main-content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    padding: var(--patient-content-pt, 4.35rem) clamp(0.8rem, 2.5vw, 1.35rem) 1.25rem !important;
+    overflow-x: hidden !important;
+  }
+
+  body:has(.sidebar) .main-header,
+  body:has(.sidebar) .section-card,
+  body:has(.sidebar) .accordion-responsive,
+  body:has(.sidebar) .card,
+  body:has(.sidebar) section {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(.sidebar) .section-card {
+    padding: clamp(1rem, 2.2vw, 1.35rem) !important;
+    margin-bottom: 1rem !important;
+    border-radius: var(--patient-card-radius, 14px) !important;
+  }
+
+  body:has(.sidebar) .section-card > .d-flex.justify-content-between {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  body:has(.sidebar) .section-title {
+    min-width: 0;
+    margin-bottom: 0.9rem !important;
+    font-size: clamp(0.98rem, 2vw, 1.1rem) !important;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  body:has(.sidebar) .btn-outline-muted,
+  body:has(.sidebar) .btn-primary-gradient,
+  body:has(.sidebar) .button,
+  body:has(.sidebar) .btn {
+    min-width: 0;
+    max-width: 100%;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  body:has(.sidebar) .accordion-responsive {
+    margin-bottom: 1rem !important;
+  }
+
+  body:has(.sidebar) .accordion-responsive .accordion-button {
+    min-width: 0 !important;
+    gap: 0.55rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  body:has(.sidebar) .accordion-responsive .accordion-body .button,
+  body:has(.sidebar) .accordion-responsive .accordion-body .btn {
+    width: auto;
+  }
+
+  body:has(.sidebar) .main-header .user-info,
+  body:has(.sidebar) .user-greeting,
+  body:has(.sidebar) #nombrePaciente {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 767px) {
+  body:has(.sidebar) .main-content {
+    padding: var(--patient-content-pt, 4.35rem) 0.75rem calc(1rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body:has(.sidebar) .main-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0.65rem !important;
+  }
+
+  body:has(.sidebar) .main-header h1,
+  body:has(.sidebar) .main-header .h3 {
+    width: 100%;
+    min-width: 0;
+  }
+
+  body:has(.sidebar) .main-header .user-info {
+    display: flex !important;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+  }
+
+  body:has(.sidebar) .main-header .btn-notif {
+    flex: 0 0 36px;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  body:has(.sidebar) .main-header .user-avatar,
+  body:has(.sidebar) .main-header [data-avatar] {
+    flex: 0 0 34px;
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  body:has(.sidebar) .accordion-responsive .accordion-body .button,
+  body:has(.sidebar) .accordion-responsive .accordion-body .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  body:has(.sidebar) .main-content {
+    padding-left: 0.55rem !important;
+    padding-right: 0.55rem !important;
+  }
+
+  body:has(.sidebar) .section-card {
+    padding: 0.85rem !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Agenda quotes */
+@media (max-width: 991px) {
+  body.patient-agenda-page #formCita,
+  body:has(#stepperCitas) #formCita {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.patient-agenda-page #formCita .step-panel,
+  body:has(#stepperCitas) #formCita .step-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.patient-agenda-page #formCita .row,
+  body:has(#stepperCitas) #formCita .row {
+    --bs-gutter-x: 0.85rem;
+    --bs-gutter-y: 0.85rem;
+  }
+
+  body.patient-agenda-page .price-tag-modern,
+  body.patient-agenda-page .modality-selector-modern,
+  body.patient-agenda-page .calendario-container,
+  body:has(#stepperCitas) .price-tag-modern,
+  body:has(#stepperCitas) .modality-selector-modern,
+  body:has(#stepperCitas) .calendario-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.patient-agenda-page .btn-primary-gradient,
+  body.patient-agenda-page .btn-outline-muted,
+  body:has(#stepperCitas) .btn-primary-gradient,
+  body:has(#stepperCitas) .btn-outline-muted {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    border-radius: 12px;
+  }
+
+  body.patient-agenda-page #stepPanel1 .text-end,
+  body:has(#stepperCitas) #stepPanel1 .text-end {
+    text-align: right !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body.patient-agenda-page .section-card > .d-flex.justify-content-between,
+  body:has(#stepperCitas) .section-card > .d-flex.justify-content-between {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  body.patient-agenda-page #btnVerHistorialPaciente,
+  body:has(#stepperCitas) #btnVerHistorialPaciente {
+    width: 100%;
+  }
+
+  body.patient-agenda-page .citas-table,
+  body:has(#tablaCitas) .citas-table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border-spacing: 0 !important;
+  }
+
+  body.patient-agenda-page .citas-table thead,
+  body:has(#tablaCitas) .citas-table thead {
+    display: none !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody,
+  body:has(#tablaCitas) .citas-table tbody {
+    display: grid !important;
+    gap: 0.7rem !important;
+    width: 100% !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody tr,
+  body:has(#tablaCitas) .citas-table tbody tr {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    gap: 0 !important;
+    padding: 0.85rem !important;
+    border: 1px solid rgba(13, 71, 161, 0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 6px 18px rgba(13, 71, 161, 0.06) !important;
+    transform: none !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody td,
+  body:has(#tablaCitas) .citas-table tbody td {
+    display: grid !important;
+    grid-template-columns: minmax(5.8rem, 34%) minmax(0, 1fr) !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    justify-self: stretch !important;
+    padding: 0.45rem 0 !important;
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08) !important;
+    font-size: 0.82rem !important;
+    overflow-wrap: anywhere;
+  }
+
+  body.patient-agenda-page .citas-table tbody td:last-child,
+  body:has(#tablaCitas) .citas-table tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody td::before,
+  body:has(#tablaCitas) .citas-table tbody td::before {
+    color: var(--color-text-muted, #60758f);
+    font-size: 0.66rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  body.patient-agenda-page .citas-table td:nth-child(1)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(1)::before { content: "Fecha"; }
+
+  body.patient-agenda-page .citas-table td:nth-child(2)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(2)::before { content: "Horario"; }
+
+  body.patient-agenda-page .citas-table td:nth-child(3)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(3)::before { content: "Tipo"; }
+
+  body.patient-agenda-page .citas-table td:nth-child(4)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(4)::before { content: "Motivo"; }
+
+  body.patient-agenda-page .citas-table td:nth-child(5)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(5)::before { content: "Accion"; }
+
+  body.patient-agenda-page .citas-table tbody td[colspan],
+  body:has(#tablaCitas) .citas-table tbody td[colspan] {
+    display: block !important;
+    text-align: center !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody td[colspan]::before,
+  body:has(#tablaCitas) .citas-table tbody td[colspan]::before {
+    content: none !important;
+  }
+
+  body.patient-agenda-page .stepper-wrapper,
+  body:has(#stepperCitas) .stepper-wrapper {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: start !important;
+    gap: 0.45rem !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  body.patient-agenda-page .step-item,
+  body:has(#stepperCitas) .step-item {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    gap: 0.35rem !important;
+    min-width: 0 !important;
+    text-align: center !important;
+  }
+
+  body.patient-agenda-page .step-item::after,
+  body:has(#stepperCitas) .step-item::after {
+    content: none !important;
+  }
+
+  body.patient-agenda-page .step-circle,
+  body:has(#stepperCitas) .step-circle {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+  }
+
+  body.patient-agenda-page .step-label,
+  body:has(#stepperCitas) .step-label {
+    display: block;
+    width: 100%;
+    font-size: 0.72rem !important;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  body.patient-agenda-page .price-tag-modern,
+  body:has(#stepperCitas) .price-tag-modern {
+    padding: 0.85rem !important;
+  }
+
+  body.patient-agenda-page .price-value,
+  body:has(#stepperCitas) .price-value {
+    font-size: 1rem !important;
+  }
+
+  body.patient-agenda-page .modality-selector-modern,
+  body:has(#stepperCitas) .modality-selector-modern {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.patient-agenda-page .modality-option,
+  body:has(#stepperCitas) .modality-option {
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 0.7rem 0.5rem !important;
+    overflow: hidden;
+  }
+
+  body.patient-agenda-page .modality-option span,
+  body:has(#stepperCitas) .modality-option span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body.patient-agenda-page #stepPanel1 .text-end,
+  body:has(#stepperCitas) #stepPanel1 .text-end {
+    text-align: left !important;
+  }
+
+  body.patient-agenda-page #stepPanel1 .btn-primary-gradient,
+  body:has(#stepperCitas) #stepPanel1 .btn-primary-gradient,
+  body.patient-agenda-page #stepPanel2 .d-flex,
+  body.patient-agenda-page #stepPanel3 .d-flex,
+  body:has(#stepperCitas) #stepPanel2 .d-flex,
+  body:has(#stepperCitas) #stepPanel3 .d-flex {
+    width: 100% !important;
+  }
+
+  body.patient-agenda-page #stepPanel2 .d-flex,
+  body.patient-agenda-page #stepPanel3 .d-flex,
+  body:has(#stepperCitas) #stepPanel2 .d-flex,
+  body:has(#stepperCitas) #stepPanel3 .d-flex {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.6rem !important;
+  }
+
+  body.patient-agenda-page #stepPanel1 .btn-primary-gradient,
+  body.patient-agenda-page #stepPanel2 .btn-primary-gradient,
+  body.patient-agenda-page #stepPanel2 .btn-outline-muted,
+  body.patient-agenda-page #stepPanel3 .btn-primary-gradient,
+  body.patient-agenda-page #stepPanel3 .btn-outline-muted,
+  body:has(#stepperCitas) #stepPanel1 .btn-primary-gradient,
+  body:has(#stepperCitas) #stepPanel2 .btn-primary-gradient,
+  body:has(#stepperCitas) #stepPanel2 .btn-outline-muted,
+  body:has(#stepperCitas) #stepPanel3 .btn-primary-gradient,
+  body:has(#stepperCitas) #stepPanel3 .btn-outline-muted {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  body.patient-agenda-page #diasCalendario,
+  body:has(#stepperCitas) #diasCalendario {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  }
+
+  body.patient-agenda-page .dia-calendario,
+  body:has(#stepperCitas) .dia-calendario {
+    min-width: 0 !important;
+    min-height: 34px !important;
+    border-radius: 9px !important;
+    font-size: 0.78rem !important;
+  }
+
+  html.dark-mode body.patient-agenda-page .citas-table tbody tr,
+  html.dark-mode body:has(#tablaCitas) .citas-table tbody tr {
+    background: var(--dm-card, #0b1429) !important;
+    border-color: var(--dm-border, #1a2b4a) !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body.patient-agenda-page .stepper-wrapper,
+  body:has(#stepperCitas) .stepper-wrapper {
+    gap: 0.25rem !important;
+  }
+
+  body.patient-agenda-page .step-circle,
+  body:has(#stepperCitas) .step-circle {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    font-size: 0.82rem !important;
+  }
+
+  body.patient-agenda-page .step-label,
+  body:has(#stepperCitas) .step-label {
+    font-size: 0.66rem !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody td,
+  body:has(#tablaCitas) .citas-table tbody td {
+    grid-template-columns: 1fr !important;
+    gap: 0.15rem !important;
+  }
+
+  body.patient-agenda-page .price-tag-modern,
+  body:has(#stepperCitas) .price-tag-modern {
+    gap: 0.65rem !important;
+  }
+
+  body.patient-agenda-page .price-icon,
+  body:has(#stepperCitas) .price-icon {
+    width: 38px !important;
+    height: 38px !important;
+    flex: 0 0 38px !important;
+  }
+
+  body.patient-agenda-page .pay-methods,
+  body:has(#stepperCitas) .pay-methods {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}

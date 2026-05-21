@@ -1,0 +1,888 @@
+/* ============================================================
+   RESPONSIVE-PATIENT.CSS - PsyAI Connect
+   Dashboard Paciente + Aside Patient
+
+   Breakpoints:
+     <= 1024px   Tablet + mobile base
+     769-1024px  Tablet refinements
+     <= 768px    Mobile
+     <= 480px    Small mobile
+     <= 375px    Very small mobile
+   ============================================================ */
+
+@media (max-width: 991px) {
+  :root {
+    --patient-sidebar-width: 300px;
+    --patient-toggle-size: 48px;
+    --patient-content-pt: 4rem;
+    --patient-card-radius: 14px;
+    --patient-card-pad: 1.1rem;
+    --patient-btn-min-h: 44px;
+    --patient-input-min-h: 46px;
+    --patient-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    transform: translateX(-100%);
+    width: var(--patient-sidebar-width, 300px) !important;
+    min-width: var(--patient-sidebar-width, 300px) !important;
+    max-width: var(--patient-sidebar-width, 300px) !important;
+    height: 100dvh;
+    z-index: 1100;
+    background: var(--color-bg-light, #fff);
+    border-radius: 0 20px 20px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    transition: transform var(--patient-transition), box-shadow 0.35s ease;
+    will-change: transform;
+  }
+
+  .sidebar.active,
+  .sidebar.show {
+    transform: translateX(0) !important;
+    box-shadow: 8px 0 40px rgba(13, 71, 161, 0.2);
+  }
+
+  html.dark-mode .sidebar {
+    background: var(--dm-card, #0b1429);
+  }
+
+  html.dark-mode .sidebar.active,
+  html.dark-mode .sidebar.show {
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.58);
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1099;
+    background: rgba(13, 47, 97, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+  }
+
+  .sidebar-overlay.active,
+  .sidebar-overlay.show {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar__logo {
+    padding: 1.35rem 1.15rem;
+    border-bottom: 1px solid var(--color-border, #d6e8fa);
+  }
+
+  .sidebar__logo img {
+    width: 66px !important;
+    height: 66px !important;
+    border: 2px solid var(--color-primary, #90caf9);
+    box-shadow: 0 0 0 4px var(--color-accent, #e3f2fd);
+  }
+
+  .sidebar__logo h5 {
+    margin-top: 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  .sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--patient-btn-min-h, 44px);
+    margin: 3px 12px;
+    padding: 11px 15px !important;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    white-space: normal;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .sidebar .nav-link i {
+    width: 20px;
+    flex: 0 0 20px;
+    text-align: center;
+  }
+
+  .sidebar__footer {
+    padding: 1rem 1.15rem;
+    border-top: 1px solid var(--color-border, #d6e8fa);
+  }
+
+  .sidebar__footer .btn {
+    width: 100% !important;
+    min-height: var(--patient-btn-min-h, 44px);
+  }
+
+  .main-content {
+    width: 100%;
+    min-height: 100dvh;
+    margin-left: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: var(--patient-content-pt, 4rem) !important;
+  }
+
+  .ms-250,
+  .ms-280 {
+    margin-left: 0 !important;
+  }
+
+  .menu-toggle,
+  .toggle-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1101;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: var(--patient-toggle-size, 48px);
+    height: var(--patient-toggle-size, 48px);
+    min-width: var(--patient-toggle-size, 48px);
+    padding: 0 !important;
+    border: 0;
+    border-radius: 12px;
+    background: var(--color-secondary, #0d47a1);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(13, 71, 161, 0.25);
+    font-size: 1.18rem;
+  }
+
+  .main-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 1rem;
+    padding: 1rem 1.1rem !important;
+    margin-bottom: 1rem !important;
+    border: 1px solid var(--color-border, #d6e8fa) !important;
+    border-radius: var(--patient-card-radius, 14px);
+    background: #fff;
+  }
+
+  html.dark-mode .main-header {
+    background: var(--dm-card, #0b1429);
+    border-color: var(--dm-border, #1a2b4a) !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    margin: 0;
+    font-size: 1.32rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .main-header small {
+    display: block;
+    margin-top: 0.25rem;
+    line-height: 1.35;
+  }
+
+  .main-header .user-info {
+    min-width: 0;
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .card,
+  section.card,
+  .modal-content {
+    border-radius: var(--patient-card-radius, 14px) !important;
+  }
+
+  .card.p-4,
+  section.card.p-4 {
+    padding: var(--patient-card-pad, 1.1rem) !important;
+  }
+
+  .card.p-3,
+  section.card.p-3 {
+    padding: 0.95rem !important;
+  }
+
+  .card-header {
+    padding: 1rem var(--patient-card-pad, 1.1rem) 0.55rem !important;
+  }
+
+  .card-body {
+    padding: 0.9rem var(--patient-card-pad, 1.1rem) var(--patient-card-pad, 1.1rem) !important;
+  }
+
+  .btn,
+  .button,
+  .psyai-modal__btn {
+    min-height: var(--patient-btn-min-h, 44px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .form-control,
+  .form-select,
+  select,
+  textarea {
+    min-height: var(--patient-input-min-h, 46px);
+    font-size: 0.94rem;
+  }
+
+  textarea.form-control {
+    min-height: 92px;
+  }
+
+  .table-responsive {
+    max-width: 100%;
+  }
+
+  .table {
+    margin-bottom: 0;
+  }
+
+  .modal-dialog {
+    max-width: min(96vw, 720px);
+    margin-inline: auto;
+  }
+
+  .toast {
+    max-width: calc(100vw - 1.5rem);
+  }
+}
+
+@media (max-width: 991px) {
+  .main-content {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 1.42rem;
+  }
+
+  body:has(#formCita) #formCita {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  body:has(#formCita) #formCita .mb-3,
+  body:has(#formCita) #formCita #btnSolicitarCita {
+    margin-bottom: 0 !important;
+  }
+
+  body:has(#formCita) #formCita .mb-3:has(textarea),
+  body:has(#formCita) #formCita button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --patient-sidebar-width: 300px;
+    --patient-content-pt: 4.45rem;
+    --patient-toggle-size: 46px;
+    --patient-card-pad: 0.95rem;
+    --patient-btn-min-h: 42px;
+    --patient-input-min-h: 42px;
+  }
+
+  .main-content {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .main-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.65rem;
+    padding: 0.85rem 0.95rem !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 1.02rem;
+  }
+
+  .main-header small {
+    max-width: 22rem;
+    font-size: 0.76rem;
+  }
+
+  .main-header .user-info {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.65rem !important;
+    text-align: left;
+    font-size: 0.84rem;
+  }
+
+  .main-header [data-avatar] {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .card h5,
+  section h5 {
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+
+  .actividad-header-title {
+    font-size: 0.9rem;
+  }
+
+  .actividad-header-subtitle,
+  .card p,
+  .text-muted,
+  .form-label,
+  .form-text {
+    font-size: 0.82rem;
+  }
+
+  .card-header .d-flex,
+  section.card > .d-flex {
+    flex-wrap: wrap;
+    align-items: flex-start !important;
+    gap: 0.65rem;
+  }
+
+  .btn,
+  .button {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .form-control,
+  .form-select,
+  select {
+    min-height: 42px;
+  }
+
+  textarea.form-control {
+    min-height: 84px;
+  }
+
+  /* Tables become readable cards instead of horizontal scroll. */
+  body:has(#tablaCitas) .table,
+  body:has(#tablaHistorialEvolucion) .table {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  body:has(#tablaCitas) .table thead,
+  body:has(#tablaHistorialEvolucion) .table thead {
+    display: none !important;
+  }
+
+  body:has(#tablaCitas) .table tbody,
+  body:has(#tablaHistorialEvolucion) .table tbody {
+    display: grid;
+    gap: 0.7rem;
+    width: 100%;
+  }
+
+  body:has(#tablaCitas) .table tbody tr,
+  body:has(#tablaHistorialEvolucion) .table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    padding: 0.82rem;
+    border: 1px solid rgba(13, 71, 161, 0.12);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(13, 71, 161, 0.06);
+  }
+
+  html.dark-mode body:has(#tablaCitas) .table tbody tr,
+  html.dark-mode body:has(#tablaHistorialEvolucion) .table tbody tr {
+    background: var(--dm-card, #0b1429);
+    border-color: var(--dm-border, #1a2b4a);
+    box-shadow: none;
+  }
+
+  body:has(#tablaCitas) .table tbody td,
+  body:has(#tablaHistorialEvolucion) .table tbody td {
+    display: grid;
+    grid-template-columns: minmax(6.7rem, 36%) minmax(0, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.45rem 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08) !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  body:has(#tablaCitas) .table tbody td:last-child,
+  body:has(#tablaHistorialEvolucion) .table tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body:has(#tablaCitas) .table tbody td::before,
+  body:has(#tablaHistorialEvolucion) .table tbody td::before {
+    color: var(--color-text-muted, #60758f);
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  #tablaCitas td:nth-child(1)::before { content: "Fecha"; }
+  #tablaCitas td:nth-child(2)::before { content: "Hora"; }
+  #tablaCitas td:nth-child(3)::before { content: "Tipo"; }
+  #tablaCitas td:nth-child(4)::before { content: "Detalles"; }
+  #tablaCitas td:nth-child(5)::before { content: "Acciones"; }
+
+  #tablaHistorialEvolucion td:nth-child(1)::before { content: "Fecha"; }
+  #tablaHistorialEvolucion td:nth-child(2)::before { content: "Estado"; }
+  #tablaHistorialEvolucion td:nth-child(3)::before { content: "Energia"; }
+  #tablaHistorialEvolucion td:nth-child(4)::before { content: "Notas"; }
+
+  body:has(#tablaCitas) .table tbody td[colspan],
+  body:has(#tablaHistorialEvolucion) .table tbody td[colspan] {
+    display: block;
+    text-align: center;
+  }
+
+  body:has(#tablaCitas) .table tbody td[colspan]::before,
+  body:has(#tablaHistorialEvolucion) .table tbody td[colspan]::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  body:has(#tablaCitas) .table-responsive,
+  body:has(#tablaHistorialEvolucion) .table-responsive {
+    overflow: visible !important;
+    border: 0;
+    background: transparent;
+  }
+
+  #tablaCitas td:last-child {
+    gap: 0.35rem;
+  }
+
+  #tablaCitas td:last-child .btn,
+  #tablaCitas td:last-child .button {
+    width: auto;
+    min-width: 38px;
+    min-height: 34px;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.76rem;
+  }
+
+  .calendario-container {
+    max-width: 100%;
+    padding: 0.75rem !important;
+    overflow: hidden;
+  }
+
+  #diasCalendario {
+    gap: 2px !important;
+  }
+
+  #diasCalendario button,
+  #diasCalendario .btn,
+  .btn-nav-calendar {
+    min-width: 0;
+    min-height: 34px;
+    padding: 0.25rem !important;
+    font-size: 0.78rem;
+  }
+
+  .label-mes {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  /* Chatbot */
+  #chatbot-section {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - 6rem);
+    padding: 0.75rem !important;
+  }
+
+  #chatbot-section .chat-header {
+    align-items: flex-start !important;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
+
+  #chatbot-section .chat-header h5 {
+    font-size: 0.95rem;
+  }
+
+  #chatbot-section .chat-header__actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  #chatbot-section .chat-header__actions > * {
+    margin-right: 0 !important;
+  }
+
+  #chatbot-section .btn-clear-chat,
+  #chatbot-section .btn-fullscreen,
+  #chatbot-section .btn-emoji-picker {
+    width: auto;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  #chatbot-section .btn-clear-chat span {
+    display: none;
+  }
+
+  #chatbot-section .chat-area {
+    flex: 1 1 auto;
+    min-height: 48dvh;
+    max-height: none;
+  }
+
+  #chatbot-section .chat-input-area {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 42px;
+    gap: 0.5rem;
+  }
+
+  #chatbot-section .chat-input-area .button {
+    width: 42px;
+    min-width: 42px;
+    padding: 0;
+  }
+
+  #chatbot-section .chat-message-field {
+    min-width: 0;
+  }
+
+  #chatbot-section .chat-message-field input {
+    min-width: 0;
+    font-size: 0.86rem;
+  }
+
+  .consent-modal .modal-dialog,
+  .modal .modal-dialog {
+    max-width: calc(100vw - 1rem);
+    margin: 0.5rem auto;
+  }
+
+  .consent-modal .modal-body,
+  .modal .modal-body {
+    max-height: 68dvh;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-footer .btn,
+  .modal-footer button {
+    width: 100%;
+  }
+
+  .pay-methods {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .pay-method-card {
+    min-width: 0;
+    padding: 0.75rem 0.45rem !important;
+  }
+
+  .card-visual-wrap {
+    transform-origin: top center;
+    transform: scale(0.88);
+    margin-bottom: -1rem;
+  }
+
+  body:has([data-field="nombre"]) .card p {
+    display: grid;
+    grid-template-columns: minmax(6.4rem, 34%) minmax(0, 1fr);
+    gap: 0.45rem;
+    margin-bottom: 0.55rem;
+    overflow-wrap: anywhere;
+  }
+
+  body:has([data-field="nombre"]) [data-avatar][style*="150px"] {
+    width: 104px !important;
+    height: 104px !important;
+  }
+
+  .psyai-modal__header,
+  .psyai-modal__body,
+  .psyai-modal__footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .psyai-modal__footer {
+    flex-direction: column-reverse;
+  }
+
+  .psyai-modal__btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --patient-sidebar-width: 85vw;
+    --patient-content-pt: 4.15rem;
+    --patient-toggle-size: 44px;
+    --patient-card-pad: 0.8rem;
+    --patient-btn-min-h: 40px;
+    --patient-input-min-h: 40px;
+  }
+
+  .main-content {
+    padding-left: 0.55rem !important;
+    padding-right: 0.55rem !important;
+  }
+
+  .main-header {
+    padding: 0.72rem 0.8rem !important;
+    border-radius: 12px;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 0.94rem;
+  }
+
+  .main-header .user-info {
+    font-size: 0.78rem;
+  }
+
+  .card.p-4,
+  section.card.p-4,
+  .card.p-3,
+  section.card.p-3,
+  .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .card-header {
+    padding: 0.75rem 0.75rem 0.35rem !important;
+  }
+
+  .actividad-header-icon {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+  }
+
+  .btn,
+  .button {
+    font-size: 0.82rem;
+  }
+
+  body:has(#tablaCitas) .table tbody td,
+  body:has(#tablaHistorialEvolucion) .table tbody td {
+    grid-template-columns: 1fr;
+    gap: 0.18rem;
+  }
+
+  #tablaCitas td:last-child .btn,
+  #tablaCitas td:last-child .button {
+    width: 100%;
+  }
+
+  .pay-methods {
+    grid-template-columns: 1fr;
+  }
+
+  .card-visual-wrap {
+    transform: scale(0.78);
+    margin-left: -1.2rem;
+    margin-right: -1.2rem;
+    margin-bottom: -2rem;
+  }
+
+  #chatbot-section {
+    min-height: calc(100dvh - 5rem);
+  }
+
+  #chatbot-section .chat-area {
+    min-height: 50dvh;
+  }
+
+  #chatbot-section .message .bubble {
+    max-width: 86%;
+    font-size: 0.84rem;
+  }
+
+  #chatbot-section .emoji-picker {
+    max-width: calc(100vw - 1.5rem);
+    left: 0;
+    right: auto;
+  }
+
+  body:has([data-field="nombre"]) .card p {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --patient-content-pt: 3.95rem;
+    --patient-toggle-size: 40px;
+  }
+
+  .toggle-btn,
+  .menu-toggle {
+    top: 0.75rem;
+    left: 0.75rem;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+
+  .sidebar__logo {
+    padding: 1rem;
+  }
+
+  .sidebar__logo img {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .sidebar__logo h5 {
+    font-size: 0.82rem;
+  }
+
+  .sidebar .nav-link {
+    min-height: 40px;
+    margin-inline: 8px;
+    padding: 9px 11px !important;
+    font-size: 0.8rem;
+    gap: 9px;
+  }
+
+  .main-content {
+    padding: 0.48rem !important;
+    padding-top: var(--patient-content-pt, 3.95rem) !important;
+  }
+
+  .main-header .user-info i.fa-bell {
+    display: none;
+  }
+
+  #diasCalendario button,
+  #diasCalendario .btn,
+  .btn-nav-calendar {
+    min-height: 30px;
+    font-size: 0.72rem;
+  }
+
+  #chatbot-section .chat-input-area {
+    grid-template-columns: minmax(0, 1fr) 38px;
+  }
+
+  #chatbot-section .chat-input-area .button {
+    width: 38px;
+    min-width: 38px;
+  }
+
+  .card-visual-wrap {
+    transform: scale(0.7);
+    margin-left: -2rem;
+    margin-right: -2rem;
+    margin-bottom: -2.8rem;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .main-content {
+    padding-top: 3.6rem !important;
+  }
+
+  .main-header {
+    margin-bottom: 0.6rem !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 1rem;
+  }
+
+  .sidebar__logo {
+    padding: 0.85rem 1rem;
+  }
+
+  .sidebar__logo img {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .sidebar .nav-link {
+    min-height: 38px;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  #chatbot-section {
+    min-height: calc(100dvh - 4.3rem);
+  }
+
+  #chatbot-section .chat-area {
+    min-height: 42dvh;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .card,
+  .btn,
+  .button,
+  .nav-link {
+    min-height: 44px;
+  }
+
+  .form-control,
+  .form-select,
+  select {
+    min-height: 44px;
+  }
+}
+
+/* Refuerzo de visibilidad para acordeones y contenedores en responsive */
+@media (max-width: 991px) {
+  .main-content .card,
+  .main-content section,
+  .accordion, 
+  .accordion-responsive,
+  .faq-accordion {
+    display: block !important; /* Forzar renderizado */
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
