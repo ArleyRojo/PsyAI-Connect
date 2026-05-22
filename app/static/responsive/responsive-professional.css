@@ -911,8 +911,43 @@
     opacity: 1 !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
+  }
+}
+
+/* Dark mode accordion fixes for responsive */
+@media (max-width: 991px) {
+  html.dark-mode .accordion-item,
+  html.dark-mode .accordion-responsive .accordion-item {
+    background: var(--dm-card, #0b1429) !important;
+    border-color: var(--dm-border, #1a2b4a) !important;
+  }
+
+  html.dark-mode .accordion-button,
+  html.dark-mode .accordion-responsive .accordion-button {
+    background: transparent !important;
+    color: var(--dm-text1, #daeeff) !important;
+  }
+
+  html.dark-mode .accordion-button:not(.collapsed),
+  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed) {
+    background: rgba(13, 71, 161, 0.25) !important;
+    color: #60a5fa !important;
+  }
+
+  html.dark-mode .accordion-button::after,
+  html.dark-mode .accordion-responsive .accordion-button::after {
+    color: #60a5fa !important;
+  }
+
+  html.dark-mode .accordion-button:not(.collapsed)::after,
+  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed)::after {
+    color: #60a5fa !important;
+  }
+
+  html.dark-mode .accordion-body,
+  html.dark-mode .accordion-responsive .accordion-body {
+    background: transparent !important;
+    color: var(--dm-text2, #cbd5e1) !important;
   }
 }
 

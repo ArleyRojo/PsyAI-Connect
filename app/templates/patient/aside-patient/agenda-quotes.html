@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
 <head>
 <meta charset="UTF-8">
@@ -31,7 +31,7 @@
 <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<div class="d-flex">
+<div class="d-flex w-100">
   <!-- Sidebar -->
   <aside class="sidebar d-flex flex-column position-fixed">
     <div class="sidebar__logo text-center mt-3">
@@ -90,67 +90,97 @@
        </div>
 </section>
 
-      <!-- Solicitar Nueva Cita -->
-    <section class="card p-4 shadow-sm border-0 mb-4">
-      <h5 class="fw-bold text-dark mb-3">    <i class="fas fa-plus-circle me-2 text-primary"></i>Solicitar Nueva Cita</h5>
-      <form id="formCita" class="mt-3">
-        <div class="mb-3">
-          <label for="tipoCita" class="form-label fw-semibold">Tipo de Cita</label>
-          <select id="tipoCita" class="form-control">
-            <option value="">Seleccionar tipo de cita</option>
-            <option>Ansiedad</option><option>Estrés</option><option>Depresión</option>
-            <option>Autoestima</option><option>Duelo</option><option>Trastornos del Sueño</option>
-            <option>Adicciones</option><option>Orientación Emocional</option>
-            <option>Terapia de Pareja</option><option>Otro</option>
-          </select>
-        </div>
-        <!-- AQUÍ VA EL SELECT DEL PROFESIONAL -->
-  <div class="mb-3">
-    <label for="profesional" class="form-label fw-semibold">Profesional</label>
-    <select id="profesional" class="form-control">
-      <option value="">Seleccionar profesional</option>
-      <option value="2">Psicólogo 1</option>
+       <!-- Solicitar Nueva Cita -->
+      <section class="card p-4 shadow-sm border-0 mb-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="fas fa-plus-circle me-2 text-primary"></i>Solicitar Nueva Cita</h5>
+        <form id="formCita" class="mt-3">
+
+          <!-- Precio + Modalidad -->
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+              <div class="price-tag-modern">
+                <div class="price-icon"><i class="fas fa-tag"></i></div>
+                <div class="price-info">
+                  <span class="price-label">Valor Consulta</span>
+                  <span class="price-value">$100.000 COP</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="agenda-label-sm">Modalidad</label>
+              <div class="agenda-modality-wrap">
+                <div class="modality-selector-modern w-100">
+                  <div class="modality-option active" data-modalidad="virtual" onclick="seleccionarModalidad('virtual', this)">
+                    <i class="fas fa-video"></i>
+                    <span>Virtual</span>
+                  </div>
+                  <div class="modality-option" data-modalidad="presencial" onclick="seleccionarModalidad('presencial', this)">
+                    <i class="fas fa-building"></i>
+                    <span>Presencial</span>
+                  </div>
+                </div>
+                <input type="hidden" id="modalidadCita" value="virtual">
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="tipoCita" class="form-label fw-semibold">Tipo de Cita</label>
+            <select id="tipoCita" class="form-control">
+              <option value="">Seleccionar tipo de cita</option>
+              <option>Ansiedad</option><option>Estrés</option><option>Depresión</option>
+              <option>Autoestima</option><option>Duelo</option><option>Trastornos del Sueño</option>
+              <option>Adicciones</option><option>Orientación Emocional</option>
+              <option>Terapia de Pareja</option><option>Otro</option>
+            </select>
+          </div>
+          <!-- AQUÍ VA EL SELECT DEL PROFESIONAL -->
+    <div class="mb-3">
+      <label for="profesional" class="form-label fw-semibold">Profesional</label>
+      <select id="profesional" class="form-control">
+        <option value="">Seleccionar profesional</option>
+        <option value="2">Psicólogo 1</option>
+      </select>
+    </div>
+          <div class="mb-3">
+    <label class="form-label fw-semibold">Fecha</label>
+    <div id="calendario-container" class="calendario-container">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <button type="button" id="btnMesAnterior" class="btn-nav-calendar" title="Mes anterior">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span id="labelMes" class="label-mes"></span>
+        <button type="button" id="btnMesSiguiente" class="btn-nav-calendar" title="Mes siguiente">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:2px;margin-bottom:4px;">
+        <span style="font-size:.75rem;" class="dia-semana">L</span><span style="font-size:.75rem;" class="dia-semana">M</span>
+        <span style="font-size:.75rem;" class="dia-semana">X</span><span style="font-size:.75rem;" class="dia-semana">J</span>
+        <span style="font-size:.75rem;" class="dia-semana">V</span><span style="font-size:.75rem;" class="dia-semana">S</span>
+        <span style="font-size:.75rem;" class="dia-semana">D</span>
+      </div>
+      <div id="diasCalendario" style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:3px;"></div>
+      <div style="margin-top:8px;font-size:.78rem;" class="leyenda-calendario">
+        <span class="dot-disponible"></span>Disponible
+      </div>
+      <input type="hidden" id="date" value="">
+      <div id="fechaSeleccionadaLabel" class="fecha-seleccionada"></div>
+    </div>
+  </div>
+          <div class="mb-3">
+    <label for="time" class="form-label fw-semibold">Hora</label>
+    <select id="time" class="form-control">
+      <option value="">Selecciona profesional y fecha para ver si hay disponibilidad</option>
     </select>
   </div>
-        <div class="mb-3">
-  <label class="form-label fw-semibold">Fecha</label>
-  <div id="calendario-container" class="calendario-container">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <button type="button" id="btnMesAnterior" class="btn-nav-calendar" title="Mes anterior">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-      <span id="labelMes" class="label-mes"></span>
-      <button type="button" id="btnMesSiguiente" class="btn-nav-calendar" title="Mes siguiente">
-        <i class="fas fa-chevron-right"></i>
-      </button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:2px;margin-bottom:4px;">
-      <span style="font-size:.75rem;" class="dia-semana">L</span><span style="font-size:.75rem;" class="dia-semana">M</span>
-      <span style="font-size:.75rem;" class="dia-semana">X</span><span style="font-size:.75rem;" class="dia-semana">J</span>
-      <span style="font-size:.75rem;" class="dia-semana">V</span><span style="font-size:.75rem;" class="dia-semana">S</span>
-      <span style="font-size:.75rem;" class="dia-semana">D</span>
-    </div>
-    <div id="diasCalendario" style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:3px;"></div>
-    <div style="margin-top:8px;font-size:.78rem;" class="leyenda-calendario">
-      <span class="dot-disponible"></span>Disponible
-    </div>
-    <input type="hidden" id="date" value="">
-    <div id="fechaSeleccionadaLabel" class="fecha-seleccionada"></div>
-  </div>
-</div>
-        <div class="mb-3">
-  <label for="time" class="form-label fw-semibold">Hora</label>
-  <select id="time" class="form-control">
-    <option value="">Selecciona profesional y fecha para ver si hay disponibilidad</option>
-  </select>
-</div>
-        <div class="mb-3"><label for="motivo" class="form-label fw-semibold">Detalles Adicionales</label><textarea id="motivo" class="form-control" rows="3" placeholder="Describe brevemente..."></textarea></div>
-        <button type="button" id="btnSolicitarCita" class="btn btn-primary w-100 py-2 fw-bold border-0 mb-4"
-            style="background:#2196F3 !important;border-color:#2196F3 !important;color:#fff !important;">
-            <i class="fas fa-calendar-plus me-2"></i>Solicitar Cita
-        </button>
-      </form>
-    </section>
+          <div class="mb-3"><label for="motivo" class="form-label fw-semibold">Detalles Adicionales</label><textarea id="motivo" class="form-control" rows="3" placeholder="Describe brevemente..."></textarea></div>
+          <button type="button" id="btnSolicitarCita" class="btn btn-primary w-100 py-2 fw-bold border-0 mb-4"
+              style="background:#2196F3 !important;border-color:#2196F3 !important;color:#fff !important;">
+              <i class="fas fa-calendar-plus me-2"></i>Solicitar Cita
+          </button>
+        </form>
+      </section>
 
      <!-- Historial de Citas (oculto en modal) -->
 
@@ -172,7 +202,7 @@
         <!-- Monto -->
         <div class="mb-4">
           <label class="form-label-pay">Monto a pagar (COP)</label>
-          <input type="number" id="montoPagoModal" class="form-control form-control-pay" placeholder="0">
+          <input type="number" id="montoPagoModal" class="form-control form-control-pay" value="100000" readonly>
         </div>
 
         <!-- Métodos -->
@@ -182,13 +212,18 @@
             <span class="pm-icon">🏦</span>
             <div class="pm-label">PSE</div>
           </div>
-          <div class="pay-method-card" data-metodo="credito" onclick="seleccionarMetodo('credito')">
+          <div class="pay-method-card" data-metodo="tarjeta" onclick="seleccionarMetodo('tarjeta')">
             <span class="pm-icon">💳</span>
-            <div class="pm-label">Crédito</div>
+            <div class="pm-label">Crédito / Débito</div>
           </div>
-          <div class="pay-method-card" data-metodo="debito" onclick="seleccionarMetodo('debito')">
-            <span class="pm-icon">🪙</span>
-            <div class="pm-label">Débito</div>
+            <div class="pay-method-card" data-metodo="efectivo" data-requiere="presencial" onclick="seleccionarMetodo('efectivo')">
+              <span class="pm-icon">💰</span>
+              <div class="pm-label">Efectivo</div>
+              <span class="pm-badge">Solo presencial</span>
+            </div>
+          <div class="pay-method-card" data-metodo="transferencia" onclick="seleccionarMetodo('transferencia')">
+            <span class="pm-icon">🏧</span>
+            <div class="pm-label">Transferencia</div>
           </div>
         </div>
         <input type="hidden" id="metodoPagoModal" value="">
@@ -219,7 +254,7 @@
       <div class="modal-body">
         <div class="row g-4">
 
-          <!-- Columna izquierda: tarjeta visual o PSE -->
+          <!-- Columna izquierda: tarjeta visual, PSE, efectivo o transferencia -->
           <div class="col-12 col-md-5">
             <!-- Tarjeta animada (crédito/débito) -->
             <div id="wrapCardVisual">
@@ -227,9 +262,11 @@
                 <div class="card-visual" id="cardVisual3D">
                   <!-- Frente -->
                   <div class="card-face card-front">
-                    <div class="card-chip"></div>
-                    <div class="card-network-badge">
-                      <div class="circle c1"></div><div class="circle c2"></div>
+                    <div class="card-front-top">
+                      <div class="card-chip"></div>
+                      <div class="card-network-badge">
+                        <div class="circle c1"></div><div class="circle c2"></div>
+                      </div>
                     </div>
                     <div class="card-number" id="cvNumero">•••• •••• •••• ••••</div>
                     <div class="card-info">
@@ -263,6 +300,44 @@
                 <small>Pago Seguro en Línea</small>
                 <hr style="border-color:#93c5fd; margin:12px 0">
                 <p style="font-size:.8rem;color:#1d4ed8;margin:0">Serás redirigido a tu banco para completar el pago de forma segura.</p>
+              </div>
+            </div>
+
+            <!-- Panel Efectivo -->
+            <div id="wrapEfectivoPanel" style="display:none">
+              <div class="cash-instructions-panel">
+                <div class="cip-header">
+                  <i class="fas fa-hand-holding-usd"></i>
+                  <div class="cip-title">Pago en Efectivo</div>
+                </div>
+                <div class="cip-step">
+                  <span class="step-num">1</span>
+                  <span>Acércate a nuestro consultorio en la dirección registrada.</span>
+                </div>
+                <div class="cip-step">
+                  <span class="step-num">2</span>
+                  <span>Indica que deseas pagar tu cita con el profesional asignado.</span>
+                </div>
+                <div class="cip-step">
+                  <span class="step-num">3</span>
+                  <span>Entrega el monto exacto de <strong>$100.000 COP</strong> en efectivo.</span>
+                </div>
+                <div class="cip-step">
+                  <span class="step-num">4</span>
+                  <span>Recibirás tu comprobante de pago. ¡Listo!</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel Transferencia -->
+            <div id="wrapTransferenciaPanel" style="display:none">
+              <div class="transferencia-panel">
+                <div class="transferencia-header">
+                  <i class="fas fa-university"></i>
+                  <span>Transferencia Bancaria</span>
+                </div>
+                <p class="transferencia-sub">Selecciona una cuenta para realizar la transferencia por <strong>$100.000 COP</strong></p>
+                <div id="listaCuentasTransferencia"></div>
               </div>
             </div>
           </div>
@@ -343,10 +418,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/modules/auth/auth-guard.js"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260522-5">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
-<script src="/js/modules/patient/aside.js"></script>
+<script src="/js/modules/patient/aside.js?v=20260522-5"></script>
 <script src="/js/modules/patient/agendaquotes.js"></script>
 <script src="/js/modules/auth/logout.js"></script>
 <script src="/js/core/shared/nombre.usuario.js"></script>

@@ -180,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { href: '/professional.dashboard.html', icon: 'fas fa-home', label: 'Inicio' },
             { href: '/aside-professional/patients.html', icon: 'fas fa-users', label: 'Pacientes' },
             { href: '/aside-professional/my.agenda.html', icon: 'fas fa-calendar-check', label: 'Agenda' },
+            { href: '/aside-professional/mensajes.html', icon: 'fas fa-comments', label: 'Mensajes' },
             { href: '/aside-professional/reports.html', icon: 'fas fa-chart-line', label: 'Reportes' },
             { href: '/aside-professional/my.profile2.html', icon: 'fas fa-user-circle', label: 'Perfil' }
         ];

@@ -421,6 +421,235 @@ function inicializarModalCancelar() {
 }
 
 // ============================================================
+// MODALIDAD (Virtual / Presencial)
+// ============================================================
+window.seleccionarModalidad = function(modalidad, el) {
+  document.querySelectorAll('.modality-option').forEach(o => o.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('modalidadCita').value = modalidad;
+  try { localStorage.setItem('psyai_last_modality', modalidad); } catch(e) {}
+  actualizarMetodosPorModalidad();
+};
+
+function cargarModalidadGuardada() {
+  try {
+    const saved = localStorage.getItem('psyai_last_modality');
+    if (saved === 'virtual' || saved === 'presencial') {
+      const opt = document.querySelector(`.modality-option[data-modalidad="${saved}"]`);
+      if (opt) {
+        document.querySelectorAll('.modality-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        document.getElementById('modalidadCita').value = saved;
+      }
+    }
+  } catch(e) {}
+}
+
+function actualizarMetodosPorModalidad() {
+  const modalidad = document.getElementById('modalidadCita').value;
+  const efectivoCard = document.querySelector('.pay-method-card[data-metodo="efectivo"]');
+  if (!efectivoCard) return;
+  if (modalidad === 'virtual') {
+    efectivoCard.classList.add('disabled');
+    efectivoCard.style.pointerEvents = 'none';
+    efectivoCard.style.opacity = '0.4';
+  } else {
+    efectivoCard.classList.remove('disabled');
+    efectivoCard.style.pointerEvents = '';
+    efectivoCard.style.opacity = '';
+  }
+}
+
+// ============================================================
+// CUENTAS BANCARIAS (Transferencia)
+// ============================================================
+const CUENTAS_BANCARIAS = [
+  {
+    banco: 'Bancolombia',
+    tipo: 'Cuenta de Ahorros',
+    numero: '1234-567890-12',
+    titular: 'PsyAI Connect S.A.S.',
+    documento: 'NIT 901.234.567-8'
+  },
+  {
+    banco: 'Davivienda',
+    tipo: 'Cuenta Corriente',
+    numero: '9876-543210-98',
+    titular: 'PsyAI Connect S.A.S.',
+    documento: 'NIT 901.234.567-8'
+  },
+  {
+    banco: 'Nequi',
+    tipo: 'Cuenta Digital',
+    numero: '3001234567',
+    titular: 'PsyAI Connect S.A.S.',
+    documento: 'NIT 901.234.567-8'
+  }
+];
+
+window.seleccionarSubTarjeta = function(sub) {
+  document.getElementById('tipoTarjeta').value = sub;
+  renderTarjetaForm(sub);
+};
+
+function renderTarjetaForm(subTipo) {
+  const contenidoEl = document.getElementById("contenidoMetodoPago");
+
+  let cuotasHtml = '';
+  if (subTipo === 'credito') {
+    cuotasHtml = `
+      <div class="mb-3">
+        <label class="form-label-pay">Número de cuotas</label>
+        <select id="cuotasTarjeta" class="form-select form-control-pay">
+          <option value="1">1 cuota</option>
+          <option value="3">3 cuotas</option>
+          <option value="6">6 cuotas</option>
+          <option value="12">12 cuotas</option>
+        </select>
+      </div>
+      <div class="mb-3 p-2 rounded" style="background:var(--card-bg);border:1px solid var(--border-color);font-size:0.85rem">
+        <i class="fas fa-percent"></i> Crédito: el valor se fracciona según las cuotas seleccionadas.
+      </div>`;
+  } else {
+    cuotasHtml = `
+      <div class="mb-3">
+        <div class="alert alert-info py-2 mb-0" style="font-size:0.8rem">
+          <i class="fas fa-info-circle"></i> Cargo inmediato a tu cuenta débito.
+        </div>
+      </div>`;
+  }
+
+  contenidoEl.innerHTML = `
+    <div class="mb-3">
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-primary btn-sm flex-fill sub-tarjeta-btn${subTipo === 'credito' ? ' active' : ''}" data-sub="credito" onclick="seleccionarSubTarjeta('credito')">Crédito</button>
+        <button type="button" class="btn btn-outline-primary btn-sm flex-fill sub-tarjeta-btn${subTipo === 'debito' ? ' active' : ''}" data-sub="debito" onclick="seleccionarSubTarjeta('debito')">Débito</button>
+      </div>
+      <input type="hidden" id="tipoTarjeta" value="${subTipo}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label-pay">Número de tarjeta</label>
+      <input type="text" id="numTarjeta" class="form-control form-control-pay" placeholder="1234 5678 9012 3456" maxlength="19">
+    </div>
+    <div class="mb-3">
+      <label class="form-label-pay">Titular de la tarjeta</label>
+      <input type="text" id="titularTarjeta" class="form-control form-control-pay" placeholder="Como aparece en la tarjeta">
+    </div>
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+        <label class="form-label-pay">Vencimiento</label>
+        <input type="text" id="vencimiento" class="form-control form-control-pay" placeholder="MM/YY" maxlength="5">
+      </div>
+      <div class="col-6">
+        <label class="form-label-pay">CVV</label>
+        <input type="text" id="cvv" class="form-control form-control-pay" placeholder="•••" maxlength="4"
+          onfocus="document.getElementById('cardVisual3D').classList.add('flipped')"
+          onblur="document.getElementById('cardVisual3D').classList.remove('flipped')">
+      </div>
+    </div>
+    ${cuotasHtml}
+    <div class="guardar-check">
+      <input type="checkbox" id="guardarTarjeta">
+      <label for="guardarTarjeta">Guardar esta tarjeta para futuros pagos</label>
+    </div>`;
+
+  // Reset card preview
+  const saved = getSavedMethods().filter(m => m.tipo === 'tarjeta' && m.subTipo === subTipo);
+  if (window._savedIndex !== null && saved[window._savedIndex]) {
+    const s = saved[window._savedIndex];
+    document.getElementById('cvNombre').textContent = s.titular;
+    document.getElementById('cvNumero').textContent = `\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 ${s.ultimos}`;
+    document.getElementById('cvExpiry').textContent = s.expiry;
+  } else {
+    document.getElementById('cvNombre').textContent = 'YOUR NAME';
+    document.getElementById('cvNumero').textContent = '\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022';
+    document.getElementById('cvExpiry').textContent = 'MM/YY';
+    document.getElementById('cvCVV').textContent    = '\u2022\u2022\u2022';
+  }
+
+  bindCardEvents();
+}
+
+function bindCardEvents() {
+  setTimeout(() => {
+    document.getElementById('numTarjeta')?.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,16);
+      e.target.value = v.replace(/(.{4})/g,'$1 ').trim();
+      const disp = v.padEnd(16,'\u2022').replace(/(.{4})/g,'$1 ').trim();
+      document.getElementById('cvNumero').textContent = disp;
+    });
+    document.getElementById('titularTarjeta')?.addEventListener('input', e => {
+      document.getElementById('cvNombre').textContent = e.target.value.toUpperCase() || 'YOUR NAME';
+    });
+    document.getElementById('vencimiento')?.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'');
+      if (v.length >= 2) v = v.slice(0,2)+'/'+v.slice(2,4);
+      e.target.value = v;
+      document.getElementById('cvExpiry').textContent = v || 'MM/YY';
+    });
+    document.getElementById('cvv')?.addEventListener('input', e => {
+      document.getElementById('cvCVV').textContent = e.target.value || '\u2022\u2022\u2022';
+    });
+  }, 50);
+}
+
+window.copiarCuenta = function(btn, numero) {
+  navigator.clipboard.writeText(numero).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
+      btn.classList.remove('copied');
+    }, 2500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = numero;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+};
+
+window.simularPSE = function(btn) {
+  const banco = document.getElementById('pseBanco')?.value;
+  if (!banco) {
+    PsyAIAlerts.error('Error', 'Selecciona un banco para continuar.');
+    return;
+  }
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirigiendo...';
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  setTimeout(() => {
+    btn.innerHTML = '✓ Pago Simulado Exitosamente';
+    btn.style.background = '#43a047';
+    btn.disabled = true;
+    document.getElementById('pseStatusPanel').style.display = 'block';
+    window._pseSimulado = true;
+  }, 2000);
+};
+
+window.subirComprobante = function(input) {
+  const area = input.closest('.receipt-upload-area');
+  const textEl = area?.querySelector('.ru-text');
+  if (input.files && input.files[0]) {
+    window._comprobanteTransferencia = input.files[0];
+    if (textEl) textEl.textContent = '✓ ' + input.files[0].name;
+    if (area) area.classList.add('has-file');
+  } else {
+    window._comprobanteTransferencia = null;
+    if (textEl) textEl.textContent = 'Haz clic o arrastra tu comprobante aquí';
+    if (area) area.classList.remove('has-file');
+  }
+};
+
+// ============================================================
 // FORMULARIO Y PAGO
 // ============================================================
 function validarFormularioCita() {
@@ -507,23 +736,30 @@ window.borrarGuardado = function(idx) {
 
 // ── Continuar pago ────────────────────────────────────────
 document.getElementById("btnContinuarPago").addEventListener("click", () => {
-  const monto  = document.getElementById("montoPagoModal").value.trim();
   const metodo = document.getElementById("metodoPagoModal").value.trim();
-  if (!monto) { PsyAIAlerts.error('Error', 'Ingresa el monto a pagar.'); return; }
   if (!metodo) { PsyAIAlerts.error('Error', 'Selecciona un método de pago.'); return; }
+  if (metodo === 'efectivo' && document.getElementById('modalidadCita').value === 'virtual') {
+    PsyAIAlerts.error('Error', 'Pago en efectivo solo está disponible para citas presenciales.'); return;
+  }
 
   const tituloEl    = document.getElementById("tituloMetodoPago");
   const contenidoEl = document.getElementById("contenidoMetodoPago");
   const wrapCard    = document.getElementById("wrapCardVisual");
   const wrapPSE     = document.getElementById("wrapPSEPanel");
+  const wrapEfectivo = document.getElementById("wrapEfectivoPanel");
+  const wrapTransferencia = document.getElementById("wrapTransferenciaPanel");
 
   contenidoEl.innerHTML = "";
   window._savedIndex = null;
+  wrapCard.style.display = "none";
+  wrapPSE.style.display = "none";
+  wrapEfectivo.style.display = "none";
+  wrapTransferencia.style.display = "none";
 
   if (metodo === "pse") {
     tituloEl.textContent = "PSE — Pago en línea";
-    wrapCard.style.display = "none";
-    wrapPSE.style.display  = "block";
+    wrapPSE.style.display = "block";
+    window._pseSimulado = false;
     contenidoEl.innerHTML = `
       <div class="mb-3">
         <label class="form-label-pay">Banco</label>
@@ -546,78 +782,70 @@ document.getElementById("btnContinuarPago").addEventListener("click", () => {
         <label class="form-label-pay">Titular de la cuenta</label>
         <input type="text" id="pseTitular" class="form-control form-control-pay" placeholder="Nombre completo">
       </div>
-      <div class="guardar-check">
+      <div class="pse-status-panel" id="pseStatusPanel" style="display:none">
+        <div class="psp-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="psp-title">Redirección simulada exitosa</div>
+        <div class="psp-sub">El banco ha procesado tu pago correctamente.</div>
+      </div>
+      <button type="button" class="btn-pago-continuar w-100" id="btnSimularPSE" onclick="simularPSE(this)">
+        <i class="fas fa-external-link-alt me-2"></i>Ir al banco (simular)
+      </button>
+      <div class="guardar-check mt-3">
         <input type="checkbox" id="guardarPSE">
         <label for="guardarPSE">Guardar este banco para futuros pagos</label>
       </div>`;
 
-  } else {
-    const label = metodo === "credito" ? "Tarjeta de Crédito" : "Tarjeta de Débito";
-    tituloEl.textContent = label;
-    wrapCard.style.display = "block";
-    wrapPSE.style.display  = "none";
-
-    // Si viene de un guardado seleccionado
-    const saved = getSavedMethods().filter(m => m.tipo === metodo);
-    if (window._savedIndex !== null && saved[window._savedIndex]) {
-      const s = saved[window._savedIndex];
-      document.getElementById('cvNombre').textContent = s.titular;
-      document.getElementById('cvNumero').textContent = `•••• •••• •••• ${s.ultimos}`;
-      document.getElementById('cvExpiry').textContent = s.expiry;
-    } else {
-      document.getElementById('cvNombre').textContent = 'YOUR NAME';
-      document.getElementById('cvNumero').textContent = '•••• •••• •••• ••••';
-      document.getElementById('cvExpiry').textContent = 'MM/YY';
-      document.getElementById('cvCVV').textContent    = '•••';
-    }
-
+  } else if (metodo === "efectivo") {
+    tituloEl.textContent = "Pago en Efectivo";
+    wrapEfectivo.style.display = "block";
     contenidoEl.innerHTML = `
-      <div class="mb-3">
-        <label class="form-label-pay">Número de tarjeta</label>
-        <input type="text" id="numTarjeta" class="form-control form-control-pay" placeholder="1234 5678 9012 3456" maxlength="19">
+      <div class="pago-summary-row">
+        <span class="ps-label">Total a pagar</span>
+        <span class="ps-value">$100.000 COP</span>
       </div>
-      <div class="mb-3">
-        <label class="form-label-pay">Titular de la tarjeta</label>
-        <input type="text" id="titularTarjeta" class="form-control form-control-pay" placeholder="Como aparece en la tarjeta">
-      </div>
-      <div class="row g-2 mb-3">
-        <div class="col-6">
-          <label class="form-label-pay">Vencimiento</label>
-          <input type="text" id="vencimiento" class="form-control form-control-pay" placeholder="MM/YY" maxlength="5">
-        </div>
-        <div class="col-6">
-          <label class="form-label-pay">CVV</label>
-          <input type="text" id="cvv" class="form-control form-control-pay" placeholder="•••" maxlength="4"
-            onfocus="document.getElementById('cardVisual3D').classList.add('flipped')"
-            onblur="document.getElementById('cardVisual3D').classList.remove('flipped')">
-        </div>
-      </div>
-      <div class="guardar-check">
-        <input type="checkbox" id="guardarTarjeta">
-        <label for="guardarTarjeta">Guardar esta tarjeta para futuros pagos</label>
+      <div class="alert alert-info" style="font-size:0.82rem;border-radius:10px;margin-bottom:0">
+        <i class="fas fa-info-circle me-2"></i>Puedes agendar tu cita ahora y pagar al momento de asistir.
       </div>`;
 
-    // Live preview en la tarjeta
-    setTimeout(() => {
-      document.getElementById('numTarjeta')?.addEventListener('input', e => {
-        let v = e.target.value.replace(/\D/g,'').slice(0,16);
-        e.target.value = v.replace(/(.{4})/g,'$1 ').trim();
-        const disp = v.padEnd(16,'•').replace(/(.{4})/g,'$1 ').trim();
-        document.getElementById('cvNumero').textContent = disp;
-      });
-      document.getElementById('titularTarjeta')?.addEventListener('input', e => {
-        document.getElementById('cvNombre').textContent = e.target.value.toUpperCase() || 'YOUR NAME';
-      });
-      document.getElementById('vencimiento')?.addEventListener('input', e => {
-        let v = e.target.value.replace(/\D/g,'');
-        if (v.length >= 2) v = v.slice(0,2)+'/'+v.slice(2,4);
-        e.target.value = v;
-        document.getElementById('cvExpiry').textContent = v || 'MM/YY';
-      });
-      document.getElementById('cvv')?.addEventListener('input', e => {
-        document.getElementById('cvCVV').textContent = e.target.value || '•••';
-      });
-    }, 50);
+  } else if (metodo === "transferencia") {
+    tituloEl.textContent = "Transferencia Bancaria";
+    wrapTransferencia.style.display = "block";
+    window._comprobanteTransferencia = null;
+    let cuentasHtml = CUENTAS_BANCARIAS.map((c, i) => `
+      <div class="bank-account-card">
+        <div class="bac-header">
+          <span class="bac-bank"><i class="fas fa-university me-2" style="color:#0d47a1"></i>${c.banco}</span>
+          <span class="bac-type">${c.tipo}</span>
+        </div>
+        <div class="bac-number">${c.numero}</div>
+        <div class="bac-holder">${c.titular} · ${c.documento}</div>
+        <button type="button" class="bac-copy-btn" onclick="copiarCuenta(this, '${c.numero}')">
+          <i class="fas fa-copy"></i> Copiar
+        </button>
+      </div>
+    `).join('');
+    contenidoEl.innerHTML = `
+      <div class="bank-accounts-section">
+        <div class="section-subtitle"><i class="fas fa-university"></i> Cuentas disponibles</div>
+        ${cuentasHtml}
+      </div>
+      <div class="receipt-upload-area" onclick="document.getElementById('receiptInput').click()">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <div class="ru-text">Haz clic o arrastra tu comprobante aquí</div>
+        <div class="ru-sub">PDF, JPG o PNG · Máx 5MB</div>
+        <input type="file" id="receiptInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="subirComprobante(this)">
+      </div>
+      <div class="pago-summary-row">
+        <span class="ps-label">Total a transferir</span>
+        <span class="ps-value">$100.000 COP</span>
+      </div>`;
+
+  } else if (metodo === "tarjeta") {
+    const subTipo = document.getElementById('tipoTarjeta')?.value || 'credito';
+    const label = subTipo === 'credito' ? "Tarjeta de Crédito" : "Tarjeta de Débito";
+    tituloEl.textContent = label;
+    wrapCard.style.display = "block";
+    renderTarjetaForm(subTipo);
   }
 
   const facturaMod = bootstrap.Modal.getInstance(document.getElementById("facturaModal"));
@@ -640,17 +868,24 @@ document.getElementById("btnFinalizarPago").addEventListener("click", async () =
     const banco   = document.getElementById("pseBanco")?.value.trim();
     const titular = document.getElementById("pseTitular")?.value.trim();
     if (!banco || !titular) valid = false;
+    if (!window._pseSimulado) { PsyAIAlerts.error('Error', 'Debes simular el pago PSE primero.'); return; }
     else if (document.getElementById('guardarPSE')?.checked) {
       addSavedMethod({ tipo: 'pse', banco, titular });
     }
-  } else {
+  } else if (metodo === "efectivo") {
+    valid = true;
+  } else if (metodo === "transferencia") {
+    if (!window._comprobanteTransferencia) { PsyAIAlerts.error('Error', 'Debes adjuntar el comprobante de transferencia.'); return; }
+    valid = true;
+  } else if (metodo === "tarjeta") {
     const num    = document.getElementById("numTarjeta")?.value.replace(/\s/g,'').trim();
     const tit    = document.getElementById("titularTarjeta")?.value.trim();
     const cvv    = document.getElementById("cvv")?.value.trim();
     const expiry = document.getElementById("vencimiento")?.value.trim();
+    const subTipo = document.getElementById("tipoTarjeta")?.value || 'credito';
     if (!num || num.length < 16 || !tit || !cvv || !expiry) valid = false;
     else if (document.getElementById('guardarTarjeta')?.checked) {
-      addSavedMethod({ tipo: metodo, titular: tit, ultimos: num.slice(-4), expiry });
+      addSavedMethod({ tipo: 'tarjeta', subTipo, titular: tit, ultimos: num.slice(-4), expiry });
     }
   }
 
@@ -661,13 +896,18 @@ document.getElementById("btnFinalizarPago").addEventListener("click", async () =
   const hora          = document.getElementById("time").value;
   const motivo        = document.getElementById("motivo").value;
   const idProfesional = document.getElementById("profesional").value;
+  const modalidad     = document.getElementById("modalidadCita").value;
 
   try {
     const res    = await fetch("/api/citas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ tipoCita, fecha, hora, motivo, idProfesional, creado_por_profesional: false })
+      body: JSON.stringify({
+        tipoCita, fecha, hora, motivo, idProfesional,
+        creado_por_profesional: false,
+        modalidad: modalidad
+      })
     });
     const result = await res.json();
     if (result.success) {
@@ -692,6 +932,8 @@ document.addEventListener("DOMContentLoaded", () => {
   cargarCitasPaciente();
   inicializarModalHistorial();
   inicializarModalCancelar();
+  cargarModalidadGuardada();
+  actualizarMetodosPorModalidad();
 
   // Initialize payment modal
   window.modalPagoFinal = new bootstrap.Modal(document.getElementById("modalPagoFinal"));

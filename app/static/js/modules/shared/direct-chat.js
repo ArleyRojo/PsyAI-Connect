@@ -95,6 +95,41 @@
     return contact.especialidad || "Profesional";
   }
 
+  function normalizeRole(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function rolesMatch(userRole, requiredRole) {
+    const current = normalizeRole(userRole);
+    const expected = normalizeRole(requiredRole);
+    const aliases = {
+      paciente: ["paciente", "patient"],
+      profesional: ["profesional", "professional", "psicologo", "psicologa"],
+      admin: ["admin", "administrador"],
+    };
+
+    if (!expected) return true;
+    const allowed = aliases[expected] || [expected];
+    return allowed.includes(current);
+  }
+
+  function normalizeContact(item) {
+    const idUsuario = item.idUsuario ?? item.id ?? item.idPaciente ?? item.idProfesional ?? item.usuarioId;
+    return {
+      ...item,
+      idUsuario,
+      nombre: item.nombre || item.name || item.paciente || item.profesional || "Usuario",
+      fotoPerfil: item.fotoPerfil || item.foto || item.avatar || null,
+      ultimoMensaje: item.ultimoMensaje || null,
+      ultimaFecha: item.ultimaFecha || null,
+      noLeidos: Number(item.noLeidos || 0),
+    };
+  }
+
   function initDirectChat(root) {
     const listEndpoint = root.dataset.listEndpoint;
     const listKey = root.dataset.listKey;
@@ -165,7 +200,7 @@
         return false;
       }
 
-      if (user.rol !== requiredRole) {
+      if (!rolesMatch(user.rol || user.role, requiredRole)) {
         renderAuthState("fas fa-user-lock", "Esta vista pertenece a otro rol.");
         return false;
       }
@@ -245,7 +280,7 @@
       }
 
       list.innerHTML = visible.map((contact) => {
-        const active = activeContact && activeContact.idUsuario === contact.idUsuario ? " active" : "";
+        const active = activeContact && Number(activeContact.idUsuario) === Number(contact.idUsuario) ? " active" : "";
         const preview = contact.ultimoMensaje || contactSubtitle(contact, contactMode);
         const unread = Number(contact.noLeidos || 0);
         const unreadClass = unread > 0 ? " has-unread" : "";
@@ -356,13 +391,28 @@
     }
 
     async function fetchContactList(endpoint, key) {
-      const response = await fetch(endpoint, { credentials: "include" });
+      const response = await fetch(endpoint, {
+        credentials: "include",
+        cache: "no-store",
+      });
       const data = await response.json();
-      return data.success ? (data[key] || []) : [];
+      if (!response.ok || data.success === false) return [];
+
+      const candidates = [
+        key,
+        "profesionales",
+        "pacientes",
+        "usuarios",
+        "items",
+        "data",
+      ];
+      const collectionKey = candidates.find((candidate) => Array.isArray(data[candidate]));
+      const items = collectionKey ? data[collectionKey] : (Array.isArray(data) ? data : []);
+      return items.map(normalizeContact).filter((item) => item.idUsuario);
     }
 
     function enrichFallbackContacts(items) {
-      return items.map((item) => ({
+      return items.map((item) => normalizeContact({
         ...item,
         ultimoMensaje: item.ultimoMensaje || null,
         ultimaFecha: item.ultimaFecha || null,
