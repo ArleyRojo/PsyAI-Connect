@@ -60,13 +60,6 @@
     opacity: 0;
   }
 
-  .main-content {
-    margin-left: 0 !important;
-    padding-left: 24px !important;
-    padding-right: 24px !important;
-    padding-top: 64px !important;
-  }
-
   .ms-250,
   .ms-280 {
     margin-left: 0 !important;
@@ -741,10 +734,7 @@
     max-width: 85vw !important;
   }
 
-  .main-content {
-    padding: 16px !important;
-    padding-top: 72px !important;
-  }
+
 
   .main-header {
     padding: 14px 16px !important;

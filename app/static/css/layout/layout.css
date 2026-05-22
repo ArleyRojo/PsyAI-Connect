@@ -11,13 +11,13 @@
 
 .hero-section {
     background: linear-gradient(160deg, #fff 0%, var(--color-accent) 100%);
-    padding: 80px 50px;
+    padding: 60px 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 40px;
 }
-.content-section { padding: 80px 50px; text-align: center; }
+.content-section { padding: 60px 25px; text-align: center; }
 .pro-description {
     margin-top: 15px;
     font-size: .92rem;
@@ -231,7 +231,8 @@
     background: var(--color-bg-soft);
     transition: background-color .35s ease;
     position: relative;
-    z-index: 101;
+    width: 100%;
+    min-width: 0;
 }
 
 /* ── Main header ── */
@@ -266,7 +267,49 @@
 .ms-250, .ms-280 { margin-left: 255px !important; }
 
 @media (max-width: 991px) {
+    .sidebar { transform: translateX(-100%); transition: transform .35s ease; }
+    .sidebar.active { transform: translateX(0); }
+    .main-content { margin-left: 0; padding: 20px 15px; }
     .ms-250, .ms-280 { margin-left: 0 !important; }
+    
+    /* Fix for mobile overflow issues */
+    body {
+        overflow-x: hidden;
+    }
+    
+    /* Ensure proper width for mobile elements */
+    .container {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+        box-sizing: border-box;
+    }
+    
+    /* Fix hero section stacking */
+    .hero-section {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 30px 15px !important;
+    }
+    
+    .hero-section > * {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Fix content section */
+    .content-section {
+        padding: 30px 15px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .public-header { padding: 15px 20px; flex-direction: column; gap: 12px; }
+    .public-header nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .public-header nav a { margin-left: 0; }
+    .hero-section { padding: 40px 20px; }
+    .footer-enhanced .footer-bottom { flex-direction: column; text-align: center; }
 }
 
 /* ── Footer Simple (light mode) ── */

@@ -387,12 +387,15 @@ function togglePwd(inputId, btn) {
     window.addEventListener('resize', () => setTimeout(attach, 100));
     const observer = new MutationObserver(() => setTimeout(attach, 50));
 document.addEventListener('DOMContentLoaded', function() {
-    observer.observe(document.querySelector('.reg-panels-wrap'), { 
-        childList: true, 
-        subtree: true, 
-        attributes: true, 
-        attributeFilter: ['class'] 
-    });
+    const target = document.querySelector('.reg-panels-wrap');
+    if (target) {
+        observer.observe(target, { 
+            childList: true, 
+            subtree: true, 
+            attributes: true, 
+            attributeFilter: ['class'] 
+        });
+    }
 });
 })();
 

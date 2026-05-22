@@ -2983,7 +2983,6 @@ html.dark-mode .sidebar,
 
 html.dark-mode .main-content,
 .dark-mode .main-content {
-    margin-left: 255px !important;
     padding: 28px 30px !important;
     min-height: 100vh !important;
 }
@@ -3126,20 +3125,11 @@ html.dark-mode .sidebar .nav-link,
     ============================== */
 .dark-mode .main-content {
     background-color: var(--dm-deep) !important;
-    margin-left: 255px !important;
     padding-top: 28px !important;
     min-height: 100vh !important;
 }
 
-html.dark-mode .ms-250,
-.dark-mode .ms-250 {
-    margin-left: 255px !important;
-}
 
-html.dark-mode .ms-280,
-.dark-mode .ms-280 {
-    margin-left: 255px !important;
-}
 
 /* ==============================
     MAIN HEADER

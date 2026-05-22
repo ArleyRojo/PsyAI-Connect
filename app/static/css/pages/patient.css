@@ -309,12 +309,12 @@
 }
 .resumen-item span { font-size: .92rem; color: #1a2e44; }
 
-/* -- Badge energ�a / estado ------------------------- */
+/* -- Badge energ�a / estado ------------------------- */
 .energia-bar { display: flex; align-items: center; gap: 8px; }
 .energia-bar .bar { height: 6px; width: 60px; background: #e8edf3; border-radius: 99px; overflow: hidden; }
 .energia-bar .fill { height: 100%; border-radius: 99px; }
 
-/* -- Animaci�n panel -------------------------------- */
+/* -- Animaci�n panel -------------------------------- */
 .panel-step { animation: fadePanel .22s ease; }
 @keyframes fadePanel { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
@@ -2231,7 +2231,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
 
 /* ==================== RESPONSIVE ASIDE PATIENT - COMPLETO ==================== */
 
-/* ==================== CHATBOT - DISE�O MEJORADO ==================== */
+/* ==================== CHATBOT - DISE�O MEJORADO ==================== */
 #chatbot-section {
     background: var(--cb-card-bg, #ffffff);
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -2274,7 +2274,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     50% { opacity: 0.5; }
 }
 
-/* Bot�n pantalla completa */
+/* Bot�n pantalla completa */
 #chatbot-section .btn-fullscreen {
     background: transparent;
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -2299,7 +2299,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     font-size: 0.85rem;
 }
 
-/* �rea de conversaci�n */
+/* �rea de conversaci�n */
 #chatbot-section .chat-area {
     background: var(--cb-bg, #F4F8FC);
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -2500,7 +2500,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     40% { transform: scale(1.2); opacity: 1; }
 }
 
-/* Overlay para m�vil */
+/* Overlay para m�vil */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -2519,7 +2519,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     opacity: 1;
 }
 
-/* Bot�n hamburguesa */
+/* Bot�n hamburguesa */
 .menu-toggle,
 .toggle-btn {
     display: none;
@@ -2608,14 +2608,14 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* ========== M�VILES GRANDES (576px - 767px) ========== */
+/* ========== M�VILES GRANDES (576px - 767px) ========== */
 @media (max-width: 767px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
     }
 
-    /* Acorde�n del sidebar */
+    /* Acorde�n del sidebar */
     .sidebar-nav {
         display: flex;
         flex-direction: column;
@@ -2794,7 +2794,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* ========== M�VILES (hasta 575px) ========== */
+/* ========== M�VILES (hasta 575px) ========== */
 @media (max-width: 575px) {
     .menu-toggle,
     .toggle-btn {
@@ -2804,7 +2804,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         font-size: 1.1rem;
     }
 
-    /* Acorde�n sidebar */
+    /* Acorde�n sidebar */
     .sidebar-nav .nav-link {
         padding: 12px 15px;
     }
@@ -2920,7 +2920,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         font-size: 0.85rem;
     }
 
-    /* Agenda - Hacer tabla m�s compacta */
+    /* Agenda - Hacer tabla m�s compacta */
     .table-responsive {
         font-size: 0.8rem;
     }
@@ -2941,7 +2941,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         margin: 2px 0;
     }
 
-    /* Ocultar columnas menos importantes en m�vil */
+    /* Ocultar columnas menos importantes en m�vil */
     .table td:nth-child(4),
     .table th:nth-child(4) {
         display: none;
@@ -3022,7 +3022,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* ========== M�VILES MUY PEQUE�OS (hasta 375px) ========== */
+/* ========== M�VILES MUY PEQUE�OS (hasta 375px) ========== */
 @media (max-width: 375px) {
     .menu-toggle,
     .toggle-btn {
@@ -3136,7 +3136,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* ========== MODO LANDSCAPE EN M�VILES ========== */
+/* ========== MODO LANDSCAPE EN M�VILES ========== */
 @media (max-height: 600px) and (orientation: landscape) {
     .main-content {
         padding: 10px !important;
@@ -3155,7 +3155,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         margin-bottom: 10px !important;
     }
 
-    /* Chatbot - �rea m�s peque�a en landscape */
+    /* Chatbot - �rea m�s peque�a en landscape */
     #chatbot-section .border {
         height: 180px !important;
     }
@@ -3208,7 +3208,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
 
 /* ========== MEJORAS GENERALES ========== */
 
-/* Botones m�s t�ctiles en m�vil */
+/* Botones m�s t�ctiles en m�vil */
 @media (max-width: 767px) {
     .button,
     .btn {
@@ -3218,7 +3218,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
         justify-content: center;
     }
 
-    /* Inputs m�s grandes para mejor usabilidad */
+    /* Inputs m�s grandes para mejor usabilidad */
     .form-control,
     .form-select,
     select {
@@ -3226,14 +3226,14 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* Ocultar elementos innecesarios en m�vil muy peque�o */
+/* Ocultar elementos innecesarios en m�vil muy peque�o */
 @media (max-width: 375px) {
     .main-header .user-info i {
         display: none;
     }
 }
 
-/* Animaci�n al abrir el acorde�n navbar */
+/* Animaci�n al abrir el acorde�n navbar */
 .navbar-collapse {
     transition: all 0.4s ease;
 }
@@ -3421,7 +3421,7 @@ html {
 }
 
 /* =============================================
-   Estilos Modales de Pago � agenda-quotes
+   Estilos Modales de Pago � agenda-quotes
    Paleta: #0D47A1 / #90CAF9 (PsyAI Connect)
    ============================================= */
 
@@ -3465,7 +3465,7 @@ html {
   background: var(--color-bg-card, #fff);
 }
 
-/* -- M�todos de pago � tarjetas seleccionables -- */
+/* -- M�todos de pago � tarjetas seleccionables -- */
 .pay-methods { display: flex; gap: 12px; margin-bottom: 1.4rem; flex-wrap: wrap; }
 .pay-method-card {
   flex: 1; min-width: 90px;
@@ -3490,6 +3490,35 @@ html {
 .pay-method-card .pm-icon { font-size: 1.6rem; margin-bottom: 6px; display: block; }
 .pay-method-card .pm-label { font-size: .72rem; font-weight: 600; color: var(--color-text-body, #3A526B); }
 .pay-method-card.active .pm-label { color: #0D47A1; }
+.pay-method-card .pm-badge {
+  display: block;
+  margin-top: 5px;
+  font-size: .58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: #e65100;
+  background: #fff3e0;
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.4;
+}
+html.dark-mode .pay-method-card .pm-badge {
+  color: #ffb74d;
+  background: rgba(255,183,77,0.12);
+}
+.pay-method-card.disabled,
+.pay-method-card.disabled:hover {
+  border-color: var(--color-border, #D6E8FA) !important;
+  background: var(--color-bg-card, #fff) !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+html.dark-mode .pay-method-card.disabled,
+html.dark-mode .pay-method-card.disabled:hover {
+  border-color: var(--dm-border, #1a3555) !important;
+  background: var(--dm-surface, #0a1a2b) !important;
+}
 
 /* -- Tarjeta visual animada -- */
 .card-visual-wrap {
@@ -3510,12 +3539,20 @@ html {
   border-radius: 18px;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  padding: 22px 26px;
+  padding: 18px 22px;
   color: #fff;
 }
 .card-front {
   background: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%);
   box-shadow: 0 20px 40px rgba(13,71,161,.35);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.card-front-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 .card-back {
   background: linear-gradient(135deg, #0a2d6e 0%, #1565C0 100%);
@@ -3523,39 +3560,62 @@ html {
   box-shadow: 0 20px 40px rgba(13,71,161,.35);
 }
 .card-chip {
-  width: 42px; height: 32px;
+  width: 36px; height: 28px;
   background: linear-gradient(135deg,#fde68a,#f59e0b);
-  border-radius: 6px;
-  margin-bottom: 18px;
+  border-radius: 5px;
 }
 .card-number {
-  font-size: 1.18rem;
-  letter-spacing: 3px;
+  font-size: 1.1rem;
+  letter-spacing: 2.5px;
   font-family: 'Courier New', monospace;
-  margin-bottom: 18px;
+  text-align: center;
   opacity: .95;
+  padding: 0 4px;
+  word-spacing: 4px;
 }
-.card-info { display: flex; justify-content: space-between; align-items: flex-end; }
-.card-info small { font-size: .65rem; opacity: .75; display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: .5px; }
-.card-info span { font-size: .88rem; font-weight: 600; letter-spacing: .5px; }
-.card-back-strip { height: 38px; background: rgba(0,0,0,.3); margin: 0 -26px 14px; }
-.card-cvv-row { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+.card-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+}
+.card-info > div { min-width: 0; }
+.card-info small {
+  font-size: .6rem;
+  opacity: .7;
+  display: block;
+  margin-bottom: 1px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.card-info span {
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .4px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+.card-back-strip { height: 36px; background: rgba(0,0,0,.3); margin: 0 -22px 14px; }
+.card-cvv-row { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding-right: 4px; }
 .card-cvv-box {
   background: #fff; color: #0D47A1;
-  padding: 5px 14px; border-radius: 5px;
+  padding: 4px 12px; border-radius: 4px;
   font-family: 'Courier New', monospace;
-  font-size: 1rem; font-weight: 700; min-width: 54px; text-align: center;
+  font-size: .9rem; font-weight: 700; min-width: 48px; text-align: center;
 }
-.card-logo { text-align: right; font-size: .75rem; opacity: .8; margin-top: 10px; letter-spacing: 1px; font-weight: 700; }
+.card-logo { text-align: right; font-size: .72rem; opacity: .75; margin-top: 8px; letter-spacing: 1px; font-weight: 700; padding-right: 4px; }
 .card-network-badge {
-  position: absolute; top: 20px; right: 22px;
-  display: flex; gap: -6px;
+  display: flex;
+  align-items: center;
 }
 .card-network-badge .circle {
-  width: 26px; height: 26px; border-radius: 50%; opacity: .85;
+  width: 22px; height: 22px; border-radius: 50%; opacity: .85;
 }
 .card-network-badge .c1 { background: #ef4444; }
-.card-network-badge .c2 { background: #f97316; margin-left: -10px; }
+.card-network-badge .c2 { background: #f97316; margin-left: -8px; }
 
 /* -- PSE panel -- */
 .pse-panel {
@@ -3574,7 +3634,7 @@ html {
 }
 .pse-panel small { color: #1565C0; font-size: .78rem; }
 
-/* -- M�todos guardados -- */
+/* -- M�todos guardados -- */
 .saved-methods { margin-bottom: 1rem; }
 .saved-item {
   display: flex; align-items: center; gap: 12px;
@@ -3629,7 +3689,380 @@ html {
 .guardar-check label { font-size: .82rem; color: var(--color-text-muted, #7B92AC); cursor: pointer; }
 
 /* =============================================
-   DARK MODE � Sistema de Pago
+   AGENDA-QUOTES — Componentes adicionales
+   Precio, Modalidad, Efectivo, Transferencia, etc.
+   ============================================= */
+
+/* ── Price Tag Modern ─────────────────────────── */
+.price-tag-modern {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1.5px solid #86efac;
+  border-radius: 16px;
+  padding: 14px 20px;
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.price-tag-modern::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.price-tag-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(34,197,94,0.22);
+}
+.price-tag-modern .price-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(22,163,74,0.25);
+}
+.price-tag-modern .price-info { display: flex; flex-direction: column; gap: 1px; }
+.price-tag-modern .price-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #15803d;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.price-tag-modern .price-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #14532d;
+  line-height: 1.2;
+}
+html.dark-mode .price-tag-modern {
+  background: linear-gradient(135deg, #052e16, #0a3d1a);
+  border-color: #166534;
+}
+html.dark-mode .price-tag-modern .price-icon {
+  background: linear-gradient(135deg, #15803d, #166534);
+}
+html.dark-mode .price-tag-modern .price-label { color: #86efac; }
+html.dark-mode .price-tag-modern .price-value { color: #bbf7d0; }
+
+/* ── Modality Selector ────────────────────────── */
+.agenda-label-sm {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #15803d;
+  display: block;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.agenda-modality-wrap { display: flex; align-items: center; height: 64px; }
+.modality-selector-modern { display: flex; gap: 8px; width: 100%; }
+.modality-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 2px solid var(--color-border, #D6E8FA);
+  border-radius: 10px;
+  background: var(--color-bg-card, #fff);
+  color: var(--color-text-muted, #7B92AC);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+  user-select: none;
+  position: relative;
+}
+.modality-option i { font-size: 1rem; }
+.modality-option:hover {
+  border-color: #90CAF9;
+  background: var(--color-accent, #E3F2FD);
+  color: #0D47A1;
+  transform: translateY(-1px);
+}
+.modality-option.active {
+  border-color: #0D47A1;
+  background: var(--color-accent, #E3F2FD);
+  color: #0D47A1;
+  box-shadow: 0 4px 12px rgba(13,71,161,0.15);
+  transform: translateY(-1px);
+}
+.modality-option.active i { color: #0D47A1; }
+.modality-option.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background: #0D47A1;
+  border-radius: 3px 3px 0 0;
+}
+html.dark-mode .agenda-label-sm { color: #86efac; }
+html.dark-mode .modality-option {
+  border-color: var(--dm-border, #1a3555);
+  background: var(--dm-elevated, #132843);
+  color: var(--dm-text2, #7aaac8);
+}
+html.dark-mode .modality-option:hover {
+  border-color: var(--dm-accent, #90CAF9);
+  background: var(--dm-mid, #0b1828);
+  color: var(--dm-accent, #90CAF9);
+}
+html.dark-mode .modality-option.active {
+  border-color: var(--dm-accent, #90CAF9);
+  background: rgba(144,202,249,0.1);
+  color: var(--dm-soft, #bbdffb);
+  box-shadow: 0 4px 12px rgba(144,202,249,0.2);
+}
+html.dark-mode .modality-option.active i { color: var(--dm-soft, #bbdffb); }
+html.dark-mode .modality-option.active::after { background: #90CAF9; }
+
+/* ── Cash Instructions Panel ──────────────────── */
+.cash-instructions-panel {
+  background: var(--color-accent, #fffbeb);
+  border: 1.5px solid #fde68a;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 1rem;
+}
+.cash-instructions-panel .cip-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.cash-instructions-panel .cip-header i { font-size: 1.6rem; color: #f59e0b; }
+.cash-instructions-panel .cip-title { font-weight: 800; font-size: 0.95rem; color: #92400e; }
+.cash-instructions-panel .cip-step {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin-bottom: 9px; font-size: 0.85rem; color: #78350f; line-height: 1.4;
+}
+.cash-instructions-panel .cip-step .step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #fbbf24; color: #fff;
+  font-size: 0.7rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px; box-shadow: 0 2px 6px rgba(245,158,11,0.3);
+}
+html.dark-mode .cash-instructions-panel {
+  background: rgba(120,80,20,0.15);
+  border-color: rgba(245,158,11,0.3);
+}
+html.dark-mode .cash-instructions-panel .cip-title { color: #fbbf24; }
+html.dark-mode .cash-instructions-panel .cip-step { color: #d6a354; }
+
+/* ── Transferencia Panel ──────────────────────── */
+.transferencia-panel {
+  background: var(--color-accent, #E3F2FD);
+  border: 1.5px solid #90CAF9;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 1rem;
+}
+.transferencia-panel .transferencia-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.transferencia-panel .transferencia-header i { font-size: 1.4rem; color: #0D47A1; }
+.transferencia-panel .transferencia-header span { font-weight: 800; font-size: 0.95rem; color: #0D47A1; }
+.transferencia-panel .transferencia-sub { font-size: 0.82rem; color: #1565C0; margin-bottom: 14px; }
+html.dark-mode .transferencia-panel {
+  background: rgba(13,71,161,0.1);
+  border-color: rgba(144,202,249,0.3);
+}
+html.dark-mode .transferencia-panel .transferencia-header i { color: var(--dm-accent, #90CAF9); }
+html.dark-mode .transferencia-panel .transferencia-header span { color: var(--dm-soft, #bbdffb); }
+html.dark-mode .transferencia-panel .transferencia-sub { color: var(--dm-text2, #7aaac8); }
+
+/* ── Bank Account Cards ───────────────────────── */
+.bank-account-card {
+  background: var(--color-bg-card, #fff);
+  border: 1.5px solid var(--color-border, #D6E8FA);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.bank-account-card:hover {
+  border-color: #90CAF9;
+  box-shadow: 0 3px 10px rgba(13,71,161,0.08);
+}
+.bank-account-card .bac-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+}
+.bank-account-card .bac-bank { font-weight: 700; font-size: 0.88rem; color: var(--color-text-main, #0D1F3C); }
+.bank-account-card .bac-type {
+  font-size: 0.68rem; font-weight: 700; padding: 3px 10px; border-radius: 50px;
+  background: var(--color-accent, #E3F2FD); color: #0D47A1;
+}
+.bank-account-card .bac-number {
+  font-family: 'Courier New', monospace; font-size: 0.92rem; font-weight: 700;
+  color: #0D47A1; letter-spacing: 1.5px; margin-bottom: 4px;
+}
+.bank-account-card .bac-holder { font-size: 0.8rem; color: var(--color-text-muted, #7B92AC); margin-bottom: 10px; }
+.bank-account-card .bac-copy-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 16px; border: none; border-radius: 8px;
+  background: #0D47A1; color: #fff; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: background 0.2s ease, transform 0.15s ease;
+}
+.bank-account-card .bac-copy-btn:hover { background: #1565C0; transform: scale(1.04); }
+.bank-account-card .bac-copy-btn:active { transform: scale(0.96); }
+.bank-account-card .bac-copy-btn.copied { background: #16a34a; }
+html.dark-mode .bank-account-card {
+  background: var(--dm-elevated, #132843);
+  border-color: var(--dm-border, #1a3555);
+}
+html.dark-mode .bank-account-card:hover {
+  border-color: var(--dm-accent, #90CAF9);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+html.dark-mode .bank-account-card .bac-bank { color: var(--dm-text1, #daeeff); }
+html.dark-mode .bank-account-card .bac-type {
+  background: rgba(144,202,249,0.12);
+  color: var(--dm-soft, #bbdffb);
+}
+html.dark-mode .bank-account-card .bac-number { color: var(--dm-soft, #bbdffb); }
+html.dark-mode .bank-account-card .bac-holder { color: var(--dm-text2, #7aaac8); }
+
+/* ── Receipt Upload Area ──────────────────────── */
+.receipt-upload-area {
+  border: 2px dashed #90CAF9;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-bottom: 12px;
+}
+.receipt-upload-area:hover {
+  border-color: #0D47A1;
+  background: var(--color-accent, #E3F2FD);
+  transform: translateY(-1px);
+}
+.receipt-upload-area i { font-size: 2rem; color: #0D47A1; margin-bottom: 8px; }
+.receipt-upload-area .ru-text { font-size: 0.85rem; font-weight: 600; color: var(--color-text-main, #0D1F3C); }
+.receipt-upload-area .ru-sub { font-size: 0.72rem; color: var(--color-text-muted, #7B92AC); margin-top: 2px; }
+.receipt-upload-area.has-file { border-color: #16a34a; background: #f0fdf4; }
+.receipt-upload-area.has-file .ru-text { color: #15803d; }
+html.dark-mode .receipt-upload-area { border-color: rgba(144,202,249,0.3); }
+html.dark-mode .receipt-upload-area:hover {
+  border-color: var(--dm-accent, #90CAF9);
+  background: rgba(144,202,249,0.08);
+}
+html.dark-mode .receipt-upload-area .ru-text { color: var(--dm-text1, #daeeff); }
+html.dark-mode .receipt-upload-area.has-file { border-color: #22c55e; background: rgba(34,197,94,0.08); }
+html.dark-mode .receipt-upload-area.has-file .ru-text { color: #86efac; }
+
+/* ── PSE Status Panel ─────────────────────────── */
+.pse-status-panel {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.pse-status-panel .psp-icon { font-size: 2.2rem; color: #16a34a; margin-bottom: 8px; }
+.pse-status-panel .psp-title { font-weight: 800; font-size: 0.95rem; color: #15803d; margin-bottom: 4px; }
+.pse-status-panel .psp-sub { font-size: 0.8rem; color: #16a34a; }
+html.dark-mode .pse-status-panel {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.3);
+}
+html.dark-mode .pse-status-panel .psp-title { color: #86efac; }
+html.dark-mode .pse-status-panel .psp-sub { color: #4ade80; }
+
+/* ── Summary Row ──────────────────────────────── */
+.pago-summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: var(--color-accent, #E3F2FD);
+  border-radius: 10px; margin-bottom: 16px; font-size: 0.88rem;
+}
+.pago-summary-row .ps-label { font-weight: 500; color: var(--color-text-body, #3A526B); }
+.pago-summary-row .ps-value { font-weight: 800; color: #0D47A1; font-size: 1rem; }
+html.dark-mode .pago-summary-row { background: rgba(144,202,249,0.08); }
+html.dark-mode .pago-summary-row .ps-label { color: var(--dm-text2, #7aaac8); }
+html.dark-mode .pago-summary-row .ps-value { color: var(--dm-soft, #bbdffb); }
+
+/* ── Section title ────────────────────────────── */
+.pago-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted, #7B92AC);
+  margin-bottom: 8px;
+}
+
+/* ── Sub-tarjeta toggle (Crédito / Débito) ───── */
+.sub-tarjeta-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+  border: 1.5px solid var(--color-border, #D6E8FA);
+  background: var(--color-bg-card, #fff);
+  color: var(--color-text-muted, #7B92AC);
+}
+.sub-tarjeta-btn:hover {
+  border-color: #90CAF9;
+  background: var(--color-accent, #E3F2FD);
+  color: #0D47A1;
+}
+.sub-tarjeta-btn.active {
+  border-color: #0D47A1;
+  background: var(--color-accent, #E3F2FD);
+  color: #0D47A1;
+  box-shadow: 0 2px 8px rgba(13,71,161,0.1);
+}
+html.dark-mode .sub-tarjeta-btn {
+  border-color: var(--dm-border, #1a3555);
+  background: var(--dm-elevated, #132843);
+  color: var(--dm-text2, #7aaac8);
+}
+html.dark-mode .sub-tarjeta-btn:hover {
+  border-color: var(--dm-accent, #90CAF9);
+  background: rgba(144,202,249,0.08);
+  color: var(--dm-soft, #bbdffb);
+}
+html.dark-mode .sub-tarjeta-btn.active {
+  border-color: var(--dm-accent, #90CAF9);
+  background: rgba(144,202,249,0.12);
+  color: var(--dm-soft, #bbdffb);
+}
+
+/* ── Form select for cuotas ───────────────────── */
+.form-control-pay.form-select {
+  border-radius: 10px;
+  padding: 10px 32px 10px 14px;
+  font-size: .88rem;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234a5568' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right .75rem center;
+  background-size: 12px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+html.dark-mode .form-control-pay.form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%237aaac8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* =============================================
+   DARK MODE � Sistema de Pago
    ============================================= */
 html.dark-mode #facturaModal .modal-content,
 html.dark-mode #modalPagoFinal .modal-content {
@@ -3651,7 +4084,7 @@ html.dark-mode #modalPagoFinal .modal-footer {
   border-top-color: var(--dm-border, #1a3555);
 }
 
-/* M�todos de pago - dark */
+/* M�todos de pago - dark */
 html.dark-mode .pay-method-card {
   background: var(--dm-elevated, #132843);
   border-color: var(--dm-border, #1a3555);
@@ -3680,7 +4113,7 @@ html.dark-mode .pse-panel .pse-logo {
 }
 html.dark-mode .pse-panel small { color: var(--dm-accent, #90CAF9); }
 
-/* M�todos guardados - dark */
+/* M�todos guardados - dark */
 html.dark-mode .saved-item {
   background: var(--dm-elevated, #132843);
   border-color: var(--dm-border, #1a3555);
@@ -3747,8 +4180,8 @@ html.dark-mode #modalPagoFinal select option {
 /* ===== Source: app\static\responsive\aside.css ===== */
 
 /* =======================================================
-   INDEX RESPONSIVE � PsyAI Connect landing page
-   �ltima actualizaci�n: 2026-04-06
+   INDEX RESPONSIVE � PsyAI Connect landing page
+   �ltima actualizaci�n: 2026-04-06
    ======================================================= */
 
 
@@ -3769,11 +4202,11 @@ html {
 
 
 /* --------------------------------------------------------
-   ACORDE�N FAQ � Bootstrap (.accordion)
+   ACORDE�N FAQ � Bootstrap (.accordion)
    Colores del tema PsyAI Connect en todos los estados
    -------------------------------------------------------- */
 
-/* � Variables Bootstrap sobreescritas globalmente � */
+/* � Variables Bootstrap sobreescritas globalmente � */
 .accordion-responsive {
     --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem rgba(144, 202, 249, 0.35);
     --bs-accordion-active-color:         #0D47A1;
@@ -3783,7 +4216,7 @@ html {
     --bs-accordion-btn-padding-y:        1.25rem;
 }
 
-/* � Item base � */
+/* � Item base � */
 .accordion-responsive .accordion-item,
 .accordion-item {
     border: 1px solid rgba(13, 71, 161, 0.15);
@@ -3813,7 +4246,7 @@ html {
     border-color: rgba(13, 71, 161, 0.28);
 }
 
-/* � Bot�n (collapsed = cerrado, estado por defecto) � */
+/* � Bot�n (collapsed = cerrado, estado por defecto) � */
 .accordion-responsive .accordion-button,
 .accordion-button {
     font-family: var(--font-body, 'Plus Jakarta Sans', system-ui, sans-serif);
@@ -3832,7 +4265,7 @@ html {
     color: #0D47A1;
 }
 
-/* � Bot�n abierto (active) � ? EL ESTADO QUE NO CAMBIABA � */
+/* � Bot�n abierto (active) � ? EL ESTADO QUE NO CAMBIABA � */
 .accordion-responsive .accordion-button:not(.collapsed),
 .accordion-button:not(.collapsed) {
     color:      #0D47A1 !important;
@@ -3841,7 +4274,7 @@ html {
     border-bottom: 1px solid rgba(13, 71, 161, 0.15);
 }
 
-/* � Icono flecha � */
+/* � Icono flecha � */
 .accordion-responsive .accordion-button::after,
 .accordion-button::after {
     width:            28px;
@@ -3856,7 +4289,7 @@ html {
     transition:       transform 0.3s ease, color 0.2s ease;
 }
 
-/* � Icono cuando est� abierto � */
+/* � Icono cuando est� abierto � */
 .accordion-responsive .accordion-button:not(.collapsed)::after,
 .accordion-button:not(.collapsed)::after {
     content: '\f00d' !important;
@@ -3864,7 +4297,7 @@ html {
     transform: rotate(0deg);
 }
 
-/* � Cuerpo del acorde�n � */
+/* � Cuerpo del acorde�n � */
 .accordion-responsive .accordion-body,
 .accordion-body {
     padding:     0.75rem 1.5rem 1.5rem;
@@ -3875,7 +4308,7 @@ html {
 }
 
 
-/* -- Dark mode � acorde�n Bootstrap -- */
+/* -- Dark mode � acorde�n Bootstrap -- */
 html.dark-mode .accordion-item {
     background:    linear-gradient(180deg, rgba(14,31,53,0.98) 0%, rgba(11,24,40,0.98) 100%) !important;
     border-color:  rgba(13, 71, 161, 0.5) !important;
@@ -3998,7 +4431,7 @@ html.dark-mode .accordion-body {
     line-height: 1.65;
 }
 
-/* � Dark mode � faq nativo � */
+/* � Dark mode � faq nativo � */
 html.dark-mode .faq-item {
     background: #1a1a2e !important;
     border-color: rgba(13, 71, 161, 0.5) !important;
@@ -4035,7 +4468,7 @@ html.dark-mode .faq-answer p {
 
 
 /* --------------------------------------------------------
-   NAVBAR � toggler + collapse
+   NAVBAR � toggler + collapse
    -------------------------------------------------------- */
 #mainNav .navbar-collapse {
     visibility: visible !important;
@@ -4080,7 +4513,7 @@ html.dark-mode .faq-answer p {
     transform-origin: center;
 }
 
-/* � Toggler lines: azul en modo claro y oscuro � */
+/* � Toggler lines: azul en modo claro y oscuro � */
 #mainNav .custom-toggler-line,
 html.dark-mode #mainNav .custom-toggler-line {
     background: #0D47A1 !important;
@@ -4115,7 +4548,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   ANIMACI�N ENTRADA NAVBAR ITEMS
+   ANIMACI�N ENTRADA NAVBAR ITEMS
    -------------------------------------------------------- */
 @keyframes navbarItemIn {
     from { opacity: 0; transform: translateY(-8px); }
@@ -4124,7 +4557,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 992px � DESKTOP
+   = 992px � DESKTOP
    -------------------------------------------------------- */
 @media (min-width: 992px) {
 
@@ -4132,7 +4565,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         display: flex !important;
     }
 
-    /* Acorde�n desktop */
+    /* Acorde�n desktop */
     .accordion-responsive {
         max-width: 800px;
         margin: 0 auto;
@@ -4170,7 +4603,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 991.98px � TABLET / M�VIL
+   = 991.98px � TABLET / M�VIL
    -------------------------------------------------------- */
 @media (max-width: 991.98px) {
 
@@ -4432,7 +4865,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         border: 1px solid rgba(61, 96, 126, 0.34);
     }
 
-    /* Acorde�n mobile */
+    /* Acorde�n mobile */
     .accordion-responsive {
         max-width: 100%;
         --bs-accordion-border-radius:    16px;
@@ -4566,7 +4999,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   1200px � XL ajustes
+   1200px � XL ajustes
    -------------------------------------------------------- */
 @media (max-width: 1199.98px) {
 
@@ -4579,7 +5012,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   768px � md tablet / m�vil grande (768 a 991)
+   768px � md tablet / m�vil grande (768 a 991)
    -------------------------------------------------------- */
 @media (min-width: 768px) and (max-width: 991.98px) {
 
@@ -4589,7 +5022,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 767.98px � M�VIL PORTRAIT
+   = 767.98px � M�VIL PORTRAIT
    -------------------------------------------------------- */
 @media (max-width: 767.98px) {
 
@@ -4668,7 +5101,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 575.98px � M�VIL PEQUE�O
+   = 575.98px � M�VIL PEQUE�O
    -------------------------------------------------------- */
 @media (max-width: 575.98px) {
 
@@ -4736,7 +5169,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   = 399.98px � M�VIL MUY PEQUE�O
+   = 399.98px � M�VIL MUY PEQUE�O
    -------------------------------------------------------- */
 @media (max-width: 399.98px) {
 
@@ -4763,7 +5196,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 
 /* --------------------------------------------------------
-   LANDSCAPE M�VIL
+   LANDSCAPE M�VIL
    -------------------------------------------------------- */
 @media (max-height: 620px) and (orientation: landscape) and (max-width: 991.98px) {
 
@@ -4809,7 +5242,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 /* ==================== RESPONSIVE ASIDE PATIENT - COMPLETO ==================== */
 
-/* ==================== CHATBOT - DISE�O MEJORADO ==================== */
+/* ==================== CHATBOT - DISE�O MEJORADO ==================== */
 #chatbot-section {
     background: var(--cb-card-bg, #ffffff);
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -4852,7 +5285,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     50% { opacity: 0.5; }
 }
 
-/* Bot�n pantalla completa */
+/* Bot�n pantalla completa */
 #chatbot-section .chat-header__actions {
     gap: 10px;
 }
@@ -4918,7 +5351,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 }
 
 /* Dark mode */
-/* �rea de conversaci�n */
+/* �rea de conversaci�n */
 #chatbot-section .chat-area {
     background: var(--cb-bg, #F4F8FC);
     border: 1px solid var(--cb-border, #D4E2F0);
@@ -5328,7 +5761,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
 }
 
-/* Overlay para m�vil */
+/* Overlay para m�vil */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -5347,7 +5780,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     opacity: 1;
 }
 
-/* Bot�n hamburguesa */
+/* Bot�n hamburguesa */
 .menu-toggle,
 .toggle-btn {
     display: none;
@@ -5436,14 +5869,14 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* ========== M�VILES GRANDES (576px - 767px) ========== */
+/* ========== M�VILES GRANDES (576px - 767px) ========== */
 @media (max-width: 767px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
     }
 
-    /* Acorde�n del sidebar */
+    /* Acorde�n del sidebar */
     .sidebar-nav {
         display: flex;
         flex-direction: column;
@@ -5622,7 +6055,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* ========== M�VILES (hasta 575px) ========== */
+/* ========== M�VILES (hasta 575px) ========== */
 @media (max-width: 575px) {
     .menu-toggle,
     .toggle-btn {
@@ -5632,7 +6065,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         font-size: 1.1rem;
     }
 
-    /* Acorde�n sidebar */
+    /* Acorde�n sidebar */
     .sidebar-nav .nav-link {
         padding: 12px 15px;
     }
@@ -5776,7 +6209,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         font-size: 0.85rem;
     }
 
-    /* Agenda - Hacer tabla m�s compacta */
+    /* Agenda - Hacer tabla m�s compacta */
     .table-responsive {
         font-size: 0.8rem;
     }
@@ -5797,7 +6230,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         margin: 2px 0;
     }
 
-    /* Ocultar columnas menos importantes en m�vil */
+    /* Ocultar columnas menos importantes en m�vil */
     .table td:nth-child(4),
     .table th:nth-child(4) {
         display: none;
@@ -5878,7 +6311,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* ========== M�VILES MUY PEQUE�OS (hasta 375px) ========== */
+/* ========== M�VILES MUY PEQUE�OS (hasta 375px) ========== */
 @media (max-width: 375px) {
     .menu-toggle,
     .toggle-btn {
@@ -5992,7 +6425,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* ========== MODO LANDSCAPE EN M�VILES ========== */
+/* ========== MODO LANDSCAPE EN M�VILES ========== */
 @media (max-height: 600px) and (orientation: landscape) {
     .main-content {
         padding: 10px !important;
@@ -6011,7 +6444,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         margin-bottom: 10px !important;
     }
 
-    /* Chatbot - �rea m�s peque�a en landscape */
+    /* Chatbot - �rea m�s peque�a en landscape */
     #chatbot-section .border {
         height: 180px !important;
     }
@@ -6064,7 +6497,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
 
 /* ========== MEJORAS GENERALES ========== */
 
-/* Botones m�s t�ctiles en m�vil */
+/* Botones m�s t�ctiles en m�vil */
 @media (max-width: 767px) {
     .button,
     .btn {
@@ -6074,7 +6507,7 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
         justify-content: center;
     }
 
-    /* Inputs m�s grandes para mejor usabilidad */
+    /* Inputs m�s grandes para mejor usabilidad */
     .form-control,
     .form-select,
     select {
@@ -6082,14 +6515,14 @@ html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-li
     }
 }
 
-/* Ocultar elementos innecesarios en m�vil muy peque�o */
+/* Ocultar elementos innecesarios en m�vil muy peque�o */
 @media (max-width: 375px) {
     .main-header .user-info i {
         display: none;
     }
 }
 
-/* Animaci�n al abrir el acorde�n navbar */
+/* Animaci�n al abrir el acorde�n navbar */
 .navbar-collapse {
     transition: all 0.4s ease;
 }
@@ -6597,7 +7030,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
     }
 }
 
-/* Dark Mode - Evoluci�n */
+/* Dark Mode - Evoluci�n */
 .dark-mode #mi-estado,
 .dark-mode #mi-evolucion,
 .dark-mode .card {
@@ -6642,13 +7075,392 @@ html.dark-mode #chatbot-section.fullscreen-active {
     color: white !important;
 }
 
+/* ========================================================
+   EVOLUCIÓN — Premium Visual Design
+   ======================================================== */
 
+/* -- Page ambient background for evolution section -- */
+.main-content:has(#mi-estado) {
+  position: relative;
+}
+.main-content:has(#mi-estado)::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 340px;
+  background: linear-gradient(135deg, rgba(13,71,161,0.04) 0%, rgba(144,202,249,0.06) 50%, rgba(13,71,161,0.02) 100%);
+  pointer-events: none;
+}
 
+/* -- Cards premium -- */
+.card#mi-estado,
+.card#mi-evolucion,
+section.card {
+  border-radius: 20px !important;
+  border: 1px solid rgba(13,71,161,0.08) !important;
+  box-shadow:
+    0 1px 3px rgba(13,71,161,0.04),
+    0 8px 24px rgba(13,71,161,0.04) !important;
+  transition: box-shadow .35s ease, transform .3s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+.card#mi-estado::before,
+.card#mi-evolucion::before,
+section.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0D47A1, #42A5F5, #90CAF9);
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.card#mi-estado:hover,
+.card#mi-evolucion:hover,
+section.card:hover {
+  box-shadow:
+    0 1px 3px rgba(13,71,161,0.06),
+    0 12px 40px rgba(13,71,161,0.08) !important;
+  transform: translateY(-2px);
+}
+.card#mi-estado:hover::before,
+.card#mi-evolucion:hover::before,
+section.card:hover::before {
+  opacity: 1;
+}
+
+/* -- Section headings -- */
+.card h5 {
+  font-size: 1rem !important;
+  letter-spacing: -.3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(13,71,161,0.06);
+  margin-bottom: 16px !important;
+}
+.card h5 i {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .9rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.card h5 i.fa-heart {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  color: #dc2626 !important;
+}
+.card h5 i.fa-chart-line {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #2563eb !important;
+}
+.card h5 i.fa-history {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  color: #16a34a !important;
+}
+
+/* -- Current state text -- */
+#estadoActual {
+  font-size: 1.05rem;
+  padding: 4px 0 0;
+  line-height: 1.7;
+  font-weight: 500;
+  position: relative;
+  padding-left: 14px;
+  border-left: 3px solid #0D47A1;
+}
+
+/* -- Form labels -- */
+.form-label.fw-semibold {
+  font-size: .8rem;
+  color: #0D1F3C;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700 !important;
+  letter-spacing: -.1px;
+}
+
+/* -- Select premium -- */
+select#estado_emocional.form-control {
+  border: 2px solid rgba(13,71,161,0.1);
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: .9rem;
+  font-weight: 500;
+  color: #0D1F3C;
+  background: #fff;
+  transition: border-color .2s ease, box-shadow .25s ease, background .2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%230D47A1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right .75rem center;
+  background-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(13,71,161,0.02);
+}
+select#estado_emocional.form-control:hover {
+  border-color: rgba(13,71,161,0.25);
+  background: #fafcff;
+}
+select#estado_emocional.form-control:focus {
+  border-color: #1976D2;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(144,202,249,.2);
+  background: #fff;
+}
+
+/* -- Number input premium -- */
+input#nivel_energia.form-control {
+  border: 2px solid rgba(13,71,161,0.1);
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #0D1F3C;
+  text-align: center;
+  transition: border-color .2s ease, box-shadow .25s ease;
+  -moz-appearance: textfield;
+  box-shadow: inset 0 2px 4px rgba(13,71,161,0.02);
+}
+input#nivel_energia.form-control::-webkit-inner-spin-button,
+input#nivel_energia.form-control::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input#nivel_energia.form-control:hover {
+  border-color: rgba(13,71,161,0.25);
+}
+input#nivel_energia.form-control:focus {
+  border-color: #1976D2;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(144,202,249,.2);
+}
+
+/* -- Textarea premium -- */
+textarea#notas_personales.form-control {
+  border: 2px solid rgba(13,71,161,0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: .88rem;
+  color: #0D1F3C;
+  resize: vertical;
+  transition: border-color .2s ease, box-shadow .25s ease, background .2s ease;
+  line-height: 1.6;
+  box-shadow: inset 0 2px 4px rgba(13,71,161,0.02);
+}
+textarea#notas_personales.form-control:hover {
+  border-color: rgba(13,71,161,0.25);
+  background: #fafcff;
+}
+textarea#notas_personales.form-control:focus {
+  border-color: #1976D2;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(144,202,249,.2);
+  background: #fff;
+}
+textarea#notas_personales.form-control::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* -- Save button premium with shine effect -- */
+#btnGuardarEvolucion.btn-primary {
+  background: linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #1976D2 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: .92rem !important;
+  font-weight: 700 !important;
+  padding: 13px 20px !important;
+  transition: all .3s ease !important;
+  box-shadow: 0 4px 16px rgba(13,71,161,0.25) !important;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: .2px;
+}
+#btnGuardarEvolucion.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255,255,255,0.08) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%) rotate(25deg);
+  transition: transform .6s ease;
+}
+#btnGuardarEvolucion.btn-primary:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 28px rgba(13,71,161,0.35) !important;
+  background: linear-gradient(135deg, #0a3682 0%, #0D47A1 50%, #1565C0 100%) !important;
+}
+#btnGuardarEvolucion.btn-primary:hover::after {
+  transform: translateX(100%) rotate(25deg);
+}
+#btnGuardarEvolucion.btn-primary:active {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(13,71,161,0.2) !important;
+}
+
+/* -- Table premium -- */
+.table#tablaHistorialEvolucion,
+.table:has(#tablaHistorialEvolucion) {
+  font-size: .85rem;
+  margin-bottom: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table thead.table-light th {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #64748b;
+  background: rgba(13,71,161,0.03);
+  border-bottom: 2px solid rgba(13,71,161,0.06);
+  padding: 12px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.table thead.table-light th:first-child {
+  border-radius: 12px 0 0 0;
+}
+.table thead.table-light th:last-child {
+  border-radius: 0 12px 0 0;
+}
+.table tbody td {
+  padding: 14px 14px;
+  vertical-align: middle;
+  border-color: rgba(13,71,161,0.04);
+  color: #475569;
+  transition: background .15s ease;
+}
+.table tbody tr {
+  transition: background .15s ease;
+}
+.table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid rgba(13,71,161,0.04);
+}
+.table tbody tr:hover td {
+  background: rgba(13,71,161,0.015);
+}
+.table tbody tr:last-child td:first-child {
+  border-radius: 0 0 0 12px;
+}
+.table tbody tr:last-child td:last-child {
+  border-radius: 0 0 12px 0;
+}
+
+/* -- Badge enhancement for table -- */
+.table .badge {
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: .2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* ========================================================
+   EVOLUCIÓN — Dark mode overrides
+   ======================================================== */
+html.dark-mode .card#mi-estado,
+html.dark-mode .card#mi-evolucion,
+html.dark-mode section.card {
+  background: linear-gradient(145deg, rgba(14,31,53,0.98), rgba(11,22,38,0.98)) !important;
+  border-color: rgba(13,71,161,0.25) !important;
+}
+html.dark-mode .card#mi-estado::before,
+html.dark-mode .card#mi-evolucion::before,
+html.dark-mode section.card::before {
+  background: linear-gradient(90deg, rgba(144,202,249,0.4), rgba(144,202,249,0.1));
+}
+html.dark-mode .card h5 {
+  border-bottom-color: rgba(144,202,249,0.06);
+}
+html.dark-mode .card h5 i.fa-heart {
+  background: rgba(220,38,38,0.12);
+  color: #fca5a5 !important;
+}
+html.dark-mode .card h5 i.fa-chart-line {
+  background: rgba(37,99,235,0.12);
+  color: #93c5fd !important;
+}
+html.dark-mode .card h5 i.fa-history {
+  background: rgba(22,163,74,0.12);
+  color: #86efac !important;
+}
+html.dark-mode #estadoActual {
+  color: var(--dm-text2, #7aaac8) !important;
+  border-left-color: var(--dm-accent, #90CAF9);
+}
+html.dark-mode .form-label.fw-semibold {
+  color: var(--dm-text, #cfe2f2);
+}
+html.dark-mode select#estado_emocional.form-control,
+html.dark-mode input#nivel_energia.form-control,
+html.dark-mode textarea#notas_personales.form-control {
+  background: rgba(10,26,43,0.6);
+  border-color: rgba(13,71,161,0.25);
+  color: var(--dm-text, #cfe2f2);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+}
+html.dark-mode select#estado_emocional.form-control:hover,
+html.dark-mode textarea#notas_personales.form-control:hover {
+  background: rgba(13,71,161,0.06);
+  border-color: rgba(144,202,249,0.3);
+}
+html.dark-mode select#estado_emocional.form-control:focus,
+html.dark-mode input#nivel_energia.form-control:focus,
+html.dark-mode textarea#notas_personales.form-control:focus {
+  border-color: var(--dm-accent, #90CAF9);
+  box-shadow: 0 0 0 4px rgba(144,202,249,.1), inset 0 2px 4px rgba(0,0,0,0.15);
+  background: rgba(10,26,43,0.8);
+}
+html.dark-mode textarea#notas_personales.form-control::placeholder {
+  color: var(--dm-muted, #3d607e);
+}
+html.dark-mode #btnGuardarEvolucion.btn-primary {
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 50%, #1E88E5 100%) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35) !important;
+}
+html.dark-mode #btnGuardarEvolucion.btn-primary:hover {
+  background: linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #1976D2 100%) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45) !important;
+}
+html.dark-mode .table thead.table-light th {
+  background: rgba(13,71,161,0.08);
+  color: var(--dm-muted, #3d607e);
+  border-color: var(--dm-border, #1a3555);
+}
+html.dark-mode .table tbody td {
+  border-color: var(--dm-border, #1a3555);
+  color: var(--dm-text2, #7aaac8);
+}
+html.dark-mode .table tbody tr:hover td {
+  background: rgba(144,202,249,0.03);
+}
+html.dark-mode .table .badge {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
 
 /* ===== Source: app\static\responsive\patient-responsive.css ===== */
 
 /* ============================================================
-   PATIENT RESPONSIVE � Mobile & Tablet styles for Patient Dashboard
+   PATIENT RESPONSIVE � Mobile & Tablet styles for Patient Dashboard
    extracted from patients.css
    ============================================================ */
 
@@ -7335,7 +8147,7 @@ html {
 }
 
 /* ============================================================
-   EVOLUTION RESPONSIVE � Mobile & Tablet styles for Evolution Page
+   EVOLUTION RESPONSIVE � Mobile & Tablet styles for Evolution Page
    extracted from evolution.css
    ============================================================ */
 
@@ -7432,53 +8244,9 @@ html {
     }
 }
 
-/* Dark Mode - Evoluci�n */
-html.dark-mode #mi-estado,
-html.dark-mode #mi-evolucion,
-html.dark-mode .card {
-    background-color: var(--dm-mid) !important;
-    border-color: var(--dm-border) !important;
-}
-
-html.dark-mode #mi-estado h5,
-html.dark-mode #mi-evolucion h5,
-html.dark-mode .card h5 {
-    color: var(--dm-text) !important;
-}
-
-html.dark-mode #estadoActual {
-    color: var(--dm-muted) !important;
-}
-
-html.dark-mode .form-label {
-    color: var(--dm-text) !important;
-}
-
-html.dark-mode .table {
-    color: var(--dm-text) !important;
-}
-
-html.dark-mode .table thead th {
-    background-color: var(--dm-deep) !important;
-    color: var(--dm-text) !important;
-    border-color: var(--dm-border) !important;
-}
-
-html.dark-mode .table tbody td {
-    border-color: var(--dm-border) !important;
-    color: var(--dm-muted) !important;
-}
-
-html.dark-mode .text-muted {
-    color: var(--dm-muted) !important;
-}
-
-html.dark-mode .badge {
-    color: white !important;
-}
 
 /* ============================================================
-   MENSAJER�A DIRECTA � Chat estilo WhatsApp (Paciente)
+   MENSAJER�A DIRECTA � Chat estilo WhatsApp (Paciente)
    ============================================================ */
 
 /* Wrapper general */
@@ -7778,7 +8546,7 @@ button.chat-item {
   color: #22c55e;
 }
 
-/* -- �rea de mensajes -- */
+/* -- �rea de mensajes -- */
 .chat-messages-area {
   flex: 1;
   overflow-y: auto;

@@ -497,18 +497,7 @@ html.dark-mode .sidebar .nav-link,
 
 /* ── Dark mode responsive override (mobile) ── */
 @media (max-width: 991px) {
-  html.dark-mode .sidebar,
-  .dark-mode .sidebar {
-    width: 280px !important;
-    min-width: 280px !important;
-    max-width: 280px !important;
-  }
-  html.dark-mode .main-content,
-  .dark-mode .main-content,
-  .main-content {
-    margin-left: 0 !important;
-    padding-top: 64px !important;
-  }
+
 
   .sidebar {
     left: 0 !important;
@@ -590,15 +579,7 @@ html.dark-mode .sidebar .nav-link,
     min-height: 100vh;
 }
 
-html.dark-mode .ms-250,
-.dark-mode .ms-250 {
-    margin-left: 255px !important;
-}
 
-html.dark-mode .ms-280,
-.dark-mode .ms-280 {
-    margin-left: 255px !important;
-}
 
 /* ==============================
     MAIN HEADER

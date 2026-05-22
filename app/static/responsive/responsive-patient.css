@@ -128,15 +128,6 @@
     min-height: var(--patient-btn-min-h, 44px);
   }
 
-  .main-content {
-    width: 100%;
-    min-height: 100dvh;
-    margin-left: 0 !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: var(--patient-content-pt, 4rem) !important;
-  }
-
   .ms-250,
   .ms-280 {
     margin-left: 0 !important;
@@ -265,10 +256,7 @@
 }
 
 @media (max-width: 991px) {
-  .main-content {
-    padding-left: 1.25rem !important;
-    padding-right: 1.25rem !important;
-  }
+
 
   .main-header h1,
   .main-header .h3 {
@@ -302,10 +290,7 @@
     --patient-input-min-h: 42px;
   }
 
-  .main-content {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
+
 
   .main-header {
     flex-direction: column;
@@ -660,10 +645,7 @@
     --patient-input-min-h: 40px;
   }
 
-  .main-content {
-    padding-left: 0.55rem !important;
-    padding-right: 0.55rem !important;
-  }
+
 
   .main-header {
     padding: 0.72rem 0.8rem !important;
@@ -784,10 +766,7 @@
     gap: 9px;
   }
 
-  .main-content {
-    padding: 0.48rem !important;
-    padding-top: var(--patient-content-pt, 3.95rem) !important;
-  }
+
 
   .main-header .user-info i.fa-bell {
     display: none;
@@ -818,9 +797,7 @@
 }
 
 @media (max-height: 600px) and (orientation: landscape) {
-  .main-content {
-    padding-top: 3.6rem !important;
-  }
+
 
   .main-header {
     margin-bottom: 0.6rem !important;
@@ -870,19 +847,10 @@
   }
 }
 
-/* Refuerzo de visibilidad para acordeones y contenedores en responsive */
 @media (max-width: 991px) {
   .main-content .card,
-  .main-content section,
-  .accordion, 
-  .accordion-responsive,
-  .faq-accordion {
-    display: block !important; /* Forzar renderizado */
-    visibility: visible !important;
-    opacity: 1 !important;
+  .main-content section {
     width: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
   }
 }
