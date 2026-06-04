@@ -62,7 +62,7 @@ CREDENTIALS: dict[str, str] = {
     # Gemini AI
     # Para activar rotación de keys en el futuro:
     #   GEMINI_API_KEYS=key1,key2,key3,...
-    "GEMINI_API_KEY":           "AIzaSyDbXVQ_QlYlD5tcn6O3gEADXotzHFo4V7M",
+    "GEMINI_API_KEY":           "",
     "GEMINI_API_KEYS":          "",   # vacío = usa solo GEMINI_API_KEY
     "GEMINI_MODEL":             "gemini-2.5-flash-lite",
 
