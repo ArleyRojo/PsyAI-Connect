@@ -9139,4 +9139,5 @@ html.dark-mode .chat-skeleton-line {
 .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .chat-bubble-avatar { width: 28px !important; height: 28px !important; }
-.chat-bubble { align-items: flex-start !important; }
+.chat-bubble.sent { align-self: flex-end; align-items: flex-start !important; }
+.chat-bubble.received { align-self: flex-start; align-items: flex-start !important; }
