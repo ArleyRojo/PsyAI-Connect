@@ -21,131 +21,20 @@
 <script src="/js/core/shared/localStorage-detector.js"></script>
 
 <style>
-/* ============================================================
-   PROFILE PAGE — Design enhancements (typography untouched)
-   ============================================================ */
 
-/* Header accent line */
-.main-header {
-    position: relative;
-    padding-bottom: 1.25rem;
+/* ── Page entrance animation ── */
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-.main-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 70px;
-    height: 3px;
-    background: linear-gradient(135deg, #0D47A1, #1976D2);
-    border-radius: 3px;
+.main-content > * {
+    animation: pageFadeIn 0.4s ease both;
 }
-
-/* Premium card styling */
-.card.profile-card {
-    border-radius: 14px !important;
-    border: 1px solid var(--color-border-soft, #EAF3FD) !important;
-    transition: all 0.22s ease;
-    background: var(--color-bg-card, #fff);
-}
-.card.profile-card:hover {
-    box-shadow: 0 8px 24px rgba(13,71,161,.1);
-    border-color: #90CAF9 !important;
-}
-.card.profile-card h5 {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-bottom: 0.6rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border-soft, #EAF3FD);
-}
-.card.profile-card h5 i {
-    width: 30px; height: 30px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 8px;
-}
-.card.profile-card h5 .icon-id { background: linear-gradient(135deg,#e3f2fd,#bbdefb); color: #1565C0; }
-.card.profile-card h5 .icon-cog { background: linear-gradient(135deg,#e8f5e9,#c8e6c9); color: #2e7d32; }
-.card.profile-card h5 .icon-avatar { background: linear-gradient(135deg,#fce4ec,#ffcdd2); color: #e53935; }
-
-/* Avatar ring */
-.avatar-ring {
-    border-radius: 50%;
-    padding: 3px;
-    background: linear-gradient(135deg, #0D47A1, #1976D2);
-    display: inline-block;
-    transition: box-shadow 0.3s ease;
-}
-.avatar-ring:hover {
-    box-shadow: 0 0 0 5px rgba(144,202,249,.25);
-}
-.avatar-ring [data-avatar] {
-    border-radius: 50% !important;
-    overflow: hidden;
-}
-
-/* Field rows — replaces <p> layout */
-.field-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.55rem 0;
-    border-bottom: 1px solid var(--color-border-soft, #EAF3FD);
-}
-.field-row:last-of-type { border-bottom: none; }
-.field-row .field-label {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--color-text-muted, #7B92AC);
-}
-.field-row .field-label i { width: 16px; text-align: center; }
-.field-row .field-value {
-    font-weight: 600;
-    color: var(--color-text-main, #0D1F3C);
-    text-align: right;
-    max-width: 55%;
-    word-break: break-word;
-}
-
-/* Button gradient */
-.btn-profile-grad {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1.2rem !important;
-    border: none !important;
-    border-radius: 9px !important;
-    color: #fff !important;
-    background: linear-gradient(135deg, #0D47A1, #1976D2) !important;
-    transition: all 0.22s ease !important;
-}
-.btn-profile-grad:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 16px rgba(13,71,161,.3) !important;
-    color: #fff !important;
-}
-
-/* ============================================================
-   DARK MODE
-   ============================================================ */
-html.dark-mode .card.profile-card {
-    background: var(--dm-card, #0e1f35) !important;
-    border-color: var(--dm-border, #1a3555) !important;
-}
-html.dark-mode .card.profile-card:hover {
-    border-color: var(--dm-accent, #90CAF9) !important;
-}
-html.dark-mode .card.profile-card h5 {
-    border-bottom-color: var(--dm-border, #1a3555);
-}
-html.dark-mode .card.profile-card h5 .icon-id     { background: rgba(21,101,192,.2); color: var(--dm-accent, #90CAF9); }
-html.dark-mode .card.profile-card h5 .icon-cog     { background: rgba(46,125,50,.2); color: #66bb6a; }
-html.dark-mode .card.profile-card h5 .icon-avatar  { background: rgba(229,57,53,.2); color: #ef5350; }
-html.dark-mode .field-row { border-bottom-color: var(--dm-border, #1a3555); }
-html.dark-mode .field-row .field-label { color: var(--dm-muted, #3d607e); }
-html.dark-mode .field-row .field-value { color: var(--dm-text1, #daeeff); }
+.main-content > *:nth-child(1) { animation-delay: 0.03s; }
+.main-content > *:nth-child(2) { animation-delay: 0.10s; }
+.main-content > *:nth-child(3) { animation-delay: 0.18s; }
+.main-content > *:nth-child(4) { animation-delay: 0.26s; }
+.main-content > *:nth-child(5) { animation-delay: 0.34s; }
 </style>
 </head>
 <body>

@@ -10,10 +10,21 @@ function limpiarSesionLocal() {
 }
 
 async function obtenerUsuarioActual() {
+    // Intentar desde localStorage primero (respuesta instantánea)
+    try {
+        const cached = localStorage.getItem('usuario');
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && parsed.idUsuario) return parsed;
+        }
+    } catch {
+        /* ignorar */
+    }
+
     try {
         const res = await fetch(`${API}/api/session`, {
             credentials: 'include',
-            signal: AbortSignal.timeout(2000)
+            signal: AbortSignal.timeout(5000)
         });
 
         if (!res.ok) {
@@ -30,7 +41,18 @@ async function obtenerUsuarioActual() {
         limpiarSesionLocal();
     } catch (error) {
         console.log('API no disponible');
-        limpiarSesionLocal();
+        // No limpiar sesión local — podríamos estar offline momentáneamente
+    }
+
+    // Último recurso: si tenemos datos locales, usarlos aunque la API falló
+    try {
+        const cached = localStorage.getItem('usuario');
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && parsed.idUsuario) return parsed;
+        }
+    } catch {
+        /* ignorar */
     }
 
     return null;
@@ -47,20 +69,25 @@ function actualizarInfoUsuario(usuario) {
     document.querySelectorAll('.user-info').forEach(el => {
         const slot = el.querySelector('[data-user-name]');
         if (slot) slot.textContent = usuario.nombre;
-        else el.innerHTML = `<i class="fas fa-bell me-2 text-secondary"></i><span>Hola, <span data-user-name>${usuario.nombre}</span></span>`;
+        else el.innerHTML = `
+            <div class="user-avatar-sm">
+                <i class="fas fa-user"></i>
+            </div>
+            <span class="fw-semibold">Hola, <span data-user-name>${usuario.nombre}</span></span>`;
     });
 
     const sidebarUser = document.querySelector('[data-sidebar-user-name]');
     if (sidebarUser) sidebarUser.textContent = usuario.nombre;
 
     const sidebarAvatar = document.querySelector('.sidebar .user-avatar');
-    if (sidebarAvatar) sidebarAvatar.textContent = construirIniciales(usuario.nombre);
+    if (sidebarAvatar) {
+        const iniciales = construirIniciales(usuario.nombre);
+        sidebarAvatar.innerHTML = `<span style="font-weight:700;font-size:0.85rem;color:#1565C0;">${iniciales}</span>`;
+    }
 }
 
 function redirigirALogin() {
-    const p = window.location.pathname;
-    let base = p.includes('/aside-patient/') || p.includes('/aside-professional/') ? '../../' : '../';
-    window.location.href = base + 'login.html';
+    window.location.href = '/login.html';
 }
 
 async function initAuthGuard(opt = {}) {

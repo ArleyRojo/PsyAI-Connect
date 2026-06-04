@@ -76,10 +76,13 @@
                  data-empty-text="Selecciona un paciente para empezar una conversaci&oacute;n">
             <aside class="chat-sidebar">
                 <div class="chat-sidebar__header">
-                    <h6>Pacientes</h6>
-                    <div class="chat-search">
-                        <i class="fas fa-search"></i>
-                        <input type="search" class="chat-search-input" placeholder="Buscar paciente...">
+                    <div class="panel-header">
+                        <span class="panel-title">Pacientes</span>
+                        <span class="panel-count" id="patientCount">·  0</span>
+                    </div>
+                    <div class="search-wrap chat-search">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="search" class="chat-search-input search-patients" placeholder="Buscar paciente...">
                     </div>
                 </div>
                 <div class="chat-list" aria-live="polite"></div>
@@ -87,8 +90,13 @@
 
             <section class="chat-panel">
                 <div class="chat-panel-placeholder">
-                    <i class="far fa-comments"></i>
-                    <p>Selecciona un paciente para empezar una conversaci&oacute;n</p>
+                    <div class="chat-empty-state">
+                        <div class="chat-empty-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3 class="chat-empty-title">Tus mensajes</h3>
+                        <p class="chat-empty-sub">Selecciona un paciente de la lista para ver o iniciar una conversaci&oacute;n.</p>
+                    </div>
                 </div>
 
                 <div class="chat-active-view d-flex flex-column h-100 d-none">

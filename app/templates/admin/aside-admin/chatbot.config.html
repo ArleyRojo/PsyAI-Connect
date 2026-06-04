@@ -19,51 +19,18 @@
 <script src="/js/core/shared/theme.js"></script>
     <script src="/js/core/shared/localStorage-detector.js"></script>
 <style>
-.main-header { position: relative; padding-bottom: 1rem; }
-.main-header::after {
-    content: ''; position: absolute; bottom: 0; left: 0;
-    width: 70px; height: 3px;
-    background: linear-gradient(135deg, #0D47A1, #1976D2);
-    border-radius: 3px;
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-/* Stat cards extra polish */
-.stat-card-modern { transition: transform .2s ease, box-shadow .2s ease; }
-.stat-card-modern:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.1); }
-.stat-card-modern .progress-stat { transition: opacity .3s ease; }
-/* Section card refinements */
-.section-card-custom { transition: box-shadow .22s ease; }
-.section-card-custom:hover { box-shadow: 0 6px 20px rgba(0,0,0,.07); }
-/* Buttons */
-.btn-primary { border-radius: 10px; font-weight: 700; }
-.btn-outline-secondary,
-.btn-outline-success,
-.btn-outline-danger { border-radius: 10px; font-weight: 600; transition: all .2s ease; }
-/* Table */
-.table-hover tbody tr { transition: background .15s ease; }
-.table-hover tbody tr:hover { background: rgba(21,101,192,.03); }
-/* Sliders */
-.form-range::-webkit-slider-thumb {
-    background: #1976D2; border: none; width: 18px; height: 18px; border-radius: 50%;
-    cursor: pointer; transition: transform .15s ease;
+.main-content > * {
+    animation: pageFadeIn 0.4s ease both;
 }
-.form-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
-/* Modal */
-.modal-content {
-    border-radius: 16px; border: none;
-    box-shadow: 0 32px 80px rgba(0,0,0,.18);
-}
-/* Dark mode */
-html.dark-mode .stat-card-modern:hover { box-shadow: 0 10px 28px rgba(0,0,0,.4); }
-html.dark-mode .section-card-custom:hover { box-shadow: 0 6px 20px rgba(0,0,0,.3); }
-html.dark-mode .table-hover tbody tr:hover { background: rgba(144,202,249,.04); }
-html.dark-mode .modal-content { background: var(--dm-card, #0e1f35); color: var(--dm-text1, #daeeff); }
-html.dark-mode .modal-header { border-color: var(--dm-border, #1a3555); }
-html.dark-mode .modal-title { color: var(--dm-heading, #90CAF9); }
-html.dark-mode .btn-close { filter: invert(.8); }
-html.dark-mode .form-range::-webkit-slider-runnable-track { background: var(--dm-border, #1a3555); }
-html.dark-mode .form-range::-webkit-slider-thumb { background: var(--dm-accent, #90CAF9); }
-html.dark-mode .form-control,
-html.dark-mode .form-select { background: var(--dm-elevated, #132843); border-color: var(--dm-border, #1a3555); color: var(--dm-text1, #daeeff); }
+.main-content > *:nth-child(1) { animation-delay: 0.03s; }
+.main-content > *:nth-child(2) { animation-delay: 0.10s; }
+.main-content > *:nth-child(3) { animation-delay: 0.18s; }
+.main-content > *:nth-child(4) { animation-delay: 0.26s; }
+.main-content > *:nth-child(5) { animation-delay: 0.34s; }
 </style>
 </head>
 <body>

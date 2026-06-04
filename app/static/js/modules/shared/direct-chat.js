@@ -36,17 +36,17 @@
   }
 
   var coloresLetras = {
-    'A':'#1D9E75','B':'#378ADD','C':'#D85A30','D':'#534AB7','E':'#BA7517',
-    'F':'#639922','G':'#D4537E','H':'#1D9E75','I':'#378ADD','J':'#D85A30',
-    'K':'#534AB7','L':'#BA7517','M':'#639922','N':'#D4537E','O':'#1D9E75',
-    'P':'#378ADD','Q':'#D85A30','R':'#534AB7','S':'#BA7517','T':'#639922',
-    'U':'#D4537E','V':'#1D9E75','W':'#378ADD','X':'#D85A30','Y':'#534AB7',
-    'Z':'#BA7517'
+    'A':'#1565C0','B':'#1565C0','C':'#1565C0','D':'#1565C0','E':'#1565C0',
+    'F':'#1565C0','G':'#1565C0','H':'#1565C0','I':'#1565C0','J':'#1565C0',
+    'K':'#1565C0','L':'#1565C0','M':'#1565C0','N':'#1565C0','O':'#1565C0',
+    'P':'#1565C0','Q':'#1565C0','R':'#1565C0','S':'#1565C0','T':'#1565C0',
+    'U':'#1565C0','V':'#1565C0','W':'#1565C0','X':'#1565C0','Y':'#1565C0',
+    'Z':'#1565C0'
   };
 
   function svgAvatar(letra, size, fontSize) {
-    var color = coloresLetras[letra.toUpperCase()] || "#6c757d";
-    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" + size + "' height='" + size + "' viewBox='0 0 " + size + " " + size + "'%3E%3Ccircle cx='" + (size/2) + "' cy='" + (size/2) + "' r='" + (size/2) + "' fill='" + encodeURIComponent(color) + "'/%3E%3Ctext x='" + (size/2) + "' y='" + (size/2 + fontSize*0.4) + "' text-anchor='middle' fill='white' font-family='Arial' font-weight='700' font-size='" + fontSize + "'%3E" + letra + "%3C/text%3E%3C/svg%3E";
+    var gid = 'g' + letra.toUpperCase();
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" + size + "' height='" + size + "' viewBox='0 0 " + size + " " + size + "'%3E%3Cdefs%3E%3ClinearGradient id='" + gid + "' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231565C0'/%3E%3Cstop offset='100%25' stop-color='%2342A5F5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='" + (size/2) + "' cy='" + (size/2) + "' r='" + (size/2) + "' fill='url(%23" + gid + ")'/%3E%3Ctext x='" + (size/2) + "' y='" + (size/2 + fontSize*0.35) + "' text-anchor='middle' fill='white' font-family='Arial,sans-serif' font-weight='700' font-size='" + fontSize + "'%3E" + letra + "%3C/text%3E%3C/svg%3E";
   }
 
   function photoUrl(fileName) {
@@ -329,6 +329,8 @@
           </button>
         `;
       }).join("");
+      const countEl = document.getElementById('patientCount');
+      if (countEl) countEl.textContent = '· ' + contacts.length;
     }
 
     function sortContacts(items) {

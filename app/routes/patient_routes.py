@@ -1,6 +1,7 @@
+import os
 from queue import Empty
 
-from flask import Blueprint, Response, jsonify, request, session, stream_with_context
+from flask import Blueprint, Response, current_app, jsonify, request, session, stream_with_context
 
 from app.repositories import mensajes_repository
 from app.services import chatbot_config_events, chatbot_config_service, chatbot_service, patient_service

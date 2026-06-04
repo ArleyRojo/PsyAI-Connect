@@ -264,7 +264,13 @@ async function cargarCitasProfesional() {
         return;
     }
 
-    lista.innerHTML = '<li class="list-group-item text-muted">Cargando...</li>';
+    lista.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+        const li = document.createElement('li');
+        li.className = 'list-group-item skeleton-item';
+        li.innerHTML = '<div class="skeleton-shimmer"></div><div class="skeleton-shimmer"></div>';
+        lista.appendChild(li);
+    }
 
     try {
         const res = await fetch("/api/citas/profesional", {
@@ -282,42 +288,70 @@ async function cargarCitasProfesional() {
             contenedor.innerHTML = `
                 <h5 class="fw-bold text-dark mb-3"><i class="fas fa-clock me-2 text-primary"></i> Citas</h5>
                 <ul class="list-group" id="listaCitas">
-                    <li class="list-group-item text-muted">No hay citas programadas</li>
+                    <li class="list-group-item border-0">
+                        <div class="empty-agenda">
+                            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="60" cy="45" r="22" stroke="%2390CAF9" stroke-width="2" fill="%23E3F2FD"/>
+                                <path d="M60 67v8" stroke="%2390CAF9" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M60 83v4" stroke="%2390CAF9" stroke-width="2" stroke-linecap="round"/>
+                                <rect x="28" y="74" width="64" height="38" rx="6" stroke="%2390CAF9" stroke-width="2" fill="%23F0F5FC"/>
+                                <path d="M38 86h44M38 94h28" stroke="%23D6E8FA" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <h6>No hay citas programadas</h6>
+                            <p>Las citas que registres aparecerán aquí</p>
+                        </div>
+                    </li>
                 </ul>`;
+            actualizarStats([]);
             return;
         }
 
-        console.log("Citas recibidas:", data.citas);
+        const citas = data.citas;
+        actualizarStats(citas);
 
         const renderCita = (c) => {
             const inicial = c.paciente ? c.paciente.charAt(0).toUpperCase() : '?';
             const fotoUrl = c.foto_perfil 
                 ? `/uploads/${c.foto_perfil}` 
-                : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='35' height='35' viewBox='0 0 35 35'%3E%3Ccircle cx='17.5' cy='17.5' r='17.5' fill='%232196F3'/%3E%3Ctext x='17.5' y='21' text-anchor='middle' fill='white' font-family='Arial' font-size='12'%3E${inicial}%3C/text%3E%3C/svg%3E`;
+                : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='38' height='38' viewBox='0 0 38 38'%3E%3Ccircle cx='19' cy='19' r='19' fill='%232196F3'/%3E%3Ctext x='19' y='23' text-anchor='middle' fill='white' font-family='Arial' font-size='14' font-weight='bold'%3E${inicial}%3C/text%3E%3C/svg%3E`;
             
-            const agendoPor = (c.creado_por_profesional === true || c.creado_por_profesional === 1 || c.creado_por_profesional === '1')
+            const esCancelada = c.estado === 'Cancelada';
+            
+            const origen = (c.creado_por_profesional === true || c.creado_por_profesional === 1 || c.creado_por_profesional === '1')
                 ? `<span class="badge bg-primary"><i class="fas fa-user-md me-1"></i>Agendado por ti</span>`
                 : `<span class="badge bg-info text-dark"><i class="fas fa-calendar me-1"></i>Sistema</span>`;
+
+            const tipoCitaBadge = c.tipoCita 
+                ? `<span class="badge" style="background:${c.tipoCita === 'Primera sesión' ? '#e3f2fd' : c.tipoCita === 'Evaluación' ? '#fff3e0' : '#e8f5e9'};color:${c.tipoCita === 'Primera sesión' ? '#1565C0' : c.tipoCita === 'Evaluación' ? '#e65100' : '#2e7d32'};font-weight:600;font-size:0.68rem;border-radius:20px;padding:0.25em 0.6em;">${c.tipoCita}</span>`
+                : '';
             
-            const canceladaBtn = c.estado !== 'Cancelada'
-                ? `<button class="btn btn-outline-danger btn-sm ms-auto" onclick="abrirModalCancelarCita(${c.idCita})" title="Cancelar cita">
+            const canceladaBtn = !esCancelada
+                ? `<button class="btn btn-outline-danger btn-sm ms-auto flex-shrink-0" onclick="abrirModalCancelarCita(${c.idCita})" title="Cancelar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
                        <i class="fas fa-ban me-1"></i>Cancelar
                    </button>`
                 : '';
 
-            const estadoBadge = c.estado === 'Cancelada' 
+            const estadoBadge = esCancelada 
                 ? `<span class="badge bg-danger">Cancelada</span>`
                 : `<span class="badge bg-success">Confirmada</span>`;
 
+            const horaFormateada = formatearHora(c.hora);
+
             return `
-                <li class="list-group-item d-flex align-items-center gap-2">
-                    <img src="${fotoUrl}" alt="Foto" class="rounded-circle flex-shrink-0" style="width:35px;height:35px;object-fit:cover;">
-                    <div class="flex-grow-1">
-                        <strong>${c.paciente}</strong> — ${c.fecha} ${formatearHora(c.hora)}<br>
-                        <small class="text-muted">${c.tipoCita}</small>
-                        ${estadoBadge}
-                        ${agendoPor}
-                        ${c.motivoCancelacion ? `<div class="mt-1"><small class="text-danger"><i class="fas fa-info-circle me-1"></i><strong>Motivo cancelación:</strong> ${c.motivoCancelacion}</small></div>` : ''}
+                <li class="list-group-item d-flex align-items-center gap-2" style="${esCancelada ? 'opacity:0.65;' : ''}">
+                    <img src="${fotoUrl}" alt="${c.paciente}" class="rounded-circle flex-shrink-0" style="width:38px;height:38px;object-fit:cover;">
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <strong>${c.paciente}</strong>
+                            ${tipoCitaBadge}
+                            ${estadoBadge}
+                            ${origen}
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <small class="text-muted"><i class="far fa-calendar-alt me-1" style="font-size:0.7rem;"></i>${c.fecha}</small>
+                            <small class="text-muted"><i class="far fa-clock me-1" style="font-size:0.7rem;"></i>${horaFormateada}</small>
+                        </div>
+                        ${c.motivoCancelacion ? `<div class="mt-1"><small class="text-danger"><i class="fas fa-info-circle me-1"></i><strong>Motivo:</strong> ${c.motivoCancelacion}</small></div>` : ''}
                     </div>
                     ${canceladaBtn}
                 </li>
@@ -325,13 +359,41 @@ async function cargarCitasProfesional() {
         };
 
         let html = '<h5 class="fw-bold text-dark mb-3"><i class="fas fa-clock me-2 text-primary"></i> Citas</h5>';
-        html += `<ul class="list-group">${data.citas.map(c => renderCita(c)).join('')}</ul>`;
+        html += `<ul class="list-group" id="listaCitas">${citas.map(c => renderCita(c)).join('')}</ul>`;
 
         contenedor.innerHTML = html;
     } catch(err) {
         console.error(err);
         lista.innerHTML = '<li class="list-group-item text-danger">Error al cargar citas</li>';
     }
+}
+
+// ── Actualizar Stats ────────────────────────────────────────
+function actualizarStats(citas) {
+    const total = citas.length;
+    const confirmadas = citas.filter(c => c.estado !== 'Cancelada').length;
+    const canceladas = citas.filter(c => c.estado === 'Cancelada').length;
+
+    const hoy = new Date();
+    const proximas = citas.filter(c => {
+        if (c.estado === 'Cancelada') return false;
+        const fechaCita = new Date(c.fecha + 'T' + (c.hora || '00:00'));
+        return fechaCita >= hoy;
+    }).length;
+
+    const animarNumero = (el, valor) => {
+        if (!el) return;
+        const original = el.textContent;
+        el.textContent = valor;
+        el.style.transition = 'transform 0.3s ease';
+        el.style.transform = 'scale(1.2)';
+        setTimeout(() => { el.style.transform = 'scale(1)'; }, 300);
+    };
+
+    animarNumero(document.getElementById('statTotal'), total);
+    animarNumero(document.getElementById('statConfirmadas'), confirmadas);
+    animarNumero(document.getElementById('statCanceladas'), canceladas);
+    animarNumero(document.getElementById('statProximas'), proximas);
 }
 
 // ── Modal Cancelar Cita (Profesional) ───────────────────────

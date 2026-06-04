@@ -24,8 +24,7 @@
 <link rel="stylesheet" href="/responsive/general.css">
   <link rel="stylesheet" href="/responsive/responsive-patient.css">
   <script src="/js/core/shared/theme.js"></script>
-<script src="/js/core/shared/localStorage-detector.js"></script>
-
+  <script src="/js/core/shared/localStorage-detector.js"></script>
 
 </head>
 <body>
@@ -86,10 +85,13 @@
                data-empty-text="Selecciona un profesional para empezar una conversación">
         <aside class="chat-sidebar">
           <div class="chat-sidebar__header">
-            <h6>Profesionales</h6>
-            <div class="chat-search">
-              <i class="fas fa-search"></i>
-              <input type="search" class="chat-search-input" placeholder="Buscar profesional...">
+            <div class="panel-header">
+              <span class="panel-title">Profesionales</span>
+              <span class="panel-count" id="patientCount">·  0</span>
+            </div>
+            <div class="search-wrap chat-search">
+              <i class="fas fa-search search-icon"></i>
+              <input type="search" class="chat-search-input search-patients" placeholder="Buscar profesional...">
             </div>
           </div>
           <div class="chat-list" aria-live="polite"></div>
@@ -97,8 +99,13 @@
 
         <section class="chat-panel">
           <div class="chat-panel-placeholder">
-            <i class="far fa-comments"></i>
-            <p>Selecciona un profesional para empezar una conversaci&oacute;n</p>
+            <div class="chat-empty-state">
+              <div class="chat-empty-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <h3 class="chat-empty-title">Tus mensajes</h3>
+              <p class="chat-empty-sub">Selecciona un profesional de la lista para ver o iniciar una conversaci&oacute;n.</p>
+            </div>
           </div>
 
           <div class="chat-active-view d-flex flex-column h-100 d-none">
