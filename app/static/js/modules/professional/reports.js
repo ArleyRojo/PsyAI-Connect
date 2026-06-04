@@ -87,7 +87,7 @@ function actualizarTablaEliminados(eliminados) {
             <td>${r.fechaFin || '—'}</td>
             <td>${r.paciente || '—'}</td>
             <td>${r.tipoReporte || '—'}</td>
-            <td><span class="badge bg-danger">${r.estado || 'Eliminado'}</span></td>
+            <td><span class="badge-estado eliminado">${r.estado || 'Eliminado'}</span></td>
         </tr>
     `).join('');
 }
@@ -109,7 +109,7 @@ function renderizarReportes(reportes) {
                 <td>${r.fechaFin || '—'}</td>
                 <td>${r.paciente || '—'}</td>
                 <td>${r.tipoReporte || '—'}</td>
-                <td><span class="badge bg-${estadoClass}">${r.estado || '—'}</span></td>
+                <td><span class="badge-estado ${estadoClass}">${r.estado || '—'}</span></td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary me-1" onclick="editarReporte(${r.idReporte})">
                         <i class="fas fa-edit"></i>
@@ -124,8 +124,8 @@ function renderizarReportes(reportes) {
 }
 
 function getEstadoClass(estado) {
-    const map = { 'Completado': 'success', 'Pendiente': 'warning', 'Eliminado': 'danger' };
-    return map[estado] || 'secondary';
+    const map = { 'Completado': 'completado', 'Pendiente': 'pendiente', 'Eliminado': 'eliminado' };
+    return map[estado] || 'pendiente';
 }
 
 async function cargarPacientesFiltro() {

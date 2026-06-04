@@ -1,4 +1,5 @@
 import secrets
+import os
 from datetime import datetime, timedelta
 
 from flask import request as flask_request
@@ -80,34 +81,44 @@ def login_user(data, ip_address):
     return payload, 200, session_user
 
 
-def recover_password(data):
-    email = (data.get("email") or "").strip()
+def recover_password(email):
     if not email:
         return {"success": False, "message": "Email requerido"}, 400
 
     existe = auth_repository.active_user_exists_by_email(email)
-    if not existe:
-        return {"success": True, "message": "Si el correo existe, recibiras instrucciones."}, 200
 
-    token = secrets.token_urlsafe(32)
-    expires = datetime.now() + timedelta(hours=1)
-    auth_repository.create_password_recovery_token(email, token, expires)
+    recovery_link = None
+    email_sent = False
 
-    recovery_link = f"{flask_request.host_url.rstrip('/')}/recover?token={token}"
-    send_recovery_email(email, recovery_link)
+    if existe:
+        token = secrets.token_urlsafe(32)
+        expires = datetime.now() + timedelta(hours=1)
+        auth_repository.create_password_recovery_token(email, token, expires)
 
-    return {"success": True, "message": "Si el correo existe, recibiras instrucciones."}, 200
+        recovery_link = f"{flask_request.host_url.rstrip('/')}/recover?token={token}"
+        email_sent = send_recovery_email(email, recovery_link)
+
+        if not email_sent:
+            print("\n[RECUPERAR PASSWORD] No se pudo enviar correo por proveedor externo.", flush=True)
+            print(f"[RECUPERAR PASSWORD] Email: {email}", flush=True)
+            print(f"[RECUPERAR PASSWORD] Enlace local: {recovery_link}\n", flush=True)
+
+    payload = {"success": True, "message": "Fue enviado al correo."}
+    if recovery_link and not email_sent and os.getenv("FLASK_ENV", "development").lower() != "production":
+        payload["recovery_link"] = recovery_link
+
+    return payload, 200
 
 
 def reset_password(data):
-    token = data.get("token") or ""
-    new_password = data.get("new_password") or ""
-    confirmar = data.get("confirm_password") or ""
+    token = data.get("token", "").strip()
+    new_password = data.get("new_password", "")
+    confirmar = data.get("confirm_password", "")
 
     if not token or not new_password:
-        return {"success": False, "message": "Token y nueva contraseña requeridos"}, 400
+        return {"success": False, "message": "Token y nueva contrase\u00f1a requeridos"}, 400
     if new_password != confirmar:
-        return {"success": False, "message": "Las contraseñas no coinciden"}, 400
+        return {"success": False, "message": "Las contrase\u00f1as no coinciden"}, 400
 
     try:
         new_password = Validator.password(new_password)
@@ -116,9 +127,11 @@ def reset_password(data):
 
     user_id = auth_repository.validate_recovery_token(token)
     if not user_id:
-        return {"success": False, "message": "Token inválido o expirado"}, 400
+        return {"success": False, "message": "Token inv\u00e1lido o expirado"}, 400
 
     auth_repository.invalidate_recovery_token(token)
     auth_repository.update_password(user_id, hash_password(new_password))
 
-    return {"success": True, "message": "Contraseña actualizada exitosamente"}, 200
+    return {"success": True, "message": "Contrase\u00f1a actualizada exitosamente"}, 200
+
+

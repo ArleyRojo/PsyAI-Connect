@@ -13,6 +13,7 @@ CONFIG_COLUMNS = {
     "temperature": "temperature",
     "top_p": "top_p",
     "max_tokens": "max_tokens",
+    "max_tokens_user": "max_tokens_user",
     "daily_message_limit": "daily_message_limit",
     "actualizado_por": "actualizado_por",
 }
@@ -46,6 +47,7 @@ def get_config():
                 "temperature",
                 "top_p",
                 "max_tokens",
+                "max_tokens_user",
                 "daily_message_limit",
                 "actualizado_por",
                 "fecha_actualizacion",

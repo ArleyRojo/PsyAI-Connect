@@ -4,6 +4,14 @@
   const POLL_MS = 3000;
   const MAX_TEXTAREA_HEIGHT = 120;
 
+  (function injectPhotoStyles() {
+    if (document.getElementById("chatPhotoStyles")) return;
+    var s = document.createElement("style");
+    s.id = "chatPhotoStyles";
+    s.textContent = "#chatPhotoOverlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;display:none;align-items:center;justify-content:center}#chatPhotoBackdrop{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);backdrop-filter:blur(4px)}.chat-photo-wrap{position:relative;max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center}.chat-photo-close{position:absolute;top:-40px;right:0;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;padding:4px 10px;line-height:1;z-index:1;opacity:.8;transition:opacity .2s}.chat-photo-close:hover{opacity:1}#chatPhotoFull{max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);object-fit:contain;background:#000}.chat-bubble{display:flex;align-items:flex-start!important;gap:8px;max-width:85%;margin-bottom:10px}.chat-bubble.sent{flex-direction:row-reverse;align-self:flex-end}.chat-bubble.received{flex-direction:row;align-self:flex-start}.chat-bubble-body{display:flex;flex-direction:column;max-width:100%}.chat-bubble-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;cursor:pointer;transition:opacity .2s;background:var(--gray-bg,#eef3f8)}.chat-bubble-avatar:hover{opacity:.8}";
+    document.head.appendChild(s);
+  })();
+
   function qs(root, selector) {
     return root.querySelector(selector);
   }
@@ -27,16 +35,38 @@
       .join("") || "US";
   }
 
+  var coloresLetras = {
+    'A':'#1565C0','B':'#1565C0','C':'#1565C0','D':'#1565C0','E':'#1565C0',
+    'F':'#1565C0','G':'#1565C0','H':'#1565C0','I':'#1565C0','J':'#1565C0',
+    'K':'#1565C0','L':'#1565C0','M':'#1565C0','N':'#1565C0','O':'#1565C0',
+    'P':'#1565C0','Q':'#1565C0','R':'#1565C0','S':'#1565C0','T':'#1565C0',
+    'U':'#1565C0','V':'#1565C0','W':'#1565C0','X':'#1565C0','Y':'#1565C0',
+    'Z':'#1565C0'
+  };
+
+  function svgAvatar(letra, size, fontSize) {
+    var gid = 'g' + letra.toUpperCase();
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" + size + "' height='" + size + "' viewBox='0 0 " + size + " " + size + "'%3E%3Cdefs%3E%3ClinearGradient id='" + gid + "' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231565C0'/%3E%3Cstop offset='100%25' stop-color='%2342A5F5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='" + (size/2) + "' cy='" + (size/2) + "' r='" + (size/2) + "' fill='url(%23" + gid + ")'/%3E%3Ctext x='" + (size/2) + "' y='" + (size/2 + fontSize*0.35) + "' text-anchor='middle' fill='white' font-family='Arial,sans-serif' font-weight='700' font-size='" + fontSize + "'%3E" + letra + "%3C/text%3E%3C/svg%3E";
+  }
+
   function photoUrl(fileName) {
-    return fileName ? `/uploads/${encodeURIComponent(fileName)}` : "/img/default-avatar.png";
+    if (!fileName) return null;
+    return `/uploads/${encodeURIComponent(fileName)}`;
+  }
+
+  function chatAvatarSrc(nombre, size, fz) {
+    var inits = initials(nombre);
+    var letra = inits.charAt(0).toUpperCase() || '?';
+    return svgAvatar(letra, size || 44, fz || 18);
   }
 
   function avatarHtml(contact) {
-    const name = escapeHtml(contact.nombre || "Usuario");
+    var name = escapeHtml(contact.nombre || "Usuario");
+    var rawName = contact.nombre || "Usuario";
     if (contact.fotoPerfil) {
-      return `<div class="chat-avatar-circle"><img src="${photoUrl(contact.fotoPerfil)}" alt="${name}" onerror="this.remove();this.parentElement.insertAdjacentText('afterbegin','${initials(contact.nombre)}');"><span class="chat-online-dot"></span></div>`;
+      return `<div class="chat-avatar-circle"><img class="chat-avatar-img" src="${photoUrl(contact.fotoPerfil)}" alt="${escapeHtml(rawName)}" data-nombre="${escapeHtml(rawName)}" data-size="44" onerror="chatFallbackImg(this)"><span class="chat-online-dot"></span></div>`;
     }
-    return `<div class="chat-avatar-circle">${escapeHtml(initials(contact.nombre))}<span class="chat-online-dot"></span></div>`;
+    return `<div class="chat-avatar-circle"><img src="${chatAvatarSrc(contact.nombre, 44, 18)}" alt="${name}" style="width:100%;height:100%;border-radius:50%"><span class="chat-online-dot"></span></div>`;
   }
 
   function parseDate(value) {
@@ -299,6 +329,8 @@
           </button>
         `;
       }).join("");
+      const countEl = document.getElementById('patientCount');
+      if (countEl) countEl.textContent = '· ' + contacts.length;
     }
 
     function sortContacts(items) {
@@ -324,6 +356,19 @@
       `);
     }
 
+    function getSenderPhoto() {
+      if (activeContact?.fotoPerfil) return photoUrl(activeContact.fotoPerfil);
+      return null;
+    }
+
+    function getMyPhoto() {
+      try {
+        const u = JSON.parse(localStorage.getItem("usuario") || "{}");
+        if (u.fotoPerfil) return photoUrl(u.fotoPerfil);
+      } catch (e) {}
+      return null;
+    }
+
     function appendMessage(message) {
       const messageId = Number(message.idMensaje || 0);
       if (messageId && seenMessageIds.has(messageId)) {
@@ -341,12 +386,31 @@
 
       const side = message.esMio ? "sent" : "received";
       const text = escapeHtml(message.mensaje).replace(/\n/g, "<br>");
+      var photo = message.esMio ? getMyPhoto() : getSenderPhoto();
+      var bubbleName = "";
+      if (message.esMio) {
+        try { var u = JSON.parse(localStorage.getItem("usuario") || "{}"); bubbleName = u.nombre || ""; } catch(e) {}
+      } else {
+        bubbleName = activeContact?.nombre || "";
+      }
+      var rawName = bubbleName;
+      bubbleName = escapeHtml(bubbleName);
+      if (!photo) {
+        var inits = initials(rawName);
+        var letra = inits.charAt(0).toUpperCase() || "?";
+        var svg = svgAvatar(letra, 28, 12);
+        photo = svg;
+      }
+      const photoHtml = '<img src="' + photo + '" alt="' + bubbleName + '" data-nombre="' + bubbleName + '" data-size="28" class="chat-bubble-avatar" onerror="chatFallbackImg(this)" onclick="var e=document.getElementById(\'chatPhotoFull\');if(e){e.src=this.src;var o=document.getElementById(\'chatPhotoOverlay\');if(o)o.style.display=\'flex\';document.body.style.overflow=\'hidden\'}">';
       messagesArea.insertAdjacentHTML("beforeend", `
         <div class="chat-bubble ${side}">
-          <div class="chat-bubble-text">${text}</div>
-          <div class="chat-bubble-meta">
-            <span>${escapeHtml(formatTime(message.fecha))}</span>
-            ${message.esMio ? '<i class="fas fa-check-double chat-check-icon"></i>' : ""}
+          ${photoHtml}
+          <div class="chat-bubble-body">
+            <div class="chat-bubble-text">${text}</div>
+            <div class="chat-bubble-meta">
+              <span>${escapeHtml(formatTime(message.fecha))}</span>
+              ${message.esMio ? '<i class="fas fa-check-double chat-check-icon"></i>' : ""}
+            </div>
           </div>
         </div>
       `);
@@ -475,6 +539,15 @@
       headerAvatar.innerHTML = avatarHtml(contact);
       headerName.textContent = contact.nombre || emptyText;
       headerStatus.textContent = contactSubtitle(contact, contactMode);
+
+      var headerImg = headerAvatar.querySelector("img");
+      if (headerImg) {
+        headerImg.style.cursor = "pointer";
+        headerImg.addEventListener("click", function(e) {
+          e.stopPropagation();
+          showPhotoModal(headerImg.src);
+        });
+      }
       textarea.value = "";
       textarea.style.height = "";
 
@@ -575,7 +648,49 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  window.chatFallbackImg = function(img) {
+    if (!img || !img.parentNode) return;
+    var nombre = img.getAttribute("data-nombre") || img.alt || "Usuario";
+    var inits = initials(nombre);
+    var letra = inits.charAt(0).toUpperCase() || "?";
+    var sz = parseInt(img.getAttribute("data-size")) || parseInt(img.width) || parseInt(img.parentNode.offsetWidth) || 44;
+    var fz = Math.round(sz * 0.4);
+    img.src = svgAvatar(letra, sz, fz);
+    img.onerror = null;
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.borderRadius = "50%";
+    img.style.objectFit = "cover";
+  };
+
+  function showPhotoModal(src) {
+    var overlay = document.getElementById("chatPhotoOverlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "chatPhotoOverlay";
+      overlay.innerHTML =
+        '<div id="chatPhotoBackdrop"></div><div class="chat-photo-wrap"><button class="chat-photo-close" onclick="var o=document.getElementById(\'chatPhotoOverlay\');if(o)o.style.display=\'none\';document.body.style.overflow=\'\'" aria-label="Cerrar">&times;</button><img id="chatPhotoFull" src="" alt="Foto de perfil"></div>';
+      overlay.querySelector("#chatPhotoBackdrop").addEventListener("click", function() {
+        overlay.style.display = "none";
+        document.body.style.overflow = "";
+      });
+      document.body.appendChild(overlay);
+    }
+    overlay.querySelector("#chatPhotoFull").src = src;
+    overlay.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        var o = document.getElementById("chatPhotoOverlay");
+        if (o && o.style.display !== "none" && o.style.display !== "") {
+          o.style.display = "none";
+          document.body.style.overflow = "";
+        }
+      }
+    });
     document.querySelectorAll("[data-chat-root]").forEach(initDirectChat);
   });
 })();

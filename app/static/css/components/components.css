@@ -1824,3 +1824,32 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
 .dark-mode .text-muted {
     color: var(--dm-muted) !important;
 }
+
+/* ── Modern Redesign: buttons ────────────────────── */
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #0D47A1, #0A3A82);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 14px 24px; font-weight: 700; font-size: 0.95rem;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    width: 100%; transition: all 0.25s;
+    box-shadow: 0 4px 14px rgba(13,71,161,0.2);
+    cursor: pointer;
+}
+.btn-primary-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(13,71,161,0.3);
+}
+.btn-primary-gradient:active { transform: translateY(0); }
+.btn-primary-gradient i { margin-right: 8px; }
+
+.btn-outline-muted {
+    padding: 7px 16px; border-radius: 10px;
+    background: #fff; border: 1.5px solid #E2E8F0;
+    color: #4A5568; font-size: 0.82rem; font-weight: 600;
+    transition: all 0.2s; cursor: pointer;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.btn-outline-muted:hover {
+    border-color: #0D47A1; color: #0D47A1;
+    background: #E8F1FF;
+}

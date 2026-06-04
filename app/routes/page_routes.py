@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, current_app, send_from_directory, render_template
+from flask import Blueprint, current_app, send_from_directory, render_template, request
 
 
 pages_bp = Blueprint("pages", __name__)
@@ -15,8 +15,17 @@ def _static_root():
 
 
 @pages_bp.route("/")
+@pages_bp.route("/index.html")
 def index():
     return render_template("base/index.html")
+
+
+@pages_bp.route("/recover")
+def recover_with_token():
+    token = request.args.get("token")
+    if token:
+        return render_template("auth/reset-password.html")
+    return render_template("auth/recover.html")
 
 
 @pages_bp.route("/<path:filename>")
@@ -30,38 +39,37 @@ def serve_pages(filename: str):
     root = _template_root()
 
     direct_map = {
+        "index.html": "base/index.html",
         "login.html": "auth/login.html",
         "register.html": "auth/register.html",
         "recover.html": "auth/recover.html",
+        "reset-password.html": "auth/reset-password.html",
         "admin.dashboard.html": "admin/admin.dashboard.html",
         "patient.dashboard.html": "patient/patient.dashboard.html",
         "professional.dashboard.html": "professional/professional.dashboard.html",
-        "patients.html": "professional/aside-professional/patients.html",
-        "index.html": "base/index.html",
     }
 
     if filename in direct_map:
-        return send_from_directory(root, direct_map[filename])
+        return render_template(direct_map[filename])
 
     if filename.startswith("aside-admin/"):
         rel = "admin/aside-admin/" + filename.removeprefix("aside-admin/")
         if os.path.exists(os.path.join(root, *rel.split("/"))):
-            return send_from_directory(root, rel)
+            return render_template(rel)
 
     if filename.startswith("aside-patient/"):
         rel = "patient/aside-patient/" + filename.removeprefix("aside-patient/")
         if os.path.exists(os.path.join(root, *rel.split("/"))):
-            return send_from_directory(root, rel)
+            return render_template(rel)
 
     if filename.startswith("aside-professional/"):
         rel = "professional/aside-professional/" + filename.removeprefix("aside-professional/")
         if os.path.exists(os.path.join(root, *rel.split("/"))):
-            return send_from_directory(root, rel)
+            return render_template(rel)
 
     # fallback: allow direct lookup inside templates root (for any other html)
     if os.path.exists(os.path.join(root, filename)):
-        return send_from_directory(root, filename)
+        return render_template(filename)
 
     # serve legacy static paths (css/js/img/responsive/uploads/etc)
     return send_from_directory(_static_root(), filename)
-

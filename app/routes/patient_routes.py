@@ -1,6 +1,7 @@
+import os
 from queue import Empty
 
-from flask import Blueprint, Response, jsonify, request, session, stream_with_context
+from flask import Blueprint, Response, current_app, jsonify, request, session, stream_with_context
 
 from app.repositories import mensajes_repository
 from app.services import chatbot_config_events, chatbot_config_service, chatbot_service, patient_service
@@ -63,8 +64,10 @@ def editar_perfil_paciente():
 
 
 @patient_bp.route("/api/perfil/foto", methods=["POST"])
-@require_role("paciente")
 def actualizar_foto_perfil():
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
     file = request.files.get("foto") or request.files.get("fotoPerfil")
     payload, status = patient_service.update_profile_photo(session.get("idUsuario"), file)
     if payload.get("success"):
@@ -121,7 +124,8 @@ def get_chatbot_config_paciente():
     return jsonify({
         "success": True,
         "config": {
-            "max_tokens": config.get("max_tokens", 420),
+            "max_tokens": config.get("max_tokens", 600),
+            "max_tokens_user": config.get("max_tokens_user", 1000),
             "daily_message_limit": config.get("daily_message_limit", 20),
         }
     }), 200
@@ -205,7 +209,12 @@ def chat_listar_profesionales():
     profesionales = patient_repository.list_professionals_for_patient(id_paciente)
     resultado = []
 
+    import os
+    upload_dir = os.path.join(current_app.root_path, "static", "uploads")
     for profesional in profesionales:
+        fp = profesional.get("fotoPerfil")
+        if fp and not os.path.exists(os.path.join(upload_dir, fp)):
+            profesional["fotoPerfil"] = None
         ultimo = mensajes_repository.get_ultimo_mensaje(id_paciente, profesional["idUsuario"])
         no_leidos = mensajes_repository.contar_no_leidos(id_paciente, profesional["idUsuario"])
         resultado.append({

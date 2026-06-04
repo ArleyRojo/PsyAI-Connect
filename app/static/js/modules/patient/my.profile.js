@@ -59,6 +59,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // ── Inicializar subida de foto ────────────────────────────
+    inicializarUploadFoto();
+
     // ── Cargar preferencias guardadas en localStorage ─────────
     cargarPreferencias();
 });
@@ -215,6 +218,197 @@ function cargarPreferencias() {
     setField('pref_notificaciones', notif);
     setField('pref_recordatorios',  recordat);
     setField('pref_contacto',       contacto);
+}
+
+// ── Foto de perfil ────────────────────────────────────────────
+function inicializarUploadFoto() {
+    const input = document.getElementById('inputFoto');
+    const btn = document.getElementById('btnCambiarFoto');
+    const img = document.getElementById('fotoPerfilPreview');
+    const avatarDiv = document.getElementById('avatarInicialPreview');
+    const btnGuardar = document.getElementById('btnGuardarFoto');
+    const btnCancelar = document.getElementById('btnCancelarFoto');
+    const actions = document.getElementById('avatarActions');
+    const statusText = document.getElementById('avatarStatusText');
+
+    if (!input || !btn) return;
+
+    let pendingFile = null;
+
+    cargarFotoDesdeSession(img, avatarDiv);
+
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        input.click();
+    });
+
+    input.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            mostrarToast('La imagen no puede superar los 5 MB', 'warning');
+            this.value = '';
+            return;
+        }
+
+        pendingFile = file;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            img.style.display = 'block';
+            avatarDiv.style.display = 'none';
+            statusText.textContent = 'Previsualizando foto nueva';
+            actions.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    btnGuardar.addEventListener('click', async function() {
+        if (!pendingFile) return;
+        statusText.textContent = 'Subiendo foto...';
+        actions.style.display = 'none';
+
+        try {
+            const formData = new FormData();
+            formData.append('foto', pendingFile);
+            const res = await fetch('/api/perfil/foto', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                mostrarToast('Foto de perfil actualizada correctamente', 'success');
+                statusText.textContent = 'Haz clic en el icono de la c\u00e1mara para cambiar tu foto de perfil';
+                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                usuario.fotoPerfil = data.fotoPerfil;
+                localStorage.setItem('usuario', JSON.stringify(usuario));
+                actualizarAvataresEnPagina(data.fotoPerfil);
+                pendingFile = null;
+            } else {
+                mostrarToast(data.message || 'Error al subir la foto', 'error');
+                recargarFotoActual(img, avatarDiv);
+                statusText.textContent = 'Haz clic en el icono de la c\u00e1mara para cambiar tu foto de perfil';
+                pendingFile = null;
+            }
+        } catch(e) {
+            mostrarToast('Error de conexi\u00f3n al subir la foto', 'error');
+            recargarFotoActual(img, avatarDiv);
+            statusText.textContent = 'Haz clic en el icono de la c\u00e1mara para cambiar tu foto de perfil';
+            pendingFile = null;
+        }
+        input.value = '';
+    });
+
+    btnCancelar.addEventListener('click', function() {
+        pendingFile = null;
+        recargarFotoActual(img, avatarDiv);
+        statusText.textContent = 'Haz clic en el icono de la c\u00e1mara para cambiar tu foto de perfil';
+        actions.style.display = 'none';
+        input.value = '';
+    });
+}
+
+async function cargarFotoDesdeSession(img, avatarDiv) {
+    try {
+        const res = await fetch('/api/session', { credentials: 'include' });
+        const data = await res.json();
+        if (data.fotoPerfil) {
+            const testImg = new Image();
+            testImg.onload = function() {
+                img.src = '/uploads/' + data.fotoPerfil;
+                img.style.display = 'block';
+                if (avatarDiv) avatarDiv.style.display = 'none';
+            };
+            testImg.onerror = function() {
+                img.style.display = 'none';
+                if (avatarDiv) avatarDiv.style.display = 'block';
+            };
+            testImg.src = '/uploads/' + data.fotoPerfil;
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            usuario.fotoPerfil = data.fotoPerfil;
+            localStorage.setItem('usuario', JSON.stringify(usuario));
+        }
+    } catch(e) {
+        console.error('Error cargando foto:', e);
+    }
+}
+
+function recargarFotoActual(img, avatarDiv) {
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    if (usuario.fotoPerfil) {
+        img.src = '/uploads/' + usuario.fotoPerfil;
+        img.style.display = 'block';
+        if (avatarDiv) avatarDiv.style.display = 'none';
+    } else {
+        img.style.display = 'none';
+        if (avatarDiv) avatarDiv.style.display = 'block';
+    }
+}
+
+function actualizarAvataresEnPagina(fotoPerfil) {
+    document.querySelectorAll('[data-avatar="inicial"]').forEach(el => {
+        const nombre = el.dataset.nombre || getNombreUsuario();
+        const parent = el.parentNode;
+        if (!parent) return;
+        if (fotoPerfil) {
+            const preview = parent.querySelector('#fotoPerfilPreview');
+            if (preview) {
+                preview.src = '/uploads/' + fotoPerfil;
+                preview.style.display = 'block';
+                preview.style.borderRadius = '50%';
+                preview.style.objectFit = 'cover';
+                el.style.display = 'none';
+                return;
+            }
+            const img = document.createElement('img');
+            img.src = '/uploads/' + fotoPerfil;
+            img.alt = 'Foto de perfil';
+            const w = el.style.width || el.offsetWidth || 40;
+            const h = el.style.height || el.offsetHeight || 40;
+            img.style.width = (typeof w === 'string' && w.includes('px') ? w : w + 'px');
+            img.style.height = (typeof h === 'string' && h.includes('px') ? h : h + 'px');
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
+            img.style.display = 'block';
+            img.onerror = function() {
+                this.style.display = 'none';
+                if (el.parentNode) {
+                    generarAvatarFallback(nombre, el);
+                }
+            };
+            parent.replaceChild(img, el);
+        }
+    });
+}
+
+function generarAvatarFallback(nombre, elemento) {
+    const inicial = nombre ? nombre.charAt(0).toUpperCase() : '?';
+    const colores = {
+        'A':'#1D9E75','B':'#378ADD','C':'#D85A30','D':'#534AB7','E':'#BA7517',
+        'F':'#639922','G':'#D4537E','H':'#1D9E75','I':'#378ADD','J':'#D85A30',
+        'K':'#534AB7','L':'#BA7517','M':'#639922','N':'#D4537E','O':'#1D9E75',
+        'P':'#378ADD','Q':'#D85A30','R':'#534AB7','S':'#BA7517','T':'#639922',
+        'U':'#D4537E','V':'#1D9E75','W':'#378ADD','X':'#D85A30','Y':'#534AB7',
+        'Z':'#BA7517'
+    };
+    const colorFondo = colores[inicial.toUpperCase()] || '#6c757d';
+    const w = elemento.style.width || elemento.offsetWidth || 40;
+    const h = elemento.style.height || elemento.offsetHeight || 40;
+    const div = document.createElement('div');
+    div.style.width = (typeof w === 'string' && w.includes('px') ? w : w + 'px');
+    div.style.height = (typeof h === 'string' && h.includes('px') ? h : h + 'px');
+    div.style.borderRadius = '50%';
+    div.style.backgroundColor = colorFondo;
+    div.style.color = 'white';
+    div.style.fontWeight = '500';
+    div.style.display = 'flex';
+    div.style.alignItems = 'center';
+    div.style.justifyContent = 'center';
+    div.style.fontSize = Math.floor(parseInt(w) * 0.4) + 'px';
+    div.textContent = inicial;
+    if (elemento.parentNode) elemento.parentNode.replaceChild(div, elemento);
 }
 
 // ── Helpers ───────────────────────────────────────────────────

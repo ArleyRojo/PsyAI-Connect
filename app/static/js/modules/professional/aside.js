@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isProfessionalPage() || document.querySelector('.mobile-bottom-nav[data-role="professional"]')) return;
 
         const items = [
-            { href: '/professional.dashboard.html', icon: 'fas fa-home', label: 'Inicio' },
+            { href: '/', icon: 'fas fa-home', label: 'Inicio' },
             { href: '/aside-professional/patients.html', icon: 'fas fa-users', label: 'Pacientes' },
             { href: '/aside-professional/my.agenda.html', icon: 'fas fa-calendar-check', label: 'Agenda' },
             { href: '/aside-professional/mensajes.html', icon: 'fas fa-comments', label: 'Mensajes' },

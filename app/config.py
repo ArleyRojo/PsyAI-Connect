@@ -52,8 +52,8 @@ class Config:
     DB_NAME = os.getenv("DB_NAME", "psyai_connect")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "root")
 
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-    LOG_FORMAT = os.getenv("LOG_FORMAT", "werkzeug")
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
+    LOG_FORMAT = os.getenv("LOG_FORMAT", "text")
 
     # ADVERTENCIA: memory:// no escala con múltiples workers ni persiste entre reinicios.
     # En producción usar: redis://localhost:6379/0
@@ -90,31 +90,41 @@ class TextFormatter(logging.Formatter):
 
 
 def setup_logging(app):
-    log_level = getattr(logging, app.config.get("LOG_LEVEL", "INFO").upper())
-    log_format = app.config.get("LOG_FORMAT", "werkzeug")
+    # Siempre mostrar werkzeug logs en desarrollo
+    werkzeug_logger = logging.getLogger('werkzeug')
     
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.WARNING)
-    
-    if log_format == "werkzeug":
-        werkzeug_logger = logging.getLogger('werkzeug')
-        werkzeug_logger.setLevel(logging.INFO)
-        if not any(isinstance(h, logging.StreamHandler) for h in werkzeug_logger.handlers):
-            werkzeug_logger.addHandler(logging.StreamHandler())
-        logging.getLogger('flask-limiter').setLevel(logging.WARNING)
-        return None
-    
-    if log_format == "json":
-        formatter = JSONFormatter()
+    # En desarrollo, usar DEBUG level
+    if os.getenv("FLASK_ENV", "development").lower() == "development":
+        werkzeug_logger.setLevel(logging.DEBUG)
     else:
-        formatter = TextFormatter()
+        werkzeug_logger.setLevel(logging.INFO)
     
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    root_logger.addHandler(console_handler)
+    # Asegurar que tiene un handler para mostrar en terminal
+    if not werkzeug_logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s in %(module)s: %(message)s')
+        handler.setFormatter(formatter)
+        werkzeug_logger.addHandler(handler)
     
-    app.logger.setLevel(log_level)
-    app.logger.handlers = []
-    app.logger.addHandler(console_handler)
+    # Forzar propagación
+    werkzeug_logger.propagate = True
     
-    return app.logger
+    # Configurar otros loggers
+    logging.getLogger('flask-limiter').setLevel(logging.WARNING)
+    
+    return werkzeug_logger
+
+
+def setup_logging(app):
+    werkzeug_logger = logging.getLogger("werkzeug")
+    werkzeug_logger.handlers.clear()
+    werkzeug_logger.setLevel(logging.INFO if os.getenv("SHOW_WERKZEUG_LOGS", "0") == "1" else logging.WARNING)
+    werkzeug_logger.propagate = True
+
+    werkzeug_serving_logger = logging.getLogger("werkzeug.serving")
+    werkzeug_serving_logger.handlers.clear()
+    werkzeug_serving_logger.setLevel(werkzeug_logger.level)
+    werkzeug_serving_logger.propagate = True
+
+    logging.getLogger("flask-limiter").setLevel(logging.WARNING)
+    return werkzeug_logger

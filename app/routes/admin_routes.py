@@ -228,6 +228,7 @@ def update_chatbot_config():
     if status < 400 and payload.get("success"):
         chatbot_config_events.publish_config_update({
             "max_tokens": data.get("max_tokens"),
+            "max_tokens_user": data.get("max_tokens_user"),
             "daily_message_limit": data.get("daily_message_limit"),
         })
     return jsonify(payload), status

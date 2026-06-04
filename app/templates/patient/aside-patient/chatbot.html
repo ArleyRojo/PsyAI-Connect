@@ -23,11 +23,6 @@
 <link rel="stylesheet" href="/css/pages/patient.css">
 <link rel="stylesheet" href="/responsive/general.css">
   <link rel="stylesheet" href="/responsive/responsive-patient.css">
-  <style>
-    #chatbot-section .chat-input-area {
-      flex-wrap: wrap;
-    }
-  </style>
   <script src="/js/core/shared/theme.js"></script>
 <script src="/js/core/shared/localStorage-detector.js"></script>
 
@@ -65,30 +60,40 @@
 
     <!-- Contenido principal -->
     <main class="main-content flex-grow-1 ms-250 p-4">
-      <header class="main-header d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 fw-bold"><i class="fas fa-robot me-2 text-primary"></i>Chatbot Emocional</h1>
-        <div class="user-info d-flex align-items-center">
-          <i class="fas fa-bell text-secondary fs-5 me-3"></i>
-          <span class="fw-semibold text-dark" id="nombrePaciente">Hola, </span>
+      <header class="main-header d-flex justify-content-between align-items-start mb-4">
+        <div>
+          <h1 class="h3 fw-bold mb-1"><i class="fas fa-robot me-2 text-primary"></i>Chatbot Emocional</h1>
+          <p class="text-muted small mb-0">Tu asistente de bienestar emocional — conversaciones seguras y confidenciales</p>
+        </div>
+        <div class="user-info d-flex align-items-center gap-2">
+          <div class="user-avatar-sm">
+            <i class="fas fa-user"></i>
+          </div>
+          <span class="fw-semibold" id="nombrePaciente">Hola, </span>
         </div>
       </header>
 
       <!-- Chatbot -->
-      <section id="chatbot-section" class="card p-3">
+      <section id="chatbot-section">
         <!-- Encabezado del chat -->
-        <div class="chat-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Asistente Emocional</h5>
-         <div class="chat-header__actions d-flex align-items-center">
-           <span class="text-muted small me-3"><span class="status-dot"></span>En línea</span>
-           <small id="msg-counter" class="text-muted small me-3"></small>
-           <button type="button" class="btn-clear-chat" id="btn-clear-chat" title="Eliminar chat" aria-label="Eliminar chat">
-             <i class="fas fa-trash-alt"></i>
-             <span>Eliminar</span>
-           </button>
-           <button type="button" class="btn-fullscreen" id="btn-fullscreen" title="Pantalla completa">
-             <i class="fas fa-expand"></i>
-           </button>
-         </div>
+        <div class="chat-header">
+          <h5 class="mb-0">
+            <i class="fas fa-robot" style="color:var(--chat-heading);"></i>
+            Asistente Emocional
+            <span class="chat-status-badge">
+              <span class="status-dot"></span>En línea
+            </span>
+          </h5>
+          <div class="chat-header__actions">
+            <small id="msg-counter" class="text-muted"></small>
+            <button type="button" class="btn-clear-chat" id="btn-clear-chat" title="Eliminar chat" aria-label="Eliminar chat">
+              <i class="fas fa-trash-alt"></i>
+              <span>Eliminar</span>
+            </button>
+            <button type="button" class="btn-fullscreen" id="btn-fullscreen" title="Pantalla completa">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Área de conversación -->
@@ -169,7 +174,7 @@
   <!-- Bootstrap JS (solo para componentes visuales) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/modules/auth/auth-guard.js"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260522-5">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
 <script src="/js/modules/patient/aside.js?v=20260522-5"></script>

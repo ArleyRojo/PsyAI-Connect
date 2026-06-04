@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isPatientPage() || document.querySelector('.mobile-bottom-nav[data-role="patient"]')) return;
 
         const items = [
-            { href: 'patient.dashboard.html', icon: 'fas fa-home', label: 'Inicio' },
+            { href: '/', icon: 'fas fa-home', label: 'Inicio' },
             { href: 'aside-patient/chatbot.html', icon: 'fas fa-robot', label: 'Chatbot' },
             { href: 'aside-patient/agenda-quotes.html', icon: 'fas fa-calendar-alt', label: 'Agenda' },
             { href: 'aside-patient/mensajes.html', icon: 'fas fa-comments', label: 'Mensajes' },

@@ -314,7 +314,12 @@ function inicializarModalHistorial() {
       const data = await res.json();
 
       if (!data.success || !data.citas || data.citas.length === 0) {
-        histDiv.innerHTML = '<div class="text-center text-muted py-3">No hay citas en el historial</div>';
+        histDiv.innerHTML = `
+          <div class="hist-empty">
+            <div class="hist-empty__icon"><i class="far fa-calendar-alt"></i></div>
+            <div class="hist-empty__title">Sin historial</div>
+            <div class="hist-empty__desc">Aún no tienes citas registradas. Las citas completadas y canceladas aparecerán aquí.</div>
+          </div>`;
         return;
       }
 
@@ -325,18 +330,55 @@ function inicializarModalHistorial() {
       });
 
       if (historial.length === 0) {
-        histDiv.innerHTML = '<div class="text-center text-muted py-3">No hay citas en el historial</div>';
+        histDiv.innerHTML = `
+          <div class="hist-empty">
+            <div class="hist-empty__icon"><i class="far fa-calendar-check"></i></div>
+            <div class="hist-empty__title">Todo al día</div>
+            <div class="hist-empty__desc">No hay citas pasadas o canceladas en tu historial.</div>
+          </div>`;
       } else {
-        histDiv.innerHTML = historial.map(c => `
-          <div class="list-group-item d-flex justify-content-between align-items-start">
-            <div>
-              <div class="fw-semibold">${c.tipoCita} &mdash; ${c.profesional || '&mdash;'}</div>
-              <small class="text-muted">${c.fecha} &middot; ${formatearHora(c.hora)}</small>
-              ${c.motivoCancelacion ? `<div class="mt-1"><small class="text-danger"><i class="fas fa-info-circle me-1"></i><strong>Motivo cancelación:</strong> ${c.motivoCancelacion}</small></div>` : ''}
+        const completadas = historial.filter(c => c.estado === 'Completada').length;
+        const canceladas = historial.filter(c => c.estado === 'Cancelada').length;
+
+        histDiv.innerHTML = `
+          <div class="hist-stats">
+            <div class="hist-stats__item">
+              <span class="hist-stats__value">${historial.length}</span>
+              <span class="hist-stats__label">Total</span>
             </div>
-            <span class="badge bg-${c.estado === 'Completada' ? 'success' : c.estado === 'Cancelada' ? 'danger' : 'secondary'} ms-2 flex-shrink-0">${c.estado}</span>
+            <div class="hist-stats__item">
+              <span class="hist-stats__value hist-stats__value--success">${completadas}</span>
+              <span class="hist-stats__label">Completadas</span>
+            </div>
+            <div class="hist-stats__item">
+              <span class="hist-stats__value hist-stats__value--danger">${canceladas}</span>
+              <span class="hist-stats__label">Canceladas</span>
+            </div>
           </div>
-        `).join('');
+          <div class="hist-list">
+          ${historial.map((c, i) => `
+            <div class="hist-card" style="animation-delay:${i * 0.04}s">
+              <div class="hist-card__accent hist-card__accent--${c.estado === 'Completada' ? 'success' : 'danger'}"></div>
+              <div class="hist-card__left">
+                <div class="hist-card__icon ${c.estado === 'Completada' ? 'hist-card__icon--success' : 'hist-card__icon--danger'}">
+                  ${c.estado === 'Completada' ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>'}
+                </div>
+                <div class="hist-card__body">
+                  <div class="hist-card__top">
+                    <div class="hist-card__title">${c.tipoCita}</div>
+                    <span class="hist-card__badge hist-card__badge--${c.estado === 'Completada' ? 'success' : 'danger'}">${c.estado}</span>
+                  </div>
+                  <div class="hist-card__meta">
+                    <span><i class="fas fa-user-md"></i>${c.profesional || '&mdash;'}</span>
+                    <span><i class="fas fa-calendar-day"></i>${c.fecha}</span>
+                    <span><i class="far fa-clock"></i>${formatearHora(c.hora)}</span>
+                  </div>
+                  ${c.motivoCancelacion ? `<div class="hist-card__cancel-reason"><i class="fas fa-info-circle"></i><strong>Motivo:</strong> ${c.motivoCancelacion}</div>` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+          </div>`;
       }
     } catch(e) {
       histDiv.innerHTML = '<div class="text-center text-muted py-3">Error al cargar historial</div>';
