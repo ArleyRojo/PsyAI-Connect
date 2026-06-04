@@ -41,7 +41,7 @@ La integración con Gemini soporta **rotación automática de API keys** para di
 ### Frontend
 | Tecnología | Uso |
 |---|---|
-| **HTML / Jinja2** | Plantillas del servidor |
+| **HTML / Jinja2 / Boostrap 5.0.2** | Plantillas del servidor |
 | **CSS personalizado** | Estilos por módulo, tema y responsividad |
 | **JavaScript vanilla** | Lógica de UI por módulo (sin frameworks) |
 | **SSE (Server-Sent Events)** | Actualizaciones en tiempo real en el panel admin |
