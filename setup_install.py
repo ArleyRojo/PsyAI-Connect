@@ -67,7 +67,7 @@ CREDENTIALS: dict[str, str] = {
     "GEMINI_MODEL":             "gemini-2.5-flash-lite",
 
     # Resend (emails)
-    "RESEND_API_KEY":           "re_7CKAtZdY_D6D1ZZW1HVvCuR5hC4Xipj9H",
+    "RESEND_API_KEY":           "",
     "SMTP_FROM":                "manuelrojasq21@gmail.com",
 
     # Logs
