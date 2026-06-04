@@ -854,3 +854,467 @@
     max-width: 100% !important;
   }
 }
+
+/* ============================================================
+   Patient final responsive layer
+   Loaded before responsive-fix.css, so selectors are intentionally
+   scoped and specific enough for patient pages.
+   ============================================================ */
+
+@media (max-width: 991px) {
+  body:has(.sidebar) .main-content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    padding: var(--patient-content-pt, 4.35rem) clamp(0.8rem, 2.5vw, 1.35rem) 1.25rem !important;
+    overflow-x: hidden !important;
+  }
+
+  body:has(.sidebar) .main-header,
+  body:has(.sidebar) .section-card,
+  body:has(.sidebar) .accordion-responsive,
+  body:has(.sidebar) .card,
+  body:has(.sidebar) section {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(.sidebar) .section-card {
+    padding: clamp(1rem, 2.2vw, 1.35rem) !important;
+    margin-bottom: 1rem !important;
+    border-radius: var(--patient-card-radius, 14px) !important;
+  }
+
+  body:has(.sidebar) .section-card > .d-flex.justify-content-between {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  body:has(.sidebar) .section-title {
+    min-width: 0;
+    margin-bottom: 0.9rem !important;
+    font-size: clamp(0.98rem, 2vw, 1.1rem) !important;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  body:has(.sidebar) .btn-outline-muted,
+  body:has(.sidebar) .btn-primary-gradient,
+  body:has(.sidebar) .button,
+  body:has(.sidebar) .btn {
+    min-width: 0;
+    max-width: 100%;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  body:has(.sidebar) .accordion-responsive {
+    margin-bottom: 1rem !important;
+  }
+
+  body:has(.sidebar) .accordion-responsive .accordion-button {
+    min-width: 0 !important;
+    gap: 0.55rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  body:has(.sidebar) .accordion-responsive .accordion-body .button,
+  body:has(.sidebar) .accordion-responsive .accordion-body .btn {
+    width: auto;
+  }
+
+  body:has(.sidebar) .main-header .user-info,
+  body:has(.sidebar) .user-greeting,
+  body:has(.sidebar) #nombrePaciente {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 767px) {
+  body:has(.sidebar) .main-content {
+    padding: var(--patient-content-pt, 4.35rem) 0.75rem calc(1rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body:has(.sidebar) .main-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0.65rem !important;
+  }
+
+  body:has(.sidebar) .main-header h1,
+  body:has(.sidebar) .main-header .h3 {
+    width: 100%;
+    min-width: 0;
+  }
+
+  body:has(.sidebar) .main-header .user-info {
+    display: flex !important;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+  }
+
+  body:has(.sidebar) .main-header .btn-notif {
+    flex: 0 0 36px;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  body:has(.sidebar) .main-header .user-avatar,
+  body:has(.sidebar) .main-header [data-avatar] {
+    flex: 0 0 34px;
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  body:has(.sidebar) .accordion-responsive .accordion-body .button,
+  body:has(.sidebar) .accordion-responsive .accordion-body .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  body:has(.sidebar) .main-content {
+    padding-left: 0.55rem !important;
+    padding-right: 0.55rem !important;
+  }
+
+  body:has(.sidebar) .section-card {
+    padding: 0.85rem !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Agenda quotes */
+@media (max-width: 991px) {
+  body.patient-agenda-page #formCita,
+  body:has(#stepperCitas) #formCita {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.patient-agenda-page #formCita .step-panel,
+  body:has(#stepperCitas) #formCita .step-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.patient-agenda-page #formCita .row,
+  body:has(#stepperCitas) #formCita .row {
+    --bs-gutter-x: 0.85rem;
+    --bs-gutter-y: 0.85rem;
+  }
+
+  body.patient-agenda-page .price-tag-modern,
+  body.patient-agenda-page .modality-selector-modern,
+  body.patient-agenda-page .calendario-container,
+  body:has(#stepperCitas) .price-tag-modern,
+  body:has(#stepperCitas) .modality-selector-modern,
+  body:has(#stepperCitas) .calendario-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.patient-agenda-page .btn-primary-gradient,
+  body.patient-agenda-page .btn-outline-muted,
+  body:has(#stepperCitas) .btn-primary-gradient,
+  body:has(#stepperCitas) .btn-outline-muted {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    border-radius: 12px;
+  }
+
+  body.patient-agenda-page #stepPanel1 .text-end,
+  body:has(#stepperCitas) #stepPanel1 .text-end {
+    text-align: right !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body.patient-agenda-page .section-card > .d-flex.justify-content-between,
+  body:has(#stepperCitas) .section-card > .d-flex.justify-content-between {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  body.patient-agenda-page #btnVerHistorialPaciente,
+  body:has(#stepperCitas) #btnVerHistorialPaciente {
+    width: 100%;
+  }
+
+  body.patient-agenda-page .citas-table,
+  body:has(#tablaCitas) .citas-table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border-spacing: 0 !important;
+  }
+
+  body.patient-agenda-page .citas-table thead,
+  body:has(#tablaCitas) .citas-table thead {
+    display: none !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody,
+  body:has(#tablaCitas) .citas-table tbody {
+    display: grid !important;
+    gap: 0.7rem !important;
+    width: 100% !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody tr,
+  body:has(#tablaCitas) .citas-table tbody tr {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    gap: 0 !important;
+    padding: 0.85rem !important;
+    border: 1px solid rgba(13, 71, 161, 0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 6px 18px rgba(13, 71, 161, 0.06) !important;
+    transform: none !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody td,
+  body:has(#tablaCitas) .citas-table tbody td {
+    display: grid !important;
+    grid-template-columns: minmax(5.8rem, 34%) minmax(0, 1fr) !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    justify-self: stretch !important;
+    padding: 0.45rem 0 !important;
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08) !important;
+    font-size: 0.82rem !important;
+    overflow-wrap: anywhere;
+  }
+
+  body.patient-agenda-page .citas-table tbody td:last-child,
+  body:has(#tablaCitas) .citas-table tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody td::before,
+  body:has(#tablaCitas) .citas-table tbody td::before {
+    color: var(--color-text-muted, #60758f);
+    font-size: 0.66rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  body.patient-agenda-page .citas-table td:nth-child(1)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(1)::before { content: "Fecha"; }
+
+  body.patient-agenda-page .citas-table td:nth-child(2)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(2)::before { content: "Horario"; }
+
+  body.patient-agenda-page .citas-table td:nth-child(3)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(3)::before { content: "Tipo"; }
+
+  body.patient-agenda-page .citas-table td:nth-child(4)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(4)::before { content: "Motivo"; }
+
+  body.patient-agenda-page .citas-table td:nth-child(5)::before,
+  body:has(#tablaCitas) .citas-table td:nth-child(5)::before { content: "Accion"; }
+
+  body.patient-agenda-page .citas-table tbody td[colspan],
+  body:has(#tablaCitas) .citas-table tbody td[colspan] {
+    display: block !important;
+    text-align: center !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody td[colspan]::before,
+  body:has(#tablaCitas) .citas-table tbody td[colspan]::before {
+    content: none !important;
+  }
+
+  body.patient-agenda-page .stepper-wrapper,
+  body:has(#stepperCitas) .stepper-wrapper {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: start !important;
+    gap: 0.45rem !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  body.patient-agenda-page .step-item,
+  body:has(#stepperCitas) .step-item {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    gap: 0.35rem !important;
+    min-width: 0 !important;
+    text-align: center !important;
+  }
+
+  body.patient-agenda-page .step-item::after,
+  body:has(#stepperCitas) .step-item::after {
+    content: none !important;
+  }
+
+  body.patient-agenda-page .step-circle,
+  body:has(#stepperCitas) .step-circle {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+  }
+
+  body.patient-agenda-page .step-label,
+  body:has(#stepperCitas) .step-label {
+    display: block;
+    width: 100%;
+    font-size: 0.72rem !important;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  body.patient-agenda-page .price-tag-modern,
+  body:has(#stepperCitas) .price-tag-modern {
+    padding: 0.85rem !important;
+  }
+
+  body.patient-agenda-page .price-value,
+  body:has(#stepperCitas) .price-value {
+    font-size: 1rem !important;
+  }
+
+  body.patient-agenda-page .modality-selector-modern,
+  body:has(#stepperCitas) .modality-selector-modern {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.patient-agenda-page .modality-option,
+  body:has(#stepperCitas) .modality-option {
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 0.7rem 0.5rem !important;
+    overflow: hidden;
+  }
+
+  body.patient-agenda-page .modality-option span,
+  body:has(#stepperCitas) .modality-option span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body.patient-agenda-page #stepPanel1 .text-end,
+  body:has(#stepperCitas) #stepPanel1 .text-end {
+    text-align: left !important;
+  }
+
+  body.patient-agenda-page #stepPanel1 .btn-primary-gradient,
+  body:has(#stepperCitas) #stepPanel1 .btn-primary-gradient,
+  body.patient-agenda-page #stepPanel2 .d-flex,
+  body.patient-agenda-page #stepPanel3 .d-flex,
+  body:has(#stepperCitas) #stepPanel2 .d-flex,
+  body:has(#stepperCitas) #stepPanel3 .d-flex {
+    width: 100% !important;
+  }
+
+  body.patient-agenda-page #stepPanel2 .d-flex,
+  body.patient-agenda-page #stepPanel3 .d-flex,
+  body:has(#stepperCitas) #stepPanel2 .d-flex,
+  body:has(#stepperCitas) #stepPanel3 .d-flex {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.6rem !important;
+  }
+
+  body.patient-agenda-page #stepPanel1 .btn-primary-gradient,
+  body.patient-agenda-page #stepPanel2 .btn-primary-gradient,
+  body.patient-agenda-page #stepPanel2 .btn-outline-muted,
+  body.patient-agenda-page #stepPanel3 .btn-primary-gradient,
+  body.patient-agenda-page #stepPanel3 .btn-outline-muted,
+  body:has(#stepperCitas) #stepPanel1 .btn-primary-gradient,
+  body:has(#stepperCitas) #stepPanel2 .btn-primary-gradient,
+  body:has(#stepperCitas) #stepPanel2 .btn-outline-muted,
+  body:has(#stepperCitas) #stepPanel3 .btn-primary-gradient,
+  body:has(#stepperCitas) #stepPanel3 .btn-outline-muted {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  body.patient-agenda-page #diasCalendario,
+  body:has(#stepperCitas) #diasCalendario {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  }
+
+  body.patient-agenda-page .dia-calendario,
+  body:has(#stepperCitas) .dia-calendario {
+    min-width: 0 !important;
+    min-height: 34px !important;
+    border-radius: 9px !important;
+    font-size: 0.78rem !important;
+  }
+
+  html.dark-mode body.patient-agenda-page .citas-table tbody tr,
+  html.dark-mode body:has(#tablaCitas) .citas-table tbody tr {
+    background: var(--dm-card, #0b1429) !important;
+    border-color: var(--dm-border, #1a2b4a) !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body.patient-agenda-page .stepper-wrapper,
+  body:has(#stepperCitas) .stepper-wrapper {
+    gap: 0.25rem !important;
+  }
+
+  body.patient-agenda-page .step-circle,
+  body:has(#stepperCitas) .step-circle {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    font-size: 0.82rem !important;
+  }
+
+  body.patient-agenda-page .step-label,
+  body:has(#stepperCitas) .step-label {
+    font-size: 0.66rem !important;
+  }
+
+  body.patient-agenda-page .citas-table tbody td,
+  body:has(#tablaCitas) .citas-table tbody td {
+    grid-template-columns: 1fr !important;
+    gap: 0.15rem !important;
+  }
+
+  body.patient-agenda-page .price-tag-modern,
+  body:has(#stepperCitas) .price-tag-modern {
+    gap: 0.65rem !important;
+  }
+
+  body.patient-agenda-page .price-icon,
+  body:has(#stepperCitas) .price-icon {
+    width: 38px !important;
+    height: 38px !important;
+    flex: 0 0 38px !important;
+  }
+
+  body.patient-agenda-page .pay-methods,
+  body:has(#stepperCitas) .pay-methods {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
