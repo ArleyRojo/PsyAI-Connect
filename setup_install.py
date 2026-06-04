@@ -1,138 +1,62 @@
+import sys
 import os
 import subprocess
 import secrets
 
 
-def print_separator(title):
+def install_package(package):
+    result = subprocess.run(
+        [sys.executable, '-m', 'pip', 'show', package],
+        capture_output=True, text=True
+    )
+    if result.returncode == 0:
+        print(f"\u26a0\ufe0f {package} ya estaba instalado")
+    else:
+        subprocess.check_call(
+            [sys.executable, '-m', 'pip', 'install', package],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        print(f"\u2705 {package} instalado")
+
+
+def main():
+    print("Iniciando configuraci\u00f3n de PsyAI Connect...\n")
+
+    # 1. Instalar dependencias
+    packages = [
+        'python-dotenv',
+        'bcrypt',
+        'requests',
+    ]
+    for pkg in packages:
+        install_package(pkg)
+
     print()
-    print("=" * 60)
-    print(f"  {title}")
-    print("=" * 60)
+
+    # 2. Configurar .env y SECRET_KEY
+    from dotenv import load_dotenv, set_key
+
+    if not os.path.exists('.env'):
+        with open('.env', 'a'):
+            pass
+
+    load_dotenv()
+
+    secret_key = os.getenv('SECRET_KEY')
+    if not secret_key:
+        new_secret = secrets.token_hex(32)
+        set_key('.env', 'SECRET_KEY', new_secret)
+        print("\u2705 SECRET_KEY configurado.")
+    else:
+        print("\u2705 SECRET_KEY ya estaba configurado.")
+
+    # 3. Resumen final
     print()
+    print("\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557")
+    print("\u2551   PsyAI Connect \u2014 Setup completado  \u2551")
+    print("\u2551   Corre: python run.py              \u2551")
+    print("\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d")
 
 
-def run_command(cmd, error_msg):
-    result = subprocess.run(cmd, shell=True)
-    if result.returncode != 0:
-        print(f"\n[ERROR] {error_msg}")
-        input("Presiona Enter para salir...")
-        exit(1)
-    return result
-
-
-# ── 1. Verificar Python ───────────────────────────────────────────────
-print_separator("PsyAI Connect - Instalacion")
-
-python_cmd = "python"
-try:
-    subprocess.run(f"{python_cmd} --version", shell=True, capture_output=True, check=True)
-except subprocess.CalledProcessError:
-    python_cmd = "py"
-    try:
-        subprocess.run(f"{python_cmd} --version", shell=True, capture_output=True, check=True)
-    except subprocess.CalledProcessError:
-        print("[ERROR] Python no encontrado.")
-        print("Descargalo en: https://www.python.org/downloads/")
-        print('Marca "Add Python to PATH" al instalar.')
-        input("Presiona Enter para salir...")
-        exit(1)
-
-print(f"  [OK] Python detectado ({python_cmd}).\n")
-
-
-# ── 2. Verificar requirements.txt ─────────────────────────────────────
-print_separator("Verificando dependencias")
-
-if not os.path.exists("requirements.txt"):
-    print("[ERROR] No se encuentra requirements.txt.")
-    print("Asegurate de que el archivo este en el directorio actual.")
-    input("Presiona Enter para salir...")
-    exit(1)
-
-print("  [OK] requirements.txt encontrado.\n")
-
-
-# ── 3. Crear entorno virtual ──────────────────────────────────────────
-print_separator("Entorno virtual")
-
-if not os.path.exists("venv"):
-    print("Creando entorno virtual...")
-    run_command(f"{python_cmd} -m venv venv", "No se pudo crear el entorno virtual.")
-    print("  [OK] Entorno virtual creado.\n")
-else:
-    print("  [OK] venv ya existe.\n")
-
-
-# ── 4. Instalar dependencias en venv ───────────────────────────────────
-print_separator("Instalando dependencias (venv)")
-
-venv_python = os.path.join("venv", "Scripts", "python.exe")
-run_command(
-    f"{venv_python} -m pip install --upgrade pip -q",
-    "No se pudo actualizar pip."
-)
-run_command(
-    f"{venv_python} -m pip install -r requirements.txt",
-    "Fallo al instalar dependencias en venv."
-)
-print("  [OK] Dependencias instaladas en venv.\n")
-
-
-# ── 5. Instalar dependencias globalmente ───────────────────────────────
-print_separator("Instalando dependencias (global)")
-
-global_result = subprocess.run(
-    f"{python_cmd} -m pip install -r requirements.txt",
-    shell=True
-)
-if global_result.returncode == 0:
-    print("  [OK] Dependencias instaladas globalmente.\n")
-else:
-    print("  [WARNING] No se pudieron instalar las dependencias globalmente.")
-    print("           Puedes ignorar esto si solo usas el entorno virtual.\n")
-
-
-# ── 6. Crear .env si no existe ─────────────────────────────────────────
-print_separator("Archivo de configuracion (.env)")
-
-ENV_FILE = ".env"
-if not os.path.exists(ENV_FILE):
-    secret_key = secrets.token_hex(32)
-    print("Generando .env con SECRET_KEY unica...")
-    with open(ENV_FILE, "w") as f:
-        f.write("# --- Flask ---------------------------------------------------\n")
-        f.write(f"SECRET_KEY={secret_key}\n")
-        f.write("\n")
-        f.write("FLASK_ENV=development\n")
-        f.write("\n")
-        f.write("# --- Base de datos MySQL (XAMPP) ----------------------------\n")
-        f.write("DB_HOST=localhost\n")
-        f.write("DB_PORT=3306\n")
-        f.write("DB_USER=root\n")
-        f.write("DB_PASSWORD=root\n")
-        f.write("DB_NAME=psyai_connect\n")
-        f.write("\n")
-        f.write("# --- Pool de conexiones --------------------------------------\n")
-        f.write("DB_POOL_NAME=psyai_pool\n")
-        f.write("DB_POOL_SIZE=5\n")
-        f.write("DB_POOL_RESET_SESSION=true\n")
-        f.write("\n")
-        f.write("# --- Gemini AI -----------------------------------------------\n")
-        f.write("GEMINI_API_KEY=YOUR_GEMINI_API_KEY\n")
-        f.write("GEMINI_MODEL=gemini-2.5-flash\n")
-        f.write("\n")
-        f.write("# --- Logs ----------------------------------------------------\n")
-        f.write("LOG_LEVEL=INFO\n")
-        f.write("LOG_FORMAT=werkzeug\n")
-    print("  [OK] .env creado.\n")
-else:
-    print("  [OK] .env ya existe.\n")
-
-
-# ── 7. Finalizar ──────────────────────────────────────────────────────
-print_separator("Instalacion completada")
-
-print("Instalacion completada correctamente.")
-print("Edita el archivo .env y agrega tu Gemini API key.")
-print()
-input("Presiona Enter para salir...")
+if __name__ == '__main__':
+    main()

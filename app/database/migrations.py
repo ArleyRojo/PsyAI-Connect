@@ -187,6 +187,17 @@ def init_db():
                 FOREIGN KEY (idReceptor) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            """
+            CREATE TABLE IF NOT EXISTS RecoveryTokens (
+                id        INT AUTO_INCREMENT PRIMARY KEY,
+                idUsuario INT NOT NULL,
+                token     VARCHAR(100) NOT NULL UNIQUE,
+                expires   DATETIME NOT NULL,
+                used      TINYINT(1) DEFAULT 0,
+                createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (idUsuario) REFERENCES Register(idUsuario) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
         ]
 
         cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
@@ -247,6 +258,7 @@ def init_db():
             ("medium_terms", "ALTER TABLE ChatbotConfig ADD COLUMN medium_terms TEXT DEFAULT NULL"),
             ("medium_response", "ALTER TABLE ChatbotConfig ADD COLUMN medium_response TEXT DEFAULT NULL"),
             ("daily_message_limit", "ALTER TABLE ChatbotConfig ADD COLUMN daily_message_limit INT DEFAULT 20"),
+            ("max_tokens_user", "ALTER TABLE ChatbotConfig ADD COLUMN max_tokens_user INT DEFAULT 2000"),
         ):
             cursor.execute("""
                 SELECT COUNT(*) FROM information_schema.COLUMNS

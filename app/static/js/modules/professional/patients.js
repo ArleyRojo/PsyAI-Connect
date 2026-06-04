@@ -67,9 +67,10 @@ function cargarPacientes() {
 
             tbody.innerHTML = pacientes.map(function (p) {
                 var inicial = (p.nombre || "P").charAt(0).toUpperCase();
+                var colorLetra = coloresLetras[inicial.toUpperCase()] || "#6c757d";
                 var fotoUrl = p.fotoPerfil
                     ? "/uploads/" + p.fotoPerfil
-                    : svgAvatar(inicial, 35, '#2196F3', 12);
+                    : svgAvatar(inicial, 35, colorLetra, 14);
 
                 // Si este paciente ya está seleccionado, marcar el botón
                 var isSelected = pacienteSeleccionado === Number(p.idUsuario);
@@ -80,13 +81,13 @@ function cargarPacientes() {
                 var nomSafe   = (p.nombre || "").replace(/"/g, '&quot;');
                 var fotoSafe  = (p.fotoPerfil || "").replace(/"/g, '&quot;');
 
-                return "<tr class='patient-row" + (isSelected ? " selected-patient" : "") + "'>" +
-                    "<td><img src='" + fotoUrl + "' class='rounded-circle me-2' style='width:35px;height:35px;object-fit:cover;'>" + (p.nombre || "—") + "</td>" +
+                return '<tr class="patient-row' + (isSelected ? " selected-patient" : "") + '">' +
+                    '<td><img src="' + fotoUrl + '" class="rounded-circle me-2" style="width:35px;height:35px;object-fit:cover;" data-inicial="' + inicial + '" data-color="' + colorLetra + '" data-size="35" data-fz="14" onerror="fallbackAvatar(this)">' + (p.nombre || "—") + '</td>' +
                     "<td>—</td>" +
                     "<td>—</td>" +
                     "<td>" + (p.email || "—") + "</td>" +
                     "<td>—</td>" +
-                    "<td><button class='" + btnClass + "' onclick='seleccionarPaciente(" + Number(p.idUsuario) + ", \"" + nomSafe + "\", \"" + fotoSafe + "\", \"" + emailSafe + "\", this)'>" + btnTxt + "</button></td>" +
+                    '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + Number(p.idUsuario) + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this)\'>' + btnTxt + "</button></td>" +
                     "</tr>";
             }).join('');
         })
@@ -124,9 +125,10 @@ function seleccionarPaciente(id, nombre, fotoPerfil, email, btn) {
 
         // Avatar
         var inicial = (nombre || "P").charAt(0).toUpperCase();
+        var colorLetra = coloresLetras[inicial.toUpperCase()] || "#6c757d";
         var fotoUrl = fotoPerfil
             ? "/uploads/" + fotoPerfil
-            : svgAvatar(inicial, 46, '#2196F3', 16);
+            : svgAvatar(inicial, 46, colorLetra, 18);
 
         // Guardar estado
         pacienteSeleccionado = id;
@@ -138,6 +140,16 @@ function seleccionarPaciente(id, nombre, fotoPerfil, email, btn) {
         document.getElementById("selectedPatientPhoto").src         = fotoUrl;
 
         // Mostrar banner y ocultar botón solitario
+        document.getElementById("selectedPatientPhoto").setAttribute("data-inicial", inicial);
+        document.getElementById("selectedPatientPhoto").setAttribute("data-color", colorLetra);
+        document.getElementById("selectedPatientPhoto").setAttribute("data-size", "46");
+        document.getElementById("selectedPatientPhoto").setAttribute("data-fz", "18");
+        document.getElementById("selectedPatientPhoto").onerror = function() { fallbackAvatar(this); };
+        document.getElementById("step2Photo").setAttribute("data-inicial", inicial);
+        document.getElementById("step2Photo").setAttribute("data-color", colorLetra);
+        document.getElementById("step2Photo").setAttribute("data-size", "46");
+        document.getElementById("step2Photo").setAttribute("data-fz", "18");
+        document.getElementById("step2Photo").onerror = function() { fallbackAvatar(this); };
         document.getElementById("paciente-seleccionado-card").classList.remove('d-none');
         document.getElementById("wrapBtnContinuar").style.display = 'none';
 
@@ -502,6 +514,25 @@ function getEnergiaColor(n) {
 function getEstadoColor(e) {
     var m = { feliz:'success', tranquilo:'info', estresado:'warning', ansioso:'secondary', triste:'danger' };
     return m[(e || '').toLowerCase()] || 'primary';
+}
+
+var coloresLetras = {
+    'A':'#1D9E75','B':'#378ADD','C':'#D85A30','D':'#534AB7','E':'#BA7517',
+    'F':'#639922','G':'#D4537E','H':'#1D9E75','I':'#378ADD','J':'#D85A30',
+    'K':'#534AB7','L':'#BA7517','M':'#639922','N':'#D4537E','O':'#1D9E75',
+    'P':'#378ADD','Q':'#D85A30','R':'#534AB7','S':'#BA7517','T':'#639922',
+    'U':'#D4537E','V':'#1D9E75','W':'#378ADD','X':'#D85A30','Y':'#534AB7',
+    'Z':'#BA7517'
+};
+
+function fallbackAvatar(img) {
+    if (!img || !img.parentNode) return;
+    var inicial = img.getAttribute("data-inicial") || "?";
+    var color = img.getAttribute("data-color") || coloresLetras[inicial.toUpperCase()] || "#6c757d";
+    var size = parseInt(img.getAttribute("data-size")) || 35;
+    var fz = parseInt(img.getAttribute("data-fz")) || 14;
+    img.src = svgAvatar(inicial, size, color, fz);
+    img.onerror = null;
 }
 
 function svgAvatar(letra, size, color, fontSize) {

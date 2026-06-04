@@ -39,7 +39,8 @@ async function cargarConfig() {
             document.getElementById('fallbackResponse').value = config.fallback_response || '';
             document.getElementById('temperature').value = config.temperature || 0.55;
             document.getElementById('topP').value = config.top_p || 0.9;
-            document.getElementById('maxTokens').value = config.max_tokens || 420;
+            document.getElementById('maxTokens').value = config.max_tokens || 600;
+            document.getElementById('maxTokensUser').value = config.max_tokens_user || 1000;
             document.getElementById('dailyMessageLimit').value = config.daily_message_limit || 20;
             
             originalConfig = {
@@ -51,7 +52,8 @@ async function cargarConfig() {
                 fallback_response: config.fallback_response || '',
                 temperature: config.temperature || 0.55,
                 top_p: config.top_p || 0.9,
-                max_tokens: config.max_tokens || 420,
+                max_tokens: config.max_tokens || 600,
+                max_tokens_user: config.max_tokens_user || 1000,
                 daily_message_limit: config.daily_message_limit || 20
             };
             
@@ -98,7 +100,12 @@ async function cargarEstadisticas() {
 function actualizarSliderDisplays() {
     document.getElementById('tempValue').textContent = parseFloat(document.getElementById('temperature').value).toFixed(2);
     document.getElementById('topPValue').textContent = parseFloat(document.getElementById('topP').value).toFixed(2);
-    document.getElementById('maxTokensValue').textContent = document.getElementById('maxTokens').value;
+    const maxTokens = document.getElementById('maxTokens');
+    const maxTokensUser = document.getElementById('maxTokensUser');
+    maxTokens.max = '1000';
+    maxTokensUser.max = '1000';
+    document.getElementById('maxTokensValue').textContent = maxTokens.value;
+    document.getElementById('maxTokensUserValue').textContent = maxTokensUser.value;
 }
 
 function configurarFormularioConfig() {
@@ -117,6 +124,10 @@ function configurarFormularioConfig() {
         document.getElementById('maxTokensValue').textContent = this.value;
     });
     
+    document.getElementById('maxTokensUser').addEventListener('input', function() {
+        document.getElementById('maxTokensUserValue').textContent = this.value;
+    });
+    
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -130,6 +141,7 @@ function configurarFormularioConfig() {
             temperature: parseFloat(document.getElementById('temperature').value),
             top_p: parseFloat(document.getElementById('topP').value),
             max_tokens: parseInt(document.getElementById('maxTokens').value),
+            max_tokens_user: parseInt(document.getElementById('maxTokensUser').value),
             daily_message_limit: parseInt(document.getElementById('dailyMessageLimit').value)
         };
         
@@ -160,7 +172,7 @@ function configurarFormularioConfig() {
             
             if (result.success) {
                 PsyAIAlerts.success('Configuración Guardada', 'La configuración del chatbot se ha guardado correctamente.');
-                notificarCambioConfigChatbot(currentData.max_tokens, currentData.daily_message_limit);
+                notificarCambioConfigChatbot(currentData.max_tokens, currentData.max_tokens_user, currentData.daily_message_limit);
                 if (result.message) {
                     document.getElementById('saveInfo').textContent = 'Última modificación: ' + result.message;
                     document.getElementById('fechaActualizacion').textContent = 'Última actualización: ' + result.message;
@@ -179,9 +191,10 @@ function configurarFormularioConfig() {
     });
 }
 
-function notificarCambioConfigChatbot(maxTokens, dailyMessageLimit) {
+function notificarCambioConfigChatbot(maxTokens, maxTokensUser, dailyMessageLimit) {
     const payload = {
         max_tokens: maxTokens,
+        max_tokens_user: maxTokensUser,
         daily_message_limit: dailyMessageLimit,
         updated_at: Date.now()
     };

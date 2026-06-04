@@ -192,12 +192,21 @@ html.dark-mode .field-row .field-value { color: var(--dm-text1, #daeeff); }
         <!-- Avatar -->
         <div class="card profile-card p-4 mb-4 text-center">
             <h5><i class="fas fa-user-circle icon-avatar"></i>Mi Avatar</h5>
-            <div class="mb-3 d-flex justify-content-center">
-                <div class="avatar-ring">
-                    <div data-avatar="inicial" style="width:150px;height:150px;"></div>
+            <div class="mb-3 d-flex justify-content-center" style="position:relative;display:inline-block">
+                <div class="avatar-ring" id="avatarRingPreview">
+                    <img id="fotoPerfilPreview" src="" alt="Foto de perfil" style="width:150px;height:150px;border-radius:50%;object-fit:cover;display:none">
+                    <div data-avatar="inicial" style="width:150px;height:150px;" id="avatarInicialPreview"></div>
                 </div>
+                <button type="button" id="btnCambiarFoto" style="position:absolute;bottom:8px;right:8px;width:38px;height:38px;border:2px solid #fff;border-radius:50%;background:var(--brand-gradient,#0D47A1);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.15);font-size:.9rem" title="Cambiar foto">
+                    <i class="fas fa-camera"></i>
+                </button>
             </div>
-            <p class="text-muted small">Avatar generado automáticamente a partir de tu nombre</p>
+            <input type="file" id="inputFoto" accept="image/*" style="display:none">
+            <p class="text-muted small" id="avatarStatusText">Haz clic en el icono de la c&aacute;mara para cambiar tu foto de perfil</p>
+            <div id="avatarActions" style="display:none;margin-top:10px;gap:8px;justify-content:center">
+                <button type="button" id="btnGuardarFoto" class="btn btn-sm" style="background:var(--brand-gradient,#0D47A1);color:#fff;border:none;border-radius:6px;padding:6px 18px;font-size:.85rem;cursor:pointer;transition:all .2s">Guardar cambios</button>
+                <button type="button" id="btnCancelarFoto" class="btn btn-sm" style="background:transparent;color:#666;border:1px solid #ccc;border-radius:6px;padding:6px 18px;font-size:.85rem;cursor:pointer;transition:all .2s">Cancelar</button>
+            </div>
         </div>
 
         <!-- Información Personal -->
@@ -378,7 +387,7 @@ html.dark-mode .field-row .field-value { color: var(--dm-text1, #daeeff); }
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/modules/auth/auth-guard.js"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260522-5">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
 <script src="/js/modules/patient/aside.js?v=20260522-5"></script>

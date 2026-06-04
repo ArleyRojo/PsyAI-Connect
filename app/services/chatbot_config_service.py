@@ -25,7 +25,8 @@ Responde siempre en espanol, con tono calido y profesional. Usa 2 a 4 frases com
     "interaction_rules": "Responde con empatía, mantén frases breves y no proporciones diagnósticos médicos.",
     "temperature": 0.55,
     "top_p": 0.9,
-    "max_tokens": 420,
+    "max_tokens": 600,
+    "max_tokens_user": 1000,
     "daily_message_limit": 20,
 }
 
@@ -45,6 +46,7 @@ def get_config():
         "temperature": config.get("temperature") if config.get("temperature") is not None else DEFAULT_CONFIG["temperature"],
         "top_p": config.get("top_p") if config.get("top_p") is not None else DEFAULT_CONFIG["top_p"],
         "max_tokens": config.get("max_tokens") if config.get("max_tokens") is not None else DEFAULT_CONFIG["max_tokens"],
+        "max_tokens_user": config.get("max_tokens_user") if config.get("max_tokens_user") is not None else DEFAULT_CONFIG["max_tokens_user"],
         "daily_message_limit": config.get("daily_message_limit") if config.get("daily_message_limit") is not None else DEFAULT_CONFIG["daily_message_limit"],
     }
     
@@ -60,6 +62,7 @@ def save_config(data, admin_id):
     temperature = data.get("temperature")
     top_p = data.get("top_p")
     max_tokens = data.get("max_tokens")
+    max_tokens_user = data.get("max_tokens_user")
     daily_message_limit = data.get("daily_message_limit")
     
     if temperature is not None:
@@ -81,10 +84,18 @@ def save_config(data, admin_id):
     if max_tokens is not None:
         try:
             max_tokens = int(max_tokens)
-            if max_tokens < 100 or max_tokens > 1000:
-                return {"success": False, "message": "Max tokens debe estar entre 100 y 1000"}, 400
+            if max_tokens < 100 or max_tokens > 2000:
+                return {"success": False, "message": "Max tokens del bot debe estar entre 100 y 2000"}, 400
         except (ValueError, TypeError):
-            return {"success": False, "message": "Max tokens debe ser un número entre 100 y 1000"}, 400
+            return {"success": False, "message": "Max tokens del bot debe ser un número entre 100 y 2000"}, 400
+    
+    if max_tokens_user is not None:
+        try:
+            max_tokens_user = int(max_tokens_user)
+            if max_tokens_user < 200 or max_tokens_user > 4000:
+                return {"success": False, "message": "Max tokens del usuario debe estar entre 200 y 4000"}, 400
+        except (ValueError, TypeError):
+            return {"success": False, "message": "Max tokens del usuario debe ser un número entre 200 y 4000"}, 400
     
     if daily_message_limit is not None:
         try:

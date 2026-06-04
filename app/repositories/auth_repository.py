@@ -128,3 +128,5 @@ def update_password(user_id, new_password_hash):
         )
         conn.commit()
         return cursor.rowcount > 0
+
+

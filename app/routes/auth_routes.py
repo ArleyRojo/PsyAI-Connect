@@ -58,6 +58,13 @@ def logout():
 @auth_bp.route("/api/session", methods=["GET"])
 def check_session():
     if session.get("idUsuario"):
+        fp = session.get("fotoPerfil")
+        if fp:
+            import os
+            fpath = os.path.join(current_app.root_path, "static", "uploads", fp)
+            if not os.path.exists(fpath):
+                session.pop("fotoPerfil", None)
+                fp = None
         return jsonify(
             {
                 "success": True,
@@ -71,21 +78,24 @@ def check_session():
                 "idUsuario": session.get("idUsuario"),
                 "nombre": session.get("nombre"),
                 "rol": session.get("rol"),
-                "fotoPerfil": session.get("fotoPerfil"),
+                "fotoPerfil": fp,
             }
         )
     return jsonify({"success": True, "logged_in": False})
 
 
-@auth_bp.route("/api/recover", methods=["POST"])
-def recover_password():
+@auth_bp.route("/api/forgot-password", methods=["POST"])
+def forgot_password():
     limiter = current_app.get_limiter()
     try:
         with limiter.limit("3 per minute"):
             pass
     except RateLimitExceeded:
         return jsonify({"success": False, "message": "Demasiadas solicitudes. Intenta más tarde."}), 429
-    payload, status = auth_service.recover_password(request.get_json() or {})
+
+    data = request.get_json() or {}
+    email = data.get("email", "").strip()
+    payload, status = auth_service.recover_password(email)
     return jsonify(payload), status
 
 
@@ -97,5 +107,10 @@ def reset_password():
             pass
     except RateLimitExceeded:
         return jsonify({"success": False, "message": "Demasiadas solicitudes. Intenta más tarde."}), 429
-    payload, status = auth_service.reset_password(request.get_json() or {})
+
+    data = request.get_json() or {}
+    payload, status = auth_service.reset_password(data)
     return jsonify(payload), status
+
+
+

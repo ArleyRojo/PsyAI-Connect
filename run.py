@@ -1,161 +1,132 @@
-import os
-import socket
-import sys
 import logging
+import os
+import sys
+import time
 
 from dotenv import load_dotenv
+import flask.cli
 
-env_path = os.path.join(os.path.dirname(__file__), '.env')
+
+BOOT_STARTED_AT = time.perf_counter()
+BASE_DIR = os.path.dirname(__file__)
+env_path = os.path.join(BASE_DIR, ".env")
 if not os.path.exists(env_path):
-    env_path = os.path.join(os.path.dirname(__file__), '.env.example')
+    env_path = os.path.join(BASE_DIR, ".env.example")
 load_dotenv(env_path)
 
-API_LIST = [
-    ("POST", "/api/register"),
-    ("POST", "/api/login"),
-    ("POST", "/api/logout"),
-    ("GET", "/api/session"),
-    ("POST", "/api/recover"),
-    ("POST", "/api/reset-password"),
-    ("POST", "/api/admin/crear-columnas-diagnostico"),
-    ("GET", "/api/admin/stats"),
-    ("GET", "/api/admin/usuarios"),
-    ("GET", "/api/admin/usuarios/<id>"),
-    ("POST", "/api/admin/usuarios"),
-    ("PUT", "/api/admin/usuarios/<id>"),
-    ("DELETE", "/api/admin/usuarios/<id>"),
-    ("PATCH", "/api/admin/usuarios/<id>/bloquear"),
-    ("GET", "/api/admin/roles/usuarios"),
-    ("PATCH", "/api/admin/usuarios/<id>/rol"),
-    ("GET", "/api/admin/roles/historial"),
-    ("GET", "/api/admin/notificaciones"),
-    ("POST", "/api/admin/notificaciones"),
-    ("DELETE", "/api/admin/notificaciones/<id>"),
-    ("GET", "/api/admin/logs"),
-    ("GET", "/api/perfil/paciente/<id>"),
-    ("PUT", "/api/perfil/paciente"),
-    ("POST", "/api/evolucion"),
-    ("GET", "/api/evolucion"),
-    ("GET", "/api/pacientes"),
-    ("GET", "/api/profesionales"),
-    ("GET", "/api/perfil/profesional/<id>"),
-    ("PUT", "/api/perfil/profesional"),
-    ("POST", "/api/disponibilidad"),
-    ("GET", "/api/disponibilidad/<id>"),
-    ("GET", "/api/profesional/dashboard"),
-    ("GET", "/api/profesional/pacientes"),
-    ("POST", "/api/diagnosticos"),
-    ("GET", "/api/diagnosticos"),
-    ("GET", "/api/reportes/profesional"),
-    ("GET", "/api/reportes/eliminados"),
-    ("POST", "/api/reportes"),
-    ("PUT", "/api/reportes/<id>"),
-    ("DELETE", "/api/reportes/<id>"),
-    ("GET", "/api/evolucion/profesional"),
-    ("POST", "/api/citas"),
-    ("GET", "/api/citas/disponibles"),
-    ("GET", "/api/citas/profesional"),
-    ("GET", "/api/citas/profesional/horarios"),
-    ("GET", "/api/citas/proxima"),
-    ("GET", "/api/citas/solicitadas"),
-    ("PATCH", "/api/citas/<id>/estado"),
-    ("GET", "/api/citas/paciente"),
-    ("DELETE", "/api/citas/<id>"),
-    ("GET", "/api/citas/fechas-disponibles"),
-    ("GET", "/healthz"),
-]
 
-STATIC_FILES = {
-    "IMAGES": [
-        "static/img/Psicologia2.jpg",
-        "static/img/psicologia1.jpg",
-        "static/img/Psicologia.jpg",
-        "static/img/Logo.jpg",
-    ],
-    "JS": [
-        "static/js/modules/auth/auth-guard.js",
-        "static/js/modules/auth/logout.js",
-        "static/js/modules/auth/login.js",
-        "static/js/modules/auth/recover.js",
-        "static/js/modules/auth/register.js",
-        "static/js/modules/auth/auth-ui.js",
-        "static/js/modules/professional/my.agenda.js",
-        "static/js/modules/professional/patients.js",
-        "static/js/modules/professional/my.profile2.js",
-        "static/js/modules/professional/reports.js",
-        "static/js/modules/professional/aside.js",
-        "static/js/modules/admin/admin.logs.js",
-        "static/js/modules/admin/admin.dashboard.js",
-        "static/js/modules/admin/admin.users.js",
-        "static/js/modules/admin/admin.notifications.js",
-        "static/js/modules/admin/admin.roles.js",
-        "static/js/modules/patient/chatbot.js",
-        "static/js/modules/patient/my.profile.js",
-        "static/js/modules/patient/evolution.js",
-        "static/js/modules/patient/agendaquotes.js",
-        "static/js/modules/patient/aside.js",
-        "static/js/core/shared/alerts.js",
-        "static/js/core/shared/theme-inline.js",
-        "static/js/core/shared/nombre.usuario.js",
-        "static/js/core/shared/localStorage-detector.js",
-        "static/js/core/shared/theme.js",
-        "static/js/core/shared/scroll-reveal.js",
-        "static/js/core/shared/mobile-navbar-toggle.js",
-        "static/js/core/shared/aside.js",
-        "static/js/pages/index.js",
-    ],
-    "CSS": [
-        "static/css/themes/theme.css",
-        "static/css/components/components.css",
-        "static/css/components/custom-alerts.css",
-        "static/css/pages/auth.css",
-        "static/css/pages/admin.css",
-        "static/css/pages/landing.css",
-        "static/css/pages/patient.css",
-        "static/css/pages/professional.css",
-        "static/css/base/base.css",
-        "static/css/base/animations.css",
-        "static/css/layout/layout.css",
-        "static/responsive/index.css",
-        "static/responsive/auth.css",
-    ],
-}
+def configure_terminal_logging():
+    os.environ.setdefault("PYTHONUNBUFFERED", "1")
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", line_buffering=True)
+        sys.stderr.reconfigure(encoding="utf-8", line_buffering=True)
+    except Exception:
+        pass
+
+    log_level_name = os.getenv("LOG_LEVEL", "ERROR").upper()
+    log_level = getattr(logging, log_level_name, logging.ERROR)
+    logging.basicConfig(
+        level=log_level,
+        format="[%(asctime)s] %(levelname)-7s %(name)s: %(message)s",
+        stream=sys.stdout,
+        force=True,
+    )
+
+    for logger_name in ("flask.app", "app"):
+        logger = logging.getLogger(logger_name)
+        logger.setLevel(log_level)
+        logger.propagate = True
+
+    werkzeug_level = logging.INFO if os.getenv("SHOW_WERKZEUG_LOGS", "0") == "1" else logging.WARNING
+    for logger_name in ("werkzeug", "werkzeug.serving"):
+        logger = logging.getLogger(logger_name)
+        logger.handlers.clear()
+        logger.setLevel(werkzeug_level)
+        logger.propagate = True
+
+    if os.getenv("LOG_THIRD_PARTY_DEBUG", "0") != "1":
+        logging.getLogger("mysql.connector").setLevel(logging.WARNING)
+        logging.getLogger("flask-limiter").setLevel(logging.WARNING)
 
 
-def print_app_info():
-    print("\n" + "=" * 60)
-    print("PsyAI Connect - Endpoints Disponibles")
-    print("=" * 60)
-    print("\n--- APIs (REST) ---")
-    for method, path in API_LIST:
-        print(f"  {method:6} {path}")
-    print("\n--- Archivos Estaticos ---")
-    for category, files in STATIC_FILES.items():
-        print(f"\n  [{category}]")
-        for f in files:
-            print(f"    {f}")
-    print("\n" + "=" * 60)
+def get_registered_routes(flask_app):
+    ignored_methods = {"HEAD", "OPTIONS"}
+    routes = []
+    for rule in sorted(flask_app.url_map.iter_rules(), key=lambda item: item.rule):
+        methods = sorted(method for method in rule.methods if method not in ignored_methods)
+        route_type = "API" if rule.rule.startswith("/api/") or rule.rule == "/healthz" else "PAGE"
+        routes.append(
+            {
+                "methods": methods,
+                "path": rule.rule,
+                "endpoint": rule.endpoint,
+                "type": route_type,
+            }
+        )
+    return routes
 
 
-from app import create_app
-from app.database.migrations import init_db
+def print_route_section(title, routes):
+    print(f"\n--- {title} ---", flush=True)
+    if not routes:
+        print("  No hay rutas registradas.", flush=True)
+        return
+
+    for route in routes:
+        methods = ",".join(route["methods"])
+        print(f"  {methods:18} {route['path']:<55} -> {route['endpoint']}", flush=True)
+
+
+def print_app_info(flask_app):
+    routes = get_registered_routes(flask_app)
+    api_routes = [route for route in routes if route["type"] == "API"]
+
+    print("\n" + "=" * 60, flush=True)
+    print("PsyAI Connect - APIs REST y errores", flush=True)
+    print("=" * 60, flush=True)
+    print_route_section("APIs REST registradas", api_routes)
+    print("\n" + "=" * 60, flush=True)
+
+
+def hide_flask_banner():
+    flask.cli.show_server_banner = lambda *args, **kwargs: None
+
+
+configure_terminal_logging()
+
+from app import create_app  # noqa: E402
+from app.database.migrations import init_db  # noqa: E402
 
 
 app = create_app()
+app.config["REGISTERED_ROUTES"] = get_registered_routes(app)
 
 with app.app_context():
     try:
         init_db()
-    except Exception:
-        pass
+    except Exception as exc:
+        app.logger.exception("No se pudo inicializar la base de datos: %s", exc)
 
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    
-    logging.getLogger('werkzeug').setLevel(logging.INFO)
-    logging.getLogger('flask-limiter').setLevel(logging.WARNING)
-    logging.getLogger('werkzeug._internal').setLevel(logging.WARNING)
-    
-    print_app_info()
-    app.run(debug=False, host="127.0.0.1", port=port, use_reloader=False, use_evalex=False, threaded=True)
+    debug_enabled = os.getenv("FLASK_DEBUG", "0") == "1"
+    boot_ms = (time.perf_counter() - BOOT_STARTED_AT) * 1000
+
+    hide_flask_banner()
+    print_app_info(app)
+    print("\n" + "=" * 60, flush=True)
+    print(f"[INICIO] Servidor preparado en {boot_ms:.1f} ms", flush=True)
+    print(f"Servidor iniciado en: http://127.0.0.1:{port}", flush=True)
+    print(f"Listado JSON de APIs: http://127.0.0.1:{port}/api/routes", flush=True)
+    print("Terminal: recursos por apartado, acciones REST y errores de pagina", flush=True)
+    print("=" * 60 + "\n", flush=True)
+
+    app.run(
+        debug=debug_enabled,
+        host="127.0.0.1",
+        port=port,
+        use_reloader=False,
+        use_evalex=False,
+        threaded=True,
+    )

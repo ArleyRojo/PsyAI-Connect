@@ -25,7 +25,8 @@ def _get_config():
             "fallback_response": "¿Cómo te sientes hoy?",
             "temperature": 0.55,
             "top_p": 0.9,
-            "max_tokens": 420,
+            "max_tokens": 600,
+            "max_tokens_user": 1000,
             "daily_message_limit": 20,
         }
 
@@ -295,13 +296,14 @@ MAL: "Entiendo que estás pasando por un momento difícil. Es importante buscar 
 BIEN: "Suena a que estás cargando mucho. ¿Qué es lo que más te está pesando ahorita?"
 """
 
+    max_user_chars = config.get("max_tokens_user", 1000)
     payload = {
         "systemInstruction": {"parts": [{"text": system_prompt}]},
-        "contents": _build_contents(history, message),
+        "contents": _build_contents(history, message, max_user_chars),
         "generationConfig": {
             "temperature": config.get("temperature", 0.75),
             "topP": config.get("top_p", 0.92),
-            "maxOutputTokens": config.get("max_tokens", 420),
+            "maxOutputTokens": config.get("max_tokens", 600),
         },
     }
     req = Request(
@@ -329,7 +331,7 @@ BIEN: "Suena a que estás cargando mucho. ¿Qué es lo que más te está pesando
 
 
 
-def _build_contents(history, message):
+def _build_contents(history, message, max_user_chars=1000):
     contents = []
     for item in history[-20:]:
         if not isinstance(item, dict):
@@ -338,8 +340,9 @@ def _build_contents(history, message):
         if not text:
             continue
         role = "model" if item.get("tipo") == "bot" else "user"
-        contents.append({"role": role, "parts": [{"text": text[:1000]}]})
-    contents.append({"role": "user", "parts": [{"text": message[:2000]}]})
+        history_limit = max_user_chars // 2
+        contents.append({"role": role, "parts": [{"text": text[:history_limit]}]})
+    contents.append({"role": "user", "parts": [{"text": message[:max_user_chars]}]})
     return contents
 
 

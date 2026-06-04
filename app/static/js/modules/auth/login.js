@@ -15,6 +15,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    const savedEmail = localStorage.getItem('savedEmail');
+    const savedPassword = localStorage.getItem('savedPassword');
+    const recordarLogin = document.getElementById('recordar-login');
+    if (savedEmail) {
+        emailInput.value = savedEmail;
+        if (recordarLogin) recordarLogin.checked = true;
+    }
+    if (savedPassword) {
+        passwordInput.value = savedPassword;
+    }
+
     function redirigir(rol) {
         if (rol === 'admin') window.location.href = 'admin.dashboard.html';
         else if (rol === 'profesional') window.location.href = 'professional.dashboard.html';
@@ -68,6 +79,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await res.json();
 
             if (data.success) {
+                if (recordarLogin && recordarLogin.checked) {
+                    localStorage.setItem('savedEmail', email);
+                    localStorage.setItem('savedPassword', password);
+                } else {
+                    localStorage.removeItem('savedEmail');
+                    localStorage.removeItem('savedPassword');
+                }
                 localStorage.setItem('usuario', JSON.stringify(data.usuario));
                 localStorage.removeItem('sessionUser');
                 const nombre = data.usuario.nombre || email;

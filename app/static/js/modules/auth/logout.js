@@ -7,5 +7,5 @@ async function cerrarSesion() {
     localStorage.removeItem('usuario');
     localStorage.removeItem('sessionUser');
   } catch (_) {}
-  window.location.href = '../index.html';
+  window.location.href = '/';
 }
