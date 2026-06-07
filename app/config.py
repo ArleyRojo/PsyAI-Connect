@@ -58,6 +58,19 @@ class Config:
     # ADVERTENCIA: memory:// no escala con múltiples workers ni persiste entre reinicios.
     # En producción usar: redis://localhost:6379/0
     RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
+    _is_production = FLASK_ENV == "production"
+    REGISTER_RATE_LIMIT = os.getenv(
+        "REGISTER_RATE_LIMIT",
+        "5 per minute" if _is_production else "20 per minute",
+    )
+    LOGIN_RATE_LIMIT = os.getenv(
+        "LOGIN_RATE_LIMIT",
+        "10 per minute" if _is_production else "60 per minute",
+    )
+    PASSWORD_RECOVERY_RATE_LIMIT = os.getenv(
+        "PASSWORD_RECOVERY_RATE_LIMIT",
+        "3 per minute" if _is_production else "10 per minute",
+    )
 
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 

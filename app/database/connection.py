@@ -91,7 +91,19 @@ def get_connection():
         from flask import current_app
         init_pool(current_app._get_current_object())
     try:
-        return _pool.get_connection()
+        conn = _pool.get_connection()
+        try:
+            # Verifica que la conexión esté activa; si no, intenta reconectar automáticamente
+            conn.ping(reconnect=True, attempts=3, delay=1)
+        except Error as pe:
+            logger.warning(f"Conexión del pool inactiva o caída ({pe}). Intentando obtener una nueva conexión...")
+            try:
+                conn.close()
+            except Exception:
+                pass
+            conn = _pool.get_connection()
+            conn.ping(reconnect=True, attempts=3, delay=1)
+        return conn
     except Error as e:
         logger.error(f"Error obteniendo conexión del pool: {e}")
         raise

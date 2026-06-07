@@ -48,20 +48,20 @@ function cargarPacientes() {
     var tbody = document.getElementById("tbodyPacientes");
     if (!tbody) return;
 
-    tbody.innerHTML = "<tr><td colspan='6' class='text-center py-3'><i class='fas fa-spinner fa-spin me-2'></i>Cargando...</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='7' class='text-center py-3'><i class='fas fa-spinner fa-spin me-2'></i>Cargando...</td></tr>";
 
     fetch("/api/pacientes", { credentials: "include" })
         .then(function (res) { return res.json(); })
         .then(function (data) {
             if (!data.success) {
-                tbody.innerHTML = "<tr><td colspan='6' class='text-danger text-center'>" + data.message + "</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>" + data.message + "</td></tr>";
                 return;
             }
 
             var pacientes = data.pacientes || data.usuarios || [];
 
             if (pacientes.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='6' class='text-muted text-center py-4'>No hay pacientes registrados</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='7' class='text-muted text-center py-4'>No hay pacientes registrados</td></tr>";
                 return;
             }
 
@@ -80,6 +80,7 @@ function cargarPacientes() {
                 var emailSafe = (p.email || "").replace(/"/g, '&quot;');
                 var nomSafe   = (p.nombre || "").replace(/"/g, '&quot;');
                 var fotoSafe  = (p.fotoPerfil || "").replace(/"/g, '&quot;');
+                var pacienteId = Number(p.idUsuario);
 
                 return '<tr class="patient-row' + (isSelected ? " selected-patient" : "") + '">' +
                     '<td><img src="' + fotoUrl + '" class="rounded-circle me-2" style="width:35px;height:35px;object-fit:cover;" data-inicial="' + inicial + '" data-color="' + colorLetra + '" data-size="35" data-fz="14" onerror="fallbackAvatar(this)">' + (p.nombre || "—") + '</td>' +
@@ -87,13 +88,14 @@ function cargarPacientes() {
                     "<td>—</td>" +
                     "<td>" + (p.email || "—") + "</td>" +
                     "<td>—</td>" +
-                    '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + Number(p.idUsuario) + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this)\'>' + btnTxt + "</button></td>" +
+                    '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + pacienteId + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this)\'>' + btnTxt + "</button></td>" +
+                    '<td><a href="historia_clinica_pro.html?pacienteId=' + pacienteId + '" class="btn btn-sm btn-outline-info" title="Ver historia clínica"><i class="fas fa-file-medical"></i></a></td>' +
                     "</tr>";
             }).join('');
         })
         .catch(function (err) {
             console.error(err);
-            tbody.innerHTML = "<tr><td colspan='6' class='text-danger text-center'>Error al cargar pacientes</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error al cargar pacientes</td></tr>";
         });
 }
 

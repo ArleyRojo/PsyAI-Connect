@@ -419,6 +419,9 @@ El servidor estará disponible en `http://127.0.0.1:5000`.
 | `SMTP_FROM` | Dirección de envío | Para correos |
 | `FLASK_ENV` | Entorno (`development` / `production`) | No |
 | `RATELIMIT_STORAGE_URI` | URI para almacenamiento de rate limit (Redis recomendado en prod) | No |
+| `LOGIN_RATE_LIMIT` | Límite para `POST /api/login` | No |
+| `REGISTER_RATE_LIMIT` | Límite para `POST /api/register` | No |
+| `PASSWORD_RECOVERY_RATE_LIMIT` | Límite para recuperar/restablecer contraseña | No |
 
 ---
 

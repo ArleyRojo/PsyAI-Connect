@@ -195,6 +195,46 @@ def eliminar_historial_chatbot():
     return jsonify({"success": True}), 200
 
 
+# -- HISTORIA CLINICA / DOCUMENTOS -------------------------------------
+@patient_bp.route("/api/paciente/documentos", methods=["GET"])
+@require_role("paciente")
+def listar_documentos_paciente():
+    from app.services import documento_service
+    payload = documento_service.list_patient_dashboard(session.get("idUsuario"))
+    return jsonify(payload), (200 if payload.get("success") else 500)
+
+
+@patient_bp.route("/api/paciente/documentos/subir", methods=["POST"])
+@require_role("paciente")
+def subir_documento_paciente():
+    from app.services import documento_service
+    file = request.files.get("archivo")
+    descripcion = request.form.get("descripcion", "")
+    payload, status = documento_service.upload_patient_doc(session.get("idUsuario"), file, descripcion)
+    return jsonify(payload), status
+
+
+@patient_bp.route("/api/paciente/documentos/<int:id_documento>", methods=["DELETE"])
+@require_role("paciente")
+def eliminar_documento_paciente(id_documento: int):
+    from app.services import documento_service
+    payload, status = documento_service.delete_patient_doc(id_documento, session.get("idUsuario"))
+    return jsonify(payload), status
+
+
+@patient_bp.route("/api/paciente/documentos/<int:id_documento>/autorizacion", methods=["PUT"])
+@require_role("paciente")
+def toggle_autorizacion_documento(id_documento: int):
+    from app.services import documento_service
+    professional_id = request.args.get("profesionalId", type=int)
+    if not professional_id:
+        return jsonify({"success": False, "message": "Falta profesionalId"}), 400
+    payload, status = documento_service.toggle_autorizacion(
+        id_documento, session.get("idUsuario"), professional_id,
+    )
+    return jsonify(payload), status
+
+
 # -- MENSAJERIA DIRECTA -------------------------------------------------
 @patient_bp.route("/api/chat/profesionales", methods=["GET"])
 @require_role("paciente")

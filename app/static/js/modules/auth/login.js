@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
+    let isSubmitting = false;
 
     roleBtns.forEach(btn => {
         btn.addEventListener('click', function () {
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
+        if (isSubmitting) return;
 
         const email = emailInput.value.trim();
         const password = passwordInput.value.trim();
@@ -69,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         try {
+            isSubmitting = true;
             const res = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -105,6 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.removeItem('usuario');
             localStorage.removeItem('sessionUser');
             mostrarToast('No fue posible iniciar sesion. Verifica que el servidor este disponible e intenta nuevamente.', 'danger');
+        } finally {
+            isSubmitting = false;
         }
     });
 

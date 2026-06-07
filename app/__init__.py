@@ -216,6 +216,18 @@ def _extract_response_summary(response):
     return None
 
 
+def _redact_sensitive(value):
+    sensitive_keys = {"password", "contrasena", "confirm_password", "new_password", "token"}
+    if isinstance(value, dict):
+        return {
+            key: "***" if str(key).lower() in sensitive_keys else _redact_sensitive(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_redact_sensitive(item) for item in value]
+    return value
+
+
 def _log_api_error(request, response):
     is_api = request.path.startswith("/api/") or request.path == "/healthz"
     if not is_api:
@@ -245,7 +257,7 @@ def _log_api_error(request, response):
         if body is None:
             body = request.form.to_dict() or request.get_data(as_text=True)
         if body:
-            print(f"  [BODY] {_shorten_text(body)}", flush=True)
+            print(f"  [BODY] {_shorten_text(_redact_sensitive(body))}", flush=True)
 
     response_summary = _extract_response_summary(response)
     if response_summary and response_summary != reason:
