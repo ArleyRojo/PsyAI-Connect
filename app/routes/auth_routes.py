@@ -55,7 +55,11 @@ def login():
 
 @auth_bp.route("/api/logout", methods=["POST"])
 def logout():
+    uid = session.get("idUsuario")
     session.clear()
+    if uid:
+        from app.services.telemetry_service import remove_user
+        remove_user(uid)
     return jsonify({"success": True, "message": "Sesion cerrada"}), 200
 
 

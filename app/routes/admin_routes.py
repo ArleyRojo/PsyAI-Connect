@@ -1,6 +1,10 @@
+import json
+import time as _time
+
 from flask import Blueprint, jsonify, request, session, Response
 
-from app.services import admin_service, chatbot_config_events, chatbot_config_service
+from app.services import admin_service, chatbot_config_events, chatbot_config_service, telemetry_service
+from app.services.telemetry_service import _normalize_ip
 from app.utils.auth import require_role
 from app.utils.db import db_cursor
 from app.repositories import admin_repository
@@ -40,12 +44,6 @@ def get_admin_stats():
 @admin_bp.route("/api/admin/stats/stream")
 @require_role("admin")
 def stats_stream():
-    import json
-    import time as _time
-    from flask import request
-    from app.services import telemetry_service
-    from app.services.telemetry_service import _normalize_ip
-
     client_ip = _normalize_ip(request.remote_addr or '127.0.0.1')
     telemetry_service.sse_connected(client_ip)
 
@@ -88,10 +86,6 @@ def stats_stream():
 @admin_bp.route("/api/admin/logs/stream")
 @require_role("admin")
 def logs_stream():
-    import json
-    import time as _time
-    from app.repositories import admin_repository
-
     def generate():
         last_version = -1
         while True:
@@ -210,6 +204,15 @@ def eliminar_notificacion(id_notificacion: int):
 def get_logs():
     payload, status = admin_service.get_logs()
     return jsonify(payload), status
+
+
+@admin_bp.route("/api/admin/usuarios-online", methods=["GET"])
+@require_role("admin")
+def get_usuarios_online():
+    from app.services.telemetry_service import get_active_user_ids
+    ids = get_active_user_ids()
+    usuarios = admin_repository.get_users_by_ids(ids)
+    return jsonify({"success": True, "usuarios": usuarios, "total": len(usuarios)}), 200
 
 
 @admin_bp.route("/api/admin/chatbot-config", methods=["GET"])

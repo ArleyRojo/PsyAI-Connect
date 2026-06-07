@@ -363,6 +363,23 @@ def delete_notification(notification_id):
         conn.commit()
 
 
+def get_users_by_ids(user_ids):
+    """Fetch basic details for a list of user IDs."""
+    if not user_ids:
+        return []
+    placeholders = ",".join(["%s"] * len(user_ids))
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(
+            f"""
+            SELECT idUsuario, nombre, email, rol, fotoPerfil
+            FROM Register
+            WHERE idUsuario IN ({placeholders})
+            """,
+            user_ids,
+        )
+        return cursor.fetchall()
+
+
 def get_logs(limit=None):
     with db_cursor(dictionary=True) as (_, cursor):
         limit_clause = f"LIMIT {limit}" if limit else "LIMIT 200"

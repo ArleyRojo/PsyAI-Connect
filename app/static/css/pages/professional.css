@@ -5391,6 +5391,9 @@ button.chat-item {
   bottom: 1px;
   right: 1px;
 }
+.chat-online-dot.offline {
+  background: #b0b8c4;
+}
 
 /* ── Item text ── */
 .chat-item-info {

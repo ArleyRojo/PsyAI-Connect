@@ -63,10 +63,11 @@
   function avatarHtml(contact) {
     var name = escapeHtml(contact.nombre || "Usuario");
     var rawName = contact.nombre || "Usuario";
+    var dotClass = contact.isOnline ? "chat-online-dot" : "chat-online-dot offline";
     if (contact.fotoPerfil) {
-      return `<div class="chat-avatar-circle"><img class="chat-avatar-img" src="${photoUrl(contact.fotoPerfil)}" alt="${escapeHtml(rawName)}" data-nombre="${escapeHtml(rawName)}" data-size="44" onerror="chatFallbackImg(this)"><span class="chat-online-dot"></span></div>`;
+      return `<div class="chat-avatar-circle"><img class="chat-avatar-img" src="${photoUrl(contact.fotoPerfil)}" alt="${escapeHtml(rawName)}" data-nombre="${escapeHtml(rawName)}" data-size="44" onerror="chatFallbackImg(this)"><span class="${dotClass}"></span></div>`;
     }
-    return `<div class="chat-avatar-circle"><img src="${chatAvatarSrc(contact.nombre, 44, 18)}" alt="${name}" style="width:100%;height:100%;border-radius:50%"><span class="chat-online-dot"></span></div>`;
+    return `<div class="chat-avatar-circle"><img src="${chatAvatarSrc(contact.nombre, 44, 18)}" alt="${name}" style="width:100%;height:100%;border-radius:50%"><span class="${dotClass}"></span></div>`;
   }
 
   function parseDate(value) {

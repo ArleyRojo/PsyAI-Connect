@@ -3,7 +3,7 @@ import re
 import time
 from urllib.parse import urlparse
 
-from flask import Flask, current_app, g, jsonify, request
+from flask import Flask, current_app, g, jsonify, request, session
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -420,7 +420,7 @@ def create_app():
         g._telemetry_start = _time.time()
         if request.path.startswith("/css/") or request.path.startswith("/js/") or request.path.startswith("/img/"):
             return
-        track_request(get_remote_address(), request.path)
+        track_request(get_remote_address(), request.path, session.get("idUsuario"))
 
     @app.after_request
     def telemetry_latency(response):

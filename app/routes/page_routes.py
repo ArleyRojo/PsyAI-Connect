@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, current_app, send_from_directory, render_template, request
+from flask import Blueprint, current_app, send_from_directory, render_template, request, session, redirect
 
 
 pages_bp = Blueprint("pages", __name__)
@@ -35,6 +35,20 @@ def serve_pages(filename: str):
     directly (e.g. /login.html, /aside-admin/users.html).
     After refactor, we keep URLs stable and map to app/templates/*.
     """
+    user_role = session.get("rol")
+
+    # Enforce role-based access control for templates
+    if filename == "admin.dashboard.html" or filename.startswith("aside-admin/"):
+        if user_role != "admin":
+            return redirect("/login.html")
+
+    if filename == "patient.dashboard.html" or filename.startswith("aside-patient/"):
+        if user_role != "paciente":
+            return redirect("/login.html")
+
+    if filename == "professional.dashboard.html" or filename.startswith("aside-professional/"):
+        if user_role != "profesional":
+            return redirect("/login.html")
 
     root = _template_root()
 

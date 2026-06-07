@@ -13,6 +13,7 @@ _visitas_fecha = time.strftime("%Y-%m-%d")
 _endpoints = Counter()
 _requests_history = deque()
 _active_clients = {}
+_active_users = {}  # user_id -> timestamp (última solicitud)
 _latency_samples = deque(maxlen=100)
 _active_sse = {}  # ip -> {"count": int, "ts": float}
 _version = 0  # Se incrementa con cada cambio para SSE
@@ -44,7 +45,7 @@ def _normalize_ip(ip):
         return '127.0.0.1'
     return ip
 
-def track_request(ip, endpoint):
+def track_request(ip, endpoint, user_id=None):
     global _requests_total, _version, _visitas_fecha
     ip = _normalize_ip(ip)
     today = time.strftime("%Y-%m-%d")
@@ -66,7 +67,9 @@ def track_request(ip, endpoint):
     _requests_history.append(now)
     _active_clients[ip] = now
 
-    # Limpiar historial mayor a 1 hora
+    if user_id:
+        _active_users[user_id] = now
+
     while _requests_history and _requests_history[0] < now - 3600:
         _requests_history.popleft()
 
@@ -93,6 +96,22 @@ def sse_heartbeat(ip):
     entry = _active_sse.get(ip)
     if entry:
         entry["ts"] = time.time()
+
+def remove_user(user_id):
+    """Mark a user as offline (called on logout)."""
+    _active_users.pop(user_id, None)
+    global _version
+    _version += 1
+
+
+def get_active_user_ids():
+    """Return list of user IDs active in the last 5 minutes."""
+    now = time.time()
+    stale = [uid for uid, ts in _active_users.items() if ts < now - 300]
+    for uid in stale:
+        del _active_users[uid]
+    return list(_active_users.keys())
+
 
 def track_latency(duration_ms):
     global _version
@@ -188,6 +207,10 @@ def get_live_stats():
     for ip in stale_clients:
         del _active_clients[ip]
     online = len(set(_active_sse.keys()) | set(_active_clients.keys()))
+    # Clean stale users
+    stale_users = [uid for uid, ts in _active_users.items() if ts < now - 300]
+    for uid in stale_users:
+        del _active_users[uid]
     actividad_hora = len(_requests_history)
     requests_minuto = sum(1 for ts in _requests_history if ts >= now - 60)
 
@@ -236,4 +259,5 @@ def get_live_stats():
         "alertas_warnings": warnings,
         "alertas_info": info_count,
         "security_timeline": timeline,
+        "active_user_ids": list(_active_users.keys()),
     }
