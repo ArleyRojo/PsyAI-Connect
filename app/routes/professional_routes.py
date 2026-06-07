@@ -238,6 +238,10 @@ def chat_listar_pacientes():
             "noLeidos": no_leidos,
         })
 
+    from app.services.telemetry_service import get_active_user_ids
+    online_ids = set(get_active_user_ids())
+    for r in resultado:
+        r["isOnline"] = r.get("idUsuario") in online_ids
     resultado = _ordenar_contactos_chat(resultado)
     return jsonify({"success": True, "pacientes": resultado}), 200
 
