@@ -1,6 +1,8 @@
-from flask import Blueprint, jsonify, request, session
+import os
 
-from app.repositories import mensajes_repository
+from flask import Blueprint, current_app, jsonify, request, session
+
+from app.repositories import documento_repository, mensajes_repository
 from app.services import professional_service
 from app.utils.auth import require_role, require_authenticated
 
@@ -135,6 +137,80 @@ def paciente_chatbot_historial(id_paciente: int):
         return auth_error
     payload, status = professional_service.get_patient_chatbot_history(session.get("idUsuario"), id_paciente)
     return jsonify(payload), status
+
+
+# -- HISTORIA CLINICA / DOCUMENTOS -------------------------------------
+@professional_bp.route("/api/profesional/paciente/<int:id_paciente>/documentos", methods=["GET"])
+@require_role("profesional")
+def listar_documentos_paciente(id_paciente: int):
+    from app.services import documento_service
+    payload = documento_service.list_patient_docs(session.get("idUsuario"), id_paciente)
+    return jsonify(payload), (200 if payload.get("success") else 500)
+
+
+@professional_bp.route("/api/profesional/paciente/<int:id_paciente>/documentos", methods=["POST"])
+@require_role("profesional")
+def subir_documento_paciente(id_paciente: int):
+    from app.services import documento_service
+    file = request.files.get("archivo")
+    categoria = request.form.get("categoria", "Otro")
+    visibilidad = request.form.get("visibilidad", "privado")
+    notas = request.form.get("notas", "")
+    payload, status = documento_service.upload_profesional_doc(
+        session.get("idUsuario"), id_paciente, file, categoria, visibilidad, notas,
+    )
+    return jsonify(payload), status
+
+
+@professional_bp.route("/api/profesional/documentos/<int:id_documento>/visibilidad", methods=["PUT"])
+@require_role("profesional")
+def toggle_visibilidad_documento(id_documento: int):
+    from app.services import documento_service
+    payload, status = documento_service.toggle_doc_visibility(id_documento, session.get("idUsuario"))
+    return jsonify(payload), status
+
+
+@professional_bp.route("/api/profesional/documentos/<int:id_documento>", methods=["DELETE"])
+@require_role("profesional")
+def eliminar_documento_profesional(id_documento: int):
+    from app.services import documento_service
+    payload, status = documento_service.delete_profesional_doc(id_documento, session.get("idUsuario"))
+    return jsonify(payload), status
+
+
+# -- SERVIDOR DE ARCHIVOS -----------------------------------------------
+@professional_bp.route("/api/descargar/documento-profesional/<int:id_documento>", methods=["GET"])
+@require_role("profesional")
+def descargar_documento_profesional(id_documento: int):
+    from flask import send_file
+    doc = documento_repository.get_profesional_doc_by_id(id_documento, session.get("idUsuario"))
+    if not doc:
+        return jsonify({"success": False, "message": "Documento no encontrado"}), 404
+    path = os.path.join(current_app.root_path, "static", doc["rutaArchivo"])
+    if not os.path.exists(path):
+        return jsonify({"success": False, "message": "Archivo no encontrado en el servidor"}), 404
+    return send_file(path, download_name=doc["nombreArchivo"], as_attachment=False)
+
+
+@professional_bp.route("/api/descargar/documento-paciente/<int:id_documento>", methods=["GET"])
+@require_role("profesional", "paciente")
+def descargar_documento_paciente(id_documento: int):
+    from flask import send_file
+    user_id = session.get("idUsuario")
+    rol = session.get("rol")
+    doc = documento_repository.get_patient_doc_by_id_any(id_documento)
+    if not doc:
+        return jsonify({"success": False, "message": "Documento no encontrado"}), 404
+    if rol == "paciente" and doc["idPaciente"] != user_id:
+        return jsonify({"success": False, "message": "No autorizado"}), 403
+    if rol == "profesional":
+        aut = documento_repository.get_autorizacion(id_documento, user_id)
+        if not aut or aut.get("revocado"):
+            return jsonify({"success": False, "message": "No autorizado"}), 403
+    path = os.path.join(current_app.root_path, "static", doc["rutaArchivo"])
+    if not os.path.exists(path):
+        return jsonify({"success": False, "message": "Archivo no encontrado en el servidor"}), 404
+    return send_file(path, download_name=doc["nombreArchivo"], as_attachment=False)
 
 
 # -- MENSAJERIA DIRECTA -------------------------------------------------

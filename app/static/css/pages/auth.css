@@ -310,12 +310,12 @@ html.dark-mode .link-action:hover { color: #b8d8f8; }
 /* ── Card tamaño fijo para que todos los pasos sean iguales ── */
 .login-card.login-card--register {
     max-width: 420px;
-    min-height: 560px;
+    min-height: auto;
     justify-content: flex-start;
 }
 
 /* ── Progress bar ── */
-.reg-progress { width: 100%; max-width: 300px; margin-bottom: 1.2rem; padding: 0 20px; box-sizing: border-box; }
+.reg-progress { width: 100%; max-width: 100%; margin-bottom: 1.2rem; padding: 0; box-sizing: border-box; }
 
 .reg-progress__label {
     display: flex;
@@ -375,7 +375,7 @@ html.dark-mode .link-action:hover { color: #b8d8f8; }
 .reg-panels-wrap { 
     flex: 1; 
     position: relative; 
-    min-height: 370px; 
+    min-height: auto; 
     padding: 15px 20px 0; 
     display: flex;
     flex-direction: column;
@@ -390,7 +390,7 @@ html.dark-mode .link-action:hover { color: #b8d8f8; }
     pointer-events: none;
     transition: opacity 0.28s ease, transform 0.28s ease;
     width: 100%;
-    max-width: 300px;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -419,7 +419,7 @@ html.dark-mode .link-action:hover { color: #b8d8f8; }
     gap: 0.5rem;
     margin-top: 1rem;
     width: 100%;
-    max-width: 320px;
+    max-width: 100%;
 }
 .btn-back {
     display: inline-flex;
@@ -486,7 +486,7 @@ html.dark-mode .link-action:hover { color: #b8d8f8; }
     margin-bottom: 1.15rem; 
     position: relative; 
     width: 100%; 
-    max-width: 320px; 
+    max-width: 100%; 
     margin-left: auto;
     margin-right: auto;
 }
@@ -643,7 +643,7 @@ html.dark-mode .gender-icon-select {
     border: 1.5px solid rgba(144,202,249,.22);
     margin-bottom: 0.9rem;
     width: 100%;
-    max-width: 320px;
+    max-width: 100%;
     line-height: 2;
 }
 .reg-resumen-box strong { color: var(--color-secondary, #0D47A1); font-weight: 700; }
@@ -652,11 +652,13 @@ html.dark-mode .gender-icon-select {
 .reg-panels-wrap {
     display: flex;
     flex-direction: column;
-    min-height: 370px;
+    min-height: auto;
 }
 
 .reg-panel.active {
     position: relative;
+    left: auto;
+    transform: none;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -852,7 +854,7 @@ html.dark-mode .gender-icon-select {
 
         .login-card.login-card--register {
             width: min(100%, 520px);
-            min-height: 640px;
+            min-height: auto;
             border-radius: 22px;
             padding: clamp(22px, 4vw, 38px);
             background: var(--paper);
@@ -880,7 +882,7 @@ html.dark-mode .gender-icon-select {
             justify-content: space-between;
             align-items: center;
             gap: 14px;
-            margin-bottom: 24px;
+            margin-bottom: 12px;
         }
 
         .back-index a,
@@ -896,8 +898,8 @@ html.dark-mode .gender-icon-select {
 
         .login-header {
             display: grid;
-            gap: 8px;
-            margin-bottom: 24px;
+            gap: 4px;
+            margin-bottom: 12px;
         }
 
         .login-header img { display: none; }
@@ -912,8 +914,8 @@ html.dark-mode .gender-icon-select {
 
         .login-header h1 {
             margin: 0;
-            font-size: clamp(2rem, 4vw, 3.25rem);
-            line-height: 1;
+            font-size: clamp(1.5rem, 3vw, 1.8rem);
+            line-height: 1.1;
             font-weight: 800;
             letter-spacing: 0;
         }
@@ -927,7 +929,7 @@ html.dark-mode .gender-icon-select {
 
         .reg-progress {
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .reg-progress__label {
@@ -964,14 +966,14 @@ html.dark-mode .gender-icon-select {
         }
 
         .reg-step {
-            min-height: 66px;
+            min-height: 48px;
             border: 1px solid var(--line);
             border-radius: 8px;
             background: #fff;
             display: grid;
             place-items: center;
             align-content: center;
-            gap: 5px;
+            gap: 3px;
             color: var(--muted);
             font-size: .72rem;
             font-weight: 800;
@@ -993,7 +995,7 @@ html.dark-mode .gender-icon-select {
         .reg-panels-wrap {
             position: relative;
             flex: 1;
-            min-height: 330px;
+            min-height: auto;
         }
 
         .reg-panel {
@@ -1500,7 +1502,7 @@ html.dark-mode .gender-icon-select {
 
         .login-card.login-card--register {
             width: min(100%, 520px);
-            min-height: 640px;
+            min-height: auto;
             border-radius: 22px;
             padding: clamp(22px, 4vw, 38px);
             background: var(--paper);
@@ -1528,7 +1530,7 @@ html.dark-mode .gender-icon-select {
             justify-content: space-between;
             align-items: center;
             gap: 14px;
-            margin-bottom: 24px;
+            margin-bottom: 12px;
         }
 
         .back-index a,
@@ -1544,8 +1546,8 @@ html.dark-mode .gender-icon-select {
 
         .login-header {
             display: grid;
-            gap: 8px;
-            margin-bottom: 24px;
+            gap: 4px;
+            margin-bottom: 12px;
         }
 
         .login-header img { display: none; }
@@ -1560,8 +1562,8 @@ html.dark-mode .gender-icon-select {
 
         .login-header h1 {
             margin: 0;
-            font-size: clamp(2rem, 4vw, 3.25rem);
-            line-height: 1;
+            font-size: clamp(1.5rem, 3vw, 1.8rem);
+            line-height: 1.1;
             font-weight: 800;
             letter-spacing: 0;
         }
@@ -1575,7 +1577,7 @@ html.dark-mode .gender-icon-select {
 
         .reg-progress {
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .reg-progress__label {
@@ -1612,14 +1614,14 @@ html.dark-mode .gender-icon-select {
         }
 
         .reg-step {
-            min-height: 66px;
+            min-height: 48px;
             border: 1px solid var(--line);
             border-radius: 8px;
             background: #fff;
             display: grid;
             place-items: center;
             align-content: center;
-            gap: 5px;
+            gap: 3px;
             color: var(--muted);
             font-size: .72rem;
             font-weight: 800;
@@ -1641,20 +1643,22 @@ html.dark-mode .gender-icon-select {
         .reg-panels-wrap {
             position: relative;
             flex: 1;
-            min-height: 330px;
+            min-height: auto;
         }
 
         .reg-panel {
             display: none;
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(10px) !important;
             transition: opacity .25s ease, transform .25s ease;
+            position: relative !important;
+            left: auto !important;
         }
 
         .reg-panel.active {
             display: block;
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) !important;
         }
 
         .reg-field {

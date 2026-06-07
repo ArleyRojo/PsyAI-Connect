@@ -7,12 +7,18 @@ from app.services import auth_service
 auth_bp = Blueprint("auth", __name__)
 
 
+def _consume_rate_limit(config_key):
+    limiter = current_app.get_limiter()
+    if not limiter:
+        return
+    with limiter.limit(current_app.config[config_key]):
+        pass
+
+
 @auth_bp.route("/api/register", methods=["POST"])
 def register():
-    limiter = current_app.get_limiter()
     try:
-        with limiter.limit("5 per minute"):
-            pass
+        _consume_rate_limit("REGISTER_RATE_LIMIT")
     except RateLimitExceeded:
         from app.services.telemetry_service import track_security_event
         track_security_event("actividad_sospechosa", f"Rate limit en registro desde {request.remote_addr}")
@@ -24,10 +30,8 @@ def register():
 
 @auth_bp.route("/api/login", methods=["POST"])
 def login():
-    limiter = current_app.get_limiter()
     try:
-        with limiter.limit("10 per minute"):
-            pass
+        _consume_rate_limit("LOGIN_RATE_LIMIT")
     except RateLimitExceeded:
         from app.services.telemetry_service import track_security_event
         track_security_event("actividad_sospechosa", f"Rate limit en login desde {request.remote_addr}")
@@ -86,10 +90,8 @@ def check_session():
 
 @auth_bp.route("/api/forgot-password", methods=["POST"])
 def forgot_password():
-    limiter = current_app.get_limiter()
     try:
-        with limiter.limit("3 per minute"):
-            pass
+        _consume_rate_limit("PASSWORD_RECOVERY_RATE_LIMIT")
     except RateLimitExceeded:
         return jsonify({"success": False, "message": "Demasiadas solicitudes. Intenta más tarde."}), 429
 
@@ -101,10 +103,8 @@ def forgot_password():
 
 @auth_bp.route("/api/reset-password", methods=["POST"])
 def reset_password():
-    limiter = current_app.get_limiter()
     try:
-        with limiter.limit("3 per minute"):
-            pass
+        _consume_rate_limit("PASSWORD_RECOVERY_RATE_LIMIT")
     except RateLimitExceeded:
         return jsonify({"success": False, "message": "Demasiadas solicitudes. Intenta más tarde."}), 429
 
