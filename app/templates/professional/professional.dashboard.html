@@ -24,14 +24,14 @@
     <link rel="stylesheet" href="/responsive/responsive-professional.css">
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
     <script src="/js/core/shared/theme.js"></script>
-        <script src="/js/core/shared/localStorage-detector.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
 
 <style>
 /* ============================================================
-   DASHBOARD PROFESIONAL — Design enhancements
+   DASHBOARD PROFESIONAL — Design v2
    ============================================================ */
 
-/* Header */
+/* ── Header ── */
 .main-header {
     position: relative;
     padding-bottom: 1.25rem;
@@ -47,7 +47,109 @@
     border-radius: 3px;
 }
 
-/* Accordion items */
+/* ── Alert Banner ── */
+.alert-banner {
+    border-radius: 14px;
+    border: 1px solid var(--color-border-soft, #EAF3FD);
+    transition: all 0.3s ease;
+    background: var(--color-bg-card, #fff);
+}
+.alert-banner:hover {
+    box-shadow: 0 4px 16px rgba(13,71,161,.06);
+}
+.alert-banner .alert-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+.alert-banner .alert-icon.warning { background: rgba(255,152,0,.15); color: #e65100; }
+.alert-banner .alert-icon.info    { background: rgba(33,150,243,.15); color: #1565C0; }
+.alert-banner .alert-icon.success { background: rgba(76,175,80,.15); color: #2e7d32; }
+.alert-banner .btn-close-alert {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted, #7B92AC);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.alert-banner .btn-close-alert:hover {
+    background: rgba(0,0,0,.05);
+    color: #333;
+}
+html.dark-mode .alert-banner {
+    background: var(--dm-card, #0e1f35);
+    border-color: var(--dm-border, #1a3555);
+}
+html.dark-mode .alert-banner .btn-close-alert:hover {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+}
+
+/* ── Stat cards (KPI Metrics) ── */
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.4rem;
+    border-radius: 14px;
+    border: 1px solid rgba(144, 202, 249, 0.08);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    background: rgba(14, 31, 53, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: default;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.stat-card:hover {
+    box-shadow:
+        0 0 20px rgba(100, 181, 246, 0.10),
+        0 10px 28px -6px rgba(0,0,0,0.3);
+    border-color: rgba(100, 181, 246, 0.25);
+    transform: translateY(-3px);
+}
+.stat-card.clickable { cursor: pointer; }
+.stat-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stat-card:hover .stat-icon {
+    transform: scale(1.08);
+    box-shadow: 0 0 16px var(--stat-glow, rgba(100,181,246,0.15));
+}
+.stat-icon.blue   { background: linear-gradient(135deg,rgba(33,150,243,0.2),rgba(13,71,161,0.25)); color: #64B5F6; --stat-glow: rgba(100,181,246,0.2); }
+.stat-icon.green  { background: linear-gradient(135deg,rgba(76,175,80,0.2),rgba(27,94,32,0.25)); color: #81C784; --stat-glow: rgba(129,199,132,0.2); }
+.stat-icon.orange { background: linear-gradient(135deg,rgba(255,152,0,0.2),rgba(230,81,0,0.25)); color: #FFB74D; --stat-glow: rgba(255,183,77,0.2); }
+.stat-icon.purple { background: linear-gradient(135deg,rgba(156,39,176,0.2),rgba(74,20,140,0.25)); color: #CE93D8; --stat-glow: rgba(206,147,216,0.2); }
+.stat-value {
+    font-size: 2.05rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, #B0D4F1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 12px rgba(100, 181, 246, 0.12));
+}
+.stat-label {
+    font-size: 0.75rem;
+    color: rgba(150, 180, 210, 0.7);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+}
+
+/* ── Accordion ── */
 .accordion-item {
     border: 1px solid var(--color-border-soft, #EAF3FD) !important;
     border-radius: 14px !important;
@@ -56,7 +158,7 @@
     transition: all 0.22s ease;
     background: var(--color-bg-card, #fff);
 }
-.accordion-item:hover {
+.accordion-item:hover:not(:has(.collapsed)) {
     box-shadow: 0 8px 24px rgba(13,71,161,.08);
     border-color: #90CAF9 !important;
 }
@@ -75,40 +177,426 @@
     box-shadow: none !important;
     border-color: #90CAF9 !important;
 }
-.accordion-body {
-    padding: 1.25rem !important;
-}
+.accordion-body { padding: 1.25rem !important; }
 
-/* Stat cards */
-.stat-card {
+/* ── Cita card (próximas citas) ── */
+.cita-card {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1.25rem;
-    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
     border: 1px solid var(--color-border-soft, #EAF3FD);
-    transition: all 0.22s ease;
+    transition: all 0.25s ease;
     background: var(--color-bg-card, #fff);
 }
-.stat-card:hover {
-    box-shadow: 0 8px 24px rgba(13,71,161,.08);
+.cita-card:hover {
+    box-shadow: 0 4px 16px rgba(13,71,161,.08);
     border-color: #90CAF9 !important;
-    transform: translateY(-2px);
+    transform: translateX(4px);
 }
-.stat-icon {
-    width: 48px; height: 48px;
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem;
+.cita-card:last-child { margin-bottom: 0; }
+.cita-date-box {
+    min-width: 52px;
+    text-align: center;
+    padding: 0.4rem 0.6rem;
+    border-radius: 10px;
+    background: var(--color-bg-soft, #F0F5FC);
     flex-shrink: 0;
 }
-.stat-icon.blue   { background: linear-gradient(135deg,#e3f2fd,#bbdefb); color: #1565C0; }
-.stat-icon.green  { background: linear-gradient(135deg,#e8f5e9,#c8e6c9); color: #2e7d32; }
-.stat-icon.orange { background: linear-gradient(135deg,#fff3e0,#ffe0b2); color: #e65100; }
-.stat-value { font-size: 1.6rem; font-weight: 800; color: var(--color-text-main, #0D1F3C); line-height: 1.2; }
-.stat-label { font-size: 0.78rem; color: var(--color-text-muted, #7B92AC); font-weight: 500; }
+.cita-date-box .day  { font-size: 1.1rem; font-weight: 800; line-height: 1.1; color: var(--color-text-main, #0D1F3C); }
+.cita-date-box .month { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted, #7B92AC); }
+.cita-date-box.today {
+    background: linear-gradient(135deg, #1565C0, #1976D2);
+}
+.cita-date-box.today .day,
+.cita-date-box.today .month { color: #fff; }
+.cita-info { flex: 1; min-width: 0; }
+.cita-info .paciente-name { font-weight: 700; font-size: 0.95rem; }
+.cita-info .cita-meta { font-size: 0.78rem; color: var(--color-text-muted, #7B92AC); }
+.cita-actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+.cita-actions .btn-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-soft, #EAF3FD);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #7B92AC);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.cita-actions .btn-icon:hover {
+    background: var(--color-accent, #E3F2FD);
+    border-color: #90CAF9;
+    color: #1565C0;
+}
+.cita-card .badge-estado {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    flex-shrink: 0;
+}
 
-/* Activity items */
+/* ── Tooltips en botones de cita ── */
+.cita-actions .btn-icon {
+    position: relative;
+}
+.cita-actions .btn-icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.85);
+    white-space: nowrap;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    background: rgba(10, 25, 47, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #daeeff;
+    border: 1px solid rgba(144, 202, 249, 0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.cita-actions .btn-icon::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.85);
+    border: 4px solid transparent;
+    border-top-color: rgba(10, 25, 47, 0.92);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.cita-actions .btn-icon:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+.cita-actions .btn-icon:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+/* ── Modal Oscuro ── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-glass {
+    background: rgba(14, 31, 53, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(144, 202, 249, 0.12);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 40px rgba(100, 181, 246, 0.06);
+    transform: scale(0.92) translateY(12px);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+.modal-overlay.active .modal-glass {
+    transform: scale(1) translateY(0);
+}
+.modal-glass .btn-close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(144,202,249,0.12);
+    background: rgba(0,0,0,0.2);
+    color: rgba(150,180,210,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.modal-glass .btn-close-modal:hover {
+    background: rgba(255,255,255,0.05);
+    color: #daeeff;
+    border-color: rgba(144,202,249,0.3);
+}
+.modal-glass .modal-icon {
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(33,150,243,0.15), rgba(13,71,161,0.2));
+    display: flex;
+    align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    color: #64B5F6;
+    margin: 0 auto 1rem;
+}
+.modal-glass h5 {
+    color: #daeeff;
+    font-weight: 700;
+}
+.modal-glass p {
+    color: rgba(150,180,210,0.7);
+    font-size: 0.88rem;
+}
+.modal-glass .btn-confirm {
+    background: linear-gradient(135deg, #1976D2, #1565C0);
+    border: none;
+    border-radius: 12px;
+    padding: 0.65rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #fff;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(21,101,192,0.25);
+}
+.modal-glass .btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(21,101,192,0.35);
+}
+.modal-glass .btn-cancel {
+    background: transparent;
+    border: 1px solid rgba(144,202,249,0.12);
+    border-radius: 12px;
+    padding: 0.65rem 1.5rem;
+    font-weight: 500;
+    font-size: 0.88rem;
+    color: rgba(150,180,210,0.7);
+    transition: all 0.2s ease;
+}
+.modal-glass .btn-cancel:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(144,202,249,0.25);
+}
+
+/* ── Quick Actions (Glassmorphism + Glow) ── */
+.quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.4rem 0.8rem;
+    border-radius: 14px;
+    border: 1px solid rgba(144, 202, 249, 0.08);
+    transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    background: rgba(14, 31, 53, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+    position: relative;
+    z-index: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.quick-action-card::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 15px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+    padding: 1.5px;
+    background: var(--glow-color, #90CAF9);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+}
+.quick-action-card:hover {
+    box-shadow:
+        0 0 24px var(--glow-alpha, rgba(144,202,249,0.18)),
+        0 12px 32px -8px rgba(0,0,0,0.4);
+    transform: translateY(-7px);
+    border-color: transparent;
+    color: inherit;
+}
+.quick-action-card:hover::after { opacity: 1; }
+.quick-action-card .qa-icon {
+    width: 54px; height: 54px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.35rem;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+.quick-action-card:hover .qa-icon {
+    transform: scale(1.12) rotate(-6deg);
+    box-shadow: 0 0 18px var(--glow-alpha, rgba(144,202,249,0.2));
+}
+.quick-action-card .qa-title {
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-align: center;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+}
+.quick-action-card .qa-desc {
+    font-size: 0.68rem;
+    color: rgba(150, 180, 210, 0.7);
+    text-align: center;
+    font-weight: 400;
+}
+.qa-icon.primary   { background: linear-gradient(135deg,rgba(33,150,243,0.2),rgba(13,71,161,0.3)); color: #64B5F6; }
+.qa-icon.success   { background: linear-gradient(135deg,rgba(76,175,80,0.2),rgba(27,94,32,0.3)); color: #81C784; }
+.qa-icon.warning   { background: linear-gradient(135deg,rgba(255,152,0,0.2),rgba(230,81,0,0.3)); color: #FFB74D; }
+.qa-icon.info      { background: linear-gradient(135deg,rgba(0,188,212,0.2),rgba(0,96,100,0.3)); color: #4DD0E1; }
+.qa-icon.purple    { background: linear-gradient(135deg,rgba(156,39,176,0.2),rgba(74,20,140,0.3)); color: #CE93D8; }
+.qa-icon.pink      { background: linear-gradient(135deg,rgba(233,30,99,0.2),rgba(136,14,79,0.3)); color: #F48FB1; }
+
+/* ── Bienestar chart bars ── */
+.bienestar-bar {
+    height: 10px;
+    border-radius: 10px;
+    background: var(--color-border-soft, #EAF3FD);
+    overflow: hidden;
+    position: relative;
+}
+.bienestar-bar .fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1.2s ease;
+    width: 0;
+}
+.bienestar-bar .fill.fill-emo { background: linear-gradient(90deg, #42a5f5, #1976D2); }
+.bienestar-bar .fill.fill-energy { background: linear-gradient(90deg, #66bb6a, #388e3c); }
+.bienestar-stat-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+.bienestar-stat-label .label { color: var(--color-text-muted, #7B92AC); }
+.bienestar-stat-label .value { font-weight: 700; color: var(--color-text-main, #0D1F3C); }
+
+/* ── SVG Metric Rings ── */
+.metric-ring-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+.metric-ring-wrap .ring-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(150, 180, 210, 0.7);
+    letter-spacing: 0.02em;
+}
+.metric-ring-svg {
+    width: 90px;
+    height: 90px;
+    transform: rotate(-90deg);
+    cursor: pointer;
+    filter: drop-shadow(0 0 6px var(--ring-glow, transparent));
+    transition: filter 0.3s ease;
+}
+.metric-ring-svg:hover {
+    filter: drop-shadow(0 0 14px var(--ring-glow, rgba(100,181,246,0.3)));
+}
+.metric-ring-svg .ring-bg {
+    fill: none;
+    stroke: rgba(144, 202, 249, 0.06);
+    stroke-width: 7;
+}
+.metric-ring-svg .ring-fill {
+    fill: none;
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-dasharray: 226.2;
+    stroke-dashoffset: 226.2;
+    transition: stroke-dashoffset 1.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.metric-ring-svg .ring-center-text {
+    transform: rotate(90deg);
+    transform-origin: 50px 50px;
+}
+.metric-ring-svg .ring-center-text .value {
+    font-size: 22px;
+    font-weight: 800;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+.metric-ring-svg .ring-center-text .suffix {
+    font-size: 9px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: rgba(150, 180, 210, 0.4);
+}
+.ring-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.85);
+    white-space: nowrap;
+    padding: 0.3rem 0.65rem;
+    border-radius: 8px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    background: rgba(10, 25, 47, 0.92);
+    backdrop-filter: blur(8px);
+    color: #daeeff;
+    border: 1px solid rgba(144, 202, 249, 0.12);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.metric-ring-wrap:hover .ring-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+/* ── Reportes Ring Compact ── */
+.reportes-ring-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+.reportes-ring-wrap .ring-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(150, 180, 210, 0.7);
+    text-align: center;
+}
+.reportes-ring-wrap .stat-desc {
+    font-size: 0.68rem;
+    color: rgba(150, 180, 210, 0.5);
+    text-align: center;
+}
+
+/* ── Activity items ── */
 #actividadContainer .d-flex {
     padding: 0.7rem 0 !important;
     border-bottom: 1px solid var(--color-border-soft, #EAF3FD) !important;
@@ -133,7 +621,23 @@
 }
 .actividad-icon i { font-size: 0.9rem; }
 
-/* Button refresh */
+/* ── Page entrance animation ── */
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.main-content > * {
+    animation: pageFadeIn 0.4s ease both;
+}
+.main-content > *:nth-child(1) { animation-delay: 0.03s; }
+.main-content > *:nth-child(2) { animation-delay: 0.08s; }
+.main-content > *:nth-child(3) { animation-delay: 0.14s; }
+.main-content > *:nth-child(4) { animation-delay: 0.20s; }
+.main-content > *:nth-child(5) { animation-delay: 0.26s; }
+.main-content > *:nth-child(6) { animation-delay: 0.32s; }
+.main-content > *:nth-child(7) { animation-delay: 0.38s; }
+
+/* ── Button refresh ── */
 .btn-light.btn-sm {
     border-radius: 10px !important;
     border: 1px solid var(--color-border-soft, #EAF3FD) !important;
@@ -144,14 +648,24 @@
     border-color: #90CAF9 !important;
 }
 
-/* ============================================================
-   DARK MODE
-   ============================================================ */
+/* ── Eskeleton loading ── */
+@keyframes shimmer {
+    0%   { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+.skeleton {
+    background: linear-gradient(90deg, var(--color-border-soft, #EAF3FD) 25%, #f0f5fc 50%, var(--color-border-soft, #EAF3FD) 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+/* ── Dark mode ── */
 html.dark-mode .accordion-item {
     background: var(--dm-card, #0e1f35);
     border-color: var(--dm-border, #1a3555) !important;
 }
-html.dark-mode .accordion-item:hover {
+html.dark-mode .accordion-item:hover:not(:has(.collapsed)) {
     border-color: var(--dm-accent, #90CAF9) !important;
 }
 html.dark-mode .accordion-button {
@@ -164,17 +678,19 @@ html.dark-mode .accordion-button:not(.collapsed) {
     border-bottom-color: var(--dm-border, #1a3555) !important;
 }
 html.dark-mode .stat-card {
-    background: var(--dm-card, #0e1f35);
-    border-color: var(--dm-border, #1a3555);
+    background: rgba(14, 31, 53, 0.5);
+    border-color: rgba(144, 202, 249, 0.08);
 }
 html.dark-mode .stat-card:hover {
-    border-color: var(--dm-accent, #90CAF9) !important;
+    border-color: rgba(100, 181, 246, 0.25) !important;
 }
-html.dark-mode .stat-value { color: var(--dm-text1, #daeeff); }
-html.dark-mode .stat-label { color: var(--dm-muted, #3d607e); }
-html.dark-mode .stat-icon.blue   { background: rgba(21,101,192,.2); color: var(--dm-accent, #90CAF9); }
-html.dark-mode .stat-icon.green  { background: rgba(46,125,50,.2); color: #66bb6a; }
-html.dark-mode .stat-icon.orange { background: rgba(230,81,0,.2); color: #ffa726; }
+html.dark-mode .stat-value {
+    background: linear-gradient(135deg, #ffffff 0%, #B0D4F1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+html.dark-mode .stat-label { color: rgba(150, 180, 210, 0.7); }
 html.dark-mode #actividadContainer .d-flex { border-bottom-color: var(--dm-border, #1a3555) !important; }
 html.dark-mode #actividadContainer .d-flex:hover { background: rgba(144,202,249,.06); }
 html.dark-mode .actividad-icon { background: var(--dm-elevated, #132843); }
@@ -187,20 +703,54 @@ html.dark-mode .btn-light.btn-sm:hover {
     background: rgba(144,202,249,.1) !important;
     border-color: var(--dm-accent, #90CAF9) !important;
 }
-
-/* ── Page entrance animation ── */
-@keyframes pageFadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
+html.dark-mode .cita-card {
+    background: var(--dm-card, #0e1f35);
+    border-color: var(--dm-border, #1a3555);
 }
-.main-content > * {
-    animation: pageFadeIn 0.4s ease both;
+html.dark-mode .cita-card:hover {
+    border-color: var(--dm-accent, #90CAF9) !important;
 }
-.main-content > *:nth-child(1) { animation-delay: 0.03s; }
-.main-content > *:nth-child(2) { animation-delay: 0.10s; }
-.main-content > *:nth-child(3) { animation-delay: 0.18s; }
-.main-content > *:nth-child(4) { animation-delay: 0.26s; }
-.main-content > *:nth-child(5) { animation-delay: 0.34s; }
+html.dark-mode .cita-date-box {
+    background: var(--dm-elevated, #132843);
+}
+html.dark-mode .cita-date-box.today {
+    background: linear-gradient(135deg, #0D47A1, #1565C0);
+}
+html.dark-mode .cita-date-box .day { color: var(--dm-text1, #daeeff); }
+html.dark-mode .cita-date-box .month { color: var(--dm-muted, #3d607e); }
+html.dark-mode .cita-actions .btn-icon {
+    border-color: var(--dm-border, #1a3555);
+    color: var(--dm-muted, #3d607e);
+}
+html.dark-mode .cita-actions .btn-icon:hover {
+    background: rgba(144,202,249,.1);
+    border-color: var(--dm-accent, #90CAF9);
+    color: #60a5fa;
+}
+html.dark-mode .quick-action-card {
+    background: rgba(14, 31, 53, 0.55);
+    border-color: rgba(144, 202, 249, 0.08);
+}
+html.dark-mode .quick-action-card:hover {
+    border-color: transparent;
+}
+html.dark-mode .quick-action-card .qa-title { color: var(--dm-text1, #daeeff); }
+html.dark-mode .quick-action-card .qa-desc { color: rgba(150, 180, 210, 0.7); }
+html.dark-mode .bienestar-stat-label .value { color: var(--dm-text1, #daeeff); }
+html.dark-mode .bienestar-bar { background: var(--dm-elevated, #132843); }
+html.dark-mode .metric-ring-svg .ring-bg { stroke: rgba(144,202,249,0.06); }
+html.dark-mode .metric-ring-wrap .ring-label { color: rgba(150,180,210,0.7); }
+html.dark-mode .reportes-ring-wrap .ring-label { color: rgba(150,180,210,0.7); }
+html.dark-mode .reportes-ring-wrap .stat-desc { color: rgba(150,180,210,0.5); }
+html.dark-mode .skeleton { background: linear-gradient(90deg, #1a3555 25%, #132843 50%, #1a3555 75%); }
+html.dark-mode .bienestar-card-bg { background: var(--dm-elevated, #132843) !important; }
+html.dark-mode .bienestar-card-bg .fw-bold { color: var(--dm-text1, #daeeff); }
+html.dark-mode .bienestar-card-bg .text-muted { color: var(--dm-muted, #3d607e); }
+.stats-mini-card { background: var(--color-bg-soft, #F0F5FC); }
+html.dark-mode .stats-mini-card { background: var(--dm-elevated, #132843) !important; }
+html.dark-mode .color-blue { color: #60a5fa !important; }
+html.dark-mode .color-green { color: #66bb6a !important; }
+html.dark-mode .color-orange { color: #ffa726 !important; }
 </style>
 </head>
 <body>
@@ -210,222 +760,705 @@ html.dark-mode .btn-light.btn-sm:hover {
 
 <div class="d-flex w-100">
     <!-- Sidebar -->
-        <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
-            <div class="sidebar__logo text-center mt-3">
-                <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
-                <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+    <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+        <nav class="nav flex-column mt-4">
+            <a href="professional.dashboard.html" class="nav-link active">
+                <i class="fas fa-home me-2"></i> Dashboard
+            </a>
+            <a href="./aside-professional/patients.html" class="nav-link">
+                <i class="fas fa-users me-2"></i> Pacientes y Diagnósticos
+            </a>
+            <a href="./aside-professional/my.agenda.html" class="nav-link">
+                <i class="fas fa-calendar-check me-2"></i> Mi Agenda
+            </a>
+            <a href="./aside-professional/mensajes.html" class="nav-link">
+                <i class="fas fa-comments me-2"></i> Mensajes
+            </a>
+            <a href="./aside-professional/reports.html" class="nav-link">
+                <i class="fas fa-chart-line me-2"></i> Reportes
+            </a>
+            <a href="./aside-professional/my.profile2.html" class="nav-link mt-3 border-top pt-3">
+                <i class="fas fa-user-circle me-2"></i> Mi Perfil
+            </a>
+        </nav>
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
             </div>
-            <nav class="nav flex-column mt-4">
-                <a href="professional.dashboard.html" class="nav-link active">
-                    <i class="fas fa-home me-2"></i> Dashboard
-                </a>
-                <a href="./aside-professional/patients.html" class="nav-link">
-                    <i class="fas fa-users me-2"></i>Pacientes y Diagnósticos
-                </a>
-                <a href="./aside-professional/my.agenda.html" class="nav-link">
-                    <i class="fas fa-calendar-check me-2"></i> Mi Agenda
-                </a>
-                <a href="./aside-professional/mensajes.html" class="nav-link">
-                    <i class="fas fa-comments me-2"></i> Mensajes
-                </a>
-                <a href="./aside-professional/reports.html" class="nav-link">
-                    <i class="fas fa-chart-line me-2"></i> Reportes
-                </a>
-                <a href="./aside-professional/my.profile2.html" class="nav-link mt-3 border-top pt-3">
-                    <i class="fas fa-user-circle me-2"></i> Mi Perfil
-                </a>
-            </nav>
-            <div class="sidebar__footer mt-auto mb-3 text-center">
-                <div class="theme-switch-container mb-2">
-                    <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                    <button id="theme-toggle" title="Cambiar modo"></button>
-                    <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-                </div>
-               <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
-            </div>
-        </aside>
+            <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+        </div>
+    </aside>
 
-        <!-- Main content -->
-        <main class="main-content flex-grow-1 ms-250 p-4">
-            <!-- Header -->
-            <header class="main-header d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h3 fw-bold mb-0"><i class="fas fa-home me-2 text-primary"></i>Dashboard Profesional</h1>
-                    <small class="text-muted">Resumen de tu actividad profesional</small>
+    <!-- Main content -->
+    <main class="main-content flex-grow-1 ms-250 p-4">
+        <!-- Header -->
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-0"><i class="fas fa-home me-2 text-primary"></i>Dashboard Profesional</h1>
+                <small class="text-muted">Resumen de tu actividad profesional</small>
+            </div>
+            <div class="user-info d-flex align-items-center gap-3">
+                <button class="btn btn-light btn-sm" onclick="cargarDashboard()" title="Actualizar">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <div class="position-relative">
+                    <i class="fas fa-bell text-secondary fs-5" id="bellIcon" style="cursor:pointer"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notifBadge" style="font-size:0.55rem;display:none">0</span>
                 </div>
-                <div class="user-info d-flex align-items-center gap-3">
-                    <button class="btn btn-light btn-sm" onclick="cargarDashboard()" title="Actualizar">
-                        <i class="fas fa-sync-alt"></i>
+                <div data-avatar="inicial" style="width:40px;height:40px;"></div>
+                <span class="fw-semibold" id="nombreProfesional">Hola, Dr(a).</span>
+            </div>
+        </header>
+
+        <!-- ═══ Alertas ═══ -->
+        <div id="alertasContainer" class="mb-4"></div>
+
+        <!-- ═══ Accesos Rápidos (Glassmorphism) ═══ -->
+        <section class="mb-4">
+            <div class="row g-2" id="quickActionsContainer">
+                <div class="col-4 col-md">
+                    <a href="./aside-professional/patients.html" class="quick-action-card"
+                       style="--glow-color: #64B5F6; --glow-alpha: rgba(100,181,246,0.20)">
+                        <div class="qa-icon primary"><i class="fas fa-user-plus"></i></div>
+                        <div class="qa-title">Nuevo Paciente</div>
+                        <div class="qa-desc">Registrar paciente</div>
+                    </a>
+                </div>
+                <div class="col-4 col-md">
+                    <a href="./aside-professional/my.agenda.html" class="quick-action-card"
+                       style="--glow-color: #81C784; --glow-alpha: rgba(129,199,132,0.20)">
+                        <div class="qa-icon success"><i class="fas fa-calendar-plus"></i></div>
+                        <div class="qa-title">Nueva Cita</div>
+                        <div class="qa-desc">Agendar sesión</div>
+                    </a>
+                </div>
+                <div class="col-4 col-md">
+                    <a href="./aside-professional/patients.html" class="quick-action-card"
+                       style="--glow-color: #FFB74D; --glow-alpha: rgba(255,183,77,0.20)">
+                        <div class="qa-icon warning"><i class="fas fa-stethoscope"></i></div>
+                        <div class="qa-title">Diagnóstico</div>
+                        <div class="qa-desc">Registrar diagnóstico</div>
+                    </a>
+                </div>
+                <div class="col-4 col-md">
+                    <a href="./aside-professional/reports.html" class="quick-action-card"
+                       style="--glow-color: #4DD0E1; --glow-alpha: rgba(77,208,225,0.20)">
+                        <div class="qa-icon info"><i class="fas fa-chart-bar"></i></div>
+                        <div class="qa-title">Reporte</div>
+                        <div class="qa-desc">Generar reporte</div>
+                    </a>
+                </div>
+                <div class="col-4 col-md">
+                    <a href="./aside-professional/mensajes.html" class="quick-action-card"
+                       style="--glow-color: #CE93D8; --glow-alpha: rgba(206,147,216,0.20)">
+                        <div class="qa-icon purple"><i class="fas fa-comment-dots"></i></div>
+                        <div class="qa-title">Mensajes</div>
+                        <div class="qa-desc">Chat con pacientes</div>
+                    </a>
+                </div>
+                <div class="col-4 col-md d-md-none"></div>
+            </div>
+        </section>
+
+        <!-- ═══ Estadísticas Rápidas ═══ -->
+        <section class="mb-4">
+            <div class="row g-3" id="statsRow">
+                <div class="col-6 col-md-3">
+                    <div class="stat-card clickable" onclick="irA('./aside-professional/patients.html')">
+                        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                        <div><div class="stat-value" id="statPacientes">0</div><div class="stat-label">Pacientes Activos</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
+                        <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
+                        <div><div class="stat-value" id="statCitasHoy">0</div><div class="stat-label">Citas Hoy</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
+                        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+                        <div><div class="stat-value" id="statPendientes">0</div><div class="stat-label">Citas Pendientes</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card clickable" onclick="irA('./aside-professional/reports.html')">
+                        <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+                        <div><div class="stat-value" id="statReportes">0</div><div class="stat-label">Reportes Totales</div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ Secciones en Acordeón ═══ -->
+        <div class="accordion accordion-responsive mb-4" id="accordionDashboard">
+
+            <!-- Próximas Citas -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingCitas">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCitas" aria-expanded="true" aria-controls="collapseCitas">
+                        <i class="fas fa-calendar-alt me-2"></i> Próximas Citas
                     </button>
-                    <i class="fas fa-bell text-secondary fs-5"></i>
-                    <div data-avatar="inicial" style="width:40px;height:40px;"></div>
-                    <span class="fw-semibold" id="nombreProfesional">Hola, Dr(a).</span>
-                </div>
-            </header>
-
-            <!-- Acordeón del Dashboard -->
-            <div class="accordion accordion-responsive mb-4" id="accordionDashboard">
-
-                <!-- Estadísticas rápidas -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingStats">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStats" aria-expanded="true" aria-controls="collapseStats">
-                            <i class="fas fa-chart-bar me-2"></i> Estadísticas Rápidas
-                        </button>
-                    </h2>
-                    <div id="collapseStats" class="accordion-collapse collapse show" aria-labelledby="headingStats" data-bs-parent="#accordionDashboard">
-                        <div class="accordion-body">
-                            <section class="row g-3">
-                                <div class="col-md-4">
-                                    <div class="stat-card">
-                                        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
-                                        <div><div class="stat-value" id="statPacientes">0</div><div class="stat-label">Pacientes Activos</div></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="stat-card">
-                                        <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
-                                        <div><div class="stat-value" id="statCitasHoy">0</div><div class="stat-label">Citas Hoy</div></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="stat-card">
-                                        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
-                                        <div><div class="stat-value" id="statPendientes">0</div><div class="stat-label">Citas Pendientes</div></div>
-                                    </div>
-                                </div>
-                            </section>
+                </h2>
+                <div id="collapseCitas" class="accordion-collapse collapse show" aria-labelledby="headingCitas" data-bs-parent="#accordionDashboard">
+                    <div class="accordion-body" id="proximasCitasContainer">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                            <div>Cargando...</div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Actividades Recientes -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingActivity">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseActivity" aria-expanded="false" aria-controls="collapseActivity">
-                            <i class="fas fa-clock me-2"></i> Actividades Recientes
-                        </button>
-                    </h2>
-                    <div id="collapseActivity" class="accordion-collapse collapse" aria-labelledby="headingActivity" data-bs-parent="#accordionDashboard">
-                        <div class="accordion-body">
-                            <div id="actividadContainer">
-                                <div class="text-center text-muted py-4">
-                                    <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
-                                    <div>Cargando...</div>
-                                </div>
+            <!-- Bienestar de Pacientes -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingBienestar">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBienestar" aria-expanded="false" aria-controls="collapseBienestar">
+                        <i class="fas fa-heart me-2"></i> Bienestar de Pacientes
+                    </button>
+                </h2>
+                <div id="collapseBienestar" class="accordion-collapse collapse" aria-labelledby="headingBienestar" data-bs-parent="#accordionDashboard">
+                    <div class="accordion-body" id="bienestarContainer">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                            <div>Cargando...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reportes rápidos -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingReportes">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReportes" aria-expanded="false" aria-controls="collapseReportes">
+                        <i class="fas fa-chart-pie me-2"></i> Resumen de Reportes
+                    </button>
+                </h2>
+                <div id="collapseReportes" class="accordion-collapse collapse" aria-labelledby="headingReportes" data-bs-parent="#accordionDashboard">
+                    <div class="accordion-body" id="reportesResumenContainer">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                            <div>Cargando...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividades Recientes -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingActivity">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseActivity" aria-expanded="false" aria-controls="collapseActivity">
+                        <i class="fas fa-clock me-2"></i> Actividades Recientes
+                    </button>
+                </h2>
+                <div id="collapseActivity" class="accordion-collapse collapse" aria-labelledby="headingActivity" data-bs-parent="#accordionDashboard">
+                    <div class="accordion-body">
+                        <div id="actividadContainer">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                                <div>Cargando...</div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
-        </main>
-    </div>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
+        </div>
+
+        <!-- ═══ Modal Videollamada ═══ -->
+        <div class="modal-overlay" id="modalVideo">
+            <div class="modal-glass text-center">
+                <button class="btn-close-modal" onclick="cerrarModalVideo()"><i class="fas fa-times"></i></button>
+                <div class="modal-icon"><i class="fas fa-video"></i></div>
+                <h5 class="mb-1">Iniciar Videollamada</h5>
+                <p class="mb-3" id="modalPacienteNombre">¿Deseas iniciar una videollamada con <strong>Paciente</strong>?</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button class="btn-cancel" onclick="cerrarModalVideo()">Cancelar</button>
+                    <button class="btn-confirm" onclick="iniciarVideo()">
+                        <i class="fas fa-video me-1"></i> Iniciar ahora
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
-    <script src="/js/core/shared/alerts.js"></script>
-    <script src="/js/core/shared/aside.js?v=20260522-5"></script>
-    <script src="/js/modules/auth/logout.js"></script>
-    <script src="/js/core/shared/nombre.usuario.js"></script>
-    <script>
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/core/shared/aside.js?v=20260522-5"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/nombre.usuario.js"></script>
+<script>
+// ── Helpers ──
+function irA(url) { window.location.href = url; }
+
+// ── Modal Videollamada ──
+function abrirModalVideo(paciente) {
+    const p = document.getElementById('modalPacienteNombre');
+    if (p) p.innerHTML = `¿Deseas iniciar una videollamada con <strong>${paciente}</strong>?`;
+    document.getElementById('modalVideo').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function cerrarModalVideo() {
+    document.getElementById('modalVideo').classList.remove('active');
+    document.body.style.overflow = '';
+}
+function iniciarVideo() {
+    cerrarModalVideo();
+    window.location.href = './aside-professional/mensajes.html';
+}
+// Cerrar modal con tecla Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarModalVideo();
+});
+// Cerrar modal al hacer clic fuera
+document.addEventListener('click', (e) => {
+    const overlay = document.getElementById('modalVideo');
+    if (e.target === overlay) cerrarModalVideo();
+});
+
+function getDiaSemana(fechaStr) {
+    const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const [d, m, y] = fechaStr.split('/');
+    const date = new Date(+y, +m - 1, +d);
+    const hoy = new Date();
+    hoy.setHours(0,0,0,0);
+    date.setHours(0,0,0,0);
+    const diff = Math.round((date - hoy) / 86400000);
+    if (diff === 0) return 'Hoy';
+    if (diff === 1) return 'Mañana';
+    return dias[date.getDay()];
+}
+
+function esHoy(fechaStr) {
+    const [d, m, y] = fechaStr.split('/');
+    const hoy = new Date();
+    return +d === hoy.getDate() && +m === hoy.getMonth() + 1 && +y === hoy.getFullYear();
+}
+
+function getMonthAbr(fechaStr) {
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const [, m] = fechaStr.split('/');
+    return meses[+m - 1] || '';
+}
+
+function getDayNum(fechaStr) {
+    const [d] = fechaStr.split('/');
+    return d;
+}
+
+// ── Contador de notificaciones ──
+let totalAlertas = 0;
+function actualizarBadge() {
+    const badge = document.getElementById('notifBadge');
+    if (totalAlertas > 0) {
+        badge.textContent = totalAlertas;
+        badge.style.display = 'inline';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// ── Render: Alertas ──
+function renderAlertas(alertas) {
+    const container = document.getElementById('alertasContainer');
+    if (!alertas || alertas.length === 0) {
+        container.innerHTML = '';
+        totalAlertas = 0;
+        actualizarBadge();
+        return;
+    }
+    totalAlertas = alertas.length;
+    actualizarBadge();
+    container.innerHTML = alertas.map((a, i) => `
+        <div class="alert-banner d-flex align-items-center gap-3 mb-2 p-3" data-alert-idx="${i}">
+            <div class="alert-icon ${a.tipo}"><i class="fas ${a.icono || 'fa-bell'}"></i></div>
+            <div class="flex-grow-1 min-width-0">
+                <div class="fw-semibold small">${a.titulo}</div>
+                <div class="text-muted" style="font-size:0.82rem">${a.mensaje}</div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:0.72rem;white-space:nowrap;flex-shrink:0" onclick="irASeccion('${a.accion || ''}')">
+                <i class="fas fa-arrow-right me-1"></i> Ir
+            </button>
+            <button class="btn-close-alert" onclick="cerrarAlerta(this)" title="Descartar"><i class="fas fa-times"></i></button>
+        </div>
+    `).join('');
+}
+
+function cerrarAlerta(btn) {
+    const alertEl = btn.closest('.alert-banner');
+    alertEl.style.transition = 'all 0.3s ease';
+    alertEl.style.opacity = '0';
+    alertEl.style.transform = 'translateX(20px)';
+    setTimeout(() => { alertEl.remove(); totalAlertas = Math.max(0, totalAlertas - 1); actualizarBadge(); }, 300);
+}
+
+function irASeccion(accion) {
+    const mapa = {
+        ver_agenda: './aside-professional/my.agenda.html',
+        ver_reportes: './aside-professional/reports.html',
+        ver_pacientes: './aside-professional/patients.html'
+    };
+    if (mapa[accion]) window.location.href = mapa[accion];
+}
+
+// ── Render: Próximas Citas ──
+function renderProximasCitas(citas) {
+    const container = document.getElementById('proximasCitasContainer');
+    if (!citas || citas.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                <div>No hay citas programadas para los próximos 7 días</div>
+                <a href="./aside-professional/my.agenda.html" class="btn btn-sm btn-outline-primary mt-2 rounded-pill">Agendar cita</a>
+            </div>`;
+        return;
+    }
+    const estadoBadge = {
+        'Pendiente':  'bg-warning text-dark',
+        'Confirmada': 'bg-success',
+        'Cancelada':  'bg-danger',
+        'Completada': 'bg-secondary'
+    };
+    container.innerHTML = citas.map(c => `
+        <div class="cita-card mb-2">
+            <div class="cita-date-box ${esHoy(c.fecha) ? 'today' : ''}">
+                <div class="day">${getDayNum(c.fecha)}</div>
+                <div class="month">${getMonthAbr(c.fecha)}</div>
+            </div>
+            <div class="cita-info">
+                <div class="paciente-name">${c.paciente}</div>
+                <div class="cita-meta">
+                    <i class="far fa-clock me-1"></i>${c.hora} · ${c.tipoCita || 'Consulta'}
+                    <span class="ms-2"><i class="far fa-calendar-alt me-1"></i>${getDiaSemana(c.fecha)}</span>
+                </div>
+            </div>
+            <span class="badge-estado ${estadoBadge[c.estado] || 'bg-secondary'}">${c.estado}</span>
+            <div class="cita-actions">
+                <button class="btn-icon" data-tooltip="Ver expediente" onclick="irA('./aside-professional/patients.html')"><i class="fas fa-folder-open"></i></button>
+                <button class="btn-icon" data-tooltip="Iniciar videollamada" onclick="abrirModalVideo('${c.paciente.replace(/'/g, "\\'")}')"><i class="fas fa-video"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ── Animar SVG rings ──
+function animarRings() {
+    document.querySelectorAll('.metric-ring-svg').forEach(svg => {
+        const fill = svg.querySelector('.ring-fill');
+        if (fill) {
+            const target = fill.getAttribute('data-target');
+            setTimeout(() => { fill.style.strokeDashoffset = target; }, 150);
+        }
+    });
+}
+
+// ── Render: Bienestar ──
+function renderBienestar(evo) {
+    const container = document.getElementById('bienestarContainer');
+    if (!evo || (!evo.estado_emocional_promedio && !evo.nivel_energia_promedio)) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-heart fa-2x mb-2"></i>
+                <div>Aún no hay datos de evolución de pacientes</div>
+            </div>`;
+        return;
+    }
+
+    const emo = Math.min(evo.estado_emocional_promedio / 5 * 100, 100);
+    const energy = Math.min(evo.nivel_energia_promedio / 5 * 100, 100);
+    const sinEvo = evo.pacientes_sin_evolucion || 0;
+
+    const C = 226.2;
+    const emoOff = C * (1 - evo.estado_emocional_promedio / 5);
+    const energyOff = C * (1 - evo.nivel_energia_promedio / 5);
+
+    container.innerHTML = `
+        <div class="row g-3 mb-3">
+            <div class="col-6">
+                <div class="metric-ring-wrap position-relative">
+                    <div class="ring-tooltip">Estado emocional promedio</div>
+                    <svg class="metric-ring-svg" viewBox="0 0 100 100" style="--ring-glow: rgba(100,181,246,0.25)">
+                        <circle class="ring-bg" cx="50" cy="50" r="36"/>
+                        <circle class="ring-fill" cx="50" cy="50" r="36"
+                                stroke="#64B5F6" data-target="${emoOff}" style="stroke-dashoffset: 226.2"/>
+                        <g class="ring-center-text">
+                            <text class="value" x="50" y="46" fill="#64B5F6">${evo.estado_emocional_promedio}</text>
+                            <text class="suffix" x="50" y="62">/5</text>
+                        </g>
+                    </svg>
+                    <span class="ring-label"><i class="fas fa-smile me-1"></i>Estado Emocional</span>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="metric-ring-wrap position-relative">
+                    <div class="ring-tooltip">Nivel de energía promedio</div>
+                    <svg class="metric-ring-svg" viewBox="0 0 100 100" style="--ring-glow: rgba(129,199,132,0.25)">
+                        <circle class="ring-bg" cx="50" cy="50" r="36"/>
+                        <circle class="ring-fill" cx="50" cy="50" r="36"
+                                stroke="#81C784" data-target="${energyOff}" style="stroke-dashoffset: 226.2"/>
+                        <g class="ring-center-text">
+                            <text class="value" x="50" y="46" fill="#81C784">${evo.nivel_energia_promedio}</text>
+                            <text class="suffix" x="50" y="62">/5</text>
+                        </g>
+                    </svg>
+                    <span class="ring-label"><i class="fas fa-bolt me-1"></i>Nivel de Energía</span>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-4">
+                <div class="text-center p-2 rounded-3 stats-mini-card">
+                    <div class="fw-bold fs-5 color-blue">${evo.pacientes_con_citas || 0}</div>
+                    <div class="text-muted" style="font-size:0.68rem;">Activos</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="text-center p-2 rounded-3 stats-mini-card">
+                    <div class="fw-bold fs-5 color-green">${evo.pacientes_con_evolucion_reciente || 0}</div>
+                    <div class="text-muted" style="font-size:0.68rem;">C/ evolución</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="text-center p-2 rounded-3 stats-mini-card">
+                    <div class="fw-bold fs-5 ${sinEvo > 0 ? 'color-orange' : 'color-green'}">${sinEvo}</div>
+                    <div class="text-muted" style="font-size:0.68rem;">Sin evolución</div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-6">
+                <div class="bienestar-stat-label mb-1">
+                    <span class="label"><i class="fas fa-smile me-1"></i>Estado Emocional</span>
+                    <span class="value">${evo.estado_emocional_promedio}</span>
+                </div>
+                <div class="bienestar-bar">
+                    <div class="fill fill-emo" style="width:${emo}%"></div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="bienestar-stat-label mb-1">
+                    <span class="label"><i class="fas fa-bolt me-1"></i>Nivel de Energía</span>
+                    <span class="value">${evo.nivel_energia_promedio}</span>
+                </div>
+                <div class="bienestar-bar">
+                    <div class="fill fill-energy" style="width:${energy}%"></div>
+                </div>
+            </div>
+        </div>
+        ${sinEvo > 0 ? `<div class="text-center mt-3">
+            <a href="./aside-professional/patients.html" class="btn btn-sm btn-outline-warning rounded-pill">
+                <i class="fas fa-exclamation-triangle me-1"></i> Revisar pacientes sin evolución
+            </a>
+        </div>` : ''}
+    `;
+
+    setTimeout(animarRings, 200);
+}
+
+// ── Render: Reportes Resumen ──
+function renderReportesResumen(reportes) {
+    const container = document.getElementById('reportesResumenContainer');
+    if (!reportes) {
+        container.innerHTML = `<div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin fa-2x mb-2"></i><div>Cargando...</div></div>`;
+        return;
+    }
+    const total = reportes.total || 0;
+    const completados = reportes.completados || 0;
+    const pendientes = reportes.pendientes || 0;
+    const pctCompletados = total > 0 ? Math.round(completados / total * 100) : 0;
+    const pctPendientes = total > 0 ? Math.round(pendientes / total * 100) : 0;
+
+    const C = 226.2;
+    const compOff = C * (1 - pctCompletados / 100);
+
+    container.innerHTML = `
+        <div class="row g-3 mb-3 align-items-center">
+            <div class="col-8">
+                <div class="row g-2">
+                    <div class="col-4">
+                        <div class="stat-card p-2" style="display:block;text-align:center;cursor:pointer;padding:0.8rem !important" onclick="irA('./aside-professional/reports.html')">
+                            <div class="fs-4 fw-800 color-blue">${total}</div>
+                            <div class="stat-label" style="font-size:0.65rem">Totales</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-card p-2" style="display:block;text-align:center;cursor:pointer;padding:0.8rem !important" onclick="irA('./aside-professional/reports.html')">
+                            <div class="fs-4 fw-800 color-green">${completados}</div>
+                            <div class="stat-label" style="font-size:0.65rem">Completados</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-card p-2" style="display:block;text-align:center;cursor:pointer;padding:0.8rem !important" onclick="irA('./aside-professional/reports.html')">
+                            <div class="fs-4 fw-800 ${pendientes > 0 ? 'color-orange' : 'color-green'}">${pendientes}</div>
+                            <div class="stat-label" style="font-size:0.65rem">Pendientes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="reportes-ring-wrap">
+                    <svg class="metric-ring-svg" viewBox="0 0 100 100" style="--ring-glow: rgba(129,199,132,0.25);width:80px;height:80px">
+                        <circle class="ring-bg" cx="50" cy="50" r="36"/>
+                        <circle class="ring-fill" cx="50" cy="50" r="36"
+                                stroke="url(#rGrad)" data-target="${compOff}" style="stroke-dashoffset: 226.2"/>
+                        <g class="ring-center-text">
+                            <text class="value" x="50" y="46" fill="#81C784">${pctCompletados}</text>
+                            <text class="suffix" x="50" y="62">%</text>
+                        </g>
+                    </svg>
+                    <span class="ring-label">Tasa de finalización</span>
+                    <span class="stat-desc">${completados} de ${total} reportes</span>
+                </div>
+            </div>
+        </div>
+        <svg width="0" height="0" style="position:absolute">
+            <defs>
+                <linearGradient id="rGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#66bb6a"/>
+                    <stop offset="100%" stop-color="#388e3c"/>
+                </linearGradient>
+            </defs>
+        </svg>
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="stat-label"><i class="fas fa-check-circle text-success me-1"></i>Completados</span>
+                            <span class="fw-bold" style="font-size:0.85rem;color:#81C784">${pctCompletados}%</span>
+                        </div>
+                        <div class="bienestar-bar">
+                            <div class="fill fill-energy" style="width:${pctCompletados}%"></div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="stat-label"><i class="fas fa-clock text-warning me-1"></i>Pendientes</span>
+                            <span class="fw-bold" style="font-size:0.85rem;color:#FFB74D">${pctPendientes}%</span>
+                        </div>
+                        <div class="bienestar-bar">
+                            <div class="fill fill-emo" style="width:${pctPendientes}%"></div>
+                        </div>
+                    </div>
+                </div>
+                ${pendientes > 0 ? `<div class="text-center mt-2">
+                    <a href="./aside-professional/reports.html" class="btn btn-sm btn-outline-warning rounded-pill">
+                        <i class="fas fa-file-alt me-1"></i> Completar reportes
+                    </a>
+                </div>` : ''}
+            </div>
+        </div>
+    `;
+
+    setTimeout(animarRings, 200);
+}
+
+// ── Render: Actividades ──
+function renderActividades(data) {
+    const actividadesLocal = JSON.parse(localStorage.getItem('psyai_actividades_recientes') || '[]');
+    let todas = [];
+
+    if (data.actividades && data.actividades.length > 0) {
+        todas = data.actividades.map(a => ({
+            tipo: 'cita',
+            titulo: a.paciente,
+            detalle: `${a.tipoCita} · ${a.fecha} ${a.hora}`,
+            estado: a.estado,
+            timestamp: new Date(`${a.fecha} ${a.hora}`).getTime() || 0
+        }));
+    }
+
+    actividadesLocal.forEach(a => {
+        todas.push({
+            tipo: a.tipo,
+            titulo: a.accion,
+            detalle: a.detalle,
+            estado: '',
+            timestamp: a.timestamp
+        });
+    });
+
+    todas.sort((a, b) => b.timestamp - a.timestamp);
+    todas = todas.slice(0, 10);
+
+    const container = document.getElementById('actividadContainer');
+    if (todas.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                <div>No hay actividades recientes</div>
+            </div>`;
+        return;
+    }
+
+    const estadoBadge = {
+        'Pendiente':   'warning',
+        'Confirmada':  'success',
+        'Cancelada':   'danger',
+        'Completada':  'secondary'
+    };
+    const tipoIcono = {
+        'cita': 'fa-calendar-check text-primary',
+        'diagnostico': 'fa-stethoscope text-success',
+        'reporte': 'fa-chart-line text-info'
+    };
+
+    container.innerHTML = todas.map(a => `
+        <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+            <div class="actividad-icon">
+                <i class="fas ${tipoIcono[a.tipo] || 'fa-clipboard text-secondary'}"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="fw-semibold">${a.titulo}</div>
+                <div class="text-muted small">${a.detalle}</div>
+            </div>
+            ${a.estado ? `<span class="badge bg-${estadoBadge[a.estado] || 'secondary'}">${a.estado}</span>` : ''}
+        </div>
+    `).join('');
+}
+
+// ── Carga principal del dashboard ──
 async function cargarDashboard() {
     try {
-        const res = await fetch('/api/profesional/dashboard', {
-            credentials: 'include'
-        });
+        const res = await fetch('/api/profesional/dashboard', { credentials: 'include' });
         const data = await res.json();
 
         if (!data.success) {
             console.error('Error al cargar dashboard:', data.message);
         }
 
-        // Actualizar estadísticas
+        // Estadísticas
         document.getElementById('statPacientes').textContent = data.pacientes_activos ?? 0;
         document.getElementById('statCitasHoy').textContent = data.citas_hoy ?? 0;
         document.getElementById('statPendientes').textContent = data.citas_pendientes ?? 0;
+        document.getElementById('statReportes').textContent = data.reportes?.total ?? 0;
 
-        // Obtener actividades de localStorage
-        const actividadesLocal = JSON.parse(localStorage.getItem('psyai_actividades_recientes') || '[]');
-        
-        // Combinar con actividades de la API
-        let todasActividades = [];
-        
-        // Agregar citas de la API
-        if (data.actividades && data.actividades.length > 0) {
-            todasActividades = data.actividades.map(a => ({
-                tipo: 'cita',
-                titulo: a.paciente,
-                detalle: `${a.tipoCita} · ${a.fecha} ${a.hora}`,
-                estado: a.estado,
-                timestamp: new Date(`${a.fecha} ${a.hora}`).getTime() || 0
-            }));
-        }
-        
-        // Agregar actividades locales (diagnósticos, reportes, etc)
-        actividadesLocal.forEach(a => {
-            todasActividades.push({
-                tipo: a.tipo,
-                titulo: a.accion,
-                detalle: a.detalle,
-                estado: '',
-                timestamp: a.timestamp
-            });
-        });
-        
-        // Ordenar por timestamp (más reciente primero)
-        todasActividades.sort((a, b) => b.timestamp - a.timestamp);
-        
-        // Limitar a 10 actividades
-        todasActividades = todasActividades.slice(0, 10);
-
-        // Renderizar actividades recientes
-        const container = document.getElementById('actividadContainer');
-        if (todasActividades.length === 0) {
-            container.innerHTML = `
-                <div class="text-center text-muted py-4">
-                    <i class="fas fa-calendar-times fa-2x mb-2"></i>
-                    <div>No hay actividades recientes</div>
-                </div>`;
-            return;
-        }
-
-        const estadoBadge = {
-            'Pendiente':   'warning',
-            'Confirmada':  'success',
-            'Cancelada':   'danger',
-            'Completada':  'secondary'
-        };
-
-        const tipoIcono = {
-            'cita': 'fa-calendar-check text-primary',
-            'diagnostico': 'fa-stethoscope text-success',
-            'reporte': 'fa-chart-line text-info'
-        };
-
-        container.innerHTML = todasActividades.map(a => `
-            <div class="d-flex align-items-center gap-3 py-2 border-bottom">
-                <div class="actividad-icon">
-                    <i class="fas ${tipoIcono[a.tipo] || 'fa-clipboard text-secondary'}"></i>
-                </div>
-                <div class="flex-grow-1">
-                    <div class="fw-semibold">${a.titulo}</div>
-                    <div class="text-muted small">${a.detalle}</div>
-                </div>
-                ${a.estado ? `<span class="badge bg-${estadoBadge[a.estado] || 'secondary'}">${a.estado}</span>` : ''}
-            </div>
-        `).join('');
+        // Renderizar secciones
+        renderAlertas(data.alertas);
+        renderProximasCitas(data.proximas_citas);
+        renderBienestar(data.evolucion);
+        renderReportesResumen(data.reportes);
+        renderActividades(data);
 
     } catch (err) {
         console.error('Error de red:', err);
-        // Si falla la API, mostrar solo actividades locales
+        // Fallback: mostrar actividades locales
         const actividadesLocal = JSON.parse(localStorage.getItem('psyai_actividades_recientes') || '[]');
+        const tipoIcono = { 'diagnostico': 'fa-stethoscope text-success', 'reporte': 'fa-chart-line text-info' };
         const container = document.getElementById('actividadContainer');
-        
+
         if (actividadesLocal.length === 0) {
             container.innerHTML = `
                 <div class="text-center text-muted py-4">
@@ -434,12 +1467,6 @@ async function cargarDashboard() {
                 </div>`;
             return;
         }
-        
-        const tipoIcono = {
-            'diagnostico': 'fa-stethoscope text-success',
-            'reporte': 'fa-chart-line text-info'
-        };
-        
         container.innerHTML = actividadesLocal.slice(0, 10).map(a => `
             <div class="d-flex align-items-center gap-3 py-2 border-bottom">
                 <div class="actividad-icon">
@@ -454,10 +1481,10 @@ async function cargarDashboard() {
     }
 }
 
-// Cargar al entrar a la página
+// Cargar al entrar
 cargarDashboard();
 
-// Escuchar cambios de localStorage desde otras páginas/pestañas
+// Escuchar cambios desde otras pestañas
 window.addEventListener('storage', (e) => {
     if (e.key === 'psyai_dashboard_update' && e.newValue) {
         cargarDashboard();
@@ -471,7 +1498,6 @@ window.addEventListener('localStorageChange', (e) => {
     }
 });
 </script>
-
 
 </body>
 </html>

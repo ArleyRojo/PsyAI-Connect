@@ -43,6 +43,11 @@ def get_dashboard(professional_id):
             actividad["fecha"] = actividad["fecha"].strftime("%d/%m/%Y")
         if actividad.get("hora"):
             actividad["hora"] = str(actividad["hora"])
+    for cita in data.get("proximas_citas", []):
+        if cita.get("fecha"):
+            cita["fecha"] = cita["fecha"].strftime("%d/%m/%Y")
+        if cita.get("hora"):
+            cita["hora"] = str(cita["hora"])
     return {"success": True, **data}, 200
 
 
