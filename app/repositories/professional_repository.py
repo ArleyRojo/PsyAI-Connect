@@ -71,7 +71,7 @@ def get_dashboard_stats(professional_id):
 
         cursor.execute(
             """
-            SELECT r.nombre as paciente, c.fecha, c.hora, c.tipoCita, c.estado
+            SELECT r.nombre as paciente, c.fecha, c.hora, c.tipoCita, c.estado, c.idCita
             FROM Citas c
             JOIN Register r ON c.idPaciente = r.idUsuario
             WHERE c.idProfesional = %s AND c.estado != 'Cancelada'
@@ -81,11 +81,146 @@ def get_dashboard_stats(professional_id):
         )
         actividades = cursor.fetchall()
 
+        cursor.execute(
+            """
+            SELECT c.idCita, r.nombre as paciente, r.idUsuario as idPaciente, r.fotoPerfil,
+                   c.fecha, c.hora, c.tipoCita, c.estado
+            FROM Citas c
+            JOIN Register r ON c.idPaciente = r.idUsuario
+            WHERE c.idProfesional = %s 
+              AND c.estado IN ('Pendiente', 'Confirmada')
+              AND c.fecha >= CURDATE()
+              AND c.fecha <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+            ORDER BY c.fecha ASC, c.hora ASC LIMIT 10
+            """,
+            (professional_id,),
+        )
+        proximas_citas = cursor.fetchall()
+
+        cursor.execute(
+            """
+            SELECT 
+                COUNT(*) as total_reportes,
+                SUM(estado = 'Completado') as completados,
+                SUM(estado = 'Pendiente') as pendientes
+            FROM Reportes 
+            WHERE idProfesional = %s AND COALESCE(eliminado, 0) = 0
+            """,
+            (professional_id,),
+        )
+        reportes_stats = cursor.fetchone()
+
+        cursor.execute(
+            """
+            SELECT 
+                COUNT(DISTINCT c.idPaciente) as pacientes_con_citas,
+                COUNT(DISTINCT CASE WHEN e.fecha >= DATE_SUB(CURDATE(), INTERVAL 14 DAY) THEN e.idPaciente END) as pacientes_con_evolucion_reciente
+            FROM Citas c
+            LEFT JOIN EvolucionPaciente e ON e.idPaciente = c.idPaciente
+            WHERE c.idProfesional = %s 
+              AND c.estado != 'Cancelada'
+              AND c.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            """,
+            (professional_id,),
+        )
+        evolucion_stats = cursor.fetchone()
+
+        cursor.execute(
+            """
+            SELECT 
+                AVG(e.estadoEmocional) as estado_emocional_promedio,
+                AVG(e.nivelEnergia) as nivel_energia_promedio,
+                COUNT(e.idEvolucion) as total_registros
+            FROM EvolucionPaciente e
+            JOIN Citas c ON c.idPaciente = e.idPaciente
+            WHERE c.idProfesional = %s 
+              AND c.estado != 'Cancelada'
+              AND e.fecha >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            """,
+            (professional_id,),
+        )
+        emocion_stats = cursor.fetchone()
+
+        cursor.execute(
+            """
+            SELECT 
+                COUNT(CASE WHEN c.estado = 'Pendiente' AND c.fecha = CURDATE() THEN 1 END) as citas_por_confirmar_hoy,
+                COUNT(CASE WHEN c.estado = 'Pendiente' AND c.fecha > CURDATE() AND c.fecha <= DATE_ADD(CURDATE(), INTERVAL 3 DAY) THEN 1 END) as citas_por_confirmar_proximas
+            FROM Citas c
+            WHERE c.idProfesional = %s
+            """,
+            (professional_id,),
+        )
+        alertas_citas = cursor.fetchone()
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) as reportes_pendientes
+            FROM Reportes
+            WHERE idProfesional = %s AND estado = 'Pendiente' AND COALESCE(eliminado, 0) = 0
+            """,
+            (professional_id,),
+        )
+        alertas_reportes = cursor.fetchone()
+
+    pacientes_sin_evolucion = 0
+    if evolucion_stats and evolucion_stats["pacientes_con_citas"]:
+        pacientes_sin_evolucion = (evolucion_stats["pacientes_con_citas"] or 0) - (evolucion_stats["pacientes_con_evolucion_reciente"] or 0)
+
+    alertas = []
+    if alertas_citas and alertas_citas["citas_por_confirmar_hoy"]:
+        alertas.append({
+            "tipo": "warning",
+            "icono": "fa-clock",
+            "titulo": "Citas por confirmar hoy",
+            "mensaje": f"{alertas_citas['citas_por_confirmar_hoy']} cita(s) pendiente(s) de confirmación",
+            "accion": "ver_agenda"
+        })
+    if alertas_citas and alertas_citas["citas_por_confirmar_proximas"]:
+        alertas.append({
+            "tipo": "info",
+            "icono": "fa-calendar-day",
+            "titulo": "Citas por confirmar (próx. 3 días)",
+            "mensaje": f"{alertas_citas['citas_por_confirmar_proximas']} cita(s) pendiente(s)",
+            "accion": "ver_agenda"
+        })
+    if alertas_reportes and alertas_reportes["reportes_pendientes"]:
+        alertas.append({
+            "tipo": "warning",
+            "icono": "fa-file-text",
+            "titulo": "Reportes pendientes",
+            "mensaje": f"{alertas_reportes['reportes_pendientes']} reporte(s) por completar",
+            "accion": "ver_reportes"
+        })
+    if pacientes_sin_evolucion > 0:
+        alertas.append({
+            "tipo": "info",
+            "icono": "fa-heart-pulse",
+            "titulo": "Pacientes sin evolución reciente",
+            "mensaje": f"{pacientes_sin_evolucion} paciente(s) sin registro en 14 días",
+            "accion": "ver_pacientes"
+        })
+
     return {
         "pacientes_activos": stats["pacientes_activos"] or 0,
         "citas_hoy": stats["citas_hoy"] or 0,
         "citas_pendientes": stats["citas_pendientes"] or 0,
         "actividades": actividades,
+        "proximas_citas": proximas_citas,
+        "reportes": {
+            "total": reportes_stats["total_reportes"] or 0,
+            "completados": reportes_stats["completados"] or 0,
+            "pendientes": reportes_stats["pendientes"] or 0,
+        },
+        "evolucion": {
+            "pacientes_con_citas": evolucion_stats["pacientes_con_citas"] or 0,
+            "pacientes_con_evolucion_reciente": evolucion_stats["pacientes_con_evolucion_reciente"] or 0,
+            "pacientes_sin_evolucion": pacientes_sin_evolucion,
+            "estado_emocional_promedio": round(emocion_stats["estado_emocional_promedio"], 1) if emocion_stats and emocion_stats["estado_emocional_promedio"] else None,
+            "nivel_energia_promedio": round(emocion_stats["nivel_energia_promedio"], 1) if emocion_stats and emocion_stats["nivel_energia_promedio"] else None,
+            "total_registros": emocion_stats["total_registros"] or 0,
+        },
+        "alertas": alertas,
     }
 
 
