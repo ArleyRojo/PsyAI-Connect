@@ -39,6 +39,71 @@
 .main-content > *:nth-child(3) { animation-delay: 0.18s; }
 .main-content > *:nth-child(4) { animation-delay: 0.26s; }
 .main-content > *:nth-child(5) { animation-delay: 0.34s; }
+
+html.dark-mode .main-content {
+    background: var(--dm-deep) !important;
+}
+html.dark-mode .main-header h1,
+html.dark-mode .main-header .user-info,
+html.dark-mode .text-dark {
+    color: var(--dm-text1) !important;
+}
+html.dark-mode .stat-card,
+html.dark-mode .report-form-card,
+html.dark-mode .report-table-card,
+html.dark-mode .modal-content {
+    background: var(--dm-card) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+}
+html.dark-mode .report-form-card,
+html.dark-mode .report-table-card {
+    box-shadow: 0 12px 30px rgba(0,0,0,0.22) !important;
+}
+html.dark-mode .report-form-card h5,
+html.dark-mode .report-table-card h5 {
+    color: var(--dm-heading) !important;
+}
+html.dark-mode .report-form-card .form-label,
+html.dark-mode .modal-body .form-label,
+html.dark-mode .form-label {
+    color: var(--dm-text1) !important;
+}
+html.dark-mode .form-control,
+html.dark-mode .form-select,
+html.dark-mode .form-control:focus,
+html.dark-mode .form-select:focus {
+    background-color: #0f1a29 !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+}
+html.dark-mode .report-form-card select.form-select,
+html.dark-mode .modal-body select.form-select {
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode .table {
+    color: var(--dm-text1) !important;
+}
+html.dark-mode .report-table-card .table thead th {
+    color: var(--dm-heading) !important;
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode .report-table-card .table tbody tr {
+    color: var(--dm-text2) !important;
+}
+html.dark-mode .report-table-card .table td,
+html.dark-mode .report-table-card .table th {
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode .table-responsive {
+    background: transparent !important;
+}
+html.dark-mode #toastReporte {
+    background: rgba(20, 37, 57, 0.95) !important;
+}
+html.dark-mode .btn-close {
+    filter: invert(1) !important;
+}
 </style>
 </head>
 <body>

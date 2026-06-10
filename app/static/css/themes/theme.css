@@ -706,6 +706,45 @@ html.dark-mode .sidebar .nav-link,
     border-color: var(--dm-border) !important;
 }
 
+/* Professional dashboard cards */
+.dark-mode .stat-card,
+.dark-mode .cita-card,
+.dark-mode .alert-banner,
+.dark-mode .accordion-item {
+    background: var(--dm-card) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.32) !important;
+}
+
+.dark-mode .stat-card:hover,
+.dark-mode .cita-card:hover,
+.dark-mode .accordion-item:hover:not(.collapsed) {
+    box-shadow: 0 0 18px rgba(74, 134, 240, 0.16) !important;
+    border-color: rgba(144, 202, 249, 0.22) !important;
+}
+
+.dark-mode .stat-card .stat-value {
+    color: var(--dm-soft) !important;
+    filter: none !important;
+}
+
+.dark-mode .stat-card .stat-label,
+.dark-mode .cita-card p,
+.dark-mode .accordion-button,
+.dark-mode .accordion-body {
+    color: var(--dm-text2) !important;
+}
+
+.dark-mode .stat-icon {
+    box-shadow: 0 0 14px rgba(144, 202, 249, 0.1) !important;
+}
+
+.dark-mode .accordion-button {
+    background: transparent !important;
+    color: var(--dm-text1) !important;
+}
+
 /* Stats cards */
 .dark-mode .card h2.text-primary {
     color: var(--dm-soft) !important;
