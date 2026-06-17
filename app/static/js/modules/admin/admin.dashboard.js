@@ -3,10 +3,11 @@ let _statsSSE = null;
 let _logsSSE = null;
 let _lastStats = {};
 
-document.addEventListener('DOMContentLoaded', () => {
-    verificarSesionAdmin();
-    cargarStats();
-    cargarActividadReciente();
+document.addEventListener('DOMContentLoaded', async () => {
+    // verificarSesionAdmin primero: si no es admin redirige y el resto sobra
+    await verificarSesionAdmin();
+    // cargarStats y cargarActividadReciente son independientes → paralelo
+    await Promise.all([cargarStats(), cargarActividadReciente()]);
     conectarSSE();
 });
 
@@ -94,9 +95,11 @@ function aplicarStatsIniciales(stats) {
     });
 
     if (typeof initCharts === 'function') initCharts(stats);
-    if (typeof verificarServidor === 'function') verificarServidor();
-
-    cargarUsuariosOnline();
+    // verificarServidor y cargarUsuariosOnline son independientes → paralelo
+    Promise.all([
+        typeof verificarServidor === 'function' ? verificarServidor() : Promise.resolve(),
+        cargarUsuariosOnline(),
+    ]).catch(() => {});
 }
 
 async function cargarUsuariosOnline() {

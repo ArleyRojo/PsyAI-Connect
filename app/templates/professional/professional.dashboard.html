@@ -176,6 +176,52 @@ html.dark-mode .alert-banner .btn-close-alert:hover {
 }
 .accordion-body { padding: 1.25rem !important; }
 
+/* ── Section Card (Resumen General, estático fuera del acordeón) ── */
+.section-card {
+    background: var(--color-bg-card, #fff);
+    border: 1px solid var(--color-border-soft, #EAF3FD);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.22s ease;
+}
+.section-card:hover {
+    box-shadow: 0 8px 24px rgba(13,71,161,.08);
+    border-color: #90CAF9;
+}
+.section-card__header {
+    padding: 1rem 1.25rem;
+    background: var(--color-bg-card, #fff);
+    border-bottom: 1px solid var(--color-border-soft, #EAF3FD);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--color-text-main, #0D1F3C);
+    display: flex;
+    align-items: center;
+}
+.section-card__header i { font-size: 1rem; }
+.section-card__body {
+    padding: 1.25rem;
+    background: var(--color-bg-card, #fff);
+}
+html.dark-mode .section-card {
+    background: var(--dm-card, #0e1f35);
+    border-color: var(--dm-border, #1a3555);
+}
+html.dark-mode .section-card:hover {
+    border-color: var(--dm-accent, #90CAF9);
+}
+html.dark-mode .section-card__header {
+    background: var(--dm-card, #0e1f35);
+    border-bottom-color: var(--dm-border, #1a3555);
+    color: var(--dm-text1, #daeeff);
+}
+html.dark-mode .section-card__body {
+    background: var(--dm-card, #0e1f35);
+}
+
 /* ── Cita card (próximas citas) ── */
 .cita-card {
     display: flex;
@@ -812,85 +858,95 @@ html.dark-mode .color-orange { color: #ffa726 !important; }
             </div>
         </header>
 
-        <!-- ═══ Alertas ═══ -->
-        <div id="alertasContainer" class="mb-4"></div>
-
-        <!-- ═══ Accesos Rápidos (Glassmorphism) ═══ -->
-        <section class="mb-4">
-            <div class="row g-2" id="quickActionsContainer">
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/patients.html" class="quick-action-card"
-                       style="--glow-color: #64B5F6; --glow-alpha: rgba(100,181,246,0.20)">
-                        <div class="qa-icon primary"><i class="fas fa-user-plus"></i></div>
-                        <div class="qa-title">Nuevo Paciente</div>
-                        <div class="qa-desc">Registrar paciente</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/my.agenda.html" class="quick-action-card"
-                       style="--glow-color: #81C784; --glow-alpha: rgba(129,199,132,0.20)">
-                        <div class="qa-icon success"><i class="fas fa-calendar-plus"></i></div>
-                        <div class="qa-title">Nueva Cita</div>
-                        <div class="qa-desc">Agendar sesión</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/patients.html" class="quick-action-card"
-                       style="--glow-color: #FFB74D; --glow-alpha: rgba(255,183,77,0.20)">
-                        <div class="qa-icon warning"><i class="fas fa-stethoscope"></i></div>
-                        <div class="qa-title">Diagnóstico</div>
-                        <div class="qa-desc">Registrar diagnóstico</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/reports.html" class="quick-action-card"
-                       style="--glow-color: #4DD0E1; --glow-alpha: rgba(77,208,225,0.20)">
-                        <div class="qa-icon info"><i class="fas fa-chart-bar"></i></div>
-                        <div class="qa-title">Reporte</div>
-                        <div class="qa-desc">Generar reporte</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/mensajes.html" class="quick-action-card"
-                       style="--glow-color: #CE93D8; --glow-alpha: rgba(206,147,216,0.20)">
-                        <div class="qa-icon purple"><i class="fas fa-comment-dots"></i></div>
-                        <div class="qa-title">Mensajes</div>
-                        <div class="qa-desc">Chat con pacientes</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md d-md-none"></div>
+        <!-- Resumen General (Alertas + Accesos Rápidos + Estadísticas) — estático, fuera del acordeón -->
+        <div class="section-card">
+            <div class="section-card__header">
+                <i class="fas fa-chart-simple me-2"></i> Resumen General
             </div>
-        </section>
+            <div class="section-card__body">
 
-        <!-- ═══ Estadísticas Rápidas ═══ -->
-        <section class="mb-4">
-            <div class="row g-3" id="statsRow">
-                <div class="col-6 col-md-3">
-                    <div class="stat-card clickable" onclick="irA('./aside-professional/patients.html')">
-                        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
-                        <div><div class="stat-value" id="statPacientes">0</div><div class="stat-label">Pacientes Activos</div></div>
+                <!-- Alertas -->
+                <div id="alertasContainer" class="mb-4"></div>
+
+                <!-- Accesos Rápidos -->
+                <section class="mb-4">
+                    <div class="row g-2" id="quickActionsContainer">
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/patients.html" class="quick-action-card"
+                               style="--glow-color: #64B5F6; --glow-alpha: rgba(100,181,246,0.20)">
+                                <div class="qa-icon primary"><i class="fas fa-user-plus"></i></div>
+                                <div class="qa-title">Nuevo Paciente</div>
+                                <div class="qa-desc">Registrar paciente</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/my.agenda.html" class="quick-action-card"
+                               style="--glow-color: #81C784; --glow-alpha: rgba(129,199,132,0.20)">
+                                <div class="qa-icon success"><i class="fas fa-calendar-plus"></i></div>
+                                <div class="qa-title">Nueva Cita</div>
+                                <div class="qa-desc">Agendar sesión</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/patients.html" class="quick-action-card"
+                               style="--glow-color: #FFB74D; --glow-alpha: rgba(255,183,77,0.20)">
+                                <div class="qa-icon warning"><i class="fas fa-stethoscope"></i></div>
+                                <div class="qa-title">Diagnóstico</div>
+                                <div class="qa-desc">Registrar diagnóstico</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/reports.html" class="quick-action-card"
+                               style="--glow-color: #4DD0E1; --glow-alpha: rgba(77,208,225,0.20)">
+                                <div class="qa-icon info"><i class="fas fa-chart-bar"></i></div>
+                                <div class="qa-title">Reporte</div>
+                                <div class="qa-desc">Generar reporte</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/mensajes.html" class="quick-action-card"
+                               style="--glow-color: #CE93D8; --glow-alpha: rgba(206,147,216,0.20)">
+                                <div class="qa-icon purple"><i class="fas fa-comment-dots"></i></div>
+                                <div class="qa-title">Mensajes</div>
+                                <div class="qa-desc">Chat con pacientes</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md d-md-none"></div>
                     </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
-                        <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
-                        <div><div class="stat-value" id="statCitasHoy">0</div><div class="stat-label">Citas Hoy</div></div>
+                </section>
+
+                <!-- Estadísticas Rápidas -->
+                <section>
+                    <div class="row g-3" id="statsRow">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/patients.html')">
+                                <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                                <div><div class="stat-value" id="statPacientes">0</div><div class="stat-label">Pacientes Activos</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
+                                <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
+                                <div><div class="stat-value" id="statCitasHoy">0</div><div class="stat-label">Citas Hoy</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
+                                <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+                                <div><div class="stat-value" id="statPendientes">0</div><div class="stat-label">Citas Pendientes</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/reports.html')">
+                                <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+                                <div><div class="stat-value" id="statReportes">0</div><div class="stat-label">Reportes Totales</div></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
-                        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
-                        <div><div class="stat-value" id="statPendientes">0</div><div class="stat-label">Citas Pendientes</div></div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card clickable" onclick="irA('./aside-professional/reports.html')">
-                        <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
-                        <div><div class="stat-value" id="statReportes">0</div><div class="stat-label">Reportes Totales</div></div>
-                    </div>
-                </div>
+                </section>
+
             </div>
-        </section>
+        </div>
 
         <!-- ═══ Secciones en Acordeón ═══ -->
         <div class="accordion accordion-responsive mb-4" id="accordionDashboard">

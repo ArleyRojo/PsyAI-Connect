@@ -46,11 +46,25 @@ class Config:
     ).split(",")
 
     # Database con defaults sensatos para desarrollo local
+    # DB_POOL_SIZE: Tamaño del pool de conexiones MySQL.
+    #   Default 10. Con SSE activo cada cliente consume una conexión,
+    #   por lo que valores <8 generan una advertencia en el log.
+    # DB_USE_PURE: Usar driver Python puro (true) o C nativo (false).
+    #   En producción con mysql-connector-python[c-ext] instalado,
+    #   usar DB_USE_PURE=false para 3-5x mejor rendimiento.
     DB_HOST = os.getenv("DB_HOST", "localhost")
     DB_PORT = int(os.getenv("DB_PORT", "3306"))
     DB_USER = os.getenv("DB_USER", "root")
     DB_NAME = os.getenv("DB_NAME", "psyai_connect")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "root")
+    DB_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "10"))
+    DB_USE_PURE = os.getenv("DB_USE_PURE", "true").lower() == "true"
+
+    # Upload validation
+    MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "5"))
+    ALLOWED_UPLOAD_EXTENSIONS = set(
+        os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp").split(",")
+    )
 
     LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
     LOG_FORMAT = os.getenv("LOG_FORMAT", "text")
@@ -73,6 +87,13 @@ class Config:
     )
 
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+
+    # CSRF protection
+    WTF_CSRF_ENABLED = os.getenv("WTF_CSRF_ENABLED", "true").lower() == "true"
+    WTF_CSRF_TIME_LIMIT = int(os.getenv("WTF_CSRF_TIME_LIMIT", "3600"))
+    WTF_CSRF_SSL_STRICT = os.getenv("WTF_CSRF_SSL_STRICT", "false").lower() == "true"
+    WTF_CSRF_CHECK_DEFAULT = os.getenv("WTF_CSRF_CHECK_DEFAULT", "true").lower() == "true"
+    WTF_CSRF_HEADERS = os.getenv("WTF_CSRF_HEADERS", "X-CSRFToken,X-CSRF-Token").split(",")
 
 
 class JSONFormatter(logging.Formatter):

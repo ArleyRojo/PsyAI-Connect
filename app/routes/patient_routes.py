@@ -118,8 +118,9 @@ def enviar_chatbot():
 
 
 @patient_bp.route("/api/chatbot/config", methods=["GET"])
-@require_role("paciente")
 def get_chatbot_config_paciente():
+    if "usuario" not in session or session.get("rol") != "paciente":
+        return jsonify({"success": False, "message": "No autorizado"}), 200
     config = chatbot_config_service.get_config()
     return jsonify({
         "success": True,
@@ -132,8 +133,16 @@ def get_chatbot_config_paciente():
 
 
 @patient_bp.route("/api/chatbot/config/events", methods=["GET"])
-@require_role("paciente")
 def chatbot_config_events_stream():
+    if "usuario" not in session or session.get("rol") != "paciente":
+        def error_stream():
+            yield "event: auth-error\ndata: {\"message\": \"No autorizado\"}\n\n"
+        return Response(
+            stream_with_context(error_stream()),
+            mimetype="text/event-stream",
+            status=200
+        )
+
     queue = chatbot_config_events.subscribe()
 
     def stream():

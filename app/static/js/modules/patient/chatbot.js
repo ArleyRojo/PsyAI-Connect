@@ -150,8 +150,15 @@ function configurarActualizacionConfigChatbot() {
     });
 }
 
-function configurarEventosConfigChatbot() {
+async function configurarEventosConfigChatbot() {
     if (!window.EventSource || chatbotConfigEventSource) return;
+    try {
+        const check = await fetch('/api/chatbot/config', { credentials: 'include' });
+        if (!check.ok) return;
+    } catch (e) {
+        console.warn('SSE config no disponible:', e);
+        return;
+    }
     chatbotConfigEventSource = new EventSource('/api/chatbot/config/events');
     chatbotConfigEventSource.addEventListener('chatbot-config', function (event) {
         try {
@@ -160,6 +167,10 @@ function configurarEventosConfigChatbot() {
         } catch (e) {
             console.warn('No se pudo leer actualización de configuración:', e);
         }
+    });
+    chatbotConfigEventSource.addEventListener('auth-error', function () {
+        chatbotConfigEventSource.close();
+        chatbotConfigEventSource = null;
     });
 }
 

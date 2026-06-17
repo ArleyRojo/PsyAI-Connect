@@ -1,20 +1,40 @@
-let historialData = [];
-let historialFiltrado = [];
-let historialPaginaActual = 1;
-const HISTORIAL_POR_PAGINA = 15;
+let pacientesData = [];
+let pacientesFiltrados = [];
 let riskTerms = [];
+let palabrasDetectadas = [];
 let originalConfig = {};
+let pacienteSeleccionado = null;
+let riskFilterActual = 'all';
+let configCargada = false;
 
 document.addEventListener('DOMContentLoaded', function() {
+    const btnGuardar = document.getElementById('btnGuardar');
+    if (btnGuardar) btnGuardar.disabled = true;
     cargarEstadisticas();
     cargarConfig();
+    cargarPalabrasDetectadas();
     cargarHistorial();
     configurarFormularioConfig();
-    configurarFiltro();
-    configurarExportarCSV();
+    configurarFiltrosHistorial();
+    configurarFiltroRiesgo();
     configurarAgregarPalabra();
     configurarLimpiarPalabras();
 });
+
+async function cargarPalabrasDetectadas() {
+    try {
+        const res = await fetch('/api/admin/chatbot-detected-words', {
+            credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success) {
+            palabrasDetectadas = data.palabras || [];
+        }
+    } catch(e) {
+        console.error('Error cargando palabras detectadas:', e);
+    }
+    renderizarRiskLevelCards();
+}
 
 async function cargarConfig() {
     try {
@@ -63,10 +83,23 @@ async function cargarConfig() {
                 document.getElementById('fechaActualizacion').textContent = 'Última actualización: ' + config.fecha_actualizacion;
                 document.getElementById('saveInfo').textContent = 'Última modificación: ' + config.fecha_actualizacion;
             }
+            configCargada = true;
+            const btnGuardar = document.getElementById('btnGuardar');
+            if (btnGuardar) {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = 'Guardar Configuraci&oacute;n';
+            }
         }
     } catch(e) {
         console.error('Error cargando configuración:', e);
+        PsyAIAlerts.error('Error de carga', 'No se pudo cargar la configuraci&oacute;n. Recarga la p&aacute;gina antes de guardar.');
+        const btnGuardar = document.getElementById('btnGuardar');
+        if (btnGuardar) {
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Recarga la p&aacute;gina';
+        }
     }
+    renderizarRiskLevelCards();
 }
 
 async function cargarEstadisticas() {
@@ -130,7 +163,12 @@ function configurarFormularioConfig() {
     
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
+
+        if (!configCargada) {
+            PsyAIAlerts.error('Configuraci&oacute;n no cargada', 'Espera a que la configuraci&oacute;n termine de cargar antes de guardar, o recarga la p&aacute;gina.');
+            return;
+        }
+
         const currentData = {
             system_prompt: document.getElementById('systemPrompt').value.trim(),
             tone: document.getElementById('tone').value.trim(),
@@ -211,34 +249,35 @@ function notificarCambioConfigChatbot(maxTokens, maxTokensUser, dailyMessageLimi
     } catch(e) {}
 }
 
-async function cargarHistorial(filtroNivel = '') {
-    const tbody = document.querySelector('#tablaHistorial tbody');
-    if (!tbody) return;
+async function cargarHistorial() {
+    const container = document.getElementById('patientsList');
+    if (!container) return;
+    container.innerHTML = '<div class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>Cargando...</div>';
     
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+    const nivel = document.getElementById('filtroNivel')?.value || '';
+    const search = document.getElementById('buscarHistorial')?.value?.trim() || '';
     
     try {
-        const url = filtroNivel 
-            ? `/api/admin/chatbot-historial?nivel=${encodeURIComponent(filtroNivel)}`
-            : '/api/admin/chatbot-historial';
+        const params = new URLSearchParams();
+        if (nivel) params.set('nivel', nivel);
+        if (search) params.set('q', search);
+        const qs = params.toString();
+        const url = qs ? `/api/admin/chatbot-historial?${qs}` : '/api/admin/chatbot-historial';
         
-        const res = await fetch(url, {
-            credentials: 'include'
-        });
+        const res = await fetch(url, { credentials: 'include' });
         const data = await res.json();
         
-        if (data.success && data.historial && data.historial.length > 0) {
-            historialData = data.historial;
-            historialFiltrado = historialData;
-            renderizarHistorial();
+        if (data.success && data.pacientes) {
+            pacientesData = data.pacientes;
+            pacientesFiltrados = pacientesData;
         } else {
-            historialData = [];
-            historialFiltrado = [];
-            renderizarHistorial();
+            pacientesData = [];
+            pacientesFiltrados = [];
         }
+        renderizarListaPacientes();
     } catch(e) {
         console.error('Error cargando historial:', e);
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger">Error al cargar el historial</td></tr>';
+        container.innerHTML = '<div class="text-center text-muted py-5"><i class="fas fa-exclamation-triangle fa-2x mb-2 d-block"></i>Error al cargar</div>';
     }
 }
 
@@ -270,169 +309,194 @@ function formatFecha(fecha) {
     }
 }
 
-function configurarFiltro() {
+function configurarFiltrosHistorial() {
     const filtro = document.getElementById('filtroNivel');
     const buscar = document.getElementById('buscarHistorial');
     const btnActualizar = document.getElementById('btnActualizarHistorial');
 
     if (filtro) {
         filtro.addEventListener('change', function() {
-            historialPaginaActual = 1;
-            aplicarFiltroBusqueda();
+            cargarHistorial();
         });
     }
 
     if (buscar) {
+        let timer = null;
         buscar.addEventListener('input', function() {
-            historialPaginaActual = 1;
-            aplicarFiltroBusqueda();
+            clearTimeout(timer);
+            timer = setTimeout(cargarHistorial, 300);
         });
     }
 
     if (btnActualizar) {
         btnActualizar.addEventListener('click', function() {
-            historialPaginaActual = 1;
-            const nivel = filtro ? filtro.value : '';
-            cargarHistorial(nivel);
+            cargarHistorial();
             cargarEstadisticas();
         });
     }
 }
 
-function verDetalle(index) {
-    const item = historialData[index];
-    if (!item) return;
-    
-    document.getElementById('detallePaciente').textContent = item.nombre || 'Paciente';
-    document.getElementById('detalleNivel').innerHTML = getNivelBadge(item.nivelEmocionalDetectado);
-    document.getElementById('detalleFecha').textContent = formatFecha(item.fecha);
-    document.getElementById('detalleMensaje').textContent = item.mensajeUsuario || '-';
-    document.getElementById('detalleRespuesta').textContent = item.respuestaChatbot || '-';
-    
-    document.getElementById('chatContainer').innerHTML = `
-        <div class="chat-bubble-custom user-custom">
-            <div class="chat-label-custom">Paciente</div>
-            <div>${escapeHtml(item.mensajeUsuario || '-')}</div>
-        </div>
-        <div class="chat-bubble-custom bot-custom">
-            <div class="chat-label-custom">PsyAI</div>
-            <div>${escapeHtml(item.respuestaChatbot || '-')}</div>
-        </div>
-    `;
-    
-    const modal = new bootstrap.Modal(document.getElementById('modalDetalleConversacion'));
-    modal.show();
-}
+function renderizarListaPacientes() {
+    const container = document.getElementById('patientsList');
+    if (!container) return;
 
-function configurarExportarCSV() {
-    const btn = document.getElementById('btnExportarCSV');
-    if (!btn) return;
-    
-    btn.addEventListener('click', function() {
-        if (historialData.length === 0) {
-            PsyAIAlerts.warning('Sin datos', 'No hay datos para exportar.');
-            return;
-        }
-        
-        const headers = ['Paciente', 'Mensaje', 'Respuesta', 'Nivel Emocional', 'Fecha'];
-        const rows = historialData.map(item => [
-            item.nombre || 'Paciente',
-            (item.mensajeUsuario || '').replace(/"/g, '""'),
-            (item.respuestaChatbot || '').replace(/"/g, '""'),
-            item.nivelEmocionalDetectado || '-',
-            formatFecha(item.fecha)
-        ]);
-        
-        const csvContent = [
-            headers.join(','),
-            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-        ].join('\n');
-        
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `historial_chatbot_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        PsyAIAlerts.success('Exportado', 'El historial se ha exportado correctamente a CSV.');
-    });
-}
-
-function renderizarHistorial() {
-    const tbody = document.querySelector('#tablaHistorial tbody');
-    const contador = document.getElementById('historialContador');
-    const paginacion = document.getElementById('historialPaginacion');
-    if (!tbody) return;
-
-    const total = historialFiltrado.length;
-    const totalPaginas = Math.max(1, Math.ceil(total / HISTORIAL_POR_PAGINA));
-    const inicio = (historialPaginaActual - 1) * HISTORIAL_POR_PAGINA;
-    const fin = Math.min(inicio + HISTORIAL_POR_PAGINA, total);
-    const pagina = historialFiltrado.slice(inicio, fin);
-
-    if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No hay conversaciones registradas</td></tr>';
-        if (contador) contador.textContent = 'Mostrando 0-0 de 0';
-        if (paginacion) paginacion.innerHTML = '';
+    if (pacientesFiltrados.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-5"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No hay conversaciones</div>';
         return;
     }
 
-    tbody.innerHTML = pagina.map((item, i) => {
-        const idx = inicio + i;
-        const nivelBadge = getNivelBadge(item.nivelEmocionalDetectado);
-        const mensajeCorto = (item.mensajeUsuario || '').substring(0, 35) + ((item.mensajeUsuario || '').length > 35 ? '...' : '');
-        const respuestaCorta = (item.respuestaChatbot || '').substring(0, 35) + ((item.respuestaChatbot || '').length > 35 ? '...' : '');
-        return `<tr>
-            <td class="fw-semibold">${escapeHtml(item.nombre || 'Paciente')}</td>
-            <td><small>${escapeHtml(mensajeCorto)}</small></td>
-            <td><small>${escapeHtml(respuestaCorta)}</small></td>
-            <td>${nivelBadge}</td>
-            <td><small class="text-muted">${formatFecha(item.fecha)}</small></td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="verDetalle(${idx})" title="Ver detalle">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </td>
-        </tr>`;
+    container.innerHTML = pacientesFiltrados.map(p => {
+        const initials = p.nombre.split(' ').map(w => w[0]).filter(Boolean).join('').toUpperCase().substring(0, 2) || '?';
+        const color = p.nivel_max === 'Alto' ? '#dc3545' : p.nivel_max === 'Medio' ? '#f59e0b' : '#10b981';
+        const active = pacienteSeleccionado && pacienteSeleccionado.nombre === p.nombre ? 'active' : '';
+        const lastMsg = p.mensajes && p.mensajes.length > 0
+            ? (p.mensajes[p.mensajes.length - 1].mensajeUsuario || '').substring(0, 50)
+            : '';
+        return `
+            <div class="patient-card ${active}" onclick="seleccionarPaciente('${escapeHtml(p.nombre).replace(/'/g, "\\'")}')" style="border-left: 3px solid ${color};">
+                <div class="patient-avatar" style="background:${color};">${initials}</div>
+                <div class="patient-info">
+                    <div class="patient-name">${escapeHtml(p.nombre)}</div>
+                    <div class="patient-preview">${escapeHtml(lastMsg)}${lastMsg.length >= 50 ? '...' : ''}</div>
+                </div>
+                <div class="patient-meta">
+                    <span class="patient-time">${formatFechaRelativa(p.ultimo_mensaje)}</span>
+                    <span class="patient-count badge ${p.nivel_max === 'Alto' ? 'bg-danger' : p.nivel_max === 'Medio' ? 'bg-warning text-dark' : 'bg-success'}">${p.total_mensajes}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function seleccionarPaciente(nombre) {
+    const paciente = pacientesFiltrados.find(p => p.nombre === nombre);
+    if (!paciente) return;
+    pacienteSeleccionado = paciente;
+
+    renderizarListaPacientes();
+
+    const header = document.getElementById('conversationHeader');
+    const messages = document.getElementById('conversationMessages');
+    const footer = document.getElementById('conversationFooter');
+
+    const initials = paciente.nombre.split(' ').map(w => w[0]).filter(Boolean).join('').toUpperCase().substring(0, 2) || '?';
+    const color = paciente.nivel_max === 'Alto' ? '#dc3545' : paciente.nivel_max === 'Medio' ? '#f59e0b' : '#10b981';
+
+    header.style.display = '';
+    header.innerHTML = `
+        <div class="d-flex align-items-center gap-3">
+            <div class="patient-avatar" style="background:${color};width:38px;height:38px;font-size:.85rem;">${initials}</div>
+            <div>
+                <div class="fw-bold" style="color:var(--dm-heading);">${escapeHtml(paciente.nombre)}</div>
+                <small class="text-muted">${paciente.total_mensajes} mensajes · ${getNivelBadge(paciente.nivel_max)}</small>
+            </div>
+        </div>
+    `;
+
+    messages.innerHTML = paciente.mensajes.map(m => {
+        const necesidadNivel = m.nivelEmocionalDetectado && (m.nivelEmocionalDetectado === 'Alto' || m.nivelEmocionalDetectado === 'Medio');
+        const nivelBadge = necesidadNivel
+            ? `<div class="msg-level-badge">${getNivelBadge(m.nivelEmocionalDetectado)}</div>`
+            : '';
+        const nivelClass = necesidadNivel ? `msg-nivel-${m.nivelEmocionalDetectado.toLowerCase()}` : '';
+        return `
+            <div class="msg-pair ${nivelClass}">
+                <div class="msg-row user">
+                    <div class="msg-avatar user-avatar">${initials}</div>
+                    <div>
+                        <div class="msg-bubble user-bubble">${escapeHtml(m.mensajeUsuario || '')}</div>
+                        <span class="msg-timestamp">${formatFechaRelativa(m.fecha)}</span>
+                        ${nivelBadge}
+                    </div>
+                </div>
+                <div class="msg-row bot">
+                    <div class="msg-avatar bot-avatar"><i class="fas fa-robot" style="font-size:0.85rem"></i></div>
+                    <div>
+                        <div class="msg-bubble bot-bubble">${escapeHtml(m.respuestaChatbot || '')}</div>
+                        <span class="msg-timestamp">${formatFechaRelativa(m.fecha)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
     }).join('');
 
-    if (contador) contador.textContent = `Mostrando ${inicio + 1}-${fin} de ${total}`;
+    header.style.display = '';
+    footer.style.display = '';
 
-    if (paginacion) {
-        let html = `<button class="btn btn-sm btn-light" ${historialPaginaActual === 1 ? 'disabled' : ''} onclick="cambiarPaginaHistorial(${historialPaginaActual - 1})"><i class="fas fa-chevron-left"></i></button>`;
-        html += `<span class="px-2 small align-self-center">Página ${historialPaginaActual} de ${totalPaginas}</span>`;
-        html += `<button class="btn btn-sm btn-light" ${historialPaginaActual === totalPaginas ? 'disabled' : ''} onclick="cambiarPaginaHistorial(${historialPaginaActual + 1})"><i class="fas fa-chevron-right"></i></button>`;
-        paginacion.innerHTML = html;
+    setTimeout(() => { messages.scrollTop = messages.scrollHeight; }, 50);
+}
+
+function formatFechaRelativa(fecha) {
+    if (!fecha) return '';
+    try {
+        const ahora = new Date();
+        const d = new Date(fecha);
+        const diffMs = ahora - d;
+        const diffMin = Math.floor(diffMs / 60000);
+        const diffHoras = Math.floor(diffMs / 3600000);
+        const diffDias = Math.floor(diffMs / 86400000);
+        if (diffMin < 1) return 'Ahora';
+        if (diffMin < 60) return `hace ${diffMin} min`;
+        if (diffHoras < 24) return `hace ${diffHoras}h`;
+        if (diffDias === 1) return 'Ayer';
+        if (diffDias < 7) return `hace ${diffDias} d\u00edas`;
+        return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
+    } catch(e) {
+        return fecha;
     }
 }
 
-function cambiarPaginaHistorial(pagina) {
-    const totalPaginas = Math.max(1, Math.ceil(historialFiltrado.length / HISTORIAL_POR_PAGINA));
-    if (pagina < 1 || pagina > totalPaginas) return;
-    historialPaginaActual = pagina;
-    renderizarHistorial();
-}
-
-function aplicarFiltroBusqueda() {
-    const texto = (document.getElementById('buscarHistorial')?.value || '').toLowerCase().trim();
-    const nivel = document.getElementById('filtroNivel')?.value || '';
-    historialFiltrado = historialData.filter(item => {
-        const coincideNivel = !nivel || item.nivelEmocionalDetectado === nivel;
-        const coincideTexto = !texto ||
-            (item.nombre || '').toLowerCase().includes(texto) ||
-            (item.mensajeUsuario || '').toLowerCase().includes(texto) ||
-            (item.respuestaChatbot || '').toLowerCase().includes(texto);
-        return coincideNivel && coincideTexto;
+function exportarConversacion(nombre) {
+    const paciente = pacientesData.find(p => p.nombre === nombre);
+    if (!paciente) {
+        PsyAIAlerts.warning('Sin datos', 'No se encontró la conversación para exportar.');
+        return;
+    }
+    const lines = [];
+    lines.push('\u2550'.repeat(47));
+    lines.push('  PsyAI Connect \u2014 Conversaci\u00f3n Completa');
+    lines.push('\u2550'.repeat(47));
+    lines.push('');
+    lines.push(`Paciente: ${paciente.nombre}`);
+    lines.push(`Nivel maximo: ${paciente.nivel_max}`);
+    lines.push(`Total mensajes: ${paciente.total_mensajes}`);
+    lines.push('');
+    lines.push('\u2500'.repeat(47));
+    lines.push('');
+    paciente.mensajes.forEach(m => {
+        lines.push(`[Paciente] ${m.mensajeUsuario || ''}`);
+        lines.push('');
+        lines.push(`[PsyAI]    ${m.respuestaChatbot || ''}`);
+        lines.push(`          (${m.nivelEmocionalDetectado || '-'} \u2022 ${formatFecha(m.fecha)})`);
+        lines.push('');
+        lines.push('\u2500'.repeat(47));
+        lines.push('');
     });
-    historialPaginaActual = 1;
-    renderizarHistorial();
+    lines.push(`  Generado por PsyAI Connect \u2022 ${new Date().toLocaleString('es-CO')}`);
+    lines.push('\u2550'.repeat(47));
+    const content = lines.join('\r\n');
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `conversacion_${nombre.replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.txt`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
-window.verDetalle = verDetalle;
-window.cambiarPaginaHistorial = cambiarPaginaHistorial;
+function exportarConversacionPaciente() {
+    if (!pacienteSeleccionado) {
+        PsyAIAlerts.warning('Sin selección', 'Selecciona un paciente primero.');
+        return;
+    }
+    exportarConversacion(pacienteSeleccionado.nombre);
+}
+
+window.seleccionarPaciente = seleccionarPaciente;
+window.exportarConversacion = exportarConversacion;
+window.exportarConversacionPaciente = exportarConversacionPaciente;
 
 function renderizarRiskTerms() {
     const container = document.getElementById('riskTermsContainer');
@@ -514,9 +578,71 @@ function renderizarRiskTerms() {
                 </div>
             `;
         }).join('');
+
+    renderizarRiskLevelCards();
 }
 
-function agregarPalabra() {
+function renderizarRiskLevelCards() {
+    const list = document.getElementById('riskFilteredList');
+    if (!list) return;
+
+    const hasWords = palabrasDetectadas.length > 0;
+    if (!hasWords) {
+        list.innerHTML = '<span class="text-muted small py-3 d-block text-center">No hay palabras detectadas. Cuando los pacientes usen palabras de riesgo en el chat, aparecer&aacute;n aqu&iacute;.</span>';
+        return;
+    }
+
+    const filtered = riskFilterActual === 'all'
+        ? palabrasDetectadas
+        : palabrasDetectadas.filter(w => w.nivel === riskFilterActual);
+
+    if (filtered.length === 0) {
+        list.innerHTML = '<span class="text-muted small py-3 d-block text-center">Sin palabras en este nivel</span>';
+        return;
+    }
+
+    list.innerHTML = filtered.map((w) => {
+        const nivel = w.nivel || 'Bajo';
+        return `<span class="risk-word-chip ${nivel.toLowerCase()} detected" title="Pacientes: ${w.pacientes.join(', ')}">
+            ${escapeHtml(w.palabra)}
+            <span class="level-badge">${nivel}</span>
+            <span class="usage-badge">${w.count} vez${w.count !== 1 ? 'es' : ''}</span>
+        </span>`;
+    }).join('');
+}
+
+function configurarFiltroRiesgo() {
+    const tabs = document.querySelectorAll('.risk-filter-btn');
+    tabs.forEach(btn => {
+        btn.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            riskFilterActual = this.getAttribute('data-filter');
+            renderizarRiskLevelCards();
+        });
+    });
+}
+
+async function guardarRiskTerms() {
+    try {
+        const res = await fetch('/api/admin/chatbot-risk-terms', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ risk_terms: JSON.stringify(riskTerms) })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            console.error('Error guardando palabras de riesgo:', data.message);
+            PsyAIAlerts.error('Error al guardar', data.message || 'No se pudieron guardar las palabras de riesgo.');
+        }
+    } catch(e) {
+        console.error('Error guardando palabras de riesgo:', e);
+        PsyAIAlerts.error('Error de conexión', 'No se pudieron guardar las palabras de riesgo. Verifica tu conexión.');
+    }
+}
+
+async function agregarPalabra() {
     const input = document.getElementById('riskTermsInput');
     const select = document.getElementById('riskLevelSelect');
     const palabra = input.value.trim().toLowerCase();
@@ -535,13 +661,15 @@ function agregarPalabra() {
     riskTerms.push({ palabra, nivel });
     input.value = '';
     renderizarRiskTerms();
+    await guardarRiskTerms();
     PsyAIAlerts.success('Agregada', `Palabra "${palabra}" agregada como ${nivel}.`);
 }
 
-function eliminarPalabra(index) {
+async function eliminarPalabra(index) {
     const palabraEliminada = riskTerms[index].palabra;
     riskTerms.splice(index, 1);
     renderizarRiskTerms();
+    await guardarRiskTerms();
     PsyAIAlerts.info('Eliminada', `Palabra "${palabraEliminada}" removida.`);
 }
 

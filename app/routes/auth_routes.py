@@ -50,6 +50,11 @@ def login():
         session["rol"] = session_user["rol"]
         session["fotoPerfil"] = session_user.get("fotoPerfil")
         session.permanent = True
+        from flask import current_app
+        current_app.logger.info(
+            "Login exitoso: usuario=%s rol=%s id=%s",
+            session_user.get("email"), session_user.get("rol"), session_user.get("id")
+        )
     return jsonify(payload), status
 
 

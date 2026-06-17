@@ -3,21 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
-<title>PsyAI Connect | Configuración del Chatbot</title>
+<title>PsyAI Connect | Configuraci\u00f3n del Chatbot</title>
 <link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
-<script src="/js/core/shared/theme-inline.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <link rel="stylesheet" href="/css/base/base.css">
 <link rel="stylesheet" href="/css/layout/layout.css">
 <link rel="stylesheet" href="/css/components/components.css">
 <link rel="stylesheet" href="/css/themes/theme.css">
-    <link rel="stylesheet" href="/css/pages/admin.css">
-    <link rel="stylesheet" href="/responsive/responsive-admin.css">
-<script src="/js/core/shared/theme.js"></script>
-    <script src="/js/core/shared/localStorage-detector.js"></script>
+<link rel="stylesheet" href="/css/pages/admin.css">
+<link rel="stylesheet" href="/responsive/responsive-admin.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
+
+<script src="/js/core/shared/theme-inline.js"></script>
+<script src="/js/core/shared/theme.js" defer></script>
+<script src="/js/core/shared/localStorage-detector.js" defer></script>
 <style>
 @keyframes pageFadeIn {
     from { opacity: 0; transform: translateY(16px); }
@@ -31,6 +40,255 @@
 .main-content > *:nth-child(3) { animation-delay: 0.18s; }
 .main-content > *:nth-child(4) { animation-delay: 0.26s; }
 .main-content > *:nth-child(5) { animation-delay: 0.34s; }
+/* =========================================
+   MODAL DETALLE CONVERSACIÓN - REDISEÑO
+   ========================================= */
+.detail-avatar-circle {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1rem; color: #fff;
+  flex-shrink: 0; text-transform: uppercase; user-select: none;
+}
+.chat-scroll-area {
+  max-height: 420px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  background: #f8fafc; border-radius: 0;
+}
+.chat-scroll-area::-webkit-scrollbar { width: 5px; }
+.chat-scroll-area::-webkit-scrollbar-track { background: transparent; }
+.chat-scroll-area::-webkit-scrollbar-thumb { background: #B0BEC5; border-radius: 4px; }
+.chat-scroll-area::-webkit-scrollbar-thumb:hover { background: #78909C; }
+.msg-row {
+  display: flex; align-items: flex-end; gap: 0.5rem;
+  max-width: 85%; animation: chatMsgFadeIn 0.3s ease both;
+}
+.msg-row.user  { align-self: flex-end; flex-direction: row-reverse; }
+.msg-row.bot   { align-self: flex-start; }
+.msg-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 600; flex-shrink: 0;
+}
+.msg-avatar.user-avatar { background: #1976D2; color: #fff; }
+.msg-avatar.bot-avatar {
+  background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff;
+}
+.msg-bubble {
+  padding: 0.625rem 0.875rem; border-radius: 16px;
+  font-size: 0.875rem; line-height: 1.55;
+  word-wrap: break-word; white-space: pre-wrap;
+  max-width: 100%; position: relative;
+}
+.msg-bubble.user-bubble {
+  background: #1976D2; color: #fff; border-bottom-right-radius: 4px;
+}
+.msg-bubble.bot-bubble {
+  background: #E3F2FD; color: #0D47A1; border-bottom-left-radius: 4px;
+}
+.msg-timestamp {
+  font-size: 0.6rem; opacity: 0.65; margin-top: 2px; display: block;
+}
+.msg-row.user .msg-timestamp { text-align: right; }
+@keyframes chatMsgFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.metadata-panel h6 { color: #0D47A1; }
+.metadata-panel hr { border-color: #e5e7eb; }
+/* Dark mode */
+html.dark-mode .chat-scroll-area {
+  background: var(--dm-mid);
+}
+html.dark-mode .chat-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--cb-scrollbar);
+}
+html.dark-mode .chat-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: var(--cb-scrollbar-hover);
+}
+html.dark-mode .msg-bubble.bot-bubble {
+  background: var(--cb-bot-bubble); color: var(--cb-bot-text);
+}
+html.dark-mode .msg-bubble.user-bubble {
+  background: var(--cb-user-bubble); color: var(--cb-user-text);
+}
+html.dark-mode .msg-avatar.user-avatar {
+  background: var(--cb-user-bubble);
+}
+html.dark-mode .msg-avatar.bot-avatar {
+  background: linear-gradient(135deg, #1a3555, #1976D2);
+}
+html.dark-mode .metadata-panel h6 { color: var(--dm-heading); }
+html.dark-mode .metadata-panel .fw-semibold { color: var(--dm-text1); }
+html.dark-mode .metadata-panel hr { border-color: var(--dm-border); }
+html.dark-mode #riesgoAltoBanner .alert-danger {
+  background: rgba(220,53,69,0.15); border-color: rgba(220,53,69,0.3); color: var(--dm-danger);
+}
+/* =========================================
+   CHAT HISTORY LAYOUT
+   ========================================= */
+.chat-history-layout {
+  display: flex; height: 520px; overflow: hidden;
+}
+.patients-list {
+  width: 35%; min-width: 260px;
+  border-right: 1px solid #e5e7eb;
+  display: flex; flex-direction: column;
+}
+html.dark-mode .patients-list {
+  border-right-color: var(--dm-border);
+}
+.patients-list-scroll {
+  flex: 1; overflow-y: auto; padding: 0.5rem;
+}
+.patients-list-scroll::-webkit-scrollbar { width: 5px; }
+.patients-list-scroll::-webkit-scrollbar-thumb { background: #B0BEC5; border-radius: 4px; }
+html.dark-mode .patients-list-scroll::-webkit-scrollbar-thumb { background: var(--cb-scrollbar); }
+
+.patient-card {
+  display: flex; align-items: center; gap: 0.625rem;
+  padding: 0.625rem 0.75rem; border-radius: 10px;
+  cursor: pointer; transition: background 0.15s;
+  margin-bottom: 4px;
+}
+.patient-card:hover { background: #f1f5f9; }
+.patient-card.active { background: #e8f0fe; }
+html.dark-mode .patient-card:hover { background: var(--dm-mid); }
+html.dark-mode .patient-card.active { background: rgba(25, 118, 210, 0.15); }
+
+.patient-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.8rem; color: #fff;
+  flex-shrink: 0; text-transform: uppercase;
+}
+.patient-info { flex: 1; min-width: 0; }
+.patient-name { font-weight: 600; font-size: 0.85rem; color: var(--dm-text1); }
+.patient-preview { font-size: 0.75rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.dark-mode .patient-preview { color: var(--dm-text2); }
+.patient-meta { text-align: right; flex-shrink: 0; }
+.patient-time { font-size: 0.65rem; color: #9ca3af; display: block; }
+html.dark-mode .patient-time { color: var(--dm-text2); }
+.patient-count { font-size: 0.65rem; }
+
+.conversation-panel {
+  flex: 1; display: flex; flex-direction: column;
+  background: #f8fafc; position: relative;
+}
+html.dark-mode .conversation-panel { background: var(--dm-mid); }
+
+.conversation-header {
+  padding: 0.75rem 1rem; display: none;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+html.dark-mode .conversation-header {
+  background: var(--dm-card); border-bottom-color: var(--dm-border);
+}
+
+.messages-area {
+  flex: 1; overflow-y: auto; padding: 1rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.messages-area::-webkit-scrollbar { width: 5px; }
+.messages-area::-webkit-scrollbar-thumb { background: #B0BEC5; border-radius: 4px; }
+html.dark-mode .messages-area::-webkit-scrollbar-thumb { background: var(--cb-scrollbar); }
+
+.messages-area .msg-row { max-width: 90%; }
+
+.empty-state {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 0.5rem; color: #9ca3af; padding: 2rem;
+}
+.empty-state i { font-size: 2.5rem; }
+.empty-state h6 { font-weight: 600; margin: 0; color: var(--dm-heading); }
+html.dark-mode .empty-state { color: var(--dm-text2); }
+
+.conversation-footer {
+  padding: 0.5rem 1rem; display: none;
+  border-top: 1px solid #e5e7eb;
+  background: #fff; text-align: center;
+}
+html.dark-mode .conversation-footer {
+  background: var(--dm-card); border-top-color: var(--dm-border);
+}
+
+.msg-pair { display: flex; flex-direction: column; gap: 0.5rem; }
+.msg-level-badge { text-align: right; font-size: 0.7rem; margin-top: 2px; }
+/* =========================================
+   RISK LEVEL CARDS
+   ========================================= */
+.risk-filter-tabs {
+  display: flex; gap: 4px;
+}
+.risk-filter-btn {
+  padding: 0.3rem 0.75rem; border-radius: 6px;
+  border: 1px solid #d1d5db; background: #fff;
+  font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  transition: all 0.15s; color: #374151;
+}
+.risk-filter-btn:hover {
+  border-color: currentColor;
+  color: var(--btn-color, #6366f1);
+}
+.risk-filter-btn.active {
+  background: var(--btn-color, #6366f1);
+  border-color: var(--btn-color, #6366f1);
+  color: #fff;
+}
+.risk-filter-btn[data-filter="all"] { --btn-color: #6366f1; }
+.risk-filter-btn[data-filter="Alto"] { --btn-color: #dc3545; }
+.risk-filter-btn[data-filter="Medio"] { --btn-color: #f59e0b; }
+.risk-filter-btn[data-filter="Bajo"] { --btn-color: #10b981; }
+html.dark-mode .risk-filter-btn {
+  background: var(--dm-mid); border-color: var(--dm-border); color: var(--dm-text1);
+}
+html.dark-mode .risk-filter-btn:hover {
+  border-color: var(--btn-color, #6366f1); color: var(--btn-color, #6366f1);
+}
+html.dark-mode .risk-filter-btn.active {
+  background: var(--btn-color, #6366f1); border-color: var(--btn-color, #6366f1); color: #fff;
+}
+.risk-filtered-list {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  min-height: 50px; align-items: flex-start;
+}
+.risk-word-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.35rem 0.75rem; border-radius: 8px;
+  font-size: 0.85rem; font-weight: 500;
+  border: 1px solid; animation: chipFadeIn 0.2s ease;
+}
+@keyframes chipFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.risk-word-chip.alto { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+.risk-word-chip.medio { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.risk-word-chip.bajo { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+html.dark-mode .risk-word-chip.alto { background: rgba(220,38,38,0.12); border-color: rgba(220,38,38,0.3); color: #fca5a5; }
+html.dark-mode .risk-word-chip.medio { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fcd34d; }
+html.dark-mode .risk-word-chip.bajo { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+.risk-word-chip .level-badge {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+  padding: 0.1rem 0.4rem; border-radius: 4px;
+  background: currentColor; color: #fff; opacity: 0.85;
+}
+.risk-word-chip .remove-chip-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 1rem; line-height: 1; padding: 0 0 0 0.2rem;
+  opacity: 0.4; transition: opacity 0.15s; color: inherit;
+}
+.risk-word-chip .remove-chip-btn:hover { opacity: 1; }
+.risk-word-chip.detected {
+  box-shadow: 0 0 0 1px currentColor inset;
+}
+.risk-word-chip .usage-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  opacity: 0.85;
+  margin-left: 2px;
+}
 </style>
 </head>
 <body>
@@ -233,6 +491,30 @@
       </div>
     </div>
 
+    <!-- Palabras de Riesgo por Nivel -->
+    <div class="section-card-custom" id="riskCardsSection">
+      <div class="section-header-custom" style="flex-wrap:wrap;">
+        <div class="header-icon" style="background: linear-gradient(135deg, #f97316, #dc2626); color: #fff;">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="flex-grow-1" style="min-width:160px;">
+          <h5 class="mb-0 fw-bold">Palabras de Riesgo por Nivel</h5>
+          <small class="text-muted">Palabras detectadas en conversaciones con pacientes, agrupadas por nivel de riesgo</small>
+        </div>
+        <div class="risk-filter-tabs" id="riskFilterTabs">
+          <button class="risk-filter-btn active" data-filter="all">Todos</button>
+          <button class="risk-filter-btn" data-filter="Alto" data-color="#dc3545">Alto</button>
+          <button class="risk-filter-btn" data-filter="Medio" data-color="#f59e0b">Medio</button>
+          <button class="risk-filter-btn" data-filter="Bajo" data-color="#10b981">Bajo</button>
+        </div>
+      </div>
+      <div class="section-body-custom">
+        <div id="riskFilteredList" class="risk-filtered-list">
+          <span class="text-muted small">No hay palabras detectadas a&uacute;n</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Historial de Conversaciones -->
     <div class="section-card-custom">
       <div class="section-header-custom">
@@ -241,10 +523,10 @@
         </div>
         <div class="flex-grow-1">
           <h5 class="mb-0 fw-bold">Historial de Conversaciones</h5>
-          <small class="text-muted">Registro de todas las conversaciones</small>
+          <small class="text-muted">Conversaciones agrupadas por paciente</small>
         </div>
         <div class="d-flex gap-2">
-          <input type="text" class="form-control form-control-sm" id="buscarHistorial" placeholder="Buscar paciente o mensaje..." style="max-width: 260px;">
+          <input type="text" class="form-control form-control-sm" id="buscarHistorial" placeholder="Buscar paciente..." style="max-width: 200px;">
           <select class="form-select form-select-sm" id="filtroNivel" style="width:auto;">
             <option value="">Todos los niveles</option>
             <option value="Alto">Nivel Alto</option>
@@ -252,21 +534,28 @@
             <option value="Bajo">Nivel Bajo</option>
           </select>
           <button class="btn btn-outline-secondary btn-sm" id="btnActualizarHistorial"><i class="fas fa-sync"></i></button>
-          <button class="btn btn-outline-success btn-sm" id="btnExportarCSV"><i class="fas fa-file-csv"></i></button>
         </div>
       </div>
-      <div class="section-body-custom p-0">
-        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
-          <small class="text-muted" id="historialContador">Mostrando 0-0 de 0</small>
-          <div class="d-flex gap-1" id="historialPaginacion"></div>
+      <div class="chat-history-layout">
+        <div class="patients-list">
+          <div id="patientsList" class="patients-list-scroll">
+            <div class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>Cargando...</div>
+          </div>
         </div>
-        <div class="table-responsive">
-          <table class="table table-hover mb-0" id="tablaHistorial">
-            <thead>
-              <tr><th>Paciente</th><th>Mensaje</th><th>Respuesta</th><th>Nivel</th><th>Fecha</th><th>Acciones</th></tr>
-            </thead>
-            <tbody><tr><td colspan="6" class="text-center py-4">Cargando...</td></tr></tbody>
-          </table>
+        <div class="conversation-panel">
+          <div class="conversation-header" id="conversationHeader"></div>
+          <div class="messages-area" id="conversationMessages">
+            <div class="empty-state">
+              <i class="fas fa-comments"></i>
+              <h6>Selecciona un paciente</h6>
+              <p class="text-muted">Elige un paciente de la lista para ver su conversaci&oacute;n completa</p>
+            </div>
+          </div>
+          <div class="conversation-footer" id="conversationFooter">
+            <button class="btn btn-outline-primary btn-sm" onclick="window.exportarConversacionPaciente()">
+              <i class="fas fa-download me-1"></i>Exportar esta conversaci&oacute;n
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -281,43 +570,12 @@
   </main>
 </div>
 
-<!-- Modal Ver Detalle -->
-<div class="modal fade" id="modalDetalleConversacion" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalDetalleLabel"><i class="fas fa-comments me-2"></i>Detalle de Conversación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
-          <div><small class="text-muted">Paciente</small><div class="fw-semibold" id="detallePaciente">-</div></div>
-          <div><small class="text-muted">Nivel</small><div id="detalleNivel">-</div></div>
-          <div><small class="text-muted">Fecha</small><div class="text-muted" id="detalleFecha">-</div></div>
-        </div>
-        <div id="chatContainer">
-          <div class="chat-bubble-custom user-custom">
-            <div class="chat-label-custom">Paciente</div>
-            <div id="detalleMensaje">-</div>
-          </div>
-          <div class="chat-bubble-custom bot-custom">
-            <div class="chat-label-custom">PsyAI</div>
-            <div id="detalleRespuesta">-</div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
-<script src="/js/core/shared/alerts.js"></script>
-<script src="/js/core/shared/aside.js?v=20260522-5"></script>
-<script src="/js/modules/auth/logout.js"></script>
-<script src="/js/modules/admin/admin.chatbot.config.js"></script>
+<script src="/js/core/shared/alerts.js" defer></script>
+<script src="/js/core/shared/aside.js?v=20260522-5" defer></script>
+<script src="/js/modules/auth/logout.js" defer></script>
+<script src="/js/modules/admin/admin.chatbot.config.js" defer></script>
 
 </body>
 </html>

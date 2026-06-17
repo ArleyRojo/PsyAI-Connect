@@ -34,12 +34,22 @@ def register_user(data):
 
 
 def login_user(data, ip_address):
+    from app.repositories.security_repository import check_brute_force, register_failed_attempt, reset_failed_attempts
+
     email = (data.get("email") or "").strip()
     password = data.get("password") or ""
     rol = data.get("rol") or "paciente"
 
     if not email or not password:
         return {"success": False, "message": "Email y contrasena requeridos"}, 400, None
+
+    bloqueado, retry_after = check_brute_force(email)
+    if bloqueado:
+        return {
+            "success": False,
+            "message": f"Cuenta bloqueada. Intenta en {retry_after // 60} minutos.",
+            "retry_after": retry_after,
+        }, 429, None
 
     usuario = auth_repository.get_user_by_email(email, admin_only=rol == "admin")
     if not usuario:
@@ -49,8 +59,10 @@ def login_user(data, ip_address):
 
     stored_hash = usuario.get("contrasena")
     if not verify_password(password, stored_hash):
+        register_failed_attempt(email)
         return {"success": False, "message": "Credenciales incorrectas"}, 401, None
 
+    reset_failed_attempts(email)
     auth_repository.register_login_event(usuario["idUsuario"], email, ip_address)
 
     session_user = {

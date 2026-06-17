@@ -10,6 +10,14 @@ from app.utils.db import db_cursor
 from app.repositories import admin_repository
 
 
+def serialize_fecha(valor):
+    if valor is None:
+        return None
+    if hasattr(valor, "isoformat"):
+        return valor.isoformat()
+    return str(valor)
+
+
 admin_bp = Blueprint("admin", __name__)
 
 
@@ -241,38 +249,84 @@ def update_chatbot_config():
 @require_role("admin")
 def clear_chatbot_risk_terms():
     admin_id = session.get("idUsuario")
-    result = chatbot_config_service.clear_risk_terms(admin_id)
-    return jsonify(result), 200
+    body, status = chatbot_config_service.clear_risk_terms(admin_id)
+    return jsonify(body), status
+
+
+@admin_bp.route("/api/admin/chatbot-risk-terms", methods=["PUT"])
+@require_role("admin")
+def save_chatbot_risk_terms():
+    admin_id = session.get("idUsuario")
+    data = request.get_json(silent=True) or {}
+    risk_terms_str = data.get("risk_terms", "[]")
+    body, status = chatbot_config_service.save_risk_terms_only(risk_terms_str, admin_id)
+    return jsonify(body), status
+
+
+@admin_bp.route("/api/admin/chatbot-detected-words", methods=["GET"])
+@require_role("admin")
+def get_chatbot_detected_words():
+    palabras = chatbot_config_service.get_detected_risk_words()
+    return jsonify({"success": True, "palabras": palabras}), 200
 
 
 @admin_bp.route("/api/admin/chatbot-historial", methods=["GET"])
 @require_role("admin")
 def get_chatbot_historial():
     nivel = request.args.get("nivel", "")
+    search = request.args.get("q", "")
     
     try:
         with db_cursor(dictionary=True) as (_, cursor):
+            cursor.execute("""
+                SELECT nombre, idPaciente, mensajeUsuario, respuestaChatbot, nivelEmocionalDetectado, fecha
+                FROM vistahistorialchatbot
+                ORDER BY nombre ASC, fecha ASC
+                LIMIT 200
+            """)
+            rows = cursor.fetchall()
+            
+            pacientes_map = {}
+            for row in rows:
+                paciente_key = row.get("idPaciente") or row["nombre"]
+                if paciente_key not in pacientes_map:
+                    pacientes_map[paciente_key] = {
+                        "nombre": row["nombre"] or "Paciente",
+                        "idPaciente": row.get("idPaciente"),
+                        "total_mensajes": 0,
+                        "ultimo_mensaje": None,
+                        "nivel_max": "Bajo",
+                        "mensajes": []
+                    }
+                p = pacientes_map[paciente_key]
+                p["total_mensajes"] += 1
+                
+                rnivel = row.get("nivelEmocionalDetectado", "")
+                if rnivel == "Alto":
+                    p["nivel_max"] = "Alto"
+                elif rnivel == "Medio" and p["nivel_max"] != "Alto":
+                    p["nivel_max"] = "Medio"
+                
+                p["mensajes"].append({
+                    "mensajeUsuario": row.get("mensajeUsuario"),
+                    "respuestaChatbot": row.get("respuestaChatbot"),
+                    "nivelEmocionalDetectado": rnivel,
+                    "fecha": serialize_fecha(row.get("fecha"))
+                })
+                
+                fecha = row.get("fecha")
+                if fecha:
+                    fecha_str = fecha.isoformat() if hasattr(fecha, 'isoformat') else str(fecha)
+                    if p["ultimo_mensaje"] is None or fecha_str > p["ultimo_mensaje"]:
+                        p["ultimo_mensaje"] = fecha_str
+            
+            pacientes = list(pacientes_map.values())
+            
             if nivel:
-                cursor.execute(
-                    """
-                    SELECT nombre, mensajeUsuario, respuestaChatbot, nivelEmocionalDetectado, fecha
-                    FROM vistahistorialchatbot
-                    WHERE nivelEmocionalDetectado = %s
-                    ORDER BY fecha DESC
-                    LIMIT 200
-                    """,
-                    (nivel,)
-                )
-            else:
-                cursor.execute(
-                    """
-                    SELECT nombre, mensajeUsuario, respuestaChatbot, nivelEmocionalDetectado, fecha
-                    FROM vistahistorialchatbot
-                    ORDER BY fecha DESC
-                    LIMIT 200
-                    """
-                )
-            historial = cursor.fetchall()
+                pacientes = [p for p in pacientes if p["nivel_max"] == nivel]
+            if search:
+                s = search.lower()
+                pacientes = [p for p in pacientes if s in p["nombre"].lower()]
             
             cursor.execute("""
                 SELECT 
@@ -286,8 +340,17 @@ def get_chatbot_historial():
             
             return jsonify({
                 "success": True,
-                "historial": historial,
+                "pacientes": pacientes,
                 "stats": stats
             }), 200
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+        estr = str(e)
+        if "1146" in estr or "doesn't exist" in estr:
+            return jsonify({
+                "success": False,
+                "message": "La vista vistahistorialchatbot no existe en la BD. "
+                           "Corre las migraciones: python -m app.database.migrations",
+                "pacientes": [],
+                "stats": {"total": 0, "alto": 0, "medio": 0, "bajo": 0}
+            }), 200
+        return jsonify({"success": False, "message": estr}), 500

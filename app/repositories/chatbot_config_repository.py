@@ -108,3 +108,15 @@ def save_config(data, admin_id):
         )
         conn.commit()
         return cursor.rowcount
+
+
+def save_risk_terms_only(risk_terms_str, admin_id):
+    with db_cursor() as (conn, cursor):
+        cursor.execute(
+            """UPDATE ChatbotConfig
+               SET risk_terms = %s, actualizado_por = %s, fecha_actualizacion = NOW()
+               WHERE id = 1""",
+            (risk_terms_str, admin_id),
+        )
+        conn.commit()
+        return cursor.rowcount
