@@ -1,0 +1,309 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <title>PsyAI Connect | Mi Agenda</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+    <script src="/js/core/shared/theme-inline.js"></script>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- CSS propios -->
+    <link rel="stylesheet" href="/css/base/base.css">
+    <link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+    <link rel="stylesheet" href="/css/pages/professional.css">
+<script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+
+<body class="aside-professional">
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+    <!-- Sidebar -->
+    <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+
+        <nav class="nav flex-column mt-4">
+            <a href="../professional.dashboard.html" class="nav-link">
+                <i class="fas fa-home me-2"></i> Dashboard
+            </a>
+            <a href="patients.html" class="nav-link">
+                <i class="fas fa-users me-2"></i>Pacientes y Diagnósticos
+            </a>
+            <a href="my.agenda.html" class="nav-link active">
+                <i class="fas fa-calendar-check me-2"></i> Mi Agenda
+            </a>
+            <a href="mensajes.html" class="nav-link"><i class="fas fa-comments me-2"></i> Mensajes</a>
+            <a href="reports.html" class="nav-link">
+                <i class="fas fa-chart-line me-2"></i> Reportes
+            </a>
+            <a href="my.profile2.html" class="nav-link mt-3 border-top pt-3">
+                <i class="fas fa-user-circle me-2"></i> Mi Perfil
+            </a>
+        </nav>
+
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+          <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content flex-grow-1 ms-250 p-4">
+        <!-- Header -->
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 fw-bold text-dark mb-0"><i class="fas fa-calendar-alt text-primary me-2"></i> Mi Agenda</h1>
+            <div class="user-info d-flex align-items-center">
+                <i class="fas fa-bell text-secondary fs-5 me-3"></i>
+                <span class="fw-semibold text-dark" id="nombreProfesional">Hola, Dr(a).</span>
+            </div>
+        </header>
+
+        <!-- Stats bar -->
+        <div class="agenda-stats" id="agendaStats">
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="background:rgba(33,150,243,.12);color:#1565C0;"><i class="fas fa-calendar-check"></i></div>
+                <div>
+                    <div class="stat-number" id="statTotal">—</div>
+                    <div class="stat-label">Totales</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="background:rgba(76,175,80,.12);color:#2e7d32;"><i class="fas fa-check-circle"></i></div>
+                <div>
+                    <div class="stat-number" id="statConfirmadas">—</div>
+                    <div class="stat-label">Confirmadas</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="background:rgba(244,67,54,.12);color:#c62828;"><i class="fas fa-times-circle"></i></div>
+                <div>
+                    <div class="stat-number" id="statCanceladas">—</div>
+                    <div class="stat-label">Canceladas</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="background:rgba(255,152,0,.12);color:#e65100;"><i class="fas fa-clock"></i></div>
+                <div>
+                    <div class="stat-number" id="statProximas">—</div>
+                    <div class="stat-label">Próximas</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Citas -->
+        <section class="card p-4 mb-4">
+            <div id="contenedorCitas">
+                <h5 class="fw-bold text-dark section-title"><i class="fas fa-clock icon-clock"></i> Citas</h5>
+                <hr class="section-divider">
+                <ul class="list-group" id="listaCitas">
+                    <li class="list-group-item skeleton-item cita-row"><div class="skeleton-shimmer"></div><div class="skeleton-shimmer"></div></li>
+                    <li class="list-group-item skeleton-item cita-row"><div class="skeleton-shimmer"></div><div class="skeleton-shimmer"></div></li>
+                    <li class="list-group-item skeleton-item cita-row"><div class="skeleton-shimmer"></div><div class="skeleton-shimmer"></div></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Formulario Mi Agenda -->
+        <section id="agenda" class="card p-4 mb-5">
+            <h5 class="fw-bold text-dark section-title"><i class="fas fa-calendar-plus icon-plus"></i> Registrar Disponibilidad</h5>
+          <div class="availability-panel">
+           <form>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label for="fecha" class="form-label fw-semibold">Fecha:</label>
+      <input type="date" id="fecha" class="form-control" name="fecha">
+    </div>
+    <div class="col-md-8">
+      <label for="hora_disponible" class="form-label fw-semibold">Horario disponible:</label>
+      <select id="hora_disponible" class="form-control" name="hora_disponible">
+        <option value="">Seleccionar horario...</option>
+        <option value="08:00-08:30">08:00 AM - 08:30 AM</option>
+        <option value="08:30-09:00">08:30 AM - 09:00 AM</option>
+        <option value="09:00-09:30">09:00 AM - 09:30 AM</option>
+        <option value="09:30-10:00">09:30 AM - 10:00 AM</option>
+        <option value="10:00-10:30">10:00 AM - 10:30 AM</option>
+        <option value="10:30-11:00">10:30 AM - 11:00 AM</option>
+        <option value="11:00-11:30">11:00 AM - 11:30 AM</option>
+        <option value="11:30-12:00">11:30 AM - 12:00 PM</option>
+        <option value="12:00-12:30">12:00 PM - 12:30 PM</option>
+        <option value="12:30-13:00">12:30 PM - 01:00 PM</option>
+        <option value="13:00-13:30">01:00 PM - 01:30 PM</option>
+        <option value="13:30-14:00">01:30 PM - 02:00 PM</option>
+        <option value="14:00-14:30">02:00 PM - 02:30 PM</option>
+        <option value="14:30-15:00">02:30 PM - 03:00 PM</option>
+        <option value="15:00-15:30">03:00 PM - 03:30 PM</option>
+        <option value="15:30-16:00">03:30 PM - 04:00 PM</option>
+        <option value="16:00-16:30">04:00 PM - 04:30 PM</option>
+        <option value="16:30-17:00">04:30 PM - 05:00 PM</option>
+        <option value="17:00-17:30">05:00 PM - 05:30 PM</option>
+        <option value="17:30-18:00">05:30 PM - 06:00 PM</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end mt-3">
+    <button type="button" id="btnDisponibilidad" class="btn btn-primary px-5">
+      <i class="fas fa-plus me-2"></i>Agregar Disponibilidad
+    </button>
+  </div>
+</form>
+          </div>
+        </section>
+        <!-- Agendar Cita Manual -->
+<section id="agendarCita" class="card p-4 mb-4">
+  <h5 class="fw-bold text-dark section-title">
+    <i class="fas fa-calendar-check icon-schedule me-2"></i> Agendar Cita con Paciente
+  </h5>
+  <form>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Profesional:</label>
+        <div class="input-with-icon">
+          <i class="fas fa-user-md input-icon"></i>
+          <select id="citaProfesional" class="form-control ps-icon">
+            <option value="">Seleccionar profesional...</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Paciente:</label>
+        <div class="input-with-icon">
+          <i class="fas fa-user input-icon"></i>
+          <select id="citaPaciente" class="form-control ps-icon">
+            <option value="">Seleccionar paciente...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-2">
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Fecha:</label>
+        <div class="input-with-icon">
+          <i class="fas fa-calendar input-icon"></i>
+          <input type="date" id="citaFecha" class="form-control ps-icon">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Hora:</label>
+        <div class="input-with-icon">
+          <i class="fas fa-clock input-icon"></i>
+          <select id="citaHora" class="form-control ps-icon">
+            <option value="">Selecciona una hora</option>
+          </select>
+        </div>
+        <small class="form-text small text-muted"><i class="far fa-clock"></i> Duración: 30 minutos</small>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Tipo de Cita:</label>
+        <div class="input-with-icon">
+          <i class="fas fa-tag input-icon"></i>
+          <select id="citaTipo" class="form-control ps-icon">
+            <option value="">Seleccionar</option>
+            <option value="Primera sesión">Primera sesión</option>
+            <option value="Seguimiento">Seguimiento</option>
+            <option value="Evaluación">Evaluación</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Motivo:</label>
+        <div class="input-with-icon">
+          <i class="fas fa-comment input-icon"></i>
+          <input type="text" id="citaMotivo" class="form-control ps-icon" placeholder="Motivo">
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-3">
+      <button type="button" id="btnAgendarCita" class="btn btn-success px-5">
+        <i class="fas fa-save me-2"></i>Agendar Cita
+      </button>
+    </div>
+  </form>
+</section>
+    </main>
+</div>
+
+
+<!-- Modal Cancelar Cita (Profesional) -->
+<div class="modal fade modal-cancel-custom" id="modalCancelarCitaPro" tabindex="-1" aria-labelledby="modalCancelarCitaProLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger" id="modalCancelarCitaProLabel">
+          <i class="fas fa-times-circle me-2"></i>Cancelar Cita
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-3">
+        <p class="text-muted mb-3">Por favor indica el motivo por el cual deseas cancelar esta cita. El paciente será notificado.</p>
+        <div class="mb-3">
+          <label for="motivoCancelacionPro" class="form-label fw-semibold">Motivo de cancelación <span class="text-danger">*</span></label>
+          <textarea id="motivoCancelacionPro" class="form-control" rows="4"
+            placeholder="Ej: Emergencia personal, reprogramación de agenda, etc."
+            maxlength="500"></textarea>
+          <div class="form-text text-end"><span id="charCountMotivo">0</span>/500 caracteres</div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Volver</button>
+        <button type="button" class="btn btn-danger px-4" id="btnConfirmarCancelarPro">
+          <i class="fas fa-ban me-1"></i>Confirmar Cancelación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/professional/aside.js?v=20260522-5"></script>
+<script src="/js/modules/auth/logout.js"></script>
+    <script src="/js/core/shared/nombre.usuario.js"></script>
+<script src="/js/modules/professional/my.agenda.js"></script>
+<script>
+// Forzar que todos los acordeones inicien cerrados
+document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+    el.classList.remove('show');
+    el.style.height = '';
+});
+
+// Cerrar acordeón al restaurar desde bfcache (botón atrás)
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+            var instance = bootstrap.Collapse.getInstance(el);
+            if (instance) {
+                instance.hide();
+            } else {
+                new bootstrap.Collapse(el, { toggle: false }).hide();
+            }
+        });
+    }
+});
+</script>
+
+</body>
+</html>
+

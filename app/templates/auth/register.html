@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyAI Connect | Registrarse</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/base/base.css">
+    <link rel="stylesheet" href="/css/layout/layout.css">
+    <script src="/js/core/shared/theme-inline.js"></script>
+    <link rel="stylesheet" href="/css/pages/auth.css">
+    <link rel="stylesheet" href="/css/themes/theme.css">
+    <script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body>
+    <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+    <main class="register-shell">
+        <section class="register-art" aria-label="PsyAI Connect">
+            <a class="brand-mark" href="/">
+                <img src="/img/Logo.webp" alt="Logo PsyAI Connect">
+                <span>PsyAI Connect</span>
+            </a>
+
+            <div class="art-copy">
+                <h1>Empieza con calma.</h1>
+                <p>Crea tu perfil y conecta con herramientas de apoyo emocional, seguimiento y acompa&ntilde;amiento profesional.</p>
+            </div>
+
+            <div class="art-strip" aria-hidden="true">
+                <div class="art-chip"><strong>01</strong><span>Datos claros para identificar tu cuenta.</span></div>
+                <div class="art-chip"><strong>02</strong><span>Seguridad antes de guardar tu acceso.</span></div>
+                <div class="art-chip"><strong>03</strong><span>Confirmaci&oacute;n final y bienvenida.</span></div>
+            </div>
+        </section>
+
+        <section class="register-stage">
+            <div class="login-card login-card--register">
+                <div class="auth-topbar">
+                    <div class="back-index">
+                        <a href="/"><i class="fas fa-arrow-left"></i> Inicio</a>
+                    </div>
+                    <a class="mini-link" href="login.html">Iniciar sesi&oacute;n</a>
+                </div>
+
+                <div class="login-header">
+                    <img src="/img/Logo.webp" alt="Logo">
+                    <span class="eyebrow">Nuevo usuario</span>
+                    <h1>Crear cuenta</h1>
+                    <p>Completa tres pasos r&aacute;pidos para activar tu acceso a PsyAI Connect.</p>
+                </div>
+
+                <div class="reg-progress">
+                    <div class="reg-progress__label">
+                        <span id="regProgressLabel">Tus datos</span>
+                        <span class="pct" id="regProgressPct">0%</span>
+                    </div>
+                    <div class="reg-progress__track">
+                        <div class="reg-progress__fill" id="regProgressFill"></div>
+                    </div>
+                    <div class="reg-progress__steps">
+                        <div class="reg-step active" id="regStep1">
+                            <i class="fas fa-user"></i>
+                            <span>Tus datos</span>
+                        </div>
+                        <div class="reg-step" id="regStep2">
+                            <i class="fas fa-lock"></i>
+                            <span>Seguridad</span>
+                        </div>
+                        <div class="reg-step" id="regStep3">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Confirmar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reg-panels-wrap">
+                    <div class="reg-panel active" id="regPanel1">
+                        <div class="reg-field">
+                            <label for="nombre" class="form-label">Nombre completo</label>
+                            <div class="field-wrap">
+                                <i class="fas fa-user field-icon reg-icon" id="icon-nombre"></i>
+                                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej: Ana Garcia" oninput="recalcProgress()" autocomplete="name" required>
+                            </div>
+                        </div>
+
+                        <div class="reg-field">
+                            <label for="email" class="form-label">Correo electr&oacute;nico</label>
+                            <div class="field-wrap">
+                                <i class="fas fa-envelope field-icon reg-icon" id="icon-email"></i>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="usuario@example.com" oninput="recalcProgress()" autocomplete="email" required>
+                            </div>
+                        </div>
+
+                        <div class="reg-field">
+                            <label for="genero" class="form-label">G&eacute;nero</label>
+                            <div class="gender-select-wrapper">
+                                <i class="fas fa-venus-mars gender-icon-select"></i>
+                                <select class="form-control" id="genero" name="genero" onchange="recalcProgress()" required>
+                                    <option value="">Seleccionar g&eacute;nero</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="Otro">Otro</option>
+                                    <option value="Prefiero no decirlo">Prefiero no decirlo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="reg-nav">
+                            <button type="button" class="btn btn-primary w-100" onclick="regGoStep(2)">
+                                Continuar <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="reg-panel" id="regPanel2">
+                        <div class="reg-field">
+                            <label for="password" class="form-label">Contrase&ntilde;a</label>
+                            <div class="field-wrap">
+                                <i class="fas fa-lock field-icon reg-icon" id="icon-password"></i>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Crea una contrase&ntilde;a" oninput="checkPwd(); recalcProgress()" autocomplete="new-password" required>
+                                <button type="button" class="pwd-toggle" onclick="togglePwd('password', this)" tabindex="-1" aria-label="Mostrar contrase&ntilde;a">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="pwd-strength mt-2">
+                                <div class="pwd-strength__fill" id="pwdFill"></div>
+                            </div>
+                            <small id="pwdHint" style="display:block;margin-top:6px;font-size:.76rem;font-weight:800;min-height:1rem;color:#667085;"></small>
+                            <div class="pwd-rules">
+                                <div id="rule-len" class="pwd-rule"><i class="fas fa-circle"></i> <span>M&iacute;nimo 6 caracteres</span></div>
+                                <div id="rule-upper" class="pwd-rule"><i class="fas fa-circle"></i> <span>Al menos 1 may&uacute;scula</span></div>
+                                <div id="rule-num" class="pwd-rule"><i class="fas fa-circle"></i> <span>Al menos 1 n&uacute;mero</span></div>
+                            </div>
+                        </div>
+
+                        <div class="reg-field">
+                            <label for="confirm-password" class="form-label">Confirmar contrase&ntilde;a</label>
+                            <div class="field-wrap">
+                                <i class="fas fa-lock-open field-icon reg-icon" id="icon-confirm"></i>
+                                <input type="password" class="form-control" id="confirm-password" name="confirm_password" placeholder="Repite tu contrase&ntilde;a" oninput="recalcProgress()" autocomplete="new-password" required>
+                                <button type="button" class="pwd-toggle" onclick="togglePwd('confirm-password', this)" tabindex="-1" aria-label="Mostrar contrase&ntilde;a">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="reg-nav">
+                            <button type="button" class="btn-back" onclick="regGoStep(1)">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Volver</span>
+                            </button>
+                            <button type="button" class="btn btn-primary flex-grow-1" onclick="regGoStep(3)">
+                                Continuar <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="reg-panel" id="regPanel3">
+                        <div class="reg-resumen-box" id="regResumen"></div>
+                        <div class="reg-field d-flex align-items-center justify-content-center" style="gap: 8px;">
+                            <input type="checkbox" id="recordar-cuenta" style="width: 16px; height: 16px; accent-color: var(--brand);">
+                            <label for="recordar-cuenta" style="font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; margin: 0;">Recordar mis datos de acceso</label>
+                        </div>
+                        <div class="reg-nav">
+                            <button type="button" class="btn-back" onclick="regGoStep(2)">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Volver</span>
+                            </button>
+                            <button type="button" class="btn btn-primary flex-grow-1" id="btnRegistrar" onclick="submitRegister()">
+                                <i class="fas fa-user-plus me-1"></i> Crear cuenta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="auth-links">
+                    <a href="login.html" class="link-action">Ya tengo cuenta</a>
+                    <a href="recover.html" class="link-action">Olvid&eacute; mi contrase&ntilde;a</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+    <script src="/js/modules/auth/register.js"></script>
+</body>
+</html>
