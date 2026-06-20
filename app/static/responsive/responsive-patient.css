@@ -11,7 +11,7 @@
    ============================================================ */
 
 @media (max-width: 991px) {
-  :root {
+:root {
     --patient-sidebar-width: 300px;
     --patient-toggle-size: 48px;
     --patient-content-pt: 4rem;
@@ -52,14 +52,9 @@
     box-shadow: 8px 0 40px rgba(13, 71, 161, 0.2);
   }
 
-  html.dark-mode .sidebar {
-    background: var(--dm-card, #0b1429);
-  }
+  
 
-  html.dark-mode .sidebar.active,
-  html.dark-mode .sidebar.show {
-    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.58);
-  }
+  
 
   .sidebar-overlay {
     position: fixed;
@@ -166,10 +161,7 @@
     background: #fff;
   }
 
-  html.dark-mode .main-header {
-    background: var(--dm-card, #0b1429);
-    border-color: var(--dm-border, #1a2b4a) !important;
-  }
+  
 
   .main-header h1,
   .main-header .h3 {
@@ -281,7 +273,7 @@
 }
 
 @media (max-width: 767px) {
-  :root {
+:root {
     --patient-sidebar-width: 300px;
     --patient-content-pt: 4.45rem;
     --patient-toggle-size: 46px;
@@ -398,12 +390,7 @@
     box-shadow: 0 6px 18px rgba(13, 71, 161, 0.06);
   }
 
-  html.dark-mode body:has(#tablaCitas) .table tbody tr,
-  html.dark-mode body:has(#tablaHistorialEvolucion) .table tbody tr {
-    background: var(--dm-card, #0b1429);
-    border-color: var(--dm-border, #1a2b4a);
-    box-shadow: none;
-  }
+  
 
   body:has(#tablaCitas) .table tbody td,
   body:has(#tablaHistorialEvolucion) .table tbody td {
@@ -935,6 +922,23 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  body:has(.sidebar) .accordion,
+  body:has(.sidebar) .accordion-responsive,
+  body:has(.sidebar) .faq-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body:has(.sidebar) .accordion .accordion-button,
+  body:has(.sidebar) .accordion-responsive .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 @media (max-width: 767px) {
@@ -1046,7 +1050,7 @@
 }
 
 @media (max-width: 767px) {
-  body.patient-agenda-page .section-card > .d-flex.justify-content-between,
+body.patient-agenda-page .section-card > .d-flex.justify-content-between,
   body:has(#stepperCitas) .section-card > .d-flex.justify-content-between {
     display: grid !important;
     grid-template-columns: 1fr !important;
@@ -1267,12 +1271,7 @@
     font-size: 0.78rem !important;
   }
 
-  html.dark-mode body.patient-agenda-page .citas-table tbody tr,
-  html.dark-mode body:has(#tablaCitas) .citas-table tbody tr {
-    background: var(--dm-card, #0b1429) !important;
-    border-color: var(--dm-border, #1a2b4a) !important;
-    box-shadow: none !important;
-  }
+  
 }
 
 @media (max-width: 480px) {

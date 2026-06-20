@@ -244,12 +244,7 @@
         box-shadow: var(--shadow-xs);
         margin-bottom: 22px;
     }
-    html.dark-mode .main-header,
-    .dark-mode .main-header {
-        background: var(--dm-card);
-        border-color: var(--dm-border);
-        color: var(--dm-text1);
-    }
+    
 .main-header h1 {
     font-family: var(--font-body);
     font-size: 1.3rem;

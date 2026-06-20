@@ -176,16 +176,13 @@ button:focus-visible,
 }
 .toast-close:hover { opacity: 1; }
 
-.dark-mode .toast {
-    background: var(--dm-card);
-    border-color: var(--dm-border);
-}
-.dark-mode .toast-title { color: var(--dm-heading); }
-.dark-mode .toast-message { color: var(--dm-muted); }
 
-html.dark-mode .toast { background: var(--dm-card); border-color: var(--dm-border); }
-html.dark-mode .toast-title { color: var(--dm-heading); }
-html.dark-mode .toast-message { color: var(--dm-muted); }
+
+
+
+
+
+
 
 /* ── Bootstrap card override ── */
 .card {
@@ -592,38 +589,25 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
   .history-action.edited   { background: #fff8e1; color: #f57f17; }
   .history-action.removed  { background: #fff0f0; color: #c62828; }
 
-  /* ── Dark mode ── */
-  .dark-mode .roles-tabs,
-  .dark-mode .logs-tabs,
-  .dark-mode .users-tabs,
-  .dark-mode .notif-tabs { border-bottom-color: #1a2b40; }
-  .dark-mode .roles-tab,
-  .dark-mode .logs-tab,
-  .dark-mode .users-tab,
-  .dark-mode .notif-tab { color: #476080; }
-  .dark-mode .roles-tab:hover, .dark-mode .roles-tab.active,
-  .dark-mode .logs-tab:hover, .dark-mode .logs-tab.active,
-  .dark-mode .users-tab:hover, .dark-mode .users-tab.active,
-  .dark-mode .notif-tab:hover, .dark-mode .notif-tab.active { color: #78a8ff; border-bottom-color: #4a86f0; }
-  .dark-mode .roles-tab .tab-count,
-  .dark-mode .logs-tab .tab-count,
-  .dark-mode .users-tab .tab-count,
-  .dark-mode .notif-tab .tab-count { background: rgba(74,134,240,.15); color: #78a8ff; }
-  .dark-mode .table-clean thead th { background: #0f1a29; color: #476080; border-bottom-color: #1a2b40; }
-  .dark-mode .table-clean tbody td { border-bottom-color: #0f1a29; }
-  .dark-mode .table-clean tbody tr:hover td { background: #0f1a29; }
-  .dark-mode .user-name  { color: #b0cfee; }
-  .dark-mode .user-email { color: #476080; }
-  .dark-mode .user-avatar { background: rgba(74,134,240,.15); color: #78a8ff; }
-  .dark-mode .form-section { background: #0f1a29; border-color: #1a2b40; }
-  .dark-mode .form-section .form-label { color: #476080; }
-  .dark-mode .form-section .form-control { background: #152036; border-color: #1a2b40; color: #dce9f7; }
-  .dark-mode .action-btn.edit   { border-color: #1a3a6e; color: #78a8ff; }
-  .dark-mode .action-btn.edit:hover   { background: rgba(74,134,240,.15); }
-  .dark-mode .action-btn.delete { border-color: #3a1a1a; color: #fca5a5; }
-  .dark-mode .action-btn.delete:hover { background: rgba(239,68,68,.1); }
-  .dark-mode .action-btn.toggle { border-color: #1a2b40; color: #476080; }
-  .dark-mode .action-btn.activate { border-color: #1a3a2a; color: #6fcf97; }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 
 /* =======================================================
@@ -906,92 +890,76 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
   .btn-export:hover { background: #e8f0fe; }
 
   /* ── Dark mode ── */
-  .dark-mode .notif-tabs   { border-bottom-color: #1a3555; }
-  .dark-mode .notif-tab    { color: #5a7a9a; }
-  .dark-mode .notif-tab:hover, .dark-mode .notif-tab.active { color: #90CAF9; border-bottom-color: #4a86f0; }
-  .dark-mode .notif-tab .tab-count { background: rgba(144,202,249,.15); color: #90CAF9; }
-  .dark-mode .stat-card    { background: var(--dm-card); border-color: var(--dm-border); }
-  .dark-mode .stat-icon    { background: var(--dm-glow); color: var(--dm-accent); }
-  .dark-mode .stat-value   { color: var(--dm-heading); }
-  .dark-mode .stat-label   { color: var(--dm-muted); }
-  .dark-mode .table-clean thead th { background: var(--dm-card); color: var(--dm-muted); border-bottom-color: var(--dm-border); }
-  .dark-mode .table-clean tbody td { border-bottom-color: var(--dm-card); color: var(--dm-text1); }
-  .dark-mode .table-clean tbody tr:hover td { background: var(--dm-card); }
-  .dark-mode .form-section { background: var(--dm-card); border-color: var(--dm-border); }
-  .dark-mode .form-section .form-label { color: var(--dm-muted); }
-  .dark-mode .form-section .form-control { background: var(--dm-elevated); border-color: var(--dm-border2); color: var(--dm-text1); }
-  .dark-mode .form-section .form-control:focus { border-color: var(--dm-accent); box-shadow: 0 0 0 3px rgba(144,202,249,.15); }
-  .dark-mode .form-section .form-control::placeholder { color: var(--dm-muted); }
-  .dark-mode .notif-preview { background: var(--dm-elevated); border-color: var(--dm-border); }
-  .dark-mode .notif-preview .preview-title { color: var(--dm-heading); }
-  .dark-mode .notif-preview .preview-body { color: var(--dm-text2); }
-  .dark-mode .notif-preview .preview-time { color: var(--dm-muted) !important; }
-  .dark-mode .notif-preview-icon { background: rgba(144,202,249,.12) !important; }
-  .dark-mode .notif-preview-icon i { color: var(--dm-soft) !important; }
-  .dark-mode .notif-info-box {
-    background: rgba(144,202,249,.08) !important;
-    border: 1px solid rgba(144,202,249,.15) !important;
-    color: var(--dm-text2) !important;
-  }
-  .dark-mode .notif-info-box i { color: var(--dm-soft) !important; }
-  .dark-mode .btn-export   { background: var(--dm-card); border-color: var(--dm-border); color: var(--dm-soft); }
-  .dark-mode .btn-export:hover { background: rgba(144,202,249,.12); }
-  .dark-mode .recipient-pill { background: rgba(144,202,249,.12); color: var(--dm-soft); }
-  .dark-mode .recipient-pill.all { background: rgba(144,202,249,.15); color: #90CAF9; }
-  .dark-mode .recipient-pill.paciente { background: rgba(76,175,80,.12); color: #81c784; }
-  .dark-mode .recipient-pill.profesional { background: rgba(149,117,205,.12); color: #ba68c8; }
-  .dark-mode .recipient-pill.individual { background: rgba(255,167,38,.12); color: #ffb74d; }
-  .dark-mode .tipo-badge { background: rgba(144,202,249,.12); color: #90CAF9; }
-  .dark-mode .tipo-badge.sistema { background: rgba(144,202,249,.15); color: #90CAF9; }
-  .dark-mode .tipo-badge.cita { background: rgba(76,175,80,.12); color: #81c784; }
-  .dark-mode .tipo-badge.recordatorio { background: rgba(255,193,7,.12); color: #ffd54f; }
-  .dark-mode .tipo-badge.alerta { background: rgba(239,83,80,.12); color: #ef9a9a; }
-  .dark-mode .tipo-badge.info { background: rgba(38,166,154,.12); color: #4db6ac; }
-  .dark-mode .toolbar { background: var(--dm-card); border-color: var(--dm-border); }
-  .dark-mode .toolbar .form-control,
-  .dark-mode .toolbar .form-select {
-    background: var(--dm-elevated); border-color: var(--dm-border2); color: var(--dm-text1);
-  }
-  .dark-mode .toolbar .form-control::placeholder { color: var(--dm-muted); }
-  .dark-mode .toolbar input[type="date"] { color-scheme: dark; }
-  .dark-mode .pagination-info { color: var(--dm-muted); }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-  .dark-mode #tab-historial tbody td:first-child,
-  .dark-mode #tab-historial tbody td:nth-child(6),
-  .dark-mode #tab-historial tbody td:nth-child(2) div:last-child,
-  .dark-mode #tab-programadas tbody td:first-child,
-  .dark-mode #tab-programadas tbody td:nth-child(2) div:last-child {
-    color: var(--dm-muted) !important;
-  }
-  .dark-mode #tab-historial tbody td:nth-child(2) div:first-child,
-  .dark-mode #tab-programadas tbody td:nth-child(2) div:first-child {
-    color: var(--dm-text1) !important;
-  }
-  .dark-mode .estado-dot.enviado { background: #4caf50; box-shadow: 0 0 6px rgba(76,175,80,.5); }
-  .dark-mode .estado-dot.fallido { background: #ef5350; box-shadow: 0 0 6px rgba(239,83,80,.5); }
-  .dark-mode .estado-texto-enviado { color: #81c784 !important; }
-  .dark-mode .estado-texto-fallido { color: #ef9a9a !important; }
-  .dark-mode .table-empty-msg { color: var(--dm-muted); }
-  .dark-mode .notif-cell-date { font-size:.82rem; color:var(--dm-muted); white-space:nowrap; }
-  .dark-mode .notif-cell-title { font-weight:600; color:var(--dm-text1); font-size:.875rem; }
-  .dark-mode .notif-cell-desc { font-size:.78rem; color:var(--dm-muted); }
-  .dark-mode .notif-cell-meta { font-size:.82rem; color:var(--dm-muted); }
-  .dark-mode .btn.btn-light { background: var(--dm-elevated); border-color: var(--dm-border); color: var(--dm-muted); }
-  .dark-mode .btn.btn-light:hover { background: var(--dm-border); }
-  .dark-mode .btn.btn-light:disabled { opacity: 0.5; cursor: not-allowed; }
-.dark-mode .btn-primary { background: var(--dm-accent); border-color: var(--dm-accent); color: var(--dm-deep); }
-.dark-mode .btn-primary:hover { background: var(--dm-soft); border-color: var(--dm-soft); }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-.dark-mode .btn-export { background: var(--dm-card); border-color: var(--dm-border); color: var(--dm-soft); }
-.dark-mode .btn-export:hover { background: rgba(144,202,249,.12); }
 
-.dark-mode .notif-preview { background: var(--dm-elevated); border-color: var(--dm-border); }
-.dark-mode .notif-preview .preview-title { color: var(--dm-heading); }
-.dark-mode .notif-preview .preview-body { color: var(--dm-text2); }
 
-.dark-mode .quick-action-btn { background: var(--dm-card); border-color: var(--dm-border); color: var(--dm-text1); }
 
-.dark-mode .dash-module-card { background: var(--dm-card); border-color: var(--dm-border); }
+
+
+
+
+
+
+
+
+
 
 /* =======================================================
    ADMIN — Gestión de Usuarios
@@ -1046,10 +1014,10 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
 }
 
 /* Dark mode */
-.dark-mode .user-detail-row  { border-bottom-color: #0f1a29; }
-.dark-mode .user-detail-label { color: #476080; }
-.dark-mode .user-detail-value { color: #b0cfee; }
-.dark-mode .timeline-item    { border-bottom-color: #0f1a29; }
+
+
+
+
 
 /* =======================================================
    ADMIN — Logs / Auditoría
@@ -1139,83 +1107,71 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
 .badge-rol-profesional { background: #e3f2fd; color: #1565c0; }
 .badge-rol-admin { background: #ffebee; color: #c62828; }
 
-.dark-mode .mono { color: #476080; }
+
 
 /* ── Dark mode — elementos sin cobertura previa ── */
 
 /* Agenda card */
-.dark-mode .agenda-card {
-  background-color: #0f1a29;
-  border-color: #1a2b40;
-  color: #dce9f7;
-}
-.dark-mode .agenda-card h5 { color: #b0cfee; }
-.dark-mode .agenda-form-label { color: #8aaac6; }
-.dark-mode .agenda-form-input {
-  background-color: #152036;
-  border-color: #22374f;
-  color: #dce9f7;
-}
-.dark-mode .agenda-form-input:focus { border-color: #4a86f0; }
+
+
+
+
+
 
 /* Card header */
-.dark-mode .card-header {
-  background-color: #111c2e !important;
-  border-bottom-color: #1a2b40 !important;
-  color: #b0cfee !important;
-}
+
 
 /* Notif preview body */
-.dark-mode .notif-preview .preview-body { color: #8aaac6; }
+
 
 /* Action btn: view y send (notificaciones) */
-.dark-mode .action-btn.view  { border-color: #1a3a6e; color: #78a8ff; }
-.dark-mode .action-btn.view:hover  { background: rgba(74,134,240,.15); }
-.dark-mode .action-btn.send  { border-color: #1a3a2a; color: #6fcf97; }
-.dark-mode .action-btn.send:hover  { background: rgba(61,184,122,.1); }
+
+
+
+
 
 /* History action (roles) */
-.dark-mode .history-action.added   { background: rgba(61,184,122,.12); color: #6fcf97; }
-.dark-mode .history-action.edited  { background: rgba(224,168,48,.1);  color: #e0a830; }
-.dark-mode .history-action.removed { background: rgba(224,92,92,.1);   color: #e05c5c; }
+
+
+
 
 /* Recipient pill (notificaciones) */
-.dark-mode .recipient-pill.all         { background: rgba(74,134,240,.15); color: #78a8ff; }
-.dark-mode .recipient-pill.paciente    { background: rgba(2,119,189,.15);  color: #64b5f6; }
-.dark-mode .recipient-pill.profesional { background: rgba(40,53,147,.2);   color: #9fa8da; }
-.dark-mode .recipient-pill.individual  { background: rgba(106,27,154,.15); color: #ce93d8; }
+
+
+
+
 
 /* Tipo badge (notificaciones) */
-.dark-mode .tipo-badge.sistema      { background: rgba(74,134,240,.15); color: #78a8ff; }
-.dark-mode .tipo-badge.cita         { background: rgba(61,184,122,.12); color: #6fcf97; }
-.dark-mode .tipo-badge.recordatorio { background: rgba(224,168,48,.1);  color: #e0a830; }
-.dark-mode .tipo-badge.alerta       { background: rgba(224,92,92,.1);   color: #e05c5c; }
-.dark-mode .tipo-badge.info         { background: rgba(0,105,92,.15);   color: #4db6ac; }
+
+
+
+
+
 
 /* Log badge (logs) */
-.dark-mode .log-badge.sistema      { background: rgba(55,71,79,.3); color: #b0bec5; }
-.dark-mode .log-badge.cita         { background: rgba(46,125,50,.2); color: #81c784; }
-.dark-mode .log-badge.recordatorio { background: rgba(255,152,0,.2); color: #ffcc80; }
-.dark-mode .log-badge.alerta       { background: rgba(244,67,54,.2); color: #ef9a9a; }
-.dark-mode .log-badge.info         { background: rgba(255,152,0,.2); color: #ffcc80; }
-.dark-mode .log-badge.create       { background: rgba(25,118,210,.2); color: #64b5f6; }
-.dark-mode .log-badge.edit         { background: rgba(230,81,0,.2); color: #ffb74d; }
-.dark-mode .log-badge.delete       { background: rgba(244,67,54,.2); color: #ef9a9a; }
-.dark-mode .log-badge.role         { background: rgba(123,31,162,.2); color: #ce93d8; }
-.dark-mode .log-badge.error        { background: rgba(244,67,54,.2); color: #ef9a9a; }
-.dark-mode .log-badge.login        { background: rgba(46,125,50,.2); color: #81c784; }
-.dark-mode .log-badge.logout       { background: rgba(55,71,79,.3); color: #b0bec5; }
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Badge Origen - Dark mode */
-.dark-mode .badge-origen-profesional { background: rgba(25,118,210,.2); color: #64b5f6; }
-.dark-mode .badge-origen-paciente { background: rgba(46,125,50,.2); color: #81c784; }
-.dark-mode .badge-origen-sistema { background: rgba(55,71,79,.3); color: #b0bec5; }
-.dark-mode .badge-origen-admin { background: rgba(244,67,54,.2); color: #ef9a9a; }
-.dark-mode .badge-origen-notificacion { background: rgba(255,152,0,.2); color: #ffcc80; }
-.dark-mode .badge-origen-auditoria { background: rgba(55,71,79,.3); color: #b0bec5; }
+
+
+
+
+
+
 
 /* Detalle Badge - Dark mode */
-.dark-mode .detalle-badge { background: rgba(55,71,79,.2); color: #b0bec5; border-color: rgba(55,71,79,.4); }
+
 
 /* Actividad Reciente - Dashboard */
 .actividad-item {
@@ -1273,7 +1229,7 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
 }
 
 /* Dark mode - Actividad Reciente */
-.dark-mode .actividad-item { background: rgba(30,41,59,.4); }
+
 
 .actividad-header-icon {
     width:32px;
@@ -1294,40 +1250,38 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
     font-size:.75rem;
 }
 
-.dark-mode .actividad-header-icon { background:rgba(74,134,240,.2); color:#78a8ff; }
-.dark-mode .actividad-header-title { color:#e2e8f0; }
 
-.dark-mode .card { background: var(--dm-card); border-color: var(--dm-border); }
-.dark-mode .card-header { background: var(--dm-card) !important; border-bottom-color: var(--dm-border) !important; }
-.dark-mode .card-body { background: var(--dm-card); color: var(--dm-text1); }
-.dark-mode .actividad-fecha { color: #64748b; }
-.dark-mode .actividad-detalle { color: #94a3b8; }
+
+
+
+
+
+
+
 
 /* Badge Modulo - Dark mode */
-.dark-mode .badge-modulo-usuarios { background: rgba(25,118,210,.2); color: #64b5f6; }
-.dark-mode .badge-modulo-roles { background: rgba(123,31,162,.2); color: #ce93d8; }
-.dark-mode .badge-modulo-notificaciones { background: rgba(255,152,0,.2); color: #ffcc80; }
-.dark-mode .badge-modulo-accesos { background: rgba(55,71,79,.3); color: #b0bec5; }
-.dark-mode .badge-modulo-sistema { background: rgba(191,54,12,.3); color: #ffab91; }
+
+
+
+
+
 
 /* Badge Usuario - Dark mode */
-.dark-mode .badge-usuario { background: rgba(55,71,79,.3); color: #b0bec5; }
 
-/* Badge Rol - Dark mode */
-.dark-mode .badge-rol-usuario,
-.dark-mode .badge-rol-paciente { background: rgba(142,71,190,.25); color: #d48ef0; }
-.dark-mode .badge-rol-profesional { background: rgba(25,118,210,.25); color: #64b5f6; }
-.dark-mode .badge-rol-admin { background: rgba(244,67,54,.25); color: #ef9a9a; }
+
+
+
+
 
 /* Badge Modulo Roles - Dark mode */
-.dark-mode .badge-modulo-roles { background: rgba(142,71,190,.25); color: #d48ef0; }
+
 
 /* Status chip (usuarios) */
-.dark-mode .status-chip.activo    { background: rgba(46,125,50,.2); color: #81c784; }
-.dark-mode .status-chip.inactivo  { background: rgba(255,152,0,.2); color: #ffcc80; }
-.dark-mode .status-chip.bloqueado { background: rgba(244,67,54,.2); color: #ef9a9a; }
-.dark-mode .status-chip.pendiente { background: rgba(25,118,210,.2); color: #64b5f6; }
-.dark-mode .status-chip.suspendido { background: rgba(244,67,54,.2); color: #ef9a9a; }
+
+
+
+
+
 
 /* =======================================================
    ADMIN DASHBOARD — módulos y accesos rápidos
@@ -1434,33 +1388,21 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
 }
 
 /* Dark mode dashboard */
-.dark-mode .dash-module-card {
-    background: var(--dm-card);
-    border-color: var(--dm-border);
-}
-.dark-mode .dash-module-card:hover {
-    border-color: var(--dm-border2);
-    box-shadow: 0 8px 28px rgba(0,0,0,.4);
-}
-.dark-mode .dash-module-icon.blue   { background: rgba(74,134,240,.15); color: var(--dm-soft); }
-.dark-mode .dash-module-icon.purple { background: rgba(149,117,205,.15);color: #ba68c8; }
-.dark-mode .dash-module-icon.orange { background: rgba(255,167,38,.12); color: #ffb74d; }
-.dark-mode .dash-module-icon.teal   { background: rgba(38,198,218,.12); color: #4dd0e1; }
-.dark-mode .dash-module-title  { color: var(--dm-heading); }
-.dark-mode .dash-module-desc   { color: var(--dm-muted); }
-.dark-mode .dash-module-footer { color: var(--dm-soft); border-top-color: var(--dm-border); }
 
-.dark-mode .timeline-title { color: var(--dm-heading); }
-.dark-mode .timeline-sub   { color: var(--dm-muted); }
 
-.dark-mode .quick-access-btn {
-    background: var(--dm-elevated);
-    color: var(--dm-soft);
-}
-.dark-mode .quick-access-btn:hover {
-    background: var(--dm-border);
-    color: var(--dm-heading);
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ══════════════════════════════════════════════════════
    PATIENTS — Stepper, cards, tabla y campos
@@ -1489,7 +1431,7 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
     align-items: center;
 }
 .progress-nav__label .pct {
-    .card:hover {
+.card:hover {
         box-shadow: var(--shadow);
         transform: translateY(-2px);
         border-color: var(--color-primary);
@@ -1500,20 +1442,9 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
         background: var(--color-bg-soft);
         transition: background 0.3s;
     }
-    html.dark-mode .main-content,
-    .dark-mode .main-content {
-        background: var(--dm-mid);
-    }
-    html.dark-mode .card,
-    .dark-mode .card {
-        background: var(--dm-card);
-        border-color: var(--dm-border);
-    }
-    html.dark-mode .stat-card,
-    .dark-mode .stat-card {
-        background: var(--dm-card);
-        border-color: var(--dm-border);
-    }
+    
+    
+    
     color: var(--color-secondary, #0D47A1);
 }
 .progress-nav__bar {
@@ -1700,19 +1631,9 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-.dark-mode #paginacionLogs .btn,
-.dark-mode #paginacionUsuarios .btn,
-.dark-mode #paginacionRoles .btn,
-.dark-mode #paginacionNotifs .btn {
-    box-shadow: none;
-}
 
-.dark-mode #paginacionLogs .btn:hover,
-.dark-mode #paginacionUsuarios .btn:hover,
-.dark-mode #paginacionRoles .btn:hover,
-.dark-mode #paginacionNotifs .btn:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-}
+
+
 
 /* ══════════════════════════════════════════════════════════════
      LOGS PAGINATION STICKY
@@ -1755,75 +1676,23 @@ html.dark-mode .toast-message { color: var(--dm-muted); }
     min-height: 580px;
 }
 
-/* Dark Mode - Logs Pagination */
-.dark-mode #tab-log-todos .card,
-.dark-mode #tab-log-usuarios .card,
-.dark-mode #tab-log-roles .card,
-.dark-mode #tab-log-notificaciones .card {
-    background: var(--dm-card);
-    border-color: var(--dm-border);
-    border-radius: var(--radius);
-    overflow: hidden;
-}
 
-.dark-mode #tab-log-todos .logs-pagination-fixed,
-.dark-mode #tab-log-usuarios .logs-pagination-fixed,
-.dark-mode #tab-log-roles .logs-pagination-fixed,
-.dark-mode #tab-log-notificaciones .logs-pagination-fixed {
-    background: var(--dm-card);
-    border-top-color: var(--dm-border);
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-    border-radius: 0 0 var(--radius) var(--radius);
-}
 
-.dark-mode #tab-log-todos .logs-pagination-fixed::before,
-.dark-mode #tab-log-usuarios .logs-pagination-fixed::before,
-.dark-mode #tab-log-roles .logs-pagination-fixed::before,
-.dark-mode #tab-log-notificaciones .logs-pagination-fixed::before {
-    background: linear-gradient(to bottom, transparent, var(--dm-card));
-}
 
-.dark-mode #tab-log-todos .text-muted,
-.dark-mode #tab-log-usuarios .text-muted,
-.dark-mode #tab-log-roles .text-muted,
-.dark-mode #tab-log-notificaciones .text-muted {
-    color: var(--dm-muted) !important;
-}
 
-.dark-mode #tab-log-todos .table-responsive::-webkit-scrollbar-thumb,
-.dark-mode #tab-log-usuarios .table-responsive::-webkit-scrollbar-thumb,
-.dark-mode #tab-log-roles .table-responsive::-webkit-scrollbar-thumb,
-.dark-mode #tab-log-notificaciones .table-responsive::-webkit-scrollbar-thumb {
-    background: var(--dm-border);
-}
 
-.dark-mode #tab-log-todos .table-responsive::-webkit-scrollbar-track,
-.dark-mode #tab-log-usuarios .table-responsive::-webkit-scrollbar-track,
-.dark-mode #tab-log-roles .table-responsive::-webkit-scrollbar-track,
-.dark-mode #tab-log-notificaciones .table-responsive::-webkit-scrollbar-track {
-    background: var(--dm-card);
-}
 
-/* Dark Mode - Users, Roles, Notifications Pagination */
-.dark-mode #tablaUsuarios,
-.dark-mode .card.shadow-sm.border-0.d-flex.flex-column,
-.dark-mode .card.shadow-sm.border-0 {
-    background: var(--dm-card);
-    border-color: var(--dm-border);
-    border-radius: var(--radius);
-    overflow: hidden;
-}
 
-.dark-mode .logs-pagination-fixed {
-    background: var(--dm-card);
-    border-top-color: var(--dm-border);
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-    border-radius: 0 0 var(--radius) var(--radius);
-}
 
-.dark-mode .text-muted {
-    color: var(--dm-muted) !important;
-}
+
+
+
+
+
+
+
+
+
 
 /* ── Modern Redesign: buttons ────────────────────── */
 .btn-primary-gradient {

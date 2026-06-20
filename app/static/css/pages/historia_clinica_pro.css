@@ -553,6 +553,88 @@ hr.divider {
 }
 .btn-danger:hover { opacity: 0.88; }
 
+/* ── Dark Mode ── */
+html.dark-mode .main-header {
+  background: var(--dm-elevated);
+  border-color: var(--dm-border);
+}
+html.dark-mode .main-header h1 { color: var(--dm-text1); }
+html.dark-mode .main-header .user-info { color: var(--dm-text2); }
+html.dark-mode nav.breadcrumb a { color: var(--dm-accent); }
+html.dark-mode nav.breadcrumb .sep { color: var(--dm-border); }
+html.dark-mode .user-greeting { color: var(--dm-text2); }
+html.dark-mode .btn-notif { color: var(--dm-text2); }
+
+html.dark-mode .patient-banner {
+  background: var(--dm-elevated);
+  border-color: var(--dm-border);
+}
+html.dark-mode .patient-name { color: var(--dm-text1); }
+html.dark-mode .patient-meta { color: var(--dm-text2); }
+
+html.dark-mode .card {
+  background: var(--dm-elevated) !important;
+  border: 1px solid var(--dm-border) !important;
+  box-shadow: none !important;
+}
+html.dark-mode .card-title {
+  color: var(--dm-text1);
+  border-color: var(--dm-border);
+}
+html.dark-mode .upload-zone {
+  background: transparent;
+  border-color: var(--dm-border);
+}
+html.dark-mode .upload-zone p { color: var(--dm-text1); }
+
+html.dark-mode select, 
+html.dark-mode textarea, 
+html.dark-mode input[type="text"] {
+  background: var(--dm-card);
+  border-color: var(--dm-border);
+  color: var(--dm-text1);
+}
+html.dark-mode label.form-label { color: var(--dm-text2); }
+
+html.dark-mode .file-row {
+  background: var(--dm-card);
+  border-color: var(--dm-border);
+}
+html.dark-mode .fname { color: var(--dm-text1); }
+html.dark-mode .finfo { color: var(--dm-text2); }
+html.dark-mode .section-label { color: var(--dm-text2); }
+html.dark-mode hr.divider { border-top-color: var(--dm-border); }
+
+html.dark-mode .notice.blue {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--dm-accent);
+  color: var(--dm-accent);
+}
+html.dark-mode .notice.amber {
+  background: rgba(180,83,9,0.1);
+  border-color: #b45309;
+  color: #fbbf24;
+}
+
+html.dark-mode .modal {
+  background: var(--dm-elevated);
+  border-top-color: var(--dm-accent);
+}
+html.dark-mode .modal h3 { color: var(--dm-text1); }
+html.dark-mode .modal p { color: var(--dm-text2); }
+html.dark-mode .btn-cancel {
+  background: transparent;
+  border-color: var(--dm-border);
+  color: var(--dm-text2);
+}
+html.dark-mode .btn-cancel:hover { border-color: var(--dm-text1); }
+
+html.dark-mode .toast {
+  background: var(--dm-elevated);
+  border: 1px solid var(--dm-border);
+  color: var(--dm-text1);
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .grid-2 { grid-template-columns: 1fr; }

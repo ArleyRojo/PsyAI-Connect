@@ -76,7 +76,7 @@ function getSavedTheme() {
         if (savedTheme === 'dark') return 'dark';
         if (savedTheme === 'light') return 'light';
     } catch (e) {}
-    return 'light';
+    return 'dark';
 }
 
 function initTheme() {

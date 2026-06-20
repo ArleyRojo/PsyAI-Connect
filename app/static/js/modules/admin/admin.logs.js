@@ -423,7 +423,7 @@ function mostrarTabLogs(tab, btn) {
         const el = document.getElementById(`tab-log-${t}`);
         if (el) el.style.display = t === tab ? '' : 'none';
     });
-    document.querySelectorAll('.logs-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.admin-panel-tab').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
     filtrarLogs();
@@ -454,7 +454,7 @@ function mostrarPanelAdmin(panel, btn) {
 
 // ── Filtros ───────────────────────────────────────────────────────────────────
 function filtrarLogs() {
-    const tabActiva = document.querySelector('.logs-tab.active');
+    const tabActiva = document.querySelector('.admin-panel-tab.active');
     if (!tabActiva) return;
     
     const tabText = tabActiva.textContent.trim().toLowerCase();

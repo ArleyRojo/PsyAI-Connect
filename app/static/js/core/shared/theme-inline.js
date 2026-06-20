@@ -5,7 +5,7 @@
         .split('; ')
         .find(r => r.startsWith('theme='))
         ?.split('=')[1];
-      const theme = cookieTheme || localStorage.getItem('theme');
+      const theme = cookieTheme || localStorage.getItem('theme') || 'dark';
       if (theme === 'dark') {
         document.documentElement.classList.add('dark-mode');
       }

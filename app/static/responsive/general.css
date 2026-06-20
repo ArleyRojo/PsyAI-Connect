@@ -5,8 +5,7 @@
    ============================================================ */
 
 @media (max-width: 991px) {
-
-  .sidebar {
+.sidebar {
     width: 280px !important;
     min-width: 280px !important;
     max-width: 280px !important;
@@ -19,12 +18,7 @@
     box-shadow: none;
   }
 
-  html.dark-mode .sidebar,
-  .dark-mode .sidebar {
-    width: 280px !important;
-    min-width: 280px !important;
-    max-width: 280px !important;
-  }
+  
 
   .sidebar.active,
   .sidebar.show {
@@ -32,12 +26,7 @@
     box-shadow: 8px 0 48px rgba(0, 0, 0, 0.18);
   }
 
-  html.dark-mode .sidebar.active,
-  html.dark-mode .sidebar.show,
-  .dark-mode .sidebar.active,
-  .dark-mode .sidebar.show {
-    box-shadow: 8px 0 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(144, 202, 249, 0.08);
-  }
+  
 
   .sidebar-overlay {
     display: none;
@@ -97,12 +86,7 @@
     transform: scale(0.94);
   }
 
-  html.dark-mode .menu-toggle,
-  html.dark-mode .toggle-btn {
-    background: var(--dm-accent, #90CAF9);
-    color: var(--dm-deep, #060e1c);
-    box-shadow: 0 4px 20px rgba(144, 202, 249, 0.3);
-  }
+  
 
   .sidebar .nav-link {
     min-height: 48px;
@@ -605,7 +589,7 @@
 }
 
 @media (max-width: 767px) {
-  h1 { font-size: clamp(1.4rem, 5vw, 1.8rem) !important; }
+h1 { font-size: clamp(1.4rem, 5vw, 1.8rem) !important; }
   h2 { font-size: clamp(1.2rem, 4vw, 1.5rem) !important; }
   h3 { font-size: clamp(1rem, 3.5vw, 1.25rem) !important; }
   h4, h5 { font-size: clamp(0.9rem, 3vw, 1.1rem) !important; }
@@ -671,20 +655,11 @@
     font-weight: 800;
   }
 
-  html.dark-mode .mobile-bottom-nav {
-    background: var(--dm-card, #0b1429);
-    border-top-color: var(--dm-border, #1a2b4a);
-    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
-  }
+  
 
-  html.dark-mode .mobile-bottom-nav__item {
-    color: var(--dm-muted, #8aaac6);
-  }
+  
 
-  html.dark-mode .mobile-bottom-nav__item.active {
-    color: var(--dm-accent, #90caf9);
-    background: rgba(144, 202, 249, 0.12);
-  }
+  
 }
 
 /* ── Tablet (769px - 1024px) ── */
@@ -858,7 +833,7 @@
 
 /* --- Smooth Gestures & Animations --- */
 @media (hover: none) {
-    .btn:active {
+.btn:active {
         transform: scale(0.96);
         transition: transform 0.1s;
     }
@@ -867,9 +842,7 @@
         background: var(--color-accent);
     }
 
-    .dark-mode .card:active {
-        background: var(--dm-elevated);
-    }
+    
 }
 
 /* Mantener los asides alineados horizontalmente */

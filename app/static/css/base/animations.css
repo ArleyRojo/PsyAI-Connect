@@ -433,14 +433,6 @@
    DARK MODE ANIMATIONS
 ──────────────────────────────────────────────────── */
 
-html.dark-mode .section-title::after {
-    background: linear-gradient(90deg, var(--dm-accent), #64b5f6);
-}
-
-html.dark-mode .nav-link::after {
-    background: var(--dm-accent);
-}
-
 /* ──────────────────────────────────────────────────
    RESPONSIVE ANIMATIONS
 ──────────────────────────────────────────────────── */
