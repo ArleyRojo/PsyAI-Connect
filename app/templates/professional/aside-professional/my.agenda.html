@@ -22,6 +22,697 @@
 <script src="/js/core/shared/theme.js"></script>
     <script src="/js/core/shared/localStorage-detector.js"></script>
 
+<style>
+/* ============================================================
+   MI AGENDA — SaaS Premium Redesign v2
+   Design tokens: #90CAF9 · #0D47A1 · #E3F2FD
+   ============================================================ */
+
+/* ── Background subtle pattern ── */
+.aside-professional {
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(144,202,249,.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(13,71,161,.05) 0%, transparent 50%),
+        var(--color-bg-light);
+}
+
+/* ── Header with glassmorphism ── */
+.main-header {
+    position: relative;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.75rem;
+    background: var(--color-bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border-soft);
+    box-shadow: var(--shadow-xs);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.main-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, rgba(144,202,249,.08), transparent 60%);
+    pointer-events: none;
+}
+.main-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 0 3px 3px 0;
+}
+.main-header h1 {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.main-header h1 i {
+    color: var(--color-secondary);
+    font-size: 1.3rem;
+}
+.main-header .user-info {
+    position: relative;
+    z-index: 1;
+    font-size: 0.9rem;
+    color: var(--color-text-body);
+}
+
+/* ── KPI Stats cards ── */
+.agenda-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+.stat-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all var(--transition);
+    box-shadow: var(--shadow-xs);
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--color-primary);
+}
+.stat-icon-wrap {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+}
+.stat-icon-wrap i { font-size: 1.25rem; }
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--color-text-main);
+}
+.stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}
+
+/* ── Section cards (premium) ── */
+section.card {
+    border: none !important;
+    border-radius: var(--radius) !important;
+    background: var(--color-bg-card) !important;
+    box-shadow: var(--shadow-card) !important;
+    transition: all var(--transition) !important;
+    position: relative;
+    overflow: hidden;
+}
+section.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+section.card:hover {
+    box-shadow: var(--shadow-hover) !important;
+    transform: translateY(-1px);
+}
+section.card:hover::before {
+    opacity: 1;
+}
+section.card h5 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.15rem;
+    border-bottom: 1px solid var(--color-border-soft);
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+section.card h5 i {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+section.card h5 .icon-clock    { background: linear-gradient(135deg,#e3f2fd,#bbdefb); color: #1565C0; }
+section.card h5 .icon-plus     { background: linear-gradient(135deg,#e8f5e9,#c8e6c9); color: #2e7d32; }
+section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffcdd2); color: #c62828; }
+
+/* ── Timeline appointment list ── */
+#contenedorCitas {
+    position: relative;
+}
+#contenedorCitas > h5 {
+    padding-left: 0;
+}
+#listaCitas {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+#listaCitas::before {
+    content: '';
+    position: absolute;
+    left: 17px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-primary), transparent);
+    opacity: 0.35;
+}
+#listaCitas .list-group-item {
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    margin-bottom: 0.65rem;
+    padding: 1rem 1.15rem 1rem 3.2rem;
+    transition: all var(--transition);
+    background: var(--color-bg-soft) !important;
+    position: relative;
+    box-shadow: var(--shadow-xs);
+}
+#listaCitas .list-group-item::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    border: 3px solid var(--color-bg-card);
+    box-shadow: 0 0 0 2px var(--color-primary);
+    z-index: 1;
+}
+#listaCitas .list-group-item:hover {
+    background: var(--color-accent) !important;
+    transform: translateX(4px) translateY(-1px);
+    box-shadow: var(--shadow);
+}
+#listaCitas .list-group-item img {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-bg-card);
+    box-shadow: var(--shadow-xs);
+    flex-shrink: 0;
+}
+#listaCitas .list-group-item strong {
+    color: var(--color-text-main);
+    font-size: 0.92rem;
+}
+#listaCitas .list-group-item .text-muted {
+    font-size: 0.78rem;
+}
+#listaCitas .badge {
+    font-weight: 600;
+    font-size: 0.68rem;
+    padding: 0.25em 0.6em;
+    border-radius: 20px;
+    letter-spacing: 0.2px;
+}
+
+/* ── Form labels ── */
+.form-label.fw-semibold {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600 !important;
+    color: var(--color-text-main);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.15px;
+}
+
+/* ── Premium form controls ── */
+section.card .form-control,
+section.card .form-select {
+    border-radius: var(--radius-sm) !important;
+    border: 1.5px solid var(--color-border) !important;
+    padding: 0.6rem 0.9rem !important;
+    transition: all var(--transition);
+    background: var(--color-bg-soft);
+    font-size: 0.875rem;
+    color: var(--color-text-main);
+}
+section.card .form-control:hover,
+section.card .form-select:hover {
+    border-color: var(--color-primary) !important;
+}
+section.card .form-control:focus,
+section.card .form-select:focus {
+    border-color: var(--color-secondary) !important;
+    box-shadow: 0 0 0 3px var(--color-primary-glow) !important;
+    background: var(--color-bg-card);
+}
+
+/* Select custom arrow */
+section.card select.form-control,
+section.card select.form-select {
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234a5568' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 12px;
+    padding-right: 36px !important;
+}
+section.card select.form-control option,
+section.card select.form-select option {
+    padding: 10px 14px;
+    background: var(--color-bg-card);
+    color: var(--color-text-main);
+}
+section.card select.form-control option:checked,
+section.card select.form-select option:checked {
+    background: var(--color-accent) !important;
+    color: var(--color-secondary);
+}
+
+/* ── Appointment row with left accent ── */
+.cita-row,
+#listaCitas .list-group-item {
+    border-left: 4px solid transparent;
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+    background: var(--color-bg-card);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition);
+}
+.cita-row:hover,
+#listaCitas .list-group-item:hover { box-shadow: var(--shadow); transform: translateX(2px); }
+.cita-row.estado-confirmada,
+.cita-row[data-estado="confirmada"] { border-left-color: #43a047; }
+.cita-row.estado-cancelada,
+.cita-row[data-estado="cancelada"]  { border-left-color: #e53935; }
+.cita-row.estado-pendiente,
+.cita-row[data-estado="pendiente"]  { border-left-color: #fb8c00; }
+/* Dynamic rows rendered by JS get accent via nested badge detection */
+#listaCitas .list-group-item:has(.badge.bg-success) { border-left-color: #43a047; }
+#listaCitas .list-group-item:has(.badge.bg-danger)  { border-left-color: #e53935; }
+
+/* ── Availability panel ── */
+.availability-panel {
+    background: var(--color-bg-soft);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+}
+
+/* ── Section title with decorative line ── */
+.section-title {
+    position: relative;
+    padding-bottom: 0.6rem;
+    margin-bottom: 1.25rem;
+}
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 48px; height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 99px;
+}
+.section-divider {
+    margin: 0.25rem 0 1rem 0;
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, var(--color-border-soft), transparent);
+}
+
+/* ── Input with icon ── */
+.input-with-icon { display: flex; align-items: center; gap: 0.75rem; }
+.input-with-icon select,
+.input-with-icon input { flex: 1; min-width: 0; }
+.input-icon { position: static; flex-shrink: 0; color:var(--color-text-muted); font-size:1.1rem; line-height:1; }
+
+/* Helper text */
+
+/* ── Premium Bootstrap buttons ── */
+.btn-primary {
+    background: var(--gradient-primary) !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem;
+    padding: 0.65rem 1.5rem !important;
+    transition: all var(--transition) !important;
+    position: relative;
+    overflow: hidden;
+}
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.12), transparent);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13,71,161,.3) !important;
+}
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(13,71,161,.2) !important;
+}
+.btn-success {
+    background: linear-gradient(135deg, #1b5e20, #388e3c, #43a047) !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem;
+    padding: 0.65rem 1.5rem !important;
+    transition: all var(--transition) !important;
+}
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46,125,50,.35) !important;
+}
+
+/* ── Legacy gradient buttons ── */
+.btn-agenda-grad {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem;
+    color: #fff !important;
+    background: var(--gradient-primary) !important;
+    transition: all var(--transition) !important;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+.btn-agenda-grad::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.12), transparent);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+.btn-agenda-grad:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13,71,161,.3) !important;
+    color: #fff !important;
+}
+.btn-agenda-grad:hover::after {
+    opacity: 1;
+}
+.btn-agenda-grad:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(13,71,161,.2) !important;
+}
+.btn-agenda-grad--success {
+    background: linear-gradient(135deg, #1b5e20, #388e3c, #43a047) !important;
+}
+.btn-agenda-grad--success:hover {
+    box-shadow: 0 6px 20px rgba(46,125,50,.35) !important;
+}
+
+/* ── Modal premium ── */
+.modal-cancel-custom .modal-content {
+    border-radius: var(--radius);
+    border: none;
+    background: var(--color-bg-card);
+}
+.modal-cancel-custom .modal-header {
+    border-bottom: 1px solid var(--color-border-soft);
+    padding: 1.25rem 1.5rem;
+}
+.modal-cancel-custom .modal-header .modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+}
+.modal-cancel-custom .modal-body {
+    padding: 1.25rem 1.5rem;
+}
+.modal-cancel-custom .modal-footer {
+    border-top: 1px solid var(--color-border-soft);
+    padding: 1rem 1.5rem;
+}
+.modal-cancel-custom textarea.form-control {
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    min-height: 100px;
+}
+.modal-cancel-custom .btn-outline-secondary {
+    border-radius: var(--radius-xs);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+.modal-cancel-custom .btn-danger {
+    border-radius: var(--radius-xs);
+    font-weight: 600;
+    font-size: 0.85rem;
+    background: linear-gradient(135deg, #c62828, #e53935);
+    border: none;
+    padding: 0.5rem 1.25rem;
+    transition: all var(--transition);
+}
+.modal-cancel-custom .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(198,40,40,.3);
+}
+
+/* ── Empty state ── */
+.empty-agenda {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+}
+.empty-agenda svg {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+.empty-agenda h6 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: 0.4rem;
+}
+.empty-agenda p {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+}
+
+/* ── Entrance animation ── */
+@keyframes agendaFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+#listaCitas .list-group-item {
+    animation: agendaFadeIn 0.35s ease both;
+}
+#listaCitas .list-group-item:nth-child(1) { animation-delay: 0.02s; }
+#listaCitas .list-group-item:nth-child(2) { animation-delay: 0.06s; }
+#listaCitas .list-group-item:nth-child(3) { animation-delay: 0.10s; }
+#listaCitas .list-group-item:nth-child(4) { animation-delay: 0.14s; }
+#listaCitas .list-group-item:nth-child(5) { animation-delay: 0.18s; }
+#listaCitas .list-group-item:nth-child(6) { animation-delay: 0.22s; }
+#listaCitas .list-group-item:nth-child(7) { animation-delay: 0.26s; }
+#listaCitas .list-group-item:nth-child(8) { animation-delay: 0.30s; }
+
+section.card {
+    animation: agendaFadeIn 0.4s ease both;
+}
+section.card:nth-of-type(1) { animation-delay: 0.05s; }
+section.card:nth-of-type(2) { animation-delay: 0.15s; }
+section.card:nth-of-type(3) { animation-delay: 0.25s; }
+
+/* ── Loading skeleton shimmer ── */
+@keyframes shimmer {
+    0%   { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+}
+.skeleton-item {
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    margin-bottom: 0.65rem;
+    padding: 1rem 1.15rem 1rem 3.2rem;
+    background: var(--color-bg-soft) !important;
+    position: relative;
+}
+.skeleton-item::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-border);
+    z-index: 1;
+}
+.skeleton-shimmer {
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--color-border-soft) 25%, var(--color-primary-glow) 50%, var(--color-border-soft) 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    margin-bottom: 6px;
+}
+.skeleton-shimmer:last-child {
+    width: 60%;
+    margin-bottom: 0;
+}
+
+/* ── DARK MODE ── */
+html.dark-mode .aside-professional {
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(144,202,249,.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(13,71,161,.03) 0%, transparent 50%),
+        var(--dm-deep);
+}
+html.dark-mode .main-header {
+    background: var(--dm-card);
+    border-color: var(--dm-border);
+}
+html.dark-mode .main-header::before {
+    background: linear-gradient(135deg, rgba(144,202,249,.04), transparent 60%);
+}
+
+html.dark-mode section.card {
+    background: var(--dm-card) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,.2) !important;
+}
+html.dark-mode section.card:hover {
+    box-shadow: 0 8px 28px rgba(0,0,0,.35) !important;
+}
+html.dark-mode section.card h5 {
+    border-bottom-color: var(--dm-border);
+}
+html.dark-mode section.card h5 .icon-clock    { background: rgba(21,101,192,.2); color: var(--dm-accent); }
+html.dark-mode section.card h5 .icon-plus     { background: rgba(46,125,50,.2); color: var(--dm-success); }
+html.dark-mode section.card h5 .icon-schedule { background: rgba(198,40,40,.2); color: var(--dm-danger); }
+html.dark-mode section.card .form-control,
+html.dark-mode section.card .form-select {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border2) !important;
+    color: var(--dm-text1) !important;
+}
+html.dark-mode section.card .form-control:focus,
+html.dark-mode section.card .form-select:focus {
+    border-color: var(--dm-accent) !important;
+    box-shadow: 0 0 0 3px var(--dm-glow) !important;
+    background: var(--dm-card) !important;
+}
+html.dark-mode section.card select.form-control,
+html.dark-mode section.card select.form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237aaac8' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+}
+html.dark-mode section.card select.form-control option,
+html.dark-mode section.card select.form-select option {
+    background: var(--dm-elevated);
+    color: var(--dm-text1);
+}
+html.dark-mode section.card select.form-control option:checked,
+html.dark-mode section.card select.form-select option:checked {
+    background: rgba(144,202,249,.15) !important;
+    color: var(--dm-accent);
+}
+html.dark-mode #listaCitas::before {
+    background: linear-gradient(to bottom, var(--dm-accent), transparent);
+    opacity: 0.2;
+}
+html.dark-mode #listaCitas .list-group-item {
+    background: var(--dm-elevated) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+}
+html.dark-mode #listaCitas .list-group-item::before {
+    background: var(--dm-accent);
+    border-color: var(--dm-card);
+    box-shadow: 0 0 0 2px var(--dm-accent);
+}
+html.dark-mode #listaCitas .list-group-item:hover {
+    background: rgba(144,202,249,.06) !important;
+}
+html.dark-mode #listaCitas .list-group-item strong { color: var(--dm-heading); }
+html.dark-mode .modal-cancel-custom .modal-content {
+    background: var(--dm-card);
+}
+html.dark-mode .modal-cancel-custom .modal-header,
+html.dark-mode .modal-cancel-custom .modal-footer {
+    border-color: var(--dm-border);
+}
+html.dark-mode .skeleton-shimmer {
+    background: linear-gradient(90deg, var(--dm-border) 25%, var(--dm-glow) 50%, var(--dm-border) 75%);
+}
+html.dark-mode .skeleton-item::before {
+    background: var(--dm-border2);
+}
+html.dark-mode .empty-agenda svg { opacity: 0.3; }
+html.dark-mode .empty-agenda h6 { color: var(--dm-heading); }
+html.dark-mode .empty-agenda p { color: var(--dm-muted); }
+html.dark-mode .stat-card {
+    background: var(--dm-card);
+    border-color: var(--dm-border);
+}
+html.dark-mode .stat-card:hover {
+    border-color: var(--dm-accent);
+}
+html.dark-mode .stat-number { color: var(--dm-text1); }
+html.dark-mode .stat-label { color: var(--dm-muted); }
+html.dark-mode .cita-row {
+    background: var(--dm-elevated);
+}
+html.dark-mode #listaCitas .list-group-item {
+    background: var(--dm-elevated) !important;
+}
+html.dark-mode #listaCitas .list-group-item:hover {
+    background: rgba(144,202,249,.08) !important;
+}
+html.dark-mode .availability-panel {
+    background: var(--dm-elevated);
+    border-left-color: var(--dm-accent);
+}
+html.dark-mode .section-title::after {
+    background: var(--gradient-primary);
+}
+html.dark-mode .input-icon {
+    color: var(--dm-muted);
+}
+</style>
 <body class="aside-professional">
 
 <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>

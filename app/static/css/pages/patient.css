@@ -10609,28 +10609,3 @@ button.chat-item {
     #chatbot-section .chat-input-area {
       flex-wrap: wrap;
     }
-
-/* ── DARK MODE STAT CARD ICONS ── */
-html.dark-mode .stat-card__icon--blue {
-    background: rgba(21, 101, 192, 0.2) !important;
-    color: #90caf9 !important;
-}
-html.dark-mode .stat-card__icon--green {
-    background: rgba(46, 125, 50, 0.2) !important;
-    color: #a5d6a7 !important;
-}
-html.dark-mode .stat-card__icon--purple {
-    background: rgba(94, 53, 177, 0.2) !important;
-    color: #b39ddb !important;
-}
-html.dark-mode .stat-card__icon--amber {
-    background: rgba(245, 127, 23, 0.2) !important;
-    color: #ffe082 !important;
-}
-
-/* -- EVOLUTION DARK MODE FIXES -- */
-html.dark-mode .emotion-option.active .emotion-label { color: #90caf9 !important; }
-html.dark-mode .section-title .icon-chart { background: rgba(21, 101, 192, 0.2) !important; color: #90caf9 !important; }
-html.dark-mode .section-title .icon-history { background: rgba(46, 125, 50, 0.2) !important; color: #a5d6a7 !important; }
-html.dark-mode .energy-value-badge { background: var(--dm-elevated) !important; color: #90caf9 !important; border: 1px solid var(--dm-border); }
-
