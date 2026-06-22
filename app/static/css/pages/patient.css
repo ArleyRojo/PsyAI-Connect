@@ -10503,3 +10503,72 @@ html.dark-mode .field-row .field-value { color: var(--dm-text1, #daeeff); }
     #chatbot-section .chat-input-area {
       flex-wrap: wrap;
     }
+
+/* ────────────────────────────────────────────────────────────
+   CLEAN LIGHT MODE STYLES (WHITER / LESS BLUE ACCENTS)
+   ──────────────────────────────────────────────────────────── */
+html:not(.dark-mode) .main-content {
+    background: #ffffff !important;
+}
+
+html:not(.dark-mode) .sidebar {
+    background: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark-mode) .sidebar__logo {
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html:not(.dark-mode) .sidebar__logo h5 {
+    color: var(--color-secondary, #0D47A1) !important;
+}
+
+html:not(.dark-mode) .sidebar__logo img {
+    border-color: #1976D2 !important;
+    box-shadow: 0 0 0 4px #f1f5f9 !important;
+}
+
+html:not(.dark-mode) .sidebar__role-badge {
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+}
+
+html:not(.dark-mode) .sidebar .nav-link {
+    color: #475569 !important;
+}
+
+html:not(.dark-mode) .sidebar .nav-link i {
+    color: #64748b !important;
+}
+
+html:not(.dark-mode) .sidebar .nav-link:hover {
+    color: #0f172a !important;
+    background: #f8fafc !important;
+}
+
+html:not(.dark-mode) .sidebar .nav-link.active {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 600;
+}
+
+html:not(.dark-mode) .sidebar .nav-link.active::before {
+    background: #1976D2 !important;
+}
+
+html:not(.dark-mode) .sidebar .nav-link.active i {
+    color: #1976D2 !important;
+}
+
+html:not(.dark-mode) .sidebar__footer {
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+html:not(.dark-mode) .main-header {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}

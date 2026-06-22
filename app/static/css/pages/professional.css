@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    PROFESSIONAL DASHBOARD + ASIDE-PROFESSIONAL
    Consolidated static stylesheet
    ============================================================ */
@@ -5221,7 +5221,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--color-border);
-  background: var(--color-bg-soft);
+  background: var(--color-bg-card);
   flex-shrink: 0;
 }
 
@@ -5251,7 +5251,7 @@ html.dark-mode #chatbot-section.fullscreen-active {
   padding: 9px 14px 9px 36px;
   border: 1.5px solid var(--color-border);
   border-radius: 50px;
-  background: var(--color-bg-soft);
+  background: var(--color-bg-card);
   font-size: 0.85rem;
   color: var(--color-text-body);
   outline: none;
@@ -5515,7 +5515,7 @@ button.chat-item {
   justify-content: center;
   gap: 14px;
   color: var(--color-text-muted);
-  background: var(--color-bg-soft);
+  background: var(--color-bg-card);
 }
 
 .chat-panel-placeholder i {
@@ -5597,7 +5597,7 @@ button.chat-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: var(--color-bg-soft);
+  background: var(--color-bg-card);
 }
 
 .chat-messages-area::-webkit-scrollbar { width: 5px; }
