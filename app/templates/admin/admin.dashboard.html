@@ -1,0 +1,325 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <title>PsyAI Connect | Dashboard Admin</title>
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/base/base.css">
+    <link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+   
+    <link rel="stylesheet" href="/css/pages/admin.css">
+    <link rel="stylesheet" href="/responsive/responsive-admin.css">
+    <script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+
+    <!-- Sidebar -->
+    <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+        <nav class="nav flex-column mt-4">
+            <a href="admin.dashboard.html" class="nav-link active">
+                <i class="fas fa-home me-2"></i> Dashboard
+            </a>
+            <a href="./aside-admin/users.html" class="nav-link">
+                <i class="fas fa-users me-2"></i> Usuarios <span id="sidebarBloqueados" class="badge rounded-pill ms-1" style="background:#ffebee;color:#c62828;font-size:.68rem;display:none;"></span>
+            </a>
+            <a href="./aside-admin/roles.html" class="nav-link">
+                <i class="fas fa-user-shield me-2"></i> Roles
+            </a>
+            <a href="./aside-admin/notifications.html" class="nav-link">
+                <i class="fas fa-bell me-2"></i> Notificaciones
+            </a>
+            <a href="./aside-admin/logs.html" class="nav-link">
+                <i class="fas fa-clipboard-list me-2"></i> Logs
+            </a>
+            <a href="./aside-admin/chatbot.config.html" class="nav-link">
+                <i class="fas fa-robot me-2"></i> Chatbot
+            </a>
+        </nav>
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+            <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content flex-grow-1 ms-250 p-4">
+
+        <!-- Header -->
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-0">Dashboard Admin</h1>
+                <small class="text-muted">Panel de administración PsyAI Connect</small>
+            </div>
+            <div class="user-info d-flex align-items-center gap-3">
+                <i class="fas fa-bell text-secondary fs-5"></i>
+                <div data-avatar="inicial" style="width:40px;height:40px;"></div>
+                <span class="fw-semibold">Hola, Administrador</span>
+            </div>
+        </header>
+
+        <!-- Acordeón del Dashboard -->
+        <div class="accordion accordion-responsive mb-4" id="accordionDashboard">
+
+            <!-- Estadísticas con gráficos -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingStats">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStats" aria-expanded="false" aria-controls="collapseStats">
+                        <i class="fas fa-chart-bar me-2"></i> Estadísticas del Sistema
+                    </button>
+                </h2>
+                <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats" data-bs-parent="#accordionDashboard">
+                    <div class="accordion-body">
+                        <!-- Stat cards -->
+                        <div class="row g-3 mb-4" aria-live="polite" aria-label="Resumen de estadísticas">
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                                    <div><div class="stat-value" id="statTotal"><span class="skeleton">0</span></div><div class="stat-label">Usuarios registrados</div></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon green"><i class="fas fa-user-check"></i></div>
+                                    <div><div class="stat-value" id="statActivos"><span class="skeleton">0</span></div><div class="stat-label">Usuarios activos</div></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon orange"><i class="fas fa-bell"></i></div>
+                                    <div><div class="stat-value" id="statNotifs"><span class="skeleton">0</span></div><div class="stat-label">Notificaciones enviadas</div></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon red"><i class="fas fa-user-slash"></i></div>
+                                    <div><div class="stat-value" id="statSuspendidos"><span class="skeleton">0</span></div><div class="stat-label">Cuentas suspendidas</div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts row -->
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="dashboard-section p-3">
+                                    <h6 class="fw-bold mb-3"><i class="fas fa-users me-1"></i> Distribución de Usuarios</h6>
+                                    <div class="chart-container-sm">
+                                        <canvas id="chartUsers"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="dashboard-section p-3">
+                                    <h6 class="fw-bold mb-3"><i class="fas fa-activity me-1"></i> Métricas de Actividad</h6>
+                                    <div class="chart-container">
+                                        <canvas id="chartActivity"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Real-time line chart -->
+                        <div class="row g-3 mt-2">
+                            <div class="col-12">
+                                <div class="dashboard-section p-3">
+                                    <h6 class="fw-bold mb-3"><i class="fas fa-wave-square me-1"></i> Tiempo Real <small class="text-muted fw-normal">(CPU, RAM, Req/min)</small></h6>
+                                    <div class="chart-container-lg">
+                                        <canvas id="chartRealtime"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rendimiento del Servidor -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPerformance">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePerformance" aria-expanded="false" aria-controls="collapsePerformance">
+                        <i class="fas fa-server me-2"></i> Rendimiento del Servidor
+                    </button>
+                </h2>
+                <div id="collapsePerformance" class="accordion-collapse collapse" aria-labelledby="headingPerformance" data-bs-parent="#accordionDashboard">
+                    <div class="accordion-body" aria-live="polite" aria-label="Métricas de rendimiento">
+                        <!-- Server status -->
+                        <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3" style="background:var(--color-bg-soft,#f8fafc);">
+                            <span id="metricServerDot" class="server-dot stable"></span>
+                            <div>
+                                <span class="fw-bold">Servidor:</span>
+                                <span id="metricServerStatus" class="badge bg-success ms-1">estable</span>
+                                <small class="text-muted ms-2">Versión: <span id="metricServerVersion">—</span></small>
+                                <small class="text-muted ms-2">Entorno: <span id="metricServerEnv">—</span></small>
+                            </div>
+                            <div class="ms-auto d-flex align-items-center gap-2">
+                                <span class="fw-bold small">Usuarios Online:</span>
+                                <span id="onlineUsersBadge" class="badge bg-success">0</span>
+                            </div>
+                            <small class="text-muted">Última actualización: <span id="metricServerTime">—</span></small>
+                        </div>
+
+                        <!-- Online users list -->
+                        <div class="mb-4 p-3 rounded-3" style="background:var(--color-bg-soft,#f8fafc);">
+                            <h6 class="fw-bold mb-2 small text-uppercase"><i class="fas fa-circle text-success me-1" style="font-size:.5rem;"></i> Conectados Ahora</h6>
+                            <div id="onlineUsersList">
+                                <div class="text-muted small py-2">Cargando...</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-3 col-6">
+                                <div class="small-metric-card text-center">
+                                    <div class="metric-label">CPU</div>
+                                    <div class="metric-value" id="metricCpu"><span class="skeleton">—</span></div>
+                                    <div class="progress-track mt-2"><div class="progress-fill" data-pct="0" id="metricCpuBar" style="width:0%"></div></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small-metric-card text-center">
+                                    <div class="metric-label">RAM</div>
+                                    <div class="metric-value" id="metricRam"><span class="skeleton">—</span></div>
+                                    <div class="progress-track mt-2"><div class="progress-fill" data-pct="0" id="metricRamBar" style="width:0%"></div></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small-metric-card text-center">
+                                    <div class="metric-label">Disco</div>
+                                    <div class="metric-value" id="metricDisk"><span class="skeleton">—</span></div>
+                                    <div class="progress-track mt-2"><div class="progress-fill" data-pct="0" id="metricDiskBar" style="width:0%"></div></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small-metric-card text-center">
+                                    <div class="metric-label">Uptime</div>
+                                    <div class="metric-value" id="metricUptime"><span class="skeleton">—</span></div>
+                                    <div class="metric-foot">desde inicio</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small-metric-card text-center">
+                                    <div class="metric-label">Req/min</div>
+                                    <div class="metric-value" id="metricRequests"><span class="skeleton">—</span></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small-metric-card text-center">
+                                    <div class="metric-label">Usuarios Online</div>
+                                    <div class="metric-value" id="metricOnline"><span class="skeleton">—</span></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small-metric-card text-center">
+                                    <div class="metric-label">Latencia</div>
+                                    <div class="metric-value" id="metricLatency"><span class="skeleton">—</span><small class="fs-6 text-muted">ms</small></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="small-metric-card text-center">
+                                    <div class="metric-label">Logs Hoy</div>
+                                    <div class="metric-value" id="metricLogsHoy"><span class="skeleton">—</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividad reciente -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingActivity">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseActivity" aria-expanded="false" aria-controls="collapseActivity">
+                        <i class="fas fa-clock me-2"></i> Actividad Reciente
+                    </button>
+                </h2>
+                <div id="collapseActivity" class="accordion-collapse collapse" aria-labelledby="headingActivity" data-bs-parent="#accordionDashboard">
+                    <div class="accordion-body">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                            <input type="text" id="activityFilter" class="form-control form-control-sm" style="max-width:260px;" placeholder="Filtrar actividad..." oninput="filterActivity()">
+                            <button class="btn-export btn-sm" onclick="exportActivityCSV()"><i class="fas fa-download"></i> Exportar CSV</button>
+                        </div>
+                        <ul class="list-unstyled mb-0" id="listaActividad" role="log" aria-live="polite" aria-label="Actividad reciente del sistema">
+                            <li class="text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Cargando actividad...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accesos rápidos -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingQuick">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuick" aria-expanded="false" aria-controls="collapseQuick">
+                        <i class="fas fa-bolt me-2"></i> Accesos Rápidos
+                    </button>
+                </h2>
+                <div id="collapseQuick" class="accordion-collapse collapse" aria-labelledby="headingQuick" data-bs-parent="#accordionDashboard">
+                    <div class="accordion-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="./aside-admin/users.html" class="btn btn-primary btn-sm">
+                                <i class="fas fa-users me-1"></i> Gestionar Usuarios
+                            </a>
+                            <a href="./aside-admin/roles.html" class="btn btn-primary btn-sm">
+                                <i class="fas fa-user-shield me-1"></i> Gestionar Roles
+                            </a>
+                            <a href="./aside-admin/notifications.html" class="btn btn-primary btn-sm">
+                                <i class="fas fa-bell me-1"></i> Notificaciones
+                            </a>
+                            <a href="./aside-admin/logs.html" class="btn btn-primary btn-sm">
+                                <i class="fas fa-clipboard-list me-1"></i> Ver Logs
+                            </a>
+                            <a href="./aside-admin/chatbot.config.html" class="btn btn-primary btn-sm">
+                                <i class="fas fa-robot me-1"></i> Configurar Chatbot
+                            </a>
+                            <button class="btn-export btn-sm" onclick="exportStatsCSV()"><i class="fas fa-download"></i> Exportar Stats</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+<script src="/js/core/shared/aside.js?v=20260522-5"></script>
+
+<script src="/js/modules/auth/logout.js"></script>
+
+<!-- Dashboard modules -->
+<script>
+// Forzar que todos los acordeones inicien cerrados
+document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+    el.classList.remove('show');
+    el.style.height = '';
+});
+</script>
+<script src="/js/modules/admin/admin.dashboard.utils.js"></script>
+<script src="/js/modules/admin/admin.dashboard.sse.js"></script>
+<script src="/js/modules/admin/admin.dashboard.charts.js"></script>
+<script src="/js/modules/admin/admin.dashboard.js"></script>
+
+</body>
+</html>
