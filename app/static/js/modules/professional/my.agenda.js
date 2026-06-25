@@ -28,6 +28,8 @@ function inicializarEventos() {
     if (btnAgendar) {
         btnAgendar.addEventListener('click', agendarCita);
     }
+
+
 }
 
 async function cargarDatosIniciales() {
