@@ -535,6 +535,11 @@ hr.divider {
 .toast.show { opacity: 1; transform: translateY(0); }
 .toast i { font-size: 18px; color: #4ade80; }
 
+/* Ocultar selector de archivo nativo feo */
+#prev-file-input {
+  display: none !important;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .welcome-banner { flex-wrap: wrap; }

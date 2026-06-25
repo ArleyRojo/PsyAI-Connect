@@ -28,6 +28,12 @@ def recover_with_token():
     return render_template("auth/recover.html")
 
 
+PAGES_LEGAL = {
+    "privacidad": {"title": "Política de Privacidad", "template": "legal/privacidad.html"},
+    "terminos": {"title": "Términos y Condiciones", "template": "legal/terminos.html"},
+    "cookies": {"title": "Política de Cookies", "template": "legal/cookies.html"},
+}
+
 @pages_bp.route("/<path:filename>")
 def serve_pages(filename: str):
     """
@@ -36,6 +42,14 @@ def serve_pages(filename: str):
     After refactor, we keep URLs stable and map to app/templates/*.
     """
     user_role = session.get("rol")
+
+    # Legal pages
+    if filename.startswith("legal/"):
+        page = filename.removeprefix("legal/").removesuffix("/")
+        if page in PAGES_LEGAL:
+            info = PAGES_LEGAL[page]
+            return render_template(info["template"], title=info["title"], updated="18 de junio de 2026")
+        return redirect("/")
 
     # Enforce role-based access control for templates
     if filename == "admin.dashboard.html" or filename.startswith("aside-admin/"):

@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+﻿<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
 <title>PsyAI Connect | Dashboard Profesional</title>
-<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
 <script src="/js/core/shared/theme-inline.js"></script>
     
     <!-- Bootstrap 5 -->
@@ -17,741 +17,11 @@
 <!-- CSS propios -->
     <link rel="stylesheet" href="/css/base/base.css">
     <link rel="stylesheet" href="/css/layout/layout.css">
-    <link rel="stylesheet" href="/css/components/components.css">
-    <link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
     <link rel="stylesheet" href="/css/pages/professional.css">
-    <link rel="stylesheet" href="/responsive/general.css">
-    <link rel="stylesheet" href="/responsive/responsive-professional.css">
-    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
     <script src="/js/core/shared/theme.js"></script>
     <script src="/js/core/shared/localStorage-detector.js"></script>
 
-<style>
-/* ============================================================
-   DASHBOARD PROFESIONAL — Design v2
-   ============================================================ */
-
-/* ── Header ── */
-.main-header {
-    position: relative;
-    padding-bottom: 1.25rem;
-}
-.main-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 70px;
-    height: 3px;
-    background: linear-gradient(135deg, #0D47A1, #1976D2);
-    border-radius: 3px;
-}
-
-/* ── Alert Banner ── */
-.alert-banner {
-    border-radius: 14px;
-    border: 1px solid var(--color-border-soft, #EAF3FD);
-    transition: all 0.3s ease;
-    background: var(--color-bg-card, #fff);
-}
-.alert-banner:hover {
-    box-shadow: 0 4px 16px rgba(13,71,161,.06);
-}
-.alert-banner .alert-icon {
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    font-size: 1rem;
-}
-.alert-banner .alert-icon.warning { background: rgba(255,152,0,.15); color: #e65100; }
-.alert-banner .alert-icon.info    { background: rgba(33,150,243,.15); color: #1565C0; }
-.alert-banner .alert-icon.success { background: rgba(76,175,80,.15); color: #2e7d32; }
-.alert-banner .btn-close-alert {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: var(--color-text-muted, #7B92AC);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.alert-banner .btn-close-alert:hover {
-    background: rgba(0,0,0,.05);
-    color: #333;
-}
-html.dark-mode .alert-banner {
-    background: var(--dm-card, #0e1f35);
-    border-color: var(--dm-border, #1a3555);
-}
-html.dark-mode .alert-banner .btn-close-alert:hover {
-    background: rgba(255,255,255,.1);
-    color: #fff;
-}
-
-/* ── Stat cards (KPI Metrics) ── */
-.stat-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem 1.4rem;
-    border-radius: 14px;
-    border: 1px solid rgba(144, 202, 249, 0.08);
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    background: rgba(14, 31, 53, 0.5);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    cursor: default;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-}
-.stat-card:hover {
-    box-shadow:
-        0 0 20px rgba(100, 181, 246, 0.10),
-        0 10px 28px -6px rgba(0,0,0,0.3);
-    border-color: rgba(100, 181, 246, 0.25);
-    transform: translateY(-3px);
-}
-.stat-card.clickable { cursor: pointer; }
-.stat-icon {
-    width: 52px; height: 52px;
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem;
-    flex-shrink: 0;
-    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.stat-card:hover .stat-icon {
-    transform: scale(1.08);
-    box-shadow: 0 0 16px var(--stat-glow, rgba(100,181,246,0.15));
-}
-.stat-icon.blue   { background: linear-gradient(135deg,rgba(33,150,243,0.2),rgba(13,71,161,0.25)); color: #64B5F6; --stat-glow: rgba(100,181,246,0.2); }
-.stat-icon.green  { background: linear-gradient(135deg,rgba(76,175,80,0.2),rgba(27,94,32,0.25)); color: #81C784; --stat-glow: rgba(129,199,132,0.2); }
-.stat-icon.orange { background: linear-gradient(135deg,rgba(255,152,0,0.2),rgba(230,81,0,0.25)); color: #FFB74D; --stat-glow: rgba(255,183,77,0.2); }
-.stat-icon.purple { background: linear-gradient(135deg,rgba(156,39,176,0.2),rgba(74,20,140,0.25)); color: #CE93D8; --stat-glow: rgba(206,147,216,0.2); }
-.stat-value {
-    font-size: 2.05rem;
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #ffffff 0%, #B0D4F1 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 12px rgba(100, 181, 246, 0.12));
-}
-.stat-label {
-    font-size: 0.75rem;
-    color: rgba(150, 180, 210, 0.7);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    margin-top: 0.15rem;
-}
-
-/* ── Accordion ── */
-.accordion-item {
-    border: 1px solid var(--color-border-soft, #EAF3FD) !important;
-    border-radius: 14px !important;
-    overflow: hidden;
-    margin-bottom: 0.75rem;
-    transition: all 0.22s ease;
-    background: var(--color-bg-card, #fff);
-}
-.accordion-item:hover:not(:has(.collapsed)) {
-    box-shadow: 0 8px 24px rgba(13,71,161,.08);
-    border-color: #90CAF9 !important;
-}
-.accordion-button {
-    font-weight: 700 !important;
-    color: var(--color-text-main, #0D1F3C) !important;
-    padding: 1rem 1.25rem !important;
-    background: var(--color-bg-card, #fff);
-    border-radius: 14px !important;
-}
-.accordion-button i { font-size: 1rem; }
-.accordion-button:not(.collapsed) {
-    border-bottom: 1px solid var(--color-border-soft, #EAF3FD);
-}
-.accordion-button:focus {
-    box-shadow: none !important;
-    border-color: #90CAF9 !important;
-}
-.accordion-body { padding: 1.25rem !important; }
-
-/* ── Cita card (próximas citas) ── */
-.cita-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.9rem 1rem;
-    border-radius: 12px;
-    border: 1px solid var(--color-border-soft, #EAF3FD);
-    transition: all 0.25s ease;
-    background: var(--color-bg-card, #fff);
-}
-.cita-card:hover {
-    box-shadow: 0 4px 16px rgba(13,71,161,.08);
-    border-color: #90CAF9 !important;
-    transform: translateX(4px);
-}
-.cita-card:last-child { margin-bottom: 0; }
-.cita-date-box {
-    min-width: 52px;
-    text-align: center;
-    padding: 0.4rem 0.6rem;
-    border-radius: 10px;
-    background: var(--color-bg-soft, #F0F5FC);
-    flex-shrink: 0;
-}
-.cita-date-box .day  { font-size: 1.1rem; font-weight: 800; line-height: 1.1; color: var(--color-text-main, #0D1F3C); }
-.cita-date-box .month { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted, #7B92AC); }
-.cita-date-box.today {
-    background: linear-gradient(135deg, #1565C0, #1976D2);
-}
-.cita-date-box.today .day,
-.cita-date-box.today .month { color: #fff; }
-.cita-info { flex: 1; min-width: 0; }
-.cita-info .paciente-name { font-weight: 700; font-size: 0.95rem; }
-.cita-info .cita-meta { font-size: 0.78rem; color: var(--color-text-muted, #7B92AC); }
-.cita-actions {
-    display: flex;
-    gap: 0.35rem;
-    flex-shrink: 0;
-}
-.cita-actions .btn-icon {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    border: 1px solid var(--color-border-soft, #EAF3FD);
-    background: transparent;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.8rem;
-    color: var(--color-text-muted, #7B92AC);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.cita-actions .btn-icon:hover {
-    background: var(--color-accent, #E3F2FD);
-    border-color: #90CAF9;
-    color: #1565C0;
-}
-.cita-card .badge-estado {
-    font-size: 0.65rem;
-    font-weight: 600;
-    padding: 0.25rem 0.6rem;
-    border-radius: 20px;
-    flex-shrink: 0;
-}
-
-/* ── Tooltips en botones de cita ── */
-.cita-actions .btn-icon {
-    position: relative;
-}
-.cita-actions .btn-icon::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%) scale(0.85);
-    white-space: nowrap;
-    padding: 0.35rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    background: rgba(10, 25, 47, 0.92);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: #daeeff;
-    border: 1px solid rgba(144, 202, 249, 0.15);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    pointer-events: none;
-    opacity: 0;
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.cita-actions .btn-icon::before {
-    content: '';
-    position: absolute;
-    bottom: calc(100% + 4px);
-    left: 50%;
-    transform: translateX(-50%) scale(0.85);
-    border: 4px solid transparent;
-    border-top-color: rgba(10, 25, 47, 0.92);
-    pointer-events: none;
-    opacity: 0;
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.cita-actions .btn-icon:hover::after {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-}
-.cita-actions .btn-icon:hover::before {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-}
-
-/* ── Modal Oscuro ── */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-.modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-.modal-glass {
-    background: rgba(14, 31, 53, 0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(144, 202, 249, 0.12);
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 420px;
-    width: 90%;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 40px rgba(100, 181, 246, 0.06);
-    transform: scale(0.92) translateY(12px);
-    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-}
-.modal-overlay.active .modal-glass {
-    transform: scale(1) translateY(0);
-}
-.modal-glass .btn-close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid rgba(144,202,249,0.12);
-    background: rgba(0,0,0,0.2);
-    color: rgba(150,180,210,0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.modal-glass .btn-close-modal:hover {
-    background: rgba(255,255,255,0.05);
-    color: #daeeff;
-    border-color: rgba(144,202,249,0.3);
-}
-.modal-glass .modal-icon {
-    width: 64px; height: 64px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, rgba(33,150,243,0.15), rgba(13,71,161,0.2));
-    display: flex;
-    align-items: center; justify-content: center;
-    font-size: 1.6rem;
-    color: #64B5F6;
-    margin: 0 auto 1rem;
-}
-.modal-glass h5 {
-    color: #daeeff;
-    font-weight: 700;
-}
-.modal-glass p {
-    color: rgba(150,180,210,0.7);
-    font-size: 0.88rem;
-}
-.modal-glass .btn-confirm {
-    background: linear-gradient(135deg, #1976D2, #1565C0);
-    border: none;
-    border-radius: 12px;
-    padding: 0.65rem 1.5rem;
-    font-weight: 600;
-    font-size: 0.88rem;
-    color: #fff;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 16px rgba(21,101,192,0.25);
-}
-.modal-glass .btn-confirm:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(21,101,192,0.35);
-}
-.modal-glass .btn-cancel {
-    background: transparent;
-    border: 1px solid rgba(144,202,249,0.12);
-    border-radius: 12px;
-    padding: 0.65rem 1.5rem;
-    font-weight: 500;
-    font-size: 0.88rem;
-    color: rgba(150,180,210,0.7);
-    transition: all 0.2s ease;
-}
-.modal-glass .btn-cancel:hover {
-    background: rgba(255,255,255,0.03);
-    border-color: rgba(144,202,249,0.25);
-}
-
-/* ── Quick Actions (Glassmorphism + Glow) ── */
-.quick-action-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    padding: 1.4rem 0.8rem;
-    border-radius: 14px;
-    border: 1px solid rgba(144, 202, 249, 0.08);
-    transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    background: rgba(14, 31, 53, 0.55);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-    height: 100%;
-    position: relative;
-    z-index: 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-.quick-action-card::after {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: 15px;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    z-index: -1;
-    padding: 1.5px;
-    background: var(--glow-color, #90CAF9);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-}
-.quick-action-card:hover {
-    box-shadow:
-        0 0 24px var(--glow-alpha, rgba(144,202,249,0.18)),
-        0 12px 32px -8px rgba(0,0,0,0.4);
-    transform: translateY(-7px);
-    border-color: transparent;
-    color: inherit;
-}
-.quick-action-card:hover::after { opacity: 1; }
-.quick-action-card .qa-icon {
-    width: 54px; height: 54px;
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.35rem;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-}
-.quick-action-card:hover .qa-icon {
-    transform: scale(1.12) rotate(-6deg);
-    box-shadow: 0 0 18px var(--glow-alpha, rgba(144,202,249,0.2));
-}
-.quick-action-card .qa-title {
-    font-weight: 700;
-    font-size: 0.88rem;
-    text-align: center;
-    line-height: 1.2;
-    letter-spacing: 0.01em;
-}
-.quick-action-card .qa-desc {
-    font-size: 0.68rem;
-    color: rgba(150, 180, 210, 0.7);
-    text-align: center;
-    font-weight: 400;
-}
-.qa-icon.primary   { background: linear-gradient(135deg,rgba(33,150,243,0.2),rgba(13,71,161,0.3)); color: #64B5F6; }
-.qa-icon.success   { background: linear-gradient(135deg,rgba(76,175,80,0.2),rgba(27,94,32,0.3)); color: #81C784; }
-.qa-icon.warning   { background: linear-gradient(135deg,rgba(255,152,0,0.2),rgba(230,81,0,0.3)); color: #FFB74D; }
-.qa-icon.info      { background: linear-gradient(135deg,rgba(0,188,212,0.2),rgba(0,96,100,0.3)); color: #4DD0E1; }
-.qa-icon.purple    { background: linear-gradient(135deg,rgba(156,39,176,0.2),rgba(74,20,140,0.3)); color: #CE93D8; }
-.qa-icon.pink      { background: linear-gradient(135deg,rgba(233,30,99,0.2),rgba(136,14,79,0.3)); color: #F48FB1; }
-
-/* ── Bienestar chart bars ── */
-.bienestar-bar {
-    height: 10px;
-    border-radius: 10px;
-    background: var(--color-border-soft, #EAF3FD);
-    overflow: hidden;
-    position: relative;
-}
-.bienestar-bar .fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width 1.2s ease;
-    width: 0;
-}
-.bienestar-bar .fill.fill-emo { background: linear-gradient(90deg, #42a5f5, #1976D2); }
-.bienestar-bar .fill.fill-energy { background: linear-gradient(90deg, #66bb6a, #388e3c); }
-.bienestar-stat-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.82rem;
-    font-weight: 500;
-}
-.bienestar-stat-label .label { color: var(--color-text-muted, #7B92AC); }
-.bienestar-stat-label .value { font-weight: 700; color: var(--color-text-main, #0D1F3C); }
-
-/* ── SVG Metric Rings ── */
-.metric-ring-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
-.metric-ring-wrap .ring-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: rgba(150, 180, 210, 0.7);
-    letter-spacing: 0.02em;
-}
-.metric-ring-svg {
-    width: 90px;
-    height: 90px;
-    transform: rotate(-90deg);
-    cursor: pointer;
-    filter: drop-shadow(0 0 6px var(--ring-glow, transparent));
-    transition: filter 0.3s ease;
-}
-.metric-ring-svg:hover {
-    filter: drop-shadow(0 0 14px var(--ring-glow, rgba(100,181,246,0.3)));
-}
-.metric-ring-svg .ring-bg {
-    fill: none;
-    stroke: rgba(144, 202, 249, 0.06);
-    stroke-width: 7;
-}
-.metric-ring-svg .ring-fill {
-    fill: none;
-    stroke-width: 7;
-    stroke-linecap: round;
-    stroke-dasharray: 226.2;
-    stroke-dashoffset: 226.2;
-    transition: stroke-dashoffset 1.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.metric-ring-svg .ring-center-text {
-    transform: rotate(90deg);
-    transform-origin: 50px 50px;
-}
-.metric-ring-svg .ring-center-text .value {
-    font-size: 22px;
-    font-weight: 800;
-    text-anchor: middle;
-    dominant-baseline: central;
-}
-.metric-ring-svg .ring-center-text .suffix {
-    font-size: 9px;
-    font-weight: 600;
-    text-anchor: middle;
-    dominant-baseline: central;
-    fill: rgba(150, 180, 210, 0.4);
-}
-.ring-tooltip {
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%) scale(0.85);
-    white-space: nowrap;
-    padding: 0.3rem 0.65rem;
-    border-radius: 8px;
-    font-size: 0.62rem;
-    font-weight: 600;
-    background: rgba(10, 25, 47, 0.92);
-    backdrop-filter: blur(8px);
-    color: #daeeff;
-    border: 1px solid rgba(144, 202, 249, 0.12);
-    pointer-events: none;
-    opacity: 0;
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.metric-ring-wrap:hover .ring-tooltip {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-}
-
-/* ── Reportes Ring Compact ── */
-.reportes-ring-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-}
-.reportes-ring-wrap .ring-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: rgba(150, 180, 210, 0.7);
-    text-align: center;
-}
-.reportes-ring-wrap .stat-desc {
-    font-size: 0.68rem;
-    color: rgba(150, 180, 210, 0.5);
-    text-align: center;
-}
-
-/* ── Activity items ── */
-#actividadContainer .d-flex {
-    padding: 0.7rem 0 !important;
-    border-bottom: 1px solid var(--color-border-soft, #EAF3FD) !important;
-    transition: background 0.2s ease;
-    border-radius: 6px;
-    margin: 0 -0.3rem;
-    padding-left: 0.3rem !important;
-    padding-right: 0.3rem !important;
-}
-#actividadContainer .d-flex:hover {
-    background: rgba(13,71,161,.04);
-    padding-left: 0.6rem !important;
-    padding-right: 0.6rem !important;
-}
-#actividadContainer .d-flex:last-child { border-bottom: none !important; }
-.actividad-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--color-bg-soft, #F0F5FC);
-    flex-shrink: 0;
-}
-.actividad-icon i { font-size: 0.9rem; }
-
-/* ── Page entrance animation ── */
-@keyframes pageFadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.main-content > * {
-    animation: pageFadeIn 0.4s ease both;
-}
-.main-content > *:nth-child(1) { animation-delay: 0.03s; }
-.main-content > *:nth-child(2) { animation-delay: 0.08s; }
-.main-content > *:nth-child(3) { animation-delay: 0.14s; }
-.main-content > *:nth-child(4) { animation-delay: 0.20s; }
-.main-content > *:nth-child(5) { animation-delay: 0.26s; }
-.main-content > *:nth-child(6) { animation-delay: 0.32s; }
-.main-content > *:nth-child(7) { animation-delay: 0.38s; }
-
-/* ── Button refresh ── */
-.btn-light.btn-sm {
-    border-radius: 10px !important;
-    border: 1px solid var(--color-border-soft, #EAF3FD) !important;
-    transition: all 0.22s ease !important;
-}
-.btn-light.btn-sm:hover {
-    background: var(--color-accent, #E3F2FD) !important;
-    border-color: #90CAF9 !important;
-}
-
-/* ── Eskeleton loading ── */
-@keyframes shimmer {
-    0%   { background-position: -200px 0; }
-    100% { background-position: calc(200px + 100%) 0; }
-}
-.skeleton {
-    background: linear-gradient(90deg, var(--color-border-soft, #EAF3FD) 25%, #f0f5fc 50%, var(--color-border-soft, #EAF3FD) 75%);
-    background-size: 200px 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-    border-radius: 8px;
-}
-
-/* ── Dark mode ── */
-html.dark-mode .accordion-item {
-    background: var(--dm-card, #0e1f35);
-    border-color: var(--dm-border, #1a3555) !important;
-}
-html.dark-mode .accordion-item:hover:not(:has(.collapsed)) {
-    border-color: var(--dm-accent, #90CAF9) !important;
-}
-html.dark-mode .accordion-button {
-    background: var(--dm-card, #0e1f35) !important;
-    color: var(--dm-text1, #daeeff) !important;
-}
-html.dark-mode .accordion-button:not(.collapsed) {
-    background: rgba(13, 71, 161, 0.25) !important;
-    color: #60a5fa !important;
-    border-bottom-color: var(--dm-border, #1a3555) !important;
-}
-html.dark-mode .stat-card {
-    background: rgba(14, 31, 53, 0.5);
-    border-color: rgba(144, 202, 249, 0.08);
-}
-html.dark-mode .stat-card:hover {
-    border-color: rgba(100, 181, 246, 0.25) !important;
-}
-html.dark-mode .stat-value {
-    background: linear-gradient(135deg, #ffffff 0%, #B0D4F1 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-html.dark-mode .stat-label { color: rgba(150, 180, 210, 0.7); }
-html.dark-mode #actividadContainer .d-flex { border-bottom-color: var(--dm-border, #1a3555) !important; }
-html.dark-mode #actividadContainer .d-flex:hover { background: rgba(144,202,249,.06); }
-html.dark-mode .actividad-icon { background: var(--dm-elevated, #132843); }
-html.dark-mode .btn-light.btn-sm {
-    background: var(--dm-card, #0e1f35);
-    border-color: var(--dm-border, #1a3555) !important;
-    color: var(--dm-text1, #daeeff) !important;
-}
-html.dark-mode .btn-light.btn-sm:hover {
-    background: rgba(144,202,249,.1) !important;
-    border-color: var(--dm-accent, #90CAF9) !important;
-}
-html.dark-mode .cita-card {
-    background: var(--dm-card, #0e1f35);
-    border-color: var(--dm-border, #1a3555);
-}
-html.dark-mode .cita-card:hover {
-    border-color: var(--dm-accent, #90CAF9) !important;
-}
-html.dark-mode .cita-date-box {
-    background: var(--dm-elevated, #132843);
-}
-html.dark-mode .cita-date-box.today {
-    background: linear-gradient(135deg, #0D47A1, #1565C0);
-}
-html.dark-mode .cita-date-box .day { color: var(--dm-text1, #daeeff); }
-html.dark-mode .cita-date-box .month { color: var(--dm-muted, #3d607e); }
-html.dark-mode .cita-actions .btn-icon {
-    border-color: var(--dm-border, #1a3555);
-    color: var(--dm-muted, #3d607e);
-}
-html.dark-mode .cita-actions .btn-icon:hover {
-    background: rgba(144,202,249,.1);
-    border-color: var(--dm-accent, #90CAF9);
-    color: #60a5fa;
-}
-html.dark-mode .quick-action-card {
-    background: rgba(14, 31, 53, 0.55);
-    border-color: rgba(144, 202, 249, 0.08);
-}
-html.dark-mode .quick-action-card:hover {
-    border-color: transparent;
-}
-html.dark-mode .quick-action-card .qa-title { color: var(--dm-text1, #daeeff); }
-html.dark-mode .quick-action-card .qa-desc { color: rgba(150, 180, 210, 0.7); }
-html.dark-mode .bienestar-stat-label .value { color: var(--dm-text1, #daeeff); }
-html.dark-mode .bienestar-bar { background: var(--dm-elevated, #132843); }
-html.dark-mode .metric-ring-svg .ring-bg { stroke: rgba(144,202,249,0.06); }
-html.dark-mode .metric-ring-wrap .ring-label { color: rgba(150,180,210,0.7); }
-html.dark-mode .reportes-ring-wrap .ring-label { color: rgba(150,180,210,0.7); }
-html.dark-mode .reportes-ring-wrap .stat-desc { color: rgba(150,180,210,0.5); }
-html.dark-mode .skeleton { background: linear-gradient(90deg, #1a3555 25%, #132843 50%, #1a3555 75%); }
-html.dark-mode .bienestar-card-bg { background: var(--dm-elevated, #132843) !important; }
-html.dark-mode .bienestar-card-bg .fw-bold { color: var(--dm-text1, #daeeff); }
-html.dark-mode .bienestar-card-bg .text-muted { color: var(--dm-muted, #3d607e); }
-.stats-mini-card { background: var(--color-bg-soft, #F0F5FC); }
-html.dark-mode .stats-mini-card { background: var(--dm-elevated, #132843) !important; }
-html.dark-mode .color-blue { color: #60a5fa !important; }
-html.dark-mode .color-green { color: #66bb6a !important; }
-html.dark-mode .color-orange { color: #ffa726 !important; }
-</style>
 </head>
 <body>
 
@@ -762,7 +32,7 @@ html.dark-mode .color-orange { color: #ffa726 !important; }
     <!-- Sidebar -->
     <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
         <div class="sidebar__logo text-center mt-3">
-            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
             <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
         </div>
         <nav class="nav flex-column mt-4">
@@ -816,85 +86,95 @@ html.dark-mode .color-orange { color: #ffa726 !important; }
             </div>
         </header>
 
-        <!-- ═══ Alertas ═══ -->
-        <div id="alertasContainer" class="mb-4"></div>
-
-        <!-- ═══ Accesos Rápidos (Glassmorphism) ═══ -->
-        <section class="mb-4">
-            <div class="row g-2" id="quickActionsContainer">
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/patients.html" class="quick-action-card"
-                       style="--glow-color: #64B5F6; --glow-alpha: rgba(100,181,246,0.20)">
-                        <div class="qa-icon primary"><i class="fas fa-user-plus"></i></div>
-                        <div class="qa-title">Nuevo Paciente</div>
-                        <div class="qa-desc">Registrar paciente</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/my.agenda.html" class="quick-action-card"
-                       style="--glow-color: #81C784; --glow-alpha: rgba(129,199,132,0.20)">
-                        <div class="qa-icon success"><i class="fas fa-calendar-plus"></i></div>
-                        <div class="qa-title">Nueva Cita</div>
-                        <div class="qa-desc">Agendar sesión</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/patients.html" class="quick-action-card"
-                       style="--glow-color: #FFB74D; --glow-alpha: rgba(255,183,77,0.20)">
-                        <div class="qa-icon warning"><i class="fas fa-stethoscope"></i></div>
-                        <div class="qa-title">Diagnóstico</div>
-                        <div class="qa-desc">Registrar diagnóstico</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/reports.html" class="quick-action-card"
-                       style="--glow-color: #4DD0E1; --glow-alpha: rgba(77,208,225,0.20)">
-                        <div class="qa-icon info"><i class="fas fa-chart-bar"></i></div>
-                        <div class="qa-title">Reporte</div>
-                        <div class="qa-desc">Generar reporte</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md">
-                    <a href="./aside-professional/mensajes.html" class="quick-action-card"
-                       style="--glow-color: #CE93D8; --glow-alpha: rgba(206,147,216,0.20)">
-                        <div class="qa-icon purple"><i class="fas fa-comment-dots"></i></div>
-                        <div class="qa-title">Mensajes</div>
-                        <div class="qa-desc">Chat con pacientes</div>
-                    </a>
-                </div>
-                <div class="col-4 col-md d-md-none"></div>
+        <!-- Resumen General (Alertas + Accesos Rápidos + Estadísticas) — estático, fuera del acordeón -->
+        <div class="section-card">
+            <div class="section-card__header">
+                <i class="fas fa-chart-simple me-2"></i> Resumen General
             </div>
-        </section>
+            <div class="section-card__body">
 
-        <!-- ═══ Estadísticas Rápidas ═══ -->
-        <section class="mb-4">
-            <div class="row g-3" id="statsRow">
-                <div class="col-6 col-md-3">
-                    <div class="stat-card clickable" onclick="irA('./aside-professional/patients.html')">
-                        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
-                        <div><div class="stat-value" id="statPacientes">0</div><div class="stat-label">Pacientes Activos</div></div>
+                <!-- Alertas -->
+                <div id="alertasContainer" class="mb-4"></div>
+
+                <!-- Accesos Rápidos -->
+                <section class="mb-4">
+                    <div class="row g-2" id="quickActionsContainer">
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/patients.html" class="quick-action-card"
+                               style="--glow-color: #64B5F6; --glow-alpha: rgba(100,181,246,0.20)">
+                                <div class="qa-icon primary"><i class="fas fa-user-plus"></i></div>
+                                <div class="qa-title">Nuevo Paciente</div>
+                                <div class="qa-desc">Registrar paciente</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/my.agenda.html" class="quick-action-card"
+                               style="--glow-color: #81C784; --glow-alpha: rgba(129,199,132,0.20)">
+                                <div class="qa-icon success"><i class="fas fa-calendar-plus"></i></div>
+                                <div class="qa-title">Nueva Cita</div>
+                                <div class="qa-desc">Agendar sesión</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/patients.html" class="quick-action-card"
+                               style="--glow-color: #FFB74D; --glow-alpha: rgba(255,183,77,0.20)">
+                                <div class="qa-icon warning"><i class="fas fa-stethoscope"></i></div>
+                                <div class="qa-title">Diagnóstico</div>
+                                <div class="qa-desc">Registrar diagnóstico</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/reports.html" class="quick-action-card"
+                               style="--glow-color: #4DD0E1; --glow-alpha: rgba(77,208,225,0.20)">
+                                <div class="qa-icon info"><i class="fas fa-chart-bar"></i></div>
+                                <div class="qa-title">Reporte</div>
+                                <div class="qa-desc">Generar reporte</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/mensajes.html" class="quick-action-card"
+                               style="--glow-color: #CE93D8; --glow-alpha: rgba(206,147,216,0.20)">
+                                <div class="qa-icon purple"><i class="fas fa-comment-dots"></i></div>
+                                <div class="qa-title">Mensajes</div>
+                                <div class="qa-desc">Chat con pacientes</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md d-md-none"></div>
                     </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
-                        <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
-                        <div><div class="stat-value" id="statCitasHoy">0</div><div class="stat-label">Citas Hoy</div></div>
+                </section>
+
+                <!-- Estadísticas Rápidas -->
+                <section>
+                    <div class="row g-3" id="statsRow">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/patients.html')">
+                                <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                                <div><div class="stat-value" id="statPacientes">0</div><div class="stat-label">Pacientes Activos</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
+                                <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
+                                <div><div class="stat-value" id="statCitasHoy">0</div><div class="stat-label">Citas Hoy</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
+                                <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+                                <div><div class="stat-value" id="statPendientes">0</div><div class="stat-label">Citas Pendientes</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/reports.html')">
+                                <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+                                <div><div class="stat-value" id="statReportes">0</div><div class="stat-label">Reportes Totales</div></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
-                        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
-                        <div><div class="stat-value" id="statPendientes">0</div><div class="stat-label">Citas Pendientes</div></div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-card clickable" onclick="irA('./aside-professional/reports.html')">
-                        <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
-                        <div><div class="stat-value" id="statReportes">0</div><div class="stat-label">Reportes Totales</div></div>
-                    </div>
-                </div>
+                </section>
+
             </div>
-        </section>
+        </div>
 
         <!-- ═══ Secciones en Acordeón ═══ -->
         <div class="accordion accordion-responsive mb-4" id="accordionDashboard">
@@ -902,11 +182,11 @@ html.dark-mode .color-orange { color: #ffa726 !important; }
             <!-- Próximas Citas -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingCitas">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCitas" aria-expanded="true" aria-controls="collapseCitas">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCitas" aria-expanded="false" aria-controls="collapseCitas">
                         <i class="fas fa-calendar-alt me-2"></i> Próximas Citas
                     </button>
                 </h2>
-                <div id="collapseCitas" class="accordion-collapse collapse show" aria-labelledby="headingCitas" data-bs-parent="#accordionDashboard">
+                <div id="collapseCitas" class="accordion-collapse collapse" aria-labelledby="headingCitas" data-bs-parent="#accordionDashboard">
                     <div class="accordion-body" id="proximasCitasContainer">
                         <div class="text-center text-muted py-4">
                             <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
@@ -990,13 +270,13 @@ html.dark-mode .color-orange { color: #ffa726 !important; }
     </main>
 </div>
 
-<!-- Bootstrap JS -->
+<!-- Bootstrap JS (sin defer para que esté disponible antes del script inline) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618-accordion">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
-<script src="/js/core/shared/aside.js?v=20260522-5"></script>
+<script src="/js/modules/professional/aside.js?v=20260522-5"></script>
 <script src="/js/modules/auth/logout.js"></script>
 <script src="/js/core/shared/nombre.usuario.js"></script>
 <script>
@@ -1495,6 +775,26 @@ window.addEventListener('storage', (e) => {
 window.addEventListener('localStorageChange', (e) => {
     if (e.detail.key === 'psyai_dashboard_update') {
         cargarDashboard();
+    }
+});
+
+// Forzar que todos los acordeones inicien cerrados
+document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+    el.classList.remove('show');
+    el.style.height = '';
+});
+
+// Cerrar acordeón al restaurar desde bfcache (botón atrás)
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+            var instance = bootstrap.Collapse.getInstance(el);
+            if (instance) {
+                instance.hide();
+            } else {
+                new bootstrap.Collapse(el, { toggle: false }).hide();
+            }
+        });
     }
 });
 </script>

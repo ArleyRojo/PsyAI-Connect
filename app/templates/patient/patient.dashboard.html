@@ -1,565 +1,23 @@
-<!DOCTYPE html>
-<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+﻿<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Dashboard del paciente - PsyAI Connect. Tu espacio personal de bienestar emocional.">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Dashboard del paciente - PsyAI Connect. Tu espacio personal de bienestar emocional.">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
 <title>PsyAI Connect | Dashboard Paciente</title>
-<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
 <script src="/js/core/shared/theme-inline.js"></script>
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <!-- CSS propios -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link rel="stylesheet" href="/css/base/base.css">
 <link rel="stylesheet" href="/css/layout/layout.css">
-<link rel="stylesheet" href="/css/components/components.css">
 <link rel="stylesheet" href="/css/themes/theme.css">
-    <link rel="stylesheet" href="/css/pages/patient.css">
-    <link rel="stylesheet" href="/responsive/general.css">
-    <link rel="stylesheet" href="/responsive/responsive-patient.css">
-    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
-    <script src="/js/core/shared/theme.js"></script>
-        <script src="/js/core/shared/localStorage-detector.js"></script>
-<style>
-/* ============================================================
-   PATIENT DASHBOARD PREMIUM — Inline Styles
-   ============================================================ */
+<link rel="stylesheet" href="/css/pages/patient.css">
 
-/* ── Page entrance stagger ── */
-@keyframes pageFadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.main-content > * {
-    animation: pageFadeIn 0.45s ease both;
-}
-.main-content > *:nth-child(1) { animation-delay: 0.03s; }
-.main-content > *:nth-child(2) { animation-delay: 0.10s; }
-.main-content > *:nth-child(3) { animation-delay: 0.18s; }
-.main-content > *:nth-child(4) { animation-delay: 0.26s; }
-.main-content > *:nth-child(5) { animation-delay: 0.34s; }
-.main-content > *:nth-child(6) { animation-delay: 0.42s; }
-
-/* ── Hero Welcome Banner ── */
-.dash-hero {
-    background: linear-gradient(135deg, #0D47A1 0%, #1565C0 40%, #1976D2 70%, #42A5F5 100%);
-    border-radius: 20px;
-    padding: 28px 32px;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 24px;
-}
-.dash-hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(144,202,249,0.25) 0%, transparent 70%);
-    pointer-events: none;
-}
-.dash-hero::after {
-    content: '';
-    position: absolute;
-    bottom: -40px; left: 30%;
-    width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-    pointer-events: none;
-}
-.dash-hero__content {
-    position: relative; z-index: 1;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 20px; flex-wrap: wrap;
-}
-.dash-hero__text h1 {
-    font-family: 'Lora', Georgia, serif;
-    font-size: 1.6rem; font-weight: 700;
-    color: #fff; margin: 0 0 4px;
-    line-height: 1.25;
-}
-.dash-hero__text .dash-hero__subtitle {
-    font-size: 0.92rem; opacity: 0.88;
-    font-weight: 400; margin: 0 0 2px;
-}
-.dash-hero__text .dash-hero__date {
-    font-size: 0.78rem; opacity: 0.65;
-    font-weight: 500; text-transform: capitalize;
-}
-.dash-hero__avatar {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.18);
-    border: 2.5px solid rgba(255,255,255,0.4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; font-weight: 800;
-    color: #fff;
-    backdrop-filter: blur(8px);
-    flex-shrink: 0;
-    text-transform: uppercase;
-}
-
-/* ── Stats Cards Grid ── */
-.dash-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-}
-.stat-card {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(214,232,250,0.6);
-    border-radius: 16px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    cursor: default;
-}
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(13,71,161,0.12);
-}
-.stat-card__icon {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.15rem;
-    margin-bottom: 14px;
-    position: relative;
-}
-.stat-card__icon--blue { background: #e3f2fd; color: #1565C0; }
-.stat-card__icon--green { background: #e8f5e9; color: #2e7d32; }
-.stat-card__icon--purple { background: #ede7f6; color: #5e35b1; }
-.stat-card__icon--amber { background: #fff8e1; color: #f57f17; }
-.stat-card__value {
-    font-size: 1.35rem; font-weight: 800;
-    color: #0D1F3C; line-height: 1.2;
-    margin-bottom: 2px;
-}
-.stat-card__label {
-    font-size: 0.78rem; font-weight: 600;
-    color: #7B92AC; text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-.stat-card__detail {
-    font-size: 0.8rem; color: #5a7a96;
-    margin-top: 6px; line-height: 1.35;
-}
-.stat-card__badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 0.72rem; font-weight: 700;
-    padding: 2px 8px; border-radius: 20px;
-    margin-top: 6px;
-}
-.stat-card__badge--pending { background: #fff3cd; color: #856404; }
-.stat-card__badge--ok { background: #d4edda; color: #155724; }
-
-/* Pulsing badge for unread */
-@keyframes pulseBadge {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-}
-.stat-card__badge--pulse {
-    animation: pulseBadge 1.8s ease infinite;
-    background: #ef5350; color: #fff;
-}
-
-/* ── Skeleton Loader ── */
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-.skeleton {
-    background: linear-gradient(90deg, #e8edf3 25%, #f0f4f9 50%, #e8edf3 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease infinite;
-    border-radius: 6px;
-    display: inline-block;
-}
-.skeleton--text { width: 80%; height: 14px; margin-bottom: 6px; }
-.skeleton--text-sm { width: 50%; height: 12px; }
-.skeleton--value { width: 60px; height: 24px; margin-bottom: 4px; }
-.skeleton--circle { width: 44px; height: 44px; border-radius: 12px; margin-bottom: 14px; }
-.skeleton--bar { height: 100%; border-radius: 4px; }
-
-/* ── Dashboard Grid ── */
-.dash-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 24px;
-}
-
-/* ── Widget Card Base ── */
-.dash-widget {
-    background: #fff;
-    border: 1px solid #dbe8f4;
-    border-radius: 18px;
-    padding: 22px 24px;
-    box-shadow: 0 2px 10px rgba(13,71,161,0.06);
-    transition: box-shadow 0.25s ease;
-}
-.dash-widget:hover {
-    box-shadow: 0 6px 24px rgba(13,71,161,0.10);
-}
-.dash-widget__header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 18px;
-}
-.dash-widget__title {
-    font-size: 0.95rem; font-weight: 700;
-    color: #0D47A1;
-    display: flex; align-items: center; gap: 8px;
-}
-.dash-widget__title i {
-    font-size: 0.9rem; opacity: 0.75;
-}
-.dash-widget__link {
-    font-size: 0.78rem; font-weight: 600;
-    color: #1565C0; text-decoration: none;
-    transition: color 0.2s;
-}
-.dash-widget__link:hover { color: #0a3580; text-decoration: underline; }
-
-/* ── Mood Check-in Widget ── */
-.mood-grid {
-    display: flex; gap: 10px; justify-content: center;
-    flex-wrap: wrap; margin-bottom: 14px;
-}
-.mood-btn {
-    width: 60px; height: 60px;
-    border-radius: 16px;
-    border: 2px solid #e8edf3;
-    background: #f8fafc;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-    position: relative;
-}
-.mood-btn:hover {
-    transform: scale(1.12);
-    border-color: #90CAF9;
-    box-shadow: 0 4px 16px rgba(13,71,161,0.12);
-}
-.mood-btn.selected {
-    border-color: #1565C0;
-    background: #e3f2fd;
-    transform: scale(1.1);
-    box-shadow: 0 4px 20px rgba(21,101,192,0.2);
-}
-.mood-btn.selected::after {
-    content: '✓';
-    position: absolute;
-    top: -4px; right: -4px;
-    width: 18px; height: 18px;
-    background: #1565C0;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 0.6rem;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800;
-}
-.mood-label {
-    font-size: 0.72rem; font-weight: 600;
-    color: #7B92AC; text-align: center;
-    margin-top: 4px;
-}
-.mood-status {
-    text-align: center; font-size: 0.82rem;
-    color: #5a7a96; min-height: 22px;
-}
-.mood-status--success {
-    color: #2e7d32; font-weight: 600;
-}
-@keyframes confettiPop {
-    0% { transform: scale(0.8); opacity: 0; }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); opacity: 1; }
-}
-.mood-status--success {
-    animation: confettiPop 0.4s ease;
-}
-
-/* ── Sparkline Chart ── */
-.sparkline-container {
-    width: 100%;
-    height: 120px;
-    position: relative;
-}
-.sparkline-container canvas {
-    width: 100% !important;
-    height: 100% !important;
-}
-.sparkline-empty {
-    display: flex; align-items: center; justify-content: center;
-    height: 120px; color: #7B92AC; font-size: 0.85rem;
-    font-weight: 500;
-}
-.sparkline-legend {
-    display: flex; gap: 12px; justify-content: center;
-    margin-top: 10px; flex-wrap: wrap;
-}
-.sparkline-legend__item {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 0.72rem; color: #5a7a96; font-weight: 500;
-}
-.sparkline-legend__dot {
-    width: 8px; height: 8px; border-radius: 50%;
-}
-
-/* ── Citas Timeline ── */
-.citas-timeline {
-    position: relative;
-    padding-left: 24px;
-}
-.citas-timeline::before {
-    content: '';
-    position: absolute;
-    left: 7px; top: 4px; bottom: 4px;
-    width: 2px;
-    background: linear-gradient(180deg, #90CAF9, #e8edf3);
-    border-radius: 2px;
-}
-.cita-item {
-    position: relative;
-    padding: 12px 0 16px;
-    transition: all 0.2s ease;
-}
-.cita-item:last-child { padding-bottom: 0; }
-.cita-item::before {
-    content: '';
-    position: absolute;
-    left: -20px; top: 16px;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    border: 2.5px solid #90CAF9;
-    background: #fff;
-    z-index: 1;
-}
-.cita-item--pendiente::before { border-color: #f9a825; background: #fff8e1; }
-.cita-item--completada::before { border-color: #2e7d32; background: #e8f5e9; }
-.cita-item--cancelada::before { border-color: #c62828; background: #ffebee; }
-.cita-item__fecha {
-    font-size: 0.72rem; font-weight: 700;
-    color: #1565C0; text-transform: uppercase;
-    letter-spacing: 0.04em; margin-bottom: 2px;
-}
-.cita-item__info {
-    font-size: 0.88rem; font-weight: 600;
-    color: #0D1F3C; margin-bottom: 2px;
-}
-.cita-item__tipo {
-    font-size: 0.78rem; color: #7B92AC;
-}
-.cita-item__badge {
-    display: inline-block;
-    font-size: 0.68rem; font-weight: 700;
-    padding: 1px 8px; border-radius: 20px;
-    margin-top: 4px;
-}
-.cita-item__badge--pendiente { background: #fff3cd; color: #856404; }
-.cita-item__badge--completada { background: #d4edda; color: #155724; }
-.cita-item__badge--cancelada { background: #f8d7da; color: #721c24; }
-.citas-empty {
-    text-align: center; color: #7B92AC;
-    font-size: 0.85rem; padding: 20px 0;
-}
-
-/* ── Quick Access Grid ── */
-.quick-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-.quick-btn {
-    display: flex; flex-direction: column;
-    align-items: center; gap: 8px;
-    padding: 16px 8px;
-    border-radius: 14px;
-    border: 1.5px solid #e8edf3;
-    background: #f8fafc;
-    text-decoration: none;
-    color: #3A526B;
-    font-size: 0.78rem; font-weight: 600;
-    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-    cursor: pointer;
-}
-.quick-btn i {
-    font-size: 1.2rem;
-    width: 40px; height: 40px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 12px;
-    transition: all 0.25s ease;
-}
-.quick-btn:hover {
-    transform: translateY(-3px);
-    border-color: #90CAF9;
-    box-shadow: 0 6px 20px rgba(13,71,161,0.10);
-    color: #1565C0;
-    text-decoration: none;
-}
-.quick-btn:hover i {
-    transform: scale(1.08);
-}
-.quick-btn--chatbot i { background: #e3f2fd; color: #1565C0; }
-.quick-btn--agenda i { background: #e8f5e9; color: #2e7d32; }
-.quick-btn--mensajes i { background: #ede7f6; color: #5e35b1; }
-.quick-btn--evolucion i { background: #fff8e1; color: #f57f17; }
-.quick-btn--docs i { background: #fce4ec; color: #c62828; }
-.quick-btn--perfil i { background: #e0f2f1; color: #00695c; }
-
-/* ── Tip of the Day ── */
-.dash-tip {
-    background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
-    border: 1px solid rgba(144,202,249,0.3);
-    border-radius: 16px;
-    padding: 18px 24px;
-    display: flex; align-items: flex-start; gap: 14px;
-    margin-bottom: 20px;
-}
-.dash-tip__icon {
-    width: 42px; height: 42px;
-    background: linear-gradient(135deg, #1565C0, #42A5F5);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 1rem;
-    flex-shrink: 0;
-}
-.dash-tip__content {
-    flex: 1;
-}
-.dash-tip__label {
-    font-size: 0.72rem; font-weight: 700;
-    color: #1565C0; text-transform: uppercase;
-    letter-spacing: 0.04em; margin-bottom: 4px;
-}
-.dash-tip__text {
-    font-size: 0.88rem; color: #3A526B;
-    line-height: 1.5; margin: 0;
-}
-
-/* ============================================================
-   DARK MODE
-   ============================================================ */
-.dark-mode .dash-hero {
-    background: linear-gradient(135deg, #0b1429 0%, #0f1d32 40%, #1a2b4a 100%);
-    border: 1px solid #1a2b4a;
-}
-.dark-mode .stat-card {
-    background: rgba(11,20,41,0.85);
-    border-color: #1a2b4a;
-    backdrop-filter: blur(12px);
-}
-.dark-mode .stat-card:hover {
-    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
-}
-.dark-mode .stat-card__value { color: #e8f0f8; }
-.dark-mode .stat-card__label { color: #5a7a96; }
-.dark-mode .stat-card__detail { color: #8aa0bc; }
-.dark-mode .stat-card__icon--blue { background: rgba(21,101,192,0.15); color: #90CAF9; }
-.dark-mode .stat-card__icon--green { background: rgba(46,125,50,0.15); color: #81c784; }
-.dark-mode .stat-card__icon--purple { background: rgba(94,53,177,0.15); color: #b39ddb; }
-.dark-mode .stat-card__icon--amber { background: rgba(245,127,23,0.15); color: #ffd54f; }
-
-.dark-mode .dash-widget {
-    background: #0b1429;
-    border-color: #1a2b4a;
-}
-.dark-mode .dash-widget:hover {
-    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
-}
-.dark-mode .dash-widget__title { color: #90CAF9; }
-.dark-mode .dash-widget__link { color: #78a8e8; }
-
-.dark-mode .mood-btn {
-    border-color: #1a2b4a;
-    background: #0f1d32;
-}
-.dark-mode .mood-btn:hover {
-    border-color: #90CAF9;
-    box-shadow: 0 4px 16px rgba(144,202,249,0.12);
-}
-.dark-mode .mood-btn.selected {
-    border-color: #90CAF9;
-    background: rgba(144,202,249,0.1);
-}
-.dark-mode .mood-btn.selected::after { background: #90CAF9; color: #0b1429; }
-.dark-mode .mood-label { color: #5a7a96; }
-.dark-mode .mood-status { color: #8aa0bc; }
-.dark-mode .mood-status--success { color: #81c784; }
-
-.dark-mode .citas-timeline::before {
-    background: linear-gradient(180deg, #1a2b4a, #0f1d32);
-}
-.dark-mode .cita-item::before { background: #0b1429; }
-.dark-mode .cita-item__fecha { color: #90CAF9; }
-.dark-mode .cita-item__info { color: #e8f0f8; }
-.dark-mode .cita-item__tipo { color: #5a7a96; }
-
-.dark-mode .quick-btn {
-    border-color: #1a2b4a;
-    background: #0f1d32;
-    color: #d0dde8;
-}
-.dark-mode .quick-btn:hover {
-    border-color: #90CAF9;
-    box-shadow: 0 6px 20px rgba(144,202,249,0.08);
-    color: #90CAF9;
-}
-.dark-mode .quick-btn--chatbot i { background: rgba(21,101,192,0.15); color: #90CAF9; }
-.dark-mode .quick-btn--agenda i { background: rgba(46,125,50,0.15); color: #81c784; }
-.dark-mode .quick-btn--mensajes i { background: rgba(94,53,177,0.15); color: #b39ddb; }
-.dark-mode .quick-btn--evolucion i { background: rgba(245,127,23,0.15); color: #ffd54f; }
-.dark-mode .quick-btn--docs i { background: rgba(198,40,40,0.15); color: #ef9a9a; }
-.dark-mode .quick-btn--perfil i { background: rgba(0,105,92,0.15); color: #80cbc4; }
-
-.dark-mode .dash-tip {
-    background: linear-gradient(135deg, #0f1d32 0%, rgba(144,202,249,0.06) 100%);
-    border-color: #1a2b4a;
-}
-.dark-mode .dash-tip__label { color: #90CAF9; }
-.dark-mode .dash-tip__text { color: #d0dde8; }
-
-.dark-mode .skeleton {
-    background: linear-gradient(90deg, #1a2b4a 25%, #243352 50%, #1a2b4a 75%);
-    background-size: 200% 100%;
-}
-
-.dark-mode .sparkline-empty { color: #5a7a96; }
-.dark-mode .sparkline-legend__item { color: #8aa0bc; }
-.dark-mode .citas-empty { color: #5a7a96; }
-
-.dark-mode .stat-card__badge--pending { background: rgba(255,243,205,0.12); color: #ffd54f; }
-.dark-mode .stat-card__badge--ok { background: rgba(212,237,218,0.12); color: #81c784; }
-.dark-mode .stat-card__badge--pulse { background: #ef5350; color: #fff; }
-
-.dark-mode .cita-item__badge--pendiente { background: rgba(255,243,205,0.12); color: #ffd54f; }
-.dark-mode .cita-item__badge--completada { background: rgba(212,237,218,0.12); color: #81c784; }
-.dark-mode .cita-item__badge--cancelada { background: rgba(248,215,218,0.12); color: #ef9a9a; }
-
-/* ── Responsive ── */
-@media (max-width: 991px) {
-    .dash-stats { grid-template-columns: repeat(2, 1fr); }
-    .dash-grid { grid-template-columns: 1fr; }
-    .dash-hero__text h1 { font-size: 1.3rem; }
-}
-@media (max-width: 576px) {
-    .dash-stats { grid-template-columns: 1fr; }
-    .quick-grid { grid-template-columns: repeat(2, 1fr); }
-    .dash-hero { padding: 20px; }
-    .dash-hero__text h1 { font-size: 1.15rem; }
-    .dash-hero__avatar { width: 50px; height: 50px; font-size: 1.2rem; }
-    .mood-btn { width: 50px; height: 50px; font-size: 1.3rem; }
-}
-</style>
+<script src="/js/core/shared/theme.js"></script>
+<script src="/js/core/shared/localStorage-detector.js"></script>
 </head>
 <body>
     <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
@@ -570,7 +28,7 @@
         <!-- Sidebar -->
         <aside class="sidebar d-flex flex-column position-fixed">
             <div class="sidebar__logo text-center mt-3">
-                <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+                <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
                 <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
             </div>
             <nav class="nav flex-column mt-4">
@@ -595,215 +53,253 @@
         <!-- Main content -->
         <main class="main-content flex-grow-1 ms-280 p-4" id="dashboardMain">
 
-            <!-- 1. Hero Welcome Banner -->
-            <section class="dash-hero" id="heroSection">
-                <div class="dash-hero__content">
-                    <div class="dash-hero__text">
-                        <h1 id="heroGreeting">Bienvenido</h1>
-                        <p class="dash-hero__subtitle" id="heroMotivation">Cada día es una nueva oportunidad para crecer</p>
-                        <p class="dash-hero__date" id="heroDate"></p>
-                    </div>
-                    <div class="dash-hero__avatar" id="heroAvatar" data-avatar="inicial" style="width:64px;height:64px;"></div>
+            <!-- Resumen General (Hero + Stats) — estático, fuera del acordeón -->
+            <div class="section-card">
+                <div class="section-card__header">
+                    <i class="fas fa-home me-2"></i> Resumen General
                 </div>
-            </section>
+                <div class="section-card__body">
 
-            <!-- 2. Stats Cards -->
-            <section class="dash-stats" id="statsSection">
-                <!-- Próxima Cita -->
-                <div class="stat-card" id="statCita">
-                    <div class="stat-card__icon stat-card__icon--blue">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
-                    <div class="stat-card__label">Próxima Cita</div>
-                    <div class="stat-card__detail" id="statCitaDetail">
-                        <span class="skeleton skeleton--text"></span>
-                    </div>
-                </div>
+                    <!-- Hero Welcome Banner -->
+                    <section class="dash-hero" id="heroSection">
+                        <div class="dash-hero__content">
+                            <div class="dash-hero__text">
+                                <h1 id="heroGreeting">Bienvenido</h1>
+                                <p class="dash-hero__subtitle" id="heroMotivation">Cada día es una nueva oportunidad para crecer</p>
+                                <p class="dash-hero__date" id="heroDate"></p>
+                            </div>
+                            <div class="dash-hero__avatar" id="heroAvatar" data-avatar="inicial" style="width:64px;height:64px;"></div>
+                        </div>
+                    </section>
 
-                <!-- Evolución -->
-                <div class="stat-card" id="statEvolucion">
-                    <div class="stat-card__icon stat-card__icon--green">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
-                    <div class="stat-card__label">Estado Emocional</div>
-                    <div class="stat-card__detail" id="statEvolucionDetail">
-                        <span class="skeleton skeleton--text"></span>
-                    </div>
-                </div>
-
-                <!-- Mensajes -->
-                <div class="stat-card" id="statMensajes">
-                    <div class="stat-card__icon stat-card__icon--purple">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
-                    <div class="stat-card__label">Mensajes</div>
-                    <div class="stat-card__detail" id="statMensajesDetail">
-                        <span class="skeleton skeleton--text"></span>
-                    </div>
-                </div>
-
-                <!-- Documentos -->
-                <div class="stat-card" id="statDocs">
-                    <div class="stat-card__icon stat-card__icon--amber">
-                        <i class="fas fa-file-medical"></i>
-                    </div>
-                    <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
-                    <div class="stat-card__label">Documentos</div>
-                    <div class="stat-card__detail" id="statDocsDetail">
-                        <span class="skeleton skeleton--text"></span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. Main Grid: 2 columns -->
-            <section class="dash-grid">
-
-                <!-- Left Column -->
-                <div>
-                    <!-- Mood Check-in -->
-                    <div class="dash-widget" style="margin-bottom: 20px;" id="moodWidget">
-                        <div class="dash-widget__header">
-                            <div class="dash-widget__title">
-                                <i class="fas fa-smile-beam"></i> ¿Cómo te sientes hoy?
+                    <!-- Stats Cards -->
+                    <section class="dash-stats" id="statsSection">
+                        <div class="stat-card" id="statCita">
+                            <div class="stat-card__icon stat-card__icon--blue">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
+                            <div class="stat-card__label">Próxima Cita</div>
+                            <div class="stat-card__detail" id="statCitaDetail">
+                                <span class="skeleton skeleton--text"></span>
                             </div>
                         </div>
-                        <div class="mood-grid" id="moodGrid">
-                            <div>
-                                <button class="mood-btn" data-mood="Muy bien" data-energy="5" title="Muy bien">😊</button>
-                                <div class="mood-label">Muy bien</div>
+                        <div class="stat-card" id="statEvolucion">
+                            <div class="stat-card__icon stat-card__icon--green">
+                                <i class="fas fa-heart"></i>
                             </div>
-                            <div>
-                                <button class="mood-btn" data-mood="Bien" data-energy="4" title="Bien">🙂</button>
-                                <div class="mood-label">Bien</div>
-                            </div>
-                            <div>
-                                <button class="mood-btn" data-mood="Regular" data-energy="3" title="Regular">😐</button>
-                                <div class="mood-label">Regular</div>
-                            </div>
-                            <div>
-                                <button class="mood-btn" data-mood="Mal" data-energy="2" title="Mal">😟</button>
-                                <div class="mood-label">Mal</div>
-                            </div>
-                            <div>
-                                <button class="mood-btn" data-mood="Muy mal" data-energy="1" title="Muy mal">😢</button>
-                                <div class="mood-label">Muy mal</div>
+                            <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
+                            <div class="stat-card__label">Estado Emocional</div>
+                            <div class="stat-card__detail" id="statEvolucionDetail">
+                                <span class="skeleton skeleton--text"></span>
                             </div>
                         </div>
-                        <div class="mood-status" id="moodStatus">Selecciona tu estado emocional</div>
-                    </div>
+                        <div class="stat-card" id="statMensajes">
+                            <div class="stat-card__icon stat-card__icon--purple">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
+                            <div class="stat-card__label">Mensajes</div>
+                            <div class="stat-card__detail" id="statMensajesDetail">
+                                <span class="skeleton skeleton--text"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card" id="statDocs">
+                            <div class="stat-card__icon stat-card__icon--amber">
+                                <i class="fas fa-file-medical"></i>
+                            </div>
+                            <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
+                            <div class="stat-card__label">Documentos</div>
+                            <div class="stat-card__detail" id="statDocsDetail">
+                                <span class="skeleton skeleton--text"></span>
+                            </div>
+                        </div>
+                    </section>
 
-                    <!-- Evolución Reciente (Sparkline) -->
-                    <div class="dash-widget" id="evolucionWidget">
-                        <div class="dash-widget__header">
-                            <div class="dash-widget__title">
-                                <i class="fas fa-chart-area"></i> Mi Evolución Reciente
+                </div>
+            </div>
+
+            <!-- Accordion del Dashboard -->
+            <div class="accordion accordion-responsive" id="accordionPatient">
+
+                <!-- Estado Emocional (Mood + Evolución) -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingMood">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMood" aria-expanded="false" aria-controls="collapseMood">
+                            <i class="fas fa-smile-beam me-2"></i> Estado Emocional
+                        </button>
+                    </h2>
+                    <div id="collapseMood" class="accordion-collapse collapse" aria-labelledby="headingMood" data-bs-parent="#accordionPatient">
+                        <div class="accordion-body">
+                            <div class="dash-grid">
+
+                                <!-- Mood Check-in -->
+                                <div>
+                                    <div class="dash-widget" id="moodWidget">
+                                        <div class="dash-widget__header">
+                                            <div class="dash-widget__title">
+                                                <i class="fas fa-smile-beam"></i> ¿Cómo te sientes hoy?
+                                            </div>
+                                        </div>
+                                        <div class="mood-grid" id="moodGrid">
+                                            <div>
+                                                <button class="mood-btn" data-mood="Muy bien" data-energy="5" title="Muy bien">😊</button>
+                                                <div class="mood-label">Muy bien</div>
+                                            </div>
+                                            <div>
+                                                <button class="mood-btn" data-mood="Bien" data-energy="4" title="Bien">🙂</button>
+                                                <div class="mood-label">Bien</div>
+                                            </div>
+                                            <div>
+                                                <button class="mood-btn" data-mood="Regular" data-energy="3" title="Regular">😐</button>
+                                                <div class="mood-label">Regular</div>
+                                            </div>
+                                            <div>
+                                                <button class="mood-btn" data-mood="Mal" data-energy="2" title="Mal">😟</button>
+                                                <div class="mood-label">Mal</div>
+                                            </div>
+                                            <div>
+                                                <button class="mood-btn" data-mood="Muy mal" data-energy="1" title="Muy mal">😢</button>
+                                                <div class="mood-label">Muy mal</div>
+                                            </div>
+                                        </div>
+                                        <div class="mood-status" id="moodStatus">Selecciona tu estado emocional</div>
+                                    </div>
+                                </div>
+
+                                <!-- Evolución Reciente (Sparkline) -->
+                                <div>
+                                    <div class="dash-widget" id="evolucionWidget">
+                                        <div class="dash-widget__header">
+                                            <div class="dash-widget__title">
+                                                <i class="fas fa-chart-area"></i> Mi Evolución Reciente
+                                            </div>
+                                            <a href="aside-patient/evolution.html" class="dash-widget__link">Ver todo →</a>
+                                        </div>
+                                        <div class="sparkline-container" id="sparklineContainer">
+                                            <div class="sparkline-empty" id="sparklineLoading">
+                                                <div style="text-align:center;">
+                                                    <div class="skeleton" style="width:100%;height:80px;border-radius:8px;display:block;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="sparkline-legend" id="sparklineLegend" style="display:none;">
+                                            <div class="sparkline-legend__item">
+                                                <div class="sparkline-legend__dot" style="background:#4CAF50;"></div> Muy bien
+                                            </div>
+                                            <div class="sparkline-legend__item">
+                                                <div class="sparkline-legend__dot" style="background:#8BC34A;"></div> Bien
+                                            </div>
+                                            <div class="sparkline-legend__item">
+                                                <div class="sparkline-legend__dot" style="background:#FFC107;"></div> Regular
+                                            </div>
+                                            <div class="sparkline-legend__item">
+                                                <div class="sparkline-legend__dot" style="background:#FF9800;"></div> Mal
+                                            </div>
+                                            <div class="sparkline-legend__item">
+                                                <div class="sparkline-legend__dot" style="background:#f44336;"></div> Muy mal
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
-                            <a href="aside-patient/evolution.html" class="dash-widget__link">Ver todo →</a>
                         </div>
-                        <div class="sparkline-container" id="sparklineContainer">
-                            <div class="sparkline-empty" id="sparklineLoading">
-                                <div style="text-align:center;">
-                                    <div class="skeleton" style="width:100%;height:80px;border-radius:8px;display:block;"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Mis Citas -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingCitas">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCitas" aria-expanded="false" aria-controls="collapseCitas">
+                            <i class="fas fa-calendar-alt me-2"></i> Mis Citas
+                        </button>
+                    </h2>
+                    <div id="collapseCitas" class="accordion-collapse collapse" aria-labelledby="headingCitas" data-bs-parent="#accordionPatient">
+                        <div class="accordion-body">
+                            <div id="citasTimeline">
+                                <div class="citas-empty">
+                                    <span class="skeleton skeleton--text" style="display:block;margin-bottom:8px;"></span>
+                                    <span class="skeleton skeleton--text-sm" style="display:block;"></span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="sparkline-legend" id="sparklineLegend" style="display:none;">
-                            <div class="sparkline-legend__item">
-                                <div class="sparkline-legend__dot" style="background:#4CAF50;"></div> Muy bien
-                            </div>
-                            <div class="sparkline-legend__item">
-                                <div class="sparkline-legend__dot" style="background:#8BC34A;"></div> Bien
-                            </div>
-                            <div class="sparkline-legend__item">
-                                <div class="sparkline-legend__dot" style="background:#FFC107;"></div> Regular
-                            </div>
-                            <div class="sparkline-legend__item">
-                                <div class="sparkline-legend__dot" style="background:#FF9800;"></div> Mal
-                            </div>
-                            <div class="sparkline-legend__item">
-                                <div class="sparkline-legend__dot" style="background:#f44336;"></div> Muy mal
+                            <div class="mt-3 text-end">
+                                <a href="aside-patient/agenda-quotes.html" class="dash-widget__link">Ver agenda completa →</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column -->
-                <div>
-                    <!-- Citas Timeline -->
-                    <div class="dash-widget" style="margin-bottom: 20px;" id="citasWidget">
-                        <div class="dash-widget__header">
-                            <div class="dash-widget__title">
-                                <i class="fas fa-calendar-alt"></i> Mis Citas
+                <!-- 4. Accesos Rápidos -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingQuick">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuick" aria-expanded="false" aria-controls="collapseQuick">
+                            <i class="fas fa-th-large me-2"></i> Accesos Rápidos
+                        </button>
+                    </h2>
+                    <div id="collapseQuick" class="accordion-collapse collapse" aria-labelledby="headingQuick" data-bs-parent="#accordionPatient">
+                        <div class="accordion-body">
+                            <div class="quick-grid">
+                                <a href="aside-patient/chatbot.html" class="quick-btn quick-btn--chatbot" id="qa-chatbot">
+                                    <i class="fas fa-robot"></i>
+                                    Chatbot
+                                </a>
+                                <a href="aside-patient/agenda-quotes.html" class="quick-btn quick-btn--agenda" id="qa-agenda">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Agenda
+                                </a>
+                                <a href="aside-patient/mensajes.html" class="quick-btn quick-btn--mensajes" id="qa-mensajes">
+                                    <i class="fas fa-comments"></i>
+                                    Mensajes
+                                </a>
+                                <a href="aside-patient/evolution.html" class="quick-btn quick-btn--evolucion" id="qa-evolucion">
+                                    <i class="fas fa-chart-area"></i>
+                                    Evolución
+                                </a>
+                                <a href="aside-patient/historia_clinica_paciente.html" class="quick-btn quick-btn--docs" id="qa-docs">
+                                    <i class="fas fa-file-medical"></i>
+                                    Documentos
+                                </a>
+                                <a href="aside-patient/my.profile.html" class="quick-btn quick-btn--perfil" id="qa-perfil">
+                                    <i class="fas fa-user-circle"></i>
+                                    Mi Perfil
+                                </a>
                             </div>
-                            <a href="aside-patient/agenda-quotes.html" class="dash-widget__link">Ver agenda →</a>
-                        </div>
-                        <div id="citasTimeline">
-                            <div class="citas-empty">
-                                <span class="skeleton skeleton--text" style="display:block;margin-bottom:8px;"></span>
-                                <span class="skeleton skeleton--text-sm" style="display:block;"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Access -->
-                    <div class="dash-widget" id="quickAccessWidget">
-                        <div class="dash-widget__header">
-                            <div class="dash-widget__title">
-                                <i class="fas fa-th-large"></i> Accesos Rápidos
-                            </div>
-                        </div>
-                        <div class="quick-grid">
-                            <a href="aside-patient/chatbot.html" class="quick-btn quick-btn--chatbot" id="qa-chatbot">
-                                <i class="fas fa-robot"></i>
-                                Chatbot
-                            </a>
-                            <a href="aside-patient/agenda-quotes.html" class="quick-btn quick-btn--agenda" id="qa-agenda">
-                                <i class="fas fa-calendar-alt"></i>
-                                Agenda
-                            </a>
-                            <a href="aside-patient/mensajes.html" class="quick-btn quick-btn--mensajes" id="qa-mensajes">
-                                <i class="fas fa-comments"></i>
-                                Mensajes
-                            </a>
-                            <a href="aside-patient/evolution.html" class="quick-btn quick-btn--evolucion" id="qa-evolucion">
-                                <i class="fas fa-chart-area"></i>
-                                Evolución
-                            </a>
-                            <a href="aside-patient/historia_clinica_paciente.html" class="quick-btn quick-btn--docs" id="qa-docs">
-                                <i class="fas fa-file-medical"></i>
-                                Documentos
-                            </a>
-                            <a href="aside-patient/my.profile.html" class="quick-btn quick-btn--perfil" id="qa-perfil">
-                                <i class="fas fa-user-circle"></i>
-                                Mi Perfil
-                            </a>
                         </div>
                     </div>
                 </div>
 
-            </section>
+                <!-- 5. Consejo del Día -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTip">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTip" aria-expanded="false" aria-controls="collapseTip">
+                            <i class="fas fa-lightbulb me-2"></i> Consejo del Día
+                        </button>
+                    </h2>
+                    <div id="collapseTip" class="accordion-collapse collapse" aria-labelledby="headingTip" data-bs-parent="#accordionPatient">
+                        <div class="accordion-body">
+                            <section class="dash-tip" id="tipSection" style="margin-bottom:0;">
+                                <div class="dash-tip__icon">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <div class="dash-tip__content">
+                                    <div class="dash-tip__label">Consejo del día</div>
+                                    <p class="dash-tip__text" id="tipText">Cargando...</p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- 4. Tip of the Day -->
-            <section class="dash-tip" id="tipSection">
-                <div class="dash-tip__icon">
-                    <i class="fas fa-lightbulb"></i>
-                </div>
-                <div class="dash-tip__content">
-                    <div class="dash-tip__label">Consejo del día</div>
-                    <p class="dash-tip__text" id="tipText">Cargando...</p>
-                </div>
-            </section>
+            </div>
 
         </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/modules/auth/auth-guard.js"></script>
-    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
-<link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/modules/auth/auth-guard.js"></script>
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css">
     <script src="/js/core/shared/alerts.js"></script>
     <script src="/js/modules/patient/aside.js?v=20260522-5"></script>
     <script src="/js/modules/auth/logout.js"></script>
@@ -1246,11 +742,22 @@
             if (el) el.textContent = getRandomItem(TIPS);
         }
 
+        // ── Accordion resize handler (re-render sparkline when expanded) ──
+        function initAccordionHandlers() {
+            const moodCollapse = document.getElementById('collapseMood');
+            if (moodCollapse) {
+                moodCollapse.addEventListener('shown.bs.collapse', function () {
+                    renderSparkline();
+                });
+            }
+        }
+
         // ── BOOT ──
         async function boot() {
             // Init static elements
             initTip();
             initMoodCheckin();
+            initAccordionHandlers();
 
             // Get session data for hero
             const sessionData = await fetchJSON('/api/session');
@@ -1281,6 +788,57 @@
             boot();
         }
     })();
+
+    // Cerrar todos los paneles usando la API de Bootstrap
+    // para evitar race condition con su estado interno
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof bootstrap === 'undefined' || !bootstrap.Collapse) {
+            console.warn('Bootstrap Collapse no disponible — el acordeón no funcionará');
+            return;
+        }
+        document.querySelectorAll('.accordion-collapse.show').forEach(function(el) {
+            var instance = bootstrap.Collapse.getInstance(el);
+            if (instance) {
+                instance.hide();
+            } else {
+                new bootstrap.Collapse(el, { toggle: false }).hide();
+            }
+        });
+    });
+
+    // Cerrar acordeón al restaurar desde bfcache (botón atrás)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+                var instance = bootstrap.Collapse.getInstance(el);
+                if (instance) {
+                    instance.hide();
+                } else {
+                    new bootstrap.Collapse(el, { toggle: false }).hide();
+                }
+            });
+        }
+    });
+
+    // Forzar que todos los acordeones inicien cerrados
+    document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+        el.classList.remove('show');
+        el.style.height = '';
+    });
+
+    // Cerrar acordeón al restaurar desde bfcache (botón atrás)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+                var instance = bootstrap.Collapse.getInstance(el);
+                if (instance) {
+                    instance.hide();
+                } else {
+                    new bootstrap.Collapse(el, { toggle: false }).hide();
+                }
+            });
+        }
+    });
     </script>
 
 </body>

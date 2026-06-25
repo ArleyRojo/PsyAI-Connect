@@ -198,6 +198,29 @@ def init_db():
                 FOREIGN KEY (idUsuario) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            """
+            CREATE TABLE IF NOT EXISTS intentos_fallidos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) NOT NULL,
+                intentos INT NOT NULL DEFAULT 0,
+                ultimo_intento DATETIME NULL,
+                bloqueado_hasta DATETIME NULL,
+                UNIQUE KEY uk_email (email)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE OR REPLACE VIEW vistahistorialchatbot AS
+            SELECT
+                r.nombre,
+                r.idUsuario AS idPaciente,
+                c.mensajeUsuario,
+                c.respuestaChatbot,
+                c.nivelEmocionalDetectado,
+                c.palabrasRiesgoDetectadas,
+                c.fecha
+            FROM ConversacionesChatbot c
+            INNER JOIN Register r ON c.idPaciente = r.idUsuario
+            """,
         ]
 
         cursor.execute("SET FOREIGN_KEY_CHECKS = 0")

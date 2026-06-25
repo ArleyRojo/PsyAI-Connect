@@ -28,24 +28,6 @@ function inicializarEventos() {
     if (btnAgendar) {
         btnAgendar.addEventListener('click', agendarCita);
     }
-
-    const citaProfesional = document.getElementById("citaProfesional");
-    if (citaProfesional) {
-        citaProfesional.addEventListener('change', () => {
-            const selectHora = document.getElementById("citaHora");
-            if (selectHora) {
-                selectHora.innerHTML = '<option value="">Selecciona una fecha primero</option>';
-            }
-            cargarHorariosDisponibles();
-        });
-    }
-
-    const citaFecha = document.getElementById("citaFecha");
-    if (citaFecha) {
-        citaFecha.addEventListener('change', () => {
-            cargarHorariosDisponibles();
-        });
-    }
 }
 
 async function cargarDatosIniciales() {
@@ -143,69 +125,6 @@ async function cargarProfesionales() {
     }
 }
 
-// ── Cargar Horarios Disponibles ──────────────────────────────
-async function cargarHorariosDisponibles() {
-    const idProfesional = document.getElementById("citaProfesional").value;
-    const fecha = document.getElementById("citaFecha").value;
-    const select = document.getElementById("citaHora");
-
-    if (!select) return;
-
-    if (!idProfesional || !fecha) {
-        select.innerHTML = '<option value="">Selecciona profesional y fecha</option>';
-        return;
-    }
-
-    select.innerHTML = '<option value="">Cargando...</option>';
-
-    try {
-        const res = await fetch(`/api/citas/disponibles?idProfesional=${encodeURIComponent(idProfesional)}&fecha=${encodeURIComponent(fecha)}`, {
-            credentials: "include"
-        });
-        const data = await res.json();
-        const horariosDisponibles = data.horarios || [];
-
-        if (horariosDisponibles.length === 0) {
-            select.innerHTML = '<option value="">No hay horarios disponibles para esta fecha</option>';
-            return;
-        }
-
-        const formatHora = (hora) => {
-            const [h, m] = hora.split(':').map(Number);
-            const esPM = h >= 12;
-            const hora12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
-            const ampm = esPM ? 'PM' : 'AM';
-            return `${hora12}:${String(m).padStart(2, '0')} ${ampm}`;
-        };
-
-        const formatHoraFin = (hora) => {
-            const [h, m] = hora.split(':').map(Number);
-            let horaFin = h;
-            let minFin = m + 30;
-            if (minFin >= 60) {
-                minFin = 0;
-                horaFin = h + 1;
-            }
-            const esPM = horaFin >= 12;
-            const hora12 = horaFin > 12 ? horaFin - 12 : horaFin;
-            const ampm = esPM ? 'PM' : 'AM';
-            return `${hora12}:${String(minFin).padStart(2, '0')} ${ampm}`;
-        };
-
-        select.innerHTML = '<option value="">Selecciona una hora</option>';
-
-        horariosDisponibles.forEach(hora => {
-            const opt = document.createElement("option");
-            opt.value = hora;
-            opt.textContent = `${formatHora(hora)} - ${formatHoraFin(hora)}`;
-            select.appendChild(opt);
-        });
-
-    } catch(err) {
-        console.error("Error cargando horarios:", err);
-        select.innerHTML = '<option value="">Error al cargar</option>';
-    }
-}
 
 // ── Agendar Cita ────────────────────────────────────────────
 async function agendarCita() {

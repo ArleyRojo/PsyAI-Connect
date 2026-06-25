@@ -162,7 +162,7 @@ html {
 }
 
 @media (max-width: 991px) {
-    html {
+html {
         scroll-padding-top: 92px;
     }
 
@@ -288,62 +288,21 @@ html {
         transform: translateY(-6.5px) rotate(-45deg) scaleX(1.1);
     }
 
-    html.dark-mode #mainNav .navbar-toggler {
-        background: rgba(15, 23, 42, 0.98);
-        border-color: rgba(99, 166, 252, 0.6);
-        color: #f1f5f9;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 166, 252, 0.4);
-        backdrop-filter: blur(20px);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-toggler:hover {
-        border-color: #60a5fa;
-        background: rgba(15, 23, 42, 1);
-        box-shadow: 0 24px 56px rgba(99, 166, 252, 0.35), 0 0 0 1px #60a5fa;
-    }
+    
 
-    html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] {
-        background: rgba(30, 64, 175, 0.95);
-        border-color: #60a5fa;
-        color: #ffffff;
-        box-shadow: 0 0 0 0.45rem rgba(99, 166, 252, 0.35), 0 20px 48px rgba(30, 64, 175, 0.5);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-toggler-label {
-        color: #f1f5f9;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-    }
+    
 
-    html.dark-mode #mainNav .custom-toggler-line {
-        background: linear-gradient(90deg, #93c5fd, #bfdbfe);
-        box-shadow: 0 4px 12px rgba(147, 197, 253, 0.6);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-line:nth-child(1) {
-        background: linear-gradient(90deg, #ffffff, #f8fafc);
-        transform: translateY(7px) rotate(45deg);
-        height: 4px !important;
-        width: 110% !important;
-        box-shadow:
-            0 0 0 2px #ffffff,
-            0 6px 20px rgba(255, 255, 255, 0.8),
-            0 0 20px rgba(99, 166, 252, 0.6);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-line:nth-child(3) {
-        background: linear-gradient(90deg, #ffffff, #f8fafc);
-        transform: translateY(-7px) rotate(-45deg);
-        height: 4px !important;
-        width: 110% !important;
-        box-shadow:
-            0 0 0 2px #ffffff,
-            0 6px 20px rgba(255, 255, 255, 0.8),
-            0 0 20px rgba(99, 166, 252, 0.6);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-toggler[aria-expanded="true"] .custom-toggler-line:nth-child(2) {
-        opacity: 0;
-    }
+    
 
     #mainNav #navmenu {
         order: 3;
@@ -456,48 +415,19 @@ html {
         text-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
     }
 
-    html.dark-mode #mainNav .navbar-collapse {
-        background: rgba(15, 23, 42, 0.98);
-        border: 1px solid rgba(59, 130, 246, 0.4);
-        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(24px);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-nav .nav-link {
-        color: #e0e7ff !important;
-        background: rgba(30, 58, 138, 0.4) !important;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-nav .nav-link:hover {
-        color: #ffffff !important;
-        background: rgba(59, 130, 246, 0.25) !important;
-        border-color: #60a5fa;
-        box-shadow: 0 8px 24px rgba(96, 165, 250, 0.3);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-nav .btn-primary {
-        background: linear-gradient(135deg, #1e40af, #1d4ed8);
-        border-color: #1d4ed8;
-        box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-nav .btn-outline-primary {
-        color: #93c5fd !important;
-        border-color: #93c5fd !important;
-        background: rgba(59, 130, 246, 0.15);
-    }
+    
 
-    html.dark-mode #mainNav .navbar-nav .btn-outline-primary:hover {
-        background: #60a5fa !important;
-        color: #0f172a !important;
-        box-shadow: 0 6px 20px rgba(96, 165, 250, 0.4);
-    }
+    
 
-    html.dark-mode #mainNav .theme-switch-container {
-        background: rgba(30, 58, 138, 0.4);
-        border-color: rgba(59, 130, 246, 0.4);
-    }
+    
 
     .hero-section {
         padding: 120px 0 72px;
@@ -1834,7 +1764,7 @@ html {
 }
 
 @media (max-width: 1199px) {
-    html {
+html {
         scroll-padding-top: 96px;
     }
 
@@ -1952,10 +1882,7 @@ html {
         max-width: 200px;
     }
 
-    html:not(.dark-mode) .professional-card .quote,
-    html.dark-mode .professional-card .quote {
-        font-size: 1rem;
-    }
+    
 
     .modal-logo-body {
         padding-top: 1.75rem !important;
@@ -1972,21 +1899,15 @@ html {
 }
 
 @media (max-width: 991px) {
-    #beneficios .row > .col-md-4,
+#beneficios .row > .col-md-4,
     #servicios .row > .col-md-4 {
         flex: 0 0 50%;
         max-width: 50%;
     }
 
-    html:not(.dark-mode) .about-card,
-    html.dark-mode .about-card {
-        padding: 2.75rem 2.25rem;
-    }
+    
 
-    html:not(.dark-mode) .about-card p,
-    html.dark-mode .about-card p {
-        font-size: 1.05rem;
-    }
+    
 
     .logo-modal-features {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2016,7 +1937,7 @@ html {
 }
 
 @media (max-width: 767px) {
-    #logoModal .modal-dialog,
+#logoModal .modal-dialog,
     #chatbotModal .modal-dialog {
         max-width: calc(100vw - 1.25rem);
         margin-left: auto;
@@ -2082,16 +2003,9 @@ html {
         padding-right: 0.5rem;
     }
 
-    html:not(.dark-mode) .about-card,
-    html.dark-mode .about-card {
-        padding: 1.65rem 1.2rem;
-    }
+    
 
-    html:not(.dark-mode) .about-card p,
-    html.dark-mode .about-card p {
-        font-size: 0.96rem;
-        line-height: 1.72;
-    }
+    
 
     .privacy-badge span {
         font-size: 0.88rem;
@@ -2210,7 +2124,7 @@ html {
 
 /* --- Premium Navbar Mobile --- */
 @media (max-width: 991px) {
-    .navbar {
+.navbar {
         padding: 0.8rem 0 !important;
     }
 
@@ -2223,10 +2137,7 @@ html {
         border: 1px solid var(--color-border);
     }
 
-    .dark-mode .navbar-collapse {
-        background: var(--dm-card);
-        border-color: var(--dm-border);
-    }
+    
 
     .nav-link {
         padding: 1rem !important;
@@ -2395,7 +2306,7 @@ html {
 }
 
 @media (max-width: 1199px) {
-    html {
+html {
         scroll-padding-top: 96px;
     }
 
@@ -2513,10 +2424,7 @@ html {
         max-width: 200px;
     }
 
-    html:not(.dark-mode) .professional-card .quote,
-    html.dark-mode .professional-card .quote {
-        font-size: 1rem;
-    }
+    
 
     .modal-logo-body {
         padding-top: 1.75rem !important;
@@ -2566,7 +2474,7 @@ html {
 }
 
 @media (max-width: 1199px) {
-    html {
+html {
         scroll-padding-top: 108px;
     }
 
@@ -2683,17 +2591,9 @@ html {
         gap: 1.2rem;
     }
 
-    html:not(.dark-mode) .about-card,
-    html.dark-mode .about-card {
-        max-width: 880px;
-        padding: 3.75rem 3rem;
-    }
+    
 
-    html:not(.dark-mode) .professional-card,
-    html.dark-mode .professional-card {
-        max-width: 760px;
-        padding: 3.75rem 3rem;
-    }
+    
 
     .logo-modal-title {
         font-size: 1.85rem;
@@ -2805,21 +2705,15 @@ html {
 }
 
 @media (max-width: 991px) {
-    #beneficios .row > .col-md-4,
+#beneficios .row > .col-md-4,
     #servicios .row > .col-md-4 {
         flex: 0 0 50%;
         max-width: 50%;
     }
 
-    html:not(.dark-mode) .about-card,
-    html.dark-mode .about-card {
-        padding: 2.75rem 2.25rem;
-    }
+    
 
-    html:not(.dark-mode) .about-card p,
-    html.dark-mode .about-card p {
-        font-size: 1.05rem;
-    }
+    
 
     .logo-modal-features {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2849,7 +2743,7 @@ html {
 }
 
 @media (max-width: 767px) {
-    #logoModal .modal-dialog,
+#logoModal .modal-dialog,
     #chatbotModal .modal-dialog {
         max-width: calc(100vw - 1.25rem);
         margin-left: auto;
@@ -2915,16 +2809,9 @@ html {
         padding-right: 0.5rem;
     }
 
-    html:not(.dark-mode) .about-card,
-    html.dark-mode .about-card {
-        padding: 1.65rem 1.2rem;
-    }
+    
 
-    html:not(.dark-mode) .about-card p,
-    html.dark-mode .about-card p {
-        font-size: 0.96rem;
-        line-height: 1.72;
-    }
+    
 
     .privacy-badge span {
         font-size: 0.88rem;

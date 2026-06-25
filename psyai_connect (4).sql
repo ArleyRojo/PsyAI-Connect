@@ -280,6 +280,20 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `intentos_fallidos`
+--
+
+CREATE TABLE `intentos_fallidos` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `intentos` int(11) NOT NULL DEFAULT 0,
+  `ultimo_intento` datetime DEFAULT NULL,
+  `bloqueado_hasta` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `itemsfactura`
 --
 
@@ -501,9 +515,11 @@ CREATE TABLE `vistafacturacion` (
 --
 CREATE TABLE `vistahistorialchatbot` (
 `nombre` varchar(120)
+,`idPaciente` int(11)
 ,`mensajeUsuario` text
 ,`respuestaChatbot` text
 ,`nivelEmocionalDetectado` varchar(50)
+,`palabrasRiesgoDetectadas` text
 ,`fecha` datetime
 );
 
@@ -574,7 +590,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `vistahistorialchatbot`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vistahistorialchatbot`  AS SELECT `u`.`nombre` AS `nombre`, `c`.`mensajeUsuario` AS `mensajeUsuario`, `c`.`respuestaChatbot` AS `respuestaChatbot`, `c`.`nivelEmocionalDetectado` AS `nivelEmocionalDetectado`, `c`.`fecha` AS `fecha` FROM (`conversacioneschatbot` `c` join `register` `u` on(`c`.`idPaciente` = `u`.`idUsuario`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vistahistorialchatbot`  AS SELECT `u`.`nombre` AS `nombre`, `u`.`idUsuario` AS `idPaciente`, `c`.`mensajeUsuario` AS `mensajeUsuario`, `c`.`respuestaChatbot` AS `respuestaChatbot`, `c`.`nivelEmocionalDetectado` AS `nivelEmocionalDetectado`, `c`.`palabrasRiesgoDetectadas` AS `palabrasRiesgoDetectadas`, `c`.`fecha` AS `fecha` FROM (`conversacioneschatbot` `c` join `register` `u` on(`c`.`idPaciente` = `u`.`idUsuario`)) ;
 
 -- --------------------------------------------------------
 
@@ -666,6 +682,13 @@ ALTER TABLE `facturas`
   ADD KEY `idPaciente` (`idPaciente`),
   ADD KEY `idProfesional` (`idProfesional`),
   ADD KEY `idCita` (`idCita`);
+
+--
+-- Indices de la tabla `intentos_fallidos`
+--
+ALTER TABLE `intentos_fallidos`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_email` (`email`);
 
 --
 -- Indices de la tabla `itemsfactura`
@@ -786,6 +809,12 @@ ALTER TABLE `evolucionpaciente`
 --
 ALTER TABLE `facturas`
   MODIFY `idFactura` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `intentos_fallidos`
+--
+ALTER TABLE `intentos_fallidos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `itemsfactura`

@@ -418,3 +418,19 @@ def get_all_patient_evolution(professional_id):
             (professional_id, professional_id),
         )
         return cursor.fetchall()
+
+
+def professional_has_patient(professional_id, patient_id):
+    """Verifica si un profesional tiene una relación activa con un paciente vía Citas."""
+    with db_cursor(dictionary=False) as (_, cursor):
+        cursor.execute(
+            """
+            SELECT COUNT(1)
+            FROM Citas
+            WHERE idProfesional = %s AND idPaciente = %s AND estado != 'cancelada'
+            LIMIT 1
+            """,
+            (professional_id, patient_id),
+        )
+        row = cursor.fetchone()
+        return row and row[0] > 0

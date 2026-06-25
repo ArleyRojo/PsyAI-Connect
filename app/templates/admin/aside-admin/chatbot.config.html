@@ -1,37 +1,31 @@
-<!DOCTYPE html>
-<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+﻿<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
-<title>PsyAI Connect | Configuración del Chatbot</title>
-<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
-<script src="/js/core/shared/theme-inline.js"></script>
+<title>PsyAI Connect | Configuraci\u00f3n del Chatbot</title>
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <link rel="stylesheet" href="/css/base/base.css">
 <link rel="stylesheet" href="/css/layout/layout.css">
-<link rel="stylesheet" href="/css/components/components.css">
 <link rel="stylesheet" href="/css/themes/theme.css">
-    <link rel="stylesheet" href="/css/pages/admin.css">
-    <link rel="stylesheet" href="/responsive/responsive-admin.css">
-<script src="/js/core/shared/theme.js"></script>
-    <script src="/js/core/shared/localStorage-detector.js"></script>
-<style>
-@keyframes pageFadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.main-content > * {
-    animation: pageFadeIn 0.4s ease both;
-}
-.main-content > *:nth-child(1) { animation-delay: 0.03s; }
-.main-content > *:nth-child(2) { animation-delay: 0.10s; }
-.main-content > *:nth-child(3) { animation-delay: 0.18s; }
-.main-content > *:nth-child(4) { animation-delay: 0.26s; }
-.main-content > *:nth-child(5) { animation-delay: 0.34s; }
-</style>
+<link rel="stylesheet" href="/css/pages/admin.css">
+<link rel="stylesheet" href="/responsive/responsive-admin.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+
+<script src="/js/core/shared/theme-inline.js"></script>
+<script src="/js/core/shared/theme.js" defer></script>
+<script src="/js/core/shared/localStorage-detector.js" defer></script>
 </head>
 <body>
 
@@ -42,7 +36,7 @@
 
   <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
     <div class="sidebar__logo text-center mt-3">
-      <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+      <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
       <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
     </div>
     <nav class="nav flex-column mt-4">
@@ -233,6 +227,30 @@
       </div>
     </div>
 
+    <!-- Palabras de Riesgo por Nivel -->
+    <div class="section-card-custom" id="riskCardsSection">
+      <div class="section-header-custom" style="flex-wrap:wrap;">
+        <div class="header-icon" style="background: linear-gradient(135deg, #f97316, #dc2626); color: #fff;">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="flex-grow-1" style="min-width:160px;">
+          <h5 class="mb-0 fw-bold">Palabras de Riesgo por Nivel</h5>
+          <small class="text-muted">Palabras detectadas en conversaciones con pacientes, agrupadas por nivel de riesgo</small>
+        </div>
+        <div class="risk-filter-tabs" id="riskFilterTabs">
+          <button class="risk-filter-btn active" data-filter="all">Todos</button>
+          <button class="risk-filter-btn" data-filter="Alto" data-color="#dc3545">Alto</button>
+          <button class="risk-filter-btn" data-filter="Medio" data-color="#f59e0b">Medio</button>
+          <button class="risk-filter-btn" data-filter="Bajo" data-color="#10b981">Bajo</button>
+        </div>
+      </div>
+      <div class="section-body-custom">
+        <div id="riskFilteredList" class="risk-filtered-list">
+          <span class="text-muted small">No hay palabras detectadas a&uacute;n</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Historial de Conversaciones -->
     <div class="section-card-custom">
       <div class="section-header-custom">
@@ -241,10 +259,10 @@
         </div>
         <div class="flex-grow-1">
           <h5 class="mb-0 fw-bold">Historial de Conversaciones</h5>
-          <small class="text-muted">Registro de todas las conversaciones</small>
+          <small class="text-muted">Conversaciones agrupadas por paciente</small>
         </div>
         <div class="d-flex gap-2">
-          <input type="text" class="form-control form-control-sm" id="buscarHistorial" placeholder="Buscar paciente o mensaje..." style="max-width: 260px;">
+          <input type="text" class="form-control form-control-sm" id="buscarHistorial" placeholder="Buscar paciente..." style="max-width: 200px;">
           <select class="form-select form-select-sm" id="filtroNivel" style="width:auto;">
             <option value="">Todos los niveles</option>
             <option value="Alto">Nivel Alto</option>
@@ -252,21 +270,28 @@
             <option value="Bajo">Nivel Bajo</option>
           </select>
           <button class="btn btn-outline-secondary btn-sm" id="btnActualizarHistorial"><i class="fas fa-sync"></i></button>
-          <button class="btn btn-outline-success btn-sm" id="btnExportarCSV"><i class="fas fa-file-csv"></i></button>
         </div>
       </div>
-      <div class="section-body-custom p-0">
-        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
-          <small class="text-muted" id="historialContador">Mostrando 0-0 de 0</small>
-          <div class="d-flex gap-1" id="historialPaginacion"></div>
+      <div class="chat-history-layout">
+        <div class="patients-list">
+          <div id="patientsList" class="patients-list-scroll">
+            <div class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>Cargando...</div>
+          </div>
         </div>
-        <div class="table-responsive">
-          <table class="table table-hover mb-0" id="tablaHistorial">
-            <thead>
-              <tr><th>Paciente</th><th>Mensaje</th><th>Respuesta</th><th>Nivel</th><th>Fecha</th><th>Acciones</th></tr>
-            </thead>
-            <tbody><tr><td colspan="6" class="text-center py-4">Cargando...</td></tr></tbody>
-          </table>
+        <div class="conversation-panel">
+          <div class="conversation-header" id="conversationHeader"></div>
+          <div class="messages-area" id="conversationMessages">
+            <div class="empty-state">
+              <i class="fas fa-comments"></i>
+              <h6>Selecciona un paciente</h6>
+              <p class="text-muted">Elige un paciente de la lista para ver su conversaci&oacute;n completa</p>
+            </div>
+          </div>
+          <div class="conversation-footer" id="conversationFooter">
+            <button class="btn btn-outline-primary btn-sm" onclick="window.exportarConversacionPaciente()">
+              <i class="fas fa-download me-1"></i>Exportar esta conversaci&oacute;n
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -281,43 +306,12 @@
   </main>
 </div>
 
-<!-- Modal Ver Detalle -->
-<div class="modal fade" id="modalDetalleConversacion" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalDetalleLabel"><i class="fas fa-comments me-2"></i>Detalle de Conversación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
-          <div><small class="text-muted">Paciente</small><div class="fw-semibold" id="detallePaciente">-</div></div>
-          <div><small class="text-muted">Nivel</small><div id="detalleNivel">-</div></div>
-          <div><small class="text-muted">Fecha</small><div class="text-muted" id="detalleFecha">-</div></div>
-        </div>
-        <div id="chatContainer">
-          <div class="chat-bubble-custom user-custom">
-            <div class="chat-label-custom">Paciente</div>
-            <div id="detalleMensaje">-</div>
-          </div>
-          <div class="chat-bubble-custom bot-custom">
-            <div class="chat-label-custom">PsyAI</div>
-            <div id="detalleRespuesta">-</div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
-<script src="/js/core/shared/alerts.js"></script>
-<script src="/js/core/shared/aside.js?v=20260522-5"></script>
-<script src="/js/modules/auth/logout.js"></script>
-<script src="/js/modules/admin/admin.chatbot.config.js"></script>
+<script src="/js/core/shared/alerts.js" defer></script>
+<script src="/js/core/shared/aside.js?v=20260522-5" defer></script>
+<script src="/js/modules/auth/logout.js" defer></script>
+<script src="/js/modules/admin/admin.chatbot.config.js" defer></script>
 
 </body>
 </html>

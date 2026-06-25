@@ -11,12 +11,13 @@ _requests_total = 0
 _visitas_hoy = set()
 _visitas_fecha = time.strftime("%Y-%m-%d")
 _endpoints = Counter()
-_requests_history = deque()
+_requests_history = deque(maxlen=3600)
 _active_clients = {}
 _active_users = {}  # user_id -> timestamp (última solicitud)
 _latency_samples = deque(maxlen=100)
 _active_sse = {}  # ip -> {"count": int, "ts": float}
 _version = 0  # Se incrementa con cada cambio para SSE
+_trim_counter = 0  # contador para recortar _endpoints cada 1000 requests
 
 # ── Caché de psutil para no llamarlo en cada get_live_stats ──
 _last_system_check = 0
@@ -37,6 +38,12 @@ _security = {
 _security_events = deque(maxlen=10)
 
 
+def _trim_endpoints(max_entries=20):
+    global _endpoints
+    if len(_endpoints) > max_entries:
+        _endpoints = Counter(dict(_endpoints.most_common(max_entries)))
+
+
 def _normalize_ip(ip):
     if not ip:
         return '127.0.0.1'
@@ -46,7 +53,7 @@ def _normalize_ip(ip):
     return ip
 
 def track_request(ip, endpoint, user_id=None):
-    global _requests_total, _version, _visitas_fecha
+    global _requests_total, _version, _visitas_fecha, _trim_counter
     ip = _normalize_ip(ip)
     today = time.strftime("%Y-%m-%d")
     if today != _visitas_fecha:
@@ -70,8 +77,10 @@ def track_request(ip, endpoint, user_id=None):
     if user_id:
         _active_users[user_id] = now
 
-    while _requests_history and _requests_history[0] < now - 3600:
-        _requests_history.popleft()
+    _trim_counter += 1
+    if _trim_counter >= 1000:
+        _trim_counter = 0
+        _trim_endpoints()
 
 
 def sse_connected(ip):

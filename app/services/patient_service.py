@@ -1,12 +1,9 @@
 import os
-import uuid
 
 from flask import current_app
-from werkzeug.utils import secure_filename
 
 from app.repositories import patient_repository
-
-ALLOWED_PHOTO_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+from app.utils.upload_validation import validate_upload
 
 
 def get_patient_profile(user_id):
@@ -56,23 +53,18 @@ def list_professionals():
 
 
 def update_profile_photo(user_id, file):
-    if not file or not file.filename:
-        return {"success": False, "message": "Archivo requerido"}, 400
-
-    filename = secure_filename(file.filename)
-    extension = filename.rsplit(".", 1)[1].lower() if "." in filename else ""
-    if extension not in ALLOWED_PHOTO_EXTENSIONS:
-        return {"success": False, "message": "Formato de imagen no permitido"}, 400
+    safe_name, error = validate_upload(file)
+    if error:
+        return {"success": False, "message": error}, 400
 
     upload_dir = os.path.join(current_app.root_path, "static", "uploads")
     os.makedirs(upload_dir, exist_ok=True)
 
-    unique_filename = f"{uuid.uuid4().hex}.{extension}"
-    file.save(os.path.join(upload_dir, unique_filename))
-    patient_repository.update_profile_photo(unique_filename, user_id)
+    file.save(os.path.join(upload_dir, safe_name))
+    patient_repository.update_profile_photo(safe_name, user_id)
 
     return {
         "success": True,
         "message": "Foto de perfil actualizada",
-        "fotoPerfil": unique_filename,
+        "fotoPerfil": safe_name,
     }, 200

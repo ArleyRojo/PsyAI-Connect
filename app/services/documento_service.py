@@ -3,10 +3,9 @@ import os
 from flask import current_app
 
 from app.repositories import documento_repository
+from app.utils.upload_validation import validate_upload
 
 UPLOAD_SUBDIR = "uploads/documentos"
-ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png", ".gif", ".webp"}
-MAX_FILE_SIZE = 20 * 1024 * 1024
 
 
 def _upload_dir():
@@ -17,15 +16,6 @@ def _ensure_upload_dir():
     d = _upload_dir()
     os.makedirs(d, exist_ok=True)
     return d
-
-
-def _safe_filename(original):
-    import secrets, string
-    ext = os.path.splitext(original)[1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        ext = ".bin"
-    name = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(24))
-    return name + ext
 
 
 def _format_size(bytes_):
@@ -65,21 +55,18 @@ def list_patient_docs(professional_id, patient_id):
 
 
 def upload_profesional_doc(professional_id, patient_id, file, categoria, visibilidad, notas):
-    if not file or file.filename == "":
-        return {"success": False, "message": "No se envió ningún archivo"}, 400
-
-    file.seek(0, os.SEEK_END)
-    size = file.tell()
-    file.seek(0)
-    if size > MAX_FILE_SIZE:
-        return {"success": False, "message": "El archivo supera los 20 MB"}, 400
-
-    ext = os.path.splitext(file.filename)[1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        return {"success": False, "message": "Tipo de archivo no permitido"}, 400
+    safe_name, error = validate_upload(
+        file,
+        allowed_extensions={"jpg", "jpeg", "png", "pdf", "gif", "webp"},
+        max_size_mb=20,
+    )
+    if error:
+        return {"success": False, "message": error}, 400
 
     upload_path = _ensure_upload_dir()
-    safe_name = _safe_filename(file.filename)
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
     file.save(os.path.join(upload_path, safe_name))
 
     ruta_relativa = f"{UPLOAD_SUBDIR}/{safe_name}"
@@ -88,7 +75,7 @@ def upload_profesional_doc(professional_id, patient_id, file, categoria, visibil
         nombre=file.filename,
         ruta=ruta_relativa,
         mime=file.content_type or "application/octet-stream",
-        tamano=size,
+        tamano=file_size,
         categoria=categoria or "Otro",
         visibilidad=visibilidad or "privado",
         notas=notas or None,
@@ -149,21 +136,18 @@ def list_patient_dashboard(patient_id):
 
 
 def upload_patient_doc(patient_id, file, descripcion):
-    if not file or file.filename == "":
-        return {"success": False, "message": "No se envió ningún archivo"}, 400
-
-    file.seek(0, os.SEEK_END)
-    size = file.tell()
-    file.seek(0)
-    if size > MAX_FILE_SIZE:
-        return {"success": False, "message": "El archivo supera los 20 MB"}, 400
-
-    ext = os.path.splitext(file.filename)[1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        return {"success": False, "message": "Tipo de archivo no permitido"}, 400
+    safe_name, error = validate_upload(
+        file,
+        allowed_extensions={"jpg", "jpeg", "png", "pdf", "gif", "webp"},
+        max_size_mb=20,
+    )
+    if error:
+        return {"success": False, "message": error}, 400
 
     upload_path = _ensure_upload_dir()
-    safe_name = _safe_filename(file.filename)
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
     file.save(os.path.join(upload_path, safe_name))
 
     ruta_relativa = f"{UPLOAD_SUBDIR}/{safe_name}"
@@ -172,7 +156,7 @@ def upload_patient_doc(patient_id, file, descripcion):
         nombre=file.filename,
         ruta=ruta_relativa,
         mime=file.content_type or "application/octet-stream",
-        tamano=size,
+        tamano=file_size,
         descripcion=descripcion or None,
     )
     return {"success": True, "idDocumento": doc_id, "message": "Documento subido correctamente"}, 201

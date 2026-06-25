@@ -1,37 +1,31 @@
 <!DOCTYPE html>
-<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme') == 'dark' else '' }}">
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
-<title>PsyAI Connect | Auditoría y Logs</title>
-<link rel="icon" type="image/jpeg" href="/img/Logo.jpg" sizes="any">
-<script src="/js/core/shared/theme-inline.js"></script>
+<title>PsyAI Connect | Auditor\u00eda y Logs</title>
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <link rel="stylesheet" href="/css/base/base.css">
 <link rel="stylesheet" href="/css/layout/layout.css">
-<link rel="stylesheet" href="/css/components/components.css">
 <link rel="stylesheet" href="/css/themes/theme.css">
-    <link rel="stylesheet" href="/css/pages/admin.css">
-    <link rel="stylesheet" href="/responsive/responsive-admin.css">
-<script src="/js/core/shared/theme.js"></script>
-    <script src="/js/core/shared/localStorage-detector.js"></script>
-<style>
-@keyframes pageFadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.main-content > * {
-    animation: pageFadeIn 0.4s ease both;
-}
-.main-content > *:nth-child(1) { animation-delay: 0.03s; }
-.main-content > *:nth-child(2) { animation-delay: 0.10s; }
-.main-content > *:nth-child(3) { animation-delay: 0.18s; }
-.main-content > *:nth-child(4) { animation-delay: 0.26s; }
-.main-content > *:nth-child(5) { animation-delay: 0.34s; }
-</style>
+<link rel="stylesheet" href="/css/pages/admin.css">
+<link rel="stylesheet" href="/responsive/responsive-admin.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+
+<script src="/js/core/shared/theme-inline.js"></script>
+<script src="/js/core/shared/theme.js" defer></script>
+<script src="/js/core/shared/localStorage-detector.js" defer></script>
 </head>
 <body>
 
@@ -41,7 +35,7 @@
 <div class="d-flex w-100">
   <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
         <div class="sidebar__logo text-center mt-3">
-            <img src="/img/Logo.jpg" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
             <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
         </div>
         <nav class="nav flex-column mt-4">
@@ -77,7 +71,7 @@
       <button class="admin-panel-tab active" type="button" role="tab" aria-selected="true" onclick="mostrarPanelAdmin('logs', this)">
         <i class="fas fa-clipboard-list"></i> Logs
       </button>
-      <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarPanelAdmin('rendimiento', this)">
+      <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarPanelAdmin('rendimiento', this); if(!window.rendimientoCargado) cargarRendimiento();">
         <i class="fas fa-chart-line"></i> Rendimiento
       </button>
     </div>
@@ -113,17 +107,17 @@
     </div>
 
     <!-- Filtros de Logs -->
-    <div class="logs-tabs">
-      <button class="logs-tab active" onclick="mostrarTabLogs('todos', this)">
+    <div class="admin-panel-tabs mb-4" role="tablist" aria-label="Filtros de logs">
+      <button class="admin-panel-tab active" type="button" role="tab" aria-selected="true" onclick="mostrarTabLogs('todos', this)">
         <i class="fas fa-list"></i> Todos <span class="tab-count" id="cntTodos">0</span>
       </button>
-      <button class="logs-tab" onclick="mostrarTabLogs('usuarios', this)">
+      <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabLogs('usuarios', this)">
         <i class="fas fa-users"></i> Usuarios <span class="tab-count" id="cntUsuarios">0</span>
       </button>
-      <button class="logs-tab" onclick="mostrarTabLogs('roles', this)">
+      <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabLogs('roles', this)">
         <i class="fas fa-user-shield"></i> Roles <span class="tab-count" id="cntRoles">0</span>
       </button>
-      <button class="logs-tab" onclick="mostrarTabLogs('notificaciones', this)">
+      <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabLogs('notificaciones', this)">
         <i class="fas fa-bell"></i> Notificaciones <span class="tab-count" id="cntNotifs">0</span>
       </button>
     </div>
@@ -371,16 +365,16 @@
         </div>
       </div>
 
-      <div class="section-header d-flex justify-content-between align-items-center mb-4 mt-5">
+      <div class="rendimiento-section-header">
         <div>
-          <h4 class="mb-1 fw-bold"><i class="fas fa-server text-primary me-2"></i>Rendimiento del Sistema</h4>
+          <h4><i class="fas fa-server text-primary me-2"></i>Rendimiento del Sistema</h4>
           <p class="text-muted mb-0">Supervisa uso de CPU, RAM, latencia y métricas del clúster en tiempo real.</p>
         </div>
         <span class="metric-status stable" style="animation: pulseGlow 2s infinite;">System Live</span>
       </div>
 
       <div class="performance-grid mb-4">
-        <div class="performance-card premium-glow-hover">
+        <div class="performance-card">
           <div class="metric-top">
             <div>
               <div class="metric-label">CPU</div>
@@ -393,7 +387,7 @@
           <div class="metric-foot"><span class="metric-status stable" id="metricCpuStatus">estable</span></div>
         </div>
 
-        <div class="performance-card premium-glow-hover">
+        <div class="performance-card">
           <div class="metric-top">
             <div>
               <div class="metric-label">RAM</div>
@@ -406,7 +400,7 @@
           <div class="metric-foot"><span class="metric-status stable" id="metricRamStatus">estable</span></div>
         </div>
 
-        <div class="performance-card premium-glow-hover">
+        <div class="performance-card">
           <div class="metric-top">
             <div>
               <div class="metric-label">Requests/min</div>
@@ -419,7 +413,7 @@
           <div class="metric-foot"><span class="metric-status stable" id="metricRequestsStatus">estable</span></div>
         </div>
 
-        <div class="performance-card premium-glow-hover">
+        <div class="performance-card">
           <div class="metric-top">
             <div>
               <div class="metric-label">Usuarios online</div>
@@ -432,7 +426,7 @@
           <div class="metric-foot"><span class="metric-status stable" id="metricOnlineStatus">estable</span></div>
         </div>
 
-        <div class="performance-card premium-glow-hover">
+        <div class="performance-card">
           <div class="metric-top">
             <div>
               <div class="metric-label">Latencia</div>
@@ -445,7 +439,7 @@
           <div class="metric-foot"><span class="metric-status stable" id="metricLatencyStatus">estable</span></div>
         </div>
 
-        <div class="performance-card premium-glow-hover">
+        <div class="performance-card">
           <div class="metric-top">
             <div>
               <div class="metric-label">Estado del servidor</div>
@@ -458,7 +452,7 @@
           <div class="metric-foot"><span class="metric-status stable" id="metricServerStatus">estable</span></div>
         </div>
 
-        <div class="performance-card premium-glow-hover">
+        <div class="performance-card">
           <div class="metric-top">
             <div>
               <div class="metric-label">Tareas pendientes</div>
@@ -473,7 +467,7 @@
         </div>
       </div>
 
-      <div class="performance-wide-card premium-glow-hover mb-4">
+      <div class="performance-wide-card mb-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
           <h5 class="mb-0 fw-bold"><i class="fas fa-database me-2 text-primary"></i>Capacidad de almacenamiento</h5>
           <span class="metric-status warning" id="storageStatusBadge">-- usado</span>
@@ -494,9 +488,9 @@
         </div>
       </div>
 
-      <div class="section-header d-flex justify-content-between align-items-center mb-4 mt-5">
+      <div class="rendimiento-section-header">
         <div>
-          <h4 class="mb-1 fw-bold"><i class="fas fa-shield-alt text-danger me-2"></i>Seguridad y Accesos</h4>
+          <h4><i class="fas fa-shield-alt text-danger me-2"></i>Seguridad y Accesos</h4>
           <p class="text-muted mb-0">Monitoreo de autenticación, firewall, bloqueos y anomalías en la plataforma.</p>
         </div>
         <span class="metric-status critical" style="animation: pulseCritical 2s infinite;">Monitoring</span>
@@ -505,7 +499,7 @@
       <div class="dashboard-section mb-4">
         <div class="row g-3">
           <div class="col-lg-8">
-            <div class="security-card p-4">
+            <div class="security-card">
               <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
                 <div>
                   <h6 class="mb-1 fw-bold">Estado de seguridad</h6>
@@ -515,28 +509,28 @@
               </div>
               <div class="row g-3">
                 <div class="col-sm-6 col-xl-3">
-                  <div class="small-metric-card has-glow premium-glow-hover">
+                  <div class="small-metric-card">
                     <div class="metric-label">Fallos login</div>
                     <div class="metric-value" id="securityFailedLogins">0</div>
                     <div class="metric-foot">Últimas 24h</div>
                   </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
-                  <div class="small-metric-card has-glow premium-glow-hover">
+                  <div class="small-metric-card">
                     <div class="metric-label">Actividad sospechosa</div>
                     <div class="metric-value" id="securitySuspicious">0</div>
                     <div class="metric-foot">Alertas recientes</div>
                   </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
-                  <div class="small-metric-card has-glow premium-glow-hover">
+                  <div class="small-metric-card">
                     <div class="metric-label">IPs bloqueadas</div>
                     <div class="metric-value" id="securityBlockedIPs">0</div>
                     <div class="metric-foot">Firewall</div>
                   </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
-                  <div class="small-metric-card has-glow premium-glow-hover">
+                  <div class="small-metric-card">
                     <div class="metric-label">Tokens inválidos</div>
                     <div class="metric-value" id="securityInvalidTokens">0</div>
                     <div class="metric-foot">Sesiones fallidas</div>
@@ -551,10 +545,10 @@
             </div>
           </div>
           <div class="col-lg-4">
-            <div class="security-timeline p-4">
+            <div class="security-timeline">
               <h6 class="mb-3 fw-bold">Eventos recientes</h6>
               <div id="securityTimelineList">
-                <div class="timeline-item premium-glow-hover">
+                <div class="timeline-item">
                   <span class="timeline-dot stable"></span>
                   <div>
                     <strong>Sin eventos registrados</strong>
@@ -567,9 +561,9 @@
         </div>
       </div>
 
-      <div class="section-header d-flex justify-content-between align-items-center mb-4 mt-5">
+      <div class="rendimiento-section-header">
         <div>
-          <h4 class="mb-1 fw-bold"><i class="fas fa-network-wired text-warning me-2"></i>Tráfico y Red</h4>
+          <h4><i class="fas fa-network-wired text-warning me-2"></i>Tráfico y Red</h4>
           <p class="text-muted mb-0">Observabilidad de carga de usuarios, distribución de peticiones y endpoints activos.</p>
         </div>
         <span class="metric-status warning">Live Traffic</span>
@@ -578,7 +572,7 @@
       <div class="dashboard-section mb-4">
         <div class="row g-3">
           <div class="col-xl-7">
-            <div class="traffic-card p-4">
+            <div class="traffic-card">
               <div class="d-flex justify-content-between align-items-start mb-4 gap-3">
                 <div>
                   <h6 class="mb-1 fw-bold">Actividad de tráfico</h6>
@@ -610,7 +604,7 @@
             </div>
           </div>
           <div class="col-xl-5">
-            <div class="traffic-card p-4">
+            <div class="traffic-card">
               <div class="d-flex justify-content-between align-items-start mb-4 gap-3">
                 <div>
                   <h6 class="mb-1 fw-bold">Resumen rápido</h6>
@@ -620,26 +614,25 @@
               </div>
               <div class="row g-3 mb-3">
                 <div class="col-6">
-                  <div class="small-metric-card compact premium-glow-hover">
+                  <div class="small-metric-card compact">
                     <div class="metric-label">Online</div>
                     <div class="metric-value" id="trafficUsersOnline">0</div>
                   </div>
                 </div>
                 <div class="col-6">
-                  <div class="small-metric-card compact premium-glow-hover">
+                  <div class="small-metric-card compact">
                     <div class="metric-label">Top endpoint</div>
                     <div class="metric-value" id="trafficTopEndpoint">/api/login</div>
                   </div>
                 </div>
               </div>
               <div class="top-endpoints-list" id="topEndpointsList">
-                <div class="top-endpoint premium-glow-hover"><span>Sin datos aún</span><strong>-</strong></div>
+                <div class="top-endpoint"><span>Sin datos aún</span><strong>-</strong></div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
 
     </section>
 
@@ -647,13 +640,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260528-sidebar-layer-1">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
-<script src="/js/core/shared/alerts.js"></script>
-<script src="/js/core/shared/aside.js?v=20260522-5"></script>
-<script src="/js/modules/admin/admin.dashboard.utils.js"></script>
-<script src="/js/modules/admin/admin.logs.js"></script>
-<script src="/js/modules/admin/admin.rendimiento.js"></script>
-<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/alerts.js" defer></script>
+<script src="/js/core/shared/aside.js?v=20260522-5" defer></script>
+<script src="/js/modules/admin/admin.dashboard.utils.js" defer></script>
+<script src="/js/modules/admin/admin.logs.js" defer></script>
+<script src="/js/modules/admin/admin.rendimiento.js" defer></script>
+<script src="/js/modules/auth/logout.js" defer></script>
 
 </body>

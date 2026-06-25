@@ -11,7 +11,7 @@
    ============================================================ */
 
 @media (max-width: 991px) {
-  :root {
+:root {
     --pro-sidebar-width: 300px;
     --pro-toggle-size: 48px;
     --pro-content-pt: 4rem;
@@ -48,14 +48,9 @@
     box-shadow: 8px 0 40px rgba(13, 71, 161, 0.2);
   }
 
-  html.dark-mode .sidebar {
-    background: var(--dm-card, #0b1429);
-  }
+  
 
-  html.dark-mode .sidebar.active,
-  html.dark-mode .sidebar.show {
-    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.58);
-  }
+  
 
   .sidebar-overlay {
     position: fixed;
@@ -78,18 +73,14 @@
     pointer-events: auto;
   }
 
-  html.dark-mode .sidebar-overlay {
-    background: rgba(3, 6, 16, 0.75);
-  }
+  
 
   .sidebar__logo {
     padding: 1.5rem 1.25rem;
     border-bottom: 1px solid var(--color-border, #d6e8fa);
   }
 
-  html.dark-mode .sidebar__logo {
-    border-bottom-color: var(--dm-border, #1a2b4a);
-  }
+  
 
   .sidebar__logo img {
     width: 68px !important;
@@ -129,9 +120,7 @@
     border-top: 1px solid var(--color-border, #d6e8fa);
   }
 
-  html.dark-mode .sidebar__footer {
-    border-top-color: var(--dm-border, #1a2b4a);
-  }
+  
 
   .sidebar__footer .btn {
     width: 100% !important;
@@ -190,10 +179,7 @@
     background: var(--color-bg-light, #fff);
   }
 
-  html.dark-mode .main-header {
-    background: var(--dm-card, #0b1429);
-    border-color: var(--dm-border, #1a2b4a) !important;
-  }
+  
 
   .main-header h1,
   .main-header .h3 {
@@ -914,42 +900,49 @@
   }
 }
 
-/* Dark mode accordion fixes for responsive */
+/* Accordion base visibility for mobile */
 @media (max-width: 991px) {
-  html.dark-mode .accordion-item,
-  html.dark-mode .accordion-responsive .accordion-item {
-    background: var(--dm-card, #0b1429) !important;
-    border-color: var(--dm-border, #1a2b4a) !important;
+  .main-content .accordion,
+  .main-content .accordion-responsive,
+  .main-content .faq-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
   }
 
-  html.dark-mode .accordion-button,
-  html.dark-mode .accordion-responsive .accordion-button {
-    background: transparent !important;
-    color: var(--dm-text1, #daeeff) !important;
+  .main-content .accordion .accordion-item,
+  .main-content .accordion-responsive .accordion-item,
+  .main-content .faq-accordion .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
   }
 
-  html.dark-mode .accordion-button:not(.collapsed),
-  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed) {
-    background: rgba(13, 71, 161, 0.25) !important;
-    color: #60a5fa !important;
+  .main-content .accordion .accordion-button,
+  .main-content .accordion-responsive .accordion-button,
+  .main-content .faq-accordion .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
   }
 
-  html.dark-mode .accordion-button::after,
-  html.dark-mode .accordion-responsive .accordion-button::after {
-    color: #60a5fa !important;
-  }
-
-  html.dark-mode .accordion-button:not(.collapsed)::after,
-  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed)::after {
-    color: #60a5fa !important;
-  }
-
-  html.dark-mode .accordion-body,
-  html.dark-mode .accordion-responsive .accordion-body {
-    background: transparent !important;
-    color: var(--dm-text2, #cbd5e1) !important;
+  .main-content .accordion .accordion-body,
+  .main-content .accordion-responsive .accordion-body,
+  .main-content .faq-accordion .accordion-body {
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
+
+/* Dark mode accordion fixes for responsive */
+
 
 /* ============================================================
    Patients + Reports refinements
@@ -957,7 +950,7 @@
    ============================================================ */
 
 @media (max-width: 991px) {
-  .aside-professional .main-content,
+.aside-professional .main-content,
   body:has(#tablaReportes) .main-content,
   body:has(#tbodyPacientes) .main-content {
     background: var(--color-bg, #f0f5fc) !important;
@@ -972,23 +965,14 @@
     box-shadow: 0 10px 26px rgba(13, 71, 161, 0.06) !important;
   }
 
-  html.dark-mode body:has(#tbodyPacientes) .tabs-container,
-  html.dark-mode body:has(#tablaReportes) section.card,
-  html.dark-mode body:has(#tbodyPacientes) .panel-step,
-  html.dark-mode body:has(#tbodyPacientes) #pestana-evolucion .card,
-  html.dark-mode body:has(#tbodyPacientes) #pestana-diagnosticos > .card {
-    border-color: var(--dm-border, #1a2b4a) !important;
-    box-shadow: none !important;
-  }
+  
 
   body:has(#tbodyPacientes) .tabs-container {
     padding: 0.45rem;
     background: #fff;
   }
 
-  html.dark-mode body:has(#tbodyPacientes) .tabs-container {
-    background: var(--dm-card, #0b1429);
-  }
+  
 
   body:has(#tbodyPacientes) .tabs {
     padding: 0;
@@ -1006,10 +990,7 @@
     padding: 0.6rem !important;
   }
 
-  html.dark-mode body:has(#tbodyPacientes) .progress-nav {
-    background: var(--dm-card, #0b1429);
-    border-color: var(--dm-border, #1a2b4a);
-  }
+  
 
   body:has(#tbodyPacientes) .progress-nav__label,
   body:has(#tbodyPacientes) .progress-nav__steps {
@@ -1069,13 +1050,7 @@
     scrollbar-color: #90caf9 transparent;
   }
 
-  html.dark-mode body:has(#tbodyPacientes) .table-responsive,
-  html.dark-mode body:has(#tablaReportes) .table-responsive,
-  html.dark-mode body:has(#tablaReportesEliminados) .table-responsive {
-    background: var(--dm-card, #0b1429);
-    border-color: var(--dm-border, #1a2b4a);
-    scrollbar-color: #2a5b8f transparent;
-  }
+  
 
   body:has(#tbodyPacientes) .table-responsive::-webkit-scrollbar,
   body:has(#tablaReportes) .table-responsive::-webkit-scrollbar,
@@ -1184,7 +1159,7 @@
 }
 
 @media (max-width: 767px) {
-  body:has(#tbodyPacientes) .main-header,
+body:has(#tbodyPacientes) .main-header,
   body:has(#tablaReportes) .main-header {
     gap: 0.55rem;
   }
@@ -1306,13 +1281,7 @@
     box-shadow: 0 6px 18px rgba(13, 71, 161, 0.06);
   }
 
-  html.dark-mode body:has(#tbodyPacientes) .table tbody tr,
-  html.dark-mode body:has(#tablaReportes) .table tbody tr,
-  html.dark-mode body:has(#tablaReportesEliminados) .table tbody tr {
-    background: var(--dm-card, #0b1429);
-    border-color: var(--dm-border, #1a2b4a);
-    box-shadow: none;
-  }
+  
 
   body:has(#tbodyPacientes) .table tbody td,
   body:has(#tablaReportes) .table tbody td,
@@ -1337,11 +1306,7 @@
     border-bottom: 0 !important;
   }
 
-  html.dark-mode body:has(#tbodyPacientes) .table tbody td,
-  html.dark-mode body:has(#tablaReportes) .table tbody td,
-  html.dark-mode body:has(#tablaReportesEliminados) .table tbody td {
-    border-bottom-color: rgba(148, 163, 184, 0.12) !important;
-  }
+  
 
   body:has(#tbodyPacientes) .table tbody td::before,
   body:has(#tablaReportes) .table tbody td::before,
@@ -1368,11 +1333,7 @@
     display: none !important;
   }
 
-  html.dark-mode body:has(#tbodyPacientes) .table tbody td::before,
-  html.dark-mode body:has(#tablaReportes) .table tbody td::before,
-  html.dark-mode body:has(#tablaReportesEliminados) .table tbody td::before {
-    color: var(--dm-muted, #8aaac6);
-  }
+  
 
   #tbodyPacientes td:nth-child(1)::before { content: "Paciente"; }
   #tbodyPacientes td:nth-child(2)::before { content: "Edad"; }
@@ -1647,4 +1608,182 @@
   body:has(#tbodyPacientes) .progress-step {
     grid-template-columns: 18px minmax(0, 1fr);
   }
+}
+
+/* Accordion responsive styles (compartido con responsive-patient.css y responsive-fix.css) */
+.accordion-responsive .accordion-item {
+  border: 1px solid rgba(13, 71, 161, 0.15);
+  border-left: 3px solid #0D47A1;
+  border-radius: 16px !important;
+  margin-bottom: 12px;
+  overflow: visible;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(13, 71, 161, 0.06);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.accordion-responsive .accordion-item:first-child,
+.accordion-responsive .accordion-item:last-child {
+  border-radius: 16px !important;
+}
+.accordion-responsive .accordion-item:hover {
+  box-shadow: 0 6px 20px rgba(13, 71, 161, 0.12);
+  border-color: rgba(13, 71, 161, 0.28);
+}
+.accordion-responsive .accordion-button {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+  color: #0D1F3C;
+  border-radius: 16px !important;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.accordion-responsive .accordion-button:hover {
+  background: #F0F5FC;
+  color: #0D47A1;
+}
+.accordion-responsive .accordion-button:not(.collapsed) {
+  color: #0D47A1 !important;
+  background: #E3F2FD !important;
+  box-shadow: none;
+  border-bottom: 1px solid rgba(13, 71, 161, 0.15);
+}
+.accordion-responsive .accordion-button::after {
+  width: 28px;
+  height: 28px;
+  background-image: none !important;
+  background-size: 20px;
+  content: '\f107';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  display: inline-block;
+  color: #0D47A1 !important;
+  filter: none !important;
+  transition: transform 0.3s ease, color 0.2s ease;
+}
+.accordion-responsive .accordion-button:not(.collapsed)::after {
+  content: '\f00d' !important;
+  color: #0D47A1 !important;
+  transform: rotate(0deg);
+}
+.accordion-responsive .accordion-body {
+  padding: 0.75rem 1.5rem 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #3A526B;
+  background: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .accordion-responsive .accordion-button {
+    font-size: 0.9rem !important;
+    padding: 0.9rem 1rem !important;
+  }
+  .accordion-responsive .accordion-button::after {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 0.85rem !important;
+  }
+  .accordion-responsive .accordion-body {
+    padding: 0.5rem 1rem 1rem !important;
+    font-size: 0.88rem !important;
+  }
+  .accordion-responsive .accordion-item {
+    margin-bottom: 8px !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .accordion-responsive .accordion-button {
+    font-size: 0.82rem !important;
+    padding: 0.75rem 0.85rem !important;
+  }
+  .accordion-responsive .accordion-body {
+    padding: 0.4rem 0.85rem 0.85rem !important;
+    font-size: 0.82rem !important;
+  }
+  .accordion-responsive .accordion-button i {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Refuerzo de visibilidad para acordeones en vistas con sidebar (mobile) */
+@media (max-width: 991px) {
+body:has(.sidebar) .accordion,
+  body:has(.sidebar) .accordion-responsive,
+  body:has(.sidebar) .faq-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  body:has(.sidebar) .accordion .accordion-item,
+  body:has(.sidebar) .accordion-responsive .accordion-item,
+  body:has(.sidebar) .faq-accordion .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+  }
+  body:has(.sidebar) .accordion .accordion-button,
+  body:has(.sidebar) .accordion-responsive .accordion-button,
+  body:has(.sidebar) .faq-accordion .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+  
+}
+
+/* ============================================================
+   ULTIMATE ACCORDION VISIBILITY FIX - Highest priority
+   ============================================================ */
+@media (max-width: 991px) {
+body:has(.sidebar) .accordion,
+  body:has(.sidebar) .accordion-responsive {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(.sidebar) .accordion-item,
+  body:has(.sidebar) .accordion-responsive .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+
+  body:has(.sidebar) .accordion-button,
+  body:has(.sidebar) .accordion-responsive .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  body:has(.sidebar) .accordion-body,
+  body:has(.sidebar) .accordion-responsive .accordion-body {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: 100% !important;
+  }
+
+  
 }

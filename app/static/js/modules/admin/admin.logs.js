@@ -18,10 +18,88 @@ const paginas = {
 
 window._logsData = window._logsData || [];
 
-document.addEventListener('DOMContentLoaded', () => {
-    cargarLogs();
+// Cache compartido para evitar 4 fetch al mismo endpoint
+let _logsFetchPromise = null;
+async function _fetchLogsOnce() {
+    if (!_logsFetchPromise) {
+        _logsFetchPromise = (async () => {
+            const res = await fetch(`${API}/api/admin/logs`, { credentials: 'include' });
+            const data = await res.json();
+            if (!data.success) throw new Error('No success from API');
+            return data.logs;
+        })();
+    }
+    return _logsFetchPromise;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Cada tab se carga como promesa independiente: una falla no bloquea las demás
+    const resultados = await Promise.allSettled([
+        cargarTabTodos(),
+        cargarTabUsuarios(),
+        cargarTabRoles(),
+        cargarTabNotificaciones(),
+    ]);
+    const nombres = ['todos', 'usuarios', 'roles', 'notificaciones'];
+    resultados.forEach((r, i) => {
+        if (r.status === 'rejected') {
+            console.warn(`Tab "${nombres[i]}" falló:`, r.reason);
+            const div = document.getElementById(`tab-log-${nombres[i]}`);
+            if (div) div.innerHTML = '<div class="text-danger p-3">Error al cargar datos de esta sección.</div>';
+        }
+    });
     iniciarLogsStream();
 });
+
+async function cargarTabTodos() {
+    const logs = await _fetchLogsOnce();
+    // Merge con logs pendientes de SSE (misma lógica que estaba en cargarLogs)
+    if (window._pendingLogs && window._pendingLogs.length > 0) {
+        const logKey = (log) => `${log.origen}-${log.id}`;
+        const map = new Map();
+        logs.forEach(l => map.set(logKey(l), l));
+        window._pendingLogs.forEach(l => map.set(logKey(l), l));
+        const mergedLogs = Array.from(map.values());
+        mergedLogs.sort((a, b) => {
+            const parse = (fecha) => {
+                const [datePart, timePart = '00:00'] = fecha.split(' ');
+                const [d, m, y] = datePart.split('/');
+                const [h, min] = (timePart || '00:00').split(':');
+                return new Date(y, m - 1, d, h, min).getTime();
+            };
+            return parse(b.fecha) - parse(a.fecha);
+        });
+        todosLogs = mergedLogs;
+        window._pendingLogs = [];
+    } else {
+        todosLogs = logs;
+    }
+    window._logsData = todosLogs;
+    renderLogs(todosLogs);
+    actualizarStats(todosLogs);
+    window.logsInitialized = true;
+}
+
+async function cargarTabUsuarios() {
+    const logs = await _fetchLogsOnce();
+    const filtrados = logs.filter(l => l.modulo === 'usuarios' || l.modulo === 'accesos');
+    const div = document.getElementById('tab-log-usuarios');
+    if (div) div._data = filtrados;
+}
+
+async function cargarTabRoles() {
+    const logs = await _fetchLogsOnce();
+    const filtrados = logs.filter(l => l.modulo === 'roles');
+    const div = document.getElementById('tab-log-roles');
+    if (div) div._data = filtrados;
+}
+
+async function cargarTabNotificaciones() {
+    const logs = await _fetchLogsOnce();
+    const filtrados = logs.filter(l => l.modulo === 'notificaciones');
+    const div = document.getElementById('tab-log-notificaciones');
+    if (div) div._data = filtrados;
+}
 
 // ── SSE para logs en tiempo real ──────────────────────────────────────────────
 function iniciarLogsStream() {
@@ -345,7 +423,7 @@ function mostrarTabLogs(tab, btn) {
         const el = document.getElementById(`tab-log-${t}`);
         if (el) el.style.display = t === tab ? '' : 'none';
     });
-    document.querySelectorAll('.logs-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.admin-panel-tab').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
     filtrarLogs();
@@ -376,7 +454,7 @@ function mostrarPanelAdmin(panel, btn) {
 
 // ── Filtros ───────────────────────────────────────────────────────────────────
 function filtrarLogs() {
-    const tabActiva = document.querySelector('.logs-tab.active');
+    const tabActiva = document.querySelector('.admin-panel-tab.active');
     if (!tabActiva) return;
     
     const tabText = tabActiva.textContent.trim().toLowerCase();

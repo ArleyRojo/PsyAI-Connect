@@ -1,12 +1,15 @@
+import datetime
 import os
 import re
 import time
 from urllib.parse import urlparse
 
 from flask import Flask, current_app, g, jsonify, request, session
+from flask.json.provider import DefaultJSONProvider
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.exceptions import HTTPException
 
 from app.config import Config, setup_logging
@@ -20,6 +23,43 @@ from app.routes.patient_routes import patient_bp
 from app.routes.professional_routes import professional_bp
 from app.routes.theme_routes import theme_bp
 from app.services.telemetry_service import track_request, track_latency
+
+
+class CustomJSONProvider(DefaultJSONProvider):
+    def default(self, obj):
+        if isinstance(obj, (datetime.datetime, datetime.date)):
+            return obj.isoformat()
+        if isinstance(obj, datetime.time):
+            return obj.isoformat()
+        return super().default(obj)
+
+
+TABLAS_CRITICAS = [
+    "Register", "PerfilPaciente", "PerfilProfesional", "AuditoriaAccesos",
+    "Login", "Disponibilidad", "Citas", "ConversacionesChatbot",
+    "EvolucionPaciente", "PacientesProfesional", "Notificaciones",
+    "ChatbotConfig", "EncuestaChatbot", "MensajesChat", "RecoveryTokens",
+    "intentos_fallidos",
+]
+
+
+def verificar_tablas(app):
+    from app.utils.db import db_cursor
+    with app.app_context():
+        try:
+            with db_cursor() as (_, cursor):
+                cursor.execute("SHOW TABLES")
+                existentes = {row[0] for row in cursor.fetchall()}
+                faltantes = [t for t in TABLAS_CRITICAS if t not in existentes]
+                if faltantes:
+                    app.logger.critical(
+                        "TABLAS FALTANTES EN BD: %s — Corre el SQL de migración antes de iniciar.",
+                        ", ".join(faltantes),
+                    )
+                else:
+                    app.logger.info("BD verificada: todas las tablas críticas existen.")
+        except Exception as e:
+            app.logger.critical("No se pudo verificar la BD al arrancar: %s", e)
 
 
 API_PATTERN = re.compile(
@@ -311,6 +351,50 @@ def _client_error_reporter_script():
 """.strip()
 
 
+def _inject_csrf_meta(response):
+    """Inyecta meta tag CSRF y JS fetch interceptor en HTML."""
+    content_type = response.headers.get("Content-Type", "")
+    if "text/html" not in content_type:
+        return response
+
+    html = response.get_data(as_text=True)
+    if 'name="csrf-token"' in html:
+        return response
+
+    from flask_wtf.csrf import generate_csrf
+    try:
+        token = generate_csrf()
+    except Exception:
+        token = ""
+
+    script = f"""<meta name="csrf-token" content="{token}">
+<script>
+(function(){{
+  var tokenMeta = document.querySelector('meta[name="csrf-token"]');
+  if (!tokenMeta || window.__csrfInstalled) return;
+  window.__csrfInstalled = true;
+  var origFetch = window.fetch;
+  window.fetch = function(url, opts) {{
+    opts = opts || {{}};
+    opts.headers = opts.headers || {{}};
+    if (opts.method && opts.method.toUpperCase() !== 'GET') {{
+      if (tokenMeta) opts.headers['X-CSRFToken'] = tokenMeta.getAttribute('content');
+    }}
+    return origFetch.call(this, url, opts);
+  }};
+}})();
+</script>
+"""
+    updated = re.sub(r"<head[^>]*>", lambda m: m.group(0) + "\n" + script.strip(), html, count=1, flags=re.IGNORECASE)
+    if updated == html:
+        updated = re.sub(r"<html[^>]*>", lambda m: m.group(0) + "\n" + script.strip(), html, count=1, flags=re.IGNORECASE)
+    if updated == html:
+        updated = script.strip() + "\n" + html
+    response.set_data(updated)
+    response.headers["Content-Length"] = str(len(response.get_data()))
+    return response
+
+
 def _inject_client_error_reporter(response):
     content_type = response.headers.get("Content-Type", "")
     if response.status_code >= 400 or "text/html" not in content_type:
@@ -340,6 +424,7 @@ def create_app():
 
     setup_logging(app)
     init_pool(app)
+    verificar_tablas(app)
 
     app.wsgi_app = RequestLoggingMiddleware(app.wsgi_app)
 
@@ -356,6 +441,13 @@ def create_app():
     app.get_limiter = get_limiter
 
     CORS(app, supports_credentials=True, origins=Config.CORS_ORIGINS)
+
+    csrf = CSRFProtect(app)
+    if not Config.WTF_CSRF_ENABLED:
+        csrf.exempt(lambda: True)
+
+    app.json_provider_class = CustomJSONProvider
+    app.json = CustomJSONProvider(app)
 
     app.register_blueprint(theme_bp)
     app.register_blueprint(auth_bp)
@@ -400,6 +492,7 @@ def create_app():
         return jsonify({"success": True, "count": len(routes), "routes": routes})
 
     @app.route("/api/client-errors", methods=["POST"])
+    @csrf.exempt
     def client_errors():
         payload = request.get_json(silent=True) or {}
         error_type = _shorten_text(payload.get("type") or "javascript", 80)
@@ -426,6 +519,25 @@ def create_app():
     def telemetry_latency(response):
         import time as _time
         from flask import g, request
+
+        # Security headers
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-XSS-Protection", "0")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; "
+            "script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; "
+            "style-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com 'unsafe-inline'; "
+            "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; "
+            "img-src 'self' data:; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'",
+        )
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+
         start = getattr(g, "_telemetry_start", None)
         if start:
             duration_ms = (_time.time() - start) * 1000
@@ -436,6 +548,7 @@ def create_app():
                 _log_page_resources(request.path, response.get_data(as_text=True))
             except Exception as exc:
                 app.logger.warning("No se pudieron detectar recursos para %s: %s", request.path, exc)
+            response = _inject_csrf_meta(response)
             response = _inject_client_error_reporter(response)
         try:
             _log_api_error(request, response)

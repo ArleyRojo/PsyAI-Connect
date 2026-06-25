@@ -1,3 +1,5 @@
+import json
+
 from app.repositories import chatbot_config_repository
 
 
@@ -105,10 +107,30 @@ def save_config(data, admin_id):
         except (ValueError, TypeError):
             return {"success": False, "message": "El limite diario debe ser un numero entero"}, 400
 
+    incoming_risk = data.get("risk_terms")
+    if incoming_risk is not None and incoming_risk.strip() in ("[]", ""):
+        current_config = chatbot_config_repository.get_config()
+        if current_config:
+            current_risk = current_config.get("risk_terms")
+            if current_risk and current_risk.strip() not in ("[]", ""):
+                try:
+                    parsed = json.loads(current_risk)
+                    if isinstance(parsed, list) and len(parsed) > 0:
+                        data["risk_terms"] = current_risk
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
     rowcount = chatbot_config_repository.save_config(data, admin_id)
     if rowcount >= 0:
         return {"success": True, "message": "Configuración guardada correctamente"}, 200
     return {"success": False, "message": "Error al guardar configuración"}, 500
+
+
+def save_risk_terms_only(risk_terms_str, admin_id):
+    rowcount = chatbot_config_repository.save_risk_terms_only(risk_terms_str, admin_id)
+    if rowcount >= 0:
+        return {"success": True, "message": "Palabras de riesgo guardadas"}, 200
+    return {"success": False, "message": "Error al guardar palabras de riesgo"}, 500
 
 
 def clear_risk_terms(admin_id):
@@ -119,3 +141,64 @@ def clear_risk_terms(admin_id):
         )
         conn.commit()
     return {"success": True, "message": "Palabras de riesgo eliminadas"}, 200
+
+
+def get_detected_risk_words():
+    """
+    Returns all risk words detected in patient conversations, grouped by word,
+    with highest level seen, count, and unique patient names.
+    Returns list: [{palabra, nivel, count, pacientes}, ...]
+    If view doesn't exist, returns [].
+    """
+    from app.utils.db import db_cursor
+    try:
+        with db_cursor(dictionary=True) as (_, cursor):
+            cursor.execute("""
+                SELECT nombre, palabrasRiesgoDetectadas, nivelEmocionalDetectado
+                FROM vistahistorialchatbot
+                WHERE palabrasRiesgoDetectadas IS NOT NULL
+                  AND palabrasRiesgoDetectadas != ''
+            """)
+            rows = cursor.fetchall()
+    except Exception as e:
+        estr = str(e)
+        if "1146" in estr or "doesn't exist" in estr:
+            return []
+        raise
+
+    NIVEL_PRECEDENCE = {"Alto": 3, "Medio": 2, "Bajo": 1}
+    word_data = {}
+
+    for row in rows:
+        detected_raw = row.get("palabrasRiesgoDetectadas", "") or ""
+        detected_words = [w.strip().lower() for w in detected_raw.split(",") if w.strip()]
+        level = row.get("nivelEmocionalDetectado", "Bajo") or "Bajo"
+        paciente = row.get("nombre", "Paciente") or "Paciente"
+
+        for word in detected_words:
+            if word not in word_data:
+                word_data[word] = {
+                    "palabra": word,
+                    "nivel": level,
+                    "nivel_priority": NIVEL_PRECEDENCE.get(level, 1),
+                    "count": 0,
+                    "pacientes": set()
+                }
+            else:
+                new_priority = NIVEL_PRECEDENCE.get(level, 1)
+                if new_priority > word_data[word]["nivel_priority"]:
+                    word_data[word]["nivel"] = level
+                    word_data[word]["nivel_priority"] = new_priority
+
+            word_data[word]["count"] += 1
+            word_data[word]["pacientes"].add(paciente)
+
+    return [
+        {
+            "palabra": v["palabra"],
+            "nivel": v["nivel"],
+            "count": v["count"],
+            "pacientes": sorted(v["pacientes"])
+        }
+        for v in word_data.values()
+    ]

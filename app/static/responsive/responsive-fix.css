@@ -509,29 +509,13 @@ table {
 .mobile-bottom-nav__item:hover i {
   color: var(--color-secondary, #0D47A1);
 }
-html.dark-mode .mobile-bottom-nav {
-  background: var(--dm-mid, #0b1828);
-  border-top-color: var(--dm-border, #1a3555);
-}
-html.dark-mode .mobile-bottom-nav__item {
-  color: var(--dm-muted, #3d607e);
-}
-html.dark-mode .mobile-bottom-nav__item i {
-  color: var(--dm-muted, #3d607e);
-}
-html.dark-mode .mobile-bottom-nav__item.active {
-  color: var(--dm-accent, #90CAF9);
-}
-html.dark-mode .mobile-bottom-nav__item.active i {
-  color: var(--dm-accent, #90CAF9);
-}
-html.dark-mode .mobile-bottom-nav__item:hover {
-  color: var(--dm-soft, #bbdffb);
-  background: rgba(144,202,249,0.1);
-}
-html.dark-mode .mobile-bottom-nav__item:hover i {
-  color: var(--dm-soft, #bbdffb);
-}
+
+
+
+
+
+
+
 body.has-mobile-bottom-nav {
   padding-bottom: 60px;
 }
@@ -777,7 +761,7 @@ body.has-mobile-bottom-nav {
   border-left: 3px solid #0D47A1;
   border-radius: var(--bs-accordion-border-radius, 16px) !important;
   margin-bottom: 12px;
-  overflow: hidden;
+  overflow: visible;
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(13, 71, 161, 0.06);
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
@@ -824,6 +808,7 @@ body.has-mobile-bottom-nav {
   content: '\f107';
   font-family: 'Font Awesome 6 Free';
   font-weight: 900;
+  display: inline-block;
   color: #0D47A1 !important;
   filter: none !important;
   transition: transform 0.3s ease, color 0.2s ease;
@@ -843,95 +828,31 @@ body.has-mobile-bottom-nav {
   background: #ffffff;
 }
 
-html.dark-mode .accordion-responsive .accordion-item {
-  background: linear-gradient(180deg, rgba(14, 31, 53, 0.98) 0%, rgba(11, 24, 40, 0.98) 100%) !important;
-  border-color: rgba(13, 71, 161, 0.5) !important;
-  border-left: 3px solid #0D47A1 !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-}
 
-html.dark-mode .accordion-responsive .accordion-item:hover {
-  border-color: rgba(96, 165, 250, 0.5) !important;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35) !important;
-}
 
-html.dark-mode .accordion-responsive .accordion-button {
-  background: transparent !important;
-  color: #e0e0e0 !important;
-}
 
-html.dark-mode .accordion-responsive .accordion-button:hover {
-  background: rgba(13, 71, 161, 0.12) !important;
-  color: #90CAF9 !important;
-}
 
-html.dark-mode .accordion-responsive .accordion-button:not(.collapsed) {
-  background: rgba(13, 71, 161, 0.25) !important;
-  color: #60a5fa !important;
-}
 
-html.dark-mode .accordion-responsive .accordion-button::after {
-  color: #60a5fa !important;
-}
 
-html.dark-mode .accordion-responsive .accordion-button:not(.collapsed)::after {
-  content: '\f00d' !important;
-  color: #60a5fa !important;
-}
 
-html.dark-mode .accordion-responsive .accordion-body {
-  color: #cbd5e1 !important;
-  background: transparent !important;
-}
 
-html.dark-mode .accordion-responsive {
-  --bs-accordion-active-color: #60a5fa;
-  --bs-accordion-active-bg:    rgba(13, 71, 161, 0.25);
-  --bs-accordion-bg:           transparent;
-  --bs-accordion-color:        #e0e0e0;
-  --bs-accordion-border-color: rgba(13, 71, 161, 0.5);
-  --bs-accordion-btn-color:    #e0e0e0;
-  --bs-accordion-btn-bg:       transparent;
-}
 
-@media (max-width: 991.98px) {
-  html.dark-mode .accordion-responsive {
-    --bs-accordion-active-color: #60a5fa;
-    --bs-accordion-active-bg:    rgba(13, 71, 161, 0.25);
-    --bs-accordion-bg:           transparent;
-    --bs-accordion-color:        #e0e0e0;
-    --bs-accordion-border-color: rgba(13, 71, 161, 0.5);
-    --bs-accordion-btn-color:    #e0e0e0;
-    --bs-accordion-btn-bg:       transparent;
-  }
 
-  html.dark-mode .accordion-responsive .accordion-item {
-    background: linear-gradient(180deg, rgba(14, 31, 53, 0.98) 0%, rgba(11, 24, 40, 0.98) 100%) !important;
-    border-color: rgba(13, 71, 161, 0.5) !important;
-    border-left-color: #0D47A1 !important;
-  }
 
-  html.dark-mode .accordion-responsive .accordion-button {
-    background: transparent !important;
-    color: #e0e0e0 !important;
-  }
 
-  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed) {
-    background: rgba(13, 71, 161, 0.25) !important;
-    color: #60a5fa !important;
-  }
 
-  html.dark-mode .accordion-responsive .accordion-body {
-    background: transparent !important;
-    color: #cbd5e1 !important;
-  }
-}
+
+
+
+
+
+
 
 /* ═══════════════════════════════════════════════════
    ACCORDION – responsive
    ═══════════════════════════════════════════════════ */
 @media (max-width: 767.98px) {
-  .accordion-responsive .accordion-button {
+.accordion-responsive .accordion-button {
     font-size: 0.9rem !important;
     padding: 0.9rem 1rem !important;
   }
@@ -959,30 +880,15 @@ html.dark-mode .accordion-responsive {
     --bs-gutter-y: 0.5rem;
   }
 
-  html.dark-mode .accordion-responsive .accordion-button {
-    background: transparent !important;
-    color: #e0e0e0 !important;
-  }
-  html.dark-mode .accordion-responsive .accordion-button:hover {
-    background: rgba(13, 71, 161, 0.12) !important;
-    color: #90CAF9 !important;
-  }
-  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed) {
-    background: rgba(13, 71, 161, 0.25) !important;
-    color: #60a5fa !important;
-  }
-  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed)::after {
-    content: '\f00d' !important;
-    color: #60a5fa !important;
-  }
-  html.dark-mode .accordion-responsive .accordion-body {
-    color: #cbd5e1 !important;
-    background: transparent !important;
-  }
+  
+  
+  
+  
+  
 }
 
 @media (max-width: 575.98px) {
-  .accordion-responsive .accordion-button {
+.accordion-responsive .accordion-button {
     font-size: 0.82rem !important;
     padding: 0.75rem 0.85rem !important;
   }
@@ -996,26 +902,11 @@ html.dark-mode .accordion-responsive {
     font-size: 0.85rem !important;
   }
 
-  html.dark-mode .accordion-responsive .accordion-button {
-    background: transparent !important;
-    color: #e0e0e0 !important;
-  }
-  html.dark-mode .accordion-responsive .accordion-button:hover {
-    background: rgba(13, 71, 161, 0.12) !important;
-    color: #90CAF9 !important;
-  }
-  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed) {
-    background: rgba(13, 71, 161, 0.25) !important;
-    color: #60a5fa !important;
-  }
-  html.dark-mode .accordion-responsive .accordion-button:not(.collapsed)::after {
-    content: '\f00d' !important;
-    color: #60a5fa !important;
-  }
-  html.dark-mode .accordion-responsive .accordion-body {
-    color: #cbd5e1 !important;
-    background: transparent !important;
-  }
+  
+  
+  
+  
+  
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1335,11 +1226,7 @@ code,
     overflow-x: hidden;
   }
 
-  .sidebar {
-    position: fixed !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    s-250,
+  .ms-250,
   .ms-280 {
     margin-left: 0 !important;
   }
@@ -1638,129 +1525,174 @@ section.chat-wrapper,
   }
 }
 
-/* Final override: accordions must remain visible in dark responsive views. */
+/* Final override: accordions must remain visible in light + dark responsive views. */
 @media (max-width: 991.98px) {
-  html.dark-mode .main-content :is(.accordion, .accordion-responsive, .faq-accordion) {
+  .main-content .accordion,
+  .main-content .accordion-responsive,
+  .main-content .faq-accordion {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    color: #e0e0e0 !important;
-    --bs-accordion-bg: transparent;
-    --bs-accordion-color: #e0e0e0;
-    --bs-accordion-border-color: rgba(96, 165, 250, 0.45);
-    --bs-accordion-btn-bg: transparent;
-    --bs-accordion-btn-color: #e0e0e0;
-    --bs-accordion-active-bg: rgba(13, 71, 161, 0.25);
-    --bs-accordion-active-color: #60a5fa;
   }
 
-  html.dark-mode .main-content :is(.accordion, .accordion-responsive, .faq-accordion) .accordion-item {
+  .main-content .accordion .accordion-item,
+  .main-content .accordion-responsive .accordion-item,
+  .main-content .faq-accordion .accordion-item {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     width: 100% !important;
-    background: linear-gradient(180deg, rgba(14, 31, 53, 0.98) 0%, rgba(11, 24, 40, 0.98) 100%) !important;
-    border-color: rgba(96, 165, 250, 0.45) !important;
-    border-left: 3px solid #0D47A1 !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32) !important;
   }
 
-  html.dark-mode .main-content :is(.accordion, .accordion-responsive, .faq-accordion) .accordion-button {
+  .main-content .accordion .accordion-button,
+  .main-content .accordion-responsive .accordion-button,
+  .main-content .faq-accordion .accordion-button {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
     align-items: center !important;
     width: 100% !important;
     min-height: 44px !important;
-    background: transparent !important;
-    color: #e0e0e0 !important;
   }
 
-  html.dark-mode .main-content :is(.accordion, .accordion-responsive, .faq-accordion) .accordion-button:hover {
-    background: rgba(13, 71, 161, 0.12) !important;
-    color: #90CAF9 !important;
-  }
-
-  html.dark-mode .main-content :is(.accordion, .accordion-responsive, .faq-accordion) .accordion-button:not(.collapsed) {
-    background: rgba(13, 71, 161, 0.25) !important;
-    color: #60a5fa !important;
-    box-shadow: none !important;
-  }
-
-  html.dark-mode .main-content :is(.accordion, .accordion-responsive, .faq-accordion) .accordion-button::after {
-    color: #60a5fa !important;
-    filter: none !important;
-  }
-
-  html.dark-mode .main-content :is(.accordion, .accordion-responsive, .faq-accordion) .accordion-body {
+  .main-content .accordion .accordion-body,
+  .main-content .accordion-responsive .accordion-body,
+  .main-content .faq-accordion .accordion-body {
     visibility: visible !important;
     opacity: 1 !important;
-    background: transparent !important;
-    color: #cbd5e1 !important;
+    display: block !important;
   }
 
-  html.dark-mode .main-content .faq-accordion :is(details, .faq-item) {
+}
+
+/* Extra override: accordions inside .main-content with :has(.sidebar) pseudo-selector */
+@media (max-width: 991.98px) {
+  body:has(.sidebar) .main-content .accordion,
+  body:has(.sidebar) .main-content .accordion-responsive,
+  body:has(.sidebar) .main-content .faq-accordion {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    background: linear-gradient(180deg, rgba(14, 31, 53, 0.98) 0%, rgba(11, 24, 40, 0.98) 100%) !important;
-    border-color: rgba(96, 165, 250, 0.45) !important;
   }
-
-  html.dark-mode .main-content .faq-accordion :is(summary, .faq-question) {
+  body:has(.sidebar) .main-content .accordion .accordion-item,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  body:has(.sidebar) .main-content .accordion .accordion-button,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-button {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    color: #e0e0e0 !important;
   }
 }
 
+
+
 /* Final layer fix: keep the responsive sidebar above page content in both themes. */
 @media (max-width: 991.98px) {
-  .main-content {
+.main-content {
     position: relative !important;
     z-index: 1 !important;
   }
 
-  .sidebar,
-  html.dark-mode .sidebar {
-    position: fixed !important;
-    z-index: 1300 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
+  
 
-  .sidebar.active,
-  .sidebar.show,
-  html.dark-mode .sidebar.active,
-  html.dark-mode .sidebar.show {
-    transform: translateX(0) !important;
-    z-index: 1300 !important;
-  }
+  
 
-  .sidebar-overlay,
-  html.dark-mode .sidebar-overlay {
-    z-index: 1290 !important;
-  }
+  
 
-  .sidebar-overlay.active,
-  .sidebar-overlay.show,
-  html.dark-mode .sidebar-overlay.active,
-  html.dark-mode .sidebar-overlay.show {
+  
+
+  
+}
+
+/* ═══════════════════════════════════════════════════
+    PATIENT & PROFESSIONAL ACCORDION FIXES
+    Ensure accordion is visible on mobile when inside main-content
+    ═══════════════════════════════════════════════════ */
+
+@media (max-width: 991px) {
+body:has(.sidebar) .main-content .accordion,
+  body:has(.sidebar) .main-content .accordion-responsive,
+  body:has(.sidebar) .main-content .faq-accordion {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    pointer-events: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
   }
 
-  .toggle-btn,
-  .menu-toggle,
-  html.dark-mode .toggle-btn,
-  html.dark-mode .menu-toggle {
-    z-index: 1310 !important;
+  body:has(.sidebar) .main-content .accordion-item,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    overflow: visible !important;
   }
+
+  body:has(.sidebar) .main-content .accordion-button,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  body:has(.sidebar) .main-content .accordion-body,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-body {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Dark mode overrides */
+  
+
+  
+
+  
+
+  
+
+  
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE: hide bottom nav
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 991.98px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  body.has-mobile-bottom-nav {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FINAL ACCORDION OVERRIDE - Ensure visibility
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 991px) {
+  body:has(.sidebar) .accordion,
+  body:has(.sidebar) .accordion-responsive,
+  body:has(.sidebar) .faq-accordion {
+    overflow: visible !important;
+  }
+
+  body:has(.sidebar) .main-content,
+  body:has(.sidebar) .main-content > * {
+    overflow: visible !important;
+  }
+
 }

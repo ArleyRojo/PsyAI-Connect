@@ -90,6 +90,10 @@ def create_password_recovery_token(email, token, expires):
         user = cursor.fetchone()
         if user:
             cursor.execute(
+                "UPDATE RecoveryTokens SET used = 1 WHERE idUsuario = %s AND used = 0",
+                (user["idUsuario"],),
+            )
+            cursor.execute(
                 "INSERT INTO RecoveryTokens (idUsuario, token, expires) VALUES (%s, %s, %s)",
                 (user["idUsuario"], token, expires),
             )

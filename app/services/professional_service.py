@@ -93,6 +93,10 @@ def get_deleted_reports(professional_id):
 
 
 def get_patient_chatbot_history(professional_id, patient_id):
-    from app.repositories import chat_repository
+    from app.repositories import chat_repository, professional_repository
+
+    if not professional_repository.professional_has_patient(professional_id, patient_id):
+        return {"success": False, "message": "No tienes acceso al historial de este paciente"}, 403
+
     return {"success": True, "historial": chat_repository.get_history(patient_id)}, 200
 

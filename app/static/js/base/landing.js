@@ -117,23 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /* ─────────────────────────────────────────────────────── */
-    /* 6. Carousel Auto-Play                                 */
-    /* ─────────────────────────────────────────────────────── */
-    const heroCarousel = document.getElementById('heroCarousel');
-    if (heroCarousel) {
-        // Crear carousel de Bootstrap si existe
-        try {
-            const carousel = new bootstrap.Carousel(heroCarousel, {
-                interval: 5000,
-                wrap: true,
-                pause: 'hover'
-            });
-        } catch (e) {
-            console.log('Bootstrap Carousel not available');
-        }
-    }
-    
-    /* ─────────────────────────────────────────────────────── */
     /* 7. Counter Animation on Scroll                         */
     /* ─────────────────────────────────────────────────────── */
     function animateCounters() {

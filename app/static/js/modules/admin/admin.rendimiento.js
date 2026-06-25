@@ -5,49 +5,94 @@ const sparklineHistory = {
     Server: [], Capacity: []
 };
 const SPARKLINE_MAX = 12;
-const _prevValues = {};
 const _sparkHashes = {};
 
 async function cargarRendimiento() {
     window.rendimientoCargado = true;
-    await verificarServidor();
-    await cargarStatsIniciales();
-    iniciarSSE();
+    // verificarServidor y cargarStatsIniciales son independientes → paralelo
+    await Promise.all([verificarServidor(), cargarStatsIniciales()]);
+    await iniciarSSEConTimeout();
+}
+
+// Reintento con backoff exponencial (3s, 6s, 12s, 24s, tope 30s)
+async function reintentar(fn, intentos = 0, maxIntentos = 5) {
+    const espera = Math.min(3000 * Math.pow(2, intentos), 30000);
+    await new Promise(r => setTimeout(r, espera));
+    try {
+        await fn();
+    } catch {
+        if (intentos < maxIntentos) return reintentar(fn, intentos + 1, maxIntentos);
+    }
 }
 
 async function cargarStatsIniciales() {
     try {
         const res = await fetch('/api/admin/stats', { credentials: 'include' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         if (data.success) aplicarStats(data.stats || {});
+        else throw new Error(data.message || 'Sin datos');
     } catch (e) {
         console.error('Error cargando stats iniciales:', e);
+        aplicarEstadoServidor('critical');
+        ['rendimientoVersion','rendimientoDB','rendimientoEntorno'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = 'Error de conexión';
+        });
     }
 }
 
-function iniciarSSE() {
+// Race entre primer mensaje SSE y timeout de seguridad (10s)
+async function iniciarSSEConTimeout(ms = 10000) {
     if (_sseSource) return;
-    _sseSource = new EventSource('/api/admin/stats/stream');
-    _sseSource.onmessage = function(event) {
-        try {
-            const data = JSON.parse(event.data);
-            if (data.success) aplicarStats(data.stats || {});
-        } catch (e) {
-            console.error('Error procesando SSE:', e);
-        }
-    };
-    _sseSource.onerror = function() {
-        console.warn('SSE desconectado, reintentando en 3s...');
-        _sseSource.close();
-        _sseSource = null;
-        aplicarEstadoServidor('critical');
-        setTimeout(() => {
-            if (window.rendimientoCargado) {
-                verificarServidor();
-                iniciarSSE();
+
+    let timeoutId = null;
+
+    const promesaSSE = new Promise((resolve, reject) => {
+        _sseSource = new EventSource('/api/admin/stats/stream');
+
+        _sseSource.onmessage = function(event) {
+            if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+            resolve();
+            try {
+                const data = JSON.parse(event.data);
+                if (data.success) aplicarStats(data.stats || {});
+            } catch (e) {
+                console.error('Error procesando SSE:', e);
             }
-        }, 3000);
-    };
+        };
+
+        _sseSource.onerror = function() {
+            if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+            _sseSource.close();
+            _sseSource = null;
+            reject(new Error('SSE connection error'));
+        };
+    });
+
+    const promesaTimeout = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+            timeoutId = null;
+            reject(new Error('SSE timeout'));
+        }, ms);
+    });
+
+    try {
+        await Promise.race([promesaSSE, promesaTimeout]);
+    } catch (e) {
+        if (_sseSource) { _sseSource.close(); _sseSource = null; }
+        console.warn('SSE no disponible:', e.message);
+        aplicarEstadoServidor('critical');
+    }
+
+    // Reconexión con backoff exponencial en caso de error
+    if (!_sseSource && window.rendimientoCargado) {
+        reintentar(async () => {
+            if (!window.rendimientoCargado) return;
+            await verificarServidor();
+            await iniciarSSEConTimeout(ms);
+        });
+    }
 }
 
 async function verificarServidor() {
@@ -158,7 +203,7 @@ function aplicarStats(stats) {
         endpointsList._lastHash = endpointsHash;
         if (stats.top_endpoints && stats.top_endpoints.length > 0) {
             endpointsList.innerHTML = stats.top_endpoints.map(ep =>
-                `<div class="top-endpoint premium-glow-hover"><span>${escapeHtml(ep.url)}</span><strong>${ep.porcentaje}%</strong></div>`
+                `<div class="top-endpoint"><span title="${escapeHtml(ep.url)}">${escapeHtml(ep.url)}</span><strong>${ep.porcentaje}%</strong></div>`
             ).join('');
         } else {
             endpointsList.innerHTML = '<div class="top-endpoint premium-glow-hover"><span>Sin datos aun</span><strong>-</strong></div>';
@@ -223,14 +268,7 @@ function aplicarStats(stats) {
     _updateText('metricUptime', stats.uptime);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.querySelector(".admin-panel-tab[onclick*=\"rendimiento\"]");
-    if (btn) {
-        btn.addEventListener('click', () => {
-            if (!window.rendimientoCargado) cargarRendimiento();
-        });
-    }
-});
+
 
 function pintarMetrica(nombre, valor, maximo, estadoBase) {
     const id = `metric${nombre}`;
@@ -290,6 +328,8 @@ function pintarSparkline(id, valores, estado = 'stable') {
 function pintarBarrasTrafico(stats) {
     const chart = document.getElementById('trafficChart');
     if (!chart) return;
+    const labels = ['Actividad/h', 'Requests', 'Visitas', 'Online', 'Top%'];
+    const colores = ['#42a5f5','#7c4dff','#26c6da','#66bb6a','#ffa726'];
     const valores = [
         stats.actividad_hora ?? 0,
         stats.requests_total ?? 0,
@@ -303,7 +343,15 @@ function pintarBarrasTrafico(stats) {
     const max = Math.max(...valores, 1);
     chart.innerHTML = valores.map((v, i) => {
         const pct = Math.round((v / max) * 100);
-        return `<div class="chart-line" style="width:${pct}%;"></div>`;
+        return `
+            <div class="chart-bar">
+                <div class="chart-bar-value">${v}</div>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill" style="height:${pct}%;background:${colores[i]}"></div>
+                </div>
+                <div class="chart-bar-label">${labels[i]}</div>
+            </div>
+        `;
     }).join('');
 }
 
