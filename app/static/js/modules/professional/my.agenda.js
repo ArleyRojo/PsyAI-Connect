@@ -28,8 +28,6 @@ function inicializarEventos() {
     if (btnAgendar) {
         btnAgendar.addEventListener('click', agendarCita);
     }
-
-
 }
 
 async function cargarDatosIniciales() {
@@ -126,6 +124,7 @@ async function cargarProfesionales() {
         console.error(err);
     }
 }
+
 
 // ── Agendar Cita ────────────────────────────────────────────
 async function agendarCita() {
