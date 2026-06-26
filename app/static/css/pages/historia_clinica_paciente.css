@@ -349,6 +349,10 @@ body, .aside-patient {
   box-shadow: 0 2px 8px rgba(13,71,161,.25);
 }
 .btn-upload-prev:hover { opacity: 0.88; transform: translateY(-1px); }
+<<<<<<< HEAD
+=======
+.btn-upload-prev i { display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1; }
+>>>>>>> 629d7c0 (avances)
 
 /* ── SHARE ROW (toggle de visibilidad) ── */
 .share-row {
@@ -546,4 +550,154 @@ hr.divider {
   .share-row { flex-wrap: wrap; gap: 8px; }
   .file-row  { flex-wrap: wrap; gap: 8px; }
   .toggle-wrap { white-space: normal; }
+<<<<<<< HEAD
 }
+=======
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DARK MODE — Historia Clínica Paciente
+   ══════════════════════════════════════════════════════════════════ */
+
+html.dark-mode .card-title i {
+  background: linear-gradient(135deg, rgba(13,71,161,0.25), rgba(13,71,161,0.4));
+  color: var(--dm-accent);
+}
+
+html.dark-mode .card-count {
+  background: var(--dm-elevated);
+  color: var(--dm-text2);
+  border-color: var(--dm-border);
+}
+
+html.dark-mode .notice.blue {
+  background: rgba(13,71,161,0.1);
+  color: var(--dm-accent);
+  border-color: rgba(13,71,161,0.3);
+}
+html.dark-mode .notice.blue i { color: var(--dm-accent); }
+
+html.dark-mode .notice.amber {
+  background: rgba(180,83,9,0.12);
+  color: #fbbf24;
+  border-color: rgba(180,83,9,0.25);
+}
+html.dark-mode .notice.amber i { color: #fbbf24; }
+html.dark-mode .notice.amber span { color: #fcd34d; }
+html.dark-mode .notice.amber strong { color: #fde68a; }
+
+html.dark-mode .file-row {
+  background: var(--dm-elevated);
+  border-color: var(--dm-border);
+}
+html.dark-mode .file-row:hover {
+  border-color: rgba(144,202,249,0.3);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+}
+
+html.dark-mode .ficon { border: 1px solid var(--dm-border); }
+html.dark-mode .ficon.pdf  { background: rgba(197,34,31,0.25); color: #fca5a5; }
+html.dark-mode .ficon.doc  { background: rgba(144,202,249,0.15); color: var(--dm-accent); }
+html.dark-mode .ficon.prev { background: rgba(144,202,249,0.15); color: var(--dm-accent); }
+
+html.dark-mode .fname { color: var(--dm-text1); }
+html.dark-mode .finfo { color: var(--dm-muted); }
+
+html.dark-mode .tag.compartido {
+  background: rgba(19,115,51,0.15);
+  color: #4ade80;
+  border-color: rgba(19,115,51,0.3);
+}
+html.dark-mode .tag.previo,
+html.dark-mode .tag.visible {
+  background: rgba(13,71,161,0.15);
+  color: var(--dm-accent);
+  border-color: rgba(13,71,161,0.3);
+}
+
+html.dark-mode .faction-btn { color: var(--dm-text2); }
+html.dark-mode .faction-btn:hover { background: var(--dm-border); color: var(--dm-text1); }
+html.dark-mode .faction-btn.danger:hover { background: rgba(197,34,31,0.2); color: #f87171; }
+
+html.dark-mode .upload-zone {
+  border-color: var(--dm-border);
+  background: var(--dm-elevated);
+  color: var(--dm-text2);
+}
+html.dark-mode .upload-zone i { color: var(--blue); }
+html.dark-mode .upload-zone p { color: var(--dm-text1); }
+html.dark-mode .upload-zone span { color: var(--dm-muted); }
+html.dark-mode .upload-zone:hover,
+html.dark-mode .upload-zone.dragover {
+  border-color: var(--dm-accent);
+  background: rgba(13,71,161,0.1);
+}
+
+html.dark-mode .btn-upload-prev {
+  background: var(--dm-accent);
+  color: var(--dm-deep, #030610);
+  box-shadow: 0 2px 8px rgba(144,202,249,0.2);
+}
+
+html.dark-mode .share-row {
+  background: var(--dm-elevated) !important;
+  border-color: var(--dm-border) !important;
+}
+html.dark-mode .share-row:hover { border-color: rgba(144,202,249,0.3) !important; }
+
+html.dark-mode .share-row-info { color: var(--dm-text2); }
+html.dark-mode .share-row-info strong { color: var(--dm-text1); }
+html.dark-mode .share-row i.fa-shield-alt { color: var(--dm-accent) !important; }
+
+html.dark-mode .toggle-wrap { color: var(--dm-muted); }
+
+html.dark-mode .toggle-slider { background: var(--dm-border2); }
+html.dark-mode .toggle-slider::before { background: var(--dm-deep, #111827); box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+html.dark-mode .toggle input:checked + .toggle-slider { background: var(--dm-accent); }
+
+html.dark-mode .file-preview {
+  background: rgba(13,71,161,0.1);
+  border-color: rgba(13,71,161,0.3);
+  color: var(--dm-accent);
+}
+html.dark-mode .file-preview .fsize-p { color: var(--dm-muted); }
+html.dark-mode .file-preview .remove { color: var(--dm-muted); }
+html.dark-mode .file-preview .remove:hover { color: #f87171; }
+
+html.dark-mode .btn-save-prev {
+  background: linear-gradient(135deg, var(--dm-accent), #1565C0);
+  color: var(--dm-deep, #030610);
+  box-shadow: none;
+}
+
+html.dark-mode hr.divider { border-color: var(--dm-border); }
+
+html.dark-mode .empty-state { color: var(--dm-muted); }
+html.dark-mode .empty-state i { color: var(--dm-border); }
+
+html.dark-mode .modal-overlay { background: rgba(0,0,0,0.6); }
+
+html.dark-mode .modal {
+  background: var(--dm-card);
+  border-color: var(--dm-border);
+}
+html.dark-mode .modal h3 { color: var(--dm-heading); }
+html.dark-mode .modal p { color: var(--dm-muted); }
+
+html.dark-mode .btn-cancel {
+  background: var(--dm-elevated);
+  border-color: var(--dm-border);
+  color: var(--dm-text2);
+}
+html.dark-mode .btn-cancel:hover { border-color: var(--dm-text1); }
+
+html.dark-mode .btn-danger { background: #dc2626; color: #fff; }
+
+html.dark-mode .toast {
+  background: var(--dm-elevated);
+  border: 1px solid var(--dm-border);
+  color: var(--dm-text1);
+}
+
+html.dark-mode .user-avatar { border-color: var(--dm-border); }
+>>>>>>> 629d7c0 (avances)

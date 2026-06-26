@@ -73,6 +73,7 @@
       </div>
     </header>
 
+<<<<<<< HEAD
     <!-- Patient Banner -->
     <div class="patient-banner">
       <div class="avatar green" id="patient-avatar">A</div>
@@ -230,6 +231,142 @@
 
       </div>
     </div>
+=======
+            <div class="patient-banner">
+              <div class="avatar green" id="patient-avatar">A</div>
+              <div class="patient-info">
+                <div class="patient-name" id="patient-name">Arley Rojo</div>
+                <div class="patient-meta" id="patient-email">Arleyandresrojomarin07@gmail.com &nbsp;·&nbsp; Paciente activo</div>
+              </div>
+              <span class="badge-status">Activo</span>
+              <a href="patients.html" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver a pacientes
+              </a>
+            </div>
+
+            <div class="card" style="border:none;box-shadow:none;background:transparent">
+              <div class="upload-zone" id="upload-zone">
+                <i class="fas fa-file-upload"></i>
+                <p>Arrastra el archivo aquí</p>
+                <span>PDF, Word, imágenes &nbsp;·&nbsp; máx. 20 MB</span><br>
+                <button class="btn-upload" type="button" onclick="document.getElementById('file-input').click()">
+                  <i class="fas fa-plus"></i> Seleccionar archivo
+                </button>
+              </div>
+              <input type="file" id="file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+              <div class="file-preview" id="file-preview">
+                <i class="fas fa-file-alt"></i>
+                <span class="fname" id="preview-name">—</span>
+                <span class="fsize" id="preview-size">—</span>
+                <i class="fas fa-times remove" onclick="clearFile()" title="Quitar"></i>
+              </div>
+            </div>
+
+            <div class="card" style="border:none;box-shadow:none;background:transparent">
+              <div class="form-group">
+                <label class="form-label">Categoría</label>
+                <select id="doc-category">
+                  <option value="">Selecciona una categoría…</option>
+                  <option value="sesion_inicial">Sesión inicial</option>
+                  <option value="evaluacion">Evaluación cognitiva</option>
+                  <option value="evolucion">Informe de evolución</option>
+                  <option value="consentimiento">Consentimiento informado</option>
+                  <option value="plan_terapeutico">Plan terapéutico</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Visibilidad</label>
+                <select id="doc-visibility">
+                  <option value="privado">Privado — solo yo lo veo</option>
+                  <option value="compartido">Compartido — el paciente también puede verlo</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Notas internas (opcional)</label>
+                <textarea id="doc-notes" rows="3" placeholder="Ej: Evaluación aplicada en sesión 3, paciente mostró…"></textarea>
+              </div>
+              <button class="btn-save" onclick="guardarDocumento()">
+                <i class="fas fa-check-circle"></i> Guardar documento
+              </button>
+            </div>
+
+            <div class="section-label"><i class="fas fa-lock"></i> Mis documentos</div>
+            <div class="file-list" id="my-docs-list">
+              <div class="file-row">
+                <div class="ficon pdf"><i class="fas fa-file-pdf"></i></div>
+                <div class="fmeta">
+                  <div class="fname">Historia_clinica_inicial.pdf</div>
+                  <div class="finfo">02 jun 2026 &nbsp;·&nbsp; 1.2 MB &nbsp;·&nbsp; Solo yo lo veo</div>
+                </div>
+                <span class="tag privado">Privado</span>
+                <div class="factions">
+                  <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
+                  <button class="faction-btn" title="Compartir con paciente" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
+                  <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
+                  <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+              <div class="file-row">
+                <div class="ficon doc"><i class="fas fa-file-alt"></i></div>
+                <div class="fmeta">
+                  <div class="fname">Informe_evolucion_mes1.pdf</div>
+                  <div class="finfo">01 jun 2026 &nbsp;·&nbsp; 340 KB &nbsp;·&nbsp; Visible para el paciente</div>
+                </div>
+                <span class="tag compartido">Compartido</span>
+                <div class="factions">
+                  <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
+                  <button class="faction-btn" title="Revocar acceso" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
+                  <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
+                  <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+              <div class="file-row">
+                <div class="ficon doc"><i class="fas fa-file-contract"></i></div>
+                <div class="fmeta">
+                  <div class="fname">Consentimiento_informado_firmado.pdf</div>
+                  <div class="finfo">15 may 2026 &nbsp;·&nbsp; 210 KB &nbsp;·&nbsp; Visible para el paciente</div>
+                </div>
+                <span class="tag compartido">Compartido</span>
+                <div class="factions">
+                  <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
+                  <button class="faction-btn" title="Revocar acceso" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
+                  <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
+                  <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="section-label"><i class="fas fa-history"></i> Historial previo — aportado por el paciente</div>
+
+            <div class="notice blue">
+              <i class="fas fa-shield-alt"></i>
+              <span>El paciente autorizó que veas estos documentos. Son registros de atenciones con otros profesionales, subidos y compartidos por el propio paciente. No puedes editarlos ni eliminarlos.</span>
+            </div>
+
+            <div class="file-list" id="prev-docs-list">
+              <div class="file-row">
+                <div class="ficon prev"><i class="fas fa-file-upload"></i></div>
+                <div class="fmeta">
+                  <div class="fname">Historia_clinica_psicologa_anterior.pdf</div>
+                  <div class="finfo">Subido por el paciente &nbsp;·&nbsp; 10 may 2026 &nbsp;·&nbsp; Autorización otorgada</div>
+                </div>
+                <span class="tag previo">Aportado por paciente</span>
+                <div class="factions">
+                  <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
+                  <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:14px;">
+              <i class="fas fa-info-circle" style="vertical-align:-2px;font-size:14px"></i>
+              Solo el paciente puede subir o revocar acceso a sus documentos previos
+            </p>
+
+>>>>>>> 629d7c0 (avances)
   </main>
 </div>
 
@@ -252,6 +389,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<<<<<<< HEAD
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
@@ -280,5 +418,15 @@ window.addEventListener('pageshow', function(event) {
     }
 });
 </script>
+=======
+<link rel="stylesheet" href="/responsive/responsive-professional.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/professional/aside.js?v=20260626-sidebar-state"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/nombre.usuario.js"></script>
+<script src="/js/modules/professional/historia_clinica_pro.js"></script>
+>>>>>>> 629d7c0 (avances)
 </body>
 </html>

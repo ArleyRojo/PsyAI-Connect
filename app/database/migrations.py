@@ -261,6 +261,17 @@ def init_db():
         if cursor.fetchone()[0] == 0:
             extra_alters.append("ALTER TABLE Reportes ADD COLUMN eliminado TINYINT(1) DEFAULT 0")
 
+<<<<<<< HEAD
+=======
+        for column_name in ("sintomas", "diagnostico", "tratamiento"):
+            cursor.execute("""
+                SELECT COUNT(*) FROM information_schema.COLUMNS 
+                WHERE TABLE_NAME = 'Reportes' AND COLUMN_NAME = %s AND TABLE_SCHEMA = DATABASE()
+            """, (column_name,))
+            if cursor.fetchone()[0] == 0:
+                extra_alters.append(f"ALTER TABLE Reportes ADD COLUMN {column_name} TEXT DEFAULT NULL")
+
+>>>>>>> 629d7c0 (avances)
         cursor.execute("""
             SELECT COUNT(*) FROM information_schema.COLUMNS 
             WHERE TABLE_NAME = 'Citas' AND COLUMN_NAME = 'motivoCancelacion' AND TABLE_SCHEMA = DATABASE()
@@ -341,6 +352,39 @@ def init_db():
         if estado_col and "pendiente" not in estado_col[0]:
             extra_alters.append("ALTER TABLE Notificaciones MODIFY COLUMN estado ENUM('enviado','pendiente') DEFAULT 'enviado'")
 
+<<<<<<< HEAD
+=======
+        cursor.execute("""
+            SELECT COUNT(*) FROM information_schema.COLUMNS 
+            WHERE TABLE_NAME = 'PacientesProfesional' AND COLUMN_NAME = 'diagnostico' AND TABLE_SCHEMA = DATABASE()
+        """)
+        if cursor.fetchone()[0] == 0:
+            extra_alters.append("ALTER TABLE PacientesProfesional ADD COLUMN diagnostico TEXT DEFAULT NULL")
+
+        cursor.execute("""
+            SELECT COUNT(*) FROM information_schema.COLUMNS 
+            WHERE TABLE_NAME = 'PacientesProfesional' AND COLUMN_NAME = 'tratamiento' AND TABLE_SCHEMA = DATABASE()
+        """)
+        if cursor.fetchone()[0] == 0:
+            extra_alters.append("ALTER TABLE PacientesProfesional ADD COLUMN tratamiento TEXT DEFAULT NULL")
+
+        cursor.execute("""
+            SELECT COUNT(*) FROM information_schema.COLUMNS 
+            WHERE TABLE_NAME = 'PacientesProfesional' AND COLUMN_NAME = 'fechaDiagnostico' AND TABLE_SCHEMA = DATABASE()
+        """)
+        if cursor.fetchone()[0] == 0:
+            extra_alters.append("ALTER TABLE PacientesProfesional ADD COLUMN fechaDiagnostico DATETIME DEFAULT CURRENT_TIMESTAMP")
+
+        cursor.execute("""
+            SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE 
+            WHERE TABLE_NAME = 'PacientesProfesional' 
+              AND CONSTRAINT_NAME = 'uq_profesional_paciente' 
+              AND TABLE_SCHEMA = DATABASE()
+        """)
+        if cursor.fetchone()[0] == 0:
+            extra_alters.append("ALTER TABLE PacientesProfesional ADD CONSTRAINT uq_profesional_paciente UNIQUE (idProfesional, idPaciente)")
+
+>>>>>>> 629d7c0 (avances)
         for alter in extra_alters:
             try:
                 cursor.execute(alter)

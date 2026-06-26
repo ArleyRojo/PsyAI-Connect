@@ -10,6 +10,11 @@ MAGIC_BYTES = {
     "pdf": (b"\x25\x50\x44\x46",),
     "gif": (b"\x47\x49\x46\x38",),
     "webp": (b"\x52\x49\x46\x46",),
+<<<<<<< HEAD
+=======
+    "doc": (b"\xd0\xcf\x11\xe0",),
+    "docx": (b"\x50\x4b\x03\x04",),
+>>>>>>> 629d7c0 (avances)
 }
 
 

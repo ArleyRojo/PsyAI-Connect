@@ -85,6 +85,12 @@ def role_history():
     for item in historial:
         if item.get("fecha"):
             item["fecha"] = item["fecha"].strftime("%d/%m/%Y %H:%M")
+<<<<<<< HEAD
+=======
+        item["usuario"] = item.pop("usuario_afectado", None)
+        item["rolAnterior"] = item.pop("rol_anterior", None)
+        item["rolNuevo"] = item.pop("rol_nuevo", None)
+>>>>>>> 629d7c0 (avances)
     return {"success": True, "historial": historial}, 200
 
 

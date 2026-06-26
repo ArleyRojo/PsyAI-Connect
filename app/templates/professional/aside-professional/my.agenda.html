@@ -22,6 +22,7 @@
 <script src="/js/core/shared/theme.js"></script>
     <script src="/js/core/shared/localStorage-detector.js"></script>
 
+<<<<<<< HEAD
 <style>
 /* ============================================================
    MI AGENDA — SaaS Premium Redesign v2
@@ -713,6 +714,9 @@ html.dark-mode .input-icon {
     color: var(--dm-muted);
 }
 </style>
+=======
+</head>
+>>>>>>> 629d7c0 (avances)
 <body class="aside-professional">
 
 <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
@@ -756,7 +760,11 @@ html.dark-mode .input-icon {
     </aside>
 
     <!-- Main content -->
+<<<<<<< HEAD
     <main class="main-content flex-grow-1 ms-250 p-4">
+=======
+    <main class="main-content flex-grow-1 ms-250 p-4 agenda-page">
+>>>>>>> 629d7c0 (avances)
         <!-- Header -->
         <header class="main-header d-flex justify-content-between align-items-center mb-4">
             <h1 class="h3 fw-bold text-dark mb-0"><i class="fas fa-calendar-alt text-primary me-2"></i> Mi Agenda</h1>
@@ -766,6 +774,7 @@ html.dark-mode .input-icon {
             </div>
         </header>
 
+<<<<<<< HEAD
         <!-- Stats bar -->
         <div class="agenda-stats" id="agendaStats">
             <div class="stat-card">
@@ -928,6 +937,181 @@ html.dark-mode .input-icon {
     </div>
   </form>
 </section>
+=======
+                        <div class="agenda-stats" id="agendaStats">
+                            <div class="stat-card">
+                                <div class="stat-icon-wrap stat-icon-blue"><i class="fas fa-calendar-check"></i></div>
+                                <div>
+                                    <div class="stat-number" id="statTotal">—</div>
+                                    <div class="stat-label">Totales</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon-wrap stat-icon-green"><i class="fas fa-check-circle"></i></div>
+                                <div>
+                                    <div class="stat-number" id="statConfirmadas">—</div>
+                                    <div class="stat-label">Confirmadas</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon-wrap stat-icon-red"><i class="fas fa-times-circle"></i></div>
+                                <div>
+                                    <div class="stat-number" id="statCanceladas">—</div>
+                                    <div class="stat-label">Canceladas</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon-wrap stat-icon-amber"><i class="fas fa-clock"></i></div>
+                                <div>
+                                    <div class="stat-number" id="statProximas">—</div>
+                                    <div class="stat-label">Próximas</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="contenedorCitas" class="mb-4">
+                            <ul class="list-group" id="listaCitas">
+                                <li class="list-group-item skeleton-item cita-row"><div class="skeleton-shimmer"></div><div class="skeleton-shimmer"></div></li>
+                                <li class="list-group-item skeleton-item cita-row"><div class="skeleton-shimmer"></div><div class="skeleton-shimmer"></div></li>
+                                <li class="list-group-item skeleton-item cita-row"><div class="skeleton-shimmer"></div><div class="skeleton-shimmer"></div></li>
+                            </ul>
+                        </div>
+
+                        <section id="agenda" class="card appointment-panel appointment-panel--availability mb-4">
+                          <div class="availability-panel">
+                           <form>
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label for="fecha" class="form-label fw-semibold">Fecha:</label>
+                      <input type="date" id="fecha" class="form-control" name="fecha">
+                    </div>
+                    <div class="col-md-8">
+                      <label for="hora_disponible" class="form-label fw-semibold">Horario disponible:</label>
+                      <select id="hora_disponible" class="form-control" name="hora_disponible">
+                        <option value="">Seleccionar horario...</option>
+                        <option value="08:00-08:30">08:00 AM - 08:30 AM</option>
+                        <option value="08:30-09:00">08:30 AM - 09:00 AM</option>
+                        <option value="09:00-09:30">09:00 AM - 09:30 AM</option>
+                        <option value="09:30-10:00">09:30 AM - 10:00 AM</option>
+                        <option value="10:00-10:30">10:00 AM - 10:30 AM</option>
+                        <option value="10:30-11:00">10:30 AM - 11:00 AM</option>
+                        <option value="11:00-11:30">11:00 AM - 11:30 AM</option>
+                        <option value="11:30-12:00">11:30 AM - 12:00 PM</option>
+                        <option value="12:00-12:30">12:00 PM - 12:30 PM</option>
+                        <option value="12:30-13:00">12:30 PM - 01:00 PM</option>
+                        <option value="13:00-13:30">01:00 PM - 01:30 PM</option>
+                        <option value="13:30-14:00">01:30 PM - 02:00 PM</option>
+                        <option value="14:00-14:30">02:00 PM - 02:30 PM</option>
+                        <option value="14:30-15:00">02:30 PM - 03:00 PM</option>
+                        <option value="15:00-15:30">03:00 PM - 03:30 PM</option>
+                        <option value="15:30-16:00">03:30 PM - 04:00 PM</option>
+                        <option value="16:00-16:30">04:00 PM - 04:30 PM</option>
+                        <option value="16:30-17:00">04:30 PM - 05:00 PM</option>
+                        <option value="17:00-17:30">05:00 PM - 05:30 PM</option>
+                        <option value="17:30-18:00">05:30 PM - 06:00 PM</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="d-flex justify-content-end mt-3">
+                    <button type="button" id="btnDisponibilidad" class="btn btn-primary px-5">
+                      <i class="fas fa-plus me-2"></i>Agregar Disponibilidad
+                    </button>
+                  </div>
+                </form>
+                          </div>
+                        </section>
+
+                        <section id="agendarCita" class="card appointment-panel appointment-panel--schedule mb-4">
+                          <form>
+                            <div class="row g-3">
+                              <div class="col-md-6">
+                                <label class="form-label fw-semibold">Profesional:</label>
+                                <div class="input-with-icon">
+                                  <i class="fas fa-user-md input-icon"></i>
+                                  <select id="citaProfesional" class="form-control ps-icon">
+                                    <option value="">Seleccionar profesional...</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="col-md-6">
+                                <label class="form-label fw-semibold">Paciente:</label>
+                                <div class="input-with-icon">
+                                  <i class="fas fa-user input-icon"></i>
+                                  <select id="citaPaciente" class="form-control ps-icon">
+                                    <option value="">Seleccionar paciente...</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="row g-3 mt-2">
+                              <div class="col-md-3">
+                                <label class="form-label fw-semibold">Fecha:</label>
+                                <div class="input-with-icon">
+                                  <i class="fas fa-calendar input-icon"></i>
+                                  <input type="date" id="citaFecha" class="form-control ps-icon">
+                                </div>
+                              </div>
+                              <div class="col-md-3">
+                                <label class="form-label fw-semibold">Hora:</label>
+                                <div class="input-with-icon">
+                                  <i class="fas fa-clock input-icon"></i>
+                                  <select id="citaHora" class="form-control ps-icon">
+                                    <option value="">Seleccionar horario...</option>
+                                    <option value="08:00-08:30">08:00 AM - 08:30 AM</option>
+                                    <option value="08:30-09:00">08:30 AM - 09:00 AM</option>
+                                    <option value="09:00-09:30">09:00 AM - 09:30 AM</option>
+                                    <option value="09:30-10:00">09:30 AM - 10:00 AM</option>
+                                    <option value="10:00-10:30">10:00 AM - 10:30 AM</option>
+                                    <option value="10:30-11:00">10:30 AM - 11:00 AM</option>
+                                    <option value="11:00-11:30">11:00 AM - 11:30 AM</option>
+                                    <option value="11:30-12:00">11:30 AM - 12:00 PM</option>
+                                    <option value="12:00-12:30">12:00 PM - 12:30 PM</option>
+                                    <option value="12:30-13:00">12:30 PM - 01:00 PM</option>
+                                    <option value="13:00-13:30">01:00 PM - 01:30 PM</option>
+                                    <option value="13:30-14:00">01:30 PM - 02:00 PM</option>
+                                    <option value="14:00-14:30">02:00 PM - 02:30 PM</option>
+                                    <option value="14:30-15:00">02:30 PM - 03:00 PM</option>
+                                    <option value="15:00-15:30">03:00 PM - 03:30 PM</option>
+                                    <option value="15:30-16:00">03:30 PM - 04:00 PM</option>
+                                    <option value="16:00-16:30">04:00 PM - 04:30 PM</option>
+                                    <option value="16:30-17:00">04:30 PM - 05:00 PM</option>
+                                    <option value="17:00-17:30">05:00 PM - 05:30 PM</option>
+                                    <option value="17:30-18:00">05:30 PM - 06:00 PM</option>
+                                  </select>
+                                </div>
+                                <small class="form-text small text-muted"><i class="far fa-clock"></i> Duración: 30 minutos</small>
+                              </div>
+                              <div class="col-md-3">
+                                <label class="form-label fw-semibold">Tipo de Cita:</label>
+                                <div class="input-with-icon">
+                                  <i class="fas fa-tag input-icon"></i>
+                                  <select id="citaTipo" class="form-control ps-icon">
+                                    <option value="">Seleccionar</option>
+                                    <option value="Primera sesión">Primera sesión</option>
+                                    <option value="Seguimiento">Seguimiento</option>
+                                    <option value="Evaluación">Evaluación</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="col-md-3">
+                                <label class="form-label fw-semibold">Motivo:</label>
+                                <div class="input-with-icon">
+                                  <i class="fas fa-comment input-icon"></i>
+                                  <input type="text" id="citaMotivo" class="form-control ps-icon" placeholder="Motivo">
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-3">
+                              <button type="button" id="btnAgendarCita" class="btn btn-success px-5">
+                                <i class="fas fa-save me-2"></i>Agendar Cita
+                              </button>
+                            </div>
+                          </form>
+                        </section>
+>>>>>>> 629d7c0 (avances)
     </main>
 </div>
 
@@ -964,6 +1148,7 @@ html.dark-mode .input-icon {
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<<<<<<< HEAD
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
     <script src="/js/core/shared/alerts.js"></script>
@@ -993,6 +1178,16 @@ window.addEventListener('pageshow', function(event) {
 });
 </script>
 
+=======
+<link rel="stylesheet" href="/responsive/responsive-professional.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/professional/aside.js?v=20260626-sidebar-state"></script>
+<script src="/js/modules/auth/logout.js"></script>
+    <script src="/js/core/shared/nombre.usuario.js"></script>
+<script src="/js/modules/professional/my.agenda.js"></script>
+>>>>>>> 629d7c0 (avances)
 </body>
 </html>
 

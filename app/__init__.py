@@ -529,7 +529,11 @@ def create_app():
             "default-src 'self'; "
             "script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; "
             "style-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com 'unsafe-inline'; "
+<<<<<<< HEAD
             "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; "
+=======
+            "font-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.gstatic.com; "
+>>>>>>> 629d7c0 (avances)
             "img-src 'self' data:; "
             "connect-src 'self'; "
             "frame-ancestors 'none'",
@@ -545,7 +549,12 @@ def create_app():
         content_type = response.headers.get("Content-Type", "")
         if response.status_code < 400 and "text/html" in content_type:
             try:
+<<<<<<< HEAD
                 _log_page_resources(request.path, response.get_data(as_text=True))
+=======
+                if app.config.get("FLASK_ENV") != "production":
+                    _log_page_resources(request.path, response.get_data(as_text=True))
+>>>>>>> 629d7c0 (avances)
             except Exception as exc:
                 app.logger.warning("No se pudieron detectar recursos para %s: %s", request.path, exc)
             response = _inject_csrf_meta(response)

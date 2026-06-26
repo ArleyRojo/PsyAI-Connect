@@ -1525,6 +1525,350 @@ section.chat-wrapper,
   }
 }
 
+<<<<<<< HEAD
+=======
+/* Reports professional: final mobile layout overrides. */
+@media (max-width: 991.98px) {
+  body.aside-professional .reports-page {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  body.aside-professional .reports-page .main-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.8rem;
+    padding: 1rem 1.1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  body.aside-professional .reports-page .main-header h1 {
+    min-width: 0;
+    font-size: 1.18rem !important;
+    line-height: 1.2;
+  }
+
+  body.aside-professional .reports-page .reports-stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.8rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats > [class*="col-"] {
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-card,
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    min-height: 98px !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    column-gap: 0.65rem !important;
+    padding: 0.8rem 0.75rem 0.8rem 0.95rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-icon-wrap {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.85rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-label {
+    font-size: 0.64rem !important;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-number {
+    font-size: 1.45rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator {
+    padding: 1rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .row {
+    --bs-gutter-x: 0.8rem;
+    --bs-gutter-y: 0.8rem;
+  }
+
+  body.aside-professional .reports-page .reports-generator .row > [class*="col-"] {
+    margin-bottom: 0 !important;
+  }
+
+  body.aside-professional .reports-page .report-toolbar {
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin: 0 !important;
+    padding: 0.95rem 1rem !important;
+  }
+
+  body.aside-professional .reports-page .report-filter-control {
+    flex: 0 1 280px;
+    min-width: min(280px, 100%);
+  }
+
+  body.aside-professional .reports-page .deleted-table-heading {
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  body.aside-professional .reports-page {
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
+  }
+
+  body.aside-professional .reports-page .main-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 0.85rem !important;
+  }
+
+  body.aside-professional .reports-page .main-header .user-info {
+    display: none !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.6rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-card,
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    min-height: 76px !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    grid-template-columns: 30px minmax(0, 1fr) !important;
+    padding: 0.68rem 0.62rem 0.68rem 0.82rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-icon-wrap {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-number {
+    font-size: 1.16rem !important;
+  }
+
+  body.aside-professional .reports-page .panel-title-row,
+  body.aside-professional .reports-page .deleted-table-heading {
+    align-items: flex-start !important;
+    gap: 0.75rem;
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  body.aside-professional .reports-page .panel-title {
+    font-size: 0.98rem !important;
+  }
+
+  body.aside-professional .reports-page .panel-title-icon,
+  body.aside-professional .reports-page .deleted-table-heading > i {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .row,
+  body.aside-professional .reports-page .reports-generator .row.mt-2,
+  body.aside-professional .reports-page .reports-generator .row.mt-4 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    margin-top: 0.7rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .row > [class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .form-control,
+  body.aside-professional .reports-page .reports-generator .form-select,
+  body.aside-professional .reports-page .report-filter-select {
+    min-height: 42px !important;
+    font-size: 0.82rem !important;
+  }
+
+  body.aside-professional .reports-page .report-form-note {
+    margin-bottom: 0 !important;
+    font-size: 0.78rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .text-end,
+  body.aside-professional .reports-page .btn-generate,
+  body.aside-professional .reports-page .report-filter-control,
+  body.aside-professional .reports-page .report-filter-select {
+    width: 100% !important;
+  }
+
+  body.aside-professional .reports-page .report-toolbar {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+    margin-top: 0 !important;
+    padding: 0.85rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel {
+    overflow: visible !important;
+    border: 1px solid rgba(13, 71, 161, 0.12) !important;
+    background: var(--reports-surface, #fff) !important;
+    box-shadow: var(--reports-shadow, 0 12px 30px rgba(19, 44, 74, .07)) !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel .table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel thead {
+    display: none !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody {
+    display: grid !important;
+    gap: 0.7rem !important;
+    width: 100% !important;
+    padding: 0.75rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody tr {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+    width: 100% !important;
+    padding: 0.85rem !important;
+    border: 1px solid rgba(13, 71, 161, 0.1) !important;
+    border-radius: 12px !important;
+    background: var(--reports-soft, #f5f8fc) !important;
+    box-shadow: none !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td {
+    display: grid !important;
+    grid-template-columns: minmax(6.5rem, 36%) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0.48rem 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08) !important;
+    color: inherit;
+    font-size: 0.78rem !important;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td::before {
+    color: var(--reports-muted, #667085) !important;
+    font-size: 0.62rem !important;
+    font-weight: 800 !important;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body.aside-professional .reports-page #tablaReportes td:nth-child(1)::before { content: "Desde"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(2)::before { content: "Hasta"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(3)::before { content: "Paciente"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(4)::before { content: "Tipo"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(5)::before { content: "Estado"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(6)::before { content: "Acciones"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(1)::before { content: "Desde"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(2)::before { content: "Hasta"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(3)::before { content: "Paciente"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(4)::before { content: "Tipo"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(5)::before { content: "Estado"; }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td[colspan] {
+    display: block !important;
+    text-align: center !important;
+    border-bottom: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td[colspan]::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  body.aside-professional .reports-page #tablaReportes td:last-child {
+    grid-template-columns: minmax(6.5rem, 36%) minmax(0, 1fr) !important;
+  }
+
+  body.aside-professional .reports-page #tablaReportes td:last-child .btn {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    margin: 0.08rem 0.18rem 0.08rem 0 !important;
+  }
+
+  body.aside-professional .reports-page .badge-estado {
+    width: fit-content;
+    min-width: 0 !important;
+    max-width: 100%;
+    padding: 0.32rem 0.62rem !important;
+    font-size: 0.68rem !important;
+  }
+
+  body.aside-professional .professional-toast-wrap {
+    left: 0.65rem !important;
+    right: 0.65rem !important;
+    bottom: 0.65rem !important;
+    padding: 0 !important;
+  }
+
+  body.aside-professional #toastReporte {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body.aside-professional .reports-page .reports-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td,
+  body.aside-professional .reports-page #tablaReportes td:last-child {
+    grid-template-columns: 1fr !important;
+    gap: 0.2rem !important;
+  }
+
+  body.aside-professional .reports-page #tablaReportes td:last-child .btn {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+}
+
+>>>>>>> 629d7c0 (avances)
 /* Final override: accordions must remain visible in light + dark responsive views. */
 @media (max-width: 991.98px) {
   .main-content .accordion,
@@ -1696,3 +2040,35 @@ body:has(.sidebar) .main-content .accordion,
   }
 
 }
+<<<<<<< HEAD
+=======
+
+/* Final mobile fix: closed accordions must stay closed when entering from another page. */
+@media (max-width: 991.98px) {
+  body.professional-dashboard .main-content .accordion-collapse:not(.show),
+  body.professional-dashboard .main-content .accordion-responsive .accordion-collapse:not(.show),
+  body:has(.sidebar) .main-content .accordion-collapse:not(.show),
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-collapse:not(.show) {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  body.professional-dashboard .main-content .accordion-collapse:not(.show) .accordion-body,
+  body.professional-dashboard .main-content .accordion-responsive .accordion-collapse:not(.show) .accordion-body,
+  body:has(.sidebar) .main-content .accordion-collapse:not(.show) .accordion-body,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-collapse:not(.show) .accordion-body {
+    display: none !important;
+  }
+
+  body.professional-dashboard .main-content .accordion-collapse.show,
+  body.professional-dashboard .main-content .accordion-responsive .accordion-collapse.show,
+  body:has(.sidebar) .main-content .accordion-collapse.show,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-collapse.show {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+>>>>>>> 629d7c0 (avances)

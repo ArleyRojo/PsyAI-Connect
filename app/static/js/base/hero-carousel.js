@@ -35,7 +35,11 @@
           img.setAttribute('data-src', src);
           img.removeAttribute('src');
         }
+<<<<<<< HEAD
         img.style.background = '#f0f5fc';
+=======
+        img.style.background = '';
+>>>>>>> 629d7c0 (avances)
       }
       observer.observe(img);
     });

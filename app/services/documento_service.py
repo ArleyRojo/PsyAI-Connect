@@ -57,7 +57,11 @@ def list_patient_docs(professional_id, patient_id):
 def upload_profesional_doc(professional_id, patient_id, file, categoria, visibilidad, notas):
     safe_name, error = validate_upload(
         file,
+<<<<<<< HEAD
         allowed_extensions={"jpg", "jpeg", "png", "pdf", "gif", "webp"},
+=======
+        allowed_extensions={"jpg", "jpeg", "png", "pdf", "doc", "docx", "gif", "webp"},
+>>>>>>> 629d7c0 (avances)
         max_size_mb=20,
     )
     if error:
@@ -138,7 +142,11 @@ def list_patient_dashboard(patient_id):
 def upload_patient_doc(patient_id, file, descripcion):
     safe_name, error = validate_upload(
         file,
+<<<<<<< HEAD
         allowed_extensions={"jpg", "jpeg", "png", "pdf", "gif", "webp"},
+=======
+        allowed_extensions={"jpg", "jpeg", "png", "pdf", "doc", "docx", "gif", "webp"},
+>>>>>>> 629d7c0 (avances)
         max_size_mb=20,
     )
     if error:

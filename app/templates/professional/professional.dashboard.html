@@ -23,7 +23,11 @@
     <script src="/js/core/shared/localStorage-detector.js"></script>
 
 </head>
+<<<<<<< HEAD
 <body>
+=======
+<body class="professional-dashboard">
+>>>>>>> 629d7c0 (avances)
 
 <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -273,10 +277,18 @@
 <!-- Bootstrap JS (sin defer para que esté disponible antes del script inline) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
+<<<<<<< HEAD
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618-accordion">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
 <script src="/js/modules/professional/aside.js?v=20260522-5"></script>
+=======
+<link rel="stylesheet" href="/responsive/responsive-professional.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260626-accordion-closed">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/professional/aside.js?v=20260626-sidebar-state"></script>
+>>>>>>> 629d7c0 (avances)
 <script src="/js/modules/auth/logout.js"></script>
 <script src="/js/core/shared/nombre.usuario.js"></script>
 <script>
@@ -778,6 +790,7 @@ window.addEventListener('localStorageChange', (e) => {
     }
 });
 
+<<<<<<< HEAD
 // Forzar que todos los acordeones inicien cerrados
 document.querySelectorAll('.accordion-collapse').forEach(function(el) {
     el.classList.remove('show');
@@ -795,6 +808,50 @@ window.addEventListener('pageshow', function(event) {
                 new bootstrap.Collapse(el, { toggle: false }).hide();
             }
         });
+=======
+function resetProfessionalAccordions() {
+    document.querySelectorAll('#accordionDashboard .accordion-collapse').forEach(function(el) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+            var instance = bootstrap.Collapse.getInstance(el);
+            if (instance) instance.dispose();
+        }
+
+        el.classList.remove('show', 'collapsing');
+        el.style.height = '';
+        el.style.display = '';
+        el.setAttribute('aria-expanded', 'false');
+
+        var trigger = document.querySelector('[data-bs-target="#' + el.id + '"]');
+        if (trigger) {
+            trigger.classList.add('collapsed');
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+    });
+}
+
+function resetProfessionalAccordionsOnMobile() {
+    if (window.innerWidth <= 991) resetProfessionalAccordions();
+}
+
+// En móvil, evitar que el acordeón aparezca abierto al entrar, salir o volver desde otra página.
+resetProfessionalAccordionsOnMobile();
+document.addEventListener('DOMContentLoaded', resetProfessionalAccordionsOnMobile);
+window.addEventListener('pageshow', function() {
+    resetProfessionalAccordionsOnMobile();
+    requestAnimationFrame(resetProfessionalAccordionsOnMobile);
+    setTimeout(resetProfessionalAccordionsOnMobile, 80);
+    setTimeout(resetProfessionalAccordionsOnMobile, 250);
+});
+window.addEventListener('pagehide', resetProfessionalAccordions);
+window.addEventListener('beforeunload', resetProfessionalAccordions);
+document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
+    link.addEventListener('click', resetProfessionalAccordions, { capture: true });
+});
+
+window.addEventListener('resize', function() {
+    if (window.innerWidth <= 991) {
+        resetProfessionalAccordions();
+>>>>>>> 629d7c0 (avances)
     }
 });
 </script>

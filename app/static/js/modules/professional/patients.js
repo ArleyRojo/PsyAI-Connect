@@ -5,6 +5,10 @@
 var pacienteSeleccionado = null;   // idUsuario (Number)
 var filaSeleccionadaAnterior = null;
 var evolucionData = [];
+<<<<<<< HEAD
+=======
+var pacientesEvolucionData = [];
+>>>>>>> 629d7c0 (avances)
 
 // ── Init ─────────────────────────────────────────────────────
 
@@ -25,6 +29,36 @@ window.onload = function () {
     cargarHistorial();
 };
 
+<<<<<<< HEAD
+=======
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function normalizarTexto(valor) {
+    return String(valor ?? '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function getPacienteId(item) {
+    return item?.idPaciente ?? item?.idUsuario ?? '';
+}
+
+function getPacienteFiltroValue(item) {
+    var id = getPacienteId(item);
+    if (id !== null && id !== undefined && String(id) !== '') return 'id:' + id;
+    return 'name:' + normalizarTexto(item?.paciente || item?.nombre || '');
+}
+
+>>>>>>> 629d7c0 (avances)
 // ── Saludo con nombre real de sesión ─────────────────────────
 
 async function cargarSaludoProfesional() {
@@ -407,12 +441,16 @@ function mostrarPestana(pestana, btnEl) {
         cargarPacientes();
         cargarHistorial();
     } else if (pestana === 'evolucion') {
+<<<<<<< HEAD
         cargarPacientesSelectEvolucion();
+=======
+>>>>>>> 629d7c0 (avances)
         cargarEvolucion();
     }
 }
 
 // ── Evolución ─────────────────────────────────────────────────
+<<<<<<< HEAD
 
 function cargarPacientesSelectEvolucion() {
     var select = document.getElementById("selectPacienteEvolucion");
@@ -494,6 +532,9 @@ function renderEvolucion(lista) {
             "</tr>";
     }).join('');
 }
+=======
+// (funciones de evolución definidas en patients.evolution.js)
+>>>>>>> 629d7c0 (avances)
 
 // ── Helpers ───────────────────────────────────────────────────
 

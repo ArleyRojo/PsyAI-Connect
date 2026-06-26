@@ -278,6 +278,10 @@ nav.breadcrumb .sep { color: var(--gray-300); }
   transition: opacity 0.15s, transform 0.15s;
 }
 .btn-upload:hover { opacity: 0.88; transform: translateY(-1px); }
+<<<<<<< HEAD
+=======
+.btn-upload i { display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1; }
+>>>>>>> 629d7c0 (avances)
 #file-input { display: none; }
 
 /* ── FORM ── */
@@ -635,7 +639,124 @@ html.dark-mode .toast {
   color: var(--dm-text1);
 }
 
+<<<<<<< HEAD
 /* ── RESPONSIVE ── */
+=======
+/* ── Ficon icons ── */
+html.dark-mode .ficon { border: 1px solid var(--dm-border); }
+html.dark-mode .ficon.pdf   { background: rgba(197,34,31,0.25); color: #fca5a5; }
+html.dark-mode .ficon.doc   { background: rgba(144,202,249,0.15); color: var(--dm-accent); }
+html.dark-mode .ficon.docx  { background: rgba(144,202,249,0.15); color: var(--dm-accent); }
+html.dark-mode .ficon.img   { background: rgba(19,115,51,0.25); color: #6ee7b7; }
+html.dark-mode .ficon.prev  { background: rgba(144,202,249,0.15); color: var(--dm-accent); }
+
+/* ── Tags ── */
+html.dark-mode .tag.privado {
+  background: rgba(13,71,161,0.15);
+  color: var(--dm-accent);
+  border-color: rgba(13,71,161,0.3);
+}
+html.dark-mode .tag.compartido {
+  background: rgba(19,115,51,0.15);
+  color: #4ade80;
+  border-color: rgba(19,115,51,0.3);
+}
+html.dark-mode .tag.previo {
+  background: rgba(13,71,161,0.15);
+  color: var(--dm-accent);
+  border-color: rgba(13,71,161,0.3);
+}
+
+/* ── Faction buttons ── */
+html.dark-mode .faction-btn { color: var(--dm-text2); }
+html.dark-mode .faction-btn:hover { background: var(--dm-border); color: var(--dm-text1); }
+html.dark-mode .faction-btn.danger:hover { background: rgba(197,34,31,0.2); color: #f87171; }
+
+/* ── Avatar ── */
+html.dark-mode .avatar.green { background: rgba(19,115,51,0.25); color: #4ade80; }
+html.dark-mode .avatar.blue  { background: rgba(13,71,161,0.25); color: var(--dm-accent); }
+
+/* ── Badge status ── */
+html.dark-mode .badge-status {
+  background: rgba(19,115,51,0.15);
+  color: #4ade80;
+  border-color: rgba(19,115,51,0.3);
+}
+
+/* ── Card title icon ── */
+html.dark-mode .card-title i {
+  background: linear-gradient(135deg, rgba(13,71,161,0.25), rgba(13,71,161,0.4));
+  color: var(--dm-accent);
+}
+
+/* ── Upload zone ── */
+html.dark-mode .upload-zone i { color: var(--blue); }
+html.dark-mode .upload-zone span { color: var(--dm-text2); }
+html.dark-mode .upload-zone:hover,
+html.dark-mode .upload-zone.dragover {
+  border-color: var(--dm-accent);
+  background: rgba(13,71,161,0.1);
+}
+
+/* ── Buttons ── */
+html.dark-mode .btn-upload {
+  background: var(--dm-accent);
+  color: var(--dm-deep, #030610);
+}
+html.dark-mode .btn-save {
+  background: linear-gradient(135deg, var(--dm-accent), #1565C0);
+  color: var(--dm-deep, #030610);
+  box-shadow: none;
+}
+html.dark-mode .btn-danger {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* ── File preview ── */
+html.dark-mode .file-preview {
+  background: rgba(13,71,161,0.1);
+  border-color: rgba(13,71,161,0.3);
+  color: var(--dm-accent);
+}
+html.dark-mode .file-preview .fsize,
+html.dark-mode .file-preview .remove { color: var(--dm-text2); }
+html.dark-mode .file-preview .remove:hover { color: #f87171; }
+
+/* ── User avatar border ── */
+html.dark-mode .user-avatar { border-color: var(--dm-border); }
+
+/* ── Toast icon ── */
+html.dark-mode .toast i { color: #4ade80; }
+
+/* ── Empty state ── */
+html.dark-mode .empty-state { color: var(--dm-text2); }
+html.dark-mode .empty-state i { color: var(--dm-border); }
+
+/* ── Inline muted text override ── */
+html.dark-mode p[style*="gray-400"] { color: var(--dm-text2) !important; }
+
+/* ── Notice icon ── */
+html.dark-mode .notice.blue i { color: var(--dm-accent); }
+html.dark-mode .notice.amber i { color: #fbbf24; }
+
+/* ── Form focus shadow ── */
+html.dark-mode select:focus,
+html.dark-mode textarea:focus,
+html.dark-mode input[type="text"]:focus {
+  background: var(--dm-card);
+  box-shadow: 0 0 0 3px rgba(144,202,249,0.15);
+}
+
+/* ── Back button hover ── */
+html.dark-mode .btn-back:hover {
+  background: rgba(13,71,161,0.2);
+  color: var(--dm-accent);
+  border-color: var(--dm-accent);
+}
+
+/* ── Responsive ── */
+>>>>>>> 629d7c0 (avances)
 @media (max-width: 768px) {
   .grid-2 { grid-template-columns: 1fr; }
   .patient-banner { flex-wrap: wrap; }

@@ -4783,7 +4783,11 @@ body {
     box-shadow: 0 20px 60px rgba(13, 71, 161, 0.2);
     transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
     transition: transform 0.5s ease;
+<<<<<<< HEAD
     background: #ffffff !important;
+=======
+    background: var(--dm-card) !important;
+>>>>>>> 629d7c0 (avances)
 }
 
 .hero-image-card img {

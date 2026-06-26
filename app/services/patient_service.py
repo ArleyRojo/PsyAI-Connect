@@ -53,7 +53,14 @@ def list_professionals():
 
 
 def update_profile_photo(user_id, file):
+<<<<<<< HEAD
     safe_name, error = validate_upload(file)
+=======
+    safe_name, error = validate_upload(
+        file,
+        allowed_extensions={"jpg", "jpeg", "png", "gif", "webp"},
+    )
+>>>>>>> 629d7c0 (avances)
     if error:
         return {"success": False, "message": error}, 400
 
