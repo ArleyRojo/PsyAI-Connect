@@ -911,18 +911,25 @@ html.dark-mode .user-avatar-sm {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main-local
 html.dark-mode .user-avatar {
     background: var(--dm-elevated) !important;
     color: var(--dm-accent) !important;
 }
 
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 html.dark-mode .user-email {
     color: var(--dm-muted) !important;
     font-size: 0.82rem !important;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 html.dark-mode .user-name {
 =======
@@ -930,6 +937,11 @@ html.dark-mode .user-name,
 html.dark-mode #modalNombreUsuario,
 html.dark-mode #tablaHistorial strong {
 >>>>>>> 629d7c0 (avances)
+=======
+html.dark-mode .user-name,
+html.dark-mode #modalNombreUsuario,
+html.dark-mode #tablaHistorial strong {
+>>>>>>> main-local
     color: var(--dm-heading) !important;
     font-weight: 600 !important;
 }
@@ -3153,7 +3165,10 @@ html.dark-mode .chatbot-modal-footer {
     border-color: var(--dm-border) !important;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main-local
 html.dark-mode .chatbot-modal-header {
     background: linear-gradient(135deg, var(--dm-elevated), var(--dm-card)) !important;
 }
@@ -3166,7 +3181,10 @@ html.dark-mode .chatbot-modal-header .btn-close {
 html.dark-mode .chatbot-modal-footer {
     background: var(--dm-card) !important;
 }
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 
 /* ── 25. COMPLEMENTO GENERAL: FONDOS, CARDS Y TEXTOS FALTANTES ── */
 /* Cubre Auth, Index, Admin, Paciente, Profesional */
@@ -3452,19 +3470,27 @@ html.dark-mode .hero-btn-secondary:hover {
 /* ── Hero image / carousel ── */
 html.dark-mode.dark-mode .hero-image-card {
 <<<<<<< HEAD
+<<<<<<< HEAD
     background: var(--dm-card) !important;
 =======
     background: var(--dm-bg) !important;
 >>>>>>> 629d7c0 (avances)
+=======
+    background: var(--dm-bg) !important;
+>>>>>>> main-local
     box-shadow: 0 20px 60px rgba(0,0,0,0.4) !important;
 }
 html.dark-mode .carousel-item {
     color: var(--dm-text1) !important;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 629d7c0 (avances)
+=======
+
+>>>>>>> main-local
 html.dark-mode .carousel-indicators button {
     background-color: var(--dm-border) !important;
 }
@@ -3472,10 +3498,13 @@ html.dark-mode .carousel-indicators button.active {
     background-color: var(--dm-accent) !important;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 html.dark-mode .carousel-control-prev-icon::before,
 html.dark-mode .carousel-control-next-icon::before {
     color: var(--dm-accent) !important;
 =======
+=======
+>>>>>>> main-local
 html.dark-mode .carousel-control-prev-icon,
 html.dark-mode .carousel-control-next-icon {
     filter: none;
@@ -3489,7 +3518,10 @@ html.dark-mode .carousel-control-prev-icon {
 }
 html.dark-mode .carousel-control-next-icon {
     background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27 fill=%27%2364b5f6%27%3E%3Cpath d=%27M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z%27/%3E%3C/svg%3E") !important;
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 }
 
 /* ── About section ── */
@@ -3930,6 +3962,16 @@ html.dark-mode .risk-word-chip .remove-chip-btn { color: var(--dm-text2) !import
 html.dark-mode .risk-word-chip.alto { background: rgba(244,67,54,.15) !important; border-color: rgba(244,67,54,.3) !important; color: #ef5350 !important; }
 html.dark-mode .risk-word-chip.medio { background: rgba(255,152,0,.15) !important; border-color: rgba(255,152,0,.3) !important; color: #ffca28 !important; }
 html.dark-mode .risk-word-chip.bajo { background: rgba(76,175,80,.15) !important; border-color: rgba(76,175,80,.3) !important; color: #81c784 !important; }
+<<<<<<< HEAD
+=======
+html.dark-mode .risk-word-chip .level-badge { color: #fff !important; }
+html.dark-mode .risk-word-chip.alto .level-badge { background: #dc3545 !important; }
+html.dark-mode .risk-word-chip.medio .level-badge { background: #f59e0b !important; }
+html.dark-mode .risk-word-chip.bajo .level-badge { background: #10b981 !important; }
+html.dark-mode .patient-name { color: #e8f0f8 !important; }
+html.dark-mode .patient-preview { color: var(--dm-text2) !important; }
+html.dark-mode .patient-time { color: var(--dm-text2) !important; }
+>>>>>>> main-local
 
 
 /* -- Dark Mode Fixes for Stat Icons (Colors & Contrast) -- */
@@ -3960,7 +4002,10 @@ html.dark-mode .legal-page .back-link { color: var(--dm-accent) !important; }
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main-local
 /* -- Hero Carrusel (Landing) Dark Mode -- */
 html.dark-mode .hero-image-card {
     background: var(--dm-card) !important;
@@ -3970,7 +4015,10 @@ html.dark-mode .hero-image-card img {
     background: var(--dm-card) !important;
 }
 
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 /* -- Navbar Logo Dark Mode -- */
 html.dark-mode .navbar-brand img { background: transparent !important; }
 

@@ -1000,10 +1000,14 @@
   body:has(#tbodyPacientes) .progress-step span {
     min-width: 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
     overflow-wrap: anywhere;
 =======
     overflow-wrap: break-word;
 >>>>>>> 629d7c0 (avances)
+=======
+    overflow-wrap: break-word;
+>>>>>>> main-local
   }
 
   body:has(#tbodyPacientes) .progress-nav__label {
@@ -1023,22 +1027,31 @@
 
   body:has(#tbodyPacientes) .progress-step {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     display: grid;
     grid-template-columns: 32px minmax(0, 1fr);
     gap: 0.2rem 0.4rem;
 >>>>>>> 629d7c0 (avances)
+=======
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 0.2rem 0.4rem;
+>>>>>>> main-local
     min-height: 32px;
     padding: 0.34rem 0.48rem;
     border-radius: 9px;
     font-size: 0.68rem;
     line-height: 1.12;
 <<<<<<< HEAD
+<<<<<<< HEAD
   }
 
   body:has(#tbodyPacientes) .progress-step i {
     font-size: 0.72rem;
 =======
+=======
+>>>>>>> main-local
     align-items: start;
   }
   body:has(#tbodyPacientes) .progress-step .step-circle {
@@ -1057,7 +1070,10 @@
     white-space: normal;
     overflow-wrap: break-word;
     word-break: normal;
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
   }
 
   body:has(#tbodyPacientes) #searchInput,
@@ -1638,11 +1654,16 @@ body:has(#tbodyPacientes) .main-header,
 @media (max-width: 480px) {
   body:has(#tbodyPacientes) .progress-step {
 <<<<<<< HEAD
+<<<<<<< HEAD
     grid-template-columns: 18px minmax(0, 1fr);
 =======
     grid-template-columns: 30px minmax(0, 1fr);
     gap: 0.15rem 0.3rem;
 >>>>>>> 629d7c0 (avances)
+=======
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 0.15rem 0.3rem;
+>>>>>>> main-local
   }
 }
 

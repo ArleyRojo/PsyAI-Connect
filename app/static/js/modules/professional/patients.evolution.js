@@ -153,6 +153,10 @@ function renderEvolucion(lista) {
 
 function actualizarBadgeEvolucion() {
     var badge = document.getElementById("badgeEvol");
+<<<<<<< HEAD
     if (badge) badge.textContent = window.evolucionData ? window.evolucionData.length : 0;
+=======
+    if (badge) badge.textContent = Array.isArray(evolucionData) ? evolucionData.length : 0;
+>>>>>>> main-local
 }
 

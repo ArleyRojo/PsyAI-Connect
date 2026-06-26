@@ -6,6 +6,7 @@ var pacienteSeleccionado = null;   // idUsuario (Number)
 var filaSeleccionadaAnterior = null;
 var evolucionData = [];
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 var pacientesEvolucionData = [];
 >>>>>>> 629d7c0 (avances)
@@ -13,6 +14,13 @@ var pacientesEvolucionData = [];
 // ── Init ─────────────────────────────────────────────────────
 
 window.onload = function () {
+=======
+var pacientesEvolucionData = [];
+
+// ── Init ─────────────────────────────────────────────────────
+
+function initPatientsPage() {
+>>>>>>> main-local
     cargarSaludoProfesional();
 
     // Fecha de hoy por defecto
@@ -27,10 +35,24 @@ window.onload = function () {
     cargarPacientes();
     cargarProfesionales();
     cargarHistorial();
+<<<<<<< HEAD
 };
 
 <<<<<<< HEAD
 =======
+=======
+    if (typeof cargarEvolucion === 'function') {
+        cargarEvolucion();
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPatientsPage);
+} else {
+    initPatientsPage();
+}
+
+>>>>>>> main-local
 function escapeHtml(value) {
     return String(value ?? '')
         .replace(/&/g, '&amp;')
@@ -52,13 +74,24 @@ function getPacienteId(item) {
     return item?.idPaciente ?? item?.idUsuario ?? '';
 }
 
+<<<<<<< HEAD
+=======
+function actualizarBadgeDiagnosticos(total) {
+    var badge = document.getElementById("badgeDiag");
+    if (badge) badge.textContent = Number(total) || 0;
+}
+
+>>>>>>> main-local
 function getPacienteFiltroValue(item) {
     var id = getPacienteId(item);
     if (id !== null && id !== undefined && String(id) !== '') return 'id:' + id;
     return 'name:' + normalizarTexto(item?.paciente || item?.nombre || '');
 }
 
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 // ── Saludo con nombre real de sesión ─────────────────────────
 
 async function cargarSaludoProfesional() {
@@ -93,6 +126,10 @@ function cargarPacientes() {
             }
 
             var pacientes = data.pacientes || data.usuarios || [];
+<<<<<<< HEAD
+=======
+            actualizarBadgeDiagnosticos(pacientes.length);
+>>>>>>> main-local
 
             if (pacientes.length === 0) {
                 tbody.innerHTML = "<tr><td colspan='7' class='text-muted text-center py-4'>No hay pacientes registrados</td></tr>";
@@ -129,6 +166,10 @@ function cargarPacientes() {
         })
         .catch(function (err) {
             console.error(err);
+<<<<<<< HEAD
+=======
+            actualizarBadgeDiagnosticos(0);
+>>>>>>> main-local
             tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error al cargar pacientes</td></tr>";
         });
 }
@@ -375,13 +416,25 @@ async function cargarHistorial() {
         var res  = await fetch("/api/diagnosticos", { credentials: "include" });
         var data = await res.json();
         var tbody = document.getElementById("tbodyHistorial");
+<<<<<<< HEAD
 
         if (!data.success || !data.historial || data.historial.length === 0) {
+=======
+        var historial = data.success && Array.isArray(data.historial) ? data.historial : [];
+
+        actualizarBadgeDiagnosticos(Math.max(historial.length, Number(document.getElementById("badgeDiag")?.textContent) || 0));
+
+        if (historial.length === 0) {
+>>>>>>> main-local
             tbody.innerHTML = "<tr><td colspan='5' class='text-muted text-center py-3'>Sin diagnósticos registrados</td></tr>";
             return;
         }
 
+<<<<<<< HEAD
         tbody.innerHTML = data.historial.map(function (h) {
+=======
+        tbody.innerHTML = historial.map(function (h) {
+>>>>>>> main-local
             var fecha = formatearFecha(h.fechaRaw);
             return "<tr>" +
                 "<td>" + (h.paciente    || "—") + "</td>" +
@@ -393,6 +446,10 @@ async function cargarHistorial() {
         }).join('');
     } catch (e) {
         console.error(e);
+<<<<<<< HEAD
+=======
+        actualizarBadgeDiagnosticos(Number(document.getElementById("badgeDiag")?.textContent) || 0);
+>>>>>>> main-local
     }
 }
 
@@ -442,14 +499,18 @@ function mostrarPestana(pestana, btnEl) {
         cargarHistorial();
     } else if (pestana === 'evolucion') {
 <<<<<<< HEAD
+<<<<<<< HEAD
         cargarPacientesSelectEvolucion();
 =======
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
         cargarEvolucion();
     }
 }
 
 // ── Evolución ─────────────────────────────────────────────────
+<<<<<<< HEAD
 <<<<<<< HEAD
 
 function cargarPacientesSelectEvolucion() {
@@ -535,6 +596,9 @@ function renderEvolucion(lista) {
 =======
 // (funciones de evolución definidas en patients.evolution.js)
 >>>>>>> 629d7c0 (avances)
+=======
+// (funciones de evolución definidas en patients.evolution.js)
+>>>>>>> main-local
 
 // ── Helpers ───────────────────────────────────────────────────
 

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿/* =======================================================
+=======
+/* =======================================================
+>>>>>>> main-local
     BASE.CSS â€“ PsyAI Connect  Â·  v5
     Paleta raÃ­z: #90CAF9 Â· #0D47A1 Â· #E3F2FD
     ======================================================= */
@@ -4784,10 +4788,14 @@ body {
     transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
     transition: transform 0.5s ease;
 <<<<<<< HEAD
+<<<<<<< HEAD
     background: #ffffff !important;
 =======
     background: var(--dm-card) !important;
 >>>>>>> 629d7c0 (avances)
+=======
+    background: var(--dm-card) !important;
+>>>>>>> main-local
 }
 
 .hero-image-card img {

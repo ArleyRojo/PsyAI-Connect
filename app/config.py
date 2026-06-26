@@ -64,10 +64,14 @@ class Config:
     MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "5"))
     ALLOWED_UPLOAD_EXTENSIONS = set(
 <<<<<<< HEAD
+<<<<<<< HEAD
         os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp").split(",")
 =======
         os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp,doc,docx").split(",")
 >>>>>>> 629d7c0 (avances)
+=======
+        os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp,doc,docx").split(",")
+>>>>>>> main-local
     )
 
     LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")

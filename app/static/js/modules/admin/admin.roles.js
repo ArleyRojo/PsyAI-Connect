@@ -256,10 +256,14 @@ async function guardarRol() {
         bootstrap.Modal.getInstance(document.getElementById('modalEditarRol')).hide();
         mostrarAlerta(data.success ? 'success' : 'danger', data.message);
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (data.success) cargarUsuariosRoles();
 =======
         if (data.success) { cargarUsuarios(); cargarHistorial(); }
 >>>>>>> 629d7c0 (avances)
+=======
+        if (data.success) { cargarUsuarios(); cargarHistorial(); }
+>>>>>>> main-local
     } catch(e) { console.error(e); }
 }
 window.guardarRol = guardarRol;
@@ -276,10 +280,14 @@ async function confirmarAccion(id, nombre, accion) {
         const data = await res.json();
         mostrarAlerta(data.success ? 'success' : 'danger', data.message);
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (data.success) cargarUsuariosRoles();
 =======
         if (data.success) { cargarUsuarios(); cargarHistorial(); }
 >>>>>>> 629d7c0 (avances)
+=======
+        if (data.success) { cargarUsuarios(); cargarHistorial(); }
+>>>>>>> main-local
     } catch(e) { console.error(e); }
 }
 
@@ -313,10 +321,14 @@ async function asignarRol() {
             document.getElementById('nuevoRol').value = '';
             document.getElementById('motivoAsignacion').value = '';
 <<<<<<< HEAD
+<<<<<<< HEAD
             cargarUsuariosRoles();
 =======
             cargarUsuarios(); cargarHistorial();
 >>>>>>> 629d7c0 (avances)
+=======
+            cargarUsuarios(); cargarHistorial();
+>>>>>>> main-local
         }
     } catch(e) { console.error(e); }
 }

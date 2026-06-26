@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿/* ============================================================
+=======
+/* ============================================================
+>>>>>>> main-local
    ADMIN DASHBOARD + ASIDE-ADMIN
    Consolidated static stylesheet
    ============================================================ */
@@ -545,6 +549,7 @@ main:has(#panel-logs) .table-clean tbody tr.log-row > td {
     background: linear-gradient(135deg, #0D47A1, #1976D2);
     border-radius: 3px;
 }
+<<<<<<< HEAD
 /* Accordion */
 .accordion-item {
     border: 1px solid var(--color-border-soft, #EAF3FD) !important;
@@ -553,14 +558,32 @@ main:has(#panel-logs) .table-clean tbody tr.log-row > td {
 }
 .accordion-item:hover { box-shadow: 0 8px 24px rgba(13,71,161,.08); border-color: #90CAF9 !important; }
 .accordion-button {
+=======
+/* Section Card (replaced Accordion) */
+.section-card {
+    border: 1px solid var(--color-border-soft, #EAF3FD) !important;
+    border-radius: 14px !important; overflow: hidden; margin-bottom: 1.25rem;
+    transition: all 0.22s ease; background: var(--color-bg-card, #fff);
+}
+.section-card:hover { box-shadow: 0 8px 24px rgba(13,71,161,.08); border-color: #90CAF9 !important; }
+.section-card__header {
+>>>>>>> main-local
     font-weight: 700 !important;
     color: var(--color-text-main, #0D1F3C) !important;
     padding: 1rem 1.25rem !important;
     background: var(--color-bg-card, #fff);
+<<<<<<< HEAD
     border-radius: 14px !important;
 }
 .accordion-button:not(.collapsed) { border-bottom: 1px solid var(--color-border-soft, #EAF3FD); }
 .accordion-body { padding: 1.25rem !important; }
+=======
+    border-bottom: 1px solid var(--color-border-soft, #EAF3FD);
+    display: flex;
+    align-items: center;
+}
+.section-card__body { padding: 1.25rem !important; background: var(--color-bg-card, #fff); }
+>>>>>>> main-local
 /* Stat cards */
 .stat-card {
     display: flex; align-items: center; gap: 1rem; padding: 1.25rem;
@@ -1088,7 +1111,11 @@ main:has(#panel-logs) .table-clean tbody tr.log-row > td {
   flex-shrink: 0; text-transform: uppercase;
 }
 .patient-info { flex: 1; min-width: 0; }
+<<<<<<< HEAD
 .patient-name { font-weight: 600; font-size: 0.85rem; color: var(--dm-text1); }
+=======
+.patient-name { font-weight: 600; font-size: 0.85rem; color: #1f2937; }
+>>>>>>> main-local
 .patient-preview { font-size: 0.75rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .patient-meta { text-align: right; flex-shrink: 0; }
@@ -1158,7 +1185,11 @@ main:has(#panel-logs) .table-clean tbody tr.log-row > td {
   border-color: var(--btn-color, #6366f1);
   color: #fff;
 }
+<<<<<<< HEAD
 .risk-filter-btn[data-filter="all"] { --btn-color: #6366f1; }
+=======
+.risk-filter-btn[data-filter="all"] { --btn-color: #1976D2; }
+>>>>>>> main-local
 .risk-filter-btn[data-filter="Alto"] { --btn-color: #dc3545; }
 .risk-filter-btn[data-filter="Medio"] { --btn-color: #f59e0b; }
 .risk-filter-btn[data-filter="Bajo"] { --btn-color: #10b981; }
@@ -1188,8 +1219,16 @@ main:has(#panel-logs) .table-clean tbody tr.log-row > td {
 .risk-word-chip .level-badge {
   font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
   padding: 0.1rem 0.4rem; border-radius: 4px;
+<<<<<<< HEAD
   background: currentColor; color: #fff; opacity: 0.85;
 }
+=======
+  color: #fff; opacity: 0.85;
+}
+.risk-word-chip.alto .level-badge { background: #dc3545; }
+.risk-word-chip.medio .level-badge { background: #f59e0b; }
+.risk-word-chip.bajo .level-badge { background: #10b981; }
+>>>>>>> main-local
 .risk-word-chip .remove-chip-btn {
   background: none; border: none; cursor: pointer;
   font-size: 1rem; line-height: 1; padding: 0 0 0 0.2rem;
@@ -1686,4 +1725,13 @@ main:has(#panel-logs) .top-endpoint {
 .main-content > *:nth-child(2) { animation-delay: 0.10s; }
 .main-content > *:nth-child(3) { animation-delay: 0.18s; }
 .main-content > *:nth-child(4) { animation-delay: 0.26s; }
+<<<<<<< HEAD
 .main-content > *:nth-child(5) { animation-delay: 0.34s; }
+=======
+.main-content > *:nth-child(5) { animation-delay: 0.34s; }
+
+/* Dark-mode overrides for chatbot config */
+html.dark-mode .patient-name { color: #e5e7eb; }
+html.dark-mode .patient-card:hover { background: #1e293b; }
+html.dark-mode .patient-card.active { background: #1e3a5f; }
+>>>>>>> main-local

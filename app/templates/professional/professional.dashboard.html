@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿<!DOCTYPE html>
+=======
+<!DOCTYPE html>
+>>>>>>> main-local
 <html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
 <head>
     <meta charset="UTF-8">
@@ -24,10 +28,14 @@
 
 </head>
 <<<<<<< HEAD
+<<<<<<< HEAD
 <body>
 =======
 <body class="professional-dashboard">
 >>>>>>> 629d7c0 (avances)
+=======
+<body class="professional-dashboard">
+>>>>>>> main-local
 
 <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -181,6 +189,7 @@
         </div>
 
         <!-- ═══ Secciones en Acordeón ═══ -->
+<<<<<<< HEAD
         <div class="accordion accordion-responsive mb-4" id="accordionDashboard">
 
             <!-- Próximas Citas -->
@@ -192,10 +201,21 @@
                 </h2>
                 <div id="collapseCitas" class="accordion-collapse collapse" aria-labelledby="headingCitas" data-bs-parent="#accordionDashboard">
                     <div class="accordion-body" id="proximasCitasContainer">
+=======
+        <div class="dashboard-sections">
+
+            <!-- Próximas Citas -->
+            <div class="section-card mb-4">
+    <div class="section-card__header">
+        <i class="fas fa-calendar-alt me-2"></i> Próximas Citas
+    </div>
+    <div class="section-card__body" id="proximasCitasContainer">
+>>>>>>> main-local
                         <div class="text-center text-muted py-4">
                             <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
                             <div>Cargando...</div>
                         </div>
+<<<<<<< HEAD
                     </div>
                 </div>
             </div>
@@ -209,10 +229,22 @@
                 </h2>
                 <div id="collapseBienestar" class="accordion-collapse collapse" aria-labelledby="headingBienestar" data-bs-parent="#accordionDashboard">
                     <div class="accordion-body" id="bienestarContainer">
+=======
+                        </div>
+</div>
+
+            <!-- Bienestar de Pacientes -->
+            <div class="section-card mb-4">
+    <div class="section-card__header">
+        <i class="fas fa-heart me-2"></i> Bienestar de Pacientes
+    </div>
+    <div class="section-card__body" id="bienestarContainer">
+>>>>>>> main-local
                         <div class="text-center text-muted py-4">
                             <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
                             <div>Cargando...</div>
                         </div>
+<<<<<<< HEAD
                     </div>
                 </div>
             </div>
@@ -226,10 +258,22 @@
                 </h2>
                 <div id="collapseReportes" class="accordion-collapse collapse" aria-labelledby="headingReportes" data-bs-parent="#accordionDashboard">
                     <div class="accordion-body" id="reportesResumenContainer">
+=======
+                        </div>
+</div>
+
+            <!-- Reportes rápidos -->
+            <div class="section-card mb-4">
+    <div class="section-card__header">
+        <i class="fas fa-chart-pie me-2"></i> Resumen de Reportes
+    </div>
+    <div class="section-card__body" id="reportesResumenContainer">
+>>>>>>> main-local
                         <div class="text-center text-muted py-4">
                             <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
                             <div>Cargando...</div>
                         </div>
+<<<<<<< HEAD
                     </div>
                 </div>
             </div>
@@ -243,6 +287,17 @@
                 </h2>
                 <div id="collapseActivity" class="accordion-collapse collapse" aria-labelledby="headingActivity" data-bs-parent="#accordionDashboard">
                     <div class="accordion-body">
+=======
+                        </div>
+</div>
+
+            <!-- Actividades Recientes -->
+            <div class="section-card mb-4">
+    <div class="section-card__header">
+        <i class="fas fa-clock me-2"></i> Actividades Recientes
+    </div>
+    <div class="section-card__body">
+>>>>>>> main-local
                         <div id="actividadContainer">
                             <div class="text-center text-muted py-4">
                                 <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
@@ -250,8 +305,13 @@
                             </div>
                         </div>
                     </div>
+<<<<<<< HEAD
                 </div>
             </div>
+=======
+</div>
+
+>>>>>>> main-local
 
         </div>
 
@@ -278,17 +338,23 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618-accordion">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
 <script src="/js/modules/professional/aside.js?v=20260522-5"></script>
 =======
+=======
+>>>>>>> main-local
 <link rel="stylesheet" href="/responsive/responsive-professional.css">
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260626-accordion-closed">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
 <script src="/js/modules/professional/aside.js?v=20260626-sidebar-state"></script>
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 <script src="/js/modules/auth/logout.js"></script>
 <script src="/js/core/shared/nombre.usuario.js"></script>
 <script>
@@ -791,6 +857,7 @@ window.addEventListener('localStorageChange', (e) => {
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Forzar que todos los acordeones inicien cerrados
 document.querySelectorAll('.accordion-collapse').forEach(function(el) {
     el.classList.remove('show');
@@ -809,6 +876,8 @@ window.addEventListener('pageshow', function(event) {
             }
         });
 =======
+=======
+>>>>>>> main-local
 function resetProfessionalAccordions() {
     document.querySelectorAll('#accordionDashboard .accordion-collapse').forEach(function(el) {
         if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
@@ -851,10 +920,16 @@ document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
 window.addEventListener('resize', function() {
     if (window.innerWidth <= 991) {
         resetProfessionalAccordions();
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
     }
 });
 </script>
 
+=======
+    }
+});
+</script>
+>>>>>>> main-local
 </body>
 </html>

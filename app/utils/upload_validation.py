@@ -11,10 +11,15 @@ MAGIC_BYTES = {
     "gif": (b"\x47\x49\x46\x38",),
     "webp": (b"\x52\x49\x46\x46",),
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     "doc": (b"\xd0\xcf\x11\xe0",),
     "docx": (b"\x50\x4b\x03\x04",),
 >>>>>>> 629d7c0 (avances)
+=======
+    "doc": (b"\xd0\xcf\x11\xe0",),
+    "docx": (b"\x50\x4b\x03\x04",),
+>>>>>>> main-local
 }
 
 

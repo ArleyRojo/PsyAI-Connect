@@ -2074,12 +2074,18 @@ body {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main-local
 .hero-image-card img {
     background: #f0f5fc;
 }
 
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 .hero-image-card::before {
     content: '';
     position: absolute;
@@ -3608,12 +3614,16 @@ html {
 .carousel-control-prev:hover,
 .carousel-control-next:hover {
 <<<<<<< HEAD
+<<<<<<< HEAD
     background: var(--color-secondary);
     opacity: 1;
     transform: translateY(-50%) scale(1.1);
 =======
     opacity: 1;
 >>>>>>> 629d7c0 (avances)
+=======
+    opacity: 1;
+>>>>>>> main-local
 }
 
 

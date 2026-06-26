@@ -1526,7 +1526,10 @@ section.chat-wrapper,
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main-local
 /* Reports professional: final mobile layout overrides. */
 @media (max-width: 991.98px) {
   body.aside-professional .reports-page {
@@ -1868,7 +1871,10 @@ section.chat-wrapper,
   }
 }
 
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 /* Final override: accordions must remain visible in light + dark responsive views. */
 @media (max-width: 991.98px) {
   .main-content .accordion,
@@ -2041,7 +2047,10 @@ body:has(.sidebar) .main-content .accordion,
 
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main-local
 
 /* Final mobile fix: closed accordions must stay closed when entering from another page. */
 @media (max-width: 991.98px) {
@@ -2071,4 +2080,7 @@ body:has(.sidebar) .main-content .accordion,
     opacity: 1 !important;
   }
 }
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local

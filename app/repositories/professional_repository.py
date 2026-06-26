@@ -231,6 +231,7 @@ def list_professional_patients(professional_id):
             SELECT DISTINCT r.idUsuario, r.nombre, r.fotoPerfil, p.edad, p.genero,
                    COALESCE(p.numeroTelefonico, r.email) as contacto,
 <<<<<<< HEAD
+<<<<<<< HEAD
                    (SELECT diagnostico FROM Reportes
                     WHERE idPaciente = r.idUsuario
                     ORDER BY fechaInicio DESC LIMIT 1) as ultimoDiagnostico
@@ -242,6 +243,8 @@ def list_professional_patients(professional_id):
             """,
             (professional_id,),
 =======
+=======
+>>>>>>> main-local
                    (SELECT diagnostico FROM PacientesProfesional
                     WHERE idPaciente = r.idUsuario AND idProfesional = %s
                     ORDER BY fechaDiagnostico DESC LIMIT 1) as ultimoDiagnostico
@@ -254,7 +257,10 @@ def list_professional_patients(professional_id):
             ORDER BY r.nombre
             """,
             (professional_id, professional_id, professional_id),
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
         )
         return cursor.fetchall()
 
@@ -333,15 +339,21 @@ def get_report_overview(professional_id):
         cursor.execute(
             """
 <<<<<<< HEAD
+<<<<<<< HEAD
             SELECT rep.idReporte, rep.tipoReporte, rep.estado,
                    DATE_FORMAT(rep.fechaInicio, '%d/%m/%Y') as fechaInicio,
                    DATE_FORMAT(rep.fechaFin, '%d/%m/%Y') as fechaFin,
 =======
+=======
+>>>>>>> main-local
             SELECT rep.idReporte, rep.idPaciente, rep.tipoReporte, rep.estado,
                    DATE_FORMAT(rep.fechaInicio, '%d/%m/%Y') as fechaInicio,
                    DATE_FORMAT(rep.fechaFin, '%d/%m/%Y') as fechaFin,
                    rep.sintomas, rep.diagnostico, rep.tratamiento,
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
                    COALESCE(r.nombre, 'General') as paciente
             FROM Reportes rep
             LEFT JOIN Register r ON rep.idPaciente = r.idUsuario
@@ -356,10 +368,13 @@ def get_report_overview(professional_id):
             SELECT DISTINCT r.idUsuario, r.nombre
             FROM Register r
 <<<<<<< HEAD
+<<<<<<< HEAD
             WHERE r.rol = 'paciente'
             ORDER BY r.nombre
             """
 =======
+=======
+>>>>>>> main-local
             JOIN Citas c ON c.idPaciente = r.idUsuario
             WHERE c.idProfesional = %s
               AND r.rol = 'paciente'
@@ -367,7 +382,10 @@ def get_report_overview(professional_id):
             ORDER BY r.nombre
             """,
             (professional_id,),
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
         )
         pacientes = cursor.fetchall()
         return {"stats": stats, "reportes": reportes, "pacientes": pacientes}
@@ -378,15 +396,21 @@ def create_report(professional_id, data):
         cursor.execute(
             """
 <<<<<<< HEAD
+<<<<<<< HEAD
             INSERT INTO Reportes (idProfesional, idPaciente, tipoReporte, fechaInicio, fechaFin, estado)
             VALUES (%s, %s, %s, %s, %s, 'Completado')
 =======
+=======
+>>>>>>> main-local
             INSERT INTO Reportes (
                 idProfesional, idPaciente, tipoReporte, fechaInicio, fechaFin,
                 sintomas, diagnostico, tratamiento, estado
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Completado')
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
             """,
             (
                 professional_id,
@@ -395,18 +419,27 @@ def create_report(professional_id, data):
                 data.get("fechaInicio") or None,
                 data.get("fechaFin") or None,
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
                 data.get("sintomas"),
                 data.get("diagnostico"),
                 data.get("tratamiento"),
 >>>>>>> 629d7c0 (avances)
+=======
+                data.get("sintomas"),
+                data.get("diagnostico"),
+                data.get("tratamiento"),
+>>>>>>> main-local
             ),
         )
         conn.commit()
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main-local
 def get_latest_patient_diagnosis(professional_id, patient_id):
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
@@ -423,7 +456,10 @@ def get_latest_patient_diagnosis(professional_id, patient_id):
         return cursor.fetchone()
 
 
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
 def update_report(professional_id, data):
     with db_cursor() as (conn, cursor):
         cursor.execute(
@@ -453,10 +489,14 @@ def get_deleted_reports(professional_id):
         cursor.execute(
             """
 <<<<<<< HEAD
+<<<<<<< HEAD
             SELECT rep.idReporte, rep.tipoReporte, rep.estado,
 =======
             SELECT rep.idReporte, rep.idPaciente, rep.tipoReporte, rep.estado,
 >>>>>>> 629d7c0 (avances)
+=======
+            SELECT rep.idReporte, rep.idPaciente, rep.tipoReporte, rep.estado,
+>>>>>>> main-local
                    DATE_FORMAT(rep.fechaInicio, '%d/%m/%Y') as fechaInicio,
                    DATE_FORMAT(rep.fechaFin, '%d/%m/%Y') as fechaFin,
                    COALESCE(r.nombre, 'General') as paciente
@@ -475,19 +515,26 @@ def get_all_patient_evolution(professional_id):
         cursor.execute(
             """
 <<<<<<< HEAD
+<<<<<<< HEAD
             SELECT DISTINCT e.estadoEmocional, e.nivelEnergia, e.notasPersonales,
 =======
+=======
+>>>>>>> main-local
             SELECT e.idEvolucion,
                    e.idPaciente,
                    e.estadoEmocional,
                    e.nivelEnergia,
                    e.notasPersonales,
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
                    DATE_FORMAT(e.fecha, '%d/%m/%Y') as fecha,
                    e.fecha as fechaRaw,
                    r.nombre as paciente
             FROM EvolucionPaciente e
             JOIN Register r ON e.idPaciente = r.idUsuario
+<<<<<<< HEAD
 <<<<<<< HEAD
             JOIN Citas c ON c.idPaciente = e.idPaciente AND c.idProfesional = %s
             WHERE c.idProfesional = %s
@@ -495,6 +542,8 @@ def get_all_patient_evolution(professional_id):
             """,
             (professional_id, professional_id),
 =======
+=======
+>>>>>>> main-local
             LEFT JOIN PacientesProfesional pp ON pp.idPaciente = r.idUsuario AND pp.idProfesional = %s
             LEFT JOIN Citas c ON c.idPaciente = r.idUsuario AND c.idProfesional = %s
             WHERE r.rol = 'paciente'
@@ -503,7 +552,10 @@ def get_all_patient_evolution(professional_id):
             ORDER BY e.fecha DESC
             """,
             (professional_id, professional_id)
+<<<<<<< HEAD
 >>>>>>> 629d7c0 (avances)
+=======
+>>>>>>> main-local
         )
         return cursor.fetchall()
 
@@ -516,10 +568,14 @@ def professional_has_patient(professional_id, patient_id):
             SELECT COUNT(1)
             FROM Citas
 <<<<<<< HEAD
+<<<<<<< HEAD
             WHERE idProfesional = %s AND idPaciente = %s AND estado != 'cancelada'
 =======
             WHERE idProfesional = %s AND idPaciente = %s AND LOWER(COALESCE(estado, '')) != 'cancelada'
 >>>>>>> 629d7c0 (avances)
+=======
+            WHERE idProfesional = %s AND idPaciente = %s AND LOWER(COALESCE(estado, '')) != 'cancelada'
+>>>>>>> main-local
             LIMIT 1
             """,
             (professional_id, patient_id),
