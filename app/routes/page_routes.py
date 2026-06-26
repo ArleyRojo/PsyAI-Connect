@@ -99,7 +99,7 @@ def serve_pages(filename: str):
     if os.path.exists(os.path.join(root, filename)):
         return render_template(filename)
 
-    # serve legacy static paths (css/js/img/responsive/uploads/etc)
+git     # serve legacy static paths (css/js/img/responsive/uploads/etc)
     if filename.startswith("uploads/"):
         cache_max_age = 0
     elif any(filename.startswith(p) for p in ("css/", "js/", "img/", "responsive/")):
