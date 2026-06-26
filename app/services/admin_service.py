@@ -1,3 +1,4 @@
+
 import secrets
 import time
 from app.repositories import admin_repository
@@ -85,18 +86,9 @@ def role_history():
     for item in historial:
         if item.get("fecha"):
             item["fecha"] = item["fecha"].strftime("%d/%m/%Y %H:%M")
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
         item["usuario"] = item.pop("usuario_afectado", None)
         item["rolAnterior"] = item.pop("rol_anterior", None)
         item["rolNuevo"] = item.pop("rol_nuevo", None)
->>>>>>> 629d7c0 (avances)
-=======
-        item["usuario"] = item.pop("usuario_afectado", None)
-        item["rolAnterior"] = item.pop("rol_anterior", None)
-        item["rolNuevo"] = item.pop("rol_nuevo", None)
->>>>>>> main-local
     return {"success": True, "historial": historial}, 200
 
 

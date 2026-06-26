@@ -100,12 +100,6 @@ def serve_pages(filename: str):
         return render_template(filename)
 
     # serve legacy static paths (css/js/img/responsive/uploads/etc)
-<<<<<<< HEAD
-<<<<<<< HEAD
-    return send_from_directory(_static_root(), filename)
-=======
-=======
->>>>>>> main-local
     if filename.startswith("uploads/"):
         cache_max_age = 0
     elif any(filename.startswith(p) for p in ("css/", "js/", "img/", "responsive/")):
@@ -113,7 +107,3 @@ def serve_pages(filename: str):
     else:
         cache_max_age = None
     return send_from_directory(_static_root(), filename, max_age=cache_max_age)
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local

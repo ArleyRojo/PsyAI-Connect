@@ -70,11 +70,6 @@ def report_overview(professional_id):
 
 
 def create_report(professional_id, data):
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> main-local
     patient_id = data.get("idPaciente")
     if patient_id and not professional_repository.professional_has_patient(professional_id, patient_id):
         return {"success": False, "message": "No puedes generar reportes para este paciente"}, 403
@@ -82,10 +77,6 @@ def create_report(professional_id, data):
         latest_diagnosis = professional_repository.get_latest_patient_diagnosis(professional_id, patient_id)
         if latest_diagnosis:
             data = {**data, **latest_diagnosis}
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
     professional_repository.create_report(professional_id, data)
     return {"success": True, "message": "Reporte generado correctamente"}, 200
 
@@ -115,10 +106,3 @@ def get_patient_chatbot_history(professional_id, patient_id):
         return {"success": False, "message": "No tienes acceso al historial de este paciente"}, 403
 
     return {"success": True, "historial": chat_repository.get_history(patient_id)}, 200
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local

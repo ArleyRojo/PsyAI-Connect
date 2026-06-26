@@ -261,11 +261,6 @@ def init_db():
         if cursor.fetchone()[0] == 0:
             extra_alters.append("ALTER TABLE Reportes ADD COLUMN eliminado TINYINT(1) DEFAULT 0")
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> main-local
         for column_name in ("sintomas", "diagnostico", "tratamiento"):
             cursor.execute("""
                 SELECT COUNT(*) FROM information_schema.COLUMNS 
@@ -274,10 +269,6 @@ def init_db():
             if cursor.fetchone()[0] == 0:
                 extra_alters.append(f"ALTER TABLE Reportes ADD COLUMN {column_name} TEXT DEFAULT NULL")
 
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
         cursor.execute("""
             SELECT COUNT(*) FROM information_schema.COLUMNS 
             WHERE TABLE_NAME = 'Citas' AND COLUMN_NAME = 'motivoCancelacion' AND TABLE_SCHEMA = DATABASE()
@@ -358,11 +349,6 @@ def init_db():
         if estado_col and "pendiente" not in estado_col[0]:
             extra_alters.append("ALTER TABLE Notificaciones MODIFY COLUMN estado ENUM('enviado','pendiente') DEFAULT 'enviado'")
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> main-local
         cursor.execute("""
             SELECT COUNT(*) FROM information_schema.COLUMNS 
             WHERE TABLE_NAME = 'PacientesProfesional' AND COLUMN_NAME = 'diagnostico' AND TABLE_SCHEMA = DATABASE()
@@ -393,10 +379,6 @@ def init_db():
         if cursor.fetchone()[0] == 0:
             extra_alters.append("ALTER TABLE PacientesProfesional ADD CONSTRAINT uq_profesional_paciente UNIQUE (idProfesional, idPaciente)")
 
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
         for alter in extra_alters:
             try:
                 cursor.execute(alter)

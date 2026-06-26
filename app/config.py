@@ -63,15 +63,7 @@ class Config:
     # Upload validation
     MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "5"))
     ALLOWED_UPLOAD_EXTENSIONS = set(
-<<<<<<< HEAD
-<<<<<<< HEAD
-        os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp").split(",")
-=======
         os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp,doc,docx").split(",")
->>>>>>> 629d7c0 (avances)
-=======
-        os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp,doc,docx").split(",")
->>>>>>> main-local
     )
 
     LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
@@ -129,32 +121,6 @@ class JSONFormatter(logging.Formatter):
 class TextFormatter(logging.Formatter):
     def format(self, record):
         return f"{datetime.utcnow().isoformat()}Z | {record.levelname:8} | {record.name:20} | {record.getMessage()}"
-
-
-def setup_logging(app):
-    # Siempre mostrar werkzeug logs en desarrollo
-    werkzeug_logger = logging.getLogger('werkzeug')
-    
-    # En desarrollo, usar DEBUG level
-    if os.getenv("FLASK_ENV", "development").lower() == "development":
-        werkzeug_logger.setLevel(logging.DEBUG)
-    else:
-        werkzeug_logger.setLevel(logging.INFO)
-    
-    # Asegurar que tiene un handler para mostrar en terminal
-    if not werkzeug_logger.handlers:
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('[%(asctime)s] %(levelname)s in %(module)s: %(message)s')
-        handler.setFormatter(formatter)
-        werkzeug_logger.addHandler(handler)
-    
-    # Forzar propagación
-    werkzeug_logger.propagate = True
-    
-    # Configurar otros loggers
-    logging.getLogger('flask-limiter').setLevel(logging.WARNING)
-    
-    return werkzeug_logger
 
 
 def setup_logging(app):
