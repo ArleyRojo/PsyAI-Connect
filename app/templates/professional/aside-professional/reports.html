@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <title>PsyAI Connect | Reportes</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+    <script src="/js/core/shared/theme-inline.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/base/base.css">
+    <link rel="stylesheet" href="/css/layout/layout.css">
+    <link rel="stylesheet" href="/css/themes/theme.css">
+    <link rel="stylesheet" href="/css/pages/professional.css?v=20260626-reports-card">
+    <script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body class="aside-professional">
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+    <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+        <div class="sidebar__logo text-center mt-3">
+            <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+            <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+        </div>
+
+        <nav class="nav flex-column mt-4">
+            <a href="../professional.dashboard.html" class="nav-link">
+                <i class="fas fa-home me-2"></i> Dashboard
+            </a>
+            <a href="patients.html" class="nav-link">
+                <i class="fas fa-users me-2"></i> Pacientes y Diagnósticos
+            </a>
+            <a href="my.agenda.html" class="nav-link">
+                <i class="fas fa-calendar-check me-2"></i> Mi Agenda
+            </a>
+            <a href="mensajes.html" class="nav-link">
+                <i class="fas fa-comments me-2"></i> Mensajes
+            </a>
+            <a href="reports.html" class="nav-link active">
+                <i class="fas fa-chart-line me-2"></i> Reportes
+            </a>
+            <a href="my.profile2.html" class="nav-link mt-3 border-top pt-3">
+                <i class="fas fa-user-circle me-2"></i> Mi Perfil
+            </a>
+        </nav>
+
+        <div class="sidebar__footer mt-auto mb-3 text-center">
+            <div class="theme-switch-container mb-2">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+            <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75">
+                <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content flex-grow-1 ms-250 p-4 reports-page">
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 fw-bold text-dark mb-0">
+                <i class="fas fa-chart-line text-primary me-2"></i> Reportes
+            </h1>
+            <div class="user-info d-flex align-items-center">
+                <i class="fas fa-bell text-secondary fs-5 me-3"></i>
+                <span class="fw-semibold text-dark" id="nombreProfesional">Hola, Dr(a).</span>
+            </div>
+        </header>
+
+        <section class="row g-3 mb-4 reports-stats">
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-blue shadow-sm">
+                    <div class="stat-bg"><i class="fas fa-file-alt"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-icon-wrap"><i class="fas fa-file-alt"></i></div>
+                        <div class="stat-label">Reportes Generados</div>
+                        <div class="stat-number" id="statTotal">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-gold shadow-sm">
+                    <div class="stat-bg"><i class="fas fa-clock"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-icon-wrap"><i class="fas fa-clock"></i></div>
+                        <div class="stat-label">Pendientes</div>
+                        <div class="stat-number" id="statPendientes">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-green shadow-sm">
+                    <div class="stat-bg"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-icon-wrap"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-label">Completados</div>
+                        <div class="stat-number" id="statCompletados">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-red shadow-sm">
+                    <div class="stat-bg"><i class="fas fa-trash-alt"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-icon-wrap"><i class="fas fa-trash-alt"></i></div>
+                        <div class="stat-label">Eliminados</div>
+                        <div class="stat-number" id="statEliminados">0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="report-form-card professional-panel reports-generator mb-4">
+            <div class="panel-title-row">
+                <div>
+                    <span class="panel-kicker">Nuevo informe</span>
+                    <h2 class="panel-title">Generar reporte clínico</h2>
+                </div>
+                <div class="panel-title-icon" aria-hidden="true">
+                    <i class="fas fa-file-medical-alt"></i>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="paciente" class="form-label">Paciente</label>
+                    <select id="paciente" class="form-select" name="paciente">
+                        <option value="">Todos los pacientes</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="tipo_reporte" class="form-label">Tipo de Reporte</label>
+                    <select id="tipo_reporte" class="form-select" name="tipo_reporte">
+                        <option value="diagnosticos">Diagnósticos</option>
+                        <option value="citas">Citas</option>
+                        <option value="evolucion">Evolución Emocional</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                    <label for="fecha_inicio" class="form-label">Desde <span class="required-mark">*</span></label>
+                    <input type="date" id="fecha_inicio" class="form-control" name="fecha_inicio" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="fecha_fin" class="form-label">Hasta <span class="required-mark">*</span></label>
+                    <input type="date" id="fecha_fin" class="form-control" name="fecha_fin" required>
+                </div>
+            </div>
+
+            <div class="row mt-4 align-items-center">
+                <div class="col-md-7">
+                    <p class="report-form-note mb-0">
+                        Selecciona un rango de fechas para consolidar la información del paciente.
+                    </p>
+                </div>
+                <div class="col-md-5 text-end">
+                    <button type="button" class="btn-generate" onclick="generarReporte()">
+                        Generar Reporte <i class="fas fa-file-export ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div class="table-responsive professional-table-panel reports-table-panel mb-4">
+            <div class="report-toolbar d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div>
+                    <span class="panel-kicker">Historial</span>
+                    <h5 class="section-heading fw-bold mb-0">Reportes generados</h5>
+                </div>
+                <div class="report-filter-control">
+                    <label for="filtroPaciente" class="visually-hidden">Filtrar por paciente</label>
+                    <select id="filtroPaciente" class="form-select form-select-sm report-filter-select" onchange="filtrarReportes()">
+                        <option value="">Todos los pacientes</option>
+                    </select>
+                </div>
+            </div>
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Desde</th>
+                        <th>Hasta</th>
+                        <th>Paciente</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaReportes">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-spinner fa-spin me-2"></i>Cargando...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-responsive professional-table-panel reports-table-panel reports-table-panel--deleted mb-4">
+            <div class="deleted-table-heading">
+                <div>
+                    <span class="panel-kicker">Archivados</span>
+                    <h5 class="section-heading fw-bold mb-0">
+                        Reportes eliminados
+                    </h5>
+                </div>
+                <i class="fas fa-trash" aria-hidden="true"></i>
+            </div>
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Desde</th>
+                        <th>Hasta</th>
+                        <th>Paciente</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaReportesEliminados">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="fas fa-spinner fa-spin me-2"></i>Cargando...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3 professional-toast-wrap">
+    <div id="toastReporte" class="toast align-items-center text-white border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold" id="toastReporteMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalVerReporte" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow professional-modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-eye me-2 text-primary"></i>Ver Reporte
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Paciente</dt>
+                    <dd class="col-sm-8 fw-semibold" id="viewPacienteReporte">---</dd>
+                    <dt class="col-sm-4 text-muted">Tipo</dt>
+                    <dd class="col-sm-8" id="viewTipoReporte">---</dd>
+                    <dt class="col-sm-4 text-muted">Desde</dt>
+                    <dd class="col-sm-8" id="viewFechaInicioReporte">---</dd>
+                    <dt class="col-sm-4 text-muted">Hasta</dt>
+                    <dd class="col-sm-8" id="viewFechaFinReporte">---</dd>
+                    <dt class="col-sm-4 text-muted">Estado</dt>
+                    <dd class="col-sm-8" id="viewEstadoReporte">---</dd>
+                </dl>
+                <div class="border-top pt-3 mt-2">
+                    <h6 class="fw-bold mb-3">Detalle clínico</h6>
+                    <div id="viewDetalleVacio" class="text-muted small">Este reporte no tiene detalle clínico registrado.</div>
+                    <div id="viewDetalleReporte" class="d-none">
+                        <div class="mb-3">
+                            <div class="text-muted small fw-semibold">Síntomas</div>
+                            <div id="viewSintomasReporte">---</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-muted small fw-semibold">Diagnóstico</div>
+                            <div id="viewDiagnosticoReporte">---</div>
+                        </div>
+                        <div class="mb-0">
+                            <div class="text-muted small fw-semibold">Tratamiento</div>
+                            <div id="viewTratamientoReporte">---</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary px-4 professional-modal-btn" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarReporte" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow professional-modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-edit me-2 text-primary"></i>Editar Reporte
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editIdReporte">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tipo de Reporte</label>
+                    <select id="editTipoReporte" class="form-select">
+                        <option value="Diagnóstico">Diagnóstico</option>
+                        <option value="Citas">Citas</option>
+                        <option value="evolucion">Evolución Emocional</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Estado</label>
+                    <select id="editEstado" class="form-select">
+                        <option value="Completado">Completado</option>
+                        <option value="Pendiente">Pendiente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary px-4 professional-modal-btn" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary px-4 professional-modal-btn" id="btnGuardarEdicion">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEliminarReporte" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow professional-modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="fas fa-trash me-2"></i>Eliminar Reporte
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-exclamation-triangle text-danger delete-modal-icon"></i>
+                <p class="text-muted mb-0">¿Estás seguro que deseas eliminar este reporte?</p>
+                <p class="text-muted small">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pb-4">
+                <button type="button" class="btn btn-outline-secondary px-4 professional-modal-btn" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger px-4 professional-modal-btn" id="btnConfirmarEliminar">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-professional.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260626-reports-mobile">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/professional/aside.js?v=20260626-sidebar-state"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/nombre.usuario.js"></script>
+<script src="/js/modules/professional/reports.js?v=20260626-report-filter-users"></script>
+</body>
+</html>
