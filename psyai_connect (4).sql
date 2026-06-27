@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 05-06-2026 a las 23:21:21
+-- Tiempo de generación: 26-06-2026 a las 12:00:00
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -21,13 +21,15 @@ SET time_zone = "+00:00";
 -- Base de datos: `psyai_connect`
 --
 
+SET FOREIGN_KEY_CHECKS = 0;
+
 DELIMITER $$
 --
 -- Procedimientos
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_AgendarCita` (IN `p_paciente` INT, IN `p_profesional` INT, IN `p_fecha` DATE, IN `p_hora` TIME, IN `p_tipoCita` VARCHAR(80), IN `p_tipoSesion` VARCHAR(80), IN `p_motivo` TEXT, IN `p_notas` TEXT)   BEGIN
-    INSERT INTO Citas(idPaciente, idProfesional, fecha, hora, tipoCita, tipoSesion, motivo, notas)
-    VALUES (p_paciente, p_profesional, p_fecha, p_hora, p_tipoCita, p_tipoSesion, p_motivo, p_notas);
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_AgendarCita` (IN `p_paciente` INT, IN `p_profesional` INT, IN `p_fecha` DATE, IN `p_hora` TIME, IN `p_tipoCita` VARCHAR(80), IN `p_tipoSesion` VARCHAR(80), IN `p_motivo` TEXT, IN `p_notas` TEXT, IN `p_creadoPorProfesional` BOOLEAN)   BEGIN
+    INSERT INTO Citas(idPaciente, idProfesional, fecha, hora, tipoCita, tipoSesion, motivo, notas, creado_por_profesional)
+    VALUES (p_paciente, p_profesional, p_fecha, p_hora, p_tipoCita, p_tipoSesion, p_motivo, p_notas, p_creadoPorProfesional);
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_CrearFactura` (IN `p_paciente` INT, IN `p_profesional` INT, IN `p_cita` INT, IN `p_monto` DECIMAL(10,2), IN `p_metodoPago` VARCHAR(20))   BEGIN
@@ -63,6 +65,59 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `register`
+--
+
+CREATE TABLE `register` (
+  `idUsuario` int(11) NOT NULL,
+  `nombre` varchar(120) NOT NULL,
+  `email` varchar(120) NOT NULL,
+  `contrasena` varchar(200) NOT NULL,
+  `rol` enum('paciente','profesional','admin') NOT NULL,
+  `fotoPerfil` varchar(255) DEFAULT NULL,
+  `estadoCuenta` enum('Activa','Suspendida') DEFAULT 'Activa',
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `fechaRegistro` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `register`
+--
+
+INSERT INTO `register` (`idUsuario`, `nombre`, `email`, `contrasena`, `rol`, `fotoPerfil`, `estadoCuenta`, `activo`, `fechaRegistro`) VALUES
+(1, 'Administrador', 'admin@psyai.com', '60fe74406e7f353ed979f350f2fbb6a2e8690a5fa7d1b0c32983d1d8b3f95f67', 'admin', NULL, 'Activa', 1, '2026-06-05 16:16:19');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `intentos_fallidos`
+--
+
+CREATE TABLE `intentos_fallidos` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `intentos` int(11) NOT NULL DEFAULT 0,
+  `ultimo_intento` datetime DEFAULT NULL,
+  `bloqueado_hasta` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `login`
+--
+
+CREATE TABLE `login` (
+  `idLogin` int(11) NOT NULL,
+  `idUsuario` int(11) NOT NULL,
+  `email` varchar(120) NOT NULL,
+  `contrasena` varchar(200) DEFAULT NULL,
+  `ultimoAcceso` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `auditoriaaccesos`
 --
 
@@ -77,16 +132,63 @@ CREATE TABLE `auditoriaaccesos` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `autorizacionesdocumento`
+-- Estructura de tabla para la tabla `perfilpaciente`
 --
 
-CREATE TABLE `autorizacionesdocumento` (
-  `idAutorizacion` int(11) NOT NULL,
-  `idDocumento` int(11) NOT NULL,
+CREATE TABLE `perfilpaciente` (
+  `idPaciente` int(11) NOT NULL,
+  `edad` int(11) DEFAULT NULL,
+  `genero` varchar(20) DEFAULT NULL,
+  `numeroTelefonico` varchar(20) DEFAULT NULL,
+  `consentimientoDatos` tinyint(1) DEFAULT 0,
+  `consentimiento_chatbot` tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `perfilprofesional`
+--
+
+CREATE TABLE `perfilprofesional` (
   `idProfesional` int(11) NOT NULL,
-  `fechaAutorizacion` datetime DEFAULT current_timestamp(),
-  `revocado` tinyint(1) DEFAULT 0,
-  `fechaRevocacion` datetime DEFAULT NULL
+  `genero` varchar(20) DEFAULT NULL,
+  `edad` int(11) DEFAULT NULL,
+  `especialidad` varchar(120) DEFAULT NULL,
+  `licencia` varchar(120) DEFAULT NULL,
+  `experiencia` text DEFAULT NULL,
+  `estado` enum('Activo','Inactivo') DEFAULT 'Activo'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `disponibilidad`
+--
+
+CREATE TABLE `disponibilidad` (
+  `idDisponibilidad` int(11) NOT NULL,
+  `idProfesional` int(11) NOT NULL,
+  `fecha` date NOT NULL,
+  `hora_inicio` time NOT NULL,
+  `hora_fin` time NOT NULL,
+  `estado` enum('Disponible','Bloqueado','Ocupado') DEFAULT 'Disponible'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `conversacioneschatbot`
+--
+
+CREATE TABLE `conversacioneschatbot` (
+  `idConversacion` int(11) NOT NULL,
+  `idPaciente` int(11) NOT NULL,
+  `mensajeUsuario` text DEFAULT NULL,
+  `respuestaChatbot` text DEFAULT NULL,
+  `nivelEmocionalDetectado` varchar(50) DEFAULT NULL,
+  `palabrasRiesgoDetectadas` text DEFAULT NULL,
+  `fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -105,74 +207,95 @@ CREATE TABLE `citas` (
   `tipoSesion` varchar(80) DEFAULT NULL,
   `motivo` text DEFAULT NULL,
   `notas` text DEFAULT NULL,
-  `estado` enum('Pendiente','Completada','Cancelada') DEFAULT 'Pendiente'
+  `estado` enum('Pendiente','Completada','Cancelada') DEFAULT 'Pendiente',
+  `creado_por_profesional` tinyint(1) DEFAULT 0,
+  `motivoCancelacion` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Disparadores `citas`
---
-DELIMITER $$
-CREATE TRIGGER `trg_cita_notificacion_paciente` AFTER INSERT ON `citas` FOR EACH ROW BEGIN
-    INSERT INTO Notificaciones (idUsuario, titulo, mensaje, tipo, estado, enviado_por)
-    VALUES (NEW.idPaciente, 'Nueva cita', 'Se ha programado una nueva cita.', 'Cita', 'enviado', 'Sistema');
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_cita_notificacion_profesional` AFTER INSERT ON `citas` FOR EACH ROW BEGIN
-    INSERT INTO Notificaciones (idUsuario, titulo, mensaje, tipo, estado, enviado_por)
-    VALUES (NEW.idProfesional, 'Nueva cita agendada', 'Tienes una nueva cita agendada.', 'Cita', 'enviado', 'Sistema');
-END
-$$
-DELIMITER ;
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `conversacioneschatbot`
+-- Estructura de tabla para la tabla `evolucionpaciente`
 --
 
-CREATE TABLE `conversacioneschatbot` (
-  `idConversacion` int(11) NOT NULL,
+CREATE TABLE `evolucionpaciente` (
+  `idEvolucion` int(11) NOT NULL,
   `idPaciente` int(11) NOT NULL,
-  `mensajeUsuario` text DEFAULT NULL,
-  `respuestaChatbot` text DEFAULT NULL,
-  `nivelEmocionalDetectado` varchar(50) DEFAULT NULL,
-  `palabrasRiesgoDetectadas` text DEFAULT NULL,
+  `idConversacion` int(11) DEFAULT NULL,
+  `estadoEmocional` varchar(100) DEFAULT NULL,
+  `nivelEnergia` int(11) DEFAULT NULL,
+  `notasPersonales` text DEFAULT NULL,
+  `resultadoEmocional` varchar(100) DEFAULT NULL,
   `fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
 --
--- Disparadores `conversacioneschatbot`
+-- Estructura de tabla para la tabla `pacientesprofesional`
 --
-DELIMITER $$
-CREATE TRIGGER `trg_alerta_emocional` AFTER INSERT ON `conversacioneschatbot` FOR EACH ROW BEGIN
-    IF NEW.nivelEmocionalDetectado = 'Alto' THEN
-        INSERT INTO Notificaciones (idUsuario, mensaje, tipo, estado)
-        VALUES (
-            NEW.idPaciente,
-            'Se detectó un estado emocional crítico. Un profesional revisará tu caso.',
-            'Alerta',
-            'enviado'
-        );
-    END IF;
-END
-$$
-DELIMITER ;
+
+CREATE TABLE `pacientesprofesional` (
+  `idRegistro` int(11) NOT NULL,
+  `idProfesional` int(11) NOT NULL,
+  `idPaciente` int(11) DEFAULT NULL,
+  `sintomas` text DEFAULT NULL,
+  `diagnostico` text DEFAULT NULL,
+  `tratamiento` text DEFAULT NULL,
+  `fechaDiagnostico` date DEFAULT NULL,
+  `fecha` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `disponibilidad`
+-- Estructura de tabla para la tabla `notificaciones`
 --
 
-CREATE TABLE `disponibilidad` (
-  `idDisponibilidad` int(11) NOT NULL,
+CREATE TABLE `notificaciones` (
+  `idNotificacion` int(11) NOT NULL,
+  `idUsuario` int(11) DEFAULT NULL,
+  `rol` enum('admin','profesional','paciente') DEFAULT NULL,
+  `titulo` varchar(200) DEFAULT NULL,
+  `mensaje` text DEFAULT NULL,
+  `tipo` varchar(50) DEFAULT NULL,
+  `destinatario` varchar(80) DEFAULT NULL,
+  `email_individual` varchar(120) DEFAULT NULL,
+  `enviado_por` varchar(120) DEFAULT NULL,
+  `estado` enum('enviado','pendiente') DEFAULT 'enviado',
+  `leido` tinyint(1) DEFAULT 0,
+  `fecha` datetime DEFAULT current_timestamp(),
+  `fecha_programada` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `facturas`
+--
+
+CREATE TABLE `facturas` (
+  `idFactura` int(11) NOT NULL,
+  `idPaciente` int(11) NOT NULL,
   `idProfesional` int(11) NOT NULL,
-  `fecha` date NOT NULL,
-  `hora_inicio` time NOT NULL,
-  `hora_fin` time NOT NULL,
-  `estado` enum('Disponible','Bloqueado') DEFAULT 'Disponible'
+  `idCita` int(11) DEFAULT NULL,
+  `monto` decimal(10,2) DEFAULT NULL,
+  `metodoPago` enum('banco','tarjeta') DEFAULT 'tarjeta',
+  `estadoPago` enum('Pendiente','Pagado') DEFAULT 'Pendiente',
+  `fecha` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `itemsfactura`
+--
+
+CREATE TABLE `itemsfactura` (
+  `idItem` int(11) NOT NULL,
+  `idFactura` int(11) NOT NULL,
+  `descripcion` varchar(120) DEFAULT NULL,
+  `precioUnitario` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -217,105 +340,16 @@ CREATE TABLE `documentospaciente` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `evolucionpaciente`
+-- Estructura de tabla para la tabla `autorizacionesdocumento`
 --
 
-CREATE TABLE `evolucionpaciente` (
-  `idEvolucion` int(11) NOT NULL,
-  `idPaciente` int(11) NOT NULL,
-  `idConversacion` int(11) DEFAULT NULL,
-  `estadoEmocional` varchar(100) DEFAULT NULL,
-  `nivelEnergia` int(11) DEFAULT NULL,
-  `notasPersonales` text DEFAULT NULL,
-  `resultadoEmocional` varchar(100) DEFAULT NULL,
-  `fecha` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Disparadores `evolucionpaciente`
---
-DELIMITER $$
-CREATE TRIGGER `trg_evolucion_notificacion` AFTER INSERT ON `evolucionpaciente` FOR EACH ROW BEGIN
-    INSERT INTO Notificaciones (idUsuario, titulo, mensaje, tipo, estado, enviado_por)
-    VALUES (NEW.idPaciente, 'Evolución registrada', 'Se ha registrado tu nueva evolución emocional.', 'Evolución', 'enviado', 'Sistema');
-END
-$$
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `facturas`
---
-
-CREATE TABLE `facturas` (
-  `idFactura` int(11) NOT NULL,
-  `idPaciente` int(11) NOT NULL,
+CREATE TABLE `autorizacionesdocumento` (
+  `idAutorizacion` int(11) NOT NULL,
+  `idDocumento` int(11) NOT NULL,
   `idProfesional` int(11) NOT NULL,
-  `idCita` int(11) DEFAULT NULL,
-  `monto` decimal(10,2) DEFAULT NULL,
-  `metodoPago` enum('banco','tarjeta') DEFAULT 'tarjeta',
-  `estadoPago` enum('Pendiente','Pagado') DEFAULT 'Pendiente',
-  `fecha` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Disparadores `facturas`
---
-DELIMITER $$
-CREATE TRIGGER `trg_evitar_factura_duplicada` BEFORE INSERT ON `facturas` FOR EACH ROW BEGIN
-    IF EXISTS (
-        SELECT 1 FROM Facturas
-        WHERE idPaciente = NEW.idPaciente
-          AND DATE(fecha) = CURDATE()
-          AND idCita      = NEW.idCita
-    ) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Ya existe una factura para esta cita hoy.';
-    END IF;
-END
-$$
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `intentos_fallidos`
---
-
-CREATE TABLE `intentos_fallidos` (
-  `id` int(11) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `intentos` int(11) NOT NULL DEFAULT 0,
-  `ultimo_intento` datetime DEFAULT NULL,
-  `bloqueado_hasta` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `itemsfactura`
---
-
-CREATE TABLE `itemsfactura` (
-  `idItem` int(11) NOT NULL,
-  `idFactura` int(11) NOT NULL,
-  `descripcion` varchar(120) DEFAULT NULL,
-  `precioUnitario` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `login`
---
-
-CREATE TABLE `login` (
-  `idLogin` int(11) NOT NULL,
-  `idUsuario` int(11) NOT NULL,
-  `email` varchar(120) NOT NULL,
-  `contrasena` varchar(200) NOT NULL,
-  `ultimoAcceso` datetime DEFAULT current_timestamp()
+  `fechaAutorizacion` datetime DEFAULT current_timestamp(),
+  `revocado` tinyint(1) DEFAULT 0,
+  `fechaRevocacion` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -330,118 +364,11 @@ CREATE TABLE `logs` (
   `modulo` varchar(80) DEFAULT NULL,
   `accion` varchar(120) DEFAULT NULL,
   `detalle` text DEFAULT NULL,
-  `fecha` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `notificaciones`
---
-
-CREATE TABLE `notificaciones` (
-  `idNotificacion` int(11) NOT NULL,
-  `idUsuario` int(11) DEFAULT NULL,
-  `titulo` varchar(200) DEFAULT NULL,
-  `mensaje` text DEFAULT NULL,
-  `tipo` varchar(50) DEFAULT NULL,
-  `destinatario` varchar(80) DEFAULT NULL,
-  `email_individual` varchar(120) DEFAULT NULL,
-  `enviado_por` varchar(120) DEFAULT NULL,
-  `estado` enum('enviado','pendiente') DEFAULT 'enviado',
-  `leido` tinyint(1) DEFAULT 0,
   `fecha` datetime DEFAULT current_timestamp(),
-  `fecha_programada` datetime DEFAULT NULL
+  `rol_anterior` varchar(20) DEFAULT NULL,
+  `rol_nuevo` varchar(20) DEFAULT NULL,
+  `usuario_afectado` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `pacientesprofesional`
---
-
-CREATE TABLE `pacientesprofesional` (
-  `idRegistro` int(11) NOT NULL,
-  `idProfesional` int(11) NOT NULL,
-  `idPaciente` int(11) DEFAULT NULL,
-  `nombre` varchar(120) DEFAULT NULL,
-  `edad` int(11) DEFAULT NULL,
-  `sexo` varchar(20) DEFAULT NULL,
-  `contacto` varchar(120) DEFAULT NULL,
-  `direccion` text DEFAULT NULL,
-  `notas` text DEFAULT NULL,
-  `sintomas` text DEFAULT NULL,
-  `diagnostico` text DEFAULT NULL,
-  `tratamiento` text DEFAULT NULL,
-  `fechaDiagnostico` date DEFAULT NULL,
-  `fecha` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `perfilpaciente`
---
-
-CREATE TABLE `perfilpaciente` (
-  `idPaciente` int(11) NOT NULL,
-  `edad` int(11) DEFAULT NULL,
-  `genero` varchar(20) DEFAULT NULL,
-  `numeroTelefonico` varchar(20) DEFAULT NULL,
-  `consentimientoDatos` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `perfilprofesional`
---
-
-CREATE TABLE `perfilprofesional` (
-  `idProfesional` int(11) NOT NULL,
-  `especialidad` varchar(120) DEFAULT NULL,
-  `licencia` varchar(120) DEFAULT NULL,
-  `experiencia` text DEFAULT NULL,
-  `estado` enum('Activo','Inactivo') DEFAULT 'Activo'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `register`
---
-
-CREATE TABLE `register` (
-  `idUsuario` int(11) NOT NULL,
-  `nombre` varchar(120) NOT NULL,
-  `email` varchar(120) NOT NULL,
-  `contrasena` varchar(200) NOT NULL,
-  `rol` enum('paciente','profesional','admin') NOT NULL,
-  `fotoPerfil` varchar(255) DEFAULT NULL,
-  `estadoCuenta` enum('Activa','Suspendida') DEFAULT 'Activa',
-  `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `fechaRegistro` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `register`
---
-
-INSERT INTO `register` (`idUsuario`, `nombre`, `email`, `contrasena`, `rol`, `fotoPerfil`, `estadoCuenta`, `activo`, `fechaRegistro`) VALUES
-(1, 'Administrador', 'admin@psyai.com', '60fe74406e7f353ed979f350f2fbb6a2e8690a5fa7d1b0c32983d1d8b3f95f67', 'admin', NULL, 'Activa', 1, '2026-06-05 16:16:19');
-
---
--- Disparadores `register`
---
-DELIMITER $$
-CREATE TRIGGER `trg_registrar_reactivacion` AFTER UPDATE ON `register` FOR EACH ROW BEGIN
-    IF NEW.estadoCuenta = 'Activa' AND OLD.estadoCuenta = 'Suspendida' THEN
-        INSERT INTO AuditoriaAccesos (idUsuario, accion, ip)
-        VALUES (NEW.idUsuario, 'Reactivación de cuenta', '0.0.0.0');
-    END IF;
-END
-$$
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -456,105 +383,148 @@ CREATE TABLE `reportes` (
   `tipoReporte` varchar(80) DEFAULT NULL,
   `fechaInicio` date DEFAULT NULL,
   `fechaFin` date DEFAULT NULL,
-  `estado` enum('Pendiente','Completado') DEFAULT 'Pendiente',
+  `estado` varchar(20) DEFAULT 'Pendiente',
+  `fecha` datetime DEFAULT current_timestamp(),
+  `eliminado` tinyint(1) DEFAULT 0,
+  `sintomas` text DEFAULT NULL,
+  `diagnostico` text DEFAULT NULL,
+  `tratamiento` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `ChatbotConfig`
+--
+
+CREATE TABLE `ChatbotConfig` (
+  `id` int(11) NOT NULL,
+  `system_prompt` text DEFAULT NULL,
+  `tone` varchar(120) DEFAULT NULL,
+  `interaction_rules` text DEFAULT NULL,
+  `risk_terms` text DEFAULT NULL,
+  `crisis_response` text DEFAULT NULL,
+  `medium_terms` text DEFAULT NULL,
+  `medium_response` text DEFAULT NULL,
+  `fallback_response` text DEFAULT NULL,
+  `temperature` float DEFAULT 0.55,
+  `top_p` float DEFAULT 0.9,
+  `max_tokens` int(11) DEFAULT 420,
+  `max_tokens_user` int(11) DEFAULT 2000,
+  `daily_message_limit` int(11) DEFAULT 20,
+  `actualizado_por` int(11) DEFAULT NULL,
+  `fecha_actualizacion` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `EncuestaChatbot`
+--
+
+CREATE TABLE `EncuestaChatbot` (
+  `id` int(11) NOT NULL,
+  `idPaciente` int(11) NOT NULL,
+  `fecha` datetime DEFAULT current_timestamp(),
+  `utilidad` tinyint(1) NOT NULL,
+  `claridad` tinyint(1) NOT NULL,
+  `recomendaria` enum('si','no') NOT NULL,
+  `comentario` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `MensajesChat`
+--
+
+CREATE TABLE `MensajesChat` (
+  `idMensaje` int(11) NOT NULL,
+  `idEmisor` int(11) NOT NULL,
+  `idReceptor` int(11) NOT NULL,
+  `mensaje` text NOT NULL,
+  `leido` tinyint(1) DEFAULT 0,
   `fecha` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `vistacitaspendientes`
--- (Véase abajo para la vista actual)
+-- Estructura de tabla para la tabla `RecoveryTokens`
 --
-CREATE TABLE `vistacitaspendientes` (
-`idCita` int(11)
-,`paciente` varchar(120)
-,`fecha` date
-,`hora` time
-,`tipoCita` varchar(80)
-,`tipoSesion` varchar(80)
-,`motivo` text
-,`notas` text
-,`estado` enum('Pendiente','Completada','Cancelada')
-);
+
+CREATE TABLE `RecoveryTokens` (
+  `id` int(11) NOT NULL,
+  `idUsuario` int(11) NOT NULL,
+  `token` varchar(100) NOT NULL,
+  `expires` datetime NOT NULL,
+  `used` tinyint(1) DEFAULT 0,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `vistaevolucionpaciente`
--- (Véase abajo para la vista actual)
+-- Disparadores
 --
-CREATE TABLE `vistaevolucionpaciente` (
-`nombre` varchar(120)
-,`estadoEmocional` varchar(100)
-,`nivelEnergia` int(11)
-,`notasPersonales` text
-,`fecha` datetime
-);
-
--- --------------------------------------------------------
-
---
--- Estructura Stand-in para la vista `vistafacturacion`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `vistafacturacion` (
-`idFactura` int(11)
-,`paciente` varchar(120)
-,`monto` decimal(10,2)
-,`metodoPago` enum('banco','tarjeta')
-,`estadoPago` enum('Pendiente','Pagado')
-,`fecha` datetime
-);
-
--- --------------------------------------------------------
-
---
--- Estructura Stand-in para la vista `vistahistorialchatbot`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `vistahistorialchatbot` (
-`nombre` varchar(120)
-,`idPaciente` int(11)
-,`mensajeUsuario` text
-,`respuestaChatbot` text
-,`nivelEmocionalDetectado` varchar(50)
-,`palabrasRiesgoDetectadas` text
-,`fecha` datetime
-);
-
--- --------------------------------------------------------
-
---
--- Estructura Stand-in para la vista `vistalogsadmin`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `vistalogsadmin` (
-`id` int(11)
-,`administrador` varchar(120)
-,`modulo` varchar(80)
-,`accion` varchar(120)
-,`detalle` mediumtext
-,`fecha` varchar(21)
-,`origen` varchar(9)
-);
-
--- --------------------------------------------------------
-
---
--- Estructura Stand-in para la vista `vistareportes`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `vistareportes` (
-`idReporte` int(11)
-,`profesional` varchar(120)
-,`paciente` varchar(120)
-,`tipoReporte` varchar(80)
-,`fechaInicio` date
-,`fechaFin` date
-,`estado` enum('Pendiente','Completado')
-,`fecha` datetime
-);
+DELIMITER $$
+CREATE TRIGGER `trg_cita_notificacion_paciente` AFTER INSERT ON `citas` FOR EACH ROW BEGIN
+    INSERT INTO Notificaciones (idUsuario, titulo, mensaje, tipo, estado, enviado_por)
+    VALUES (NEW.idPaciente, 'Nueva cita', 'Se ha programado una nueva cita.', 'Cita', 'enviado', 'Sistema');
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_cita_notificacion_profesional` AFTER INSERT ON `citas` FOR EACH ROW BEGIN
+    INSERT INTO Notificaciones (idUsuario, titulo, mensaje, tipo, estado, enviado_por)
+    VALUES (NEW.idProfesional, 'Nueva cita agendada', 'Tienes una nueva cita agendada.', 'Cita', 'enviado', 'Sistema');
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_alerta_emocional` AFTER INSERT ON `conversacioneschatbot` FOR EACH ROW BEGIN
+    IF NEW.nivelEmocionalDetectado = 'Alto' THEN
+        INSERT INTO Notificaciones (idUsuario, mensaje, tipo, estado)
+        VALUES (
+            NEW.idPaciente,
+            'Se detectó un estado emocional crítico. Un profesional revisará tu caso.',
+            'Alerta',
+            'enviado'
+        );
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_evolucion_notificacion` AFTER INSERT ON `evolucionpaciente` FOR EACH ROW BEGIN
+    INSERT INTO Notificaciones (idUsuario, titulo, mensaje, tipo, estado, enviado_por)
+    VALUES (NEW.idPaciente, 'Evolución registrada', 'Se ha registrado tu nueva evolución emocional.', 'Evolución', 'enviado', 'Sistema');
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_evitar_factura_duplicada` BEFORE INSERT ON `facturas` FOR EACH ROW BEGIN
+    IF EXISTS (
+        SELECT 1 FROM Facturas
+        WHERE idPaciente = NEW.idPaciente
+          AND DATE(fecha) = CURDATE()
+          AND idCita      = NEW.idCita
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ya existe una factura para esta cita hoy.';
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_registrar_reactivacion` AFTER UPDATE ON `register` FOR EACH ROW BEGIN
+    IF NEW.estadoCuenta = 'Activa' AND OLD.estadoCuenta = 'Suspendida' THEN
+        INSERT INTO AuditoriaAccesos (idUsuario, accion, ip)
+        VALUES (NEW.idUsuario, 'Reactivación de cuenta', '0.0.0.0');
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -610,6 +580,8 @@ DROP TABLE IF EXISTS `vistareportes`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vistareportes`  AS SELECT `r`.`idReporte` AS `idReporte`, `up`.`nombre` AS `profesional`, `ua`.`nombre` AS `paciente`, `r`.`tipoReporte` AS `tipoReporte`, `r`.`fechaInicio` AS `fechaInicio`, `r`.`fechaFin` AS `fechaFin`, `r`.`estado` AS `estado`, `r`.`fecha` AS `fecha` FROM ((`reportes` `r` join `register` `up` on(`r`.`idProfesional` = `up`.`idUsuario`)) left join `register` `ua` on(`r`.`idPaciente` = `ua`.`idUsuario`)) ;
 
+-- --------------------------------------------------------
+
 --
 -- Índices para tablas volcadas
 --
@@ -628,6 +600,13 @@ ALTER TABLE `autorizacionesdocumento`
   ADD PRIMARY KEY (`idAutorizacion`),
   ADD UNIQUE KEY `uq_doc_prof` (`idDocumento`,`idProfesional`),
   ADD KEY `idx_profesional` (`idProfesional`);
+
+--
+-- Indices de la tabla `ChatbotConfig`
+--
+ALTER TABLE `ChatbotConfig`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `actualizado_por` (`actualizado_por`);
 
 --
 -- Indices de la tabla `citas`
@@ -665,6 +644,13 @@ ALTER TABLE `documentosclinicos`
 ALTER TABLE `documentospaciente`
   ADD PRIMARY KEY (`idDocumento`),
   ADD KEY `idx_paciente` (`idPaciente`);
+
+--
+-- Indices de la tabla `EncuestaChatbot`
+--
+ALTER TABLE `EncuestaChatbot`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idPaciente` (`idPaciente`);
 
 --
 -- Indices de la tabla `evolucionpaciente`
@@ -711,6 +697,14 @@ ALTER TABLE `logs`
   ADD PRIMARY KEY (`idLog`);
 
 --
+-- Indices de la tabla `MensajesChat`
+--
+ALTER TABLE `MensajesChat`
+  ADD PRIMARY KEY (`idMensaje`),
+  ADD KEY `idEmisor` (`idEmisor`),
+  ADD KEY `idReceptor` (`idReceptor`);
+
+--
 -- Indices de la tabla `notificaciones`
 --
 ALTER TABLE `notificaciones`
@@ -722,6 +716,7 @@ ALTER TABLE `notificaciones`
 --
 ALTER TABLE `pacientesprofesional`
   ADD PRIMARY KEY (`idRegistro`),
+  ADD UNIQUE KEY `uq_profesional_paciente` (`idProfesional`,`idPaciente`),
   ADD KEY `idProfesional` (`idProfesional`),
   ADD KEY `idPaciente` (`idPaciente`);
 
@@ -736,6 +731,14 @@ ALTER TABLE `perfilpaciente`
 --
 ALTER TABLE `perfilprofesional`
   ADD PRIMARY KEY (`idProfesional`);
+
+--
+-- Indices de la tabla `RecoveryTokens`
+--
+ALTER TABLE `RecoveryTokens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `token` (`token`),
+  ADD KEY `idUsuario` (`idUsuario`);
 
 --
 -- Indices de la tabla `register`
@@ -769,6 +772,12 @@ ALTER TABLE `autorizacionesdocumento`
   MODIFY `idAutorizacion` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `ChatbotConfig`
+--
+ALTER TABLE `ChatbotConfig`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `citas`
 --
 ALTER TABLE `citas`
@@ -797,6 +806,12 @@ ALTER TABLE `documentosclinicos`
 --
 ALTER TABLE `documentospaciente`
   MODIFY `idDocumento` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `EncuestaChatbot`
+--
+ALTER TABLE `EncuestaChatbot`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `evolucionpaciente`
@@ -835,6 +850,12 @@ ALTER TABLE `logs`
   MODIFY `idLog` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `MensajesChat`
+--
+ALTER TABLE `MensajesChat`
+  MODIFY `idMensaje` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `notificaciones`
 --
 ALTER TABLE `notificaciones`
@@ -845,6 +866,12 @@ ALTER TABLE `notificaciones`
 --
 ALTER TABLE `pacientesprofesional`
   MODIFY `idRegistro` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `RecoveryTokens`
+--
+ALTER TABLE `RecoveryTokens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `register`
@@ -874,6 +901,12 @@ ALTER TABLE `auditoriaaccesos`
 ALTER TABLE `autorizacionesdocumento`
   ADD CONSTRAINT `autdoc_ibfk_1` FOREIGN KEY (`idDocumento`) REFERENCES `documentospaciente` (`idDocumento`) ON DELETE CASCADE,
   ADD CONSTRAINT `autdoc_ibfk_2` FOREIGN KEY (`idProfesional`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `ChatbotConfig`
+--
+ALTER TABLE `ChatbotConfig`
+  ADD CONSTRAINT `chatbotconfig_ibfk_1` FOREIGN KEY (`actualizado_por`) REFERENCES `register` (`idUsuario`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `citas`
@@ -908,6 +941,12 @@ ALTER TABLE `documentospaciente`
   ADD CONSTRAINT `docpac_ibfk_1` FOREIGN KEY (`idPaciente`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE;
 
 --
+-- Filtros para la tabla `EncuestaChatbot`
+--
+ALTER TABLE `EncuestaChatbot`
+  ADD CONSTRAINT `encuestachatbot_ibfk_1` FOREIGN KEY (`idPaciente`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `evolucionpaciente`
 --
 ALTER TABLE `evolucionpaciente`
@@ -935,6 +974,13 @@ ALTER TABLE `login`
   ADD CONSTRAINT `login_ibfk_1` FOREIGN KEY (`idUsuario`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE;
 
 --
+-- Filtros para la tabla `MensajesChat`
+--
+ALTER TABLE `MensajesChat`
+  ADD CONSTRAINT `mensajeschat_ibfk_1` FOREIGN KEY (`idEmisor`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE,
+  ADD CONSTRAINT `mensajeschat_ibfk_2` FOREIGN KEY (`idReceptor`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `notificaciones`
 --
 ALTER TABLE `notificaciones`
@@ -960,11 +1006,20 @@ ALTER TABLE `perfilprofesional`
   ADD CONSTRAINT `perfilprofesional_ibfk_1` FOREIGN KEY (`idProfesional`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE;
 
 --
+-- Filtros para la tabla `RecoveryTokens`
+--
+ALTER TABLE `RecoveryTokens`
+  ADD CONSTRAINT `recoverytokens_ibfk_1` FOREIGN KEY (`idUsuario`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `reportes`
 --
 ALTER TABLE `reportes`
   ADD CONSTRAINT `reportes_ibfk_1` FOREIGN KEY (`idProfesional`) REFERENCES `register` (`idUsuario`) ON DELETE CASCADE,
   ADD CONSTRAINT `reportes_ibfk_2` FOREIGN KEY (`idPaciente`) REFERENCES `register` (`idUsuario`) ON DELETE SET NULL;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
