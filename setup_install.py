@@ -62,12 +62,12 @@ CREDENTIALS: dict[str, str] = {
     # Gemini AI
     # Para activar rotación de keys en el futuro:
     #   GEMINI_API_KEYS=key1,key2,key3,...
-    "GEMINI_API_KEY":           "AIzaSyDbXVQ_QlYlD5tcn6O3gEADXotzHFo4V7M",
+    "GEMINI_API_KEY":           "",
     "GEMINI_API_KEYS":          "",   # vacío = usa solo GEMINI_API_KEY
     "GEMINI_MODEL":             "gemini-2.5-flash-lite",
 
     # Resend (emails)
-    "BREVO_API_KEY":            "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",
+    "BREVO_API_KEY":            "",
     "BREVO_FROM":               "manuelrojasq21@gmail.com",
     "BREVO_FROM_NAME":          "PsyAI Connect",
 
