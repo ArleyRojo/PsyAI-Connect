@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: repositories/auth_repository.py
+# ============================================================
+
 import logging
 from datetime import datetime
 from app.utils.db import db_cursor
@@ -7,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_user_by_email(email, *, admin_only=False):
+    # Busca un usuario por email, opcionalmente filtrando solo admins
     with db_cursor(dictionary=True) as (_, cursor):
         if admin_only:
             cursor.execute(
@@ -30,12 +35,14 @@ def get_user_by_email(email, *, admin_only=False):
 
 
 def user_exists_by_email(email):
+    # Verifica si un email ya está registrado en el sistema
     with db_cursor() as (_, cursor):
         cursor.execute("SELECT idUsuario FROM Register WHERE email = %s", (email,))
         return cursor.fetchone() is not None
 
 
 def create_user(nombre, email, password_hash, rol, genero, edad=None):
+    # Crea un usuario y su perfil correspondiente según el rol (paciente o profesional)
     with db_cursor() as (conn, cursor):
         cursor.execute(
             "INSERT INTO Register (nombre, email, contrasena, rol) VALUES (%s, %s, %s, %s)",
@@ -58,6 +65,7 @@ def create_user(nombre, email, password_hash, rol, genero, edad=None):
 
 
 def register_login_event(user_id, email, ip_address="unknown"):
+    # Registra el evento de login exitoso en Login y AuditoriaAccesos
     with db_cursor() as (conn, cursor):
         try:
             cursor.execute(
@@ -76,6 +84,7 @@ def register_login_event(user_id, email, ip_address="unknown"):
 
 
 def active_user_exists_by_email(email):
+    # Verifica si existe un usuario activo con ese email
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             "SELECT idUsuario FROM Register WHERE email = %s AND estadoCuenta = 'Activa'",
@@ -85,6 +94,7 @@ def active_user_exists_by_email(email):
 
 
 def create_password_recovery_token(email, token, expires):
+    # Invalida tokens anteriores y crea uno nuevo para recuperación de contraseña
     with db_cursor(dictionary=True) as (conn, cursor):
         cursor.execute(
             "SELECT idUsuario FROM Register WHERE email = %s",
@@ -104,6 +114,7 @@ def create_password_recovery_token(email, token, expires):
 
 
 def validate_recovery_token(token):
+    # Valida que un token de recuperación exista, no esté usado y no haya expirado
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             "SELECT idUsuario, expires FROM RecoveryTokens WHERE token = %s AND used = 0",
@@ -113,11 +124,12 @@ def validate_recovery_token(token):
         if not result:
             return None
         if result["expires"] < datetime.now():
-            return None
+            return None  # Token expirado
         return result["idUsuario"]
 
 
 def invalidate_recovery_token(token):
+    # Marca un token como usado para evitar reutilización
     with db_cursor(dictionary=True) as (conn, cursor):
         cursor.execute(
             "UPDATE RecoveryTokens SET used = 1 WHERE token = %s",
@@ -128,6 +140,7 @@ def invalidate_recovery_token(token):
 
 
 def update_password(user_id, new_password_hash):
+    # Actualiza la contraseña de un usuario (hash ya generado por el service)
     with db_cursor(dictionary=True) as (conn, cursor):
         cursor.execute(
             "UPDATE Register SET contrasena = %s WHERE idUsuario = %s",
@@ -135,5 +148,3 @@ def update_password(user_id, new_password_hash):
         )
         conn.commit()
         return cursor.rowcount > 0
-
-

@@ -1,12 +1,17 @@
+# ============================================================
+# ARCHIVO: repositories/admin_repository.py
+# ============================================================
+
 from flask import session
 from app.utils.db import db_cursor
 from app.utils.security import hash_password
 
-# Global version counter for logs streaming
+# Contador global de versión para notificar a los suscriptores SSE de nuevos logs
 _logs_version = 0
 
 
 def get_admin_name():
+    # Obtiene el nombre del admin desde la sesión actual, con fallback por defecto
     return session.get("nombre", "Admin")
 
 
@@ -26,6 +31,7 @@ def registrar_log(cursor, modulo, accion, detalle, rol_anterior=None, rol_nuevo=
 
 
 def registrar_evento_seguridad(accion, detalle, administrador="Sistema"):
+    # Crea un contexto de base de datos automáticamente para registrar un evento de seguridad
     with db_cursor() as (conn, cursor):
         registrar_log(cursor, "seguridad", accion, detalle, administrador=administrador)
         conn.commit()
@@ -48,6 +54,7 @@ def get_logs_version():
 
 
 def ensure_report_columns():
+    # Verifica y agrega columnas faltantes en las tablas Reportes y Logs para compatibilidad
     with db_cursor() as (conn, cursor):
         for field in ("sintomas", "diagnostico", "tratamiento"):
             cursor.execute(f"SHOW COLUMNS FROM Reportes LIKE '{field}'")
@@ -69,6 +76,7 @@ def ensure_report_columns():
 
 
 def get_stats():
+    # Obtiene métricas globales del sistema en una sola consulta con subqueries
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -87,6 +95,7 @@ def get_stats():
             """
         )
         row = cursor.fetchone()
+        # Extrae cada métrica a variables individuales para claridad
         total = row["total_usuarios"]
         activos = row["usuarios_activos"]
         bloqueados = row["cuentas_suspendidas"]
@@ -98,6 +107,7 @@ def get_stats():
         actividad_sospechosa = row["actividad_sospechosa"]
         ips_bloqueadas = row["ips_bloqueadas"]
         tokens_invalidos = row["tokens_invalidos"]
+        # Obtiene los últimos 10 eventos de seguridad para la línea de tiempo del panel
         cursor.execute(
             """
             SELECT accion as titulo,
@@ -115,10 +125,12 @@ def get_stats():
             """
         )
         security_timeline = cursor.fetchall()
+        # Obtiene las últimas 5 actividades generales para la sección de actividad reciente
         cursor.execute(
             "SELECT accion, detalle, DATE_FORMAT(fecha,'%d/%m/%Y %H:%i') as fecha FROM Logs ORDER BY fecha DESC LIMIT 5"
         )
         actividad = cursor.fetchall()
+    # Retorna un diccionario plano con todas las métricas calculadas
     return {
         "total_usuarios": total,
         "usuarios_activos": activos,
@@ -143,6 +155,7 @@ def get_stats():
 def list_users(page=1, limit=20):
     offset = (page - 1) * limit
     with db_cursor(dictionary=True) as (_, cursor):
+        # Lista usuarios ordenados por rol (admin primero, luego profesional, luego paciente)
         cursor.execute(
             """
             SELECT r.idUsuario, r.nombre, r.email, r.rol,
@@ -166,6 +179,7 @@ def list_users(page=1, limit=20):
 
 
 def get_user(user_id):
+    # Obtiene un usuario específico por su ID
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -182,6 +196,7 @@ def get_user(user_id):
 def create_user(data):
     password = data.get("contrasena") or "1234"
     with db_cursor() as (conn, cursor):
+        # Inserta el usuario en Register y luego crea el perfil según el rol
         cursor.execute(
             """
             INSERT INTO Register (nombre, email, contrasena, rol)
@@ -213,6 +228,7 @@ def update_user(data):
 
 
 def delete_user(user_id):
+    # Elimina un usuario y todos sus datos en cascada por las FK on delete
     with db_cursor() as (conn, cursor):
         cursor.execute("SELECT nombre FROM Register WHERE idUsuario = %s", (user_id,))
         user = cursor.fetchone()
@@ -222,6 +238,7 @@ def delete_user(user_id):
 
 
 def block_user(user_id, accion):
+    # Alterna entre bloquear (activo=0) y reestablecer (activo=1) un usuario
     activo = 0 if accion in ("bloquear", "suspender") else 1
     estado = "Suspendida" if activo == 0 else "Activa"
     with db_cursor() as (conn, cursor):
@@ -238,6 +255,7 @@ def block_user(user_id, accion):
 
 
 def list_role_users():
+    # Lista todos los usuarios no-admin para la gestión de roles en el panel
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -251,6 +269,7 @@ def list_role_users():
 
 
 def change_role(user_id, nuevo_rol):
+    # Cambia el rol de un usuario y registra el cambio en el log con los roles anterior y nuevo
     with db_cursor() as (conn, cursor):
         cursor.execute("SELECT nombre, rol FROM Register WHERE idUsuario = %s", (user_id,))
         user = cursor.fetchone()
@@ -270,12 +289,14 @@ def change_role(user_id, nuevo_rol):
 
 
 def get_role_history():
+    # Obtiene el historial de cambios de roles
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute("SELECT * FROM Logs WHERE modulo = 'roles' ORDER BY fecha DESC LIMIT 50")
         return cursor.fetchall()
 
 
 def get_notifications_feed():
+    # Obtiene un feed unificado de notificaciones (del sistema, citas como profesional y como paciente)
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -372,6 +393,7 @@ def get_users_by_ids(user_ids):
     """Fetch basic details for a list of user IDs."""
     if not user_ids:
         return []
+    # Construye placeholders dinámicos para la consulta IN con lista variable
     placeholders = ",".join(["%s"] * len(user_ids))
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
@@ -386,6 +408,7 @@ def get_users_by_ids(user_ids):
 
 
 def get_logs(limit=None):
+    # Obtiene logs combinados de cinco fuentes (admin, auditoría, notificaciones, profesional, paciente)
     with db_cursor(dictionary=True) as (_, cursor):
         limit_clause = f"LIMIT {limit}" if limit else "LIMIT 200"
         cursor.execute(

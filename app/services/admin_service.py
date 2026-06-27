@@ -1,10 +1,15 @@
+# ============================================================
+# ARCHIVO: services/admin_service.py
+# ============================================================
+
 import secrets
 import time
 from app.repositories import admin_repository
 
+# Caché de estadísticas para evitar consultas repetitivas en el SSE del panel admin
 _stats_cache = None
 _stats_cache_time = 0
-STATS_CACHE_TTL = 10
+STATS_CACHE_TTL = 10  # segundos
 
 
 def init_db():
@@ -21,10 +26,11 @@ def create_report_columns():
 
 
 def get_stats(force=False):
+    # Retorna estadísticas combinadas (telemetría en memoria + base de datos)
     global _stats_cache, _stats_cache_time
     now = time.time()
     if not force and _stats_cache is not None and now - _stats_cache_time < STATS_CACHE_TTL:
-        return _stats_cache
+        return _stats_cache  # Usa caché si no han pasado los segundos del TTL
     from app.services.telemetry_service import get_live_stats
     db_stats = admin_repository.get_stats()
     live_stats = get_live_stats()
@@ -81,6 +87,7 @@ def change_role(data):
 
 
 def role_history():
+    # Obtiene el historial y renombra campos para la respuesta JSON del frontend
     historial = admin_repository.get_role_history()
     for item in historial:
         if item.get("fecha"):
@@ -92,6 +99,7 @@ def role_history():
 
 
 def notifications_feed():
+    # Obtiene el feed de notificaciones y calcula estadísticas de envío
     actividades = admin_repository.get_notifications_feed()
     actividades.sort(key=lambda x: x["fecha"], reverse=True)
     stats = _notification_stats(actividades)
@@ -103,6 +111,7 @@ def notifications_feed():
 
 
 def _notification_stats(actividades):
+    # Calcula estadísticas de notificaciones: enviadas, programadas, tasa de alcance
     total = len(actividades)
     enviadas = sum(1 for item in actividades if item.get("estado") != "pendiente")
     programadas = sum(1 for item in actividades if item.get("estado") == "pendiente")
@@ -136,6 +145,7 @@ def get_logs(limit=None):
 
 
 def get_chatbot_historial(nivel="", search=""):
+    # Procesa y agrupa el historial del chatbot por paciente, con filtros de nivel y búsqueda
     def _serialize_fecha(valor):
         if valor is None:
             return None
@@ -158,6 +168,7 @@ def get_chatbot_historial(nivel="", search=""):
             }, 200
         return {"success": False, "message": estr}, 500
 
+    # Agrupa mensajes por paciente en un mapa
     pacientes_map = {}
     for row in rows:
         key = row.get("idPaciente") or row["nombre"]

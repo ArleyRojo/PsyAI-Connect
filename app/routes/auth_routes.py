@@ -1,3 +1,6 @@
+# ARCHIVO: auth_routes.py
+# Autenticación: registro, inicio de sesión, cierre, verificación de sesión, recuperación de contraseña.
+# Aplica rate limiting por endpoint (Flask-Limiter) y registra eventos de seguridad vía telemetría.
 from flask import Blueprint, jsonify, request, session, current_app
 from flask_limiter import RateLimitExceeded
 from app.services import auth_service
@@ -6,6 +9,7 @@ from app.services import auth_service
 auth_bp = Blueprint("auth", __name__)
 
 
+# Consume un token del rate limiter configurado en app.config
 def _consume_rate_limit(config_key):
     limiter = current_app.get_limiter()
     if not limiter:
@@ -63,6 +67,7 @@ def logout():
     return jsonify({"success": True, "message": "Sesion cerrada"}), 200
 
 
+# Devuelve datos de sesión si el usuario está autenticado; verifica que la foto de perfil exista en disco
 @auth_bp.route("/api/session", methods=["GET"])
 def check_session():
     if session.get("idUsuario"):

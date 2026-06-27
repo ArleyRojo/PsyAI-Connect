@@ -1,6 +1,11 @@
+# ============================================================
+# ARCHIVO: repositories/chatbot_config_repository.py
+# ============================================================
+
 from app.utils.db import db_cursor
 
 
+# Mapeo de nombres de campos del frontend a columnas de la base de datos
 CONFIG_COLUMNS = {
     "system_prompt": "system_prompt",
     "tone": "tone",
@@ -20,6 +25,7 @@ CONFIG_COLUMNS = {
 
 
 def _get_existing_columns(cursor):
+    # Consulta las columnas existentes de ChatbotConfig para construir queries dinámicas
     cursor.execute("SHOW COLUMNS FROM ChatbotConfig")
     columns = set()
     for row in cursor.fetchall():
@@ -31,8 +37,10 @@ def _get_existing_columns(cursor):
 
 
 def get_config():
+    # Obtiene la configuración activa del chatbot (fila 1)
     with db_cursor(dictionary=True) as (_, cursor):
         existing_columns = _get_existing_columns(cursor)
+        # Filtra solo las columnas que realmente existen en la tabla para evitar errores
         select_columns = [
             column for column in (
                 "id",
@@ -69,6 +77,7 @@ def get_config():
 
 
 def save_config(data, admin_id):
+    # Guarda o actualiza la configuración usando INSERT ... ON DUPLICATE KEY UPDATE
     with db_cursor() as (conn, cursor):
         existing_columns = _get_existing_columns(cursor)
         columns = ["id"]
@@ -88,6 +97,7 @@ def save_config(data, admin_id):
         if "fecha_actualizacion" in existing_columns:
             placeholders.append("NOW()")
 
+        # Prepara las asignaciones para la cláusula ON DUPLICATE KEY UPDATE
         update_columns = [column for column in columns if column != "id"]
         update_assignments = [
             f"{column} = VALUES({column})"
@@ -111,6 +121,7 @@ def save_config(data, admin_id):
 
 
 def save_risk_terms_only(risk_terms_str, admin_id):
+    # Actualiza únicamente los términos de riesgo en la configuración
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """UPDATE ChatbotConfig

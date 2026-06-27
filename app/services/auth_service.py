@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: services/auth_service.py
+# ============================================================
+
 import secrets
 import os
 from datetime import datetime, timedelta
@@ -13,6 +17,7 @@ from app.utils.validators import Validator, ValidationError
 
 def register_user(data):
     try:
+        # Valida y extrae cada campo del formulario de registro
         nombre = Validator.required((data.get("nombre") or "").strip(), "nombre")
         email = Validator.email((data.get("email") or "").strip())
         password = Validator.password(data.get("password") or "")
@@ -33,6 +38,7 @@ def register_user(data):
                 raise ValidationError("La edad debe estar entre 1 y 120", "edad")
         except ValidationError as e:
             return {"success": False, "message": e.message}, 400
+        # Verifica que el email no esté ya registrado
         if auth_repository.user_exists_by_email(email):
             return {"success": False, "message": "El correo ya está registrado"}, 409
 
@@ -53,6 +59,7 @@ def login_user(data, ip_address):
     if not email or not password:
         return {"success": False, "message": "Email y contrasena requeridos"}, 400, None
 
+    # Verifica si la cuenta está bloqueada por demasiados intentos fallidos
     bloqueado, retry_after = check_brute_force(email)
     if bloqueado:
         return {
@@ -64,6 +71,7 @@ def login_user(data, ip_address):
     usuario = auth_repository.get_user_by_email(email, admin_only=rol == "admin")
     if not usuario:
         return {"success": False, "message": "Credenciales incorrectas o cuenta suspendida"}, 401, None
+    # Verifica que el rol coincida con el solicitado en el login
     if usuario["rol"] != rol:
         return {"success": False, "message": f"Este usuario no tiene rol de {rol}"}, 403, None
 
@@ -73,6 +81,7 @@ def login_user(data, ip_address):
         registrar_evento_seguridad("Login fallido", f"Email: {email} - IP: {ip_address}")
         return {"success": False, "message": "Credenciales incorrectas"}, 401, None
 
+    # Login exitoso: reinicia contador de intentos y registra el evento
     reset_failed_attempts(email)
     auth_repository.register_login_event(usuario["idUsuario"], email, ip_address)
 
@@ -84,6 +93,7 @@ def login_user(data, ip_address):
         "fotoPerfil": usuario.get("fotoPerfil"),
     }
 
+    # Redirige al dashboard correspondiente según el rol
     if usuario["rol"] == "paciente":
         redirect_url = "patient.dashboard.html"
     elif usuario["rol"] == "profesional":
@@ -114,6 +124,7 @@ def recover_password(email):
     email_sent = False
 
     if existe:
+        # Genera un token seguro de 32 bytes y lo guarda con expiración de 1 hora
         token = secrets.token_urlsafe(32)
         expires = datetime.now() + timedelta(hours=1)
         auth_repository.create_password_recovery_token(email, token, expires)
@@ -130,6 +141,7 @@ def recover_password(email):
         return {"success": False, "message": "No existe una cuenta con ese correo electr\u00f3nico."}, 404
 
     payload = {"success": True, "message": "Fue enviado al correo."}
+    # En desarrollo, devuelve el enlace directamente si no se pudo enviar el email
     if recovery_link and not email_sent and os.getenv("FLASK_ENV", "development").lower() != "production":
         payload["recovery_link"] = recovery_link
 
@@ -151,6 +163,7 @@ def reset_password(data):
     except ValidationError as e:
         return {"success": False, "message": e.message}, 400
 
+    # Valida que el token sea válido y no haya expirado
     user_id = auth_repository.validate_recovery_token(token)
     if not user_id:
         return {"success": False, "message": "Token inv\u00e1lido o expirado"}, 400
@@ -159,5 +172,3 @@ def reset_password(data):
     auth_repository.update_password(user_id, hash_password(new_password))
 
     return {"success": True, "message": "Contrase\u00f1a actualizada exitosamente"}, 200
-
-

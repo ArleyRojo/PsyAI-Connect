@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: repositories/appointment_repository.py
+# ============================================================
+
 from datetime import timedelta
 from app.utils.db import db_cursor
 from app.repositories import admin_repository
@@ -21,6 +25,7 @@ def _format_time(value):
 
 
 def appointment_exists(professional_id, fecha, hora):
+    # Verifica si ya existe una cita activa (no cancelada) en ese horario con ese profesional
     with db_cursor() as (_, cursor):
         cursor.execute(
             """
@@ -48,6 +53,7 @@ def create_appointment(patient_id, professional_id, fecha, hora, tipo_cita, moti
 
 
 def get_daily_availability(professional_id, fecha):
+    # Obtiene los bloques de disponibilidad de un profesional para una fecha específica
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -61,6 +67,7 @@ def get_daily_availability(professional_id, fecha):
 
 
 def get_taken_times(professional_id, fecha):
+    # Obtiene las horas ya ocupadas (con cita activa) para un profesional en una fecha
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -112,6 +119,7 @@ def get_taken_times_by_professional(professional_id, fecha):
 
 
 def get_next_patient_appointment(patient_id):
+    # Obtiene la próxima cita pendiente de un paciente (la más cercana en el tiempo)
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -130,6 +138,7 @@ def get_next_patient_appointment(patient_id):
 
 
 def get_appointment_owner(appointment_id):
+    # Obtiene el profesional y paciente propietarios de una cita para verificar permisos
     with db_cursor() as (_, cursor):
         cursor.execute("SELECT idProfesional, idPaciente FROM Citas WHERE idCita = %s", (appointment_id,))
         return cursor.fetchone()
@@ -142,6 +151,7 @@ def update_appointment_status(appointment_id, estado):
 
 
 def get_patient_appointments(patient_id):
+    # Obtiene todas las citas de un paciente ordenadas de más reciente a más antigua
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -162,6 +172,7 @@ def get_patient_appointments(patient_id):
 
 
 def cancel_patient_appointment(appointment_id, patient_id, motivo_cancelacion):
+    # Cancela una cita validando que pertenezca al paciente que solicita la cancelación
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -175,6 +186,7 @@ def cancel_patient_appointment(appointment_id, patient_id, motivo_cancelacion):
 
 
 def cancel_professional_appointment(appointment_id, professional_id, motivo_cancelacion):
+    # Cancela una cita validando que pertenezca al profesional que solicita la cancelación
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -188,6 +200,7 @@ def cancel_professional_appointment(appointment_id, professional_id, motivo_canc
 
 
 def create_notification(user_id, rol, titulo, mensaje, tipo="Cita"):
+    # Crea una notificación en la base de datos y notifica a los suscriptores SSE
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -202,6 +215,7 @@ def create_notification(user_id, rol, titulo, mensaje, tipo="Cita"):
 
 
 def get_month_availability(professional_id, anio, mes):
+    # Obtiene la disponibilidad de un profesional para un mes completo
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -218,6 +232,7 @@ def get_month_availability(professional_id, anio, mes):
 
 
 def get_month_taken_counts(professional_id, anio, mes):
+    # Cuenta cuántas citas activas (no canceladas) hay por cada día del mes
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """

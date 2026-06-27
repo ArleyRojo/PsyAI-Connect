@@ -1,3 +1,7 @@
+# ARCHIVO: page_routes.py
+# Sirve páginas HTML del frontend (templates) y archivos estáticos (CSS, JS, imágenes, uploads).
+# Capa de compatibilidad que mapea URLs legacy a la estructura app/templates/*.
+# Aplica control de acceso basado en rol para dashboards y aside-*.
 import os
 
 from flask import Blueprint, current_app, send_from_directory, render_template, request, session, redirect

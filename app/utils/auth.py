@@ -1,3 +1,6 @@
+# ARCHIVO: utils/auth.py
+# Decoradores y helpers de control de acceso: require_role (varios roles),
+# require_authenticated (solo verifica sesión), check_role (un rol específico).
 from functools import wraps
 from flask import jsonify, session
 

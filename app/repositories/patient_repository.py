@@ -1,13 +1,19 @@
+# ============================================================
+# ARCHIVO: repositories/patient_repository.py
+# ============================================================
+
 from app.utils.db import db_cursor
 
 
 def update_profile_photo(filename, user_id):
+    # Actualiza la foto de perfil de un usuario en la tabla Register
     with db_cursor() as (conn, cursor):
         cursor.execute("UPDATE Register SET fotoPerfil = %s WHERE idUsuario = %s", (filename, user_id))
         conn.commit()
 
 
 def save_chatbot_survey(user_id, data):
+    # Guarda una encuesta de satisfacción del chatbot respondida por el paciente
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -26,6 +32,7 @@ def save_chatbot_survey(user_id, data):
 
 
 def get_patient_profile(user_id):
+    # Obtiene el perfil completo de un paciente combinando Register y PerfilPaciente
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -41,6 +48,7 @@ def get_patient_profile(user_id):
 
 
 def update_patient_profile(data):
+    # Actualiza los datos del perfil del paciente
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -59,6 +67,7 @@ def update_patient_profile(data):
 
 
 def get_chatbot_consent(user_id):
+    # Obtiene el consentimiento del paciente para usar el chatbot
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             "SELECT consentimiento_chatbot FROM PerfilPaciente WHERE idPaciente = %s",
@@ -69,6 +78,7 @@ def get_chatbot_consent(user_id):
 
 
 def update_chatbot_consent(user_id, consent):
+    # Actualiza o inserta el consentimiento del paciente para el chatbot
     with db_cursor() as (conn, cursor):
         cursor.execute(
             "UPDATE PerfilPaciente SET consentimiento_chatbot = %s WHERE idPaciente = %s",
@@ -83,6 +93,7 @@ def update_chatbot_consent(user_id, consent):
 
 
 def create_patient_evolution(user_id, data):
+    # Crea un registro de evolución diaria del paciente (estado emocional, energía, notas)
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -95,6 +106,7 @@ def create_patient_evolution(user_id, data):
 
 
 def get_patient_evolution_history(user_id):
+    # Obtiene el historial de evoluciones del paciente ordenado de más reciente a más antiguo
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -126,6 +138,7 @@ def list_patients(page=1, limit=20):
 
 
 def list_professionals():
+    # Lista todos los profesionales registrados para mostrarlos al paciente
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """

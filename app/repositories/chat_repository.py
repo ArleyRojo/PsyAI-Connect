@@ -1,7 +1,12 @@
+# ============================================================
+# ARCHIVO: repositories/chat_repository.py
+# ============================================================
+
 from app.utils.db import db_cursor
 
 
 def save_conversation(patient_id, mensaje_usuario, respuesta_bot, nivel_emocional, palabras_riesgo):
+    # Guarda una interacción del chatbot en la base de datos
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -32,8 +37,10 @@ def get_history(patient_id, limit=40, today_only=False):
             """,
             (patient_id, limit),
         )
+        # Invierte el orden para tenerlos cronológicamente ascendentes
         rows = list(reversed(cursor.fetchall()))
         
+        # Convierte las filas a una lista plana de mensajes alternados usuario/bot
         historial = []
         for row in rows:
             if row.get('mensajeUsuario'):
@@ -45,6 +52,7 @@ def get_history(patient_id, limit=40, today_only=False):
 
 
 def delete_history(patient_id):
+    # Elimina todo el historial de conversaciones del chatbot de un paciente
     with db_cursor() as (conn, cursor):
         cursor.execute(
             "DELETE FROM conversacioneschatbot WHERE idPaciente = %s",

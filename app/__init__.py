@@ -1,3 +1,6 @@
+# ARCHIVO: app/__init__.py
+# Fábrica de la aplicación Flask: configuración, blueprints, middlewares (logging, telemetría, CSRF),
+# seguridad (headers CSP), healthcheck, manejo de errores, e inyección de reporter de errores del cliente.
 import datetime
 import os
 import re

@@ -1,7 +1,12 @@
+# ============================================================
+# ARCHIVO: repositories/mensajes_repository.py
+# ============================================================
+
 from app.utils.db import db_cursor
 
 
 def enviar_mensaje(id_emisor, id_receptor, mensaje):
+    # Inserta un nuevo mensaje en la conversación entre dos usuarios
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -18,6 +23,7 @@ def get_conversacion(id_usuario, id_otro, desde_id=0, limit=60):
     """Devuelve mensajes entre dos usuarios. Si desde_id > 0, solo los nuevos."""
     with db_cursor(dictionary=True) as (_, cursor):
         if desde_id <= 0:
+            # Carga inicial: obtiene los últimos N mensajes ordenados cronológicamente
             cursor.execute(
                 """
                 SELECT *
@@ -42,6 +48,7 @@ def get_conversacion(id_usuario, id_otro, desde_id=0, limit=60):
             )
             return cursor.fetchall()
 
+        # Mensajes nuevos desde un ID específico (para polling incremental)
         cursor.execute(
             """
             SELECT
@@ -66,6 +73,7 @@ def get_conversacion(id_usuario, id_otro, desde_id=0, limit=60):
 
 
 def marcar_leidos(id_receptor, id_emisor):
+    # Marca como leídos todos los mensajes no leídos de un emisor específico
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -79,6 +87,7 @@ def marcar_leidos(id_receptor, id_emisor):
 
 
 def contar_no_leidos(id_receptor, id_emisor):
+    # Cuenta los mensajes no leídos de una conversación específica
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -92,6 +101,7 @@ def contar_no_leidos(id_receptor, id_emisor):
 
 
 def get_ultimo_mensaje(id_usuario, id_otro):
+    # Obtiene el mensaje más reciente entre dos usuarios
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """

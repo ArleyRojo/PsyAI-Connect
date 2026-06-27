@@ -1,16 +1,23 @@
+# ============================================================
+# ARCHIVO: database/migrations.py
+# ============================================================
+
 import logging
 from app.database.connection import get_connection
 
 logger = logging.getLogger(__name__)
 
 def init_db():
+    # Obtiene una conexión del pool y ejecuta todas las sentencias DDL para crear/esquema
     conn = None
     cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
+        # Lista de CREATE TABLE que definen todo el esquema de la base de datos
         create_statements = [
+            # Tabla principal de usuarios — unifica pacientes, profesionales y admins
             """
             CREATE TABLE IF NOT EXISTS Register (
                 idUsuario INT AUTO_INCREMENT PRIMARY KEY,
@@ -24,6 +31,7 @@ def init_db():
                 fotoPerfil VARCHAR(255) DEFAULT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Perfil específico del paciente con datos demográficos básicos
             """
             CREATE TABLE IF NOT EXISTS PerfilPaciente (
                 idPaciente INT PRIMARY KEY,
@@ -33,6 +41,7 @@ def init_db():
                 FOREIGN KEY (idPaciente) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Perfil del profesional con datos de especialidad y licencia
             """
             CREATE TABLE IF NOT EXISTS PerfilProfesional (
                 idProfesional INT PRIMARY KEY,
@@ -43,6 +52,7 @@ def init_db():
                 FOREIGN KEY (idProfesional) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Auditoría de accesos: registra cada login de los usuarios para trazabilidad
             """
             CREATE TABLE IF NOT EXISTS AuditoriaAccesos (
                 idAuditoria INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,6 +63,7 @@ def init_db():
                 FOREIGN KEY (idUsuario) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Historial de logins: guarda cada inicio de sesión exitoso
             """
             CREATE TABLE IF NOT EXISTS Login (
                 idLogin INT AUTO_INCREMENT PRIMARY KEY,
@@ -62,6 +73,7 @@ def init_db():
                 FOREIGN KEY (idUsuario) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Disponibilidad del profesional: slots de tiempo donde acepta citas
             """
             CREATE TABLE IF NOT EXISTS Disponibilidad (
                 idDisponibilidad INT AUTO_INCREMENT PRIMARY KEY,
@@ -73,6 +85,7 @@ def init_db():
                 FOREIGN KEY (idProfesional) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Citas médicas: asocian paciente-profesional con fecha, hora y estado
             """
             CREATE TABLE IF NOT EXISTS Citas (
                 idCita INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,6 +101,7 @@ def init_db():
                 FOREIGN KEY (idProfesional) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Conversaciones del chatbot de triaje emocional
             """
             CREATE TABLE IF NOT EXISTS ConversacionesChatbot (
                 idConversacion INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,6 +114,7 @@ def init_db():
                 FOREIGN KEY (idPaciente) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Evolución del paciente: registro diario de estado emocional y energía
             """
             CREATE TABLE IF NOT EXISTS EvolucionPaciente (
                 idEvolucion INT AUTO_INCREMENT PRIMARY KEY,
@@ -111,6 +126,7 @@ def init_db():
                 FOREIGN KEY (idPaciente) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Relación paciente-profesional con datos de diagnóstico y tratamiento
             """
             CREATE TABLE IF NOT EXISTS PacientesProfesional (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -124,6 +140,7 @@ def init_db():
                 FOREIGN KEY (idPaciente) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Notificaciones del sistema (alertas de citas, recordatorios, eventos de seguridad)
             """
             CREATE TABLE IF NOT EXISTS Notificaciones (
                 idNotificacion INT AUTO_INCREMENT PRIMARY KEY,
@@ -142,6 +159,7 @@ def init_db():
                 FOREIGN KEY (idUsuario) REFERENCES Register(idUsuario) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Configuración dinámica del chatbot (prompts, límites, reglas de interacción)
             """
             CREATE TABLE IF NOT EXISTS ChatbotConfig (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -163,6 +181,7 @@ def init_db():
                 FOREIGN KEY (actualizado_por) REFERENCES Register(idUsuario) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Encuesta de satisfacción del chatbot respondida por pacientes
             """
             CREATE TABLE IF NOT EXISTS EncuestaChatbot (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -175,6 +194,7 @@ def init_db():
                 FOREIGN KEY (idPaciente) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Mensajería directa entre pacientes y profesionales
             """
             CREATE TABLE IF NOT EXISTS MensajesChat (
                 idMensaje   INT AUTO_INCREMENT PRIMARY KEY,
@@ -187,6 +207,7 @@ def init_db():
                 FOREIGN KEY (idReceptor) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Tokens para recuperación de contraseña (expiran y se marcan como usados)
             """
             CREATE TABLE IF NOT EXISTS RecoveryTokens (
                 id        INT AUTO_INCREMENT PRIMARY KEY,
@@ -198,6 +219,7 @@ def init_db():
                 FOREIGN KEY (idUsuario) REFERENCES Register(idUsuario) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Control de intentos fallidos de login para protección contra brute-force
             """
             CREATE TABLE IF NOT EXISTS intentos_fallidos (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -208,6 +230,7 @@ def init_db():
                 UNIQUE KEY uk_email (email)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
+            # Vista que combina datos del chatbot con nombres de pacientes para el panel admin
             """
             CREATE OR REPLACE VIEW vistahistorialchatbot AS
             SELECT
@@ -223,6 +246,7 @@ def init_db():
             """,
         ]
 
+        # Desactiva temporalmente la verificación de claves foráneas para evitar errores de orden
         cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
         for stmt in create_statements:
             try:
@@ -231,7 +255,7 @@ def init_db():
                 logger.warning(f"Error creando tabla: {e}")
         cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
 
-        # Columnas adicionales para tablas existentes
+        # Migraciones adicionales: agrega columnas faltantes a tablas existentes
         extra_alters = []
         cursor.execute("""
             SELECT COUNT(*) FROM information_schema.COLUMNS 
@@ -390,6 +414,7 @@ def init_db():
             if cursor.fetchone()[0] == 0:
                 extra_alters.append(alter)
 
+        # Ejecuta cada ALTER TABLE individualmente, ignorando errores de columnas ya existentes
         for alter in extra_alters:
             try:
                 cursor.execute(alter)

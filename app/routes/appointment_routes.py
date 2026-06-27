@@ -1,3 +1,6 @@
+# ARCHIVO: appointment_routes.py
+# Gestión de citas: crear, listar, cancelar, consultar disponibilidad.
+# Roles: paciente crea/cancela/consulta sus citas; profesional gestiona estado y horarios.
 from flask import Blueprint, jsonify, request, session
 
 from app.services import appointment_service
@@ -7,6 +10,7 @@ from app.utils.auth import require_role
 appointment_bp = Blueprint("appointments", __name__)
 
 
+# Helper: extrae paginación de query params
 def _get_pagination():
     try:
         page = int(request.args.get("page", 1))
@@ -35,6 +39,7 @@ def crear_cita():
     return jsonify(payload), status
 
 
+# Horarios disponibles de un profesional para una fecha (público, sin autenticación)
 @appointment_bp.route("/api/citas/disponibles", methods=["GET"])
 def horarios_disponibles():
     id_profesional = request.args.get("idProfesional")
@@ -74,6 +79,7 @@ def citas_solicitadas():
     return jsonify(payload), status
 
 
+# Cambia estado de una cita (confirmar/rechazar por el profesional)
 @appointment_bp.route("/api/citas/<int:id_cita>/estado", methods=["PATCH"])
 @require_role("profesional")
 def actualizar_estado_cita(id_cita: int):

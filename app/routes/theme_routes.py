@@ -1,3 +1,5 @@
+# ARCHIVO: theme_routes.py
+# Endpoint para cambiar/obtener el tema visual (claro/oscuro) vía cookie.
 from flask import Blueprint, jsonify, make_response, request
 
 

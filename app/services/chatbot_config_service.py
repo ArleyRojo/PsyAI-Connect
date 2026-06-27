@@ -1,8 +1,12 @@
+# ============================================================
+# ARCHIVO: services/chatbot_config_service.py
+# ============================================================
+
 import json
 
 from app.repositories import chatbot_config_repository
 
-
+# Configuración por defecto del chatbot (usada si no hay registro en BD)
 DEFAULT_CONFIG = {
     "system_prompt": """Actua como un asistente de triaje psicologico para PsyAI Connect.
 Tu objetivo es ser empatico, claro y breve. No des diagnosticos medicos, no reemplaces a un profesional de salud,
@@ -34,10 +38,12 @@ Responde siempre en espanol, con tono calido y profesional. Usa 2 a 4 frases com
 
 
 def get_config():
+    # Obtiene la configuración desde BD, con fallback a valores por defecto
     config = chatbot_config_repository.get_config()
     if not config:
         return DEFAULT_CONFIG.copy()
     
+    # Combina valores de BD con defaults para campos que puedan ser nulos
     result = {
         "system_prompt": config.get("system_prompt") or DEFAULT_CONFIG["system_prompt"],
         "tone": config.get("tone") or DEFAULT_CONFIG["tone"],
@@ -67,6 +73,7 @@ def save_config(data, admin_id):
     max_tokens_user = data.get("max_tokens_user")
     daily_message_limit = data.get("daily_message_limit")
     
+    # Validación de rangos para cada parámetro numérico de configuración
     if temperature is not None:
         try:
             temperature = float(temperature)
@@ -107,6 +114,7 @@ def save_config(data, admin_id):
         except (ValueError, TypeError):
             return {"success": False, "message": "El limite diario debe ser un numero entero"}, 400
 
+    # Preserva los términos de riesgo existentes si el admin envía una lista vacía
     incoming_risk = data.get("risk_terms")
     if incoming_risk is not None and incoming_risk.strip() in ("[]", ""):
         current_config = chatbot_config_repository.get_config()
@@ -153,6 +161,7 @@ def get_detected_risk_words():
             return []
         raise
 
+    # Jerarquía de niveles para determinar el nivel máximo de cada palabra
     NIVEL_PRECEDENCE = {"Alto": 3, "Medio": 2, "Bajo": 1}
     word_data = {}
 
@@ -180,6 +189,7 @@ def get_detected_risk_words():
             word_data[word]["count"] += 1
             word_data[word]["pacientes"].add(paciente)
 
+    # Convierte el mapa a lista ordenada para la respuesta
     return [
         {
             "palabra": v["palabra"],

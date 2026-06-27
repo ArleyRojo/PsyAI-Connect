@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: services/appointment_service.py
+# ============================================================
+
 from datetime import date, datetime, timedelta
 
 from app.repositories import appointment_repository
@@ -13,6 +17,7 @@ def create_appointment(patient_id, data, *, created_by_professional=False):
     if not professional_id or not fecha or not hora:
         return {"success": False, "message": "Datos incompletos"}, 400
 
+    # Verifica que el horario no esté ya ocupado antes de crear la cita
     if appointment_repository.appointment_exists(professional_id, fecha, hora):
         msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
         return {"success": False, "message": msg}, 409
@@ -40,6 +45,7 @@ def get_available_times(professional_id, fecha):
     ocupadas = appointment_repository.get_taken_times(professional_id, fecha)
     horarios_set = set()
 
+    # Genera slots de 30 minutos dentro de cada bloque de disponibilidad
     for disponibilidad in disponibilidades:
         inicio = disponibilidad["hora_inicio"]
         fin = disponibilidad["hora_fin"]
@@ -66,6 +72,7 @@ def list_professional_appointments(professional_id, *, pending_only=False, page=
         page=page,
         limit=limit,
     )
+    # Formatea fechas y horas para la respuesta JSON
     for cita in citas:
         if cita.get("fecha"):
             cita["fecha"] = cita["fecha"].strftime("%d/%m/%Y")
@@ -102,7 +109,7 @@ def update_status(appointment_id, estado, acting_professional_id):
     if not row:
         return {"success": False, "message": "Cita no encontrada"}, 404
     if row[0] != acting_professional_id:
-        return {"success": False, "message": "No tienes permiso"}, 403
+        return {"success": False, "message": "No tienes permiso"}, 403  # Verifica que sea el profesional propietario
 
     appointment_repository.update_appointment_status(appointment_id, estado)
     return {"success": True, "message": f"Cita {estado}"}, 200
@@ -132,6 +139,7 @@ def cancel_appointment(appointment_id, patient_id, motivo_cancelacion):
     if rowcount == 0:
         return {"success": False, "message": "Cita no encontrada o ya cancelada"}, 404
         
+    # Notifica al profesional que el paciente canceló la cita
     if professional_id:
         appointment_repository.create_notification(
             user_id=professional_id,
@@ -160,6 +168,7 @@ def cancel_professional_appointment(appointment_id, professional_id, motivo_canc
     if rowcount == 0:
         return {"success": False, "message": "No se pudo cancelar la cita"}, 400
 
+    # Notifica al paciente que el profesional canceló la cita
     patient_id = row[1] if len(row) > 1 else None
     if patient_id:
         appointment_repository.create_notification(
@@ -181,6 +190,7 @@ def get_available_dates(professional_id, anio, mes):
     if not disponibilidades:
         return {"success": True, "fechas": []}, 200
 
+    # Calcula cuántos slots de 30 minutos hay por fecha y cuáles están disponibles
     slots_por_fecha = {}
     for disponibilidad in disponibilidades:
         fecha_str = disponibilidad["fecha"].strftime("%Y-%m-%d")
@@ -197,6 +207,7 @@ def get_available_dates(professional_id, anio, mes):
             hora_actual = (datetime.combine(date.today(), hora_actual) + timedelta(minutes=30)).time()
 
     ocupadas_por_fecha = appointment_repository.get_month_taken_counts(professional_id, anio, mes)
+    # Solo retorna fechas donde aún quedan slots libres
     fechas = [
         fecha_key
         for fecha_key, total_slots in slots_por_fecha.items()

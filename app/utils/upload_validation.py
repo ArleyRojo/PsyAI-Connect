@@ -1,3 +1,6 @@
+# ARCHIVO: utils/upload_validation.py
+# Validación de archivos subidos: extensión, tamaño máximo y verificación de magic bytes
+# (cabeceras binarias) para prevenir suplantación de tipo de archivo.
 import os
 import uuid
 from flask import current_app

@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: services/documento_service.py
+# ============================================================
+
 import os
 
 from flask import current_app
@@ -9,16 +13,19 @@ UPLOAD_SUBDIR = "uploads/documentos"
 
 
 def _upload_dir():
+    # Retorna la ruta absoluta del directorio de subida de documentos
     return os.path.join(current_app.root_path, "static", UPLOAD_SUBDIR)
 
 
 def _ensure_upload_dir():
+    # Crea el directorio de subida si no existe
     d = _upload_dir()
     os.makedirs(d, exist_ok=True)
     return d
 
 
 def _format_size(bytes_):
+    # Formatea bytes a KB/MB legible para humanos
     if bytes_ is None:
         return None
     kb = bytes_ / 1024
@@ -55,6 +62,7 @@ def list_patient_docs(professional_id, patient_id):
 
 
 def upload_profesional_doc(professional_id, patient_id, file, categoria, visibilidad, notas):
+    # Valida el archivo y lo guarda en el servidor, luego crea el registro en BD
     safe_name, error = validate_upload(
         file,
         allowed_extensions={"jpg", "jpeg", "png", "pdf", "doc", "docx", "gif", "webp"},
@@ -84,6 +92,7 @@ def upload_profesional_doc(professional_id, patient_id, file, categoria, visibil
 
 
 def toggle_doc_visibility(doc_id, professional_id):
+    # Alterna la visibilidad de un documento entre privado y compartido
     doc = documento_repository.get_profesional_doc_by_id(doc_id, professional_id)
     if not doc:
         return {"success": False, "message": "Documento no encontrado"}, 404
@@ -104,6 +113,7 @@ def delete_profesional_doc(doc_id, professional_id):
 
 
 def list_patient_dashboard(patient_id):
+    # Combina documentos compartidos por profesionales y documentos propios del paciente
     compartidos = documento_repository.list_shared_docs_for_patient(patient_id)
     propios = documento_repository.list_patient_own_docs(patient_id)
 
@@ -170,6 +180,7 @@ def delete_patient_doc(doc_id, patient_id):
 
 
 def toggle_autorizacion(documento_id, patient_id, professional_id):
+    # Alterna la autorización de un profesional para ver un documento del paciente
     doc = documento_repository.get_patient_doc_by_id(documento_id, patient_id)
     if not doc:
         return {"success": False, "message": "Documento no encontrado"}, 404
@@ -191,6 +202,7 @@ def get_profesional_doc_for_download(id_documento, professional_id):
 
 
 def get_patient_doc_for_download(id_documento, user_id, rol):
+    # Obtiene documento del paciente validando permisos según el rol
     doc = documento_repository.get_patient_doc_by_id_any(id_documento)
     if not doc:
         return None, {"success": False, "message": "Documento no encontrado"}, 404

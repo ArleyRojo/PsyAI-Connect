@@ -1,3 +1,6 @@
+# ARCHIVO: admin_routes.py
+# Rutas del panel de administración: estadísticas, usuarios, roles, logs, chatbot.
+# Todas requieren rol "admin". Usa SSE para streaming de stats y logs en tiempo real.
 import json
 import time as _time
 
@@ -12,6 +15,7 @@ from app.repositories import admin_repository
 admin_bp = Blueprint("admin", __name__)
 
 
+# Helper: extrae paginación de query params con valores por defecto seguros
 def _get_pagination():
     try:
         page = int(request.args.get("page", 1))
@@ -40,6 +44,7 @@ def get_admin_stats():
     return jsonify(payload), status
 
 
+# SSE en vivo: notifica al panel admin cuando cambian las estadísticas
 @admin_bp.route("/api/admin/stats/stream")
 @require_role("admin")
 def stats_stream():
@@ -82,6 +87,7 @@ def stats_stream():
     )
 
 
+# SSE en vivo: transmite los últimos logs cuando cambia su versión
 @admin_bp.route("/api/admin/logs/stream")
 @require_role("admin")
 def logs_stream():
@@ -107,6 +113,7 @@ def logs_stream():
     )
 
 
+# CRUD de usuarios desde el panel admin
 @admin_bp.route("/api/admin/usuarios", methods=["GET"])
 @require_role("admin")
 def get_usuarios():
@@ -154,6 +161,7 @@ def bloquear_usuario(id_usuario: int):
     return jsonify(payload), status
 
 
+# Gestión de roles: listar usuarios por rol, cambiar rol, historial de cambios
 @admin_bp.route("/api/admin/roles/usuarios", methods=["GET"])
 @require_role("admin")
 def get_usuarios_roles():
@@ -177,6 +185,7 @@ def get_historial_roles():
     return jsonify(payload), status
 
 
+# Notificaciones del sistema (crear, listar, eliminar)
 @admin_bp.route("/api/admin/notificaciones", methods=["GET"])
 @require_role("admin")
 def get_notificaciones():
@@ -198,6 +207,7 @@ def eliminar_notificacion(id_notificacion: int):
     return jsonify(payload), status
 
 
+# Logs de auditoría y usuarios online
 @admin_bp.route("/api/admin/logs", methods=["GET"])
 @require_role("admin")
 def get_logs():
@@ -214,6 +224,7 @@ def get_usuarios_online():
     return jsonify({"success": True, "usuarios": usuarios, "total": len(usuarios)}), 200
 
 
+# Configuración del chatbot (leer, actualizar, términos de riesgo, palabras detectadas, historial)
 @admin_bp.route("/api/admin/chatbot-config", methods=["GET"])
 @require_role("admin")
 def get_chatbot_config():
@@ -228,6 +239,7 @@ def update_chatbot_config():
     admin_id = session.get("idUsuario")
     payload, status = chatbot_config_service.save_config(data, admin_id)
     if status < 400 and payload.get("success"):
+        # Publica evento SSE para que los pacientes reciban la nueva config en vivo
         chatbot_config_events.publish_config_update({
             "max_tokens": data.get("max_tokens"),
             "max_tokens_user": data.get("max_tokens_user"),

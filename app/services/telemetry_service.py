@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: services/telemetry_service.py
+# ============================================================
+
 import time
 import psutil
 from collections import Counter, deque
@@ -26,7 +30,7 @@ _last_ram = 0
 _last_disk = None
 SYSTEM_CHECK_INTERVAL = 3  # segundos
 
-# Seguridad
+# Contadores de eventos de seguridad
 _security = {
     "fallos_login": 0,
     "actividad_sospechosa": 0,
@@ -45,6 +49,7 @@ def _trim_endpoints(max_entries=20):
 
 
 def _normalize_ip(ip):
+    # Normaliza direcciones IPv4/IPv6/localhost a un formato estándar
     if not ip:
         return '127.0.0.1'
     ip = ip.strip().lower()
@@ -53,6 +58,7 @@ def _normalize_ip(ip):
     return ip
 
 def track_request(ip, endpoint, user_id=None):
+    # Registra cada petición HTTP para métricas de tráfico y rendimiento
     global _requests_total, _version, _visitas_fecha, _trim_counter
     ip = _normalize_ip(ip)
     today = time.strftime("%Y-%m-%d")
@@ -62,6 +68,7 @@ def track_request(ip, endpoint, user_id=None):
     _requests_total += 1
     _version += 1
 
+    # Normaliza endpoints con IDs numéricos (ej: /api/user/123 -> /api/user/*)
     parts = endpoint.split('/')
     if len(parts) > 3 and parts[-1].isdigit():
         parts[-1] = '*'
@@ -84,6 +91,7 @@ def track_request(ip, endpoint, user_id=None):
 
 
 def sse_connected(ip):
+    # Registra una conexión SSE activa desde una IP
     ip = _normalize_ip(ip)
     now = time.time()
     if ip in _active_sse:
@@ -101,6 +109,7 @@ def sse_disconnected(ip):
             del _active_sse[ip]
 
 def sse_heartbeat(ip):
+    # Actualiza el timestamp de heartbeat de una conexión SSE
     ip = _normalize_ip(ip)
     entry = _active_sse.get(ip)
     if entry:
@@ -134,6 +143,7 @@ def track_security_event(event_type, detail=None):
         _security[event_type] += 1
     _version += 1
 
+    # Mapeo de tipos de evento a etiquetas legibles y tipos de severidad
     label_map = {
         "fallos_login": "Intento de login fallido",
         "actividad_sospechosa": "Actividad sospechosa detectada",
@@ -176,6 +186,7 @@ def _format_time_ago(ts):
 
 
 def get_live_stats():
+    # Recolecta y retorna todas las métricas en vivo del sistema
     global _last_system_check, _last_cpu, _last_ram, _last_disk
     now = time.time()
 
@@ -235,7 +246,7 @@ def get_live_stats():
     warnings = _security["fallos_login"]
     info_count = _security["tokens_invalidos"]
 
-    # Timeline
+    # Timeline de eventos de seguridad
     timeline = []
     for evt in _security_events:
         timeline.append({

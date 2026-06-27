@@ -1,7 +1,12 @@
+# ============================================================
+# ARCHIVO: repositories/professional_repository.py
+# ============================================================
+
 from app.utils.db import db_cursor
 
 
 def get_professional_profile(user_id):
+    # Obtiene el perfil completo de un profesional combinando Register y PerfilProfesional
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -18,6 +23,7 @@ def get_professional_profile(user_id):
 
 
 def update_professional_profile(data):
+    # Actualiza los datos del perfil profesional (especialidad, licencia, experiencia)
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -31,6 +37,7 @@ def update_professional_profile(data):
 
 
 def create_availability(professional_id, data):
+    # Crea un bloque de disponibilidad en la agenda del profesional
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -43,6 +50,7 @@ def create_availability(professional_id, data):
 
 
 def get_availability(professional_id):
+    # Obtiene todos los bloques de disponibilidad activos de un profesional
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -56,7 +64,9 @@ def get_availability(professional_id):
 
 
 def get_dashboard_stats(professional_id):
+    # Recolecta todas las estadísticas del dashboard del profesional en múltiples consultas
     with db_cursor(dictionary=True) as (_, cursor):
+        # Estadísticas principales: pacientes activos, citas hoy, citas pendientes
         cursor.execute(
             """
             SELECT 
@@ -70,6 +80,7 @@ def get_dashboard_stats(professional_id):
         )
         stats = cursor.fetchone()
 
+        # Últimas 3 actividades registradas
         cursor.execute(
             """
             SELECT r.nombre as paciente, c.fecha, c.hora, c.tipoCita, c.estado, c.idCita
@@ -82,6 +93,7 @@ def get_dashboard_stats(professional_id):
         )
         actividades = cursor.fetchall()
 
+        # Próximas 10 citas en los siguientes 7 días
         cursor.execute(
             """
             SELECT c.idCita, r.nombre as paciente, r.idUsuario as idPaciente, r.fotoPerfil,
@@ -98,6 +110,7 @@ def get_dashboard_stats(professional_id):
         )
         proximas_citas = cursor.fetchall()
 
+        # Estadísticas de reportes del profesional
         cursor.execute(
             """
             SELECT 
@@ -111,6 +124,7 @@ def get_dashboard_stats(professional_id):
         )
         reportes_stats = cursor.fetchone()
 
+        # Estadísticas de evolución de pacientes (con citas en los últimos 30 días)
         cursor.execute(
             """
             SELECT 
@@ -126,6 +140,7 @@ def get_dashboard_stats(professional_id):
         )
         evolucion_stats = cursor.fetchone()
 
+        # Promedios de estado emocional y nivel de energía de los pacientes
         cursor.execute(
             """
             SELECT 
@@ -142,6 +157,7 @@ def get_dashboard_stats(professional_id):
         )
         emocion_stats = cursor.fetchone()
 
+        # Alertas de citas por confirmar (hoy y próximos 3 días)
         cursor.execute(
             """
             SELECT 
@@ -154,6 +170,7 @@ def get_dashboard_stats(professional_id):
         )
         alertas_citas = cursor.fetchone()
 
+        # Alertas de reportes pendientes
         cursor.execute(
             """
             SELECT COUNT(*) as reportes_pendientes
@@ -164,10 +181,12 @@ def get_dashboard_stats(professional_id):
         )
         alertas_reportes = cursor.fetchone()
 
+    # Calcula pacientes con citas pero sin evolución reciente (más de 14 días)
     pacientes_sin_evolucion = 0
     if evolucion_stats and evolucion_stats["pacientes_con_citas"]:
         pacientes_sin_evolucion = (evolucion_stats["pacientes_con_citas"] or 0) - (evolucion_stats["pacientes_con_evolucion_reciente"] or 0)
 
+    # Construye lista de alertas con tipo, icono y acción sugerida
     alertas = []
     if alertas_citas and alertas_citas["citas_por_confirmar_hoy"]:
         alertas.append({
@@ -226,6 +245,7 @@ def get_dashboard_stats(professional_id):
 
 
 def list_professional_patients(professional_id):
+    # Lista todos los pacientes (con su último diagnóstico de este profesional)
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -261,6 +281,7 @@ def list_patients_for_chat():
 
 
 def save_diagnosis(professional_id, data):
+    # Guarda o actualiza el diagnóstico de un paciente (con UPSERT para evitar duplicados)
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -285,6 +306,7 @@ def save_diagnosis(professional_id, data):
 
 
 def get_diagnosis_history(professional_id):
+    # Obtiene el historial de diagnósticos realizados por un profesional
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -304,6 +326,7 @@ def get_diagnosis_history(professional_id):
 
 
 def get_report_overview(professional_id):
+    # Obtiene un resumen de reportes del profesional: estadísticas + lista + pacientes disponibles
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -347,6 +370,7 @@ def get_report_overview(professional_id):
 
 
 def create_report(professional_id, data):
+    # Crea un nuevo reporte clínico con estado "Completado" por defecto
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -371,6 +395,7 @@ def create_report(professional_id, data):
 
 
 def get_latest_patient_diagnosis(professional_id, patient_id):
+    # Obtiene el diagnóstico más reciente de un paciente por parte de un profesional
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -399,6 +424,7 @@ def update_report(professional_id, data):
 
 
 def delete_report(professional_id, report_id):
+    # Eliminación lógica de un reporte
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
@@ -411,6 +437,7 @@ def delete_report(professional_id, report_id):
 
 
 def get_deleted_reports(professional_id):
+    # Obtiene los reportes eliminados (para posible recuperación)
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
@@ -429,6 +456,7 @@ def get_deleted_reports(professional_id):
 
 
 def get_all_patient_evolution(professional_id):
+    # Obtiene todas las evoluciones de pacientes (sin filtrar por profesional - todos los pacientes)
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """

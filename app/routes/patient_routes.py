@@ -1,3 +1,6 @@
+# ARCHIVO: patient_routes.py
+# Rutas del paciente: perfil, chatbot, documentos, mensajería directa, evolución.
+# Incluye SSE para recibir cambios de configuración del chatbot en vivo.
 import os
 from queue import Empty
 
@@ -10,6 +13,7 @@ from app.utils.auth import require_role, require_authenticated
 patient_bp = Blueprint("patient", __name__)
 
 
+# Helper: extrae paginación de query params
 def _get_pagination():
     try:
         page = int(request.args.get("page", 1))
@@ -24,6 +28,7 @@ def _get_pagination():
     return page, limit
 
 
+# Perfil: ver (propio o por admin/profesional), editar, subir foto
 @patient_bp.route("/api/perfil/paciente/<int:id_usuario>", methods=["GET"])
 @require_role("admin", "profesional", "paciente")
 def get_perfil_paciente(id_usuario: int):
@@ -34,6 +39,7 @@ def get_perfil_paciente(id_usuario: int):
     rol = session.get("rol")
     usuario_id = session.get("idUsuario")
 
+    # Un paciente solo puede ver su propio perfil; admin/profesional pueden ver cualquiera
     if rol not in ("admin", "profesional") and int(usuario_id) != id_usuario:
         return jsonify({"success": False, "message": "No autorizado"}), 403
 
@@ -50,6 +56,7 @@ def editar_perfil_paciente():
     return jsonify(payload), status
 
 
+# Carga foto de perfil (multipart) y actualiza la sesión inmediatamente
 @patient_bp.route("/api/perfil/foto", methods=["POST"])
 def actualizar_foto_perfil():
     auth_error = require_authenticated()
@@ -64,6 +71,7 @@ def actualizar_foto_perfil():
     return jsonify(payload), status
 
 
+# Registro de evolución del paciente (autoevaluación diaria/semanal)
 @patient_bp.route("/api/evolucion", methods=["POST"])
 @require_role("paciente")
 def guardar_evolucion():
@@ -78,6 +86,7 @@ def historial_evolucion():
     return jsonify(payload), status
 
 
+# Listados: pacientes (profesional/admin) y profesionales (todos los roles)
 @patient_bp.route("/api/pacientes", methods=["GET"])
 @require_role("profesional", "admin")
 def listar_pacientes():
@@ -93,6 +102,7 @@ def listar_profesionales():
     return jsonify(payload), status
 
 
+# Chatbot terapéutico: enviar mensaje, obtener config, SSE de cambios, consentimiento, encuesta, historial
 @patient_bp.route("/api/chatbot/enviar", methods=["POST"])
 @require_role("paciente")
 def enviar_chatbot():
@@ -104,6 +114,7 @@ def enviar_chatbot():
     return jsonify(payload), status
 
 
+# Expone solo parámetros relevantes para el paciente (no toda la config interna)
 @patient_bp.route("/api/chatbot/config", methods=["GET"])
 def get_chatbot_config_paciente():
     if "usuario" not in session or session.get("rol") != "paciente":
@@ -119,6 +130,7 @@ def get_chatbot_config_paciente():
     }), 200
 
 
+# SSE: recibe en vivo los cambios de configuración del chatbot hechos por admin
 @patient_bp.route("/api/chatbot/config/events", methods=["GET"])
 def chatbot_config_events_stream():
     if "usuario" not in session or session.get("rol") != "paciente":
@@ -217,6 +229,7 @@ def eliminar_documento_paciente(id_documento: int):
     return jsonify(payload), status
 
 
+# El paciente autoriza a un profesional a ver un documento específico
 @patient_bp.route("/api/paciente/documentos/<int:id_documento>/autorizacion", methods=["PUT"])
 @require_role("paciente")
 def toggle_autorizacion_documento(id_documento: int):
@@ -231,6 +244,7 @@ def toggle_autorizacion_documento(id_documento: int):
 
 
 # -- MENSAJERIA DIRECTA -------------------------------------------------
+# Lista profesionales para chat, enriqueciendo con último mensaje y no leídos
 @patient_bp.route("/api/chat/profesionales", methods=["GET"])
 @require_role("paciente")
 def chat_listar_profesionales():
@@ -253,6 +267,7 @@ def chat_listar_profesionales():
     return jsonify({"success": True, "profesionales": resultado}), 200
 
 
+# Obtiene mensajes con un receptor (soporta ruta legacy /api/paciente/chat/mensajes)
 @patient_bp.route("/api/chat/mensajes", methods=["GET"])
 @patient_bp.route("/api/paciente/chat/mensajes", methods=["GET"])
 @require_role("paciente", "profesional")
@@ -264,6 +279,7 @@ def chat_get_mensajes_paciente():
     return jsonify({"success": True, "mensajes": msgs}), 200
 
 
+# Envía mensaje directo (soporta ruta legacy /api/paciente/chat/enviar)
 @patient_bp.route("/api/chat/enviar", methods=["POST"])
 @patient_bp.route("/api/paciente/chat/enviar", methods=["POST"])
 @require_role("paciente", "profesional")

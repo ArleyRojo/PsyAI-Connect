@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: services/chatbot_service.py
+# ============================================================
+
 import json
 import logging
 import os
@@ -12,6 +16,7 @@ from app.services import chatbot_config_service
 
 logger = logging.getLogger(__name__)
 
+# Configuración de la API de Gemini y reintentos
 GEMINI_URL_TEMPLATE = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 GEMINI_RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 GEMINI_RETRIES = 2
@@ -19,6 +24,7 @@ GEMINI_RETRY_BASE_DELAY = 0.6
 SYSTEM_PROMPT_FALLBACK = "Actua como un asistente de triaje psicologico para PsyAI Connect."
 CONFIG_CACHE_TTL_SECONDS = 30
 
+# Caché de configuración del chatbot para evitar consultas repetitivas a BD
 _cached_config_version = None
 _cached_config = None
 _cached_system_prompt = None
@@ -61,6 +67,7 @@ def _next_key(keys: list[str]) -> str | None:
 
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Instrucciones de comportamiento obligatorio que se añaden al final del system prompt
 _PROMPT_SUFFIX = """
 
 COMPORTAMIENTO OBLIGATORIO:
@@ -93,6 +100,7 @@ def _now_ts():
 
 
 def _get_chatbot_config():
+    # Obtiene la configuración del chatbot con caché para evitar consultas repetitivas
     global _cached_config_version, _cached_config, _cached_config_ts
     now = _now_ts()
     if _cached_config is not None and now - _cached_config_ts < CONFIG_CACHE_TTL_SECONDS:
@@ -147,6 +155,7 @@ def build_response(patient_id, message):
     config, _ = _get_chatbot_config()
     daily_limit = int(config.get("daily_message_limit") or 20)
     used_today = chat_repository.count_today_messages(patient_id)
+    # Verifica el límite diario de mensajes
     if used_today >= daily_limit:
         return {
             "success": False,
@@ -162,11 +171,13 @@ def build_response(patient_id, message):
 
     history = chat_repository.get_history(patient_id, today_only=False, limit=12)
 
+    # Carga los términos de riesgo desde la configuración (JSON)
     try:
         risk_list = json.loads(config.get("risk_terms") or "[]")
     except Exception:
         risk_list = []
 
+    # Clasifica los términos por nivel de riesgo
     alto_terms  = [r["palabra"].strip().lower() for r in risk_list if r.get("nivel") == "Alto"  and r.get("palabra")]
     medio_terms = [r["palabra"].strip().lower() for r in risk_list if r.get("nivel") == "Medio" and r.get("palabra")]
     bajo_terms  = [r["palabra"].strip().lower() for r in risk_list if r.get("nivel") == "Bajo"  and r.get("palabra")]
@@ -176,6 +187,7 @@ def build_response(patient_id, message):
     es_medio = any(t in normalized for t in medio_terms)
     es_bajo  = any(t in normalized for t in bajo_terms)
 
+    # Riesgo Alto: respuesta inmediata de crisis + notificación a profesionales
     if es_alto:
         nivel_emocional = "Alto"
         risk_words = ",".join([t for t in alto_terms if t in normalized])
@@ -205,6 +217,7 @@ def build_response(patient_id, message):
 
     keys = _get_api_keys()
     if not keys:
+        # Sin API keys: usa respuestas de fallback local
         response_text = _build_local_fallback(message, history, config, es_medio, es_bajo)
         chat_repository.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
         return {
@@ -230,6 +243,7 @@ def build_response(patient_id, message):
             "limit": daily_limit,
         }, 200
     except Exception as exc:
+        # Fallback local si Gemini falla
         logger.exception("Error llamando Gemini: %s", exc)
         response_text = _build_local_fallback(message, history, config, es_medio, es_bajo)
         chat_repository.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
@@ -289,6 +303,7 @@ def _call_gemini_with_rotation(keys: list[str], model: str, message: str, histor
 
 
 def _build_local_fallback(message, history, config, es_medio=False, es_bajo=False):
+    # Genera respuestas locales cuando Gemini no está disponible
     normalized = _normalize_text(message)
     last_bot_message = _last_bot_message(history)
 
@@ -314,6 +329,7 @@ def _build_local_fallback(message, history, config, es_medio=False, es_bajo=Fals
                 return option
         return medio_options[0]
 
+    # Detecta temas clave en el mensaje para elegir la respuesta más apropiada
     if _contains_any(normalized, ("ansioso", "ansiosa", "ansiedad", "nervioso", "nerviosa", "estres", "estresado", "estresada")):
         options = [
             "Se nota que esto te esta activando bastante. Para entenderlo mejor, que fue lo que disparo esa ansiedad hoy?",
@@ -364,6 +380,7 @@ def _build_local_fallback(message, history, config, es_medio=False, es_bajo=Fals
 
 
 def _normalize_text(value):
+    # Normaliza texto: minúsculas y elimina tildes para comparación
     text = (value or "").lower()
     replacements = str.maketrans("\u00e1\u00e9\u00ed\u00f3\u00fa\u00fc\u00f1", "aeiouun")
     return text.translate(replacements)
@@ -381,12 +398,14 @@ def _last_bot_message(history):
 
 
 def _rotate_options(options, seed_text):
+    # Rota las opciones de respuesta basado en el mensaje del usuario para variar las respuestas
     seed = sum(ord(char) for char in re.sub(r"\s+", "", seed_text or ""))
     start = seed % len(options)
     return options[start:] + options[:start]
 
 
 def _notify_high_risk(patient_id):
+    # Notifica a todos los profesionales (asignados o todos) sobre una alerta de alto riesgo
     patient_name = _get_patient_name(patient_id) or f"Paciente #{patient_id}"
     titulo = "Alerta: el paciente requiere atención urgente"
     mensaje = f"Alerta: el paciente {patient_name} requiere atención urgente. Se detectaron palabras de riesgo alto en el chatbot."
@@ -409,6 +428,7 @@ def _ya_notificado_recientemente(patient_name, tipo, horas=12):
 
 
 def _notify_medium_risk(patient_id, risk_words):
+    # Notifica a profesionales sobre riesgo medio, con throttling de 12h para evitar spam
     patient_name = _get_patient_name(patient_id) or f"Paciente #{patient_id}"
     
     if _ya_notificado_recientemente(patient_name, "Seguimiento", horas=12):
@@ -432,6 +452,7 @@ def _get_patient_name(patient_id):
 
 
 def _build_system_prompt(config, history, contexto_riesgo=None):
+    # Construye el system prompt dinámicamente combinando configuración + contexto + historial reciente
     system_prompt = (config.get("system_prompt") or SYSTEM_PROMPT_FALLBACK).strip()
     interaction_rules = (config.get("interaction_rules") or "").strip()
     tone = (config.get("tone") or "").strip()
@@ -456,6 +477,7 @@ def _build_system_prompt(config, history, contexto_riesgo=None):
 
 
 def call_gemini(api_key, model, message, history, config, contexto_riesgo=None):
+    # Llama a la API de Gemini con reintentos y extracción de texto de la respuesta
     system_prompt = _build_system_prompt(config, history, contexto_riesgo)
     max_user_chars = int(config.get("max_tokens_user") or 1000)
     payload = {
@@ -504,6 +526,7 @@ def call_gemini(api_key, model, message, history, config, contexto_riesgo=None):
 
 
 def _build_contents(history, message, max_user_chars=1000):
+    # Construye el array de contenidos para la API de Gemini con historial truncado
     contents = []
     for item in (history or [])[-12:]:
         if not isinstance(item, dict):
@@ -519,6 +542,7 @@ def _build_contents(history, message, max_user_chars=1000):
 
 
 def _extract_text(data):
+    # Extrae el texto de la respuesta estructurada de Gemini
     parts = (
         data.get("candidates", [{}])[0]
         .get("content", {})

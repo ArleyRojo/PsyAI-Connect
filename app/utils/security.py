@@ -1,3 +1,6 @@
+# ARCHIVO: utils/security.py
+# Funciones de hashing y verificación de contraseñas con bcrypt.
+# Soporta migración desde SHA-256 (legacy) verificando ambos formatos.
 import hashlib
 import bcrypt
 

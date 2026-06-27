@@ -1,3 +1,8 @@
+# ============================================================
+# ARCHIVO: config.py
+# ============================================================
+
+# Importaciones de la biblioteca estándar para manejo del SO, logs, JSON, seguridad y fechas
 import os
 import logging
 import json
@@ -11,6 +16,7 @@ class Config:
 
     # SECRET_KEY: obligatoria en producción, en desarrollo se genera si falta
     _secret_key = os.getenv("SECRET_KEY")
+    # Placeholders conocidos para detectar que el usuario no configuró su propia clave
     _placeholders = (
         "your-secret-key-here",
         "CHANGE_THIS_TO_A_RANDOM_SECRET_KEY_USE_secrets.token_urlsafe(50)",
@@ -32,6 +38,7 @@ class Config:
 
     FLASK_ENV = _flask_env
 
+    # Cookies de sesión seguras: HttpOnly, SameSite Lax, Secure solo en producción
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = (
@@ -40,6 +47,7 @@ class Config:
     )
     SESSION_COOKIE_PATH = "/"
 
+    # Orígenes permitidos para CORS (separados por coma en env)
     CORS_ORIGINS = os.getenv(
         "CORS_ORIGINS",
         "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com"
@@ -60,7 +68,7 @@ class Config:
     DB_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "10"))
     DB_USE_PURE = os.getenv("DB_USE_PURE", "true").lower() == "true"
 
-    # Upload validation
+    # Validación de tamaño máximo y extensiones permitidas para subida de archivos
     MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "5"))
     ALLOWED_UPLOAD_EXTENSIONS = set(
         os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp,doc,docx").split(",")
@@ -73,6 +81,7 @@ class Config:
     # En producción usar: redis://localhost:6379/0
     RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
     _is_production = FLASK_ENV == "production"
+    # Límites de rate limiting más restrictivos en producción para evitar abusos
     REGISTER_RATE_LIMIT = os.getenv(
         "REGISTER_RATE_LIMIT",
         "5 per minute" if _is_production else "20 per minute",
@@ -86,9 +95,10 @@ class Config:
         "3 per minute" if _is_production else "10 per minute",
     )
 
+    # Las sesiones expiran después de 7 días de inactividad
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 
-    # CSRF protection
+    # Configuración de protección CSRF (token anti-falsificación de peticiones)
     WTF_CSRF_ENABLED = os.getenv("WTF_CSRF_ENABLED", "true").lower() == "true"
     WTF_CSRF_TIME_LIMIT = int(os.getenv("WTF_CSRF_TIME_LIMIT", "3600"))
     WTF_CSRF_SSL_STRICT = os.getenv("WTF_CSRF_SSL_STRICT", "false").lower() == "true"
@@ -97,6 +107,7 @@ class Config:
 
 
 class JSONFormatter(logging.Formatter):
+    # Formateador de logs en JSON estructurado, ideal para ingestión en sistemas de monitoreo
     def format(self, record):
         log_data = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -119,11 +130,13 @@ class JSONFormatter(logging.Formatter):
 
 
 class TextFormatter(logging.Formatter):
+    # Formateador de logs en texto plano legible para desarrollo local
     def format(self, record):
         return f"{datetime.utcnow().isoformat()}Z | {record.levelname:8} | {record.name:20} | {record.getMessage()}"
 
 
 def setup_logging(app):
+    # Limpia los handlers de werkzeug para evitar duplicados en los logs del servidor HTTP
     werkzeug_logger = logging.getLogger("werkzeug")
     werkzeug_logger.handlers.clear()
     werkzeug_logger.setLevel(logging.INFO if os.getenv("SHOW_WERKZEUG_LOGS", "0") == "1" else logging.WARNING)
@@ -134,5 +147,6 @@ def setup_logging(app):
     werkzeug_serving_logger.setLevel(werkzeug_logger.level)
     werkzeug_serving_logger.propagate = True
 
+    # Silencia los logs verbosos de flask-limiter para no saturar la salida
     logging.getLogger("flask-limiter").setLevel(logging.WARNING)
     return werkzeug_logger

@@ -1,22 +1,28 @@
+# ============================================================
+# ARCHIVO: database/connection.py
+# ============================================================
+
+# Importaciones para acceder a variables de entorno y al conector MySQL con pool de conexiones
 import os
 import logging
 from mysql.connector import pooling, Error
 
 logger = logging.getLogger(__name__)
 
-_pool = None
+_pool = None  # Variable global que almacena la única instancia del pool de conexiones
 
 
 def init_pool(app):
     """Inicializa el pool de conexiones MySQL. Crea la BD si no existe."""
     global _pool
     if _pool is not None:
-        return _pool
+        return _pool  # Si ya está inicializado, retorna el pool existente (singleton)
 
     cfg = app.config
 
     use_pure = os.getenv("DB_USE_PURE", "true").lower() == "true"
 
+    # Construye el diccionario de configuración para el pool de MySQL
     pool_cfg = dict(
         pool_name=os.getenv("DB_POOL_NAME", "psyai_pool"),
         pool_size=int(os.getenv("DB_POOL_SIZE", "10")),
@@ -31,6 +37,7 @@ def init_pool(app):
         use_pure=use_pure,
     )
 
+    # Si el pool es muy pequeño, advierte porque el SSE consume conexiones adicionales
     if pool_cfg["pool_size"] < 8:
         logger.warning(
             "DB_POOL_SIZE=%d es bajo para una app con SSE. "
@@ -88,6 +95,7 @@ def _create_database(pool_cfg, use_pure=True):
     """Crea la base de datos conectando sin especificar database."""
     import mysql.connector
 
+    # Conecta al servidor MySQL sin seleccionar BD para poder ejecutar CREATE DATABASE
     tmp = mysql.connector.connect(
         host=pool_cfg["host"],
         port=pool_cfg["port"],
@@ -98,6 +106,7 @@ def _create_database(pool_cfg, use_pure=True):
     )
     cur = tmp.cursor()
     db = _sanitize_db_name(pool_cfg["database"])
+    # Crea la BD con charset utf8mb4 para soporte completo de Unicode (emojis, caracteres especiales)
     cur.execute(
         f"CREATE DATABASE IF NOT EXISTS `{db}` "
         f"CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
@@ -111,7 +120,7 @@ def get_connection():
     """Retorna una conexión del pool (la crea si es necesario)."""
     global _pool
     if _pool is None:
-        # Lazy-init (poco común, pero seguro)
+        # Lazy-init (poco común, pero seguro): si nunca se llamó a init_pool, lo hace automáticamente
         from flask import current_app
         init_pool(current_app._get_current_object())
     try:

@@ -1,3 +1,6 @@
+# ARCHIVO: utils/validators.py
+# Validadores de formularios/campos: email, contraseña, fecha, hora, enteros, sanitización.
+# Lanza ValidationError con mensaje y campo específico para respuestas claras.
 import re
 from typing import Any, Optional
 

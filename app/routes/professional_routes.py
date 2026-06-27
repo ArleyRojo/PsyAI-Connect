@@ -1,3 +1,6 @@
+# ARCHIVO: professional_routes.py
+# Rutas del profesional: perfil, disponibilidad, dashboard, pacientes, diagnósticos, reportes,
+# evolución de pacientes, historial chatbot, documentos, descarga de archivos y mensajería directa.
 import os
 
 from flask import Blueprint, current_app, jsonify, request, session
@@ -16,6 +19,7 @@ def get_perfil_profesional(id_usuario: int):
     return jsonify(payload), status
 
 
+# Edita perfil propio; evita que edite el perfil de otro profesional
 @professional_bp.route("/api/perfil/profesional", methods=["PUT"])
 @require_role("profesional")
 def editar_perfil_profesional():
@@ -30,6 +34,7 @@ def editar_perfil_profesional():
     return jsonify(payload), status
 
 
+# Gestión de disponibilidad horaria para citas
 @professional_bp.route("/api/disponibilidad", methods=["POST"])
 @require_role("profesional")
 def crear_disponibilidad():
@@ -44,6 +49,7 @@ def ver_disponibilidad(id_profesional: int):
     return jsonify(payload), status
 
 
+# Dashboard, listado de pacientes asignados
 @professional_bp.route("/api/profesional/dashboard", methods=["GET"])
 @require_role("profesional")
 def dashboard_profesional():
@@ -58,6 +64,7 @@ def listar_pacientes_profesional():
     return jsonify(payload), status
 
 
+# Diagnósticos: guardar y ver historial
 @professional_bp.route("/api/diagnosticos", methods=["POST"])
 @require_role("profesional")
 def guardar_diagnostico():
@@ -72,6 +79,7 @@ def historial_diagnosticos():
     return jsonify(payload), status
 
 
+# Reportes clínicos: CRUD completo + listado de eliminados
 @professional_bp.route("/api/reportes/profesional", methods=["GET"])
 @require_role("profesional")
 def listar_reportes_profesional():
@@ -109,6 +117,7 @@ def eliminar_reporte(id_reporte: int):
     return jsonify(payload), status
 
 
+# Evolución de todos los pacientes del profesional
 @professional_bp.route("/api/evolucion/profesional", methods=["GET"])
 @require_role("profesional")
 def evolucion_todos_pacientes():
@@ -116,6 +125,7 @@ def evolucion_todos_pacientes():
     return jsonify(payload), status
 
 
+# Historial de chatbot de un paciente específico (vista profesional/admin)
 @professional_bp.route("/api/profesional/paciente/<int:id_paciente>/chatbot-historial", methods=["GET"])
 @require_role("profesional", "admin")
 def paciente_chatbot_historial(id_paciente: int):
@@ -166,6 +176,7 @@ def eliminar_documento_profesional(id_documento: int):
 
 
 # -- SERVIDOR DE ARCHIVOS -----------------------------------------------
+# Descarga física de documentos desde el sistema de archivos
 @professional_bp.route("/api/descargar/documento-profesional/<int:id_documento>", methods=["GET"])
 @require_role("profesional")
 def descargar_documento_profesional(id_documento: int):
@@ -197,6 +208,7 @@ def descargar_documento_paciente(id_documento: int):
 
 
 # -- MENSAJERIA DIRECTA -------------------------------------------------
+# Lista pacientes para chat, enriqueciendo con último mensaje y no leídos
 @professional_bp.route("/api/chat/pacientes", methods=["GET"])
 @require_role("profesional")
 def chat_listar_pacientes():

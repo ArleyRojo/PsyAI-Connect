@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: repositories/security_repository.py
+# ============================================================
+
 from datetime import datetime
 
 from flask import current_app
@@ -7,6 +11,7 @@ from app.utils.db import db_cursor
 
 
 def _table_not_found(e):
+    # Verifica si el error MySQL corresponde a "tabla no existe" (errno 1146)
     return e.errno == 1146
 
 
@@ -22,18 +27,18 @@ def check_brute_force(email):
     except ProgrammingError as e:
         if _table_not_found(e):
             current_app.logger.error("Tabla intentos_fallidos no existe en check_brute_force: %s", e)
-            return False, 0
+            return False, 0  # Si la tabla no existe, permite el login sin restricción
         raise
     if not row:
-        return False, 0
+        return False, 0  # No hay intentos registrados para este email
     if row["intentos"] < 5:
-        return False, 0
+        return False, 0  # Menos de 5 intentos, aún no se bloquea
     bloqueado_hasta = row["bloqueado_hasta"]
     if not bloqueado_hasta:
         return False, 0
     ahora = datetime.now()
     if bloqueado_hasta <= ahora:
-        return False, 0
+        return False, 0  # El bloqueo ya expiró
     segundos = int((bloqueado_hasta - ahora).total_seconds())
     return True, segundos
 
@@ -49,6 +54,7 @@ def register_failed_attempt(email):
             )
             row = cursor.fetchone()
             if row:
+                # Actualiza el contador existente: incrementa y bloquea si >= 5 intentos
                 cursor.execute(
                     """
                     UPDATE intentos_fallidos
@@ -60,6 +66,7 @@ def register_failed_attempt(email):
                     (ahora, ahora, email),
                 )
             else:
+                # Primera vez que este email falla, crea el registro con 1 intento
                 cursor.execute(
                     """
                     INSERT INTO intentos_fallidos (email, intentos, ultimo_intento, bloqueado_hasta)

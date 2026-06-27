@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: services/professional_service.py
+# ============================================================
+
 from app.repositories import professional_repository
 
 
@@ -26,6 +30,7 @@ def create_availability(professional_id, data):
 
 def get_availability(professional_id):
     datos = professional_repository.get_availability(professional_id)
+    # Convierte tipos timedelta/time a string para serialización JSON
     for item in datos:
         if hasattr(item["hora_inicio"], "__str__"):
             item["hora_inicio"] = str(item["hora_inicio"])
@@ -38,6 +43,7 @@ def get_availability(professional_id):
 
 def get_dashboard(professional_id):
     data = professional_repository.get_dashboard_stats(professional_id)
+    # Formatea fechas y horas para el dashboard
     for actividad in data["actividades"]:
         if actividad.get("fecha"):
             actividad["fecha"] = actividad["fecha"].strftime("%d/%m/%Y")
@@ -76,7 +82,7 @@ def create_report(professional_id, data):
     if patient_id and data.get("tipoReporte") == "diagnosticos":
         latest_diagnosis = professional_repository.get_latest_patient_diagnosis(professional_id, patient_id)
         if latest_diagnosis:
-            data = {**data, **latest_diagnosis}
+            data = {**data, **latest_diagnosis}  # Auto-completa con datos del diagnóstico más reciente
     professional_repository.create_report(professional_id, data)
     return {"success": True, "message": "Reporte generado correctamente"}, 200
 

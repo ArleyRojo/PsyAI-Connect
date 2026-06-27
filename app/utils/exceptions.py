@@ -1,3 +1,6 @@
+# ARCHIVO: utils/exceptions.py
+# Excepciones personalizadas de la API (APIError y subtipos HTTP) más helpers
+# success_response/error_response para respuestas JSON consistentes.
 import logging
 from flask import jsonify
 from werkzeug.exceptions import HTTPException

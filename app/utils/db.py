@@ -1,3 +1,6 @@
+# ARCHIVO: utils/db.py
+# Context manager db_cursor que obtiene una conexión del pool, provee cursor,
+# hace rollback en error y cierra cursor + conexión al salir (así o en finally).
 from contextlib import contextmanager
 
 from app.database.connection import get_connection

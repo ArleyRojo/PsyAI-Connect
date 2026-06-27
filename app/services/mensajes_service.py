@@ -1,3 +1,7 @@
+# ============================================================
+# ARCHIVO: services/mensajes_service.py
+# ============================================================
+
 from app.repositories import mensajes_repository
 
 
@@ -22,6 +26,7 @@ def get_contactos_con_mensajes(id_usuario, lista_contactos, id_field="idUsuario"
             "noLeidos": no_leidos,
             "isOnline": uid in online_ids,
         })
+    # Ordena: primero los no leídos, luego por fecha del último mensaje descendente
     return sorted(
         resultado,
         key=lambda c: (
@@ -34,6 +39,7 @@ def get_contactos_con_mensajes(id_usuario, lista_contactos, id_field="idUsuario"
 
 
 def get_mensajes(id_usuario, id_otro, desde_id=0):
+    # Marca mensajes como leídos y obtiene la conversación
     mensajes_repository.marcar_leidos(id_usuario, id_otro)
     rows = mensajes_repository.get_conversacion(id_usuario, id_otro, desde_id)
     return [

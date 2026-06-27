@@ -1,3 +1,6 @@
+# ARCHIVO: utils/mail.py
+# Envío de correos electrónicos vía API Brevo (Sendinblue) para recuperación de contraseña.
+# Usa urllib estándar (sin dependencias externas de email).
 import os
 import logging
 import json
