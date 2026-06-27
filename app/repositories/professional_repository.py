@@ -6,7 +6,8 @@ def get_professional_profile(user_id):
         cursor.execute(
             """
             SELECT r.nombre, r.email, r.fotoPerfil, r.fechaRegistro,
-                   p.especialidad, p.licencia, p.experiencia, p.estado
+                   p.especialidad, p.licencia, p.experiencia, p.estado,
+                   p.edad, p.genero
             FROM Register r
             LEFT JOIN PerfilProfesional p ON r.idUsuario = p.idProfesional
             WHERE r.idUsuario = %s
@@ -235,13 +236,10 @@ def list_professional_patients(professional_id):
                     ORDER BY fechaDiagnostico DESC LIMIT 1) as ultimoDiagnostico
             FROM Register r
             JOIN PerfilPaciente p ON r.idUsuario = p.idPaciente
-            LEFT JOIN PacientesProfesional pp ON pp.idPaciente = r.idUsuario AND pp.idProfesional = %s
-            LEFT JOIN Citas c ON c.idPaciente = r.idUsuario AND c.idProfesional = %s
             WHERE r.rol = 'paciente'
-              AND (pp.id IS NOT NULL OR (c.idCita IS NOT NULL AND LOWER(COALESCE(c.estado, '')) != 'cancelada'))
             ORDER BY r.nombre
             """,
-            (professional_id, professional_id, professional_id),
+            (professional_id,),
         )
         return cursor.fetchall()
 
@@ -444,14 +442,9 @@ def get_all_patient_evolution(professional_id):
                    r.nombre as paciente
             FROM EvolucionPaciente e
             JOIN Register r ON e.idPaciente = r.idUsuario
-            LEFT JOIN PacientesProfesional pp ON pp.idPaciente = r.idUsuario AND pp.idProfesional = %s
-            LEFT JOIN Citas c ON c.idPaciente = r.idUsuario AND c.idProfesional = %s
             WHERE r.rol = 'paciente'
-              AND (pp.id IS NOT NULL OR (c.idCita IS NOT NULL AND LOWER(COALESCE(c.estado, '')) != 'cancelada'))
-            GROUP BY e.idEvolucion
             ORDER BY e.fecha DESC
             """,
-            (professional_id, professional_id)
         )
         return cursor.fetchall()
 

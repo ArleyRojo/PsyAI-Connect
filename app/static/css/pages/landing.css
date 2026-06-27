@@ -805,6 +805,7 @@ button:focus-visible,
   .tipo-badge.cita       { background: #e8f5e9; color: #2e7d32; }
   .tipo-badge.recordatorio { background: #fff8e1; color: #f57f17; }
   .tipo-badge.alerta     { background: #ffebee; color: #c62828; }
+  .tipo-badge.seguimiento { background: #fff3e0; color: #e65100; }
   .tipo-badge.info       { background: #e0f2f1; color: #00695c; }
 
   /* â”€â”€ Estado badge â”€â”€ */
@@ -2073,19 +2074,10 @@ body {
 
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> main-local
 .hero-image-card img {
     background: #f0f5fc;
 }
 
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
 .hero-image-card::before {
     content: '';
     position: absolute;
@@ -3613,17 +3605,7 @@ html {
 
 .carousel-control-prev:hover,
 .carousel-control-next:hover {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    background: var(--color-secondary);
     opacity: 1;
-    transform: translateY(-50%) scale(1.1);
-=======
-    opacity: 1;
->>>>>>> 629d7c0 (avances)
-=======
-    opacity: 1;
->>>>>>> main-local
 }
 
 

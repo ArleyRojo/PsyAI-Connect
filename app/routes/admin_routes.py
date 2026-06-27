@@ -6,16 +6,7 @@ from flask import Blueprint, jsonify, request, session, Response
 from app.services import admin_service, chatbot_config_events, chatbot_config_service, telemetry_service
 from app.services.telemetry_service import _normalize_ip
 from app.utils.auth import require_role
-from app.utils.db import db_cursor
 from app.repositories import admin_repository
-
-
-def serialize_fecha(valor):
-    if valor is None:
-        return None
-    if hasattr(valor, "isoformat"):
-        return valor.isoformat()
-    return str(valor)
 
 
 admin_bp = Blueprint("admin", __name__)
@@ -275,82 +266,5 @@ def get_chatbot_detected_words():
 def get_chatbot_historial():
     nivel = request.args.get("nivel", "")
     search = request.args.get("q", "")
-    
-    try:
-        with db_cursor(dictionary=True) as (_, cursor):
-            cursor.execute("""
-                SELECT nombre, idPaciente, mensajeUsuario, respuestaChatbot, nivelEmocionalDetectado, fecha
-                FROM vistahistorialchatbot
-                ORDER BY nombre ASC, fecha ASC
-                LIMIT 200
-            """)
-            rows = cursor.fetchall()
-            
-            pacientes_map = {}
-            for row in rows:
-                paciente_key = row.get("idPaciente") or row["nombre"]
-                if paciente_key not in pacientes_map:
-                    pacientes_map[paciente_key] = {
-                        "nombre": row["nombre"] or "Paciente",
-                        "idPaciente": row.get("idPaciente"),
-                        "total_mensajes": 0,
-                        "ultimo_mensaje": None,
-                        "nivel_max": "Bajo",
-                        "mensajes": []
-                    }
-                p = pacientes_map[paciente_key]
-                p["total_mensajes"] += 1
-                
-                rnivel = row.get("nivelEmocionalDetectado", "")
-                if rnivel == "Alto":
-                    p["nivel_max"] = "Alto"
-                elif rnivel == "Medio" and p["nivel_max"] != "Alto":
-                    p["nivel_max"] = "Medio"
-                
-                p["mensajes"].append({
-                    "mensajeUsuario": row.get("mensajeUsuario"),
-                    "respuestaChatbot": row.get("respuestaChatbot"),
-                    "nivelEmocionalDetectado": rnivel,
-                    "fecha": serialize_fecha(row.get("fecha"))
-                })
-                
-                fecha = row.get("fecha")
-                if fecha:
-                    fecha_str = fecha.isoformat() if hasattr(fecha, 'isoformat') else str(fecha)
-                    if p["ultimo_mensaje"] is None or fecha_str > p["ultimo_mensaje"]:
-                        p["ultimo_mensaje"] = fecha_str
-            
-            pacientes = list(pacientes_map.values())
-            
-            if nivel:
-                pacientes = [p for p in pacientes if p["nivel_max"] == nivel]
-            if search:
-                s = search.lower()
-                pacientes = [p for p in pacientes if s in p["nombre"].lower()]
-            
-            cursor.execute("""
-                SELECT 
-                    COUNT(*) as total,
-                    SUM(CASE WHEN nivelEmocionalDetectado = 'Alto' THEN 1 ELSE 0 END) as alto,
-                    SUM(CASE WHEN nivelEmocionalDetectado = 'Medio' THEN 1 ELSE 0 END) as medio,
-                    SUM(CASE WHEN nivelEmocionalDetectado = 'Bajo' THEN 1 ELSE 0 END) as bajo
-                FROM vistahistorialchatbot
-            """)
-            stats = cursor.fetchone()
-            
-            return jsonify({
-                "success": True,
-                "pacientes": pacientes,
-                "stats": stats
-            }), 200
-    except Exception as e:
-        estr = str(e)
-        if "1146" in estr or "doesn't exist" in estr:
-            return jsonify({
-                "success": False,
-                "message": "La vista vistahistorialchatbot no existe en la BD. "
-                           "Corre las migraciones: python -m app.database.migrations",
-                "pacientes": [],
-                "stats": {"total": 0, "alto": 0, "medio": 0, "bajo": 0}
-            }), 200
-        return jsonify({"success": False, "message": estr}), 500
+    payload, status = admin_service.get_chatbot_historial(nivel, search)
+    return jsonify(payload), status

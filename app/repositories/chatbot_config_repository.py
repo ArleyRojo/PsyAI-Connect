@@ -120,3 +120,25 @@ def save_risk_terms_only(risk_terms_str, admin_id):
         )
         conn.commit()
         return cursor.rowcount
+
+
+def clear_risk_terms(admin_id):
+    """Vacía los risk_terms en ChatbotConfig."""
+    with db_cursor() as (conn, cursor):
+        cursor.execute(
+            "UPDATE ChatbotConfig SET risk_terms = '', fecha_actualizacion = NOW() WHERE id = 1"
+        )
+        conn.commit()
+        return cursor.rowcount
+
+
+def get_historial_palabras_riesgo():
+    """Retorna filas de vistahistorialchatbot con palabras de riesgo detectadas."""
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute("""
+            SELECT nombre, palabrasRiesgoDetectadas, nivelEmocionalDetectado
+            FROM vistahistorialchatbot
+            WHERE palabrasRiesgoDetectadas IS NOT NULL
+              AND palabrasRiesgoDetectadas != ''
+        """)
+        return cursor.fetchall()

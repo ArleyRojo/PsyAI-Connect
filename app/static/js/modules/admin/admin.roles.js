@@ -255,15 +255,7 @@ async function guardarRol() {
         const data = await res.json();
         bootstrap.Modal.getInstance(document.getElementById('modalEditarRol')).hide();
         mostrarAlerta(data.success ? 'success' : 'danger', data.message);
-<<<<<<< HEAD
-<<<<<<< HEAD
-        if (data.success) cargarUsuariosRoles();
-=======
         if (data.success) { cargarUsuarios(); cargarHistorial(); }
->>>>>>> 629d7c0 (avances)
-=======
-        if (data.success) { cargarUsuarios(); cargarHistorial(); }
->>>>>>> main-local
     } catch(e) { console.error(e); }
 }
 window.guardarRol = guardarRol;
@@ -279,15 +271,7 @@ async function confirmarAccion(id, nombre, accion) {
         });
         const data = await res.json();
         mostrarAlerta(data.success ? 'success' : 'danger', data.message);
-<<<<<<< HEAD
-<<<<<<< HEAD
-        if (data.success) cargarUsuariosRoles();
-=======
         if (data.success) { cargarUsuarios(); cargarHistorial(); }
->>>>>>> 629d7c0 (avances)
-=======
-        if (data.success) { cargarUsuarios(); cargarHistorial(); }
->>>>>>> main-local
     } catch(e) { console.error(e); }
 }
 
@@ -320,15 +304,7 @@ async function asignarRol() {
             document.getElementById('emailUsuario').value = '';
             document.getElementById('nuevoRol').value = '';
             document.getElementById('motivoAsignacion').value = '';
-<<<<<<< HEAD
-<<<<<<< HEAD
-            cargarUsuariosRoles();
-=======
             cargarUsuarios(); cargarHistorial();
->>>>>>> 629d7c0 (avances)
-=======
-            cargarUsuarios(); cargarHistorial();
->>>>>>> main-local
         }
     } catch(e) { console.error(e); }
 }
@@ -337,7 +313,10 @@ async function asignarRol() {
 function mostrarTab(tab, btn) {
     ['usuarios','agregar','historial'].forEach(t => {
         const el = document.getElementById(`tab-${t}`);
-        if (el) el.style.display = t === tab ? '' : 'none';
+        if (el) {
+            el.style.display = t === tab ? '' : 'none';
+            if (t === tab) { el.style.opacity = '1'; el.style.transform = 'none'; }
+        }
     });
     document.querySelectorAll('.admin-panel-tab').forEach(b => {
         b.classList.remove('active');

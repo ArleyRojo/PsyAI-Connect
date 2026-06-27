@@ -90,6 +90,14 @@ function renderizarPaginaNotifs() {
                 tipoBadge = getTipoBadge(n.tipo);
             }
             
+            const destinatarioTexto = n.tipo_registro === 'notificacion'
+                ? getDestPill(n.destinatario, n.email_individual)
+                : n.tipo_registro === 'profesional'
+                    ? '<span class="recipient-pill paciente"><i class="fas fa-user"></i> ' + extraerDestinatarioDeMensaje(n.mensaje, 'Paciente: ') + '</span>'
+                    : n.tipo_registro === 'paciente'
+                        ? '<span class="recipient-pill profesional"><i class="fas fa-user-md"></i> ' + extraerDestinatarioDeMensaje(n.mensaje, 'Profesional: ') + '</span>'
+                        : (n.enviado_por || '—');
+            
             return `
             <tr>
               <td class="ps-4 notif-cell-date">${n.fecha_envio || n.fecha || '—'}</td>
@@ -98,7 +106,7 @@ function renderizarPaginaNotifs() {
                 <div class="notif-cell-desc">${(n.mensaje||'').substring(0,60)}${(n.mensaje||'').length>60?'...':''}</div>
               </td>
               <td>${tipoBadge}</td>
-              <td>${n.tipo_registro === 'notificacion' ? getDestPill(n.destinatario, n.email_individual) : (n.enviado_por || '—')}</td>
+              <td>${destinatarioTexto}</td>
               <td>${estadoTexto}</td>
               <td class="notif-cell-meta">${getEnviadoPorBadge(n.enviado_por)}</td>
               <td class="text-end pe-4">
@@ -225,7 +233,27 @@ function verDetalle(id) {
     set('detalleTitle',       n.titulo);
     set('detalleBody',        n.mensaje);
     set('detalleTipo',        n.tipo_registro === 'profesional' ? 'Actividad Profesional' : n.tipo_registro === 'paciente' ? 'Actividad Paciente' : n.tipo);
-    set('detalleDestinatario', n.tipo_registro === 'notificacion' ? (n.destinatario === 'individual' ? n.email_individual : n.destinatario) : n.enviado_por);
+    
+    // Mostrar nombre real del destinatario
+    let destinatario;
+    if (n.tipo_registro === 'notificacion') {
+        if (n.email_individual && n.destinatario === 'individual') {
+            destinatario = n.email_individual;
+        } else if (n.destinatario && ['todos','pacientes','profesionales','individual'].includes(n.destinatario)) {
+            const labels = {todos:'Todos los usuarios', pacientes:'Solo pacientes', profesionales:'Solo profesionales', individual:'Individual'};
+            destinatario = labels[n.destinatario] || n.destinatario;
+        } else {
+            destinatario = n.destinatario || '—';
+        }
+    } else if (n.tipo_registro === 'profesional') {
+        destinatario = extraerDestinatarioDeMensaje(n.mensaje, 'Paciente: ') || n.enviado_por || '—';
+    } else if (n.tipo_registro === 'paciente') {
+        destinatario = extraerDestinatarioDeMensaje(n.mensaje, 'Profesional: ') || n.enviado_por || '—';
+    } else {
+        destinatario = n.enviado_por || '—';
+    }
+    set('detalleDestinatario', destinatario);
+    
     set('detalleEnviadoPor',  n.enviado_por || 'Sistema');
     set('detalleFecha',       n.fecha_envio || n.fecha);
     set('detalleEstado',      n.estado);
@@ -272,7 +300,11 @@ function limpiarFormulario() {
 function mostrarTab(tab, btn) {
     document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
     const target = document.getElementById(`tab-${tab}`);
-    if (target) target.style.display = '';
+    if (target) {
+        target.style.display = '';
+        target.style.opacity = '1';
+        target.style.transform = 'none';
+    }
     document.querySelectorAll('.admin-panel-tab').forEach(b => {
         b.classList.remove('active');
         b.setAttribute('aria-selected', 'false');
@@ -283,15 +315,24 @@ function mostrarTab(tab, btn) {
     }
 }
 
+function extraerDestinatarioDeMensaje(mensaje, prefijo) {
+    if (!mensaje) return '—';
+    const idx = mensaje.indexOf(prefijo);
+    if (idx === -1) return '—';
+    return mensaje.substring(idx + prefijo.length).trim();
+}
+
 function getTipoBadge(tipo) {
+    const key = (tipo || '').toLowerCase();
     const map = {
         sistema:      '<span class="tipo-badge sistema"><i class="fas fa-cog"></i> Sistema</span>',
         cita:         '<span class="tipo-badge cita"><i class="fas fa-calendar-check"></i> Cita</span>',
         recordatorio: '<span class="tipo-badge recordatorio"><i class="fas fa-clock"></i> Recordatorio</span>',
         alerta:       '<span class="tipo-badge alerta"><i class="fas fa-exclamation-triangle"></i> Alerta</span>',
-        info:         '<span class="tipo-badge info"><i class="fas fa-info-circle"></i> Info</span>'
+        info:         '<span class="tipo-badge info"><i class="fas fa-info-circle"></i> Info</span>',
+        seguimiento:  '<span class="tipo-badge seguimiento"><i class="fas fa-eye"></i> Seguimiento</span>'
     };
-    return map[tipo] || `<span class="tipo-badge info">${tipo||'—'}</span>`;
+    return map[key] || `<span class="tipo-badge info">${tipo||'—'}</span>`;
 }
 
 function getDestPill(dest, email) {
@@ -301,7 +342,7 @@ function getDestPill(dest, email) {
         profesionales: '<span class="recipient-pill profesional"><i class="fas fa-user-md"></i> Profesionales</span>',
         individual:    `<span class="recipient-pill individual"><i class="fas fa-user-circle"></i> ${email || 'Individual'}</span>`
     };
-    return map[dest] || `<span class="recipient-pill individual">${dest||'—'}</span>`;
+    return map[dest] || `<span class="recipient-pill individual"><i class="fas fa-user-circle"></i> ${dest || '—'}</span>`;
 }
 
 function getEnviadoPorBadge(usuario) {

@@ -9,7 +9,6 @@ from urllib.request import Request, urlopen
 
 from app.repositories import chat_repository, patient_repository, appointment_repository, chatbot_config_repository
 from app.services import chatbot_config_service
-from app.utils.db import db_cursor
 
 logger = logging.getLogger(__name__)
 
@@ -192,10 +191,21 @@ def build_response(patient_id, message):
             "limit": daily_limit,
         }, 200
 
+    # ── Riesgo Medio: notificar con throttling + contexto de respuesta ──
+    if es_medio:
+        nivel_emocional = "Medio"
+        risk_words = ",".join([t for t in medio_terms if t in normalized])
+        _notify_medium_risk(patient_id, risk_words)
+    elif es_bajo:
+        nivel_emocional = "Bajo"
+        risk_words = ",".join([t for t in bajo_terms if t in normalized])
+    else:
+        nivel_emocional = "Sin riesgo"
+        risk_words = None
+
     keys = _get_api_keys()
     if not keys:
-        nivel_emocional, risk_words = _evaluate_risk_level(es_medio, es_bajo, medio_terms, bajo_terms, normalized)
-        response_text = _build_local_fallback(message, history, config)
+        response_text = _build_local_fallback(message, history, config, es_medio, es_bajo)
         chat_repository.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
         return {
             "success": True,
@@ -208,9 +218,10 @@ def build_response(patient_id, message):
 
     model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip() or "gemini-2.5-flash-lite"
 
+    contexto_riesgo = _build_risk_context(es_medio, es_bajo)
+
     try:
-        response_text = _call_gemini_with_rotation(keys, model, message, history or [], config)
-        nivel_emocional, risk_words = _evaluate_risk_level(es_medio, es_bajo, medio_terms, bajo_terms, normalized)
+        response_text = _call_gemini_with_rotation(keys, model, message, history or [], config, contexto_riesgo)
         chat_repository.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
         return {
             "success": True,
@@ -220,8 +231,7 @@ def build_response(patient_id, message):
         }, 200
     except Exception as exc:
         logger.exception("Error llamando Gemini: %s", exc)
-        nivel_emocional, risk_words = _evaluate_risk_level(es_medio, es_bajo, medio_terms, bajo_terms, normalized)
-        response_text = _build_local_fallback(message, history, config)
+        response_text = _build_local_fallback(message, history, config, es_medio, es_bajo)
         chat_repository.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
         return {
             "success": True,
@@ -233,7 +243,21 @@ def build_response(patient_id, message):
         }, 200
 
 
-def _call_gemini_with_rotation(keys: list[str], model: str, message: str, history: list, config: dict) -> str:
+def _build_risk_context(es_medio=False, es_bajo=False):
+    if es_medio:
+        return (
+            "El paciente mostró señales de riesgo emocional medio. "
+            "Responde con calidez y, si es natural, sugiere hablar con su profesional sin sonar alarmante."
+        )
+    if es_bajo:
+        return (
+            "El paciente mostró una señal leve de malestar. "
+            "Responde con empatía y normalidad, sin alarmar."
+        )
+    return None
+
+
+def _call_gemini_with_rotation(keys: list[str], model: str, message: str, history: list, config: dict, contexto_riesgo=None) -> str:
     """
     Intenta llamar a Gemini usando la key activa.
     Si recibe 429 (cuota agotada), rota a la siguiente key y reintenta.
@@ -246,7 +270,7 @@ def _call_gemini_with_rotation(keys: list[str], model: str, message: str, histor
     for attempt in range(total_keys):
         current_key = keys[_key_index]
         try:
-            return call_gemini(current_key, model, message, history, config)
+            return call_gemini(current_key, model, message, history, config, contexto_riesgo)
         except RuntimeError as exc:
             error_str = str(exc)
             is_quota = "429" in error_str or "RESOURCE_EXHAUSTED" in error_str
@@ -263,17 +287,32 @@ def _call_gemini_with_rotation(keys: list[str], model: str, message: str, histor
     raise RuntimeError("Todas las API keys agotaron su cuota por hoy.")
 
 
-def _evaluate_risk_level(is_medio, is_bajo, medio_terms, bajo_terms, normalized):
-    if is_medio:
-        return "Medio", ",".join([t for t in medio_terms if t in normalized])
-    if is_bajo:
-        return "Bajo", ",".join([t for t in bajo_terms if t in normalized])
-    return "Sin riesgo", None
 
-
-def _build_local_fallback(message, history, config):
+def _build_local_fallback(message, history, config, es_medio=False, es_bajo=False):
     normalized = _normalize_text(message)
     last_bot_message = _last_bot_message(history)
+
+    if es_bajo:
+        bajo_options = [
+            "Gracias por contarme eso. A veces nombrar lo que sentimos ya ayuda un poco. Que crees que esta influyendo en como te sientes hoy?",
+            "Te escucho. Es valido sentirse asi de vez en cuando. Hay algo concreto que te haya estado pesando?",
+            "Aprecio que compartas esto conmigo. Te gustaria contarme un poco mas sobre lo que esta pasando?",
+        ]
+        for option in _rotate_options(bajo_options, message):
+            if option != last_bot_message:
+                return option
+        return bajo_options[0]
+
+    if es_medio:
+        medio_options = [
+            "Gracias por compartir esto conmigo. Parece que hay algo que te está afectando más de lo habitual. ¿Qué tan seguido has estado sintiendo esto últimamente?",
+            "Valoro que me cuentes cómo te sientes. A veces cuando algo nos pesa así, hablar con la persona indicada puede ayudar. ¿Has considerado comentarlo con tu profesional?",
+            "Entiendo que esto puede ser difícil de llevar. Quiero recordarte que no estás sol@ en esto y que hay personas que pueden apoyarte. ¿Te gustaría que hablemos más sobre ello?",
+        ]
+        for option in _rotate_options(medio_options, message):
+            if option != last_bot_message:
+                return option
+        return medio_options[0]
 
     if _contains_any(normalized, ("ansioso", "ansiosa", "ansiedad", "nervioso", "nerviosa", "estres", "estresado", "estresada")):
         options = [
@@ -352,39 +391,47 @@ def _notify_high_risk(patient_id):
     titulo = "Alerta: el paciente requiere atención urgente"
     mensaje = f"Alerta: el paciente {patient_name} requiere atención urgente. Se detectaron palabras de riesgo alto en el chatbot."
     profesionales = _get_assigned_professionals(patient_id)
-
-    if profesionales:
-        for profesional_id in profesionales:
-            appointment_repository.create_notification(profesional_id, 'profesional', titulo, mensaje, 'Alerta')
-        return
-
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute("SELECT idUsuario FROM Register WHERE rol = 'profesional'")
-        todos = cursor.fetchall()
-        for row in todos:
-            appointment_repository.create_notification(row['idUsuario'], 'profesional', titulo, mensaje, 'Alerta')
+    destinos = profesionales if profesionales else _get_all_professional_ids()
+    for profesional_id in destinos:
+        appointment_repository.create_notification(profesional_id, 'profesional', titulo, mensaje, 'Alerta')
 
 
 def _get_assigned_professionals(patient_id):
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            "SELECT idProfesional FROM PacientesProfesional WHERE idPaciente = %s",
-            (patient_id,),
-        )
-        return [row['idProfesional'] for row in cursor.fetchall() if row.get('idProfesional')]
+    return chat_repository.get_assigned_professionals(patient_id)
+
+
+def _get_all_professional_ids():
+    return chat_repository.get_all_professional_ids()
+
+
+def _ya_notificado_recientemente(patient_name, tipo, horas=12):
+    return chat_repository.notificacion_reciente_existe(patient_name, tipo, horas)
+
+
+def _notify_medium_risk(patient_id, risk_words):
+    patient_name = _get_patient_name(patient_id) or f"Paciente #{patient_id}"
+    
+    if _ya_notificado_recientemente(patient_name, "Seguimiento", horas=12):
+        logger.info("Riesgo medio: ya se notificó a profesionales sobre %s en las últimas 12h, omitiendo.", patient_name)
+        return
+
+    titulo = "Seguimiento recomendado"
+    mensaje = (
+        f"El paciente {patient_name} mostró señales de riesgo medio en el chatbot "
+        f"(palabras detectadas: {risk_words}). Se recomienda revisar su evolución reciente."
+    )
+    profesionales = _get_assigned_professionals(patient_id)
+    destinos = profesionales if profesionales else _get_all_professional_ids()
+    for profesional_id in destinos:
+        appointment_repository.create_notification(profesional_id, 'profesional', titulo, mensaje, 'Seguimiento')
+    logger.info("Notificación de seguimiento enviada a %d profesional(es) sobre %s", len(destinos), patient_name)
 
 
 def _get_patient_name(patient_id):
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            "SELECT nombre FROM Register WHERE idUsuario = %s",
-            (patient_id,),
-        )
-        row = cursor.fetchone()
-        return row['nombre'] if row else None
+    return chat_repository.get_patient_name(patient_id)
 
 
-def _build_system_prompt(config, history):
+def _build_system_prompt(config, history, contexto_riesgo=None):
     system_prompt = (config.get("system_prompt") or SYSTEM_PROMPT_FALLBACK).strip()
     interaction_rules = (config.get("interaction_rules") or "").strip()
     tone = (config.get("tone") or "").strip()
@@ -392,6 +439,8 @@ def _build_system_prompt(config, history):
         system_prompt = f"{system_prompt}\nReglas de interacción: {interaction_rules}"
     if tone:
         system_prompt = f"{system_prompt}\nTono de comunicación: {tone.lower()}."
+    if contexto_riesgo:
+        system_prompt = f"{system_prompt}\n\nCONTEXTO DE RIESGO DETECTADO: {contexto_riesgo}"
     if history:
         ultimos = history[-4:]
         if ultimos:
@@ -406,8 +455,8 @@ def _build_system_prompt(config, history):
     return f"{system_prompt}{_PROMPT_SUFFIX}"
 
 
-def call_gemini(api_key, model, message, history, config):
-    system_prompt = _build_system_prompt(config, history)
+def call_gemini(api_key, model, message, history, config, contexto_riesgo=None):
+    system_prompt = _build_system_prompt(config, history, contexto_riesgo)
     max_user_chars = int(config.get("max_tokens_user") or 1000)
     payload = {
         "systemInstruction": {"parts": [{"text": system_prompt}]},
@@ -452,10 +501,6 @@ def call_gemini(api_key, model, message, history, config):
             if attempt <= GEMINI_RETRIES:
                 time.sleep(base_delay * attempt)
     raise RuntimeError(f"Gemini no disponible luego de reintentos: {last_exc}")
-
-
-def _call_gemini(api_key, model, message, history, config):
-    return call_gemini(api_key, model, message, history, config)
 
 
 def _build_contents(history, message, max_user_chars=1000):

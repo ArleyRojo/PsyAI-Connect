@@ -1,4 +1,72 @@
 var pacientesEvolucionData = window.pacientesEvolucionData || [];
+var evolucionData = window.evolucionData || [];
+var riesgoBajoPorPaciente = {};
+
+function getRiesgoBajoCount(patientId) {
+    if (!patientId) return 0;
+    return Number(riesgoBajoPorPaciente[String(patientId)] || 0);
+}
+
+function renderRiesgoBajoBadge(patientId) {
+    var count = getRiesgoBajoCount(patientId);
+    if (!count) return '';
+    return (
+        ' <span class="riesgo-bajo-badge" title="Señales de riesgo bajo en chatbot (últimos 7 días)">' +
+        '<span class="riesgo-bajo-dot"></span>' + count + '</span>'
+    );
+}
+
+function actualizarResumenRiesgoBajo() {
+    var card = document.querySelector('#pestana-evolucion .card');
+    if (!card) return;
+
+    var container = document.getElementById('riesgoBajoResumenEvolucion');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'riesgoBajoResumenEvolucion';
+        container.className = 'riesgo-bajo-resumen mb-3';
+        var row = card.querySelector('.row.mb-3');
+        if (row) {
+            card.insertBefore(container, row);
+        } else {
+            card.appendChild(container);
+        }
+    }
+
+    var select = document.getElementById('selectPacienteEvolucion');
+    var filtro = select?.value || '';
+    var selectedId = filtro.startsWith('id:') ? filtro.slice(3) : '';
+    var totalPacientes = Object.keys(riesgoBajoPorPaciente).length;
+    var totalMensajes = Object.values(riesgoBajoPorPaciente).reduce(function (sum, n) {
+        return sum + Number(n || 0);
+    }, 0);
+
+    if (!totalMensajes) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+        return;
+    }
+
+    if (selectedId) {
+        var count = getRiesgoBajoCount(selectedId);
+        if (!count) {
+            container.style.display = 'none';
+            container.innerHTML = '';
+            return;
+        }
+        container.style.display = '';
+        container.innerHTML =
+            '<span class="riesgo-bajo-dot"></span>' +
+            '<span>Este paciente tuvo <strong>' + count + '</strong> mensaje(s) con señales de riesgo bajo en el chatbot durante los últimos 7 días.</span>';
+        return;
+    }
+
+    container.style.display = '';
+    container.innerHTML =
+        '<span class="riesgo-bajo-dot"></span>' +
+        '<span><strong>' + totalPacientes + '</strong> paciente(s) con señales de riesgo bajo en chatbot (últimos 7 días): ' +
+        '<strong>' + totalMensajes + '</strong> mensaje(s) en total.</span>';
+}
 
 function escapeHtmlEvolucion(value) {
     return String(value ?? '')
@@ -62,7 +130,11 @@ async function cargarPacientesSelectEvolucion(historial) {
 
     select.innerHTML = '<option value="">Todos los pacientes</option>' +
         ordered.map(function (option) {
-            return '<option value="' + escapeHtmlEvolucion(option.value) + '">' + escapeHtmlEvolucion(option.label) + '</option>';
+            var patientId = option.value.startsWith('id:') ? option.value.slice(3) : '';
+            var count = getRiesgoBajoCount(patientId);
+            var suffix = count ? ' (' + count + ' riesgo bajo)' : '';
+            return '<option value="' + escapeHtmlEvolucion(option.value) + '">' +
+                escapeHtmlEvolucion(option.label + suffix) + '</option>';
         }).join('');
 
     // Restore selected value if it still exists
@@ -81,18 +153,22 @@ async function cargarEvolucion() {
         var res = await fetch("/api/evolucion/profesional", { credentials: "include" });
         var data = await res.json();
         
-        evolucionData = (data.success && data.historial ? data.historial : []).sort(function (a, b) {
+        window.evolucionData = evolucionData = (data.success && data.historial ? data.historial : []).sort(function (a, b) {
             return new Date(b.fechaRaw || b.fecha || 0) - new Date(a.fechaRaw || a.fecha || 0);
         });
+        riesgoBajoPorPaciente = data.riesgo_bajo_chatbot || {};
 
         await cargarPacientesSelectEvolucion(evolucionData);
         actualizarBadgeEvolucion();
+        actualizarResumenRiesgoBajo();
         filtrarEvolucionPorPaciente(); // Re-apply filter and render
     } catch (e) {
         console.error(e);
         evolucionData = [];
+        riesgoBajoPorPaciente = {};
         await cargarPacientesSelectEvolucion([]);
         actualizarBadgeEvolucion();
+        actualizarResumenRiesgoBajo();
         tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar la evolución</td></tr>';
     }
 }
@@ -103,6 +179,7 @@ function filtrarEvolucionPorPaciente() {
     
     if (!filtro) {
         renderEvolucion(evolucionData);
+        actualizarResumenRiesgoBajo();
         return;
     }
 
@@ -122,6 +199,7 @@ function filtrarEvolucionPorPaciente() {
     });
 
     renderEvolucion(filteredData);
+    actualizarResumenRiesgoBajo();
 }
 
 function renderEvolucion(lista) {
@@ -143,7 +221,7 @@ function renderEvolucion(lista) {
 
         return "<tr>" +
             "<td>" + escapeHtmlEvolucion(fecha) + "</td>" +
-            "<td>" + escapeHtmlEvolucion(h.paciente || "---") + "</td>" +
+            "<td>" + escapeHtmlEvolucion(h.paciente || "---") + renderRiesgoBajoBadge(h.idPaciente || h.idUsuario) + "</td>" +
             "<td><span class='badge bg-" + colorEstado + "'>" + escapeHtmlEvolucion(h.estadoEmocional || "---") + "</span></td>" +
             "<td><div class='energia-bar'><div class='bar'><div class='fill bg-" + colorBarra + "' style='width:" + Math.min(nivel * 10, 100) + "%'></div></div><small class='text-muted'>" + escapeHtmlEvolucion(nivel) + "</small></div></td>" +
             "<td>" + escapeHtmlEvolucion(h.notasPersonales || "---") + "</td>" +
@@ -153,10 +231,6 @@ function renderEvolucion(lista) {
 
 function actualizarBadgeEvolucion() {
     var badge = document.getElementById("badgeEvol");
-<<<<<<< HEAD
     if (badge) badge.textContent = window.evolucionData ? window.evolucionData.length : 0;
-=======
-    if (badge) badge.textContent = Array.isArray(evolucionData) ? evolucionData.length : 0;
->>>>>>> main-local
 }
 

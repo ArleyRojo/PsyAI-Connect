@@ -40,6 +40,9 @@ wheels/
 *.sqlite
 *.db
 
+# Uploads
+app/static/uploads/
+
 # OS
 .DS_Store
 Thumbs.db

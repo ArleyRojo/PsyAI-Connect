@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request, session, current_app
 from flask_limiter import RateLimitExceeded
-from app.repositories.admin_repository import registrar_evento_seguridad
 from app.services import auth_service
 
 
@@ -22,7 +21,6 @@ def register():
     except RateLimitExceeded:
         from app.services.telemetry_service import track_security_event
         track_security_event("actividad_sospechosa", f"Rate limit en registro desde {request.remote_addr}")
-        registrar_evento_seguridad("Rate limit registro", f"IP: {request.remote_addr}")
         return jsonify({"success": False, "message": "Demasiadas solicitudes. Intenta más tarde."}), 429
     payload, status = auth_service.register_user(request.get_json() or {})
     return jsonify(payload), status
@@ -35,14 +33,11 @@ def login():
     except RateLimitExceeded:
         from app.services.telemetry_service import track_security_event
         track_security_event("actividad_sospechosa", f"Rate limit en login desde {request.remote_addr}")
-        registrar_evento_seguridad("Rate limit login", f"IP: {request.remote_addr}")
         return jsonify({"success": False, "message": "Demasiadas solicitudes. Intenta más tarde."}), 429
     payload, status, session_user = auth_service.login_user(request.get_json() or {}, request.remote_addr)
     if not session_user:
         from app.services.telemetry_service import track_security_event
         track_security_event("fallos_login", f"IP: {request.remote_addr}")
-        email = (request.get_json(silent=True) or {}).get("email", "sin email")
-        registrar_evento_seguridad("Login fallido", f"Email: {email} - IP: {request.remote_addr}")
     if session_user:
         session["usuario"] = session_user
         session["idUsuario"] = session_user["id"]

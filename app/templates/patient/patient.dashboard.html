@@ -119,229 +119,136 @@
                 </div>
             </div>
 
-            <!-- Accordion del Dashboard -->
-<<<<<<< HEAD
-            <div class="accordion accordion-responsive" id="accordionPatient">
+            <!-- Secciones del Dashboard -->
+            <div>
 
                 <!-- Estado Emocional (Mood + Evolución) -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingMood">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMood" aria-expanded="false" aria-controls="collapseMood">
-                            <i class="fas fa-smile-beam me-2"></i> Estado Emocional
-                        </button>
-                    </h2>
-                    <div id="collapseMood" class="accordion-collapse collapse" aria-labelledby="headingMood" data-bs-parent="#accordionPatient">
-                        <div class="accordion-body">
-=======
-            <div class="dashboard-sections">
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-smile-beam me-2"></i> Estado Emocional</h5>
+                    <div>
+                        <div class="dash-grid">
 
-                <!-- Estado Emocional (Mood + Evolución) -->
-                <div class="section-card mb-4">
-    <div class="section-card__header">
-        <i class="fas fa-smile-beam me-2"></i> Estado Emocional
-    </div>
-    <div class="section-card__body">
->>>>>>> main-local
-                            <div class="dash-grid">
-
-                                <!-- Mood Check-in -->
-                                <div>
-                                    <div class="dash-widget" id="moodWidget">
-                                        <div class="dash-widget__header">
-                                            <div class="dash-widget__title">
-                                                <i class="fas fa-smile-beam"></i> ¿Cómo te sientes hoy?
-                                            </div>
+                            <!-- Historial de Evolución Reciente -->
+                            <div>
+                                <div class="dash-widget" id="evolutionWidget">
+                                    <div class="dash-widget__header">
+                                        <div class="dash-widget__title">
+                                            <i class="fas fa-chart-line"></i> Historial de Evolución
                                         </div>
-                                        <div class="mood-grid" id="moodGrid">
-                                            <div>
-                                                <button class="mood-btn" data-mood="Muy bien" data-energy="5" title="Muy bien">😊</button>
-                                                <div class="mood-label">Muy bien</div>
-                                            </div>
-                                            <div>
-                                                <button class="mood-btn" data-mood="Bien" data-energy="4" title="Bien">🙂</button>
-                                                <div class="mood-label">Bien</div>
-                                            </div>
-                                            <div>
-                                                <button class="mood-btn" data-mood="Regular" data-energy="3" title="Regular">😐</button>
-                                                <div class="mood-label">Regular</div>
-                                            </div>
-                                            <div>
-                                                <button class="mood-btn" data-mood="Mal" data-energy="2" title="Mal">😟</button>
-                                                <div class="mood-label">Mal</div>
-                                            </div>
-                                            <div>
-                                                <button class="mood-btn" data-mood="Muy mal" data-energy="1" title="Muy mal">😢</button>
-                                                <div class="mood-label">Muy mal</div>
-                                            </div>
-                                        </div>
-                                        <div class="mood-status" id="moodStatus">Selecciona tu estado emocional</div>
+                                        <a href="aside-patient/evolution.html" class="dash-widget__link">Ver todo →</a>
                                     </div>
-                                </div>
-
-                                <!-- Evolución Reciente (Sparkline) -->
-                                <div>
-                                    <div class="dash-widget" id="evolucionWidget">
-                                        <div class="dash-widget__header">
-                                            <div class="dash-widget__title">
-                                                <i class="fas fa-chart-area"></i> Mi Evolución Reciente
-                                            </div>
-                                            <a href="aside-patient/evolution.html" class="dash-widget__link">Ver todo →</a>
-                                        </div>
-                                        <div class="sparkline-container" id="sparklineContainer">
-                                            <div class="sparkline-empty" id="sparklineLoading">
-                                                <div style="text-align:center;">
-                                                    <div class="skeleton" style="width:100%;height:80px;border-radius:8px;display:block;"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="sparkline-legend" id="sparklineLegend" style="display:none;">
-                                            <div class="sparkline-legend__item">
-                                                <div class="sparkline-legend__dot" style="background:#4CAF50;"></div> Muy bien
-                                            </div>
-                                            <div class="sparkline-legend__item">
-                                                <div class="sparkline-legend__dot" style="background:#8BC34A;"></div> Bien
-                                            </div>
-                                            <div class="sparkline-legend__item">
-                                                <div class="sparkline-legend__dot" style="background:#FFC107;"></div> Regular
-                                            </div>
-                                            <div class="sparkline-legend__item">
-                                                <div class="sparkline-legend__dot" style="background:#FF9800;"></div> Mal
-                                            </div>
-                                            <div class="sparkline-legend__item">
-                                                <div class="sparkline-legend__dot" style="background:#f44336;"></div> Muy mal
-                                            </div>
+                                    <div class="evolution-history" id="evolutionHistoryList">
+                                        <div style="text-align:center;padding:16px;">
+                                            <span class="skeleton" style="display:block;height:40px;border-radius:6px;"></span>
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
+
+                            <!-- Evolución Reciente (Sparkline) -->
+                            <div>
+                                <div class="dash-widget" id="evolucionWidget">
+                                    <div class="dash-widget__header">
+                                        <div class="dash-widget__title">
+                                            <i class="fas fa-chart-area"></i> Mi Evolución Reciente
+                                        </div>
+                                        <a href="aside-patient/evolution.html" class="dash-widget__link">Ver todo →</a>
+                                    </div>
+                                    <div class="sparkline-container" id="sparklineContainer">
+                                        <div class="sparkline-empty" id="sparklineLoading">
+                                            <div style="text-align:center;">
+                                                <div class="skeleton" style="width:100%;height:80px;border-radius:8px;display:block;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="sparkline-legend" id="sparklineLegend" style="display:none;">
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#4CAF50;"></div> Muy bien
+                                        </div>
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#8BC34A;"></div> Bien
+                                        </div>
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#FFC107;"></div> Regular
+                                        </div>
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#FF9800;"></div> Mal
+                                        </div>
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#f44336;"></div> Muy mal
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
-<<<<<<< HEAD
                     </div>
                 </div>
 
                 <!-- 3. Mis Citas -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingCitas">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCitas" aria-expanded="false" aria-controls="collapseCitas">
-                            <i class="fas fa-calendar-alt me-2"></i> Mis Citas
-                        </button>
-                    </h2>
-                    <div id="collapseCitas" class="accordion-collapse collapse" aria-labelledby="headingCitas" data-bs-parent="#accordionPatient">
-                        <div class="accordion-body">
-=======
-</div>
-
-
-                <!-- 3. Mis Citas -->
-                <div class="section-card mb-4">
-    <div class="section-card__header">
-        <i class="fas fa-calendar-alt me-2"></i> Mis Citas
-    </div>
-    <div class="section-card__body">
->>>>>>> main-local
-                            <div id="citasTimeline">
-                                <div class="citas-empty">
-                                    <span class="skeleton skeleton--text" style="display:block;margin-bottom:8px;"></span>
-                                    <span class="skeleton skeleton--text-sm" style="display:block;"></span>
-                                </div>
-                            </div>
-                            <div class="mt-3 text-end">
-                                <a href="aside-patient/agenda-quotes.html" class="dash-widget__link">Ver agenda completa →</a>
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-calendar-alt me-2"></i> Mis Citas</h5>
+                    <div class="dash-widget">
+                        <div id="citasTimeline">
+                            <div class="citas-empty">
+                                <span class="skeleton skeleton--text" style="display:block;margin-bottom:8px;"></span>
+                                <span class="skeleton skeleton--text-sm" style="display:block;"></span>
                             </div>
                         </div>
-<<<<<<< HEAD
+                        <div class="dash-widget__footer text-end mt-3 pt-3 border-top">
+                            <a href="aside-patient/agenda-quotes.html" class="dash-widget__link">Ver agenda completa →</a>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 4. Accesos Rápidos -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingQuick">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuick" aria-expanded="false" aria-controls="collapseQuick">
-                            <i class="fas fa-th-large me-2"></i> Accesos Rápidos
-                        </button>
-                    </h2>
-                    <div id="collapseQuick" class="accordion-collapse collapse" aria-labelledby="headingQuick" data-bs-parent="#accordionPatient">
-                        <div class="accordion-body">
-=======
-</div>
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-th-large me-2"></i> Accesos Rápidos</h5>
+                    <div>
+                        <div class="quick-grid">
+                            <a href="aside-patient/chatbot.html" class="quick-btn quick-btn--chatbot" id="qa-chatbot">
+                                <i class="fas fa-robot"></i>
+                                Chatbot
+                            </a>
+                            <a href="aside-patient/agenda-quotes.html" class="quick-btn quick-btn--agenda" id="qa-agenda">
+                                <i class="fas fa-calendar-alt"></i>
+                                Agenda
+                            </a>
+                            <a href="aside-patient/mensajes.html" class="quick-btn quick-btn--mensajes" id="qa-mensajes">
+                                <i class="fas fa-comments"></i>
+                                Mensajes
+                            </a>
+                            <a href="aside-patient/evolution.html" class="quick-btn quick-btn--evolucion" id="qa-evolucion">
+                                <i class="fas fa-chart-area"></i>
+                                Evolución
+                            </a>
+                            <a href="aside-patient/historia_clinica_paciente.html" class="quick-btn quick-btn--docs" id="qa-docs">
+                                <i class="fas fa-file-medical"></i>
+                                Documentos
+                            </a>
+                            <a href="aside-patient/my.profile.html" class="quick-btn quick-btn--perfil" id="qa-perfil">
+                                <i class="fas fa-user-circle"></i>
+                                Mi Perfil
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
-
-                <!-- 4. Accesos Rápidos -->
-                <div class="section-card mb-4">
-    <div class="section-card__header">
-        <i class="fas fa-th-large me-2"></i> Accesos Rápidos
-    </div>
-    <div class="section-card__body">
->>>>>>> main-local
-                            <div class="quick-grid">
-                                <a href="aside-patient/chatbot.html" class="quick-btn quick-btn--chatbot" id="qa-chatbot">
-                                    <i class="fas fa-robot"></i>
-                                    Chatbot
-                                </a>
-                                <a href="aside-patient/agenda-quotes.html" class="quick-btn quick-btn--agenda" id="qa-agenda">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    Agenda
-                                </a>
-                                <a href="aside-patient/mensajes.html" class="quick-btn quick-btn--mensajes" id="qa-mensajes">
-                                    <i class="fas fa-comments"></i>
-                                    Mensajes
-                                </a>
-                                <a href="aside-patient/evolution.html" class="quick-btn quick-btn--evolucion" id="qa-evolucion">
-                                    <i class="fas fa-chart-area"></i>
-                                    Evolución
-                                </a>
-                                <a href="aside-patient/historia_clinica_paciente.html" class="quick-btn quick-btn--docs" id="qa-docs">
-                                    <i class="fas fa-file-medical"></i>
-                                    Documentos
-                                </a>
-                                <a href="aside-patient/my.profile.html" class="quick-btn quick-btn--perfil" id="qa-perfil">
-                                    <i class="fas fa-user-circle"></i>
-                                    Mi Perfil
-                                </a>
+                <!-- 5. Consejo del Día -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2"></i> Consejo del Día</h5>
+                    <div>
+                        <section class="dash-tip" id="tipSection" style="margin-bottom:0;">
+                            <div class="dash-tip__icon">
+                                <i class="fas fa-lightbulb"></i>
                             </div>
-                        </div>
-<<<<<<< HEAD
+                            <div class="dash-tip__content">
+                                <div class="dash-tip__label">Consejo del día</div>
+                                <p class="dash-tip__text" id="tipText">Cargando...</p>
+                            </div>
+                        </section>
                     </div>
                 </div>
-
-                <!-- 5. Consejo del Día -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingTip">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTip" aria-expanded="false" aria-controls="collapseTip">
-                            <i class="fas fa-lightbulb me-2"></i> Consejo del Día
-                        </button>
-                    </h2>
-                    <div id="collapseTip" class="accordion-collapse collapse" aria-labelledby="headingTip" data-bs-parent="#accordionPatient">
-                        <div class="accordion-body">
-=======
-</div>
-
-
-                <!-- 5. Consejo del Día -->
-                <div class="section-card mb-4">
-    <div class="section-card__header">
-        <i class="fas fa-lightbulb me-2"></i> Consejo del Día
-    </div>
-    <div class="section-card__body">
->>>>>>> main-local
-                            <section class="dash-tip" id="tipSection" style="margin-bottom:0;">
-                                <div class="dash-tip__icon">
-                                    <i class="fas fa-lightbulb"></i>
-                                </div>
-                                <div class="dash-tip__content">
-                                    <div class="dash-tip__label">Consejo del día</div>
-                                    <p class="dash-tip__text" id="tipText">Cargando...</p>
-                                </div>
-                            </section>
-                        </div>
-<<<<<<< HEAD
-                    </div>
-                </div>
-=======
-</div>
-
->>>>>>> main-local
 
             </div>
 
@@ -394,11 +301,14 @@
 
         // ── Mood → Emoji/Color Maps ──
         const MOOD_EMOJIS = {
-            'Muy bien': '😊', 'Bien': '🙂', 'Regular': '😐', 'Mal': '😟', 'Muy mal': '😢'
+            'Muy bien': '😊', 'Bien': '🙂', 'Regular': '😐', 'Mal': '😟', 'Muy mal': '😢',
+            'feliz': '😊', 'tranquilo': '😌', 'estresado': '😰', 'ansioso': '😟', 'triste': '😢'
         };
         const MOOD_COLORS = {
             'Muy bien': '#4CAF50', 'Bien': '#8BC34A', 'Regular': '#FFC107',
-            'Mal': '#FF9800', 'Muy mal': '#f44336'
+            'Mal': '#FF9800', 'Muy mal': '#f44336',
+            'feliz': '#4CAF50', 'tranquilo': '#42A5F5', 'estresado': '#FF9800',
+            'ansioso': '#FFC107', 'triste': '#78909C'
         };
         const MOOD_LEVELS = { 'Muy bien': 5, 'Bien': 4, 'Regular': 3, 'Mal': 2, 'Muy mal': 1 };
 
@@ -553,69 +463,39 @@
             }
         }
 
-        // ── 6. Mood Check-in ──
-        function initMoodCheckin() {
-            const btns = document.querySelectorAll('.mood-btn');
-            const statusEl = document.getElementById('moodStatus');
-            let selectedMood = null;
+        // ── 6. Render Evolution History ──
+        function renderEvolutionHistory() {
+            const container = document.getElementById('evolutionHistoryList');
+            if (!container) return;
 
-            if (!statusEl) return;
+            if (!_evolucionData || _evolucionData.length === 0) {
+                container.innerHTML = '<div class="evolution-empty"><i class="fas fa-chart-area"></i><span>Aún no tienes registros de evolución</span></div>';
+                return;
+            }
 
-            btns.forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    if (selectedMood) return; // prevent double click
+            const last = _evolucionData[0];
+            const mood = last.estadoEmocional || 'Regular';
+            const emoji = MOOD_EMOJIS[mood] || '😐';
+            const color = MOOD_COLORS[mood] || '#FFC107';
+            const energia = Math.min(last.nivelEnergia || 3, 5);
+            const nota = last.notasPersonales || '';
 
-                    const mood = this.dataset.mood;
-                    const energy = parseInt(this.dataset.energy);
-
-                    // Visual feedback
-                    btns.forEach(b => b.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedMood = mood;
-                    statusEl.textContent = 'Registrando...';
-                    statusEl.className = 'mood-status';
-
-                    try {
-                        const res = await fetch('/api/evolucion', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({
-                                estadoEmocional: mood,
-                                nivelEnergia: energy,
-                                notasPersonales: `Check-in rápido desde dashboard: ${mood}`
-                            })
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            statusEl.textContent = `✨ ¡Registrado! Te sientes: ${mood}`;
-                            statusEl.className = 'mood-status mood-status--success';
-                            // Reload evolution data
-                            setTimeout(() => {
-                                loadStatEvolucion().then(renderSparkline);
-                            }, 800);
-                        } else {
-                            statusEl.textContent = data.message || 'Error al registrar';
-                            statusEl.className = 'mood-status';
-                            selectedMood = null;
-                            this.classList.remove('selected');
-                        }
-                    } catch (e) {
-                        statusEl.textContent = 'Error de conexión';
-                        statusEl.className = 'mood-status';
-                        selectedMood = null;
-                        this.classList.remove('selected');
-                    }
-
-                    // Allow new check-in after 5 seconds
-                    setTimeout(() => {
-                        selectedMood = null;
-                        statusEl.textContent = 'Selecciona tu estado emocional';
-                        statusEl.className = 'mood-status';
-                        btns.forEach(b => b.classList.remove('selected'));
-                    }, 5000);
-                });
-            });
+            container.innerHTML = `
+                <div class="evolution-last">
+                    <div class="evolution-last__emoji" style="background:${color}">${emoji}</div>
+                    <div class="evolution-last__body">
+                        <span class="evolution-last__mood">${mood}</span>
+                        ${nota ? `<div class="evolution-last__note">${nota}</div>` : ''}
+                        <div class="evolution-last__energy">
+                            <span class="evolution-last__energy-label">Energía</span>
+                            <div class="evolution-last__energy-track">
+                                <div class="evolution-last__energy-fill" style="width:${energia * 20}%;background:${color};"></div>
+                            </div>
+                            <span class="evolution-last__energy-value">${energia}/5</span>
+                        </div>
+                        <span class="evolution-last__date">${last.fecha || ''}</span>
+                    </div>
+                </div>`;
         }
 
         // ── 7. Sparkline Chart ──
@@ -791,25 +671,19 @@
         // ── 9. Tip of the Day ──
         function initTip() {
             const el = document.getElementById('tipText');
-            if (el) el.textContent = getRandomItem(TIPS);
-        }
-
-        // ── Accordion resize handler (re-render sparkline when expanded) ──
-        function initAccordionHandlers() {
-            const moodCollapse = document.getElementById('collapseMood');
-            if (moodCollapse) {
-                moodCollapse.addEventListener('shown.bs.collapse', function () {
-                    renderSparkline();
-                });
-            }
+            if (!el) return;
+            const today = new Date();
+            const start = new Date(today.getFullYear(), 0, 0);
+            const diff = today - start;
+            const dayOfYear = Math.floor(diff / 86400000);
+            const idx = dayOfYear % TIPS.length;
+            el.textContent = TIPS[idx];
         }
 
         // ── BOOT ──
         async function boot() {
             // Init static elements
             initTip();
-            initMoodCheckin();
-            initAccordionHandlers();
 
             // Get session data for hero
             const sessionData = await fetchJSON('/api/session');
@@ -829,8 +703,9 @@
                 loadCitasTimeline()
             ]);
 
-            // Render sparkline after evolution data is loaded
+            // Render sparkline and history after evolution data is loaded
             renderSparkline();
+            renderEvolutionHistory();
         }
 
         // Launch
@@ -841,56 +716,7 @@
         }
     })();
 
-    // Cerrar todos los paneles usando la API de Bootstrap
-    // para evitar race condition con su estado interno
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof bootstrap === 'undefined' || !bootstrap.Collapse) {
-            console.warn('Bootstrap Collapse no disponible — el acordeón no funcionará');
-            return;
-        }
-        document.querySelectorAll('.accordion-collapse.show').forEach(function(el) {
-            var instance = bootstrap.Collapse.getInstance(el);
-            if (instance) {
-                instance.hide();
-            } else {
-                new bootstrap.Collapse(el, { toggle: false }).hide();
-            }
-        });
-    });
 
-    // Cerrar acordeón al restaurar desde bfcache (botón atrás)
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-                var instance = bootstrap.Collapse.getInstance(el);
-                if (instance) {
-                    instance.hide();
-                } else {
-                    new bootstrap.Collapse(el, { toggle: false }).hide();
-                }
-            });
-        }
-    });
-
-    // Forzar que todos los acordeones inicien cerrados
-    document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-        el.classList.remove('show');
-        el.style.height = '';
-    });
-
-    // Cerrar acordeón al restaurar desde bfcache (botón atrás)
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-                var instance = bootstrap.Collapse.getInstance(el);
-                if (instance) {
-                    instance.hide();
-                } else {
-                    new bootstrap.Collapse(el, { toggle: false }).hide();
-                }
-            });
-        }
-    });
     </script>
 
 </body>

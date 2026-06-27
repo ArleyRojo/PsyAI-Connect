@@ -2,24 +2,11 @@ import os
 
 from flask import Blueprint, current_app, jsonify, request, session
 
-from app.repositories import documento_repository, mensajes_repository
-from app.services import professional_service
+from app.services import mensajes_service, professional_service
 from app.utils.auth import require_role, require_authenticated
 
 
 professional_bp = Blueprint("professional", __name__)
-
-
-def _ordenar_contactos_chat(contactos):
-    return sorted(
-        contactos,
-        key=lambda contacto: (
-            1 if contacto.get("noLeidos", 0) else 0,
-            contacto.get("ultimaFecha") or "",
-            contacto.get("ultimoIdMensaje") or 0,
-        ),
-        reverse=True,
-    )
 
 
 @professional_bp.route("/api/perfil/profesional/<int:id_usuario>", methods=["GET"])
@@ -183,9 +170,10 @@ def eliminar_documento_profesional(id_documento: int):
 @require_role("profesional")
 def descargar_documento_profesional(id_documento: int):
     from flask import send_file
-    doc = documento_repository.get_profesional_doc_by_id(id_documento, session.get("idUsuario"))
-    if not doc:
-        return jsonify({"success": False, "message": "Documento no encontrado"}), 404
+    from app.services import documento_service
+    doc, err, status = documento_service.get_profesional_doc_for_download(id_documento, session.get("idUsuario"))
+    if err:
+        return jsonify(err), status
     path = os.path.join(current_app.root_path, "static", doc["rutaArchivo"])
     if not os.path.exists(path):
         return jsonify({"success": False, "message": "Archivo no encontrado en el servidor"}), 404
@@ -196,17 +184,12 @@ def descargar_documento_profesional(id_documento: int):
 @require_role("profesional", "paciente")
 def descargar_documento_paciente(id_documento: int):
     from flask import send_file
-    user_id = session.get("idUsuario")
-    rol = session.get("rol")
-    doc = documento_repository.get_patient_doc_by_id_any(id_documento)
-    if not doc:
-        return jsonify({"success": False, "message": "Documento no encontrado"}), 404
-    if rol == "paciente" and doc["idPaciente"] != user_id:
-        return jsonify({"success": False, "message": "No autorizado"}), 403
-    if rol == "profesional":
-        aut = documento_repository.get_autorizacion(id_documento, user_id)
-        if not aut or aut.get("revocado"):
-            return jsonify({"success": False, "message": "No autorizado"}), 403
+    from app.services import documento_service
+    doc, err, status = documento_service.get_patient_doc_for_download(
+        id_documento, session.get("idUsuario"), session.get("rol")
+    )
+    if err:
+        return jsonify(err), status
     path = os.path.join(current_app.root_path, "static", doc["rutaArchivo"])
     if not os.path.exists(path):
         return jsonify({"success": False, "message": "Archivo no encontrado en el servidor"}), 404
@@ -220,48 +203,19 @@ def chat_listar_pacientes():
     """
     Devuelve los pacientes registrados con ultimo mensaje y no-leidos.
     """
-    from app.repositories import professional_repository
-
     id_profesional = session.get("idUsuario")
-    pacientes = professional_repository.list_patients_for_chat()
-    resultado = []
-
-    for paciente in pacientes:
-        ultimo = mensajes_repository.get_ultimo_mensaje(id_profesional, paciente["idUsuario"])
-        no_leidos = mensajes_repository.contar_no_leidos(id_profesional, paciente["idUsuario"])
-        resultado.append({
-            **paciente,
-            "ultimoMensaje": ultimo["mensaje"][:60] if ultimo else None,
-            "ultimaFecha": str(ultimo["fecha"]) if ultimo else None,
-            "ultimoIdMensaje": ultimo["idMensaje"] if ultimo else 0,
-            "ultimoEmisor": ultimo["idEmisor"] if ultimo else None,
-            "noLeidos": no_leidos,
-        })
-
-    from app.services.telemetry_service import get_active_user_ids
-    online_ids = set(get_active_user_ids())
-    for r in resultado:
-        r["isOnline"] = r.get("idUsuario") in online_ids
-    resultado = _ordenar_contactos_chat(resultado)
+    pacientes = professional_service.list_patients_for_chat()
+    resultado = mensajes_service.get_contactos_con_mensajes(id_profesional, pacientes)
     return jsonify({"success": True, "pacientes": resultado}), 200
 
 
 @professional_bp.route("/api/profesional/chat/mensajes", methods=["GET"])
 @require_role("paciente", "profesional")
 def chat_get_mensajes_profesional():
-    id_profesional = session.get("idUsuario")
     id_paciente = request.args.get("receptor", type=int)
-    desde_id = request.args.get("desde", default=0, type=int)
-
     if not id_paciente:
         return jsonify({"success": False, "message": "Falta receptor"}), 400
-
-    mensajes_repository.marcar_leidos(id_profesional, id_paciente)
-    rows = mensajes_repository.get_conversacion(id_profesional, id_paciente, desde_id)
-    msgs = [
-        {**row, "esMio": row["idEmisor"] == id_profesional, "fecha": str(row["fecha"])}
-        for row in rows
-    ]
+    msgs = mensajes_service.get_mensajes(session.get("idUsuario"), id_paciente, request.args.get("desde", default=0, type=int))
     return jsonify({"success": True, "mensajes": msgs}), 200
 
 
@@ -277,5 +231,5 @@ def chat_enviar_profesional():
     if len(mensaje) > 2000:
         return jsonify({"success": False, "message": "Mensaje demasiado largo"}), 400
 
-    id_msg = mensajes_repository.enviar_mensaje(session.get("idUsuario"), receptor, mensaje)
+    id_msg = mensajes_service.enviar_mensaje(session.get("idUsuario"), receptor, mensaje)
     return jsonify({"success": True, "idMensaje": id_msg}), 201

@@ -1,4 +1,3 @@
-
 import secrets
 import time
 from app.repositories import admin_repository
@@ -134,3 +133,67 @@ def get_logs(limit=None):
     logs = admin_repository.get_logs(limit=limit)
     logs.sort(key=lambda x: x["fecha"], reverse=True)
     return {"success": True, "logs": logs}, 200
+
+
+def get_chatbot_historial(nivel="", search=""):
+    def _serialize_fecha(valor):
+        if valor is None:
+            return None
+        if hasattr(valor, "isoformat"):
+            return valor.isoformat()
+        return str(valor)
+
+    try:
+        rows = admin_repository.get_chatbot_historial_rows()
+        stats = admin_repository.get_chatbot_historial_stats()
+    except Exception as e:
+        estr = str(e)
+        if "1146" in estr or "doesn't exist" in estr:
+            return {
+                "success": False,
+                "message": "La vista vistahistorialchatbot no existe en la BD. "
+                           "Corre las migraciones: python -m app.database.migrations",
+                "pacientes": [],
+                "stats": {"total": 0, "alto": 0, "medio": 0, "bajo": 0},
+            }, 200
+        return {"success": False, "message": estr}, 500
+
+    pacientes_map = {}
+    for row in rows:
+        key = row.get("idPaciente") or row["nombre"]
+        if key not in pacientes_map:
+            pacientes_map[key] = {
+                "nombre": row["nombre"] or "Paciente",
+                "idPaciente": row.get("idPaciente"),
+                "total_mensajes": 0,
+                "ultimo_mensaje": None,
+                "nivel_max": "Bajo",
+                "mensajes": [],
+            }
+        p = pacientes_map[key]
+        p["total_mensajes"] += 1
+        rnivel = row.get("nivelEmocionalDetectado", "")
+        if rnivel == "Alto":
+            p["nivel_max"] = "Alto"
+        elif rnivel == "Medio" and p["nivel_max"] != "Alto":
+            p["nivel_max"] = "Medio"
+        p["mensajes"].append({
+            "mensajeUsuario": row.get("mensajeUsuario"),
+            "respuestaChatbot": row.get("respuestaChatbot"),
+            "nivelEmocionalDetectado": rnivel,
+            "fecha": _serialize_fecha(row.get("fecha")),
+        })
+        fecha = row.get("fecha")
+        if fecha:
+            fecha_str = fecha.isoformat() if hasattr(fecha, "isoformat") else str(fecha)
+            if p["ultimo_mensaje"] is None or fecha_str > p["ultimo_mensaje"]:
+                p["ultimo_mensaje"] = fecha_str
+
+    pacientes = list(pacientes_map.values())
+    if nivel:
+        pacientes = [p for p in pacientes if p["nivel_max"] == nivel]
+    if search:
+        s = search.lower()
+        pacientes = [p for p in pacientes if s in p["nombre"].lower()]
+
+    return {"success": True, "pacientes": pacientes, "stats": stats}, 200

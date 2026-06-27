@@ -12,6 +12,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await cargarPerfil(usuario.id);
     inicializarUploadFoto();
+
+    const modalEditar = document.getElementById('modalEditarPerfil');
+    if (modalEditar) {
+        modalEditar.addEventListener('show.bs.modal', () => {
+            document.getElementById('editGeneroProf').value = document.querySelector('[data-field="genero"]')?.textContent?.trim() || 'No especificado';
+        });
+    }
 });
 
 function setField(campo, valor) {
@@ -31,6 +38,7 @@ async function cargarPerfil(idUsuario) {
             const p = data.perfil;
             setField('nombre',       p.nombre       || 'Sin nombre');
             setField('especialidad', p.especialidad || 'No especificada');
+            setField('genero',       p.genero       || 'No especificado');
             setField('email',        p.email        || 'Sin correo');
             setField('licencia',     p.licencia     || 'Sin licencia');
             setField('experiencia',  p.experiencia  || 'Sin experiencia registrada');
@@ -38,10 +46,10 @@ async function cargarPerfil(idUsuario) {
             const headerSpan = document.querySelector('.user-info span');
             if (headerSpan) headerSpan.textContent = 'Dr(a). ' + (p.nombre || '');
 
-            // Pre-llenar modal
             document.getElementById('editEspecialidad').value = p.especialidad || '';
             document.getElementById('editLicencia').value     = p.licencia     || '';
             document.getElementById('editExperiencia').value  = p.experiencia  || '';
+            document.getElementById('editGeneroProf').value   = p.genero       || 'No especificado';
 
         } else {
             console.error('Error perfil:', data.message);

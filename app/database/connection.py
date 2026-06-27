@@ -26,7 +26,7 @@ def init_pool(app):
         user=cfg.get("DB_USER", "root"),
         password=cfg.get("DB_PASSWORD") or None,
         database=cfg.get("DB_NAME", "psyai_connect"),
-        autocommit=True,
+        autocommit=False,
         charset="utf8mb4",
         use_pure=use_pure,
     )

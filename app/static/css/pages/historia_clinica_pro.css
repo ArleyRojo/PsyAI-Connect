@@ -278,14 +278,7 @@ nav.breadcrumb .sep { color: var(--gray-300); }
   transition: opacity 0.15s, transform 0.15s;
 }
 .btn-upload:hover { opacity: 0.88; transform: translateY(-1px); }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 .btn-upload i { display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1; }
->>>>>>> 629d7c0 (avances)
-=======
-.btn-upload i { display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1; }
->>>>>>> main-local
 #file-input { display: none; }
 
 /* ── FORM ── */
@@ -643,12 +636,6 @@ html.dark-mode .toast {
   color: var(--dm-text1);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* ── RESPONSIVE ── */
-=======
-=======
->>>>>>> main-local
 /* ── Ficon icons ── */
 html.dark-mode .ficon { border: 1px solid var(--dm-border); }
 html.dark-mode .ficon.pdf   { background: rgba(197,34,31,0.25); color: #fca5a5; }
@@ -763,16 +750,8 @@ html.dark-mode .btn-back:hover {
 }
 
 /* ── Responsive ── */
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
 @media (max-width: 768px) {
   .grid-2 { grid-template-columns: 1fr; }
   .patient-banner { flex-wrap: wrap; }
   .file-row { flex-wrap: wrap; gap: 8px; }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main-local

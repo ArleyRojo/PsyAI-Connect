@@ -208,12 +208,10 @@ async function cargarCitasPaciente() {
     _citasHistorialGlobal = historial;
     
     if (btnHist) {
-      if (historial.length > 0) {
-        btnHist.style.display = 'inline-block';
-        if (contadorHist) contadorHist.textContent = historial.length;
-      } else {
-        btnHist.style.display = 'inline-block';
-        if (contadorHist) contadorHist.textContent = '0';
+      btnHist.style.display = 'inline-flex';
+      if (contadorHist) {
+        contadorHist.textContent = historial.length;
+        contadorHist.setAttribute('data-count', historial.length);
       }
     }
 

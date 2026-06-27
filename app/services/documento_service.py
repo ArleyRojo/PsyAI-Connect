@@ -181,3 +181,23 @@ def toggle_autorizacion(documento_id, patient_id, professional_id):
     else:
         documento_repository.set_autorizacion(documento_id, professional_id, revocado=0)
         return {"success": True, "autorizado": True, "message": "Acceso concedido"}
+
+
+def get_profesional_doc_for_download(id_documento, professional_id):
+    doc = documento_repository.get_profesional_doc_by_id(id_documento, professional_id)
+    if not doc:
+        return None, {"success": False, "message": "Documento no encontrado"}, 404
+    return doc, None, 200
+
+
+def get_patient_doc_for_download(id_documento, user_id, rol):
+    doc = documento_repository.get_patient_doc_by_id_any(id_documento)
+    if not doc:
+        return None, {"success": False, "message": "Documento no encontrado"}, 404
+    if rol == "paciente" and doc["idPaciente"] != user_id:
+        return None, {"success": False, "message": "No autorizado"}, 403
+    if rol == "profesional":
+        aut = documento_repository.get_autorizacion(id_documento, user_id)
+        if not aut or aut.get("revocado"):
+            return None, {"success": False, "message": "No autorizado"}, 403
+    return doc, None, 200

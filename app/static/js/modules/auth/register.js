@@ -5,7 +5,7 @@
 
 /* ═══════════════════════════════════════════
    CAMPOS y su peso en el progreso global
-   5 campos × 20% = 100%
+   6 campos × ~16.7% = 100%
 ═══════════════════════════════════════════ */
 const FIELDS = [
     {
@@ -21,6 +21,14 @@ const FIELDS = [
     {
         id: 'genero',
         check: () => document.getElementById('genero').value !== '',
+        step: 1
+    },
+    {
+        id: 'edad',
+        check: () => {
+            const edad = parseInt(document.getElementById('edad').value, 10);
+            return !isNaN(edad) && edad >= 1 && edad <= 120;
+        },
         step: 1
     },
     {
@@ -98,6 +106,7 @@ function validateStep1() {
     const nombre = document.getElementById('nombre').value.trim();
     const email  = document.getElementById('email').value.trim();
     const genero = document.getElementById('genero').value;
+    const edad   = parseInt(document.getElementById('edad').value, 10);
 
     if (!nombre || nombre.length < 2) {
         mostrarToast('¿Cómo te llamamos? Ingresa tu nombre completo para continuar.', 'warning');
@@ -109,6 +118,10 @@ function validateStep1() {
     }
     if (!genero) {
         mostrarToast('Selecciona tu género para completar tu perfil.', 'warning');
+        return false;
+    }
+    if (!edad || edad < 1 || edad > 120) {
+        mostrarToast('Ingresa tu edad para completar tu perfil. Debe ser un número entre 1 y 120.', 'warning');
         return false;
     }
     return true;
@@ -182,11 +195,13 @@ function buildRegResumen() {
     const nombre = document.getElementById('nombre').value.trim() || '—';
     const email  = document.getElementById('email').value.trim()  || '—';
     const genero = document.getElementById('genero').value        || '—';
+    const edad   = document.getElementById('edad').value.trim()   || '—';
     document.getElementById('regResumen').innerHTML = `
         <div style="display:grid;gap:6px;">
             <div><strong>Nombre:</strong> ${nombre}</div>
             <div><strong>Correo:</strong> ${email}</div>
             <div><strong>Género:</strong> ${genero}</div>
+            <div><strong>Edad:</strong> ${edad}</div>
         </div>`;
 }   
 
@@ -197,6 +212,7 @@ async function submitRegister() {
     const nombre           = document.getElementById('nombre').value.trim();
     const email            = document.getElementById('email').value.trim();
     const genero           = document.getElementById('genero').value;
+    const edad             = parseInt(document.getElementById('edad').value, 10);
     const password         = document.getElementById('password').value;
     const confirm_password = document.getElementById('confirm-password').value;
 
@@ -209,7 +225,7 @@ async function submitRegister() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ nombre, email, genero, password, confirm_password })
+            body: JSON.stringify({ nombre, email, genero, edad, password, confirm_password })
         });
         const data = await res.json();
 

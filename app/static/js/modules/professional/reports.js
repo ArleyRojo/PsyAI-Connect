@@ -1,29 +1,13 @@
 let reportesData = [];
 let reportesEliminadosData = [];
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-document.addEventListener('DOMContentLoaded', function() {
-=======
-=======
->>>>>>> main-local
 let pacientesFiltroData = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("filtroPaciente")?.addEventListener("change", filtrarReportes);
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
     cargarReportes();
     cargarPacientesFiltro();
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> main-local
 function normalizarTexto(valor) {
     return String(valor ?? '')
         .trim()
@@ -105,37 +89,17 @@ function syncPacienteSelects(pacientes = [], reportes = []) {
     }
 }
 
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
 async function cargarReportes() {
     const tbody = document.getElementById("tablaReportes");
     if (!tbody) return;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
-=======
     tbody.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
->>>>>>> 629d7c0 (avances)
-=======
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
->>>>>>> main-local
 
     try {
         const res = await fetch("/api/reportes/profesional", { credentials: "include" });
 
         if (res.status === 401) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Inicia sesión para ver reportes</td></tr>';
-=======
             tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Inicia sesión para ver reportes</td></tr>';
->>>>>>> 629d7c0 (avances)
-=======
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Inicia sesión para ver reportes</td></tr>';
->>>>>>> main-local
             return;
         }
 
@@ -153,20 +117,6 @@ async function cargarReportes() {
         // Actualizar contador de eliminados
         document.getElementById("statEliminados").textContent = reportesEliminadosData.length;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        // Tabla principal
-        if (!data.success || !data.reportes || data.reportes.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-folder-open me-2"></i>No hay reportes generados aún</td></tr>';
-            reportesData = [];
-            return;
-        }
-
-        reportesData = data.reportes;
-        renderizarReportes(reportesData);
-=======
-=======
->>>>>>> main-local
         reportesData = data.reportes || [];
         syncPacienteSelects(data.pacientes || pacientesFiltroData, reportesData);
 
@@ -179,10 +129,6 @@ async function cargarReportes() {
         }
 
         filtrarReportes();
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
 
     } catch(e) {
         console.error("Error cargando reportes:", e);
@@ -237,19 +183,9 @@ function renderizarReportes(reportes) {
     if (!tbody) return;
 
     if (!reportes || reportes.length === 0) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-folder-open me-2"></i>No hay reportes</td></tr>';
-=======
         const filtro = document.getElementById("filtroPaciente")?.value || '';
         const mensaje = filtro ? 'No hay reportes generados para este paciente' : 'No hay reportes';
         tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-folder-open me-2"></i>${mensaje}</td></tr>`;
->>>>>>> 629d7c0 (avances)
-=======
-        const filtro = document.getElementById("filtroPaciente")?.value || '';
-        const mensaje = filtro ? 'No hay reportes generados para este paciente' : 'No hay reportes';
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-folder-open me-2"></i>${mensaje}</td></tr>`;
->>>>>>> main-local
         return;
     }
 
@@ -263,15 +199,6 @@ function renderizarReportes(reportes) {
                 <td>${r.tipoReporte || '—'}</td>
                 <td><span class="badge-estado ${estadoClass}">${r.estado || '—'}</span></td>
                 <td>
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editarReporte(${r.idReporte})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarReporte(${r.idReporte})">
-=======
-=======
->>>>>>> main-local
                     <button class="btn btn-sm btn-outline-secondary me-1 btn-action btn-view" title="Ver reporte" aria-label="Ver reporte" onclick="verReporte(${r.idReporte})">
                         <i class="fas fa-eye"></i>
                     </button>
@@ -279,10 +206,6 @@ function renderizarReportes(reportes) {
                         <i class="fas fa-edit"></i>
                     </button>
                     <button class="btn btn-sm btn-outline-danger btn-action btn-delete" title="Eliminar reporte" aria-label="Eliminar reporte" onclick="eliminarReporte(${r.idReporte})">
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -297,35 +220,12 @@ function getEstadoClass(estado) {
 }
 
 async function cargarPacientesFiltro() {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const select = document.getElementById("paciente");
-    const filtroSelect = document.getElementById("filtroPaciente");
-    if (!select && !filtroSelect) return;
-
-    try {
-        const res = await fetch("/api/pacientes", { credentials: "include" });
-        const data = await res.json();
-        if (!data.success || !data.pacientes) return;
-
-        const optionsHTML = '<option value="">Todos los pacientes</option>' +
-            data.pacientes.map(p => `<option value="${p.idUsuario}">${p.nombre}</option>`).join('');
-
-        if (select) select.innerHTML = optionsHTML;
-        if (filtroSelect) filtroSelect.innerHTML = optionsHTML;
-=======
-=======
->>>>>>> main-local
     try {
         const res = await fetch("/api/profesional/pacientes", { credentials: "include" });
         const data = await res.json();
         if (!data.success || !data.pacientes) return;
 
         syncPacienteSelects(data.pacientes, reportesData);
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
     } catch(e) {
         console.error("Error cargando pacientes:", e);
     }
@@ -385,16 +285,6 @@ async function generarReporte() {
 }
 
 function filtrarReportes() {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const filtro = document.getElementById("filtroPaciente").value;
-    if (!filtro) { renderizarReportes(reportesData); return; }
-    renderizarReportes(reportesData.filter(r => r.idPaciente == filtro));
-}
-
-=======
-=======
->>>>>>> main-local
     const filtroSelect = document.getElementById("filtroPaciente");
     const filtro = filtroSelect?.value || '';
     if (!filtro) {
@@ -447,10 +337,6 @@ window.verReporte = function(idReporte) {
     new bootstrap.Modal(document.getElementById("modalVerReporte")).show();
 };
 
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
 window.editarReporte = function(idReporte) {
     const reporte = reportesData.find(r => r.idReporte === idReporte);
     if (!reporte) return;
@@ -523,15 +409,7 @@ document.getElementById("btnConfirmarEliminar").addEventListener("click", async 
                 actualizarTablaEliminados(reportesEliminadosData);
                 document.getElementById("statEliminados").textContent = reportesEliminadosData.length;
                 reportesData = reportesData.filter(r => r.idReporte !== idReporte);
-<<<<<<< HEAD
-<<<<<<< HEAD
-                renderizarReportes(reportesData);
-=======
                 filtrarReportes();
->>>>>>> 629d7c0 (avances)
-=======
-                filtrarReportes();
->>>>>>> main-local
             }
             
             localStorage.setItem('psyai_dashboard_update', Date.now());
@@ -543,12 +421,4 @@ document.getElementById("btnConfirmarEliminar").addEventListener("click", async 
     } catch(e) {
         PsyAIAlerts.error('Error', 'Error de conexión');
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 629d7c0 (avances)
-=======
-});
->>>>>>> main-local

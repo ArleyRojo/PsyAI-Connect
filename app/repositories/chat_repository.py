@@ -66,3 +66,70 @@ def count_today_messages(patient_id):
         )
         row = cursor.fetchone()
         return row["total"] if row else 0
+
+
+def get_assigned_professionals(patient_id):
+    """Retorna lista de idProfesional asignados a un paciente."""
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(
+            "SELECT idProfesional FROM PacientesProfesional WHERE idPaciente = %s",
+            (patient_id,),
+        )
+        return [row["idProfesional"] for row in cursor.fetchall() if row.get("idProfesional")]
+
+
+def get_all_professional_ids():
+    """Retorna todos los idUsuario con rol profesional."""
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute("SELECT idUsuario FROM Register WHERE rol = 'profesional'")
+        return [row["idUsuario"] for row in cursor.fetchall()]
+
+
+def get_patient_name(patient_id):
+    """Retorna el nombre de un paciente por su id."""
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(
+            "SELECT nombre FROM Register WHERE idUsuario = %s",
+            (patient_id,),
+        )
+        row = cursor.fetchone()
+        return row["nombre"] if row else None
+
+
+def notificacion_reciente_existe(patient_name, tipo, horas=12):
+    """True si ya existe una notificación de ese tipo sobre ese paciente en las últimas N horas."""
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(
+            """
+            SELECT 1 FROM Notificaciones
+            WHERE tipo = %s
+              AND mensaje LIKE %s
+              AND fecha >= NOW() - INTERVAL %s HOUR
+            LIMIT 1
+            """,
+            (tipo, f"%{patient_name}%", horas),
+        )
+        return cursor.fetchone() is not None
+
+
+def get_low_risk_counts_for_professional(professional_id, days=7):
+    """Cuenta mensajes de riesgo bajo del chatbot por paciente en los últimos N días."""
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(
+            """
+            SELECT c.idPaciente, COUNT(*) as total
+            FROM conversacioneschatbot c
+            JOIN Register r ON r.idUsuario = c.idPaciente AND r.rol = 'paciente'
+            LEFT JOIN PacientesProfesional pp ON pp.idPaciente = c.idPaciente AND pp.idProfesional = %s
+            LEFT JOIN Citas cit ON cit.idPaciente = c.idPaciente AND cit.idProfesional = %s
+            WHERE c.nivelEmocionalDetectado = 'Bajo'
+              AND c.fecha >= DATE_SUB(NOW(), INTERVAL %s DAY)
+              AND (
+                pp.idRegistro IS NOT NULL
+                OR (cit.idCita IS NOT NULL AND LOWER(COALESCE(cit.estado, '')) != 'cancelada')
+              )
+            GROUP BY c.idPaciente
+            """,
+            (professional_id, professional_id, days),
+        )
+        return {str(row["idPaciente"]): row["total"] for row in cursor.fetchall()}

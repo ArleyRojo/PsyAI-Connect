@@ -8,11 +8,12 @@ logger = logging.getLogger(__name__)
 
 
 def send_recovery_email(recipient_email, recovery_link):
-    api_key = os.getenv("RESEND_API_KEY")
-    sender = os.getenv("SMTP_FROM", "onboarding@resend.dev")
+    api_key = os.getenv("BREVO_API_KEY")
+    sender_email = os.getenv("BREVO_FROM", "manuelrojasq21@gmail.com")
+    sender_name = os.getenv("BREVO_FROM_NAME", "PsyAI Connect")
 
     if not api_key:
-        logger.warning("Resend no configurado. Falta RESEND_API_KEY.")
+        logger.warning("Brevo no configurado. Falta BREVO_API_KEY.")
         return False
 
     body_html = f"""
@@ -33,19 +34,20 @@ def send_recovery_email(recipient_email, recovery_link):
     """
 
     payload = {
-        "from": sender,
-        "to": [recipient_email],
+        "sender": {"name": sender_name, "email": sender_email},
+        "to": [{"email": recipient_email}],
         "subject": "Recuperaci\u00f3n de contrase\u00f1a \u2014 PsyAI Connect",
-        "html": body_html,
+        "htmlContent": body_html,
     }
 
     try:
         req = urlrequest.Request(
-            "https://api.resend.com/emails",
+            "https://api.brevo.com/v3/smtp/email",
             data=json.dumps(payload).encode("utf-8"),
             headers={
-                "Authorization": f"Bearer {api_key}",
+                "api-key": api_key,
                 "Content-Type": "application/json",
+                "Accept": "application/json",
             },
             method="POST",
         )
@@ -54,15 +56,15 @@ def send_recovery_email(recipient_email, recovery_link):
             response_text = resp.read().decode("utf-8", errors="ignore")
 
         if status_code in (200, 201):
-            logger.info(f"Correo de recuperaci\u00f3n enviado a {recipient_email}")
+            logger.info(f"Correo de recuperaci\u00f3n enviado a {recipient_email} v\u00eda Brevo")
             return True
 
-        print(f"[RESEND ERROR] Status {status_code}: {response_text}", flush=True)
+        print(f"[BREVO ERROR] Status {status_code}: {response_text}", flush=True)
         return False
     except HTTPError as e:
         response_text = e.read().decode("utf-8", errors="ignore")
-        print(f"[RESEND ERROR] HTTP {e.code}: {response_text}", flush=True)
+        print(f"[BREVO ERROR] HTTP {e.code}: {response_text}", flush=True)
         return False
     except (URLError, TimeoutError, OSError) as e:
-        print(f"[RESEND ERROR] {e}", flush=True)
+        print(f"[BREVO ERROR] {e}", flush=True)
         return False

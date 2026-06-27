@@ -805,6 +805,7 @@ button:focus-visible,
   .tipo-badge.cita       { background: #e8f5e9; color: #2e7d32; }
   .tipo-badge.recordatorio { background: #fff8e1; color: #f57f17; }
   .tipo-badge.alerta     { background: #ffebee; color: #c62828; }
+  .tipo-badge.seguimiento { background: #fff3e0; color: #e65100; }
   .tipo-badge.info       { background: #e0f2f1; color: #00695c; }
 
   /* ── Estado badge ── */
@@ -1712,13 +1713,43 @@ button:focus-visible,
 .btn-primary-gradient i { margin-right: 8px; }
 
 .btn-outline-muted {
-    padding: 7px 16px; border-radius: 10px;
+    padding: 8px 20px; border-radius: 10px;
     background: #fff; border: 1.5px solid #E2E8F0;
     color: #4A5568; font-size: 0.82rem; font-weight: 600;
-    transition: all 0.2s; cursor: pointer;
+    transition: all 0.25s; cursor: pointer;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    display: inline-flex; align-items: center; gap: 6px;
 }
 .btn-outline-muted:hover {
     border-color: #0D47A1; color: #0D47A1;
-    background: #E8F1FF;
+    background: #E8F1FF; transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13,71,161,0.15);
+}
+.btn-outline-muted:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.btn-outline-muted .badge-outline-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #0D47A1;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    transition: all 0.25s;
+}
+.btn-outline-muted:hover .badge-outline-count {
+    background: #fff;
+    color: #0D47A1;
+}
+.btn-outline-muted .badge-outline-count[data-count="0"] {
+    opacity: 0.4;
 }

@@ -138,3 +138,73 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+/* ──────────────────────────────
+   FONDO ANIMADO — PARTÍCULAS
+   ────────────────────────────── */
+(function () {
+    const canvas = document.getElementById('bgCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 0;
+
+    const LIGHT = [[144,202,249],[100,181,246],[179,229,252],[33,150,243],[207,226,255],[66,165,245],[21,101,192]];
+    const DARK  = [[74,134,240],[30,80,160],[15,52,120],[100,160,255],[50,110,210],[20,70,180],[10,40,100]];
+
+    function isDark() { return document.documentElement.classList.contains('dark-mode'); }
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+
+    function mkParticle(startY) {
+        const pal = isDark() ? DARK : LIGHT;
+        const c   = pal[Math.floor(Math.random() * pal.length)];
+        const op  = isDark() ? (0.22 + Math.random() * 0.32) : (0.30 + Math.random() * 0.38);
+        const r   = 5 + Math.random() * 18;
+        return {
+            x: 10 + Math.random() * Math.max(W - 20, 100),
+            y: startY !== undefined ? startY : H + r,
+            r,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: -(0.35 + Math.random() * 0.65),
+            color: `rgba(${c[0]},${c[1]},${c[2]},${op.toFixed(2)})`
+        };
+    }
+
+    let particles = [];
+    function init() {
+        resize();
+        particles = [];
+        for (let i = 0; i < 45; i++) {
+            particles.push(mkParticle(Math.random() * H));
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (let p of particles) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+        }
+    }
+
+    function update() {
+        for (let p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.y + p.r < 0 || p.x + p.r < 0 || p.x - p.r > W) {
+                Object.assign(p, mkParticle());
+            }
+        }
+    }
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', () => { resize(); });
+    init();
+    loop();
+})();

@@ -750,6 +750,14 @@
 .psyai-modal__input:focus {
     border-color: #1565C0; box-shadow: 0 0 0 3px rgba(21,101,192,0.1); background: #fff;
 }
+.profile-readonly-field,
+.profile-readonly-field:focus {
+    background: #eef2f7 !important;
+    color: #5f7289;
+    cursor: not-allowed;
+    box-shadow: none;
+    border-color: #dbe3ec;
+}
 .psyai-modal__footer {
     display: flex; justify-content: flex-end; gap: 10px;
     padding: 14px 24px 20px; background: #fff; border-top: 1px solid #f0f4fa;
@@ -9773,11 +9781,6 @@ html.dark-mode .chat-empty-icon { background: var(--dm-elevated) !important; col
 html.dark-mode .icon-plus { background: rgba(46, 125, 50, 0.2) !important; color: #a5d6a7 !important; }
 html.dark-mode .icon-schedule { background: rgba(198, 40, 40, 0.2) !important; color: #ef9a9a !important; }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> main-local
 /* ============================================================
    REPORTS HTML PREMIUM DESIGN OVERRIDES
    ============================================================ */
@@ -11573,7 +11576,38 @@ body.aside-professional .reports-page .reports-generator .form-select,
 body.aside-professional .reports-page .report-filter-select {
     border-radius: 12px !important;
 }
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
+
+/* Indicador de riesgo bajo en evolución del paciente (chatbot) */
+.riesgo-bajo-resumen {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 10px;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    color: #6d4c00;
+    font-size: 0.875rem;
+}
+.riesgo-bajo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 0.35rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    color: #f57f17;
+    font-size: 0.72rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+.riesgo-bajo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffb300;
+    flex-shrink: 0;
+    display: inline-block;
+}

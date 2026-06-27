@@ -134,12 +134,7 @@ def save_risk_terms_only(risk_terms_str, admin_id):
 
 
 def clear_risk_terms(admin_id):
-    from app.utils.db import db_cursor
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            "UPDATE ChatbotConfig SET risk_terms = '', fecha_actualizacion = NOW() WHERE id = 1"
-        )
-        conn.commit()
+    chatbot_config_repository.clear_risk_terms(admin_id)
     return {"success": True, "message": "Palabras de riesgo eliminadas"}, 200
 
 
@@ -150,16 +145,8 @@ def get_detected_risk_words():
     Returns list: [{palabra, nivel, count, pacientes}, ...]
     If view doesn't exist, returns [].
     """
-    from app.utils.db import db_cursor
     try:
-        with db_cursor(dictionary=True) as (_, cursor):
-            cursor.execute("""
-                SELECT nombre, palabrasRiesgoDetectadas, nivelEmocionalDetectado
-                FROM vistahistorialchatbot
-                WHERE palabrasRiesgoDetectadas IS NOT NULL
-                  AND palabrasRiesgoDetectadas != ''
-            """)
-            rows = cursor.fetchall()
+        rows = chatbot_config_repository.get_historial_palabras_riesgo()
     except Exception as e:
         estr = str(e)
         if "1146" in estr or "doesn't exist" in estr:

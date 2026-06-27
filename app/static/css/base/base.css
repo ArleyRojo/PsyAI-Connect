@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 ﻿/* =======================================================
-=======
-/* =======================================================
->>>>>>> main-local
     BASE.CSS â€“ PsyAI Connect  Â·  v5
     Paleta raÃ­z: #90CAF9 Â· #0D47A1 Â· #E3F2FD
     ======================================================= */
@@ -1062,6 +1058,7 @@ button:focus-visible,
   .tipo-badge.cita       { background: #e8f5e9; color: #2e7d32; }
   .tipo-badge.recordatorio { background: #fff8e1; color: #f57f17; }
   .tipo-badge.alerta     { background: #ffebee; color: #c62828; }
+  .tipo-badge.seguimiento { background: #fff3e0; color: #e65100; }
   .tipo-badge.info       { background: #e0f2f1; color: #00695c; }
 
   /* â”€â”€ Estado badge â”€â”€ */
@@ -4787,15 +4784,7 @@ body {
     box-shadow: 0 20px 60px rgba(13, 71, 161, 0.2);
     transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
     transition: transform 0.5s ease;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    background: #ffffff !important;
-=======
     background: var(--dm-card) !important;
->>>>>>> 629d7c0 (avances)
-=======
-    background: var(--dm-card) !important;
->>>>>>> main-local
 }
 
 .hero-image-card img {

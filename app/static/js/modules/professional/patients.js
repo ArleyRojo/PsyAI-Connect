@@ -5,22 +5,11 @@
 var pacienteSeleccionado = null;   // idUsuario (Number)
 var filaSeleccionadaAnterior = null;
 var evolucionData = [];
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 var pacientesEvolucionData = [];
->>>>>>> 629d7c0 (avances)
 
 // ── Init ─────────────────────────────────────────────────────
 
 window.onload = function () {
-=======
-var pacientesEvolucionData = [];
-
-// ── Init ─────────────────────────────────────────────────────
-
-function initPatientsPage() {
->>>>>>> main-local
     cargarSaludoProfesional();
 
     // Fecha de hoy por defecto
@@ -35,24 +24,9 @@ function initPatientsPage() {
     cargarPacientes();
     cargarProfesionales();
     cargarHistorial();
-<<<<<<< HEAD
+    cargarEvolucion();
 };
 
-<<<<<<< HEAD
-=======
-=======
-    if (typeof cargarEvolucion === 'function') {
-        cargarEvolucion();
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPatientsPage);
-} else {
-    initPatientsPage();
-}
-
->>>>>>> main-local
 function escapeHtml(value) {
     return String(value ?? '')
         .replace(/&/g, '&amp;')
@@ -74,24 +48,12 @@ function getPacienteId(item) {
     return item?.idPaciente ?? item?.idUsuario ?? '';
 }
 
-<<<<<<< HEAD
-=======
-function actualizarBadgeDiagnosticos(total) {
-    var badge = document.getElementById("badgeDiag");
-    if (badge) badge.textContent = Number(total) || 0;
-}
-
->>>>>>> main-local
 function getPacienteFiltroValue(item) {
     var id = getPacienteId(item);
     if (id !== null && id !== undefined && String(id) !== '') return 'id:' + id;
     return 'name:' + normalizarTexto(item?.paciente || item?.nombre || '');
 }
 
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
 // ── Saludo con nombre real de sesión ─────────────────────────
 
 async function cargarSaludoProfesional() {
@@ -126,10 +88,6 @@ function cargarPacientes() {
             }
 
             var pacientes = data.pacientes || data.usuarios || [];
-<<<<<<< HEAD
-=======
-            actualizarBadgeDiagnosticos(pacientes.length);
->>>>>>> main-local
 
             if (pacientes.length === 0) {
                 tbody.innerHTML = "<tr><td colspan='7' class='text-muted text-center py-4'>No hay pacientes registrados</td></tr>";
@@ -166,10 +124,6 @@ function cargarPacientes() {
         })
         .catch(function (err) {
             console.error(err);
-<<<<<<< HEAD
-=======
-            actualizarBadgeDiagnosticos(0);
->>>>>>> main-local
             tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error al cargar pacientes</td></tr>";
         });
 }
@@ -416,25 +370,16 @@ async function cargarHistorial() {
         var res  = await fetch("/api/diagnosticos", { credentials: "include" });
         var data = await res.json();
         var tbody = document.getElementById("tbodyHistorial");
-<<<<<<< HEAD
+
+        var badge = document.getElementById("badgeDiag");
+        if (badge) badge.textContent = (data.success && data.historial) ? data.historial.length : 0;
 
         if (!data.success || !data.historial || data.historial.length === 0) {
-=======
-        var historial = data.success && Array.isArray(data.historial) ? data.historial : [];
-
-        actualizarBadgeDiagnosticos(Math.max(historial.length, Number(document.getElementById("badgeDiag")?.textContent) || 0));
-
-        if (historial.length === 0) {
->>>>>>> main-local
             tbody.innerHTML = "<tr><td colspan='5' class='text-muted text-center py-3'>Sin diagnósticos registrados</td></tr>";
             return;
         }
 
-<<<<<<< HEAD
         tbody.innerHTML = data.historial.map(function (h) {
-=======
-        tbody.innerHTML = historial.map(function (h) {
->>>>>>> main-local
             var fecha = formatearFecha(h.fechaRaw);
             return "<tr>" +
                 "<td>" + (h.paciente    || "—") + "</td>" +
@@ -446,10 +391,6 @@ async function cargarHistorial() {
         }).join('');
     } catch (e) {
         console.error(e);
-<<<<<<< HEAD
-=======
-        actualizarBadgeDiagnosticos(Number(document.getElementById("badgeDiag")?.textContent) || 0);
->>>>>>> main-local
     }
 }
 
@@ -498,107 +439,12 @@ function mostrarPestana(pestana, btnEl) {
         cargarPacientes();
         cargarHistorial();
     } else if (pestana === 'evolucion') {
-<<<<<<< HEAD
-<<<<<<< HEAD
-        cargarPacientesSelectEvolucion();
-=======
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
         cargarEvolucion();
     }
 }
 
 // ── Evolución ─────────────────────────────────────────────────
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-function cargarPacientesSelectEvolucion() {
-    var select = document.getElementById("selectPacienteEvolucion");
-    if (!select) return;
-
-    fetch("/api/evolucion/profesional", { credentials: "include" })
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-            if (!data.success || !data.historial || !data.historial.length) {
-                select.innerHTML = '<option value="">No hay pacientes con evolución</option>';
-                return;
-            }
-            var unicos = {};
-            data.historial.forEach(function (h) { if (h.paciente) unicos[h.paciente] = true; });
-            select.innerHTML = '<option value="">Todos los pacientes</option>' +
-                Object.keys(unicos).sort().map(function (n) {
-                    return '<option value="' + n + '">' + n + '</option>';
-                }).join('');
-        })
-        .catch(function () { select.innerHTML = '<option value="">Error al cargar</option>'; });
-}
-
-async function cargarEvolucion() {
-    var tbody = document.getElementById("tablaEvolucion");
-    if (!tbody) return;
-
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr>';
-
-    try {
-        var res  = await fetch("/api/evolucion/profesional", { credentials: "include" });
-        var data = await res.json();
-
-        if (!data.success || !data.historial || !data.historial.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay registros de evolución</td></tr>';
-            evolucionData = [];
-            return;
-        }
-
-        evolucionData = data.historial.sort(function (a, b) {
-            return new Date(b.fechaRaw || b.fecha || 0) - new Date(a.fechaRaw || a.fecha || 0);
-        });
-        renderEvolucion(evolucionData);
-    } catch (e) {
-        console.error(e);
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar</td></tr>';
-        evolucionData = [];
-    }
-}
-
-function filtrarEvolucionPorPaciente() {
-    var val = (document.getElementById("selectPacienteEvolucion")?.value || "").toLowerCase();
-    renderEvolucion(val
-        ? evolucionData.filter(function (h) { return (h.paciente || "").toLowerCase().includes(val); })
-        : evolucionData
-    );
-}
-
-function renderEvolucion(lista) {
-    var tbody = document.getElementById("tablaEvolucion");
-    if (!tbody) return;
-
-    if (!lista || !lista.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay registros</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = lista.map(function (h) {
-        var fecha       = formatearFecha(h.fechaRaw) || h.fecha || "—";
-        var colorEstado = getEstadoColor(h.estadoEmocional);
-        var nivel       = h.nivelEnergia || 0;
-        var colorBarra  = getEnergiaColor(nivel);
-
-        return "<tr>" +
-            "<td>" + fecha + "</td>" +
-            "<td>" + (h.paciente || "—") + "</td>" +
-            "<td><span class='badge bg-" + colorEstado + "'>" + (h.estadoEmocional || "—") + "</span></td>" +
-            "<td><div class='energia-bar'><div class='bar'><div class='fill bg-" + colorBarra + "' style='width:" + (nivel * 10) + "%'></div></div><small class='text-muted'>" + nivel + "</small></div></td>" +
-            "<td>" + (h.notasPersonales || "—") + "</td>" +
-            "</tr>";
-    }).join('');
-}
-=======
 // (funciones de evolución definidas en patients.evolution.js)
->>>>>>> 629d7c0 (avances)
-=======
-// (funciones de evolución definidas en patients.evolution.js)
->>>>>>> main-local
 
 // ── Helpers ───────────────────────────────────────────────────
 

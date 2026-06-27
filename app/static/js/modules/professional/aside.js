@@ -37,21 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(menuToggle);
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> main-local
     if (!sidebar.id) {
         sidebar.id = 'sidebar';
     }
     menuToggle.setAttribute('aria-controls', sidebar.id || 'sidebar');
     menuToggle.setAttribute('aria-expanded', 'false');
 
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
     // Crear overlay si no existe
     let overlay = document.getElementById('sidebarOverlay');
     if (!overlay) {
@@ -75,14 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
             menuToggle.classList.remove('active');
             menuToggle.setAttribute('aria-expanded', 'false');
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
         saveSidebarState(false);
->>>>>>> 629d7c0 (avances)
-=======
-        saveSidebarState(false);
->>>>>>> main-local
     };
 
     const openSidebar = () => {
@@ -148,23 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cerrar sidebar al hacer clic en un enlace (solo en móvil)
     const navLinks = document.querySelectorAll('.sidebar .nav-link');
     navLinks.forEach(link => {
-<<<<<<< HEAD
-<<<<<<< HEAD
-        link.addEventListener('click', function(e) {
-            // SI ES UN ACORDEÓN (submenu), NO CERRAMOS EL SIDEBAR
-            if (this.hasAttribute('data-bs-toggle') || this.classList.contains('dropdown-toggle')) {
-                return;
-            }
-
-            if (window.innerWidth <= 991 && !this.target) {
-=======
         link.addEventListener('click', function() {
             if (window.innerWidth <= 991) {
->>>>>>> 629d7c0 (avances)
-=======
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 991) {
->>>>>>> main-local
                 hideSidebarImmediately();
             }
         });

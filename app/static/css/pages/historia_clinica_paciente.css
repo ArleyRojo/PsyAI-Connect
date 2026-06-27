@@ -349,14 +349,7 @@ body, .aside-patient {
   box-shadow: 0 2px 8px rgba(13,71,161,.25);
 }
 .btn-upload-prev:hover { opacity: 0.88; transform: translateY(-1px); }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 .btn-upload-prev i { display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1; }
->>>>>>> 629d7c0 (avances)
-=======
-.btn-upload-prev i { display: inline-flex; align-items: center; justify-content: center; color: inherit; line-height: 1; }
->>>>>>> main-local
 
 /* ── SHARE ROW (toggle de visibilidad) ── */
 .share-row {
@@ -554,12 +547,6 @@ hr.divider {
   .share-row { flex-wrap: wrap; gap: 8px; }
   .file-row  { flex-wrap: wrap; gap: 8px; }
   .toggle-wrap { white-space: normal; }
-<<<<<<< HEAD
-<<<<<<< HEAD
-}
-=======
-=======
->>>>>>> main-local
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -707,7 +694,3 @@ html.dark-mode .toast {
 }
 
 html.dark-mode .user-avatar { border-color: var(--dm-border); }
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local

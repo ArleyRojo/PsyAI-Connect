@@ -35,15 +35,7 @@
           img.setAttribute('data-src', src);
           img.removeAttribute('src');
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-        img.style.background = '#f0f5fc';
-=======
         img.style.background = '';
->>>>>>> 629d7c0 (avances)
-=======
-        img.style.background = '';
->>>>>>> main-local
       }
       observer.observe(img);
     });

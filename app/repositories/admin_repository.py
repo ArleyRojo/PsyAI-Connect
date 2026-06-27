@@ -280,53 +280,58 @@ def get_notifications_feed():
         cursor.execute(
             """
             SELECT 
-                idNotificacion as id,
-                titulo,
-                mensaje,
-                tipo,
-                destinatario,
-                email_individual,
-                enviado_por,
-                estado,
-                leido,
-                DATE_FORMAT(fecha, '%d/%m/%Y %H:%i') as fecha,
-                fecha_programada,
-                'notificacion' as tipo_registro
-            FROM notificaciones
+                n.idNotificacion,
+                n.titulo,
+                n.mensaje,
+                n.tipo,
+                COALESCE(n.destinatario, reg.nombre, reg.email) as destinatario,
+                n.email_individual,
+                n.enviado_por,
+                n.estado,
+                n.leido,
+                DATE_FORMAT(n.fecha, '%d/%m/%Y %H:%i') as fecha,
+                n.fecha_programada,
+                'notificacion' as tipo_registro,
+                n.fecha as fecha_orden
+            FROM notificaciones n
+            LEFT JOIN Register reg ON reg.idUsuario = n.idUsuario
             UNION ALL
             SELECT 
-                NULL as id,
+                NULL as idNotificacion,
                 CONCAT('Cita: ', c.tipoCita) as titulo,
-                CONCAT('Paciente: ', r.nombre) as mensaje,
+                CONCAT('Paciente: ', pa.nombre) as mensaje,
                 'profesional' as tipo,
-                NULL as destinatario,
+                CONCAT('profesional_', pr.idUsuario) as destinatario,
                 NULL as email_individual,
-                r.nombre as enviado_por,
+                pr.nombre as enviado_por,
                 'enviado' as estado,
                 NULL as leido,
                 DATE_FORMAT(c.fecha, '%d/%m/%Y %H:%i') as fecha,
                 NULL as fecha_programada,
-                'profesional' as tipo_registro
+                'profesional' as tipo_registro,
+                c.fecha as fecha_orden
             FROM Citas c
-            JOIN Register r ON c.idProfesional = r.idUsuario
+            JOIN Register pr ON c.idProfesional = pr.idUsuario
+            JOIN Register pa ON c.idPaciente = pa.idUsuario
             UNION ALL
             SELECT 
-                NULL as id,
-                CONCAT('Cita solicitada por: ', r.nombre) as titulo,
-                CONCAT('Profesional: ', p.nombre) as mensaje,
+                NULL as idNotificacion,
+                CONCAT('Cita solicitada por: ', pa.nombre) as titulo,
+                CONCAT('Profesional: ', pr.nombre) as mensaje,
                 'paciente' as tipo,
-                NULL as destinatario,
+                CONCAT('paciente_', pa.idUsuario) as destinatario,
                 NULL as email_individual,
-                r.nombre as enviado_por,
+                pa.nombre as enviado_por,
                 'enviado' as estado,
                 NULL as leido,
                 DATE_FORMAT(c.fecha, '%d/%m/%Y %H:%i') as fecha,
                 NULL as fecha_programada,
-                'paciente' as tipo_registro
+                'paciente' as tipo_registro,
+                c.fecha as fecha_orden
             FROM Citas c
-            JOIN Register r ON c.idPaciente = r.idUsuario
-            JOIN Register p ON c.idProfesional = p.idUsuario
-            ORDER BY fecha DESC
+            JOIN Register pa ON c.idPaciente = pa.idUsuario
+            JOIN Register pr ON c.idProfesional = pr.idUsuario
+            ORDER BY fecha_orden DESC
             LIMIT 200
             """
         )
@@ -452,3 +457,30 @@ def get_logs(limit=None):
         )
         logs_pacientes = cursor.fetchall()
     return logs_admin + logs_auditoria + logs_notificaciones + logs_profesionales + logs_pacientes
+
+
+def get_chatbot_historial_rows(limit=200):
+    """Retorna todas las filas de vistahistorialchatbot ordenadas por nombre y fecha."""
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute("""
+            SELECT nombre, idPaciente, mensajeUsuario, respuestaChatbot,
+                   nivelEmocionalDetectado, fecha
+            FROM vistahistorialchatbot
+            ORDER BY nombre ASC, fecha ASC
+            LIMIT %s
+        """, (limit,))
+        return cursor.fetchall()
+
+
+def get_chatbot_historial_stats():
+    """Retorna conteos globales de niveles emocionales."""
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute("""
+            SELECT
+                COUNT(*) as total,
+                SUM(CASE WHEN nivelEmocionalDetectado = 'Alto'  THEN 1 ELSE 0 END) as alto,
+                SUM(CASE WHEN nivelEmocionalDetectado = 'Medio' THEN 1 ELSE 0 END) as medio,
+                SUM(CASE WHEN nivelEmocionalDetectado = 'Bajo'  THEN 1 ELSE 0 END) as bajo
+            FROM vistahistorialchatbot
+        """)
+        return cursor.fetchone()

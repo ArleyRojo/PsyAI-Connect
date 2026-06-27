@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 ﻿<!DOCTYPE html>
-=======
-<!DOCTYPE html>
->>>>>>> main-local
 <html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
 <head>
     <meta charset="UTF-8">
@@ -53,81 +49,9 @@
     <main class="main-content flex-grow-1">
         <header class="main-header d-flex justify-content-between align-items-center mb-3">
             <h1><i class="fas fa-comments me-2"></i> Mensajes con Pacientes</h1>
-            <div class="user-info d-flex align-items-center">
-                <span class="user-greeting" id="nombrePaciente">Hola, Dr(a).</span>
-                <button class="btn-notif" title="Notificaciones">
-                    <i class="fas fa-bell"></i>
-                    <span class="notif-dot"></span>
-                </button>
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23E8F1FF'/%3E%3C/svg%3E" alt="Avatar" class="user-avatar" data-avatar="inicial" data-nombre="">
-            </div>
+            <span class="user-greeting" id="nombreProfesional">Hola, Dr(a).</span>
         </header>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> main-local
-        <section class="chat-wrapper"
-                 data-chat-root
-                 data-list-endpoint="/api/chat/pacientes"
-                 data-list-key="pacientes"
-                 data-messages-endpoint="/api/profesional/chat/mensajes"
-                 data-send-endpoint="/api/profesional/chat/enviar"
-                 data-required-role="profesional"
-                 data-fallback-endpoint="/api/pacientes?limit=500"
-                 data-fallback-key="pacientes"
-                 data-contact-mode="patient"
-                 data-empty-text="Selecciona un paciente para empezar una conversaci&oacute;n">
-            <aside class="chat-sidebar">
-                <div class="chat-sidebar__header">
-                    <div class="panel-header">
-                        <span class="panel-title">Pacientes</span>
-                        <span class="panel-count" id="patientCount">·  0</span>
-                    </div>
-                    <div class="search-wrap chat-search">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="search" class="chat-search-input search-patients" placeholder="Buscar paciente...">
-                    </div>
-                </div>
-                <div class="chat-list" aria-live="polite"></div>
-            </aside>
-
-            <section class="chat-panel">
-                <div class="chat-panel-placeholder">
-                    <div class="chat-empty-state">
-                        <div class="chat-empty-icon">
-                            <i class="fas fa-comments"></i>
-                        </div>
-                        <h3 class="chat-empty-title">Tus mensajes</h3>
-                        <p class="chat-empty-sub">Selecciona un paciente de la lista para ver o iniciar una conversaci&oacute;n.</p>
-                    </div>
-                </div>
-
-                <div class="chat-active-view d-flex flex-column h-100 d-none">
-                    <header class="chat-panel-header">
-                        <button type="button" class="chat-back-btn" aria-label="Volver a conversaciones">
-                            <i class="fas fa-arrow-left"></i>
-                        </button>
-                        <div class="chat-active-avatar"></div>
-                        <div class="chat-header-info">
-                            <h6 class="chat-active-name"></h6>
-                            <small class="chat-active-status"></small>
-                        </div>
-                    </header>
-
-                    <div class="chat-messages-area" aria-live="polite"></div>
-
-                    <div class="chat-input-bar">
-                        <textarea class="chat-message-input" rows="1" maxlength="2000" placeholder="Escribe un mensaje..."></textarea>
-                        <button type="button" class="chat-send-btn" aria-label="Enviar mensaje">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
-        </section>
-<<<<<<< HEAD
-=======
                         <section class="chat-wrapper"
                                  data-chat-root
                                  data-list-endpoint="/api/chat/pacientes"
@@ -187,46 +111,10 @@
                                 </div>
                             </section>
                         </section>
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
     </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
-<link rel="stylesheet" href="/css/components/custom-alerts.css">
-<script src="/js/core/shared/alerts.js"></script>
-<script src="/js/modules/professional/aside.js?v=20260522-5"></script>
-<script src="/js/modules/auth/logout.js"></script>
-<script src="/js/core/shared/nombre.usuario.js"></script>
-<script src="/js/modules/shared/direct-chat.js?v=20260522-3"></script>
-<script>
-// Forzar que todos los acordeones inicien cerrados
-document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-    el.classList.remove('show');
-    el.style.height = '';
-});
-
-// Cerrar acordeón al restaurar desde bfcache (botón atrás)
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-            var instance = bootstrap.Collapse.getInstance(el);
-            if (instance) {
-                instance.hide();
-            } else {
-                new bootstrap.Collapse(el, { toggle: false }).hide();
-            }
-        });
-    }
-});
-</script>
-=======
-=======
->>>>>>> main-local
 <link rel="stylesheet" href="/responsive/responsive-professional.css">
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
@@ -235,9 +123,5 @@ window.addEventListener('pageshow', function(event) {
 <script src="/js/modules/auth/logout.js"></script>
 <script src="/js/core/shared/nombre.usuario.js"></script>
 <script src="/js/modules/shared/direct-chat.js?v=20260522-3"></script>
-<<<<<<< HEAD
->>>>>>> 629d7c0 (avances)
-=======
->>>>>>> main-local
 </body>
 </html>

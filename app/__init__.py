@@ -63,7 +63,7 @@ def verificar_tablas(app):
 
 
 API_PATTERN = re.compile(
-    r"""(?:"
+    r"""(?:
         fetch\(\s*[`'"]([^`'"]*(?:/api/|/healthz)[^`'"]*)[`'"] |
         new\s+EventSource\(\s*[`'"]([^`'"]*(?:/api/|/healthz)[^`'"]*)[`'"] |
         data-[\w-]*endpoint=["']([^"']*(?:/api/|/healthz)[^"']*)["']
@@ -456,6 +456,11 @@ def create_app():
     app.register_blueprint(professional_bp)
     app.register_blueprint(appointment_bp)
     app.register_blueprint(pages_bp)
+
+    # Public recovery endpoints: no session → no CSRF token possible
+    from app.routes.auth_routes import forgot_password, reset_password
+    csrf.exempt(forgot_password)
+    csrf.exempt(reset_password)
 
     @app.route("/healthz")
     def healthz():

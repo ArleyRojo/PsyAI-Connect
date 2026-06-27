@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from flask import request as flask_request
 
 from app.repositories import auth_repository
+from app.repositories.admin_repository import registrar_evento_seguridad
 from app.utils.security import hash_password, verify_password
 from app.utils.mail import send_recovery_email
 from app.utils.validators import Validator, ValidationError
@@ -18,15 +19,24 @@ def register_user(data):
         confirmar = data.get("confirm_password") or ""
         rol = data.get("rol") or "paciente"
         genero = data.get("genero") or ""
+        edad = data.get("edad")
 
         if password != confirmar:
             return {"success": False, "message": "Las contraseñas no coinciden"}, 400
         if rol not in ("paciente", "profesional"):
             return {"success": False, "message": "Rol inválido"}, 400
+        if not genero:
+            return {"success": False, "message": "El género es requerido"}, 400
+        try:
+            edad = Validator.integer(edad, "edad")
+            if edad < 1 or edad > 120:
+                raise ValidationError("La edad debe estar entre 1 y 120", "edad")
+        except ValidationError as e:
+            return {"success": False, "message": e.message}, 400
         if auth_repository.user_exists_by_email(email):
             return {"success": False, "message": "El correo ya está registrado"}, 409
 
-        auth_repository.create_user(nombre, email, hash_password(password), rol, genero)
+        auth_repository.create_user(nombre, email, hash_password(password), rol, genero, edad)
         return {"success": True, "message": "Registro exitoso"}, 201
 
     except ValidationError as e:
@@ -60,6 +70,7 @@ def login_user(data, ip_address):
     stored_hash = usuario.get("contrasena")
     if not verify_password(password, stored_hash):
         register_failed_attempt(email)
+        registrar_evento_seguridad("Login fallido", f"Email: {email} - IP: {ip_address}")
         return {"success": False, "message": "Credenciales incorrectas"}, 401, None
 
     reset_failed_attempts(email)
@@ -114,6 +125,9 @@ def recover_password(email):
             print("\n[RECUPERAR PASSWORD] No se pudo enviar correo por proveedor externo.", flush=True)
             print(f"[RECUPERAR PASSWORD] Email: {email}", flush=True)
             print(f"[RECUPERAR PASSWORD] Enlace local: {recovery_link}\n", flush=True)
+
+    if not existe:
+        return {"success": False, "message": "No existe una cuenta con ese correo electr\u00f3nico."}, 404
 
     payload = {"success": True, "message": "Fue enviado al correo."}
     if recovery_link and not email_sent and os.getenv("FLASK_ENV", "development").lower() != "production":

@@ -1,12 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-﻿<!DOCTYPE html>
-=======
 <!DOCTYPE html>
->>>>>>> 629d7c0 (avances)
-=======
-<!DOCTYPE html>
->>>>>>> main-local
 <html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
 <head>
     <meta charset="UTF-8">
@@ -24,15 +16,7 @@
     <link rel="stylesheet" href="/css/pages/professional.css">
 <script src="/js/core/shared/theme.js"></script>
     <script src="/js/core/shared/localStorage-detector.js"></script>
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
 </head>
->>>>>>> 629d7c0 (avances)
-=======
-</head>
->>>>>>> main-local
 <body class="aside-professional">
 
 <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
@@ -61,16 +45,8 @@
             <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
         </div>
     </aside>
-<<<<<<< HEAD
 
-<<<<<<< HEAD
-    <main class="main-content flex-grow-1 ms-250">
-=======
     <main class="main-content flex-grow-1 ms-250 patients-page">
->>>>>>> 629d7c0 (avances)
-=======
-    <main class="main-content flex-grow-1 ms-250 patients-page">
->>>>>>> main-local
         <header class="main-header mb-4">
             <div style="display:flex; align-items:flex-start; justify-content:space-between; width:100%; position:relative; z-index:1;">
                 <div>
@@ -89,15 +65,7 @@
             </div>
         </header>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        <div class="p-4">
-=======
         <div class="patients-shell p-4">
->>>>>>> 629d7c0 (avances)
-=======
-        <div class="patients-shell p-4">
->>>>>>> main-local
             <!-- Pestañas -->
             <div class="tabs-container mb-4">
                 <div class="tabs">
@@ -309,42 +277,8 @@
         </div><!-- /p-4 -->
     </main>
 </div>
-<<<<<<< HEAD
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<<<<<<< HEAD
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
-<link rel="stylesheet" href="/css/components/custom-alerts.css">
-<script src="/js/core/shared/alerts.js"></script>
-<script src="/js/modules/professional/aside.js?v=20260522-5"></script>
-<script src="/js/modules/auth/logout.js"></script>
-<script src="/js/core/shared/nombre.usuario.js"></script>
-<script src="/js/modules/professional/patients.js"></script>
-<script>
-// Forzar que todos los acordeones inicien cerrados
-document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-    el.classList.remove('show');
-    el.style.height = '';
-});
-
-// Cerrar acordeón al restaurar desde bfcache (botón atrás)
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-            var instance = bootstrap.Collapse.getInstance(el);
-            if (instance) {
-                instance.hide();
-            } else {
-                new bootstrap.Collapse(el, { toggle: false }).hide();
-            }
-        });
-    }
-});
-</script>
-=======
-=======
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
->>>>>>> main-local
 <link rel="stylesheet" href="/responsive/responsive-professional.css?v=20260626-patients-responsive">
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
@@ -352,13 +286,7 @@ window.addEventListener('pageshow', function(event) {
 <script src="/js/modules/professional/aside.js?v=20260626-sidebar-state"></script>
 <script src="/js/modules/auth/logout.js"></script>
 <script src="/js/core/shared/nombre.usuario.js"></script>
-<<<<<<< HEAD
 <script src="/js/modules/professional/patients.js?v=20260626-fix2"></script>
 <script src="/js/modules/professional/patients.evolution.js?v=20260626-fix2"></script>
->>>>>>> 629d7c0 (avances)
-=======
-<script src="/js/modules/professional/patients.js?v=20260626-counter3"></script>
-<script src="/js/modules/professional/patients.evolution.js?v=20260626-counter3"></script>
->>>>>>> main-local
 </body>
 </html>

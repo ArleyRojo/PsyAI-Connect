@@ -45,15 +45,15 @@ def update_patient_profile(data):
         cursor.execute(
             """
             UPDATE PerfilPaciente
-            SET edad = %s, genero = %s, numeroTelefonico = %s
+            SET numeroTelefonico = %s
             WHERE idPaciente = %s
             """,
-            (data.get("edad"), data.get("genero"), data.get("numeroTelefonico"), data.get("idUsuario")),
+            (data.get("numeroTelefonico"), data.get("idUsuario")),
         )
         if cursor.rowcount == 0:
             cursor.execute(
-                "INSERT INTO PerfilPaciente (idPaciente, edad, genero, numeroTelefonico, consentimiento_chatbot) VALUES (%s, %s, %s, %s, 0)",
-                (data.get("idUsuario"), data.get("edad"), data.get("genero"), data.get("numeroTelefonico")),
+                "INSERT INTO PerfilPaciente (idPaciente, numeroTelefonico, consentimiento_chatbot) VALUES (%s, %s, 0)",
+                (data.get("idUsuario"), data.get("numeroTelefonico")),
             )
         conn.commit()
 

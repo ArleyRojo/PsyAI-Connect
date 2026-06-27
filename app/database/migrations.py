@@ -379,6 +379,17 @@ def init_db():
         if cursor.fetchone()[0] == 0:
             extra_alters.append("ALTER TABLE PacientesProfesional ADD CONSTRAINT uq_profesional_paciente UNIQUE (idProfesional, idPaciente)")
 
+        for column_name, alter in (
+            ("genero", "ALTER TABLE PerfilProfesional ADD COLUMN genero VARCHAR(20) DEFAULT NULL"),
+            ("edad", "ALTER TABLE PerfilProfesional ADD COLUMN edad INT DEFAULT NULL"),
+        ):
+            cursor.execute("""
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_NAME = 'PerfilProfesional' AND COLUMN_NAME = %s AND TABLE_SCHEMA = DATABASE()
+            """, (column_name,))
+            if cursor.fetchone()[0] == 0:
+                extra_alters.append(alter)
+
         for alter in extra_alters:
             try:
                 cursor.execute(alter)

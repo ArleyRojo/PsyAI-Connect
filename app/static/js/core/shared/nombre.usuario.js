@@ -147,7 +147,7 @@ function generarAvatar(nombre, elemento) {
 }
 
 function actualizarNombresEnPagina(nombre, rol) {
-    const elementos = document.querySelectorAll('#nombrePaciente, #nombreProfesional, #nombrPaciente, .user-info span');
+    const elementos = document.querySelectorAll('#nombrePaciente, #nombreProfesional, #nombrPaciente, .user-info > span');
     
     elementos.forEach(el => {
         if (!el) return;
@@ -162,9 +162,9 @@ function actualizarNombresEnPagina(nombre, rol) {
         }
     });
 
-    const headerSpans = document.querySelectorAll('.user-info span');
+    const headerSpans = document.querySelectorAll('.user-info > span');
     headerSpans.forEach(span => {
-        if (span.textContent.trim() === '' || span.textContent === 'Hola, ') {
+        if (!span.id && (span.textContent.trim() === '' || span.textContent === 'Hola, ')) {
             span.textContent = `Hola, ${nombre}`;
         }
     });

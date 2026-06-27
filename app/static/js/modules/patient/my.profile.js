@@ -41,11 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const modalEditar = document.getElementById('modalEditarPerfil');
     if (modalEditar) {
         modalEditar.addEventListener('show.bs.modal', () => {
-            document.getElementById('editEdad').value     = localStorage.getItem('perfil_edad')     || '';
+            document.getElementById('editGenero').value   = document.querySelector('[data-field="genero"]')?.textContent?.trim() || 'No especificado';
             document.getElementById('editTelefono').value = localStorage.getItem('perfil_telefono') || '';
-            const generoGuardado = localStorage.getItem('perfil_genero') || '';
-            const selectGenero   = document.getElementById('editGenero');
-            if (selectGenero) selectGenero.value = generoGuardado;
         });
     }
 
@@ -77,11 +74,12 @@ async function cargarPerfil(idUsuario) {
         if (data.success) {
             const p = data.perfil;
             setField('nombre',   p.nombre              || 'Sin nombre');
-            setField('edad',     p.edad                || 'No especificada');
-            setField('genero',   p.genero              || localStorage.getItem('perfil_genero') || 'No especificado');
+            setField('genero',   p.genero              || 'No especificado');
             setField('email',    p.email               || 'Sin correo');
             setField('telefono', p.numeroTelefonico     || 'Sin teléfono');
             setField('rol',      getRolLabel(p.rol));
+
+            if (p.genero) localStorage.setItem('perfil_genero', p.genero);
 
             const headerSpan = document.querySelector('.user-info span');
             if (headerSpan) headerSpan.textContent = p.nombre || 'Paciente';
@@ -105,7 +103,6 @@ function cargarDesdeLocal(usuario) {
     setField('nombre',   nombre);
     setField('email',    email);
     setField('rol',      getRolLabel(rol));
-    setField('edad',     localStorage.getItem('perfil_edad')     || 'No especificada');
     setField('genero',   localStorage.getItem('perfil_genero')   || 'No especificado');
     setField('telefono', localStorage.getItem('perfil_telefono') || 'Sin teléfono');
 
@@ -118,37 +115,20 @@ async function guardarPerfil() {
     const usuario = JSON.parse(localStorage.getItem('usuario'))
                  || JSON.parse(localStorage.getItem('sessionUser'));
 
-    const edadNueva     = document.getElementById('editEdad').value.trim();
-    const generoNuevo   = document.getElementById('editGenero').value;
     const telefonoNuevo = document.getElementById('editTelefono').value.trim();
-
-    // ── Valores actuales guardados ────────────────────────────
-    const edadActual     = localStorage.getItem('perfil_edad')     || '';
-    const generoActual   = localStorage.getItem('perfil_genero')   || '';
     const telefonoActual = localStorage.getItem('perfil_telefono') || '';
 
-    // ── Detectar si algo cambió ───────────────────────────────
-    const sinCambios =
-        edadNueva     === edadActual &&
-        generoNuevo   === generoActual &&
-        telefonoNuevo === telefonoActual;
-
-    if (sinCambios) {
+    if (telefonoNuevo === telefonoActual) {
         mostrarToast('No se detectaron cambios. La información ingresada es idéntica a la registrada actualmente.', 'warning');
         return;
     }
 
-    // ── Guardar solo los campos que cambiaron ─────────────────
-    if (edadNueva     !== edadActual)     localStorage.setItem('perfil_edad',     edadNueva);
-    if (generoNuevo   !== generoActual)   localStorage.setItem('perfil_genero',   generoNuevo);
-    if (telefonoNuevo !== telefonoActual) localStorage.setItem('perfil_telefono', telefonoNuevo);
+    if (telefonoNuevo !== telefonoActual) {
+        localStorage.setItem('perfil_telefono', telefonoNuevo);
+    }
 
-    // ── Actualizar vista con los nuevos valores ───────────────
-    if (edadNueva)     setField('edad',     edadNueva);
-    if (generoNuevo)   setField('genero',   generoNuevo);
     if (telefonoNuevo) setField('telefono', telefonoNuevo);
 
-    // ── Intentar sincronizar con Flask ────────────────────────
     if (usuario?.id) {
         try {
             const res = await fetch('/api/perfil/paciente', {
@@ -157,8 +137,6 @@ async function guardarPerfil() {
                 credentials: 'include',
                 body: JSON.stringify({
                     idUsuario:        usuario.id,
-                    edad:             edadNueva,
-                    genero:           generoNuevo,
                     numeroTelefonico: telefonoNuevo
                 })
             });

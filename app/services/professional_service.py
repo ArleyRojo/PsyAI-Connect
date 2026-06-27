@@ -92,11 +92,23 @@ def delete_report(professional_id, report_id):
 
 
 def all_evolution(professional_id):
-    return {"success": True, "historial": professional_repository.get_all_patient_evolution(professional_id)}, 200
+    from app.repositories import chat_repository
+
+    historial = professional_repository.get_all_patient_evolution(professional_id)
+    riesgo_bajo = chat_repository.get_low_risk_counts_for_professional(professional_id)
+    return {
+        "success": True,
+        "historial": historial,
+        "riesgo_bajo_chatbot": riesgo_bajo,
+    }, 200
 
 
 def get_deleted_reports(professional_id):
     return {"success": True, "reportes": professional_repository.get_deleted_reports(professional_id)}, 200
+
+
+def list_patients_for_chat():
+    return professional_repository.list_patients_for_chat()
 
 
 def get_patient_chatbot_history(professional_id, patient_id):

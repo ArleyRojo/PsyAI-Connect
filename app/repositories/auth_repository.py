@@ -35,7 +35,7 @@ def user_exists_by_email(email):
         return cursor.fetchone() is not None
 
 
-def create_user(nombre, email, password_hash, rol, genero):
+def create_user(nombre, email, password_hash, rol, genero, edad=None):
     with db_cursor() as (conn, cursor):
         cursor.execute(
             "INSERT INTO Register (nombre, email, contrasena, rol) VALUES (%s, %s, %s, %s)",
@@ -45,11 +45,14 @@ def create_user(nombre, email, password_hash, rol, genero):
         nuevo_id = cursor.lastrowid
         if rol == "paciente":
             cursor.execute(
-                "INSERT INTO PerfilPaciente (idPaciente, genero) VALUES (%s, %s)",
-                (nuevo_id, genero),
+                "INSERT INTO PerfilPaciente (idPaciente, genero, edad) VALUES (%s, %s, %s)",
+                (nuevo_id, genero, edad),
             )
         else:
-            cursor.execute("INSERT INTO PerfilProfesional (idProfesional) VALUES (%s)", (nuevo_id,))
+            cursor.execute(
+                "INSERT INTO PerfilProfesional (idProfesional, genero, edad) VALUES (%s, %s, %s)",
+                (nuevo_id, genero, edad),
+            )
         conn.commit()
         return nuevo_id
 

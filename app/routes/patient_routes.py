@@ -3,8 +3,7 @@ from queue import Empty
 
 from flask import Blueprint, Response, current_app, jsonify, request, session, stream_with_context
 
-from app.repositories import mensajes_repository
-from app.services import chatbot_config_events, chatbot_config_service, chatbot_service, patient_service
+from app.services import chatbot_config_events, chatbot_config_service, chatbot_service, mensajes_service, patient_service
 from app.utils.auth import require_role, require_authenticated
 
 
@@ -23,18 +22,6 @@ def _get_pagination():
     page = max(page, 1)
     limit = min(max(limit, 1), 100)
     return page, limit
-
-
-def _ordenar_contactos_chat(contactos):
-    return sorted(
-        contactos,
-        key=lambda contacto: (
-            1 if contacto.get("noLeidos", 0) else 0,
-            contacto.get("ultimaFecha") or "",
-            contacto.get("ultimoIdMensaje") or 0,
-        ),
-        reverse=True,
-    )
 
 
 @patient_bp.route("/api/perfil/paciente/<int:id_usuario>", methods=["GET"])
@@ -199,8 +186,7 @@ def historial_chatbot():
 @patient_bp.route("/api/chatbot/historial", methods=["DELETE"])
 @require_role("paciente")
 def eliminar_historial_chatbot():
-    from app.repositories import chat_repository
-    chat_repository.delete_history(session.get("idUsuario"))
+    mensajes_service.eliminar_historial_chatbot(session.get("idUsuario"))
     return jsonify({"success": True}), 200
 
 
@@ -252,34 +238,18 @@ def chat_listar_profesionales():
     Devuelve los profesionales registrados,
     enriquecidos con el ultimo mensaje y no-leidos.
     """
-    from app.repositories import patient_repository
-
-    id_paciente = session.get("idUsuario")
-    profesionales = patient_repository.list_professionals_for_patient(id_paciente)
-    resultado = []
-
     import os
-    upload_dir = os.path.join(current_app.root_path, "static", "uploads")
-    for profesional in profesionales:
-        fp = profesional.get("fotoPerfil")
-        if fp and not os.path.exists(os.path.join(upload_dir, fp)):
-            profesional["fotoPerfil"] = None
-        ultimo = mensajes_repository.get_ultimo_mensaje(id_paciente, profesional["idUsuario"])
-        no_leidos = mensajes_repository.contar_no_leidos(id_paciente, profesional["idUsuario"])
-        resultado.append({
-            **profesional,
-            "ultimoMensaje": ultimo["mensaje"][:60] if ultimo else None,
-            "ultimaFecha": str(ultimo["fecha"]) if ultimo else None,
-            "ultimoIdMensaje": ultimo["idMensaje"] if ultimo else 0,
-            "ultimoEmisor": ultimo["idEmisor"] if ultimo else None,
-            "noLeidos": no_leidos,
-        })
+    id_paciente = session.get("idUsuario")
+    payload, _ = patient_service.list_professionals()
+    profesionales = payload.get("profesionales", [])
 
-    from app.services.telemetry_service import get_active_user_ids
-    online_ids = set(get_active_user_ids())
-    for r in resultado:
-        r["isOnline"] = r.get("idUsuario") in online_ids
-    resultado = _ordenar_contactos_chat(resultado)
+    upload_dir = os.path.join(current_app.root_path, "static", "uploads")
+    for p in profesionales:
+        fp = p.get("fotoPerfil")
+        if fp and not os.path.exists(os.path.join(upload_dir, fp)):
+            p["fotoPerfil"] = None
+
+    resultado = mensajes_service.get_contactos_con_mensajes(id_paciente, profesionales)
     return jsonify({"success": True, "profesionales": resultado}), 200
 
 
@@ -287,19 +257,10 @@ def chat_listar_profesionales():
 @patient_bp.route("/api/paciente/chat/mensajes", methods=["GET"])
 @require_role("paciente", "profesional")
 def chat_get_mensajes_paciente():
-    id_usuario = session.get("idUsuario")
     id_receptor = request.args.get("receptor", type=int)
-    desde_id = request.args.get("desde", default=0, type=int)
-
     if not id_receptor:
         return jsonify({"success": False, "message": "Falta receptor"}), 400
-
-    mensajes_repository.marcar_leidos(id_usuario, id_receptor)
-    rows = mensajes_repository.get_conversacion(id_usuario, id_receptor, desde_id)
-    msgs = [
-        {**row, "esMio": row["idEmisor"] == id_usuario, "fecha": str(row["fecha"])}
-        for row in rows
-    ]
+    msgs = mensajes_service.get_mensajes(session.get("idUsuario"), id_receptor, request.args.get("desde", default=0, type=int))
     return jsonify({"success": True, "mensajes": msgs}), 200
 
 
@@ -316,5 +277,5 @@ def chat_enviar_paciente():
     if len(mensaje) > 2000:
         return jsonify({"success": False, "message": "Mensaje demasiado largo"}), 400
 
-    id_msg = mensajes_repository.enviar_mensaje(session.get("idUsuario"), receptor, mensaje)
+    id_msg = mensajes_service.enviar_mensaje(session.get("idUsuario"), receptor, mensaje)
     return jsonify({"success": True, "idMensaje": id_msg}), 201
