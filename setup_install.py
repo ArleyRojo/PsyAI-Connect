@@ -67,8 +67,9 @@ CREDENTIALS: dict[str, str] = {
     "GEMINI_MODEL":             "gemini-2.5-flash-lite",
 
     # Resend (emails)
-    "RESEND_API_KEY":           "",
-    "SMTP_FROM":                "manuelrojasq21@gmail.com",
+    "BREVO_API_KEY":            "",
+    "BREVO_FROM":               "manuelrojasq21@gmail.com",
+    "BREVO_FROM_NAME":          "PsyAI Connect",
 
     # Logs
     "LOG_LEVEL":                "ERROR",
@@ -102,7 +103,7 @@ ENV_SECTIONS: list[tuple[str, list[str]]] = [
         "GEMINI_API_KEY", "GEMINI_API_KEYS", "GEMINI_MODEL",
     ]),
     ("Resend (emails)", [
-        "RESEND_API_KEY", "SMTP_FROM",
+        "BREVO_API_KEY", "BREVO_FROM", "BREVO_FROM_NAME",
     ]),
     ("Logs", [
         "LOG_LEVEL", "LOG_FORMAT",
@@ -277,7 +278,7 @@ def configure_env():
     ok(f".env escrito → {ENV_FILE}")
 
     # Mostrar resumen (sin exponer valores secretos)
-    secret_keys = {"SECRET_KEY", "GEMINI_API_KEY", "GEMINI_API_KEYS", "RESEND_API_KEY", "DB_PASSWORD"}
+    secret_keys = {"SECRET_KEY", "GEMINI_API_KEY", "GEMINI_API_KEYS", "BREVO_API_KEY", "DB_PASSWORD"}
     print()
     for section_name, keys in ENV_SECTIONS:
         print(f"  {CYAN}{section_name}{RESET}")
@@ -299,8 +300,9 @@ def verify() -> bool:
         "DB_NAME":        "Base de datos",
         "GEMINI_API_KEY": "Gemini AI",
         "GEMINI_MODEL":   "Gemini AI",
-        "RESEND_API_KEY": "Resend",
-        "SMTP_FROM":      "Resend",
+        "BREVO_API_KEY": "Brevo",
+        "BREVO_FROM":    "Brevo",
+        "BREVO_FROM_NAME": "Brevo",
     }
 
     env = _read_existing_env()
