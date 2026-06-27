@@ -31,7 +31,7 @@ Digitalizar y centralizar la operación de un consultorio o red de psicólogos, 
 | **psutil** | Métricas del sistema (CPU, RAM, disco) |
 | **bcrypt** | Hash seguro de contraseñas |
 | **filetype** | Validación de tipo de archivos subidos |
-| **resend / Brevo** | Envío de correos transaccionales |
+| **Brevo** | Envío de correos transaccionales |
 
 ### Inteligencia Artificial
 | Tecnología | Uso |
