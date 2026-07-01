@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Facturación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+    <link rel="stylesheet" href="/css/pages/admin.css">
+    <link rel="stylesheet" href="/responsive/responsive-admin.css">
+<script src="/js/core/shared/theme.js"></script>
+    <script src="/js/core/shared/localStorage-detector.js"></script>
+    <style>
+      .factura-badge { display:inline-block; padding:.28rem .7rem; border-radius:999px; font-size:.75rem; font-weight:600; }
+      .factura-badge--pagado { background:#e8f5e9; color:#2e7d32; }
+      .factura-badge--pendiente { background:#fff8e1; color:#f57c00; }
+      .factura-badge--parcial { background:#fff3e0; color:#e65100; }
+      .factura-badge--anulada { background:#eceff1; color:#607d8b; }
+    </style>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm">
+    <div class="sidebar__logo text-center mt-3">
+      <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+      <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+    </div>
+    <nav class="nav flex-column mt-4">
+        <a href="../admin.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+        <a href="users.html" class="nav-link"><i class="fas fa-users me-2"></i> Usuarios <span id="sidebarBloqueados" class="badge rounded-pill ms-1" style="background:#ffebee;color:#c62828;font-size:.68rem;display:none;"></span></a>
+        <a href="roles.html" class="nav-link"><i class="fas fa-user-shield me-2"></i> Roles</a>
+        <a href="notifications.html" class="nav-link"><i class="fas fa-bell me-2"></i> Notificaciones</a>
+        <a href="logs.html" class="nav-link"><i class="fas fa-clipboard-list me-2"></i> Logs</a>
+        <a href="chatbot.config.html" class="nav-link"><i class="fas fa-robot me-2"></i> Chatbot</a>
+        <a href="facturacion.html" class="nav-link active"><i class="fas fa-file-invoice-dollar me-2"></i> Facturación</a>
+    </nav>
+    <div class="sidebar__footer mt-auto mb-3 text-center">
+        <div class="theme-switch-container mb-2">
+            <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+            <button id="theme-toggle" title="Cambiar modo"></button>
+            <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+        </div>
+      <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+    </div>
+  </aside>
+
+  <main class="main-content flex-grow-1 ms-250 p-4">
+
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-0"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Facturación</h1>
+        <small class="text-muted">Visibilidad y control total sobre todas las facturas del sistema.</small>
+      </div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
+    </header>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-file-invoice"></i></div>
+          <div><div class="stat-value" id="kpiTotalFacturado">$0</div><div class="stat-label">Total Facturado</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div><div class="stat-value" id="kpiTotalPagado">$0</div><div class="stat-label">Total Pagado</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+          <div><div class="stat-value" id="kpiTotalPendiente">$0</div><div class="stat-label">Pendiente / Parcial</div></div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-ban"></i></div>
+          <div><div class="stat-value" id="kpiAnuladas">0</div><div class="stat-label">Facturas Anuladas</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="toolbar mb-3">
+      <div class="toolbar-left flex-wrap">
+        <select id="filtroPaciente" class="form-control form-control-sm" style="width:170px;">
+          <option value="">Todos los pacientes</option>
+        </select>
+        <select id="filtroProfesional" class="form-control form-control-sm" style="width:170px;">
+          <option value="">Todos los profesionales</option>
+        </select>
+        <select id="filtroEstado" class="form-control form-control-sm" style="width:150px;">
+          <option value="">Todos los estados</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Parcial">Parcial</option>
+          <option value="Pagado">Pagado</option>
+          <option value="Anulada">Anulada</option>
+        </select>
+        <select id="filtroMetodoPago" class="form-control form-control-sm" style="width:140px;">
+          <option value="">Todos los métodos</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="banco">Banco</option>
+        </select>
+        <input type="date" id="filtroFechaDesde" class="form-control form-control-sm" style="width:150px;" title="Desde">
+        <input type="date" id="filtroFechaHasta" class="form-control form-control-sm" style="width:150px;" title="Hasta">
+        <button type="button" class="btn btn-primary btn-sm" id="btnAplicarFiltros">Aplicar</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnLimpiarFiltros">Limpiar</button>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm border-0">
+      <div class="table-responsive">
+        <table class="table table-clean mb-0">
+          <thead>
+            <tr>
+              <th class="ps-4">Fecha</th>
+              <th>Paciente</th>
+              <th>Profesional</th>
+              <th>Monto</th>
+              <th>Método</th>
+              <th>Estado</th>
+              <th class="text-end pe-4">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaFacturasAdmin"><tr><td colspan="7" class="text-center text-muted py-3">Cargando facturas...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal: Ver Detalle -->
+<div class="modal fade" id="modalDetalleFactura" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold"><i class="fas fa-receipt me-2 text-primary"></i>Detalle de Factura</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="detalleFacturaBody">
+        <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Anular Factura -->
+<div class="modal fade modal-cancel-custom" id="modalAnularFactura" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger"><i class="fas fa-ban me-2"></i>Anular Factura</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-3">
+        <p class="text-muted mb-3">Indica el motivo por el cual deseas anular esta factura. Esta acción no se puede deshacer.</p>
+        <div class="mb-3">
+          <label for="motivoAnulacionFactura" class="form-label fw-semibold">Motivo de anulación <span class="text-danger">*</span></label>
+          <textarea id="motivoAnulacionFactura" class="form-control" rows="4" maxlength="255" placeholder="Ej: Factura duplicada, error en el monto, etc."></textarea>
+          <div class="form-text text-end"><span id="charCountAnulacion">0</span>/255 caracteres</div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Volver</button>
+        <button type="button" class="btn btn-danger px-4" id="btnConfirmarAnular">
+          <i class="fas fa-ban me-1"></i>Confirmar Anulación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/modules/auth/auth-guard.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/nombre.usuario.js"></script>
+<script>
+// ============================================================
+// FACTURACIÓN — ADMIN
+// ============================================================
+const COP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+
+let _facturaAAnular = null;
+
+function estadoBadge(factura) {
+  if (factura.anulada) return '<span class="factura-badge factura-badge--anulada">Anulada</span>';
+  if (factura.estadoPago === 'Pagado') return '<span class="factura-badge factura-badge--pagado">Pagado</span>';
+  if (factura.estadoPago === 'Parcial') return '<span class="factura-badge factura-badge--parcial">Parcial</span>';
+  return '<span class="factura-badge factura-badge--pendiente">Pendiente</span>';
+}
+
+async function cargarPacientesYProfesionales() {
+  try {
+    const [resPacientes, resProfesionales] = await Promise.all([
+      fetch('/api/pacientes?limit=100', { credentials: 'include' }),
+      fetch('/api/profesionales', { credentials: 'include' })
+    ]);
+    const dataPacientes = await resPacientes.json();
+    const dataProfesionales = await resProfesionales.json();
+
+    const selectPaciente = document.getElementById('filtroPaciente');
+    (dataPacientes.pacientes || []).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.idUsuario;
+      opt.textContent = p.nombre;
+      selectPaciente.appendChild(opt);
+    });
+
+    const selectProfesional = document.getElementById('filtroProfesional');
+    (dataProfesionales.profesionales || []).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.idUsuario;
+      opt.textContent = p.nombre;
+      selectProfesional.appendChild(opt);
+    });
+  } catch (e) {
+    console.error('Error cargando pacientes/profesionales:', e);
+  }
+}
+
+function actualizarKPIs(facturas) {
+  let totalFacturado = 0, totalPagado = 0, totalPendiente = 0, anuladas = 0;
+  facturas.forEach(f => {
+    if (f.anulada) { anuladas++; return; }
+    totalFacturado += Number(f.monto);
+    if (f.estadoPago === 'Pagado') totalPagado += Number(f.monto);
+    else totalPendiente += Number(f.monto);
+  });
+  document.getElementById('kpiTotalFacturado').textContent = COP.format(totalFacturado);
+  document.getElementById('kpiTotalPagado').textContent = COP.format(totalPagado);
+  document.getElementById('kpiTotalPendiente').textContent = COP.format(totalPendiente);
+  document.getElementById('kpiAnuladas').textContent = anuladas;
+}
+
+async function cargarFacturasAdmin() {
+  const tbody = document.getElementById('tablaFacturasAdmin');
+  tbody.innerHTML = '<tr><td colspan="7" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+
+  const params = new URLSearchParams();
+  const paciente = document.getElementById('filtroPaciente').value;
+  const profesional = document.getElementById('filtroProfesional').value;
+  const estado = document.getElementById('filtroEstado').value;
+  const metodoPago = document.getElementById('filtroMetodoPago').value;
+  const fechaDesde = document.getElementById('filtroFechaDesde').value;
+  const fechaHasta = document.getElementById('filtroFechaHasta').value;
+  if (paciente) params.set('paciente', paciente);
+  if (profesional) params.set('profesional', profesional);
+  if (estado) params.set('estado', estado);
+  if (metodoPago) params.set('metodoPago', metodoPago);
+  if (fechaDesde) params.set('fecha_desde', fechaDesde);
+  if (fechaHasta) params.set('fecha_hasta', fechaHasta);
+
+  try {
+    const res = await fetch(`/api/facturas?${params.toString()}`, { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success || !data.facturas || data.facturas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No hay facturas registradas</td></tr>';
+      actualizarKPIs([]);
+      return;
+    }
+
+    actualizarKPIs(data.facturas);
+
+    tbody.innerHTML = data.facturas.map(f => `
+      <tr>
+        <td>${new Date(f.fecha).toLocaleDateString('es-CO')}</td>
+        <td>${f.paciente}</td>
+        <td>${f.profesional}</td>
+        <td class="fw-semibold">${COP.format(f.monto)}</td>
+        <td class="text-capitalize">${f.metodoPago}</td>
+        <td>${estadoBadge(f)}</td>
+        <td class="text-center">
+          <button class="btn btn-outline-primary btn-sm me-1" onclick="verDetalleFactura(${f.idFactura})" title="Ver detalle"><i class="fas fa-eye"></i></button>
+          ${!f.anulada ? `<button class="btn btn-outline-danger btn-sm" onclick="abrirModalAnular(${f.idFactura})" title="Anular"><i class="fas fa-ban"></i></button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error al cargar facturas</td></tr>';
+  }
+}
+
+async function verDetalleFactura(idFactura) {
+  const modal = new bootstrap.Modal(document.getElementById('modalDetalleFactura'));
+  const body = document.getElementById('detalleFacturaBody');
+  body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+  modal.show();
+
+  try {
+    const res = await fetch(`/api/facturas/${idFactura}`, { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success || !data.factura) {
+      body.innerHTML = '<p class="text-danger text-center">No se pudo cargar el detalle.</p>';
+      return;
+    }
+    const f = data.factura;
+    const itemsHtml = (f.items || []).map(it => `
+      <tr><td>${it.descripcion}</td><td class="text-end">${COP.format(it.precioUnitario)}</td></tr>
+    `).join('');
+    body.innerHTML = `
+      <div class="mb-3">
+        <div><strong>Factura #${f.idFactura}</strong></div>
+        <div class="text-muted small">${new Date(f.fecha).toLocaleString('es-CO')}</div>
+        <div class="text-muted small">Paciente: ${f.paciente} · Profesional: ${f.profesional}</div>
+      </div>
+      <table class="table table-sm">
+        <thead><tr><th>Concepto</th><th class="text-end">Valor</th></tr></thead>
+        <tbody>${itemsHtml || '<tr><td colspan="2" class="text-muted">Sin ítems detallados</td></tr>'}</tbody>
+        <tfoot><tr><th>Total</th><th class="text-end">${COP.format(f.monto)}</th></tr></tfoot>
+      </table>
+      ${f.anulada ? `<div class="alert alert-secondary mb-0"><strong>Anulada:</strong> ${f.motivoAnulacion || 'Sin motivo registrado'}</div>` : estadoBadge(f)}
+    `;
+  } catch (e) {
+    body.innerHTML = '<p class="text-danger text-center">Error al cargar el detalle.</p>';
+  }
+}
+
+function abrirModalAnular(idFactura) {
+  _facturaAAnular = idFactura;
+  document.getElementById('motivoAnulacionFactura').value = '';
+  document.getElementById('charCountAnulacion').textContent = '0';
+  new bootstrap.Modal(document.getElementById('modalAnularFactura')).show();
+}
+
+document.getElementById('motivoAnulacionFactura').addEventListener('input', function () {
+  document.getElementById('charCountAnulacion').textContent = this.value.length;
+});
+
+document.getElementById('btnConfirmarAnular').addEventListener('click', async () => {
+  const motivo = document.getElementById('motivoAnulacionFactura').value.trim();
+  if (!motivo) { PsyAIAlerts.error('Error', 'Debes indicar el motivo de la anulación.'); return; }
+  if (!_facturaAAnular) return;
+
+  const btn = document.getElementById('btnConfirmarAnular');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Anulando...';
+
+  try {
+    const res = await fetch(`/api/facturas/${_facturaAAnular}/anular`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ motivo })
+    });
+    const data = await res.json();
+    bootstrap.Modal.getInstance(document.getElementById('modalAnularFactura')).hide();
+    if (data.success) {
+      PsyAIAlerts.success('Factura anulada', data.message);
+      _facturaAAnular = null;
+      cargarFacturasAdmin();
+    } else {
+      PsyAIAlerts.error('Error', data.message || 'No se pudo anular la factura.');
+    }
+  } catch (e) {
+    PsyAIAlerts.error('Error', 'Error al conectar con el servidor.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+});
+
+document.getElementById('btnAplicarFiltros').addEventListener('click', cargarFacturasAdmin);
+document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
+  document.getElementById('filtroPaciente').value = '';
+  document.getElementById('filtroProfesional').value = '';
+  document.getElementById('filtroEstado').value = '';
+  document.getElementById('filtroMetodoPago').value = '';
+  document.getElementById('filtroFechaDesde').value = '';
+  document.getElementById('filtroFechaHasta').value = '';
+  cargarFacturasAdmin();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  cargarPacientesYProfesionales();
+  cargarFacturasAdmin();
+});
+</script>
+</body>
+</html>

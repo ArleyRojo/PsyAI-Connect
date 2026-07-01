@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Mis Facturas</title>
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/css/pages/patient.css">
+<script src="/js/core/shared/theme.js"></script>
+<style>
+  .factura-badge { display:inline-block; padding:.28rem .7rem; border-radius:999px; font-size:.75rem; font-weight:600; }
+  .factura-badge--pagado { background:#e8f5e9; color:#2e7d32; }
+  .factura-badge--pendiente { background:#fff8e1; color:#f57c00; }
+  .factura-badge--parcial { background:#fff3e0; color:#e65100; }
+  .factura-badge--anulada { background:#eceff1; color:#607d8b; }
+  .facturas-table td, .facturas-table th { vertical-align:middle; }
+  .factura-resumen-card { display:flex; align-items:center; gap:14px; }
+  .factura-resumen-card .fr-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+  .factura-resumen-card .fr-label { font-size:.78rem; color:var(--text-muted,#788); }
+  .factura-resumen-card .fr-value { font-size:1.35rem; font-weight:700; }
+</style>
+</head>
+<body class="patient-agenda-page">
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+  <!-- Sidebar -->
+  <aside class="sidebar d-flex flex-column position-fixed">
+    <div class="sidebar__logo text-center mt-3">
+      <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+      <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+    </div>
+
+    <nav class="nav flex-column mt-4">
+      <a href="../patient.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
+      <a href="chatbot.html" class="nav-link"><i class="fas fa-robot me-2"></i>Chatbot Emocional</a>
+      <a href="agenda-quotes.html" class="nav-link"><i class="fas fa-calendar-alt me-2"></i> Agenda de Citas</a>
+      <a href="facturas.html" class="nav-link active"><i class="fas fa-file-invoice-dollar me-2"></i> Mis Facturas</a>
+      <a href="mensajes.html" class="nav-link"><i class="fas fa-comments me-2"></i> Mensajes</a>
+      <a href="evolution.html" class="nav-link"><i class="fas fa-chart-area me-2"></i> Mi Evolución</a>
+      <a href="historia_clinica_paciente.html" class="nav-link"><i class="fas fa-file-medical me-2"></i> Mis Documentos</a>
+      <a href="my.profile.html" class="nav-link border-top pt-3 mt-3"><i class="fas fa-user-circle me-2"></i> Mi Perfil</a>
+    </nav>
+
+    <div class="sidebar__footer mt-auto mb-3 text-center">
+      <div class="theme-switch-container mb-2">
+          <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+          <button id="theme-toggle" title="Cambiar modo"></button>
+          <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+      </div>
+      <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="main-content flex-grow-1">
+    <header class="main-header d-flex justify-content-between align-items-center">
+      <h1><i class="fas fa-file-invoice-dollar me-2"></i>Mis Facturas</h1>
+      <div class="user-info d-flex align-items-center">
+        <span class="user-greeting" id="nombrePaciente">Hola, </span>
+        <button class="btn-notif" title="Notificaciones">
+          <i class="fas fa-bell"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23E8F1FF'/%3E%3C/svg%3E" alt="Avatar" class="user-avatar" data-avatar="inicial" data-nombre="">
+      </div>
+    </header>
+
+    <!-- Resumen -->
+    <section class="section-card">
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <div class="factura-resumen-card">
+            <div class="fr-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fas fa-check-circle"></i></div>
+            <div>
+              <div class="fr-label">Total Pagado</div>
+              <div class="fr-value" id="resumenPagado">$0</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="factura-resumen-card">
+            <div class="fr-icon" style="background:#fff8e1;color:#f57c00"><i class="fas fa-clock"></i></div>
+            <div>
+              <div class="fr-label">Total Pendiente</div>
+              <div class="fr-value" id="resumenPendiente">$0</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="factura-resumen-card">
+            <div class="fr-icon" style="background:#e3f2fd;color:#1565c0"><i class="fas fa-file-invoice"></i></div>
+            <div>
+              <div class="fr-label">Total General</div>
+              <div class="fr-value" id="resumenTotal">$0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabla de facturas -->
+    <section class="section-card">
+      <div class="section-title mb-2"><i class="fas fa-list"></i> Historial de Facturas</div>
+      <table class="citas-table w-100 facturas-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Profesional</th>
+            <th>Servicio(s)</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th class="text-center">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tablaFacturas"><tr><td colspan="6" class="text-center text-muted py-3">Cargando facturas...</td></tr></tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL 1: SELECCIÓN DE MÉTODO DE PAGO -->
+<div class="modal fade" id="facturaModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2" style="color:var(--primary)"></i>Confirmar Pago</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+  <div class="mb-4">
+    <label class="form-label-pay">Monto a pagar (COP)</label>
+    <input type="number" id="montoPagoModal" class="form-control form-control-pay" value="0" readonly>
+  </div>
+  <div class="pago-section-title">M&eacute;todo de pago</div>
+  <div class="pay-methods">
+    <div class="pay-method-card" data-metodo="pse" onclick="seleccionarMetodo('pse')">
+      <span class="pm-icon">🏦</span>
+      <div class="pm-label">PSE</div>
+    </div>
+    <div class="pay-method-card" data-metodo="tarjeta" onclick="seleccionarMetodo('tarjeta')">
+      <span class="pm-icon">💳</span>
+      <div class="pm-label">Cr&eacute;dito / D&eacute;bito</div>
+    </div>
+    <div class="pay-method-card" data-metodo="efectivo" onclick="seleccionarMetodo('efectivo')">
+      <span class="pm-icon">💰</span>
+      <div class="pm-label">Efectivo</div>
+      <span class="pm-badge">Solo presencial</span>
+    </div>
+    <div class="pay-method-card" data-metodo="transferencia" onclick="seleccionarMetodo('transferencia')">
+      <span class="pm-icon">🏧</span>
+      <div class="pm-label">Transferencia</div>
+    </div>
+  </div>
+  <input type="hidden" id="metodoPagoModal" value="">
+  <div id="wrapGuardados" style="display:none">
+    <div class="pago-section-title">Guardados</div>
+    <div class="saved-methods" id="listaSaved"></div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn-pago-cancelar" data-bs-dismiss="modal">Cancelar</button>
+  <button id="btnContinuarPago" class="btn-pago-continuar">Continuar →</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- MODAL 2: FORMULARIO + TARJETA VISUAL -->
+<div class="modal fade" id="modalPagoFinal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+  <h5 class="modal-title fw-bold" id="tituloMetodoPago"><i class="fas fa-credit-card me-2" style="color:var(--primary)"></i>Datos de pago</h5>
+  <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+<div class="row g-4">
+  <div class="col-12 col-md-5">
+    <div id="wrapWompiPanel" style="display:none">
+      <div class="pse-panel">
+        <div class="pse-logo" id="wompiPanelLogo">WOMPI</div>
+        <small>Pago Seguro en L&iacute;nea</small>
+        <hr style="border-color:#93c5fd; margin:12px 0">
+        <p style="font-size:.8rem;color:#1d4ed8;margin:0">Ser&aacute;s redirigido a Wompi para completar tu pago de forma segura. Al finalizar volver&aacute;s autom&aacute;ticamente a esta p&aacute;gina.</p>
+      </div>
+    </div>
+    <div id="wrapEfectivoPanel" style="display:none">
+      <div class="cash-instructions-panel">
+        <div class="cip-header">
+          <i class="fas fa-hand-holding-usd"></i>
+          <div class="cip-title">Pago en Efectivo</div>
+        </div>
+        <div class="cip-step"><span class="step-num">1</span><span>Ac&eacute;rcate a nuestro consultorio en la direcci&oacute;n registrada.</span></div>
+        <div class="cip-step"><span class="step-num">2</span><span>Indica que deseas pagar la factura pendiente.</span></div>
+        <div class="cip-step"><span class="step-num">3</span><span>Entrega el monto exacto en efectivo.</span></div>
+        <div class="cip-step"><span class="step-num">4</span><span>Recibir&aacute;s tu comprobante de pago. &iexcl;Listo!</span></div>
+      </div>
+    </div>
+    <div id="wrapTransferenciaPanel" style="display:none">
+      <div class="transferencia-panel">
+        <div class="transferencia-header"><i class="fas fa-university"></i><span>Transferencia Bancaria</span></div>
+        <p class="transferencia-sub">Selecciona una cuenta para realizar la transferencia</p>
+        <div id="listaCuentasTransferencia"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-7">
+    <div id="contenidoMetodoPago"></div>
+  </div>
+</div>
+</div>
+<div class="modal-footer">
+  <button id="btnAtras" class="btn-pago-cancelar">← Atr&aacute;s</button>
+  <button id="btnFinalizarPago" class="btn-pago-continuar">Finalizar Pago ✓</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Modal Comprobante de Pago -->
+<div class="modal fade" id="modalComprobante" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+  <h5 class="modal-title fw-bold"><i class="fas fa-receipt me-2" style="color:var(--primary)"></i>Comprobante de Pago</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body" id="comprobanteBody">
+  <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+  <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print me-1"></i>Imprimir</button>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/modules/auth/auth-guard.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+<link rel="stylesheet" href="/css/components/custom-alerts.css">
+<script src="/js/core/shared/alerts.js"></script>
+<script src="/js/modules/patient/aside.js?v=20260522-5"></script>
+<script src="/js/modules/auth/logout.js"></script>
+<script src="/js/core/shared/nombre.usuario.js"></script>
+<script>
+// ============================================================
+// FACTURACIÓN — PACIENTE
+// ============================================================
+const COP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+
+let _facturasGlobal = [];
+let _facturaAPagar = null;
+
+const CUENTAS_BANCARIAS = [
+  { banco: 'Bancolombia', tipo: 'Cuenta de Ahorros', numero: '1234-567890-12', titular: 'PsyAI Connect S.A.S.', documento: 'NIT 901.234.567-8' },
+  { banco: 'Davivienda', tipo: 'Cuenta Corriente', numero: '9876-543210-98', titular: 'PsyAI Connect S.A.S.', documento: 'NIT 901.234.567-8' },
+  { banco: 'Nequi', tipo: 'Cuenta Digital', numero: '3001234567', titular: 'PsyAI Connect S.A.S.', documento: 'NIT 901.234.567-8' }
+];
+
+function estadoBadge(factura) {
+  if (factura.anulada) return '<span class="factura-badge factura-badge--anulada">Anulada</span>';
+  if (factura.estadoPago === 'Pagado') return '<span class="factura-badge factura-badge--pagado">Pagado</span>';
+  if (factura.estadoPago === 'Parcial') return '<span class="factura-badge factura-badge--parcial">Parcial</span>';
+  return '<span class="factura-badge factura-badge--pendiente">Pendiente</span>';
+}
+
+function accionesFactura(factura) {
+  if (factura.anulada) {
+    return `<small class="text-muted">${factura.motivoAnulacion || 'Sin motivo registrado'}</small>`;
+  }
+  if (factura.estadoPago === 'Pagado') {
+    return `<button class="btn btn-outline-primary btn-sm" onclick="verComprobante(${factura.idFactura})"><i class="fas fa-receipt me-1"></i>Ver comprobante</button>`;
+  }
+  return `<button class="btn-primary-gradient" style="padding:6px 16px;width:auto" onclick="abrirModalPago(${factura.idFactura}, ${factura.monto})"><i class="fas fa-credit-card me-1"></i>Pagar</button>`;
+}
+
+async function cargarFacturas() {
+  const tbody = document.getElementById('tablaFacturas');
+  tbody.innerHTML = '<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+
+  try {
+    const res = await fetch('/api/facturas/mias', { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success || !data.facturas || data.facturas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No tienes facturas registradas</td></tr>';
+      actualizarResumen([]);
+      return;
+    }
+
+    _facturasGlobal = data.facturas;
+    actualizarResumen(data.facturas);
+
+    tbody.innerHTML = data.facturas.map(f => `
+      <tr>
+        <td>${new Date(f.fecha).toLocaleDateString('es-CO')}</td>
+        <td>${f.profesional || '—'}</td>
+        <td>${f.servicios || 'Consulta psicológica'}</td>
+        <td class="fw-semibold">${COP.format(f.monto)}</td>
+        <td>${estadoBadge(f)}</td>
+        <td class="text-center">${accionesFactura(f)}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar facturas</td></tr>';
+  }
+}
+
+function actualizarResumen(facturas) {
+  let pagado = 0, pendiente = 0, total = 0;
+  facturas.forEach(f => {
+    if (f.anulada) return;
+    total += Number(f.monto);
+    if (f.estadoPago === 'Pagado') pagado += Number(f.monto);
+    else pendiente += Number(f.monto);
+  });
+  document.getElementById('resumenPagado').textContent = COP.format(pagado);
+  document.getElementById('resumenPendiente').textContent = COP.format(pendiente);
+  document.getElementById('resumenTotal').textContent = COP.format(total);
+}
+
+// ── Ver comprobante ────────────────────────────────────────
+async function verComprobante(idFactura) {
+  const modal = new bootstrap.Modal(document.getElementById('modalComprobante'));
+  const body = document.getElementById('comprobanteBody');
+  body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+  modal.show();
+
+  try {
+    const res = await fetch(`/api/facturas/${idFactura}`, { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success || !data.factura) {
+      body.innerHTML = '<p class="text-danger text-center">No se pudo cargar el comprobante.</p>';
+      return;
+    }
+    const f = data.factura;
+    const itemsHtml = (f.items || []).map(it => `
+      <tr><td>${it.descripcion}</td><td class="text-end">${COP.format(it.precioUnitario)}</td></tr>
+    `).join('');
+    body.innerHTML = `
+      <div class="mb-3">
+        <div><strong>Factura #${f.idFactura}</strong></div>
+        <div class="text-muted small">${new Date(f.fecha).toLocaleString('es-CO')}</div>
+        <div class="text-muted small">Profesional: ${f.profesional}</div>
+      </div>
+      <table class="table table-sm">
+        <thead><tr><th>Concepto</th><th class="text-end">Valor</th></tr></thead>
+        <tbody>${itemsHtml || '<tr><td colspan="2" class="text-muted">Sin ítems detallados</td></tr>'}</tbody>
+        <tfoot><tr><th>Total</th><th class="text-end">${COP.format(f.monto)}</th></tr></tfoot>
+      </table>
+      <div class="text-center"><span class="factura-badge factura-badge--pagado">Pagado</span></div>
+    `;
+  } catch (e) {
+    body.innerHTML = '<p class="text-danger text-center">Error al cargar el comprobante.</p>';
+  }
+}
+
+// ── Flujo de pago (visual PSE / tarjeta / efectivo / transferencia) ──
+function abrirModalPago(idFactura, monto) {
+  _facturaAPagar = idFactura;
+  document.getElementById('montoPagoModal').value = monto;
+  document.querySelectorAll('.pay-method-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('metodoPagoModal').value = '';
+  document.getElementById('wrapGuardados').style.display = 'none';
+  new bootstrap.Modal(document.getElementById('facturaModal')).show();
+}
+
+window.seleccionarMetodo = function (metodo) {
+  document.querySelectorAll('.pay-method-card').forEach(c => c.classList.remove('active'));
+  const card = document.querySelector(`.pay-method-card[data-metodo="${metodo}"]`);
+  if (card) card.classList.add('active');
+  document.getElementById('metodoPagoModal').value = metodo;
+};
+
+window.copiarCuenta = function (btn, numero) {
+  navigator.clipboard.writeText(numero).then(() => {
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copiar'; }, 2000);
+  }).catch(() => {});
+};
+
+document.getElementById('btnContinuarPago').addEventListener('click', () => {
+  const metodo = document.getElementById('metodoPagoModal').value.trim();
+  if (!metodo) { PsyAIAlerts.error('Error', 'Selecciona un método de pago.'); return; }
+
+  const monto = Number(document.getElementById('montoPagoModal').value);
+  const tituloEl = document.getElementById('tituloMetodoPago');
+  const contenidoEl = document.getElementById('contenidoMetodoPago');
+  const wrapWompi = document.getElementById('wrapWompiPanel');
+  const wrapEfectivo = document.getElementById('wrapEfectivoPanel');
+  const wrapTransferencia = document.getElementById('wrapTransferenciaPanel');
+
+  contenidoEl.innerHTML = '';
+  wrapWompi.style.display = 'none';
+  wrapEfectivo.style.display = 'none';
+  wrapTransferencia.style.display = 'none';
+
+  if (metodo === 'pse' || metodo === 'tarjeta') {
+    tituloEl.textContent = metodo === 'pse' ? 'PSE — Pago en línea' : 'Tarjeta de Crédito / Débito';
+    wrapWompi.style.display = 'block';
+    document.getElementById('wompiPanelLogo').textContent = metodo === 'pse' ? 'PSE' : 'WOMPI';
+    contenidoEl.innerHTML = `
+      <div class="pago-summary-row">
+        <span class="ps-label">Total a pagar</span>
+        <span class="ps-value">${COP.format(monto)}</span>
+      </div>
+      <div class="alert alert-info" style="font-size:0.82rem;border-radius:10px">
+        <i class="fas fa-shield-alt me-2"></i>Tu factura quedará <strong>Pendiente</strong> hasta que Wompi confirme el pago. No compartimos tus datos de banco o tarjeta — los ingresas directamente en la pasarela de Wompi.
+      </div>`;
+  } else if (metodo === 'efectivo') {
+    tituloEl.textContent = 'Pago en Efectivo';
+    wrapEfectivo.style.display = 'block';
+    contenidoEl.innerHTML = `
+      <div class="pago-summary-row">
+        <span class="ps-label">Total a pagar</span>
+        <span class="ps-value">${COP.format(monto)}</span>
+      </div>
+      <div class="alert alert-info" style="font-size:0.82rem;border-radius:10px;margin-bottom:0">
+        <i class="fas fa-info-circle me-2"></i>Tu factura quedará <strong>Pendiente</strong> hasta que tu profesional o un administrador confirme el pago en efectivo.
+      </div>`;
+  } else if (metodo === 'transferencia') {
+    tituloEl.textContent = 'Transferencia Bancaria';
+    wrapTransferencia.style.display = 'block';
+    const cuentasHtml = CUENTAS_BANCARIAS.map(c => `
+      <div class="bank-account-card">
+        <div class="bac-header">
+          <span class="bac-bank"><i class="fas fa-university me-2" style="color:#0d47a1"></i>${c.banco}</span>
+          <span class="bac-type">${c.tipo}</span>
+        </div>
+        <div class="bac-number">${c.numero}</div>
+        <div class="bac-holder">${c.titular} · ${c.documento}</div>
+        <button type="button" class="bac-copy-btn" onclick="copiarCuenta(this, '${c.numero}')"><i class="fas fa-copy"></i> Copiar</button>
+      </div>`).join('');
+    contenidoEl.innerHTML = `
+      <div class="bank-accounts-section">
+        <div class="section-subtitle"><i class="fas fa-university"></i> Cuentas disponibles</div>
+        ${cuentasHtml}
+      </div>
+      <div class="pago-summary-row">
+        <span class="ps-label">Total a transferir</span>
+        <span class="ps-value">${COP.format(monto)}</span>
+      </div>
+      <div class="alert alert-info" style="font-size:0.82rem;border-radius:10px;margin-bottom:0">
+        <i class="fas fa-info-circle me-2"></i>Envía tu comprobante por Mensajes a tu profesional. Tu factura quedará <strong>Pendiente</strong> hasta que confirme el pago recibido.
+      </div>`;
+  }
+
+  bootstrap.Modal.getInstance(document.getElementById('facturaModal')).hide();
+  window.modalPagoFinal.show();
+});
+
+document.getElementById('btnAtras').addEventListener('click', () => {
+  window.modalPagoFinal.hide();
+  new bootstrap.Modal(document.getElementById('facturaModal')).show();
+});
+
+// ── Finalizar: PSE/tarjeta salen a Wompi de verdad; efectivo/transferencia quedan
+// pendientes de confirmación manual (nunca se auto-marcan como pagadas) ──
+document.getElementById('btnFinalizarPago').addEventListener('click', async () => {
+  const metodo = document.getElementById('metodoPagoModal').value.trim();
+
+  if (metodo === 'efectivo' || metodo === 'transferencia') {
+    window.modalPagoFinal.hide();
+    PsyAIAlerts.info('Pago registrado', 'Tu factura seguirá como Pendiente hasta que se confirme el pago.');
+    _facturaAPagar = null;
+    return;
+  }
+
+  if (!_facturaAPagar) { PsyAIAlerts.error('Error', 'No se identificó la factura a pagar.'); return; }
+
+  const btn = document.getElementById('btnFinalizarPago');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirigiendo a Wompi...';
+
+  try {
+    // Recordamos qué factura estamos pagando para reconciliar al volver de Wompi
+    localStorage.setItem('psyai_wompi_factura', String(_facturaAPagar));
+
+    const res = await fetch(`/api/facturas/${_facturaAPagar}/iniciar-pago`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (!data.success) {
+      PsyAIAlerts.error('Error', data.message || 'No se pudo iniciar el pago con Wompi.');
+      btn.disabled = false;
+      btn.innerHTML = original;
+      return;
+    }
+
+    // Formulario GET real hacia el checkout hosteado de Wompi (no un fetch: navega el navegador)
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = data.checkoutUrl;
+    const campos = {
+      'public-key': data.publicKey,
+      'currency': data.currency,
+      'amount-in-cents': data.amountInCents,
+      'reference': data.reference,
+      'signature:integrity': data.signature,
+      'redirect-url': data.redirectUrl
+    };
+    Object.entries(campos).forEach(([name, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  } catch (e) {
+    PsyAIAlerts.error('Error', 'Error al conectar con el servidor.');
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+});
+
+// ── Reconciliación al volver de Wompi: ?factura=<id>&id=<transactionId> ──
+async function verificarRetornoWompi() {
+  const params = new URLSearchParams(window.location.search);
+  const transactionId = params.get('id');
+  const idFactura = params.get('factura') || localStorage.getItem('psyai_wompi_factura');
+  if (!transactionId || !idFactura) return;
+
+  history.replaceState({}, '', window.location.pathname);
+  localStorage.removeItem('psyai_wompi_factura');
+
+  try {
+    const res = await fetch(`/api/facturas/${idFactura}/verificar-pago?transactionId=${encodeURIComponent(transactionId)}`, {
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (data.success && data.estadoPago === 'Pagado') {
+      PsyAIAlerts.success('¡Pago aprobado!', 'Wompi confirmó tu pago y la factura ya está marcada como pagada.');
+    } else if (data.success && data.wompiStatus === 'DECLINED') {
+      PsyAIAlerts.error('Pago rechazado', 'Wompi rechazó la transacción. Puedes intentar nuevamente.');
+    } else if (data.success && data.wompiStatus === 'PENDING') {
+      PsyAIAlerts.info('Pago en proceso', 'Wompi todavía está confirmando tu pago, actualiza en unos minutos.');
+    } else {
+      PsyAIAlerts.warning('No se pudo verificar', data.message || 'Intenta consultar el estado más tarde.');
+    }
+  } catch (e) {
+    PsyAIAlerts.warning('No se pudo verificar', 'No fue posible confirmar el estado del pago con Wompi.');
+  } finally {
+    cargarFacturas();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  window.modalPagoFinal = new bootstrap.Modal(document.getElementById('modalPagoFinal'));
+  cargarFacturas();
+  verificarRetornoWompi();
+});
+</script>
+</body>
+</html>

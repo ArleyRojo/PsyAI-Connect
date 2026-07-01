@@ -89,7 +89,7 @@ def get_professional_appointments(professional_id, *, pending_only=False, page=1
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             f"""
-            SELECT c.idCita, r.nombre as paciente, r.fotoPerfil, c.fecha, c.hora,
+            SELECT c.idCita, c.idPaciente, r.nombre as paciente, r.fotoPerfil, c.fecha, c.hora,
                    c.tipoCita, c.motivo, c.estado, c.creado_por_profesional
             FROM Citas c
             JOIN Register r ON c.idPaciente = r.idUsuario

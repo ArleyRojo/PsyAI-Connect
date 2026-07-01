@@ -105,6 +105,19 @@ class Config:
     WTF_CSRF_CHECK_DEFAULT = os.getenv("WTF_CSRF_CHECK_DEFAULT", "true").lower() == "true"
     WTF_CSRF_HEADERS = os.getenv("WTF_CSRF_HEADERS", "X-CSRFToken,X-CSRF-Token").split(",")
 
+    # Wompi (pasarela de pagos PSE/tarjeta) — https://docs.wompi.co
+    # WOMPI_ENV=test usa sandbox.wompi.co con llaves pub_test_/prv_test_
+    # WOMPI_ENV=prod usa production.wompi.co con llaves pub_prod_/prv_prod_
+    WOMPI_ENV = os.getenv("WOMPI_ENV", "test").lower()
+    WOMPI_PUBLIC_KEY = os.getenv("WOMPI_PUBLIC_KEY", "")
+    WOMPI_PRIVATE_KEY = os.getenv("WOMPI_PRIVATE_KEY", "")
+    WOMPI_INTEGRITY_SECRET = os.getenv("WOMPI_INTEGRITY_SECRET", "")
+    WOMPI_EVENTS_SECRET = os.getenv("WOMPI_EVENTS_SECRET", "")
+    WOMPI_API_BASE = (
+        "https://production.wompi.co/v1" if WOMPI_ENV == "prod" else "https://sandbox.wompi.co/v1"
+    )
+    WOMPI_CHECKOUT_URL = "https://checkout.wompi.co/p/"
+
 
 class JSONFormatter(logging.Formatter):
     # Formateador de logs en JSON estructurado, ideal para ingestión en sistemas de monitoreo

@@ -374,7 +374,28 @@ def init_db():
             extra_alters.append("ALTER TABLE Notificaciones MODIFY COLUMN estado ENUM('enviado','pendiente') DEFAULT 'enviado'")
 
         cursor.execute("""
-            SELECT COUNT(*) FROM information_schema.COLUMNS 
+            SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+            WHERE TABLE_NAME = 'facturas' AND COLUMN_NAME = 'estadoPago' AND TABLE_SCHEMA = DATABASE()
+        """)
+        estado_pago_col = cursor.fetchone()
+        if estado_pago_col and "Parcial" not in estado_pago_col[0]:
+            extra_alters.append("ALTER TABLE facturas MODIFY COLUMN estadoPago ENUM('Pendiente','Parcial','Pagado') DEFAULT 'Pendiente'")
+
+        for column_name, alter in (
+            ("anulada", "ALTER TABLE facturas ADD COLUMN anulada BOOLEAN DEFAULT FALSE"),
+            ("motivoAnulacion", "ALTER TABLE facturas ADD COLUMN motivoAnulacion VARCHAR(255) DEFAULT NULL"),
+            ("wompiReference", "ALTER TABLE facturas ADD COLUMN wompiReference VARCHAR(64) DEFAULT NULL"),
+            ("wompiTransactionId", "ALTER TABLE facturas ADD COLUMN wompiTransactionId VARCHAR(64) DEFAULT NULL"),
+        ):
+            cursor.execute("""
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_NAME = 'facturas' AND COLUMN_NAME = %s AND TABLE_SCHEMA = DATABASE()
+            """, (column_name,))
+            if cursor.fetchone()[0] == 0:
+                extra_alters.append(alter)
+
+        cursor.execute("""
+            SELECT COUNT(*) FROM information_schema.COLUMNS
             WHERE TABLE_NAME = 'PacientesProfesional' AND COLUMN_NAME = 'diagnostico' AND TABLE_SCHEMA = DATABASE()
         """)
         if cursor.fetchone()[0] == 0:

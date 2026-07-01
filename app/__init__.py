@@ -21,6 +21,7 @@ from app.database.connection import init_pool
 from app.routes.admin_routes import admin_bp
 from app.routes.appointment_routes import appointment_bp
 from app.routes.auth_routes import auth_bp
+from app.routes.invoice_routes import invoice_bp
 from app.routes.page_routes import pages_bp
 from app.routes.patient_routes import patient_bp
 from app.routes.professional_routes import professional_bp
@@ -43,6 +44,7 @@ TABLAS_CRITICAS = [
     "EvolucionPaciente", "PacientesProfesional", "Notificaciones",
     "ChatbotConfig", "EncuestaChatbot", "MensajesChat", "RecoveryTokens",
     "intentos_fallidos",
+    "Facturas", "ItemsFactura",
 ]
 
 
@@ -458,12 +460,18 @@ def create_app():
     app.register_blueprint(patient_bp)
     app.register_blueprint(professional_bp)
     app.register_blueprint(appointment_bp)
+    app.register_blueprint(invoice_bp)
     app.register_blueprint(pages_bp)
 
     # Public recovery endpoints: no session → no CSRF token possible
     from app.routes.auth_routes import forgot_password, reset_password
     csrf.exempt(forgot_password)
     csrf.exempt(reset_password)
+
+    # Webhook de Wompi: lo llama el servidor de Wompi, no un navegador con sesión/CSRF.
+    # Se autentica con la firma HMAC-SHA256 propia de Wompi (ver invoice_service.procesar_evento_wompi).
+    from app.routes.invoice_routes import webhook_wompi
+    csrf.exempt(webhook_wompi)
 
     @app.route("/healthz")
     def healthz():
