@@ -1,0 +1,723 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="{{ 'dark-mode' if request.cookies.get('theme', 'dark') == 'dark' else '' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Dashboard del paciente - PsyAI Connect. Tu espacio personal de bienestar emocional.">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Dashboard Paciente</title>
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+<script src="/js/core/shared/theme-inline.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/css/base/base.css">
+<link rel="stylesheet" href="/css/layout/layout.css">
+<link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/css/pages/patient.css">
+
+<script src="/js/core/shared/theme.js"></script>
+<script src="/js/core/shared/localStorage-detector.js"></script>
+</head>
+<body>
+    <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="d-flex w-100">
+
+        <!-- Sidebar -->
+        <aside class="sidebar d-flex flex-column position-fixed">
+            <div class="sidebar__logo text-center mt-3">
+                <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="img-fluid rounded-circle" width="100">
+                <h5 class="mt-2 fw-bold text-primary">PsyAI Connect</h5>
+            </div>
+            <nav class="nav flex-column mt-4">
+                <a href="patient.dashboard.html" class="nav-link active"><i class="fas fa-home me-2"></i> Dashboard</a>
+                <a href="aside-patient/chatbot.html" class="nav-link"><i class="fas fa-robot me-2"></i>Chatbot Emocional</a>
+                <a href="aside-patient/agenda-quotes.html" class="nav-link"><i class="fas fa-calendar-alt me-2"></i> Agenda de Citas</a>
+                <a href="aside-patient/mensajes.html" class="nav-link"><i class="fas fa-comments me-2"></i> Mensajes</a>
+                <a href="aside-patient/evolution.html" class="nav-link"><i class="fas fa-chart-area me-2"></i> Mi Evolución</a>
+                <a href="aside-patient/historia_clinica_paciente.html" class="nav-link"><i class="fas fa-file-medical me-2"></i> Mis Documentos</a>
+                <a href="aside-patient/my.profile.html" class="nav-link border-top pt-3 mt-3"><i class="fas fa-user-circle me-2"></i> Mi Perfil</a>
+            </nav>
+            <div class="sidebar__footer mt-auto mb-3 text-center">
+                <div class="theme-switch-container mb-2">
+                    <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                    <button id="theme-toggle" title="Cambiar modo"></button>
+                    <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+                </div>
+                <a href="#" onclick="cerrarSesion()" class="btn btn-outline-danger btn-sm w-75"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="main-content flex-grow-1 ms-280 p-4" id="dashboardMain">
+
+            <!-- Resumen General (Hero + Stats) — estático, fuera del acordeón -->
+            <div class="section-card">
+                <div class="section-card__header">
+                    <i class="fas fa-home me-2"></i> Resumen General
+                </div>
+                <div class="section-card__body">
+
+                    <!-- Hero Welcome Banner -->
+                    <section class="dash-hero" id="heroSection">
+                        <div class="dash-hero__content">
+                            <div class="dash-hero__text">
+                                <h1 id="heroGreeting">Bienvenido</h1>
+                                <p class="dash-hero__subtitle" id="heroMotivation">Cada día es una nueva oportunidad para crecer</p>
+                                <p class="dash-hero__date" id="heroDate"></p>
+                            </div>
+                            <div class="dash-hero__avatar" id="heroAvatar" data-avatar="inicial" style="width:64px;height:64px;"></div>
+                        </div>
+                    </section>
+
+                    <!-- Stats Cards -->
+                    <section class="dash-stats" id="statsSection">
+                        <div class="stat-card" id="statCita">
+                            <div class="stat-card__icon stat-card__icon--blue">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
+                            <div class="stat-card__label">Próxima Cita</div>
+                            <div class="stat-card__detail" id="statCitaDetail">
+                                <span class="skeleton skeleton--text"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card" id="statEvolucion">
+                            <div class="stat-card__icon stat-card__icon--green">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
+                            <div class="stat-card__label">Estado Emocional</div>
+                            <div class="stat-card__detail" id="statEvolucionDetail">
+                                <span class="skeleton skeleton--text"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card" id="statMensajes">
+                            <div class="stat-card__icon stat-card__icon--purple">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
+                            <div class="stat-card__label">Mensajes</div>
+                            <div class="stat-card__detail" id="statMensajesDetail">
+                                <span class="skeleton skeleton--text"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card" id="statDocs">
+                            <div class="stat-card__icon stat-card__icon--amber">
+                                <i class="fas fa-file-medical"></i>
+                            </div>
+                            <div class="stat-card__value"><span class="skeleton skeleton--value"></span></div>
+                            <div class="stat-card__label">Documentos</div>
+                            <div class="stat-card__detail" id="statDocsDetail">
+                                <span class="skeleton skeleton--text"></span>
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+
+            <!-- Secciones del Dashboard -->
+            <div>
+
+                <!-- Estado Emocional (Mood + Evolución) -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-smile-beam me-2"></i> Estado Emocional</h5>
+                    <div>
+                        <div class="dash-grid">
+
+                            <!-- Historial de Evolución Reciente -->
+                            <div>
+                                <div class="dash-widget" id="evolutionWidget">
+                                    <div class="dash-widget__header">
+                                        <div class="dash-widget__title">
+                                            <i class="fas fa-chart-line"></i> Historial de Evolución
+                                        </div>
+                                        <a href="aside-patient/evolution.html" class="dash-widget__link">Ver todo →</a>
+                                    </div>
+                                    <div class="evolution-history" id="evolutionHistoryList">
+                                        <div style="text-align:center;padding:16px;">
+                                            <span class="skeleton" style="display:block;height:40px;border-radius:6px;"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Evolución Reciente (Sparkline) -->
+                            <div>
+                                <div class="dash-widget" id="evolucionWidget">
+                                    <div class="dash-widget__header">
+                                        <div class="dash-widget__title">
+                                            <i class="fas fa-chart-area"></i> Mi Evolución Reciente
+                                        </div>
+                                        <a href="aside-patient/evolution.html" class="dash-widget__link">Ver todo →</a>
+                                    </div>
+                                    <div class="sparkline-container" id="sparklineContainer">
+                                        <div class="sparkline-empty" id="sparklineLoading">
+                                            <div style="text-align:center;">
+                                                <div class="skeleton" style="width:100%;height:80px;border-radius:8px;display:block;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="sparkline-legend" id="sparklineLegend" style="display:none;">
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#4CAF50;"></div> Muy bien
+                                        </div>
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#8BC34A;"></div> Bien
+                                        </div>
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#FFC107;"></div> Regular
+                                        </div>
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#FF9800;"></div> Mal
+                                        </div>
+                                        <div class="sparkline-legend__item">
+                                            <div class="sparkline-legend__dot" style="background:#f44336;"></div> Muy mal
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Mis Citas -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-calendar-alt me-2"></i> Mis Citas</h5>
+                    <div class="dash-widget">
+                        <div id="citasTimeline">
+                            <div class="citas-empty">
+                                <span class="skeleton skeleton--text" style="display:block;margin-bottom:8px;"></span>
+                                <span class="skeleton skeleton--text-sm" style="display:block;"></span>
+                            </div>
+                        </div>
+                        <div class="dash-widget__footer text-end mt-3 pt-3 border-top">
+                            <a href="aside-patient/agenda-quotes.html" class="dash-widget__link">Ver agenda completa →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Accesos Rápidos -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-th-large me-2"></i> Accesos Rápidos</h5>
+                    <div>
+                        <div class="quick-grid">
+                            <a href="aside-patient/chatbot.html" class="quick-btn quick-btn--chatbot" id="qa-chatbot">
+                                <i class="fas fa-robot"></i>
+                                Chatbot
+                            </a>
+                            <a href="aside-patient/agenda-quotes.html" class="quick-btn quick-btn--agenda" id="qa-agenda">
+                                <i class="fas fa-calendar-alt"></i>
+                                Agenda
+                            </a>
+                            <a href="aside-patient/mensajes.html" class="quick-btn quick-btn--mensajes" id="qa-mensajes">
+                                <i class="fas fa-comments"></i>
+                                Mensajes
+                            </a>
+                            <a href="aside-patient/evolution.html" class="quick-btn quick-btn--evolucion" id="qa-evolucion">
+                                <i class="fas fa-chart-area"></i>
+                                Evolución
+                            </a>
+                            <a href="aside-patient/historia_clinica_paciente.html" class="quick-btn quick-btn--docs" id="qa-docs">
+                                <i class="fas fa-file-medical"></i>
+                                Documentos
+                            </a>
+                            <a href="aside-patient/my.profile.html" class="quick-btn quick-btn--perfil" id="qa-perfil">
+                                <i class="fas fa-user-circle"></i>
+                                Mi Perfil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Consejo del Día -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2"></i> Consejo del Día</h5>
+                    <div>
+                        <section class="dash-tip" id="tipSection" style="margin-bottom:0;">
+                            <div class="dash-tip__icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="dash-tip__content">
+                                <div class="dash-tip__label">Consejo del día</div>
+                                <p class="dash-tip__text" id="tipText">Cargando...</p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/modules/auth/auth-guard.js"></script>
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css">
+    <script src="/js/core/shared/alerts.js"></script>
+    <script src="/js/modules/patient/aside.js?v=20260522-5"></script>
+    <script src="/js/modules/auth/logout.js"></script>
+    <script src="/js/core/shared/nombre.usuario.js"></script>
+
+    <script>
+    /* ============================================================
+       PATIENT DASHBOARD — Premium JS Controller
+       ============================================================ */
+    (function() {
+        'use strict';
+
+        // ── Motivational Phrases ──
+        const PHRASES = [
+            'Cada día es una nueva oportunidad para crecer.',
+            'Tu bienestar emocional es tu mayor fortaleza.',
+            'Pequeños pasos llevan a grandes cambios.',
+            'Mereces sentirte en paz contigo mismo.',
+            'La vulnerabilidad es un acto de valentía.',
+            'Hoy es un buen día para cuidar de ti.',
+            'Tu progreso importa, por pequeño que sea.',
+            'Reconocer tus emociones es el primer paso.',
+            'No tienes que tener todas las respuestas hoy.',
+            'Cada momento de calma es una victoria.'
+        ];
+
+        // ── Tips of the Day ──
+        const TIPS = [
+            'Intenta dedicar 5 minutos al día a la respiración profunda. Inhala 4 segundos, sostén 4 y exhala 6.',
+            'Escribir un diario de gratitud puede mejorar significativamente tu estado de ánimo.',
+            'El ejercicio físico, incluso una caminata de 15 minutos, libera endorfinas naturales.',
+            'Limitar el tiempo en redes sociales puede reducir la ansiedad hasta en un 30%.',
+            'Mantener una rutina de sueño regular es fundamental para la salud mental.',
+            'Hablar sobre lo que sientes con alguien de confianza reduce el estrés emocional.',
+            'La meditación de 10 minutos diarios puede cambiar la estructura de tu cerebro positivamente.',
+            'Hidrátate bien: la deshidratación leve puede afectar tu estado de ánimo y concentración.',
+            'Celebra tus logros, por pequeños que sean. El auto-reconocimiento fortalece la autoestima.',
+            'Practicar la amabilidad con otros genera bienestar propio. Un acto amable al día marca la diferencia.'
+        ];
+
+        // ── Mood → Emoji/Color Maps ──
+        const MOOD_EMOJIS = {
+            'Muy bien': '😊', 'Bien': '🙂', 'Regular': '😐', 'Mal': '😟', 'Muy mal': '😢',
+            'feliz': '😊', 'tranquilo': '😌', 'estresado': '😰', 'ansioso': '😟', 'triste': '😢'
+        };
+        const MOOD_COLORS = {
+            'Muy bien': '#4CAF50', 'Bien': '#8BC34A', 'Regular': '#FFC107',
+            'Mal': '#FF9800', 'Muy mal': '#f44336',
+            'feliz': '#4CAF50', 'tranquilo': '#42A5F5', 'estresado': '#FF9800',
+            'ansioso': '#FFC107', 'triste': '#78909C'
+        };
+        const MOOD_LEVELS = { 'Muy bien': 5, 'Bien': 4, 'Regular': 3, 'Mal': 2, 'Muy mal': 1 };
+
+        // ── Utils ──
+        function getGreeting() {
+            const h = new Date().getHours();
+            if (h < 12) return 'Buenos días';
+            if (h < 18) return 'Buenas tardes';
+            return 'Buenas noches';
+        }
+
+        function formatDate() {
+            return new Date().toLocaleDateString('es-ES', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+
+        function getRandomItem(arr) {
+            const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+            return arr[dayOfYear % arr.length];
+        }
+
+        async function fetchJSON(url) {
+            try {
+                const res = await fetch(url, { credentials: 'include' });
+                if (!res.ok) return null;
+                return await res.json();
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ── 1. Init Hero Banner ──
+        function initHero(nombre) {
+            const greeting = getGreeting();
+            const displayName = nombre || 'Paciente';
+            const greetingEl = document.getElementById('heroGreeting');
+            if (greetingEl) greetingEl.textContent = `${greeting}, ${displayName}`;
+            
+            const motivationEl = document.getElementById('heroMotivation');
+            if (motivationEl) motivationEl.textContent = getRandomItem(PHRASES);
+            
+            const dateEl = document.getElementById('heroDate');
+            if (dateEl) dateEl.textContent = formatDate();
+
+            // Avatar initials
+            const avatar = document.getElementById('heroAvatar');
+            if (avatar) {
+                const parts = displayName.split(' ');
+                const initials = parts.length >= 2
+                    ? (parts[0][0] + parts[1][0]).toUpperCase()
+                    : displayName.substring(0, 2).toUpperCase();
+                avatar.textContent = initials;
+            }
+        }
+
+        // ── 2. Load Stats: Próxima Cita ──
+        async function loadStatCita() {
+            const card = document.getElementById('statCita');
+            if (!card) return;
+            const valueEl = card.querySelector('.stat-card__value');
+            const detailEl = document.getElementById('statCitaDetail');
+            if (!valueEl || !detailEl) return;
+
+            const data = await fetchJSON('/api/citas/proxima');
+            if (data && data.success && data.cita) {
+                valueEl.textContent = data.cita.fecha || '—';
+                detailEl.innerHTML = `
+                    <strong>${data.cita.hora || ''}</strong> con ${data.cita.profesional || 'Profesional'}
+                    <br><span class="stat-card__badge stat-card__badge--pending">
+                        <i class="fas fa-clock" style="font-size:0.6rem"></i> ${data.cita.tipoCita || 'Cita'}
+                    </span>`;
+            } else {
+                valueEl.textContent = 'Sin citas';
+                detailEl.innerHTML = '<span style="opacity:0.7">No tienes citas próximas</span>';
+            }
+        }
+
+        // ── 3. Load Stats: Evolución ──
+        let _evolucionData = null;
+        async function loadStatEvolucion() {
+            const card = document.getElementById('statEvolucion');
+            if (!card) return;
+            const valueEl = card.querySelector('.stat-card__value');
+            const detailEl = document.getElementById('statEvolucionDetail');
+            if (!valueEl || !detailEl) return;
+
+            const data = await fetchJSON('/api/evolucion');
+            if (data && data.success && data.historial && data.historial.length > 0) {
+                _evolucionData = data.historial;
+                const latest = data.historial[0];
+                const mood = latest.estadoEmocional || 'Regular';
+                const emoji = MOOD_EMOJIS[mood] || '😐';
+                valueEl.textContent = `${emoji} ${mood}`;
+                const energia = latest.nivelEnergia || 3;
+                const barColor = MOOD_COLORS[mood] || '#FFC107';
+                detailEl.innerHTML = `
+                    Energía: <strong>${energia}/5</strong>
+                    <div style="height:4px;background:#e8edf3;border-radius:2px;margin-top:6px;overflow:hidden;">
+                        <div style="height:100%;width:${energia * 20}%;background:${barColor};border-radius:2px;transition:width 0.5s ease;"></div>
+                    </div>`;
+            } else {
+                _evolucionData = [];
+                valueEl.textContent = '— Sin registro';
+                detailEl.innerHTML = '<span style="opacity:0.7">Registra cómo te sientes</span>';
+            }
+        }
+
+        // ── 4. Load Stats: Mensajes ──
+        async function loadStatMensajes() {
+            const card = document.getElementById('statMensajes');
+            if (!card) return;
+            const valueEl = card.querySelector('.stat-card__value');
+            const detailEl = document.getElementById('statMensajesDetail');
+            if (!valueEl || !detailEl) return;
+
+            const data = await fetchJSON('/api/chat/profesionales');
+            if (data && data.success && data.profesionales) {
+                const total = data.profesionales.reduce((sum, p) => sum + (p.noLeidos || 0), 0);
+                valueEl.textContent = total > 0 ? `${total} nuevos` : '0';
+                if (total > 0) {
+                    detailEl.innerHTML = `<span class="stat-card__badge stat-card__badge--pulse">
+                         <i class="fas fa-envelope" style="font-size:0.6rem"></i> ${total} sin leer</span>`;
+                } else {
+                    detailEl.innerHTML = '<span style="opacity:0.7">Todo al día ✓</span>';
+                }
+            } else {
+                valueEl.textContent = '—';
+                detailEl.innerHTML = '<span style="opacity:0.7">Sin mensajes</span>';
+            }
+        }
+
+        // ── 5. Load Stats: Documentos ──
+        async function loadStatDocs() {
+            const card = document.getElementById('statDocs');
+            if (!card) return;
+            const valueEl = card.querySelector('.stat-card__value');
+            const detailEl = document.getElementById('statDocsDetail');
+            if (!valueEl || !detailEl) return;
+
+            const data = await fetchJSON('/api/paciente/documentos');
+            if (data && data.success) {
+                const shared = (data.compartidos || []).length;
+                const own = (data.propios || []).length;
+                const total = shared + own;
+                valueEl.textContent = total;
+                detailEl.innerHTML = `
+                    <span style="opacity:0.8">${shared} clínicos · ${own} propios</span>`;
+            } else {
+                valueEl.textContent = '0';
+                detailEl.innerHTML = '<span style="opacity:0.7">Sin documentos</span>';
+            }
+        }
+
+        // ── 6. Render Evolution History ──
+        function renderEvolutionHistory() {
+            const container = document.getElementById('evolutionHistoryList');
+            if (!container) return;
+
+            if (!_evolucionData || _evolucionData.length === 0) {
+                container.innerHTML = '<div class="evolution-empty"><i class="fas fa-chart-area"></i><span>Aún no tienes registros de evolución</span></div>';
+                return;
+            }
+
+            const last = _evolucionData[0];
+            const mood = last.estadoEmocional || 'Regular';
+            const emoji = MOOD_EMOJIS[mood] || '😐';
+            const color = MOOD_COLORS[mood] || '#FFC107';
+            const energia = Math.min(last.nivelEnergia || 3, 5);
+            const nota = last.notasPersonales || '';
+
+            container.innerHTML = `
+                <div class="evolution-last">
+                    <div class="evolution-last__emoji" style="background:${color}">${emoji}</div>
+                    <div class="evolution-last__body">
+                        <span class="evolution-last__mood">${mood}</span>
+                        ${nota ? `<div class="evolution-last__note">${nota}</div>` : ''}
+                        <div class="evolution-last__energy">
+                            <span class="evolution-last__energy-label">Energía</span>
+                            <div class="evolution-last__energy-track">
+                                <div class="evolution-last__energy-fill" style="width:${energia * 20}%;background:${color};"></div>
+                            </div>
+                            <span class="evolution-last__energy-value">${energia}/5</span>
+                        </div>
+                        <span class="evolution-last__date">${last.fecha || ''}</span>
+                    </div>
+                </div>`;
+        }
+
+        // ── 7. Sparkline Chart ──
+        function renderSparkline() {
+            const container = document.getElementById('sparklineContainer');
+            const loadingEl = document.getElementById('sparklineLoading');
+            const legendEl = document.getElementById('sparklineLegend');
+
+            if (!container) return;
+
+            if (!_evolucionData || _evolucionData.length === 0) {
+                if (loadingEl) loadingEl.innerHTML = '<div class="sparkline-empty"><i class="fas fa-chart-area" style="margin-right:8px;opacity:0.5"></i>Aún no tienes registros de evolución</div>';
+                return;
+            }
+
+            // Take last 10 entries, reversed for chronological order
+            const entries = _evolucionData.slice(0, 10).reverse();
+
+            // Remove loading, show legend
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (legendEl) legendEl.style.display = 'flex';
+
+            // Remove any existing canvas to avoid duplicating graphs
+            const existingCanvas = document.getElementById('sparklineCanvas');
+            if (existingCanvas) {
+                existingCanvas.remove();
+            }
+
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.id = 'sparklineCanvas';
+            container.insertBefore(canvas, container.firstChild);
+
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = 120 * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = '120px';
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width;
+            const h = 120;
+            const padding = { top: 14, right: 16, bottom: 24, left: 16 };
+            const chartW = w - padding.left - padding.right;
+            const chartH = h - padding.top - padding.bottom;
+
+            // Map values
+            const values = entries.map(e => MOOD_LEVELS[e.estadoEmocional] || 3);
+            const colors = entries.map(e => MOOD_COLORS[e.estadoEmocional] || '#FFC107');
+            const labels = entries.map(e => {
+                if (!e.fecha) return '';
+                const d = new Date(e.fecha);
+                return `${d.getDate()}/${d.getMonth() + 1}`;
+            });
+
+            const maxV = 5, minV = 1;
+            const stepX = entries.length > 1 ? chartW / (entries.length - 1) : chartW / 2;
+
+            function getY(val) {
+                return padding.top + chartH - ((val - minV) / (maxV - minV)) * chartH;
+            }
+            function getX(i) {
+                return padding.left + (entries.length > 1 ? i * stepX : chartW / 2);
+            }
+
+            const isDark = document.documentElement.classList.contains('dark-mode');
+
+            // Draw grid lines
+            ctx.strokeStyle = isDark ? 'rgba(26,43,74,0.5)' : 'rgba(232,237,243,0.8)';
+            ctx.lineWidth = 1;
+            for (let v = 1; v <= 5; v++) {
+                const y = getY(v);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(w - padding.right, y);
+                ctx.stroke();
+            }
+
+            // Draw gradient fill
+            if (entries.length > 1) {
+                const gradient = ctx.createLinearGradient(0, padding.top, 0, h - padding.bottom);
+                gradient.addColorStop(0, isDark ? 'rgba(144,202,249,0.12)' : 'rgba(21,101,192,0.08)');
+                gradient.addColorStop(1, 'rgba(21,101,192,0)');
+
+                ctx.beginPath();
+                ctx.moveTo(getX(0), getY(values[0]));
+                for (let i = 1; i < values.length; i++) {
+                    const x0 = getX(i - 1), y0 = getY(values[i - 1]);
+                    const x1 = getX(i), y1 = getY(values[i]);
+                    const cpx = (x0 + x1) / 2;
+                    ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+                }
+                ctx.lineTo(getX(values.length - 1), h - padding.bottom);
+                ctx.lineTo(getX(0), h - padding.bottom);
+                ctx.closePath();
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Draw line
+                ctx.beginPath();
+                ctx.moveTo(getX(0), getY(values[0]));
+                for (let i = 1; i < values.length; i++) {
+                    const x0 = getX(i - 1), y0 = getY(values[i - 1]);
+                    const x1 = getX(i), y1 = getY(values[i]);
+                    const cpx = (x0 + x1) / 2;
+                    ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+                }
+                ctx.strokeStyle = isDark ? '#90CAF9' : '#1565C0';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+            }
+
+            // Draw points and labels
+            for (let i = 0; i < values.length; i++) {
+                const x = getX(i);
+                const y = getY(values[i]);
+
+                // Point
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = colors[i];
+                ctx.fill();
+                ctx.strokeStyle = isDark ? '#0b1429' : '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Date label
+                ctx.fillStyle = isDark ? '#5a7a96' : '#7B92AC';
+                ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(labels[i], x, h - 6);
+            }
+        }
+
+        // ── 8. Citas Timeline ──
+        async function loadCitasTimeline() {
+            const container = document.getElementById('citasTimeline');
+            if (!container) return;
+
+            const data = await fetchJSON('/api/citas/paciente');
+
+            if (!data || !data.success || !data.citas || data.citas.length === 0) {
+                container.innerHTML = `
+                    <div class="citas-empty">
+                        <i class="fas fa-calendar-times" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:8px;"></i>
+                        No tienes citas registradas
+                        <br><a href="aside-patient/agenda-quotes.html" style="font-size:0.82rem;color:#1565C0;font-weight:600;">Agendar una cita →</a>
+                    </div>`;
+                return;
+            }
+
+            // Sort by date, take most recent 4
+            const citas = data.citas.slice(0, 4);
+            let html = '<div class="citas-timeline">';
+            citas.forEach(cita => {
+                const estado = (cita.estado || 'Pendiente').toLowerCase();
+                const estadoClass = estado === 'completada' ? 'completada' : estado === 'cancelada' ? 'cancelada' : 'pendiente';
+                const estadoLabel = cita.estado || 'Pendiente';
+                html += `
+                    <div class="cita-item cita-item--${estadoClass}">
+                        <div class="cita-item__fecha">${cita.fecha || '—'} · ${cita.hora || ''}</div>
+                        <div class="cita-item__info">${cita.profesional || 'Profesional'}</div>
+                        <div class="cita-item__tipo">${cita.tipoCita || 'Consulta'}</div>
+                        <span class="cita-item__badge cita-item__badge--${estadoClass}">${estadoLabel}</span>
+                    </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ── 9. Tip of the Day ──
+        function initTip() {
+            const el = document.getElementById('tipText');
+            if (!el) return;
+            const today = new Date();
+            const start = new Date(today.getFullYear(), 0, 0);
+            const diff = today - start;
+            const dayOfYear = Math.floor(diff / 86400000);
+            const idx = dayOfYear % TIPS.length;
+            el.textContent = TIPS[idx];
+        }
+
+        // ── BOOT ──
+        async function boot() {
+            // Init static elements
+            initTip();
+
+            // Get session data for hero
+            const sessionData = await fetchJSON('/api/session');
+            const nombre = sessionData?.nombre || sessionData?.usuario?.nombre || '';
+            initHero(nombre);
+
+            // Set date
+            const dateEl = document.getElementById('heroDate');
+            if (dateEl) dateEl.textContent = formatDate();
+
+            // Load all stats in parallel
+            await Promise.all([
+                loadStatCita(),
+                loadStatEvolucion(),
+                loadStatMensajes(),
+                loadStatDocs(),
+                loadCitasTimeline()
+            ]);
+
+            // Render sparkline and history after evolution data is loaded
+            renderSparkline();
+            renderEvolutionHistory();
+        }
+
+        // Launch
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+    })();
+
+
+    </script>
+
+</body>
+</html>

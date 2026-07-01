@@ -1,0 +1,1807 @@
+/* ============================================================
+   RESPONSIVE-PROFESSIONAL.CSS - PsyAI Connect
+   Dashboard Profesional + Aside Professional
+
+   Breakpoints alineados con responsive-admin.css:
+     <= 1024px   Tablet + mobile base
+     769-1024px  Tablet refinements
+     <= 768px    Mobile
+     <= 480px    Small mobile
+     <= 375px    Very small mobile
+   ============================================================ */
+
+@media (max-width: 991px) {
+:root {
+    --pro-sidebar-width: 300px;
+    --pro-toggle-size: 48px;
+    --pro-content-pt: 4rem;
+    --pro-card-radius: 14px;
+    --pro-card-pad: 1.25rem;
+    --pro-btn-min-h: 44px;
+    --pro-input-min-h: 46px;
+    --pro-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    transform: translateX(-100%);
+    width: var(--pro-sidebar-width, 300px) !important;
+    min-width: var(--pro-sidebar-width, 300px) !important;
+    max-width: var(--pro-sidebar-width, 300px) !important;
+    height: 100dvh;
+    z-index: 1100;
+    background: var(--color-bg-light, #fff);
+    border-radius: 0 20px 20px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    transition: transform var(--pro-transition), box-shadow 0.35s ease;
+    will-change: transform;
+  }
+
+  .sidebar.active,
+  .sidebar.show {
+    transform: translateX(0) !important;
+    box-shadow: 8px 0 40px rgba(13, 71, 161, 0.2);
+  }
+
+  
+
+  
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1099;
+    background: rgba(13, 47, 97, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+  }
+
+  .sidebar-overlay.active,
+  .sidebar-overlay.show {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  
+
+  .sidebar__logo {
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid var(--color-border, #d6e8fa);
+  }
+
+  
+
+  .sidebar__logo img {
+    width: 68px !important;
+    height: 68px !important;
+    border: 2.5px solid var(--color-primary, #90caf9);
+    box-shadow: 0 0 0 4px var(--color-accent, #e3f2fd);
+  }
+
+  .sidebar__logo h5 {
+    margin-top: 0.5rem;
+    font-size: 0.94rem;
+  }
+
+  .sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: var(--pro-btn-min-h, 44px);
+    margin: 3px 12px;
+    padding: 12px 16px !important;
+    border-radius: 12px;
+    font-size: 0.94rem;
+    font-weight: 500;
+    white-space: normal;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .sidebar .nav-link i {
+    width: 20px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .sidebar__footer {
+    padding: 1rem 1.25rem;
+    margin-top: auto;
+    border-top: 1px solid var(--color-border, #d6e8fa);
+  }
+
+  
+
+  .sidebar__footer .btn {
+    width: 100% !important;
+    min-height: var(--pro-btn-min-h, 44px);
+  }
+
+  .main-content {
+    width: 100%;
+    min-height: 100dvh;
+    margin-left: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: var(--pro-content-pt, 4rem) !important;
+  }
+
+  .main-content > .p-4 {
+    padding: 0 !important;
+  }
+
+  .ms-250,
+  .ms-280 {
+    margin-left: 0 !important;
+  }
+
+  .menu-toggle,
+  .toggle-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1101;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: var(--pro-toggle-size, 48px);
+    height: var(--pro-toggle-size, 48px);
+    min-width: var(--pro-toggle-size, 48px);
+    padding: 0 !important;
+    border: 0;
+    border-radius: 12px;
+    background: var(--color-secondary, #0d47a1);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(13, 71, 161, 0.25);
+    font-size: 1.25rem;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .main-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 1rem;
+    padding: 1rem 1.1rem !important;
+    border: 1px solid var(--color-border, #d6e8fa) !important;
+    border-radius: var(--pro-card-radius, 14px);
+    background: var(--color-bg-light, #fff);
+  }
+
+  
+
+  .main-header h1,
+  .main-header .h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .main-header small {
+    display: block;
+    margin-top: 0.25rem;
+    line-height: 1.35;
+  }
+
+  .main-header .user-info {
+    flex: 0 1 auto;
+    min-width: 0;
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .row.g-3,
+  .row {
+    --bs-gutter-x: 0.85rem;
+    --bs-gutter-y: 0.85rem;
+  }
+
+  .stat-card,
+  .card,
+  .panel-step,
+  .report-card,
+  .form-section {
+    border-radius: var(--pro-card-radius, 14px) !important;
+  }
+
+  .card.p-4,
+  section.card.p-4,
+  .panel-step.p-4 {
+    padding: var(--pro-card-pad, 1.25rem) !important;
+  }
+
+  .stat-card {
+    min-height: 86px;
+    padding: 1rem !important;
+    gap: 0.75rem;
+  }
+
+  .stat-card .stat-icon,
+  .stat-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+  }
+
+  .stat-value {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    line-height: 1.25;
+  }
+
+  .btn,
+  .button,
+  .psyai-modal__btn {
+    min-height: var(--pro-btn-min-h, 44px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .form-control,
+  .form-select,
+  select,
+  textarea {
+    min-height: var(--pro-input-min-h, 46px);
+    font-size: 0.94rem;
+  }
+
+  textarea.form-control,
+  textarea.psyai-modal__input {
+    min-height: 96px;
+  }
+
+  .toolbar,
+  .tabs-container,
+  .progress-nav {
+    border-radius: var(--pro-card-radius, 14px);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab,
+  .progress-step {
+    min-height: var(--pro-btn-min-h, 44px);
+    white-space: nowrap;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    min-width: 720px;
+  }
+
+  .table th,
+  .table td {
+    vertical-align: middle;
+  }
+
+  .selected-patient-banner,
+  .step2-patient-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .agenda-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .report-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .psyai-modal .modal-dialog {
+    max-width: min(460px, calc(100vw - 2rem));
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 991px) {
+  .main-content {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 1.45rem;
+  }
+
+  .main-content > .row.g-3,
+  main > section.row.g-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  main > section.row.g-3 > [class*="col-"],
+  .main-content > .row.g-3 > [class*="col-"] {
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .toolbar {
+    align-items: center;
+  }
+
+  .toolbar .search-input,
+  .toolbar .form-control {
+    flex: 1 1 220px;
+  }
+
+  .progress-nav__steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .agenda-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --pro-sidebar-width: 300px;
+    --pro-content-pt: 4.5rem;
+    --pro-toggle-size: 46px;
+    --pro-card-pad: 1rem;
+  }
+
+  body,
+  .main-content {
+    overflow-x: hidden;
+  }
+
+  .main-content {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .main-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    padding: 0.9rem 1rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 1.08rem;
+  }
+
+  .main-header small {
+    max-width: 22rem;
+    font-size: 0.76rem;
+  }
+
+  .main-header .user-info {
+    display: flex !important;
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 0.65rem !important;
+    font-size: 0.85rem;
+  }
+
+  .main-header .user-info [data-avatar] {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  main > section.row.g-3,
+  .main-content > section.row.g-3,
+  .main-content > .row.g-3 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  main > section.row.g-3 > [class*="col-"],
+  .main-content > section.row.g-3 > [class*="col-"],
+  .main-content > .row.g-3 > [class*="col-"] {
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  .stat-card {
+    min-height: 74px;
+    padding: 0.75rem !important;
+  }
+
+  .stat-card .stat-icon,
+  .stat-icon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    font-size: 0.9rem;
+  }
+
+  .stat-value,
+  .card h2 {
+    font-size: 1.05rem;
+  }
+
+  .stat-label,
+  .card h6 {
+    font-size: 0.72rem;
+  }
+
+  .card.p-4,
+  section.card.p-4,
+  .panel-step.p-4 {
+    padding: var(--pro-card-pad, 1rem) !important;
+  }
+
+  .card-header {
+    padding: 0.9rem 1rem !important;
+  }
+
+  .card-body {
+    padding: 1rem !important;
+  }
+
+  #actividadContainer > .d-flex {
+    align-items: flex-start !important;
+    gap: 0.7rem !important;
+  }
+
+  #actividadContainer .badge {
+    margin-left: 0 !important;
+    white-space: normal;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.8rem !important;
+  }
+
+  .toolbar .form-control,
+  .toolbar .form-select,
+  .toolbar .btn,
+  .toolbar .button,
+  .search-input,
+  .filter-select,
+  .filter-date {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .tabs-container {
+    margin-bottom: 0.85rem !important;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .tab {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+    font-size: 0.78rem;
+    line-height: 1.2;
+  }
+
+  .progress-nav {
+    padding: 0.65rem !important;
+  }
+
+  .progress-nav__label {
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    line-height: 1.18;
+  }
+
+  .progress-nav__steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .progress-step {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 34px;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.72rem;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
+  .selected-patient-banner,
+  .step2-patient-header {
+    align-items: flex-start;
+  }
+
+  .selected-patient-banner img,
+  .step2-patient-header img {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .selected-patient-banner .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .d-flex.justify-content-between {
+    gap: 0.65rem;
+  }
+
+  form .row > [class*="col-"] {
+    margin-bottom: 0.35rem;
+  }
+
+  .table {
+    min-width: 660px;
+    font-size: 0.82rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.65rem 0.55rem;
+    white-space: normal;
+  }
+
+  .agenda-grid,
+  .patients-grid,
+  .report-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .agenda-day-header,
+  .agenda-slot,
+  .patient-card,
+  .report-card,
+  .form-section {
+    padding: 0.9rem !important;
+  }
+
+  .patient-actions {
+    flex-direction: column;
+  }
+
+  .patient-actions .btn,
+  .patient-actions .button {
+    width: 100%;
+  }
+
+  .profile-form {
+    max-width: 100%;
+  }
+
+  .profile-avatar,
+  #profilePhotoPreview,
+  [data-avatar][style*="150px"] {
+    width: 96px !important;
+    height: 96px !important;
+  }
+
+  .psyai-modal__header,
+  .psyai-modal__body,
+  .psyai-modal__footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .psyai-modal__footer {
+    flex-direction: column-reverse;
+  }
+
+  .psyai-modal__btn {
+    width: 100%;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --pro-sidebar-width: 85vw;
+    --pro-content-pt: 4.25rem;
+    --pro-toggle-size: 44px;
+    --pro-card-pad: 0.85rem;
+    --pro-btn-min-h: 42px;
+    --pro-input-min-h: 44px;
+  }
+
+  .main-content {
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
+  }
+
+  .main-header {
+    padding: 0.78rem 0.85rem !important;
+    border-radius: 12px;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 0.98rem;
+  }
+
+  .main-header .user-info {
+    font-size: 0.78rem;
+  }
+
+  main > section.row.g-3,
+  .main-content > section.row.g-3,
+  .main-content > .row.g-3,
+  .tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    min-height: 66px;
+  }
+
+  .card h4,
+  .card h5,
+  section h5,
+  .form-section-title {
+    font-size: 0.94rem;
+    line-height: 1.25;
+  }
+
+  .card p,
+  .text-muted,
+  .form-label,
+  .form-text {
+    font-size: 0.82rem;
+  }
+
+  .btn,
+  .button {
+    width: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    white-space: normal;
+  }
+
+  .d-flex.justify-content-between,
+  .d-flex.align-items-center {
+    flex-wrap: wrap;
+  }
+
+  .table {
+    min-width: 600px;
+    font-size: 0.76rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.55rem 0.45rem;
+  }
+
+  .list-group-item {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .report-stat {
+    padding: 1rem;
+  }
+
+  .report-stat-value {
+    font-size: 1.35rem;
+  }
+
+  .psyai-modal__header {
+    gap: 0.75rem;
+  }
+
+  .psyai-modal__header-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .psyai-modal__title {
+    font-size: 1rem;
+  }
+
+  .psyai-modal__subtitle {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --pro-content-pt: 4rem;
+    --pro-toggle-size: 40px;
+    --pro-btn-min-h: 40px;
+    --pro-input-min-h: 42px;
+  }
+
+  .menu-toggle,
+  .toggle-btn {
+    top: 0.75rem;
+    left: 0.75rem;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+
+  .sidebar__logo {
+    padding: 1rem;
+  }
+
+  .sidebar__logo img {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .sidebar__logo h5 {
+    font-size: 0.82rem;
+  }
+
+  .sidebar .nav-link {
+    min-height: 40px;
+    margin-inline: 8px;
+    padding: 9px 11px !important;
+    font-size: 0.8rem;
+    gap: 9px;
+  }
+
+  .main-content {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    padding-top: var(--pro-content-pt, 4rem) !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 0.92rem;
+  }
+
+  .main-header .user-info i.fa-bell {
+    display: none;
+  }
+
+  .card.p-4,
+  section.card.p-4,
+  .panel-step.p-4,
+  .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .stat-card .stat-icon,
+  .stat-icon {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+
+  .stat-value,
+  .card h2 {
+    font-size: 0.95rem;
+  }
+
+  .tab,
+  .progress-step,
+  .btn,
+  .button,
+  .form-control,
+  .form-select {
+    font-size: 0.78rem;
+  }
+
+  .table {
+    min-width: 560px;
+    font-size: 0.7rem;
+  }
+
+  .psyai-modal__close {
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .main-content {
+    padding-top: 3.75rem !important;
+  }
+
+  .main-header {
+    margin-bottom: 0.65rem !important;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    font-size: 1rem;
+  }
+
+  .sidebar__logo {
+    padding: 0.85rem 1rem;
+  }
+
+  .sidebar__logo img {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .sidebar .nav-link {
+    min-height: 38px;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .agenda-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .stat-card,
+  .card,
+  .btn,
+  .button,
+  .nav-link,
+  .tab,
+  .progress-step {
+    min-height: 44px;
+  }
+
+  .form-control,
+  .form-select,
+  select {
+    min-height: 44px;
+  }
+}
+
+/* Refuerzo de visibilidad para acordeones y contenedores en responsive */
+@media (max-width: 991px) {
+  .main-content .card,
+  .main-content section,
+  .accordion, 
+  .accordion-responsive,
+  .faq-accordion {
+    display: block !important; /* Forzar renderizado */
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Accordion base visibility for mobile */
+@media (max-width: 991px) {
+  .main-content .accordion,
+  .main-content .accordion-responsive,
+  .main-content .faq-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .main-content .accordion .accordion-item,
+  .main-content .accordion-responsive .accordion-item,
+  .main-content .faq-accordion .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+  }
+
+  .main-content .accordion .accordion-button,
+  .main-content .accordion-responsive .accordion-button,
+  .main-content .faq-accordion .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  .main-content .accordion .accordion-body,
+  .main-content .accordion-responsive .accordion-body,
+  .main-content .faq-accordion .accordion-body {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Dark mode accordion fixes for responsive */
+
+
+/* ============================================================
+   Patients + Reports refinements
+   Mantiene tablas y contenido; mejora encuadre, scroll y densidad.
+   ============================================================ */
+
+@media (max-width: 991px) {
+.aside-professional .main-content,
+  body:has(#tablaReportes) .main-content,
+  body:has(#tbodyPacientes) .main-content {
+    background: var(--color-bg, #f0f5fc) !important;
+  }
+
+  body:has(#tbodyPacientes) .tabs-container,
+  body:has(#tablaReportes) section.card,
+  body:has(#tbodyPacientes) .panel-step,
+  body:has(#tbodyPacientes) #pestana-evolucion .card,
+  body:has(#tbodyPacientes) #pestana-diagnosticos > .card {
+    border: 1px solid rgba(13, 71, 161, 0.1) !important;
+    box-shadow: 0 10px 26px rgba(13, 71, 161, 0.06) !important;
+  }
+
+  
+
+  body:has(#tbodyPacientes) .tabs-container {
+    padding: 0.45rem;
+    background: #fff;
+  }
+
+  
+
+  body:has(#tbodyPacientes) .tabs {
+    padding: 0;
+  }
+
+  body:has(#tbodyPacientes) .tab {
+    flex: 1 0 auto;
+    border-radius: 10px;
+    padding: 0.65rem 0.95rem;
+  }
+
+  body:has(#tbodyPacientes) .progress-nav {
+    background: #fff;
+    border: 1px solid rgba(13, 71, 161, 0.1);
+    padding: 0.6rem !important;
+  }
+
+  
+
+  body:has(#tbodyPacientes) .progress-nav__label,
+  body:has(#tbodyPacientes) .progress-nav__steps {
+    min-width: 0;
+  }
+
+  body:has(#tbodyPacientes) .progress-step span {
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  body:has(#tbodyPacientes) .progress-nav__label {
+    margin-bottom: 0.35rem;
+    font-size: 0.7rem;
+    line-height: 1.15;
+  }
+
+  body:has(#tbodyPacientes) .progress-nav__bar {
+    height: 5px;
+    margin-bottom: 0.45rem;
+  }
+
+  body:has(#tbodyPacientes) .progress-nav__steps {
+    gap: 0.3rem;
+  }
+
+  body:has(#tbodyPacientes) .progress-step {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 0.2rem 0.4rem;
+    min-height: 32px;
+    padding: 0.34rem 0.48rem;
+    border-radius: 9px;
+    font-size: 0.68rem;
+    line-height: 1.12;
+    align-items: start;
+  }
+  body:has(#tbodyPacientes) .progress-step .step-circle {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  body:has(#tbodyPacientes) .progress-step i {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 0.72rem;
+    align-self: center;
+  }
+  body:has(#tbodyPacientes) .progress-step span:not(.step-circle) {
+    grid-column: 2;
+    grid-row: 2;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
+  body:has(#tbodyPacientes) #searchInput,
+  body:has(#tablaReportes) #filtroPaciente,
+  body:has(#tablaReportes) #paciente,
+  body:has(#tablaReportes) #tipo_reporte {
+    width: 100%;
+  }
+
+  body:has(#tbodyPacientes) .table-responsive,
+  body:has(#tablaReportes) .table-responsive,
+  body:has(#tablaReportesEliminados) .table-responsive {
+    position: relative;
+    max-width: 100%;
+    border: 1px solid rgba(13, 71, 161, 0.1);
+    border-radius: 12px;
+    background: #fff;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #90caf9 transparent;
+  }
+
+  
+
+  body:has(#tbodyPacientes) .table-responsive::-webkit-scrollbar,
+  body:has(#tablaReportes) .table-responsive::-webkit-scrollbar,
+  body:has(#tablaReportesEliminados) .table-responsive::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  body:has(#tbodyPacientes) .table-responsive::-webkit-scrollbar-thumb,
+  body:has(#tablaReportes) .table-responsive::-webkit-scrollbar-thumb,
+  body:has(#tablaReportesEliminados) .table-responsive::-webkit-scrollbar-thumb {
+    background: #90caf9;
+    border-radius: 999px;
+  }
+
+  body:has(#tbodyPacientes) .table,
+  body:has(#tablaEvolucion) .table {
+    min-width: 760px;
+    margin-bottom: 0;
+  }
+
+  body:has(#tbodyHistorial) #tbodyHistorial,
+  body:has(#tablaEvolucion) #tablaEvolucion,
+  body:has(#tbodyPacientes) #tbodyPacientes,
+  body:has(#tablaReportes) #tablaReportes,
+  body:has(#tablaReportesEliminados) #tablaReportesEliminados {
+    overflow-wrap: anywhere;
+  }
+
+  body:has(#tablaReportes) #tablaReportes,
+  body:has(#tablaReportesEliminados) #tablaReportesEliminados {
+    vertical-align: middle;
+  }
+
+  body:has(#tablaReportes) .table {
+    min-width: 720px;
+    margin-bottom: 0;
+  }
+
+  body:has(#tablaReportesEliminados) .table {
+    min-width: 640px;
+    margin-bottom: 0;
+  }
+
+  body:has(#tbodyPacientes) .table thead th,
+  body:has(#tablaReportes) .table thead th,
+  body:has(#tablaReportesEliminados) .table thead th {
+    white-space: nowrap;
+    font-size: 0.78rem;
+  }
+
+  body:has(#tbodyPacientes) .table tbody td,
+  body:has(#tablaReportes) .table tbody td,
+  body:has(#tablaReportesEliminados) .table tbody td {
+    font-size: 0.84rem;
+    line-height: 1.35;
+  }
+
+  body:has(#tablaReportes) #tablaReportes td:last-child {
+    min-width: 96px;
+    white-space: nowrap;
+  }
+
+  body:has(#tablaReportes) #tablaReportes .btn {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    margin: 0.1rem;
+  }
+
+  body:has(#tbodyPacientes) .energia-bar {
+    min-width: 130px;
+  }
+
+  body:has(#tbodyPacientes) .resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 > [class*="col-"] {
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 991px) {
+  body:has(#tbodyPacientes) .tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body:has(#tablaReportes) section.card .row {
+    align-items: end;
+  }
+}
+
+@media (max-width: 767px) {
+body:has(#tbodyPacientes) .main-header,
+  body:has(#tablaReportes) .main-header {
+    gap: 0.55rem;
+  }
+
+  body:has(#tbodyPacientes) .main-header h1,
+  body:has(#tablaReportes) .main-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  body:has(#tbodyPacientes) .tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body:has(#tbodyPacientes) .tab {
+    min-height: 34px;
+    padding: 0.38rem 0.52rem;
+    font-size: 0.7rem;
+  }
+
+  body:has(#tbodyPacientes) .tabs-container {
+    margin-bottom: 0.55rem !important;
+    padding: 0.3rem;
+  }
+
+  body:has(#tbodyPacientes) .card.p-4,
+  body:has(#tbodyPacientes) .panel-step.p-4,
+  body:has(#tbodyPacientes) #pestana-evolucion .card {
+    padding: 0.72rem !important;
+  }
+
+  body:has(#tbodyPacientes) .panel-step,
+  body:has(#tbodyPacientes) .progress-nav {
+    margin-bottom: 0.6rem !important;
+  }
+
+  body:has(#tbodyPacientes) h4.fw-bold,
+  body:has(#tbodyPacientes) .card h4 {
+    margin-bottom: 0.55rem !important;
+    font-size: 0.88rem;
+    line-height: 1.18;
+  }
+
+  body:has(#tbodyPacientes) #searchInput,
+  body:has(#tbodyPacientes) .form-control,
+  body:has(#tbodyPacientes) .form-select {
+    min-height: 38px;
+    font-size: 0.78rem;
+  }
+
+  body:has(#tbodyPacientes) textarea.form-control {
+    min-height: 72px;
+  }
+
+  body:has(#tbodyPacientes) .form-label {
+    margin-bottom: 0.25rem;
+    font-size: 0.76rem;
+  }
+
+  body:has(#tbodyPacientes) .progress-nav__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  body:has(#tbodyPacientes) .progress-step {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+  }
+
+  body:has(#tbodyPacientes) #panelStep2 .d-flex.justify-content-between,
+  body:has(#tbodyPacientes) #panelStep3 .d-flex.justify-content-between {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+
+  body:has(#tbodyPacientes) #panelStep2 .btn,
+  body:has(#tbodyPacientes) #panelStep3 .btn,
+  body:has(#tbodyPacientes) #wrapBtnContinuar .btn {
+    width: 100%;
+  }
+
+  body:has(#tbodyPacientes) .table,
+  body:has(#tablaReportes) .table,
+  body:has(#tablaReportesEliminados) .table {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+    font-size: 0.78rem;
+  }
+
+  body:has(#tbodyPacientes) .table thead,
+  body:has(#tablaReportes) .table thead,
+  body:has(#tablaReportesEliminados) .table thead {
+    display: none !important;
+  }
+
+  body:has(#tbodyPacientes) .table tbody,
+  body:has(#tablaReportes) .table tbody,
+  body:has(#tablaReportesEliminados) .table tbody {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    gap: 0.7rem;
+  }
+
+  body:has(#tbodyPacientes) .table tbody tr,
+  body:has(#tablaReportes) .table tbody tr,
+  body:has(#tablaReportesEliminados) .table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    min-width: 0;
+    padding: 0.85rem;
+    border: 1px solid rgba(13, 71, 161, 0.12);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(13, 71, 161, 0.06);
+  }
+
+  
+
+  body:has(#tbodyPacientes) .table tbody td,
+  body:has(#tablaReportes) .table tbody td,
+  body:has(#tablaReportesEliminados) .table tbody td {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 38%) minmax(0, 1fr);
+    align-items: start;
+    gap: 0.55rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.48rem 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08) !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  body:has(#tbodyPacientes) .table tbody td:last-child,
+  body:has(#tablaReportes) .table tbody td:last-child,
+  body:has(#tablaReportesEliminados) .table tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  
+
+  body:has(#tbodyPacientes) .table tbody td::before,
+  body:has(#tablaReportes) .table tbody td::before,
+  body:has(#tablaReportesEliminados) .table tbody td::before {
+    color: var(--color-text-muted, #60758f);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  body:has(#tbodyPacientes) .table tbody td[colspan],
+  body:has(#tablaReportes) .table tbody td[colspan],
+  body:has(#tablaReportesEliminados) .table tbody td[colspan] {
+    display: block;
+    text-align: center;
+  }
+
+  body:has(#tbodyPacientes) .table tbody td[colspan]::before,
+  body:has(#tablaReportes) .table tbody td[colspan]::before,
+  body:has(#tablaReportesEliminados) .table tbody td[colspan]::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  
+
+  #tbodyPacientes td:nth-child(1)::before { content: "Paciente"; }
+  #tbodyPacientes td:nth-child(2)::before { content: "Edad"; }
+  #tbodyPacientes td:nth-child(3)::before { content: "Sexo"; }
+  #tbodyPacientes td:nth-child(4)::before { content: "Contacto"; }
+  #tbodyPacientes td:nth-child(5)::before { content: "Ultimo diagnostico"; }
+  #tbodyPacientes td:nth-child(6)::before { content: "Accion"; }
+
+  #tbodyPacientes tr.patient-row {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "paciente paciente paciente"
+      "edad sexo ."
+      "contacto contacto contacto"
+      "diagnostico diagnostico accion";
+    gap: 0.45rem 0.7rem;
+  }
+
+  #tbodyPacientes tr.patient-row td {
+    min-width: 0;
+    padding: 0 !important;
+    border-bottom: 0 !important;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(1) {
+    grid-area: paciente;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 36px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1.2;
+    overflow: hidden;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(1)::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(1) img {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 32px;
+    margin-right: 0 !important;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(2),
+  #tbodyPacientes tr.patient-row td:nth-child(3),
+  #tbodyPacientes tr.patient-row td:nth-child(4),
+  #tbodyPacientes tr.patient-row td:nth-child(5) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(2) { grid-area: edad; }
+  #tbodyPacientes tr.patient-row td:nth-child(3) {
+    grid-area: sexo;
+    justify-self: start;
+    max-width: 100%;
+  }
+  #tbodyPacientes tr.patient-row td:nth-child(4) { grid-area: contacto; }
+  #tbodyPacientes tr.patient-row td:nth-child(5) { grid-area: diagnostico; }
+
+  #tbodyPacientes tr.patient-row td:nth-child(2)::before,
+  #tbodyPacientes tr.patient-row td:nth-child(3)::before,
+  #tbodyPacientes tr.patient-row td:nth-child(4)::before,
+  #tbodyPacientes tr.patient-row td:nth-child(5)::before {
+    font-size: 0.58rem;
+    letter-spacing: 0.01em;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(3)::before {
+    content: "Sexo";
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(6) {
+    grid-area: accion;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(6)::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(6) .btn {
+    min-height: 32px;
+    max-width: 100%;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.7rem;
+    line-height: 1.1;
+    white-space: normal;
+  }
+
+  #tbodyHistorial td:nth-child(1)::before { content: "Paciente"; }
+  #tbodyHistorial td:nth-child(2)::before { content: "Fecha"; }
+  #tbodyHistorial td:nth-child(3)::before { content: "Sintomas"; }
+  #tbodyHistorial td:nth-child(4)::before { content: "Diagnostico"; }
+  #tbodyHistorial td:nth-child(5)::before { content: "Tratamiento"; }
+
+  #tablaEvolucion td:nth-child(1)::before { content: "Fecha"; }
+  #tablaEvolucion td:nth-child(2)::before { content: "Paciente"; }
+  #tablaEvolucion td:nth-child(3)::before { content: "Estado"; }
+  #tablaEvolucion td:nth-child(4)::before { content: "Energia"; }
+  #tablaEvolucion td:nth-child(5)::before { content: "Notas"; }
+
+  #tablaReportes td:nth-child(1)::before { content: "Desde"; }
+  #tablaReportes td:nth-child(2)::before { content: "Hasta"; }
+  #tablaReportes td:nth-child(3)::before { content: "Paciente"; }
+  #tablaReportes td:nth-child(4)::before { content: "Tipo"; }
+  #tablaReportes td:nth-child(5)::before { content: "Estado"; }
+  #tablaReportes td:nth-child(6)::before { content: "Acciones"; }
+
+  #tablaReportesEliminados td:nth-child(1)::before { content: "Desde"; }
+  #tablaReportesEliminados td:nth-child(2)::before { content: "Hasta"; }
+  #tablaReportesEliminados td:nth-child(3)::before { content: "Paciente"; }
+  #tablaReportesEliminados td:nth-child(4)::before { content: "Tipo"; }
+  #tablaReportesEliminados td:nth-child(5)::before { content: "Estado"; }
+
+  body:has(#tbodyPacientes) .table-responsive,
+  body:has(#tablaReportes) .table-responsive,
+  body:has(#tablaReportesEliminados) .table-responsive {
+    overflow: visible !important;
+    border: 0;
+    background: transparent;
+  }
+
+  body:has(#tablaReportes) #tablaReportes td:last-child {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  body:has(#tablaReportes) #tablaReportes td:last-child {
+    grid-template-columns: minmax(7.5rem, 38%) minmax(0, 1fr);
+  }
+
+  body:has(#tablaReportes) #tablaReportes td:last-child .btn,
+  body:has(#tbodyPacientes) #tbodyPacientes td:last-child .btn,
+  body:has(#tbodyPacientes) #tbodyPacientes td:last-child .button {
+    width: auto;
+    min-width: 38px;
+    margin: 0.1rem 0.15rem 0.1rem 0;
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 .card {
+    min-height: 82px;
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 h6 {
+    min-height: 2.1em;
+    line-height: 1.15;
+  }
+
+  body:has(#tablaReportes) section.card .row {
+    --bs-gutter-y: 0.7rem;
+  }
+
+  body:has(#tablaReportes) section.card .button {
+    width: 100%;
+  }
+
+  body:has(#tablaReportes) #toastReporte {
+    max-width: calc(100vw - 1.5rem);
+  }
+}
+
+@media (max-width: 480px) {
+  body:has(#tbodyPacientes) .tabs {
+    grid-template-columns: 1fr;
+  }
+
+  body:has(#tbodyPacientes) .progress-nav__label {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.18rem;
+  }
+
+  body:has(#tbodyPacientes) .progress-nav__label .pct {
+    align-self: flex-start;
+  }
+
+  body:has(#tbodyPacientes) .selected-patient-banner,
+  body:has(#tbodyPacientes) .step2-patient-header {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  body:has(#tbodyPacientes) .selected-patient-banner .actions,
+  body:has(#tbodyPacientes) .step2-patient-header .change-link {
+    grid-column: 1 / -1;
+  }
+
+  body:has(#tbodyPacientes) .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body:has(#tbodyPacientes) .table tbody td,
+  body:has(#tablaReportes) .table tbody td,
+  body:has(#tablaReportesEliminados) .table tbody td {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  #tbodyPacientes tr.patient-row {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "paciente paciente paciente"
+      "edad sexo ."
+      "contacto contacto contacto"
+      "diagnostico diagnostico diagnostico"
+      "accion accion accion";
+    gap: 0.4rem 0.55rem;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(1) {
+    font-size: 0.78rem;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(2),
+  #tbodyPacientes tr.patient-row td:nth-child(3),
+  #tbodyPacientes tr.patient-row td:nth-child(4),
+  #tbodyPacientes tr.patient-row td:nth-child(5) {
+    grid-template-columns: auto minmax(0, 1fr);
+    font-size: 0.68rem;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(3) {
+    justify-self: stretch;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(6) {
+    justify-content: stretch;
+  }
+
+  #tbodyPacientes tr.patient-row td:nth-child(6) .btn {
+    width: 100%;
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 {
+    grid-template-columns: 1fr;
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 .card {
+    min-height: 72px;
+  }
+
+  body:has(#tablaReportes) main > section.row.g-3 h6 {
+    min-height: 0;
+  }
+
+  body:has(#tablaReportes) #tablaReportes .btn {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+  }
+}
+
+@media (max-width: 480px) {
+  body:has(#tbodyPacientes) .progress-step {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 0.15rem 0.3rem;
+  }
+}
+
+/* Accordion responsive styles (compartido con responsive-patient.css y responsive-fix.css) */
+.accordion-responsive .accordion-item {
+  border: 1px solid rgba(13, 71, 161, 0.15);
+  border-left: 3px solid #0D47A1;
+  border-radius: 16px !important;
+  margin-bottom: 12px;
+  overflow: visible;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(13, 71, 161, 0.06);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.accordion-responsive .accordion-item:first-child,
+.accordion-responsive .accordion-item:last-child {
+  border-radius: 16px !important;
+}
+.accordion-responsive .accordion-item:hover {
+  box-shadow: 0 6px 20px rgba(13, 71, 161, 0.12);
+  border-color: rgba(13, 71, 161, 0.28);
+}
+.accordion-responsive .accordion-button {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+  color: #0D1F3C;
+  border-radius: 16px !important;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.accordion-responsive .accordion-button:hover {
+  background: #F0F5FC;
+  color: #0D47A1;
+}
+.accordion-responsive .accordion-button:not(.collapsed) {
+  color: #0D47A1 !important;
+  background: #E3F2FD !important;
+  box-shadow: none;
+  border-bottom: 1px solid rgba(13, 71, 161, 0.15);
+}
+.accordion-responsive .accordion-button::after {
+  width: 28px;
+  height: 28px;
+  background-image: none !important;
+  background-size: 20px;
+  content: '\f107';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  display: inline-block;
+  color: #0D47A1 !important;
+  filter: none !important;
+  transition: transform 0.3s ease, color 0.2s ease;
+}
+.accordion-responsive .accordion-button:not(.collapsed)::after {
+  content: '\f00d' !important;
+  color: #0D47A1 !important;
+  transform: rotate(0deg);
+}
+.accordion-responsive .accordion-body {
+  padding: 0.75rem 1.5rem 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #3A526B;
+  background: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .accordion-responsive .accordion-button {
+    font-size: 0.9rem !important;
+    padding: 0.9rem 1rem !important;
+  }
+  .accordion-responsive .accordion-button::after {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 0.85rem !important;
+  }
+  .accordion-responsive .accordion-body {
+    padding: 0.5rem 1rem 1rem !important;
+    font-size: 0.88rem !important;
+  }
+  .accordion-responsive .accordion-item {
+    margin-bottom: 8px !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .accordion-responsive .accordion-button {
+    font-size: 0.82rem !important;
+    padding: 0.75rem 0.85rem !important;
+  }
+  .accordion-responsive .accordion-body {
+    padding: 0.4rem 0.85rem 0.85rem !important;
+    font-size: 0.82rem !important;
+  }
+  .accordion-responsive .accordion-button i {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Refuerzo de visibilidad para acordeones en vistas con sidebar (mobile) */
+@media (max-width: 991px) {
+body:has(.sidebar) .accordion,
+  body:has(.sidebar) .accordion-responsive,
+  body:has(.sidebar) .faq-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  body:has(.sidebar) .accordion .accordion-item,
+  body:has(.sidebar) .accordion-responsive .accordion-item,
+  body:has(.sidebar) .faq-accordion .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+  }
+  body:has(.sidebar) .accordion .accordion-button,
+  body:has(.sidebar) .accordion-responsive .accordion-button,
+  body:has(.sidebar) .faq-accordion .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+  
+}
+
+/* ============================================================
+   ULTIMATE ACCORDION VISIBILITY FIX - Highest priority
+   ============================================================ */
+@media (max-width: 991px) {
+body:has(.sidebar) .accordion,
+  body:has(.sidebar) .accordion-responsive {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(.sidebar) .accordion-item,
+  body:has(.sidebar) .accordion-responsive .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+
+  body:has(.sidebar) .accordion-button,
+  body:has(.sidebar) .accordion-responsive .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  body:has(.sidebar) .accordion-body,
+  body:has(.sidebar) .accordion-responsive .accordion-body {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: 100% !important;
+  }
+
+  
+}
