@@ -463,8 +463,10 @@ def create_app():
     app.register_blueprint(invoice_bp)
     app.register_blueprint(pages_bp)
 
-    # Public recovery endpoints: no session → no CSRF token possible
-    from app.routes.auth_routes import forgot_password, reset_password
+    # Public endpoints: no session → no CSRF token possible
+    from app.routes.auth_routes import login, register, forgot_password, reset_password
+    csrf.exempt(login)
+    csrf.exempt(register)
     csrf.exempt(forgot_password)
     csrf.exempt(reset_password)
 
