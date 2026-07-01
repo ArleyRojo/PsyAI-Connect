@@ -381,6 +381,14 @@ def init_db():
         if estado_pago_col and "Parcial" not in estado_pago_col[0]:
             extra_alters.append("ALTER TABLE facturas MODIFY COLUMN estadoPago ENUM('Pendiente','Parcial','Pagado') DEFAULT 'Pendiente'")
 
+        cursor.execute("""
+            SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+            WHERE TABLE_NAME = 'facturas' AND COLUMN_NAME = 'metodoPago' AND TABLE_SCHEMA = DATABASE()
+        """)
+        metodo_pago_col = cursor.fetchone()
+        if metodo_pago_col and "pse" not in metodo_pago_col[0]:
+            extra_alters.append("ALTER TABLE facturas MODIFY COLUMN metodoPago ENUM('banco','tarjeta','efectivo','transferencia','pse') DEFAULT 'tarjeta'")
+
         for column_name, alter in (
             ("anulada", "ALTER TABLE facturas ADD COLUMN anulada BOOLEAN DEFAULT FALSE"),
             ("motivoAnulacion", "ALTER TABLE facturas ADD COLUMN motivoAnulacion VARCHAR(255) DEFAULT NULL"),

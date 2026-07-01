@@ -50,6 +50,7 @@ def create_appointment(patient_id, professional_id, fecha, hora, tipo_cita, moti
         conn.commit()
         # Increment logs version to notify SSE subscribers of new appointment log
         admin_repository.increment_logs_version()
+        return cursor.lastrowid
 
 
 def get_daily_availability(professional_id, fecha):

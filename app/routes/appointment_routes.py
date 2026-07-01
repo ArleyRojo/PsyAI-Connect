@@ -3,11 +3,18 @@
 # Roles: paciente crea/cancela/consulta sus citas; profesional gestiona estado y horarios.
 from flask import Blueprint, jsonify, request, session
 
-from app.services import appointment_service
+from app.services import appointment_service, invoice_service
 from app.utils.auth import require_role
 
 
 appointment_bp = Blueprint("appointments", __name__)
+
+
+METODOS_PAGO_SIMULADO = {"pse", "tarjeta"}
+
+
+def _estado_factura_agendada(metodo_pago):
+    return "Pagado" if metodo_pago in METODOS_PAGO_SIMULADO else "Pendiente"
 
 
 # Helper: extrae paginación de query params
@@ -30,12 +37,39 @@ def _get_pagination():
 def crear_cita():
     data = request.get_json() or {}
     created_by_professional = data.get("creado_por_profesional", False)
+    metodo_pago = data.get("metodoPago")
 
     payload, status = appointment_service.create_appointment(
         session["idUsuario"],
         data,
         created_by_professional=created_by_professional,
     )
+
+    if status == 200 and metodo_pago and session.get("rol") == "paciente":
+        id_cita = payload.get("idCita")
+        if id_cita:
+            professional_id = data.get("idProfesional")
+            tipo_cita = data.get("tipoCita", "Consulta")
+            desc = f"Consulta psicológica - {tipo_cita}"
+            estado_pago = _estado_factura_agendada(metodo_pago)
+            invoice_payload, invoice_status = invoice_service.create_invoice(
+                professional_id,
+                {
+                    "idPaciente": session["idUsuario"],
+                    "idCita": id_cita,
+                    "metodoPago": metodo_pago,
+                    "estadoPago": estado_pago,
+                    "items": [{"descripcion": desc, "precioUnitario": 100000}],
+                },
+            )
+            if invoice_payload.get("success"):
+                payload["idFactura"] = invoice_payload.get("idFactura")
+                payload["estadoPagoFactura"] = invoice_payload.get("estadoPago")
+            else:
+                payload["facturaGenerada"] = False
+                payload["facturaError"] = invoice_payload.get("message")
+                payload["facturaStatus"] = invoice_status
+
     return jsonify(payload), status
 
 

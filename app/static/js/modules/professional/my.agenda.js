@@ -244,10 +244,17 @@ async function cargarCitasProfesional() {
                 ? `<span class="badge" style="background:${c.tipoCita === 'Primera sesión' ? '#e3f2fd' : c.tipoCita === 'Evaluación' ? '#fff3e0' : '#e8f5e9'};color:${c.tipoCita === 'Primera sesión' ? '#1565C0' : c.tipoCita === 'Evaluación' ? '#e65100' : '#2e7d32'};font-weight:600;font-size:0.68rem;border-radius:20px;padding:0.25em 0.6em;">${c.tipoCita}</span>`
                 : '';
             
-            const canceladaBtn = !esCancelada
-                ? `<button class="btn btn-outline-danger btn-sm ms-auto flex-shrink-0" onclick="abrirModalCancelarCita(${c.idCita})" title="Cancelar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
-                       <i class="fas fa-ban me-1"></i>Cancelar
-                   </button>`
+            const acciones = [];
+            if (!esCancelada) {
+              acciones.push(`<button class="btn btn-outline-danger btn-sm flex-shrink-0" onclick="abrirModalCancelarCita(${c.idCita})" title="Cancelar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                <i class="fas fa-ban me-1"></i>Cancelar
+              </button>`);
+              acciones.push(`<a href="facturacion.html?paciente=${c.idPaciente || ''}" class="btn btn-outline-primary btn-sm flex-shrink-0" title="Facturar" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                <i class="fas fa-file-invoice-dollar me-1"></i>Facturar
+              </a>`);
+            }
+            const canceladaBtn = acciones.length > 0
+                ? `<div class="d-flex gap-1 ms-auto flex-shrink-0">${acciones.join('')}</div>`
                 : '';
 
             const estadoBadge = esCancelada 

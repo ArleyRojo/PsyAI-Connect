@@ -47,6 +47,7 @@ setTimeout(function() { document.querySelectorAll('.step-panel').forEach(functio
       <a href="../patient.dashboard.html" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a>
       <a href="chatbot.html" class="nav-link"><i class="fas fa-robot me-2"></i>Chatbot Emocional</a>
       <a href="agenda-quotes.html" class="nav-link active"><i class="fas fa-calendar-alt me-2"></i> Agenda de Citas</a>
+      <a href="facturas.html" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i> Mis Facturas</a>
       <a href="mensajes.html" class="nav-link"><i class="fas fa-comments me-2"></i> Mensajes</a>
       <a href="evolution.html" class="nav-link"><i class="fas fa-chart-area me-2"></i> Mi Evolución</a>
       <a href="historia_clinica_paciente.html" class="nav-link"><i class="fas fa-file-medical me-2"></i> Mis Documentos</a>
@@ -233,20 +234,16 @@ setTimeout(function() { document.querySelectorAll('.step-panel').forEach(functio
   </main>
 </div>
 
-<!-- MODAL 1: SELECCIÓN DE MÉTODO DE PAGO -->
+<!-- MODAL SELECCIÓN DE MÉTODO DE PAGO -->
 <div class="modal fade" id="facturaModal" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
-<div class="modal-content">
-<div class="modal-header">
-  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2" style="color:var(--primary)"></i>Confirmar Pago</h5>
+<div class="modal-content border-0 shadow" style="border-radius:16px">
+<div class="modal-header border-0 pb-0">
+  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2" style="color:var(--primary)"></i>Seleccionar método de pago</h5>
   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 </div>
 <div class="modal-body">
-  <div class="mb-4">
-    <label class="form-label-pay">Monto a pagar (COP)</label>
-    <input type="number" id="montoPagoModal" class="form-control form-control-pay" value="100000" readonly>
-  </div>
-  <div class="pago-section-title">M&eacute;todo de pago</div>
+  <p class="text-muted small mb-3">Elige c&oacute;mo deseas pagar tu consulta. Podr&aacute;s completar el pago despu&eacute;s desde Mis Facturas.</p>
   <div class="pay-methods">
     <div class="pay-method-card" data-metodo="pse" onclick="seleccionarMetodo('pse')">
       <span class="pm-icon">🏦</span>
@@ -256,7 +253,7 @@ setTimeout(function() { document.querySelectorAll('.step-panel').forEach(functio
       <span class="pm-icon">💳</span>
       <div class="pm-label">Cr&eacute;dito / D&eacute;bito</div>
     </div>
-    <div class="pay-method-card" data-metodo="efectivo" data-requiere="presencial" onclick="seleccionarMetodo('efectivo')">
+    <div class="pay-method-card" data-metodo="efectivo" onclick="seleccionarMetodo('efectivo')">
       <span class="pm-icon">💰</span>
       <div class="pm-label">Efectivo</div>
       <span class="pm-badge">Solo presencial</span>
@@ -267,99 +264,34 @@ setTimeout(function() { document.querySelectorAll('.step-panel').forEach(functio
     </div>
   </div>
   <input type="hidden" id="metodoPagoModal" value="">
-  <div id="wrapGuardados" style="display:none">
-    <div class="pago-section-title">Guardados</div>
-    <div class="saved-methods" id="listaSaved"></div>
-  </div>
 </div>
-<div class="modal-footer">
-  <button class="btn-pago-cancelar" data-bs-dismiss="modal">Cancelar</button>
-  <button id="btnContinuarPago" class="btn-pago-continuar">Continuar →</button>
+<div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+  <button class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+  <button id="btnConfirmarPago" class="btn btn-primary px-4 rounded-pill" disabled>Confirmar y agendar</button>
 </div>
 </div>
 </div>
 </div>
 
-<!-- MODAL 2: FORMULARIO + TARJETA VISUAL -->
-<div class="modal fade" id="modalPagoFinal" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered modal-lg">
-<div class="modal-content">
-<div class="modal-header">
-  <h5 class="modal-title fw-bold" id="tituloMetodoPago"><i class="fas fa-credit-card me-2" style="color:var(--primary)"></i>Datos de pago</h5>
-  <button class="btn-close" data-bs-dismiss="modal"></button>
-</div>
-<div class="modal-body">
-<div class="row g-4">
-  <div class="col-12 col-md-5">
-    <div id="wrapCardVisual">
-      <div class="card-visual-wrap">
-        <div class="card-visual" id="cardVisual3D">
-          <div class="card-face card-front">
-            <div class="card-front-top">
-              <div class="card-chip"></div>
-              <div class="card-network-badge">
-                <div class="circle c1"></div><div class="circle c2"></div>
-              </div>
-            </div>
-            <div class="card-number" id="cvNumero">•••• •••• •••• ••••</div>
-            <div class="card-info">
-              <div>
-                <small>Card Holder</small>
-                <span id="cvNombre">YOUR NAME</span>
-              </div>
-              <div>
-                <small>Expires</small>
-                <span id="cvExpiry">MM/YY</span>
-              </div>
-            </div>
-          </div>
-          <div class="card-face card-back">
-            <div class="card-back-strip"></div>
-            <div class="card-cvv-row">
-              <span style="font-size:.75rem;opacity:.7">CVV</span>
-              <div class="card-cvv-box" id="cvCVV">•••</div>
-            </div>
-            <div class="card-logo">PSYAI PAY</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="wrapPSEPanel" style="display:none">
-      <div class="pse-panel">
-        <div class="pse-logo">PSE</div>
-        <small>Pago Seguro en L&iacute;nea</small>
-        <hr style="border-color:#93c5fd; margin:12px 0">
-        <p style="font-size:.8rem;color:#1d4ed8;margin:0">Ser&aacute;s redirigido a tu banco para completar el pago de forma segura.</p>
-      </div>
-    </div>
-    <div id="wrapEfectivoPanel" style="display:none">
-      <div class="cash-instructions-panel">
-        <div class="cip-header">
-          <i class="fas fa-hand-holding-usd"></i>
-          <div class="cip-title">Pago en Efectivo</div>
-        </div>
-        <div class="cip-step"><span class="step-num">1</span><span>Ac&eacute;rcate a nuestro consultorio en la direcci&oacute;n registrada.</span></div>
-        <div class="cip-step"><span class="step-num">2</span><span>Indica que deseas pagar tu cita con el profesional asignado.</span></div>
-        <div class="cip-step"><span class="step-num">3</span><span>Entrega el monto exacto de <strong>$100.000 COP</strong> en efectivo.</span></div>
-        <div class="cip-step"><span class="step-num">4</span><span>Recibir&aacute;s tu comprobante de pago. &iexcl;Listo!</span></div>
-      </div>
-    </div>
-    <div id="wrapTransferenciaPanel" style="display:none">
-      <div class="transferencia-panel">
-        <div class="transferencia-header"><i class="fas fa-university"></i><span>Transferencia Bancaria</span></div>
-        <p class="transferencia-sub">Selecciona una cuenta para realizar la transferencia por <strong>$100.000 COP</strong></p>
-        <div id="listaCuentasTransferencia"></div>
-      </div>
+<!-- MODAL CONFIRMACIÓN DE CITA CREADA -->
+<div class="modal fade" id="modalCitaCreada" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content border-0 shadow" style="border-radius:16px">
+<div class="modal-body text-center py-5 px-4">
+  <div class="mb-3">
+    <div style="width:72px;height:72px;background:var(--success, #10b981);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto">
+      <i class="fas fa-check" style="font-size:32px;color:#fff"></i>
     </div>
   </div>
-  <div class="col-12 col-md-7">
-    <div id="contenidoMetodoPago"></div>
+  <h4 class="fw-bold mb-2">Cita agendada con &eacute;xito</h4>
+  <p class="text-muted mb-1" id="modalCitaResumen"></p>
+  <p class="text-muted small mb-4" id="modalCitaFacturaMsg">Recibir&aacute;s un recordatorio antes de tu cita.</p>
+  <div class="d-flex justify-content-center gap-2">
+    <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+    <a href="facturas.html" class="btn btn-primary px-4 rounded-pill">
+      <i class="fas fa-file-invoice me-1"></i>Ir a Mis Facturas
+    </a>
   </div>
-</div>
-</div>
-<div class="modal-footer">
-  <button id="btnAtras" class="btn-pago-cancelar">← Atr&aacute;s</button>
-  <button id="btnFinalizarPago" class="btn-pago-continuar">Finalizar Pago ✓</button>
 </div>
 </div>
 </div>

@@ -22,7 +22,7 @@ def create_appointment(patient_id, data, *, created_by_professional=False):
         msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
         return {"success": False, "message": msg}, 409
 
-    appointment_repository.create_appointment(
+    id_cita = appointment_repository.create_appointment(
         data.get("idPaciente") if created_by_professional else patient_id,
         professional_id,
         fecha,
@@ -31,7 +31,7 @@ def create_appointment(patient_id, data, *, created_by_professional=False):
         motivo,
         created_by_professional if created_by_professional else False,
     )
-    return {"success": True, "message": "Cita agendada correctamente"}, 200
+    return {"success": True, "message": "Cita agendada correctamente", "idCita": id_cita}, 200
 
 
 def get_available_times(professional_id, fecha):

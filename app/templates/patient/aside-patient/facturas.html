@@ -273,7 +273,7 @@ function estadoBadge(factura) {
   if (factura.anulada) return '<span class="factura-badge factura-badge--anulada">Anulada</span>';
   if (factura.estadoPago === 'Pagado') return '<span class="factura-badge factura-badge--pagado">Pagado</span>';
   if (factura.estadoPago === 'Parcial') return '<span class="factura-badge factura-badge--parcial">Parcial</span>';
-  return '<span class="factura-badge factura-badge--pendiente">Pendiente</span>';
+  return '<span class="factura-badge factura-badge--pendiente">Debe</span>';
 }
 
 function accionesFactura(factura) {

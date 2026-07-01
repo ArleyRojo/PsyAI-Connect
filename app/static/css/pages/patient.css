@@ -983,6 +983,67 @@ html.dark-mode .form-control-pay {
     border-color: var(--dm-border) !important;
 }
 
+html.dark-mode #facturaModal .modal-content,
+html.dark-mode #modalPagoFinal .modal-content {
+    background: var(--dm-card) !important;
+    border: 1px solid var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode #facturaModal .modal-body,
+html.dark-mode #modalPagoFinal .modal-body,
+html.dark-mode #facturaModal .modal-footer,
+html.dark-mode #modalPagoFinal .modal-footer {
+    background: var(--dm-card) !important;
+    color: var(--dm-text1) !important;
+    border-color: var(--dm-border) !important;
+}
+
+html.dark-mode #facturaModal .modal-body p,
+html.dark-mode #modalPagoFinal .modal-body p {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode .pay-method-card {
+    background: var(--dm-elevated) !important;
+    border: 1.5px solid var(--dm-border2) !important;
+    color: var(--dm-text1) !important;
+    box-shadow: none !important;
+}
+
+html.dark-mode .pay-method-card:hover {
+    background: rgba(144, 202, 249, 0.08) !important;
+    border-color: var(--dm-accent) !important;
+}
+
+html.dark-mode .pay-method-card.active {
+    background: rgba(144, 202, 249, 0.14) !important;
+    border-color: var(--dm-accent) !important;
+    box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.12) !important;
+}
+
+html.dark-mode .pay-method-card .pm-icon {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+html.dark-mode .pay-method-card .pm-label,
+html.dark-mode .pay-method-card.active .pm-label {
+    color: var(--dm-heading) !important;
+}
+
+html.dark-mode .pay-method-card .pm-badge {
+    background: rgba(245, 158, 11, 0.16) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(245, 158, 11, 0.26) !important;
+}
+
+html.dark-mode .pay-method-card.disabled,
+html.dark-mode .pay-method-card.disabled:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: var(--dm-border) !important;
+    opacity: 0.55 !important;
+}
+
 /* --- Chatbot --- */
 html.dark-mode #chatbot-section {
     background: var(--dm-deep) !important;

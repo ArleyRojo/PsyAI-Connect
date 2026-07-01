@@ -13,7 +13,7 @@ from app.config import Config
 from app.repositories import invoice_repository
 
 ESTADOS_VALIDOS = {"Pendiente", "Parcial", "Pagado"}
-METODOS_VALIDOS = {"banco", "tarjeta", "efectivo", "transferencia"}
+METODOS_VALIDOS = {"banco", "tarjeta", "efectivo", "transferencia", "pse"}
 
 ERRNO_SIGNAL = 1644  # SIGNAL SQLSTATE '45000' del trigger trg_evitar_factura_duplicada
 
@@ -25,11 +25,14 @@ def create_invoice(professional_id, data):
     cita_id = data.get("idCita")
     items = data.get("items") or []
     metodo_pago = data.get("metodoPago")
+    estado_pago = data.get("estadoPago") or "Pendiente"
 
     if not professional_id or not patient_id or not metodo_pago or not items:
         return {"success": False, "message": "Datos incompletos"}, 400
     if metodo_pago not in METODOS_VALIDOS:
         return {"success": False, "message": "Método de pago inválido"}, 400
+    if estado_pago not in ESTADOS_VALIDOS:
+        return {"success": False, "message": "Estado de pago inválido"}, 400
 
     for item in items:
         precio = item.get("precioUnitario")
@@ -42,13 +45,20 @@ def create_invoice(professional_id, data):
             return {"success": False, "message": "Precio de ítem inválido"}, 400
 
     try:
-        invoice_id = invoice_repository.create_invoice(patient_id, professional_id, cita_id, items, metodo_pago)
+        invoice_id = invoice_repository.create_invoice(
+            patient_id, professional_id, cita_id, items, metodo_pago, estado_pago
+        )
     except DatabaseError as e:
         if e.errno == ERRNO_SIGNAL:
             return {"success": False, "message": e.msg or "Ya existe una factura para este paciente hoy"}, 409
         raise
 
-    return {"success": True, "message": "Factura creada correctamente", "idFactura": invoice_id}, 200
+    return {
+        "success": True,
+        "message": "Factura creada correctamente",
+        "idFactura": invoice_id,
+        "estadoPago": estado_pago,
+    }, 200
 
 
 def get_invoice_detail(invoice_id, requester_id, requester_role):

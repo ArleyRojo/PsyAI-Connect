@@ -5,15 +5,15 @@
 from app.utils.db import db_cursor
 
 
-def create_invoice(patient_id, professional_id, cita_id, items, metodo_pago):
+def create_invoice(patient_id, professional_id, cita_id, items, metodo_pago, estado_pago="Pendiente"):
     monto = sum(float(item.get("precioUnitario") or 0) for item in items)
     with db_cursor() as (conn, cursor):
         cursor.execute(
             """
             INSERT INTO facturas (idPaciente, idProfesional, idCita, monto, metodoPago, estadoPago)
-            VALUES (%s, %s, %s, %s, %s, 'Pendiente')
+            VALUES (%s, %s, %s, %s, %s, %s)
             """,
-            (patient_id, professional_id, cita_id, monto, metodo_pago),
+            (patient_id, professional_id, cita_id, monto, metodo_pago, estado_pago),
         )
         invoice_id = cursor.lastrowid
         for item in items:
