@@ -76,9 +76,7 @@ PsyAI-Connect/
 ├── .env.example
 ├── .env
 ├── .gitignore
-├── psyai_connect_v2.sql
-├── loadtest.py
-├── test_evol.py
+├── psyai_connect (4).sql
 │
 └── app/
     ├── __init__.py
@@ -94,6 +92,7 @@ PsyAI-Connect/
     │   ├── admin_routes.py
     │   ├── appointment_routes.py
     │   ├── auth_routes.py
+    │   ├── invoice_routes.py
     │   ├── page_routes.py
     │   ├── patient_routes.py
     │   ├── professional_routes.py
@@ -109,6 +108,7 @@ PsyAI-Connect/
     │   ├── chatbot_config_service.py
     │   ├── chatbot_service.py
     │   ├── documento_service.py
+    │   ├── invoice_service.py
     │   ├── mensajes_service.py
     │   ├── patient_service.py
     │   ├── professional_service.py
@@ -122,6 +122,7 @@ PsyAI-Connect/
     │   ├── chat_repository.py
     │   ├── chatbot_config_repository.py
     │   ├── documento_repository.py
+    │   ├── invoice_repository.py
     │   ├── mensajes_repository.py
     │   ├── patient_repository.py
     │   ├── professional_repository.py
@@ -156,12 +157,14 @@ PsyAI-Connect/
     │   │       ├── agenda-quotes.html
     │   │       ├── chatbot.html
     │   │       ├── evolution.html
+    │   │       ├── facturas.html
     │   │       ├── historia_clinica_paciente.html
     │   │       ├── mensajes.html
     │   │       └── my.profile.html
     │   ├── professional/
     │   │   ├── professional.dashboard.html
     │   │   └── aside-professional/
+    │   │       ├── facturacion.html
     │   │       ├── historia_clinica_pro.html
     │   │       ├── mensajes.html
     │   │       ├── my.agenda.html
@@ -172,15 +175,11 @@ PsyAI-Connect/
     │       ├── admin.dashboard.html
     │       └── aside-admin/
     │           ├── chatbot.config.html
+    │           ├── facturacion.html
     │           ├── logs.html
     │           ├── notifications.html
     │           ├── roles.html
     │           └── users.html
-    │
-    ├── js/
-    │   └── modules/
-    │       └── patient/
-    │           └── chatbot.js
     │
     └── static/
         ├── css/
@@ -280,9 +279,7 @@ PsyAI-Connect/
 | `.env` | Variables de entorno reales con credenciales del proyecto (base de datos, API keys, SMTP). **No debe subirse a Git.** |
 | `.env.example` | Plantilla de `.env` con todos los campos necesarios pero sin valores reales. Se copia y renombra a `.env` al configurar el proyecto por primera vez. |
 | `.gitignore` | Define qué archivos y carpetas Git debe ignorar: `.env`, `venv/`, `__pycache__/`, archivos de subidas, etc. |
-| `psyai_connect_v2.sql` | Dump completo de la base de datos MySQL. Contiene la estructura de todas las tablas y datos iniciales (usuarios de prueba, configuración del chatbot, etc.). Se importa con `mysql -u root -p < psyai_connect_v2.sql`. |
-| `loadtest.py` | Script de pruebas de carga para simular múltiples peticiones concurrentes al servidor y medir el rendimiento bajo estrés. |
-| `test_evol.py` | Script de pruebas específico para el módulo de evolución del paciente. |
+| `psyai_connect (4).sql` | Dump completo de la base de datos MySQL. Contiene la estructura de todas las tablas y datos iniciales (usuarios de prueba, facturas, configuración del chatbot, etc.). Se importa con `mysql -u root -p < "psyai_connect (4).sql"`. |
 
 ---
 
@@ -315,6 +312,7 @@ Cada archivo define un Blueprint de Flask con un grupo de endpoints.
 | `professional_routes.py` | Endpoints del portal de profesionales: perfil, disponibilidad de horarios, dashboard, lista de pacientes asignados, evolución, diagnósticos, reportes clínicos y chat con pacientes. |
 | `admin_routes.py` | Endpoints del panel de administración: estadísticas del servidor en tiempo real (SSE), logs del sistema, gestión completa de usuarios (CRUD, bloqueo), cambio de roles e historial, notificaciones y configuración del chatbot de IA. |
 | `appointment_routes.py` | Endpoints de citas: crear, listar, cancelar y cambiar el estado de una cita. Expone horarios disponibles y fechas con disponibilidad. |
+| `invoice_routes.py` | Endpoints de facturación: iniciar pago Wompi, cancelar pago, confirmar pago, listar y filtrar facturas por profesional y administrador. |
 | `page_routes.py` | Sirve las páginas HTML (Jinja2). Controla el acceso por rol: redirige a `/login.html` si el usuario no tiene el rol requerido para acceder a un dashboard. También resuelve rutas legacy que antes apuntaban a archivos estáticos. |
 | `theme_routes.py` | Endpoints `GET /api/theme` y `POST /api/theme` para leer y guardar la preferencia de tema (claro/oscuro) del usuario en la base de datos. |
 
@@ -336,6 +334,7 @@ Cada servicio orquesta las operaciones del dominio, llamando a uno o más reposi
 | `chatbot_config_events.py` | Generador SSE que emite la configuración del chatbot en tiempo real a los clientes conectados cuando detecta cambios de versión. |
 | `chat_events.py` | Generador SSE para el chat en tiempo real entre paciente y profesional. Mantiene un registro de clientes SSE activos y emite nuevos mensajes a los participantes de la conversación en cuanto se insertan. |
 | `documento_service.py` | Gestión de documentos clínicos subidos por los profesionales: validación del tipo de archivo, almacenamiento en `static/uploads/documentos/` con nombre único (UUID) y operaciones de lectura y eliminación. |
+| `invoice_service.py` | Lógica de facturación e integración con Wompi: iniciar pago, confirmar transacción, cancelar pago, actualizar estado, listar y filtrar facturas. |
 | `mensajes_service.py` | Lógica de mensajería directa: obtener el historial de mensajes entre un paciente y su profesional, y registrar nuevos mensajes en la base de datos. |
 | `telemetry_service.py` | Recolecta y expone métricas del servidor en memoria sin dependencias externas: conteo de peticiones, visitantes únicos diarios, endpoints más usados, historial de latencia, uso de CPU/RAM/disco (vía `psutil`), clientes SSE activos y eventos de seguridad (intentos fallidos de login, IPs bloqueadas). |
 
@@ -355,6 +354,7 @@ Cada repositorio encapsula las consultas SQL de su dominio. Ningún servicio eje
 | `chat_repository.py` | Consultas de mensajería directa: insertar mensajes en `Mensajes`, obtener historial de conversación entre dos usuarios y listar los contactos disponibles para chatear. |
 | `chatbot_config_repository.py` | Consultas sobre la tabla `ChatbotConfig`: leer la configuración activa, actualizarla y registrar encuestas de satisfacción del chatbot. |
 | `documento_repository.py` | Consultas sobre documentos clínicos: insertar referencia de documento, listar documentos de un paciente y eliminar por ID. |
+| `invoice_repository.py` | Consultas de facturación: crear factura, actualizar estado de pago, establecer referencia de pago, consultar por ID o referencia, listar y filtrar por profesional o admin. |
 | `mensajes_repository.py` | Consultas auxiliares de mensajes: insertar mensaje y recuperar historial (alternativa a `chat_repository` para contextos específicos). |
 | `security_repository.py` | Consultas relacionadas con seguridad: registrar y consultar eventos de auditoría de accesos, IPs bloqueadas y tokens de recuperación. |
 
@@ -403,7 +403,8 @@ Las plantillas se organizan por rol de usuario. Los dashboards usan un layout co
 | Archivo | Descripción |
 |---|---|
 | `patient.dashboard.html` | Dashboard principal del paciente. Incluye la barra de navegación lateral y el contenedor donde se cargan dinámicamente las secciones del aside. |
-| `aside-patient/agenda-quotes.html` | Sección de citas del paciente: calendario de disponibilidad del profesional, formulario para agendar una nueva cita y listado de citas próximas y pasadas. |
+| `aside-patient/agenda-quotes.html` | Sección de citas del paciente: calendario de disponibilidad del profesional, formulario para agendar una nueva cita y listado de citas próximas y pasadas con integración de pago Wompi. |
+| `aside-patient/facturas.html` | Facturación del paciente: lista de facturas con estado de pago, integración con Wompi para pagar en línea y badge de estado (Completado/Pendiente/Anulada). |
 | `aside-patient/chatbot.html` | Interfaz del chatbot de triaje psicológico impulsado por Gemini. Incluye el área de conversación, campo de texto y pantalla de consentimiento informado que el paciente debe aceptar antes de usar el chatbot. |
 | `aside-patient/evolution.html` | Seguimiento de la evolución terapéutica del paciente: formulario para registrar una nueva entrada (cómo se siente hoy) y visualización del historial de entradas anteriores. |
 | `aside-patient/historia_clinica_paciente.html` | Vista de la historia clínica del paciente: diagnósticos registrados por el profesional y documentos clínicos adjuntos. |
@@ -415,6 +416,7 @@ Las plantillas se organizan por rol de usuario. Los dashboards usan un layout co
 |---|---|
 | `professional.dashboard.html` | Dashboard principal del profesional con panel lateral y resumen de métricas (pacientes activos, citas pendientes). |
 | `aside-professional/my.agenda.html` | Agenda del profesional: configuración de horarios de disponibilidad y listado de citas programadas con sus pacientes. |
+| `aside-professional/facturacion.html` | Facturación del profesional: tabla de facturas con filtros por estado y fecha, badges de pago unificados (Completado/Pendiente/Anulada). |
 | `aside-professional/patients.html` | Listado de pacientes asignados al profesional con acceso al detalle de cada uno. |
 | `aside-professional/historia_clinica_pro.html` | Herramienta para gestionar la historia clínica de un paciente: registrar diagnósticos y adjuntar documentos clínicos (PDF, DOCX, imágenes). |
 | `aside-professional/reports.html` | Creación, edición y eliminación de reportes clínicos. Incluye una papelera de reportes eliminados. |
@@ -426,18 +428,11 @@ Las plantillas se organizan por rol de usuario. Los dashboards usan un layout co
 |---|---|
 | `admin.dashboard.html` | Dashboard del administrador con métricas en vivo del servidor (CPU, RAM, disco, requests/minuto, endpoints más usados) actualizadas por SSE. |
 | `aside-admin/users.html` | Gestión completa de usuarios: tabla con todos los registros, formularios para crear y editar usuarios, y opción de bloquear/desbloquear o eliminar cuentas. |
+| `aside-admin/facturacion.html` | Facturación del administrador: tabla global de facturas con filtros por profesional, estado y fecha; badges de pago unificados. |
 | `aside-admin/roles.html` | Cambio de roles de usuarios y visualización del historial de cambios de rol con fecha y responsable. |
 | `aside-admin/logs.html` | Visor de logs del sistema en tiempo real (SSE). Muestra eventos recientes de la aplicación con nivel de severidad y timestamp. |
 | `aside-admin/notifications.html` | Gestión de notificaciones del sistema: crear mensajes informativos para mostrar a los usuarios y eliminar los existentes. |
 | `aside-admin/chatbot.config.html` | Configuración del chatbot de IA: selección del modelo Gemini, edición del prompt del sistema, gestión de términos de riesgo y visualización del historial global de conversaciones del chatbot. |
-
----
-
-### `app/js/` — Módulo JavaScript legacy
-
-| Archivo | Descripción |
-|---|---|
-| `js/modules/patient/chatbot.js` | Versión original del módulo de chatbot del paciente (anterior a la refactorización a `static/js`). Puede coexistir con la versión en `static` durante la transición. |
 
 ---
 
@@ -794,7 +789,7 @@ cp .env.example .env
 # Editar .env con tus credenciales
 
 # 5. Importar la base de datos
-mysql -u root -p < psyai_connect_v2.sql
+mysql -u root -p < "psyai_connect (4).sql"
 
 # 6. Iniciar el servidor
 python run.py
