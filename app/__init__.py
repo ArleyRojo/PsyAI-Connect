@@ -542,15 +542,18 @@ def create_app():
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-XSS-Protection", "0")
+        is_sandbox = current_app.config.get("WOMPI_ENV", "test") != "prod"
+        wompi_domains = "https://checkout.wompi.co https://sandbox.wompi.co" if is_sandbox else "https://checkout.wompi.co https://production.wompi.co"
         response.headers.setdefault(
             "Content-Security-Policy",
-            "default-src 'self'; "
-            "script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; "
-            "style-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com 'unsafe-inline'; "
-            "font-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.gstatic.com; "
-            "img-src 'self' data:; "
-            "connect-src 'self'; "
-            "frame-ancestors 'none'",
+            f"default-src 'self'; "
+            f"script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com {wompi_domains} 'unsafe-inline'; "
+            f"style-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com 'unsafe-inline'; "
+            f"font-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.gstatic.com; "
+            f"img-src 'self' data: https://checkout.wompi.co; "
+            f"connect-src 'self' {wompi_domains}; "
+            f"frame-src 'self' https://checkout.wompi.co; "
+            f"frame-ancestors 'none'",
         )
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")

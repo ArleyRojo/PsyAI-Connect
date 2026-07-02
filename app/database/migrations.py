@@ -378,8 +378,8 @@ def init_db():
             WHERE TABLE_NAME = 'facturas' AND COLUMN_NAME = 'estadoPago' AND TABLE_SCHEMA = DATABASE()
         """)
         estado_pago_col = cursor.fetchone()
-        if estado_pago_col and "Parcial" not in estado_pago_col[0]:
-            extra_alters.append("ALTER TABLE facturas MODIFY COLUMN estadoPago ENUM('Pendiente','Parcial','Pagado') DEFAULT 'Pendiente'")
+        if estado_pago_col and "Cancelado" not in estado_pago_col[0]:
+            extra_alters.append("ALTER TABLE facturas MODIFY COLUMN estadoPago ENUM('Pendiente','Parcial','Pagado','Cancelado') DEFAULT 'Pendiente'")
 
         cursor.execute("""
             SELECT COLUMN_TYPE FROM information_schema.COLUMNS
