@@ -27,6 +27,18 @@ function formatearHoraCorta(hora) {
 }
 
 let _citasHistorialGlobal = [];
+let _wompiPaymentCompleted = false;
+let _wompiCitaId = null;
+
+function cancelarCitaPagoNoCompletado(idCita) {
+  if (!idCita) return;
+  fetch("/api/citas/" + idCita, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ motivoCancelacion: "Pago no completado en Wompi" })
+  }).catch(function() {});
+}
 
 // ============================================================
 // CALENDARIO
@@ -184,7 +196,7 @@ async function cargarCitasPaciente() {
   const btnHist = document.getElementById("btnVerHistorialPaciente");
   const contadorHist = document.getElementById("contadorHistorial");
 
-  if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
 
   try {
     const res  = await fetch("/api/citas/paciente", { credentials: "include" });
@@ -238,12 +250,9 @@ async function cargarCitasPaciente() {
             horaFormateada = `${hora12}:${String(minutos).padStart(2, '0')} - ${horaFin12}:${minFinStr} ${periodo}`;
           }
 
-          const actions = [];
-          if (c.estado !== 'Cancelada') {
-            actions.push(`<button class="btn btn-outline-danger btn-sm" onclick="abrirModalCancelar(${c.idCita})" title="Cancelar cita">
-              <i class="fas fa-ban me-1"></i>Cancelar
-            </button>`);
-          }
+          const accionHtml = c.estado !== 'Cancelada'
+            ? `<button class="btn btn-outline-danger btn-sm py-0" onclick="abrirModalCancelar(${c.idCita})" title="Cancelar cita">Cancelar</button>`
+            : `<span class="badge bg-secondary">Cancelada</span>`;
 
           return `
             <tr class="align-middle">
@@ -251,11 +260,7 @@ async function cargarCitasPaciente() {
               <td class="text-dark fw-medium">${horaFormateada}</td>
               <td>${c.tipoCita}</td>
               <td>${c.motivo || '<em class="text-muted">Sin detalles</em>'}</td>
-              <td class="text-center">
-                <div class="d-flex gap-1 justify-content-center flex-wrap">
-                  ${actions.join('')}
-                </div>
-              </td>
+              <td>${accionHtml}</td>
             </tr>
           `;
         }).join('');
@@ -290,13 +295,6 @@ async function cargarProfesionales() {
   } catch(e) {
     console.error("Error cargando profesionales:", e);
   }
-}
-
-// ============================================================
-// CARGAR PACIENTES (para historial modal)
-// ============================================================
-async function cargarPacientes() {
-  // Placeholder - currently not used in main flow but kept for compatibility
 }
 
 // ============================================================
@@ -375,6 +373,7 @@ function inicializarModalHistorial() {
                     <span><i class="fas fa-user-md"></i>${c.profesional || '&mdash;'}</span>
                     <span><i class="fas fa-calendar-day"></i>${c.fecha}</span>
                     <span><i class="far fa-clock"></i>${formatearHora(c.hora)}</span>
+                    ${c.estadoPago ? `<span class="badge ${c.estadoPago === 'Pagado' ? 'bg-success' : 'bg-warning text-dark'} ms-1">${c.estadoPago === 'Pagado' ? 'Completado' : 'Pendiente'}</span>` : ''}
                   </div>
                   ${c.motivoCancelacion ? `<div class="hist-card__cancel-reason"><i class="fas fa-info-circle"></i><strong>Motivo:</strong> ${c.motivoCancelacion}</div>` : ''}
                 </div>
@@ -473,7 +472,6 @@ window.seleccionarModalidad = function(modalidad, el) {
   if (el) el.classList.add('active');
   document.getElementById('modalidadCita').value = modalidad;
   try { localStorage.setItem('psyai_last_modality', modalidad); } catch(e) {}
-  actualizarMetodosPorModalidad();
 };
 
 function cargarModalidadGuardada() {
@@ -490,23 +488,8 @@ function cargarModalidadGuardada() {
   } catch(e) {}
 }
 
-function actualizarMetodosPorModalidad() {
-  const modalidad = document.getElementById('modalidadCita').value;
-  const efectivoCard = document.querySelector('.pay-method-card[data-metodo="efectivo"]');
-  if (!efectivoCard) return;
-  if (modalidad === 'virtual') {
-    efectivoCard.classList.add('disabled');
-    efectivoCard.style.pointerEvents = 'none';
-    efectivoCard.style.opacity = '0.4';
-  } else {
-    efectivoCard.classList.remove('disabled');
-    efectivoCard.style.pointerEvents = '';
-    efectivoCard.style.opacity = '';
-  }
-}
-
 // ============================================================
-// FORMULARIO Y MÉTODO DE PAGO
+// FORMULARIO Y FLUJO DE PAGO (ePayco)
 // ============================================================
 function validarFormularioCita() {
   const tipoCita = document.getElementById("tipoCita").value.trim();
@@ -520,82 +503,221 @@ function validarFormularioCita() {
   return true;
 }
 
-window.seleccionarMetodo = function(metodo) {
-  const modalidad = document.getElementById('modalidadCita').value;
-  if (metodo === 'efectivo' && modalidad !== 'presencial') {
-    PsyAIAlerts.info('El pago en efectivo está disponible únicamente para citas presenciales.', 'Solo presencial');
-    return;
-  }
-  document.querySelectorAll('.pay-method-card').forEach(c => c.classList.remove('active'));
-  const card = document.querySelector(`.pay-method-card[data-metodo="${metodo}"]`);
-  if (card) card.classList.add('active');
-  document.getElementById('metodoPagoModal').value = metodo;
-  document.getElementById('btnConfirmarPago').disabled = false;
-};
+function elegirMetodoPago(el) {
+  const metodo = el.dataset.metodo;
+  const data = window._pendingCitaData;
+  if (!data) return;
+  const idCita = data.idCita;
+  _wompiPaymentCompleted = false;
+  _wompiCitaId = idCita;
+  var idFactura = null;
+  const wompiModal = new bootstrap.Modal(document.getElementById("modalPagoWompi"));
+  bootstrap.Modal.getInstance(document.getElementById("modalElegirPago")).hide();
 
-document.getElementById("btnSolicitarCita").addEventListener("click", () => {
+  fetch("/api/facturas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      idProfesional: data.idProfesional,
+      idCita: idCita,
+      metodoPago: "tarjeta",
+      items: [{ descripcion: "Consulta psicológica", precioUnitario: 100000 }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(dataFact) {
+    window._pendingCitaData = null;
+    if (!dataFact.success) {
+      cancelarCitaPagoNoCompletado(idCita);
+      PsyAIAlerts.warning('Cita agendada', 'La cita se creó pero no se pudo generar la factura. Puedes pagar después desde Mis Facturas.');
+      cargarCitasPaciente();
+      return null;
+    }
+    idFactura = dataFact.idFactura;
+
+    if (metodo === "despues") {
+      PsyAIAlerts.success('Cita agendada', 'Tu cita ha sido agendada. La factura queda pendiente, puedes pagarla desde Mis Facturas.');
+      cargarCitasPaciente();
+      return null;
+    }
+
+    document.getElementById("wompiLoading").style.display = "block";
+    document.getElementById("wompiWidgetContainer").style.display = "none";
+    document.getElementById("wompiSuccess").style.display = "none";
+    document.getElementById("wompiError").style.display = "none";
+    wompiModal.show();
+
+    return fetch(`/api/facturas/${idFactura}/iniciar-pago`, {
+      method: "POST", credentials: "include"
+    }).then(function(r) { return r.json(); });
+  })
+  .then(function(dataWompi) {
+    if (!dataWompi) return;
+
+    if (!dataWompi.success) {
+      document.getElementById("wompiLoading").style.display = "none";
+      document.getElementById("wompiError").style.display = "block";
+      document.getElementById("wompiErrorMsg").textContent = dataWompi.message + " Puedes pagar después desde Mis Facturas.";
+      cancelarCitaPagoNoCompletado(idCita);
+      cargarCitasPaciente();
+      return;
+    }
+
+    document.getElementById("wompiLoading").style.display = "none";
+
+    var sandboxInfo = document.getElementById("wompiSandboxInfo");
+    if (sandboxInfo) {
+      sandboxInfo.style.display = dataWompi.data.sandbox ? "block" : "none";
+    }
+
+    document.getElementById("wompiWidgetContainer").style.display = "block";
+
+    var d = dataWompi.data;
+    console.log("[Wompi] initWidget data:", d);
+
+    if (typeof WidgetCheckout === "undefined") {
+      document.getElementById("wompiWidgetContainer").style.display = "none";
+      document.getElementById("wompiError").style.display = "block";
+      document.getElementById("wompiErrorMsg").textContent = "No se pudo cargar el widget de pago. Verifica tu conexi\u00f3n o desactiva bloqueadores de anuncios.";
+      cancelarCitaPagoNoCompletado(idCita);
+      cargarCitasPaciente();
+      return;
+    }
+
+    var wompiWidget = null;
+    var wompiTimeout = setTimeout(function() {
+      document.getElementById("wompiWidgetContainer").style.display = "none";
+      document.getElementById("wompiError").style.display = "block";
+      document.getElementById("wompiErrorMsg").textContent = "El formulario de pago no carg\u00f3. Puede estar siendo bloqueado por tu navegador o extensiones. Intenta desactivar bloqueadores de anuncios/rastreadores para este sitio, o usa otro navegador.";
+    }, 120000);
+
+    try {
+      wompiWidget = new WidgetCheckout({
+        currency: d.currency,
+        amountInCents: d.amountInCents,
+        reference: d.reference,
+        publicKey: d.publicKey,
+        signature: d.signature,
+      });
+    } catch (e) {
+      clearTimeout(wompiTimeout);
+      document.getElementById("wompiWidgetContainer").style.display = "none";
+      document.getElementById("wompiError").style.display = "block";
+      document.getElementById("wompiErrorMsg").textContent = "Error al crear el widget de pago: " + e.message;
+      console.error("[Wompi] constructor error:", e);
+      cancelarCitaPagoNoCompletado(idCita);
+      cargarCitasPaciente();
+      return;
+    }
+
+    try {
+      wompiWidget.open(function(result) {
+        clearTimeout(wompiTimeout);
+        var transaction = result.transaction || {};
+        if (transaction.status === "APPROVED") {
+          fetch("/api/facturas/" + idFactura + "/confirmar-pago", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ transactionId: transaction.id })
+          })
+          .then(function(r) { return r.json(); })
+          .then(function() {
+            _wompiPaymentCompleted = true;
+            document.getElementById("wompiWidgetContainer").style.display = "none";
+            document.getElementById("wompiError").style.display = "none";
+            document.getElementById("wompiSuccess").style.display = "block";
+            cargarCitasPaciente();
+          })
+          .catch(function() {
+            _wompiPaymentCompleted = true;
+            document.getElementById("wompiWidgetContainer").style.display = "none";
+            document.getElementById("wompiError").style.display = "none";
+            document.getElementById("wompiSuccess").style.display = "block";
+            cargarCitasPaciente();
+          });
+        } else {
+          document.getElementById("wompiWidgetContainer").style.display = "none";
+          document.getElementById("wompiError").style.display = "block";
+          var msg = transaction.status === "DECLINED" ? "La transacci\u00f3n fue rechazada." : "El pago no se complet\u00f3.";
+          document.getElementById("wompiErrorMsg").textContent = msg + " Puedes pagar despu\u00e9s desde Mis Facturas.";
+          cancelarCitaPagoNoCompletado(idCita);
+          cargarCitasPaciente();
+        }
+      });
+    } catch (e) {
+      clearTimeout(wompiTimeout);
+      document.getElementById("wompiWidgetContainer").style.display = "none";
+      document.getElementById("wompiError").style.display = "block";
+      document.getElementById("wompiErrorMsg").textContent = "Error al abrir el widget de pago: " + e.message;
+      console.error("[Wompi] open error:", e);
+      cancelarCitaPagoNoCompletado(idCita);
+      cargarCitasPaciente();
+    }
+  })
+  .catch(function() {
+    document.getElementById("wompiLoading").style.display = "none";
+    document.getElementById("wompiError").style.display = "block";
+    document.getElementById("wompiErrorMsg").textContent = "Error al conectar con la pasarela de pago. Puedes pagar después desde Mis Facturas.";
+    cancelarCitaPagoNoCompletado(idCita);
+    cargarCitasPaciente();
+  });
+}
+
+document.getElementById("btnSolicitarCita").addEventListener("click", async () => {
   if (!validarFormularioCita()) return;
-  document.getElementById('metodoPagoModal').value = '';
-  document.getElementById('btnConfirmarPago').disabled = true;
-  document.querySelectorAll('.pay-method-card').forEach(c => c.classList.remove('active'));
-  new bootstrap.Modal(document.getElementById('facturaModal')).show();
-});
 
-document.getElementById("btnConfirmarPago").addEventListener("click", async () => {
-  const metodo = document.getElementById('metodoPagoModal').value;
-  if (!metodo) return;
-
+  const idProfesional = parseInt(document.getElementById("profesional").value);
   const tipoCita      = document.getElementById("tipoCita").value;
   const fecha         = document.getElementById("date").value;
   const hora          = document.getElementById("time").value;
   const motivo        = document.getElementById("motivo").value;
-  const idProfesional = document.getElementById("profesional").value;
   const modalidad     = document.getElementById("modalidadCita").value;
 
-  const btn = document.getElementById('btnConfirmarPago');
+  const btn = document.getElementById("btnSolicitarCita");
+  const textOriginal = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Agendando...';
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Agendando...';
 
   try {
-    const res = await fetch("/api/citas", {
+    // 1. Crear la cita
+    const resCita = await fetch("/api/citas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
         tipoCita, fecha, hora, motivo, idProfesional,
         creado_por_profesional: false,
-        modalidad: modalidad,
-        metodoPago: metodo
+        modalidad: modalidad
       })
     });
-    const result = await res.json();
-    if (result.success) {
-      const resumen = `${fecha} · ${hora} · ${tipoCita}`;
-      document.getElementById('modalCitaResumen').textContent = resumen;
-      const msgEl = document.getElementById('modalCitaFacturaMsg');
-      if (result.idFactura) {
-        if (result.estadoPagoFactura === 'Pagado') {
-          msgEl.textContent = 'Se generó la factura y el pago quedó marcado como Pagado en modo simulado.';
-        } else {
-          msgEl.textContent = 'Se generó la factura pendiente. Puedes verla desde Mis Facturas.';
-        }
-      } else {
-        msgEl.textContent = result.facturaError
-          ? `La cita se creó, pero la factura no se pudo generar: ${result.facturaError}`
-          : 'Recibirás un recordatorio antes de tu cita.';
-      }
-      bootstrap.Modal.getInstance(document.getElementById('facturaModal')).hide();
-      new bootstrap.Modal(document.getElementById('modalCitaCreada')).show();
-      cargarCitasPaciente();
-    } else {
-      PsyAIAlerts.error('Error', result.message);
+    const dataCita = await resCita.json();
+
+    if (!dataCita.success) {
+      PsyAIAlerts.error('Error', dataCita.message || 'No se pudo agendar la cita.');
+      return;
     }
+
+    const idCita = dataCita.idCita;
+
+    window._pendingCitaData = { idCita: idCita, idProfesional: idProfesional };
+    new bootstrap.Modal(document.getElementById("modalElegirPago")).show();
+
   } catch(e) {
     PsyAIAlerts.error('Error', 'Error al conectar con el servidor.');
   } finally {
+    btn.innerHTML = textOriginal;
     btn.disabled = false;
-    btn.innerHTML = 'Confirmar y agendar';
   }
+});
+
+document.getElementById("modalPagoWompi")?.addEventListener("hidden.bs.modal", function() {
+  if (!_wompiPaymentCompleted && _wompiCitaId) {
+    cancelarCitaPagoNoCompletado(_wompiCitaId);
+  }
+  _wompiPaymentCompleted = false;
+  _wompiCitaId = null;
 });
 
 // ============================================================
@@ -609,7 +731,6 @@ document.addEventListener("DOMContentLoaded", () => {
   inicializarModalHistorial();
   inicializarModalCancelar();
   cargarModalidadGuardada();
-  actualizarMetodosPorModalidad();
 
   document.getElementById('btnMesAnterior').addEventListener('click', () => {
     calMes--; if (calMes < 1) { calMes = 12; calAnio--; }

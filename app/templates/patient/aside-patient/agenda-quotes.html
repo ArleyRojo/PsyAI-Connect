@@ -9,9 +9,11 @@
 <script src="/js/core/shared/theme-inline.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://checkout.wompi.co/widget.js"></script>
 <link rel="stylesheet" href="/css/base/base.css">
 <link rel="stylesheet" href="/css/layout/layout.css">
 <link rel="stylesheet" href="/css/themes/theme.css">
+<link rel="stylesheet" href="/css/components/components.css">
 <link rel="stylesheet" href="/css/pages/patient.css">
 <script src="/js/core/shared/theme.js"></script>
 
@@ -95,7 +97,7 @@ setTimeout(function() { document.querySelectorAll('.step-panel').forEach(functio
             <th>Horario</th>
             <th>Tipo</th>
             <th>Motivo</th>
-            <th class="text-center">Acción</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody id="tablaCitas"><tr><td colspan="5" class="text-center text-muted py-3">Cargando citas...</td></tr></tbody>
@@ -234,64 +236,78 @@ setTimeout(function() { document.querySelectorAll('.step-panel').forEach(functio
   </main>
 </div>
 
-<!-- MODAL SELECCIÓN DE MÉTODO DE PAGO -->
-<div class="modal fade" id="facturaModal" tabindex="-1">
+<!-- MODAL: ELEGIR MÉTODO DE PAGO -->
+<div class="modal fade" id="modalElegirPago" tabindex="-1" data-bs-backdrop="static">
 <div class="modal-dialog modal-dialog-centered">
-<div class="modal-content border-0 shadow" style="border-radius:16px">
-<div class="modal-header border-0 pb-0">
-  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2" style="color:var(--primary)"></i>Seleccionar método de pago</h5>
+<div class="modal-content border-0 shadow">
+<div class="modal-header border-0">
+  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Método de pago</h5>
   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 </div>
-<div class="modal-body">
-  <p class="text-muted small mb-3">Elige c&oacute;mo deseas pagar tu consulta. Podr&aacute;s completar el pago despu&eacute;s desde Mis Facturas.</p>
-  <div class="pay-methods">
-    <div class="pay-method-card" data-metodo="pse" onclick="seleccionarMetodo('pse')">
-      <span class="pm-icon">🏦</span>
-      <div class="pm-label">PSE</div>
+<div class="modal-body py-4">
+  <p class="text-muted text-center mb-4">Elige cómo quieres pagar esta consulta</p>
+  <div class="payment-method-grid">
+    <div class="payment-option" data-metodo="ahora" onclick="elegirMetodoPago(this)">
+      <div class="payment-option-icon"><i class="fas fa-credit-card"></i></div>
+      <div class="payment-option-info">
+        <span class="payment-option-title">Pagar ahora</span>
+        <span class="payment-option-desc">Tarjeta, PSE o efectivo — vía Wompi</span>
+      </div>
+      <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
     </div>
-    <div class="pay-method-card" data-metodo="tarjeta" onclick="seleccionarMetodo('tarjeta')">
-      <span class="pm-icon">💳</span>
-      <div class="pm-label">Cr&eacute;dito / D&eacute;bito</div>
-    </div>
-    <div class="pay-method-card" data-metodo="efectivo" onclick="seleccionarMetodo('efectivo')">
-      <span class="pm-icon">💰</span>
-      <div class="pm-label">Efectivo</div>
-      <span class="pm-badge">Solo presencial</span>
-    </div>
-    <div class="pay-method-card" data-metodo="transferencia" onclick="seleccionarMetodo('transferencia')">
-      <span class="pm-icon">🏧</span>
-      <div class="pm-label">Transferencia</div>
+    <div class="payment-option" data-metodo="despues" onclick="elegirMetodoPago(this)">
+      <div class="payment-option-icon"><i class="fas fa-clock"></i></div>
+      <div class="payment-option-info">
+        <span class="payment-option-title">Pagar después</span>
+        <span class="payment-option-desc">La factura queda pendiente, puedes pagar desde Mis Facturas</span>
+      </div>
+      <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
     </div>
   </div>
-  <input type="hidden" id="metodoPagoModal" value="">
-</div>
-<div class="modal-footer border-0 pt-0 justify-content-center gap-2">
-  <button class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
-  <button id="btnConfirmarPago" class="btn btn-primary px-4 rounded-pill" disabled>Confirmar y agendar</button>
 </div>
 </div>
 </div>
 </div>
 
-<!-- MODAL CONFIRMACIÓN DE CITA CREADA -->
-<div class="modal fade" id="modalCitaCreada" tabindex="-1">
+<!-- MODAL: PAGO CON Wompi -->
+<div class="modal fade" id="modalPagoWompi" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
-<div class="modal-content border-0 shadow" style="border-radius:16px">
-<div class="modal-body text-center py-5 px-4">
-  <div class="mb-3">
-    <div style="width:72px;height:72px;background:var(--success, #10b981);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto">
-      <i class="fas fa-check" style="font-size:32px;color:#fff"></i>
-    </div>
+<div class="modal-content border-0 shadow">
+<div class="modal-header border-0">
+  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Pago de Consulta</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body text-center py-4">
+  <div id="wompiLoading"><div class="spinner-border text-primary mb-3"></div><p class="fw-semibold">Preparando pago...</p></div>
+  <div id="wompiSandboxInfo" class="alert alert-info text-start small p-3 mb-3" style="display:none;">
+    <i class="fas fa-info-circle me-1"></i> <strong>Estás en modo de pruebas de Wompi.</strong> Usa estos datos para simular un pago:
+    <hr class="my-2">
+    <div class="mb-1"><strong>Tarjeta — Aprobado:</strong> <code class="user-select-all">4242 4242 4242 4242</code></div>
+    <div class="mb-1"><strong>Tarjeta — Rechazado:</strong> <code class="user-select-all">4111 1111 1111 1111</code></div>
+    <div class="mb-1"><strong>Tarjeta — Cualquier otro número:</strong> genera <em>ERROR</em></div>
+    <div class="mb-1"><strong>Nequi — Aprobado:</strong> <code class="user-select-all">3991111111</code></div>
+    <div class="mb-1"><strong>Nequi — Cualquier otro número:</strong> genera <em>RECHAZADO</em></div>
+    <hr class="my-2">
+    <div><strong>Datos adicionales (tarjeta):</strong> cualquier fecha futura (ej. 12/28), CVC de 3 dígitos (ej. 123), y nombre del titular.</div>
   </div>
-  <h4 class="fw-bold mb-2">Cita agendada con &eacute;xito</h4>
-  <p class="text-muted mb-1" id="modalCitaResumen"></p>
-  <p class="text-muted small mb-4" id="modalCitaFacturaMsg">Recibir&aacute;s un recordatorio antes de tu cita.</p>
-  <div class="d-flex justify-content-center gap-2">
-    <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
-    <a href="facturas.html" class="btn btn-primary px-4 rounded-pill">
-      <i class="fas fa-file-invoice me-1"></i>Ir a Mis Facturas
-    </a>
+  <div id="wompiWidgetContainer" style="display:none;">
+    <i class="fas fa-credit-card text-primary" style="font-size:3rem;"></i>
+    <p class="fw-bold mt-3">Procesando pago...</p>
+    <p class="text-muted small">Se abrirá el formulario de pago seguro de Wompi.</p>
   </div>
+  <div id="wompiSuccess" style="display:none;">
+    <i class="fas fa-check-circle text-success" style="font-size:3rem;"></i>
+    <p class="fw-bold mt-3">Pago exitoso</p>
+    <p class="text-muted small">Tu cita ha sido agendada y el pago confirmado.</p>
+  </div>
+  <div id="wompiError" style="display:none;">
+    <i class="fas fa-times-circle text-danger" style="font-size:3rem;"></i>
+    <p class="fw-bold mt-3">Pago no completado</p>
+    <p class="text-muted small" id="wompiErrorMsg">Puedes pagar después desde Mis Facturas.</p>
+  </div>
+</div>
+<div class="modal-footer border-0 justify-content-center">
+  <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cerrar</button>
 </div>
 </div>
 </div>

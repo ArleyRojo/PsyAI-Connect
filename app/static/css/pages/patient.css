@@ -983,67 +983,6 @@ html.dark-mode .form-control-pay {
     border-color: var(--dm-border) !important;
 }
 
-html.dark-mode #facturaModal .modal-content,
-html.dark-mode #modalPagoFinal .modal-content {
-    background: var(--dm-card) !important;
-    border: 1px solid var(--dm-border) !important;
-    color: var(--dm-text1) !important;
-}
-
-html.dark-mode #facturaModal .modal-body,
-html.dark-mode #modalPagoFinal .modal-body,
-html.dark-mode #facturaModal .modal-footer,
-html.dark-mode #modalPagoFinal .modal-footer {
-    background: var(--dm-card) !important;
-    color: var(--dm-text1) !important;
-    border-color: var(--dm-border) !important;
-}
-
-html.dark-mode #facturaModal .modal-body p,
-html.dark-mode #modalPagoFinal .modal-body p {
-    color: var(--dm-text2) !important;
-}
-
-html.dark-mode .pay-method-card {
-    background: var(--dm-elevated) !important;
-    border: 1.5px solid var(--dm-border2) !important;
-    color: var(--dm-text1) !important;
-    box-shadow: none !important;
-}
-
-html.dark-mode .pay-method-card:hover {
-    background: rgba(144, 202, 249, 0.08) !important;
-    border-color: var(--dm-accent) !important;
-}
-
-html.dark-mode .pay-method-card.active {
-    background: rgba(144, 202, 249, 0.14) !important;
-    border-color: var(--dm-accent) !important;
-    box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.12) !important;
-}
-
-html.dark-mode .pay-method-card .pm-icon {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
-}
-
-html.dark-mode .pay-method-card .pm-label,
-html.dark-mode .pay-method-card.active .pm-label {
-    color: var(--dm-heading) !important;
-}
-
-html.dark-mode .pay-method-card .pm-badge {
-    background: rgba(245, 158, 11, 0.16) !important;
-    color: #fbbf24 !important;
-    border: 1px solid rgba(245, 158, 11, 0.26) !important;
-}
-
-html.dark-mode .pay-method-card.disabled,
-html.dark-mode .pay-method-card.disabled:hover {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border-color: var(--dm-border) !important;
-    opacity: 0.55 !important;
-}
-
 /* --- Chatbot --- */
 html.dark-mode #chatbot-section {
     background: var(--dm-deep) !important;
@@ -4682,6 +4621,70 @@ html {
   background: var(--color-bg-card, #fff) !important;
   box-shadow: none !important;
   cursor: not-allowed;
+}
+
+/* -- Selector de método de pago en stepper (agenda-quotes) -- */
+.payment-method-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 4px;
+}
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid var(--color-border, #D6E8FA);
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--color-bg-card, #fff);
+  user-select: none;
+}
+.payment-option:hover {
+  border-color: #90CAF9;
+  background: var(--color-accent, #E3F2FD);
+}
+.payment-option.selected {
+  border-color: #0D47A1;
+  background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+  box-shadow: 0 4px 14px rgba(13,71,161,.15);
+}
+.payment-option-icon {
+  font-size: 1.5rem;
+  color: #0D47A1;
+  width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.payment-option-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.payment-option-title {
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--color-text-main, #0D1F3C);
+}
+.payment-option-desc {
+  font-size: .7rem;
+  color: var(--color-text-muted, #6B7F99);
+  line-height: 1.3;
+  margin-top: 2px;
+}
+.payment-option-check {
+  margin-left: auto;
+  font-size: 1.1rem;
+  color: transparent;
+  flex-shrink: 0;
+}
+.payment-option.selected .payment-option-check {
+  color: #0D47A1;
+}
+html.dark-mode .payment-option.selected {
+  background: linear-gradient(135deg, rgba(13,71,161,.25), rgba(25,118,210,.15));
 }
 
 
@@ -9591,13 +9594,21 @@ button.chat-item {
 }
 .citas-table tbody tr td:first-child { font-weight: 600; color: #1E293B; }
 .citas-table tbody tr td:nth-child(2) { font-weight: 500; }
-.citas-table tbody tr td:last-child { justify-self: end; }
+.citas-table tbody tr td:last-child { justify-self: center; }
 .citas-table tbody tr td .btn-outline-danger {
-  padding: 5px 12px; border-radius: 10px; font-size: 0.78rem;
+  padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   border: 1.5px solid #FECACA; background: #FEF2F2; color: #DC2626;
-  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(220,38,38,0.08);
+  transition: all 0.25s;
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.citas-table tbody tr td .btn-outline-danger:hover { background: #DC2626; color: white; border-color: #DC2626; }
+.citas-table tbody tr td .btn-outline-danger:hover {
+  background: #DC2626; color: white; border-color: #DC2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220,38,38,0.25);
+}
+.citas-table tbody tr td .btn-outline-danger:active { transform: translateY(0); }
 .citas-table tbody tr td em { font-style: normal; }
 
 /* Stepper */

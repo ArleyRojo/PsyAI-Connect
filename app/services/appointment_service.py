@@ -18,12 +18,20 @@ def create_appointment(patient_id, data, *, created_by_professional=False):
         return {"success": False, "message": "Datos incompletos"}, 400
 
     # Verifica que el horario no esté ya ocupado antes de crear la cita
-    if appointment_repository.appointment_exists(professional_id, fecha, hora):
-        msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
-        return {"success": False, "message": msg}, 409
+    target_patient_id = data.get("idPaciente") if created_by_professional else patient_id
+    existing = appointment_repository.get_appointment_in_slot(professional_id, fecha, hora)
+    if existing:
+        if existing["idPaciente"] == target_patient_id:
+            appointment_repository.cancel_patient_appointment(
+                existing["idCita"], target_patient_id,
+                "Reemplazada por nuevo intento de agendamiento"
+            )
+        else:
+            msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
+            return {"success": False, "message": msg}, 409
 
-    id_cita = appointment_repository.create_appointment(
-        data.get("idPaciente") if created_by_professional else patient_id,
+    cita_id = appointment_repository.create_appointment(
+        target_patient_id,
         professional_id,
         fecha,
         hora,
@@ -31,7 +39,7 @@ def create_appointment(patient_id, data, *, created_by_professional=False):
         motivo,
         created_by_professional if created_by_professional else False,
     )
-    return {"success": True, "message": "Cita agendada correctamente", "idCita": id_cita}, 200
+    return {"success": True, "message": "Cita agendada correctamente", "idCita": cita_id}, 200
 
 
 def get_available_times(professional_id, fecha):

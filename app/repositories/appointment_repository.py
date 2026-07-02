@@ -38,6 +38,22 @@ def appointment_exists(professional_id, fecha, hora):
         return cursor.fetchone() is not None
 
 
+def get_appointment_in_slot(professional_id, fecha, hora):
+    with db_cursor() as (_, cursor):
+        cursor.execute(
+            """
+            SELECT idCita, idPaciente FROM Citas
+            WHERE idProfesional = %s AND fecha = %s AND hora = %s
+            AND estado != 'Cancelada'
+            """,
+            (professional_id, fecha, hora),
+        )
+        row = cursor.fetchone()
+        if row:
+            return {"idCita": row[0], "idPaciente": row[1]}
+        return None
+
+
 def create_appointment(patient_id, professional_id, fecha, hora, tipo_cita, motivo, creado_por_profesional=False):
     with db_cursor() as (conn, cursor):
         cursor.execute(
@@ -90,7 +106,7 @@ def get_professional_appointments(professional_id, *, pending_only=False, page=1
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             f"""
-            SELECT c.idCita, c.idPaciente, r.nombre as paciente, r.fotoPerfil, c.fecha, c.hora,
+            SELECT c.idCita, r.nombre as paciente, r.fotoPerfil, c.fecha, c.hora,
                    c.tipoCita, c.motivo, c.estado, c.creado_por_profesional
             FROM Citas c
             JOIN Register r ON c.idPaciente = r.idUsuario
@@ -157,9 +173,11 @@ def get_patient_appointments(patient_id):
         cursor.execute(
             """
             SELECT c.idCita, c.fecha, c.hora, c.tipoCita, c.motivo, c.estado,
-                   c.motivoCancelacion, r.nombre as profesional, c.creado_por_profesional
+                   c.motivoCancelacion, r.nombre as profesional, c.creado_por_profesional,
+                   f.estadoPago, f.idFactura
             FROM Citas c
             JOIN Register r ON c.idProfesional = r.idUsuario
+            LEFT JOIN Facturas f ON c.idCita = f.idCita
             WHERE c.idPaciente = %s
             ORDER BY c.fecha DESC, c.hora DESC
             """,

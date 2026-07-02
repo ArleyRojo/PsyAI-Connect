@@ -5,57 +5,44 @@
 from app.utils.db import db_cursor
 
 
-def create_invoice(patient_id, professional_id, cita_id, items, metodo_pago, estado_pago="Pendiente"):
-    monto = sum(float(item.get("precioUnitario") or 0) for item in items)
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            """
-            INSERT INTO facturas (idPaciente, idProfesional, idCita, monto, metodoPago, estadoPago)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            """,
-            (patient_id, professional_id, cita_id, monto, metodo_pago, estado_pago),
-        )
-        invoice_id = cursor.lastrowid
-        for item in items:
+def create_invoice(patient_id, professional_id, cita_id, items, metodo_pago):
+    with db_cursor(dictionary=True) as (conn, cursor):
+        try:
+            monto = sum(item["precioUnitario"] for item in items)
             cursor.execute(
-                "INSERT INTO itemsfactura (idFactura, descripcion, precioUnitario) VALUES (%s, %s, %s)",
-                (invoice_id, item.get("descripcion"), item.get("precioUnitario")),
+                """
+                INSERT INTO Facturas
+                    (idPaciente, idProfesional, idCita, monto, metodoPago, estadoPago)
+                VALUES (%s, %s, %s, %s, %s, 'Pendiente')
+                """,
+                (patient_id, professional_id, cita_id, monto, metodo_pago),
             )
-        conn.commit()
-        return invoice_id
+            invoice_id = cursor.lastrowid
 
-
-def get_invoice_payment_info(invoice_id):
-    # Datos mínimos para orquestar el cobro con Wompi (monto, dueño, estado, referencia)
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            "SELECT idFactura, idPaciente, monto, estadoPago, anulada, wompiReference "
-            "FROM facturas WHERE idFactura = %s",
-            (invoice_id,),
-        )
-        return cursor.fetchone()
-
-
-def get_invoice_owner(invoice_id):
-    # Devuelve (idPaciente, idProfesional, anulada) para validar permisos y estado
-    with db_cursor() as (_, cursor):
-        cursor.execute(
-            "SELECT idPaciente, idProfesional, anulada FROM facturas WHERE idFactura = %s",
-            (invoice_id,),
-        )
-        return cursor.fetchone()
+            for item in items:
+                cursor.execute(
+                    """
+                    INSERT INTO ItemsFactura (idFactura, descripcion, precioUnitario)
+                    VALUES (%s, %s, %s)
+                    """,
+                    (invoice_id, item["descripcion"], item["precioUnitario"]),
+                )
+            conn.commit()
+            return invoice_id
+        except Exception:
+            conn.rollback()
+            raise
 
 
 def get_invoice_by_id(invoice_id):
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
-            SELECT f.idFactura, f.idPaciente, f.idProfesional, f.idCita, f.monto, f.metodoPago,
-                   f.estadoPago, f.anulada, f.motivoAnulacion, f.fecha,
-                   rp.nombre as paciente, rpr.nombre as profesional
-            FROM facturas f
-            JOIN Register rp ON f.idPaciente = rp.idUsuario
-            JOIN Register rpr ON f.idProfesional = rpr.idUsuario
+            SELECT f.*, p.nombre AS nombrePaciente,
+                   pr.nombre AS nombreProfesional
+            FROM Facturas f
+            JOIN Register p ON f.idPaciente = p.idUsuario
+            JOIN Register pr ON f.idProfesional = pr.idUsuario
             WHERE f.idFactura = %s
             """,
             (invoice_id,),
@@ -64,7 +51,7 @@ def get_invoice_by_id(invoice_id):
         if not factura:
             return None
         cursor.execute(
-            "SELECT idItem, descripcion, precioUnitario FROM itemsfactura WHERE idFactura = %s",
+            "SELECT * FROM ItemsFactura WHERE idFactura = %s",
             (invoice_id,),
         )
         factura["items"] = cursor.fetchall()
@@ -75,127 +62,116 @@ def list_invoices_by_patient(patient_id):
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             """
-            SELECT f.idFactura, f.idCita, f.monto, f.metodoPago, f.estadoPago,
-                   f.anulada, f.motivoAnulacion, f.fecha, r.nombre as profesional,
-                   (SELECT GROUP_CONCAT(i.descripcion SEPARATOR ', ')
-                    FROM itemsfactura i WHERE i.idFactura = f.idFactura) as servicios
-            FROM facturas f
-            JOIN Register r ON f.idProfesional = r.idUsuario
+            SELECT f.*, pr.nombre AS nombreProfesional
+            FROM Facturas f
+            JOIN Register pr ON f.idProfesional = pr.idUsuario
             WHERE f.idPaciente = %s
             ORDER BY f.fecha DESC
             """,
             (patient_id,),
         )
-        return cursor.fetchall()
+        facturas = cursor.fetchall()
+        for factura in facturas:
+            cursor.execute(
+                "SELECT * FROM ItemsFactura WHERE idFactura = %s",
+                (factura["idFactura"],),
+            )
+            factura["items"] = cursor.fetchall()
+        return facturas
 
 
-def _build_filter_clauses(filtros, base_clauses, base_params):
-    clauses = list(base_clauses)
-    params = list(base_params)
+def list_invoices_by_professional(professional_id, estado=None, fecha_desde=None, fecha_hasta=None):
+    conditions = ["f.idProfesional = %s"]
+    params = [professional_id]
 
-    if filtros.get("paciente"):
-        clauses.append("f.idPaciente = %s")
-        params.append(filtros["paciente"])
-    if filtros.get("profesional"):
-        clauses.append("f.idProfesional = %s")
-        params.append(filtros["profesional"])
-    if filtros.get("metodoPago"):
-        clauses.append("f.metodoPago = %s")
-        params.append(filtros["metodoPago"])
-    estado = filtros.get("estado")
-    if estado == "Anulada":
-        clauses.append("f.anulada = TRUE")
-    elif estado:
-        clauses.append("f.estadoPago = %s AND f.anulada = FALSE")
-        params.append(estado)
-    if filtros.get("fecha_desde"):
-        clauses.append("DATE(f.fecha) >= %s")
-        params.append(filtros["fecha_desde"])
-    if filtros.get("fecha_hasta"):
-        clauses.append("DATE(f.fecha) <= %s")
-        params.append(filtros["fecha_hasta"])
+    if estado:
+        if estado == "Anulada":
+            conditions.append("f.anulada = 1")
+        else:
+            conditions.append("f.anulada = 0 AND f.estadoPago = %s")
+            params.append(estado)
 
-    return clauses, params
+    if fecha_desde:
+        conditions.append("f.fecha >= %s")
+        params.append(fecha_desde)
+    if fecha_hasta:
+        conditions.append("f.fecha < %s")
+        params.append(fecha_hasta + " 23:59:59")
+
+    sql = f"""
+        SELECT f.*, p.nombre AS nombrePaciente
+        FROM Facturas f
+        JOIN Register p ON f.idPaciente = p.idUsuario
+        WHERE {' AND '.join(conditions)}
+        ORDER BY f.fecha DESC
+    """
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(sql, tuple(params))
+        facturas = cursor.fetchall()
+        for factura in facturas:
+            cursor.execute(
+                "SELECT * FROM ItemsFactura WHERE idFactura = %s",
+                (factura["idFactura"],),
+            )
+            factura["items"] = cursor.fetchall()
+        return facturas
 
 
-def list_invoices_by_professional(professional_id, filtros=None):
-    clauses, params = _build_filter_clauses(filtros or {}, ["f.idProfesional = %s"], [professional_id])
-    where = " AND ".join(clauses)
+def list_all_invoices(paciente=None, profesional=None, estado=None, metodo_pago=None, fecha_desde=None, fecha_hasta=None):
+    conditions = []
+    params = []
+
+    if paciente:
+        conditions.append("p.nombre LIKE %s")
+        params.append(f"%{paciente}%")
+    if profesional:
+        conditions.append("pr.nombre LIKE %s")
+        params.append(f"%{profesional}%")
+    if estado:
+        if estado == "Anulada":
+            conditions.append("f.anulada = 1")
+        else:
+            conditions.append("f.anulada = 0 AND f.estadoPago = %s")
+            params.append(estado)
+    if metodo_pago:
+        conditions.append("f.metodoPago = %s")
+        params.append(metodo_pago)
+    if fecha_desde:
+        conditions.append("f.fecha >= %s")
+        params.append(fecha_desde)
+    if fecha_hasta:
+        conditions.append("f.fecha < %s")
+        params.append(fecha_hasta + " 23:59:59")
+
+    where_clause = " AND ".join(conditions) if conditions else "1=1"
+
     with db_cursor(dictionary=True) as (_, cursor):
         cursor.execute(
             f"""
-            SELECT f.idFactura, f.idPaciente, f.idCita, f.monto, f.metodoPago, f.estadoPago,
-                   f.anulada, f.motivoAnulacion, f.fecha, r.nombre as paciente
-            FROM facturas f
-            JOIN Register r ON f.idPaciente = r.idUsuario
-            WHERE {where}
+            SELECT f.*, p.nombre AS nombrePaciente, pr.nombre AS nombreProfesional
+            FROM Facturas f
+            JOIN Register p ON f.idPaciente = p.idUsuario
+            JOIN Register pr ON f.idProfesional = pr.idUsuario
+            WHERE {where_clause}
             ORDER BY f.fecha DESC
             """,
             tuple(params),
         )
-        return cursor.fetchall()
-
-
-def list_all_invoices(filtros=None):
-    clauses, params = _build_filter_clauses(filtros or {}, ["1=1"], [])
-    where = " AND ".join(clauses)
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            f"""
-            SELECT f.idFactura, f.idPaciente, f.idProfesional, f.idCita, f.monto, f.metodoPago,
-                   f.estadoPago, f.anulada, f.motivoAnulacion, f.fecha,
-                   rp.nombre as paciente, rpr.nombre as profesional
-            FROM facturas f
-            JOIN Register rp ON f.idPaciente = rp.idUsuario
-            JOIN Register rpr ON f.idProfesional = rpr.idUsuario
-            WHERE {where}
-            ORDER BY f.fecha DESC
-            """,
-            tuple(params),
-        )
-        return cursor.fetchall()
+        facturas = cursor.fetchall()
+        for factura in facturas:
+            cursor.execute(
+                "SELECT * FROM ItemsFactura WHERE idFactura = %s",
+                (factura["idFactura"],),
+            )
+            factura["items"] = cursor.fetchall()
+        return facturas
 
 
 def update_payment_status(invoice_id, nuevo_estado):
     with db_cursor() as (conn, cursor):
         cursor.execute(
-            "UPDATE facturas SET estadoPago = %s WHERE idFactura = %s AND anulada = FALSE",
+            "UPDATE Facturas SET estadoPago = %s WHERE idFactura = %s",
             (nuevo_estado, invoice_id),
-        )
-        conn.commit()
-        return cursor.rowcount
-
-
-def set_wompi_reference(invoice_id, reference):
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            "UPDATE facturas SET wompiReference = %s WHERE idFactura = %s",
-            (reference, invoice_id),
-        )
-        conn.commit()
-
-
-def get_invoice_by_wompi_reference(reference):
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            "SELECT idFactura, idPaciente, monto, estadoPago, anulada, wompiReference "
-            "FROM facturas WHERE wompiReference = %s",
-            (reference,),
-        )
-        return cursor.fetchone()
-
-
-def mark_paid_by_wompi(invoice_id, transaction_id):
-    # Idempotente: solo aplica si la factura sigue pendiente/parcial y no está anulada,
-    # así un reintento del webhook o de la verificación por redirect no la vuelve a tocar.
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            """
-            UPDATE facturas
-            SET estadoPago = 'Pagado', wompiTransactionId = %s
-            WHERE idFactura = %s AND anulada = FALSE AND estadoPago != 'Pagado'
-            """,
-            (transaction_id, invoice_id),
         )
         conn.commit()
         return cursor.rowcount
@@ -204,8 +180,83 @@ def mark_paid_by_wompi(invoice_id, transaction_id):
 def annul_invoice(invoice_id, motivo):
     with db_cursor() as (conn, cursor):
         cursor.execute(
-            "UPDATE facturas SET anulada = TRUE, motivoAnulacion = %s WHERE idFactura = %s AND anulada = FALSE",
+            "UPDATE Facturas SET anulada = 1, motivoAnulacion = %s WHERE idFactura = %s",
             (motivo, invoice_id),
         )
         conn.commit()
         return cursor.rowcount
+
+
+def set_payment_reference(invoice_id, referencia, id_transaccion):
+    with db_cursor() as (conn, cursor):
+        cursor.execute(
+            "UPDATE Facturas SET referenciaPago = %s, idTransaccionPago = %s WHERE idFactura = %s",
+            (referencia, id_transaccion, invoice_id),
+        )
+        conn.commit()
+        return cursor.rowcount
+
+
+def get_invoice_by_reference(reference):
+    with db_cursor() as (_, cursor):
+        cursor.execute(
+            "SELECT idFactura FROM Facturas WHERE referenciaPago = %s",
+            (reference,),
+        )
+        row = cursor.fetchone()
+        return row[0] if row else None
+
+
+def get_invoice_owner(invoice_id):
+    with db_cursor() as (_, cursor):
+        cursor.execute(
+            "SELECT idPaciente, idProfesional, anulada FROM Facturas WHERE idFactura = %s",
+            (invoice_id,),
+        )
+        return cursor.fetchone()
+
+
+def get_professional_patients(professional_id):
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(
+            """
+            SELECT DISTINCT r.idUsuario, r.nombre
+            FROM PacientesProfesional pp
+            JOIN Register r ON pp.idPaciente = r.idUsuario
+            WHERE pp.idProfesional = %s
+            ORDER BY r.nombre
+            """,
+            (professional_id,),
+        )
+        return cursor.fetchall()
+
+
+def get_invoice_stats_by_professional(professional_id):
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(
+            """
+            SELECT
+                COALESCE(SUM(CASE WHEN f.anulada = 0 AND f.estadoPago = 'Pagado' THEN f.monto ELSE 0 END), 0) AS totalPagado,
+                COALESCE(SUM(CASE WHEN f.anulada = 0 AND f.estadoPago IN ('Pendiente','Parcial') THEN f.monto ELSE 0 END), 0) AS totalPendiente,
+                COALESCE(SUM(CASE WHEN f.anulada = 0 THEN f.monto ELSE 0 END), 0) AS totalGeneral
+            FROM Facturas f
+            WHERE f.idProfesional = %s
+            """,
+            (professional_id,),
+        )
+        return cursor.fetchone()
+
+
+def get_invoice_stats_all():
+    with db_cursor(dictionary=True) as (_, cursor):
+        cursor.execute(
+            """
+            SELECT
+                COALESCE(SUM(CASE WHEN f.anulada = 0 THEN f.monto ELSE 0 END), 0) AS totalFacturado,
+                COALESCE(SUM(CASE WHEN f.anulada = 0 AND f.estadoPago = 'Pagado' THEN f.monto ELSE 0 END), 0) AS totalPagado,
+                COALESCE(SUM(CASE WHEN f.anulada = 0 AND f.estadoPago IN ('Pendiente','Parcial') THEN f.monto ELSE 0 END), 0) AS totalPendiente,
+                COALESCE(SUM(f.anulada), 0) AS anuladas
+            FROM Facturas f
+            """,
+        )
+        return cursor.fetchone()

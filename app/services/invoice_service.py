@@ -2,261 +2,244 @@
 # ARCHIVO: services/invoice_service.py
 # ============================================================
 
+import uuid
 import hashlib
-import hmac
-import secrets
+from datetime import datetime
 
 import requests
-from mysql.connector.errors import DatabaseError
+from flask import current_app
 
-from app.config import Config
 from app.repositories import invoice_repository
 
-ESTADOS_VALIDOS = {"Pendiente", "Parcial", "Pagado"}
-METODOS_VALIDOS = {"banco", "tarjeta", "efectivo", "transferencia", "pse"}
 
-ERRNO_SIGNAL = 1644  # SIGNAL SQLSTATE '45000' del trigger trg_evitar_factura_duplicada
-
-WOMPI_CURRENCY = "COP"
-
-
-def create_invoice(professional_id, data):
-    patient_id = data.get("idPaciente")
+def create_invoice(patient_id, professional_id, data):
     cita_id = data.get("idCita")
-    items = data.get("items") or []
-    metodo_pago = data.get("metodoPago")
-    estado_pago = data.get("estadoPago") or "Pendiente"
+    items = data.get("items", [])
+    metodo_pago = data.get("metodoPago", "tarjeta")
 
-    if not professional_id or not patient_id or not metodo_pago or not items:
-        return {"success": False, "message": "Datos incompletos"}, 400
-    if metodo_pago not in METODOS_VALIDOS:
+    if not items or not isinstance(items, list):
+        return {"success": False, "message": "Debes incluir al menos un item"}, 400
+    if metodo_pago not in ("banco", "tarjeta"):
         return {"success": False, "message": "Método de pago inválido"}, 400
-    if estado_pago not in ESTADOS_VALIDOS:
-        return {"success": False, "message": "Estado de pago inválido"}, 400
-
-    for item in items:
-        precio = item.get("precioUnitario")
-        if not item.get("descripcion") or precio in (None, ""):
-            return {"success": False, "message": "Cada ítem requiere descripción y precio"}, 400
-        try:
-            if float(precio) <= 0:
-                return {"success": False, "message": "El precio de cada ítem debe ser mayor a cero"}, 400
-        except (TypeError, ValueError):
-            return {"success": False, "message": "Precio de ítem inválido"}, 400
+    if any(not item.get("descripcion") or not item.get("precioUnitario") for item in items):
+        return {"success": False, "message": "Cada item debe tener descripción y precio unitario"}, 400
 
     try:
         invoice_id = invoice_repository.create_invoice(
-            patient_id, professional_id, cita_id, items, metodo_pago, estado_pago
+            patient_id, professional_id, cita_id, items, metodo_pago,
         )
-    except DatabaseError as e:
-        if e.errno == ERRNO_SIGNAL:
-            return {"success": False, "message": e.msg or "Ya existe una factura para este paciente hoy"}, 409
-        raise
-
-    return {
-        "success": True,
-        "message": "Factura creada correctamente",
-        "idFactura": invoice_id,
-        "estadoPago": estado_pago,
-    }, 200
+        return {"success": True, "message": "Factura creada correctamente", "idFactura": invoice_id}, 201
+    except Exception as e:
+        current_app.logger.error("Error creando factura: %s", e, exc_info=True)
+        detalle = str(e) if current_app.config.get("FLASK_ENV", "development") != "production" else "Intenta de nuevo."
+        return {"success": False, "message": f"Error al crear la factura. {detalle}"}, 500
 
 
-def get_invoice_detail(invoice_id, requester_id, requester_role):
-    owner = invoice_repository.get_invoice_owner(invoice_id)
-    if not owner:
+def get_invoice(invoice_id, user_id, user_role):
+    factura = invoice_repository.get_invoice_by_id(invoice_id)
+    if not factura:
         return {"success": False, "message": "Factura no encontrada"}, 404
 
-    id_paciente, id_profesional, _anulada = owner
-    if requester_role == "paciente" and id_paciente != requester_id:
-        return {"success": False, "message": "No tienes permiso"}, 403
-    if requester_role == "profesional" and id_profesional != requester_id:
-        return {"success": False, "message": "No tienes permiso"}, 403
+    if user_role not in ("admin",) and factura["idPaciente"] != user_id and factura["idProfesional"] != user_id:
+        return {"success": False, "message": "No tienes permiso para ver esta factura"}, 403
 
-    return {"success": True, "factura": invoice_repository.get_invoice_by_id(invoice_id)}, 200
+    if factura.get("fecha"):
+        factura["fecha"] = factura["fecha"].strftime("%d/%m/%Y %H:%M") if hasattr(factura["fecha"], "strftime") else str(factura["fecha"])
+    if factura.get("monto"):
+        factura["monto"] = float(factura["monto"])
+    for item in factura.get("items", []):
+        if item.get("precioUnitario"):
+            item["precioUnitario"] = float(item["precioUnitario"])
 
-
-def list_my_invoices(patient_id):
-    return {"success": True, "facturas": invoice_repository.list_invoices_by_patient(patient_id)}, 200
-
-
-def list_issued_invoices(professional_id, filtros):
-    return {"success": True, "facturas": invoice_repository.list_invoices_by_professional(professional_id, filtros)}, 200
+    return {"success": True, "factura": factura}, 200
 
 
-def list_all_invoices(filtros):
-    return {"success": True, "facturas": invoice_repository.list_all_invoices(filtros)}, 200
+def list_patient_invoices(patient_id):
+    facturas = invoice_repository.list_invoices_by_patient(patient_id)
+    for f in facturas:
+        if f.get("fecha"):
+            f["fecha"] = f["fecha"].strftime("%d/%m/%Y %H:%M") if hasattr(f["fecha"], "strftime") else str(f["fecha"])
+        if f.get("monto"):
+            f["monto"] = float(f["monto"])
+        for item in f.get("items", []):
+            if item.get("precioUnitario"):
+                item["precioUnitario"] = float(item["precioUnitario"])
+    return {"success": True, "facturas": facturas}, 200
 
 
-def update_status(invoice_id, nuevo_estado, requester_id, requester_role):
-    # El paciente nunca puede auto-marcarse como pagado: los pagos en línea (PSE/tarjeta)
-    # se confirman solo vía webhook de Wompi, y efectivo/transferencia los confirma
-    # manualmente el profesional o un admin tras verificar el ingreso.
-    if requester_role == "paciente":
-        return {"success": False, "message": "Solo el profesional o un administrador pueden actualizar el estado de pago"}, 403
+def list_professional_invoices(professional_id, estado=None, fecha_desde=None, fecha_hasta=None):
+    facturas = invoice_repository.list_invoices_by_professional(
+        professional_id, estado=estado, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
+    )
+    for f in facturas:
+        if f.get("fecha"):
+            f["fecha"] = f["fecha"].strftime("%d/%m/%Y %H:%M") if hasattr(f["fecha"], "strftime") else str(f["fecha"])
+        if f.get("monto"):
+            f["monto"] = float(f["monto"])
+    return {"success": True, "facturas": facturas}, 200
 
-    if nuevo_estado not in ESTADOS_VALIDOS:
-        return {"success": False, "message": "Estado inválido"}, 400
 
-    owner = invoice_repository.get_invoice_owner(invoice_id)
-    if not owner:
+def list_all_invoices(paciente=None, profesional=None, estado=None, metodo_pago=None, fecha_desde=None, fecha_hasta=None):
+    facturas = invoice_repository.list_all_invoices(
+        paciente=paciente, profesional=profesional, estado=estado,
+        metodo_pago=metodo_pago, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
+    )
+    for f in facturas:
+        if f.get("fecha"):
+            f["fecha"] = f["fecha"].strftime("%d/%m/%Y %H:%M") if hasattr(f["fecha"], "strftime") else str(f["fecha"])
+        if f.get("monto"):
+            f["monto"] = float(f["monto"])
+    return {"success": True, "facturas": facturas}, 200
+
+
+def update_status(invoice_id, nuevo_estado, user_id, user_role):
+    if nuevo_estado not in ("Pendiente", "Parcial", "Pagado", "Cancelado"):
+        return {"success": False, "message": "Estado de pago inválido"}, 400
+
+    row = invoice_repository.get_invoice_owner(invoice_id)
+    if not row:
         return {"success": False, "message": "Factura no encontrada"}, 404
 
-    id_paciente, id_profesional, anulada = owner
-    if anulada:
-        return {"success": False, "message": "No se puede modificar una factura anulada"}, 400
+    if row[2]:  # anulada
+        return {"success": False, "message": "No se puede cambiar el estado de una factura anulada"}, 400
 
-    if requester_role == "profesional" and id_profesional != requester_id:
-        return {"success": False, "message": "No tienes permiso"}, 403
+    if user_role not in ("admin",) and row[1] != user_id:
+        return {"success": False, "message": "No tienes permiso para modificar esta factura"}, 403
 
-    rowcount = invoice_repository.update_payment_status(invoice_id, nuevo_estado)
-    if rowcount == 0:
-        return {"success": False, "message": "No se pudo actualizar la factura"}, 400
-    return {"success": True, "message": "Estado de la factura actualizado"}, 200
+    invoice_repository.update_payment_status(invoice_id, nuevo_estado)
+    return {"success": True, "message": f"Estado actualizado a {nuevo_estado}"}, 200
 
 
-def annul_invoice(invoice_id, motivo, requester_id, requester_role):
+def cancel_payment(invoice_id, patient_id):
+    factura = invoice_repository.get_invoice_by_id(invoice_id)
+    if not factura:
+        return {"success": False, "message": "Factura no encontrada"}, 404
+    if factura["idPaciente"] != patient_id:
+        return {"success": False, "message": "Esta factura no te pertenece"}, 403
+    if factura["anulada"]:
+        return {"success": False, "message": "La factura ya está anulada"}, 400
+    if factura["estadoPago"] == "Pagado":
+        return {"success": False, "message": "La factura ya está pagada"}, 400
+
+    invoice_repository.update_payment_status(invoice_id, "Cancelado")
+    return {"success": True, "message": "Pago cancelado"}, 200
+
+
+def annul_invoice(invoice_id, motivo, user_id, user_role):
     if not motivo or not motivo.strip():
-        return {"success": False, "message": "Debes indicar el motivo de la anulación"}, 400
+        return {"success": False, "message": "Debes indicar el motivo de anulación"}, 400
 
-    owner = invoice_repository.get_invoice_owner(invoice_id)
-    if not owner:
+    row = invoice_repository.get_invoice_owner(invoice_id)
+    if not row:
         return {"success": False, "message": "Factura no encontrada"}, 404
 
-    _id_paciente, id_profesional, anulada = owner
-    if anulada:
-        return {"success": False, "message": "La factura ya se encuentra anulada"}, 400
-    if requester_role == "profesional" and id_profesional != requester_id:
-        return {"success": False, "message": "No tienes permiso"}, 403
+    if row[2]:  # anulada
+        return {"success": False, "message": "La factura ya está anulada"}, 400
 
-    rowcount = invoice_repository.annul_invoice(invoice_id, motivo.strip())
-    if rowcount == 0:
-        return {"success": False, "message": "No se pudo anular la factura"}, 400
+    if user_role not in ("admin",) and row[1] != user_id:
+        return {"success": False, "message": "No tienes permiso para anular esta factura"}, 403
+
+    invoice_repository.annul_invoice(invoice_id, motivo.strip())
     return {"success": True, "message": "Factura anulada correctamente"}, 200
 
 
-# ============================================================
-# WOMPI — pasarela de pagos (PSE / tarjeta)
-# https://docs.wompi.co
-# ============================================================
-
-def _wompi_configured():
-    return bool(Config.WOMPI_PUBLIC_KEY and Config.WOMPI_INTEGRITY_SECRET)
-
-
-def _resolve_path(data, dotted_path):
-    node = data
-    for part in dotted_path.split("."):
-        if not isinstance(node, dict) or part not in node:
-            return None
-        node = node[part]
-    return node
-
-
-def iniciar_pago_wompi(invoice_id, patient_id, redirect_url):
-    info = invoice_repository.get_invoice_payment_info(invoice_id)
-    if not info:
+def init_wompi_payment(invoice_id, patient_id):
+    factura = invoice_repository.get_invoice_by_id(invoice_id)
+    if not factura:
         return {"success": False, "message": "Factura no encontrada"}, 404
-    if info["idPaciente"] != patient_id:
-        return {"success": False, "message": "No tienes permiso"}, 403
-    if info["anulada"]:
-        return {"success": False, "message": "La factura está anulada"}, 400
-    if info["estadoPago"] == "Pagado":
-        return {"success": False, "message": "La factura ya está pagada"}, 400
-    if not _wompi_configured():
-        return {"success": False, "message": "La pasarela de pagos no está configurada todavía"}, 503
 
-    amount_in_cents = int(round(float(info["monto"]) * 100))
-    # Referencia única por intento: si el paciente cancela y reintenta, no choca con la anterior
-    reference = f"PSY{invoice_id}-{secrets.token_hex(6)}"
-    signature = hashlib.sha256(
-        f"{reference}{amount_in_cents}{WOMPI_CURRENCY}{Config.WOMPI_INTEGRITY_SECRET}".encode("utf-8")
-    ).hexdigest()
+    if factura["idPaciente"] != patient_id:
+        return {"success": False, "message": "Esta factura no te pertenece"}, 403
 
-    invoice_repository.set_wompi_reference(invoice_id, reference)
+    if factura["anulada"]:
+        return {"success": False, "message": "No se puede pagar una factura anulada"}, 400
+
+    if factura["estadoPago"] == "Pagado":
+        return {"success": False, "message": "Esta factura ya está pagada"}, 400
+
+    public_key = current_app.config.get("WOMPI_PUBLIC_KEY")
+    integrity_secret = current_app.config.get("WOMPI_INTEGRITY_SECRET")
+    if not public_key or not integrity_secret:
+        return {"success": False, "message": "Pasarela de pago no configurada"}, 500
+
+    monto = float(factura["monto"])
+    amount_in_cents = int(round(monto * 100))
+    reference = f"PSYAI-{invoice_id}-{uuid.uuid4().hex[:8].upper()}"
+
+    raw = f"{reference}{amount_in_cents}COP{integrity_secret}"
+    integrity_hash = hashlib.sha256(raw.encode()).hexdigest()
+
+    invoice_repository.set_payment_reference(invoice_id, reference, None)
+
+    is_sandbox = public_key.startswith("pub_test_")
 
     return {
         "success": True,
-        "checkoutUrl": Config.WOMPI_CHECKOUT_URL,
-        "publicKey": Config.WOMPI_PUBLIC_KEY,
-        "currency": WOMPI_CURRENCY,
-        "amountInCents": amount_in_cents,
-        "reference": reference,
-        "signature": signature,
-        "redirectUrl": redirect_url,
+        "data": {
+            "publicKey": public_key,
+            "currency": "COP",
+            "amountInCents": amount_in_cents,
+            "reference": reference,
+            "signature": {"integrity": integrity_hash},
+            "idFactura": invoice_id,
+            "sandbox": is_sandbox,
+        },
     }, 200
 
 
-def verificar_pago_wompi(invoice_id, transaction_id, requester_id):
-    """Reconciliación al volver del checkout: consulta el estado real en Wompi
-    en caso de que el webhook aún no haya llegado."""
-    info = invoice_repository.get_invoice_payment_info(invoice_id)
-    if not info:
+def get_patient_invoice_stats(patient_id):
+    stats = invoice_repository.get_invoice_stats_by_professional(patient_id)
+    return {"success": True, "stats": stats}, 200
+
+
+def get_admin_stats():
+    stats = invoice_repository.get_invoice_stats_all()
+    return {"success": True, "stats": stats}, 200
+
+
+def get_professional_patients(professional_id):
+    patients = invoice_repository.get_professional_patients(professional_id)
+    return {"success": True, "pacientes": patients}, 200
+
+
+def confirm_wompi_payment(invoice_id, transaction_id, patient_id):
+    factura = invoice_repository.get_invoice_by_id(invoice_id)
+    if not factura:
         return {"success": False, "message": "Factura no encontrada"}, 404
-    if info["idPaciente"] != requester_id:
-        return {"success": False, "message": "No tienes permiso"}, 403
-    if not transaction_id:
-        return {"success": False, "message": "Falta el identificador de la transacción"}, 400
-    if not _wompi_configured():
-        return {"success": False, "message": "La pasarela de pagos no está configurada todavía"}, 503
+
+    if factura["idPaciente"] != patient_id:
+        return {"success": False, "message": "Esta factura no te pertenece"}, 403
+
+    if factura["estadoPago"] == "Pagado":
+        return {"success": True, "message": "La factura ya estaba marcada como pagada"}, 200
+
+    public_key = current_app.config.get("WOMPI_PUBLIC_KEY", "")
+    base_url = "https://sandbox.wompi.co/v1" if public_key.startswith("pub_test") else "https://production.wompi.co/v1"
 
     try:
+        headers = {"Authorization": f"Bearer {public_key}"}
         resp = requests.get(
-            f"{Config.WOMPI_API_BASE}/transactions/{transaction_id}",
-            headers={"Authorization": f"Bearer {Config.WOMPI_PUBLIC_KEY}"},
+            f"{base_url}/transactions/{transaction_id}",
+            headers=headers,
             timeout=10,
         )
         resp.raise_for_status()
-        transaction = (resp.json() or {}).get("data") or {}
-    except requests.RequestException:
-        return {"success": False, "message": "No se pudo verificar el pago con Wompi"}, 502
+        transaction = resp.json().get("data", {})
+    except Exception as e:
+        current_app.logger.error("Error verificando transacción Wompi: %s", e, exc_info=True)
+        return {"success": False, "message": "No se pudo verificar el pago con Wompi. Intenta más tarde."}, 502
 
-    if transaction.get("reference") != info["wompiReference"]:
+    if transaction.get("status") != "APPROVED":
+        return {"success": False, "message": f"La transacción no está aprobada (estado: {transaction.get('status')})"}, 400
+
+    reference = transaction.get("reference", "")
+    if reference != factura.get("referenciaPago"):
+        current_app.logger.warning(
+            "Referencia de transacción no coincide con la factura %s (esperado=%s, recibido=%s)",
+            invoice_id, factura.get("referenciaPago"), reference,
+        )
         return {"success": False, "message": "La transacción no corresponde a esta factura"}, 400
 
-    status = transaction.get("status")
-    if status == "APPROVED":
-        invoice_repository.mark_paid_by_wompi(invoice_id, transaction.get("id"))
-        return {"success": True, "estadoPago": "Pagado", "wompiStatus": status}, 200
-
-    return {"success": True, "estadoPago": info["estadoPago"], "wompiStatus": status}, 200
-
-
-def procesar_evento_wompi(payload):
-    """Webhook de Wompi: valida el checksum y marca la factura como pagada.
-    Siempre responde 200 salvo firma inválida, para no generar reintentos infinitos
-    por facturas/eventos que ya no aplican."""
-    if not Config.WOMPI_EVENTS_SECRET:
-        return {"success": False, "message": "Webhook no configurado"}, 503
-
-    signature_block = payload.get("signature") or {}
-    properties = signature_block.get("properties") or []
-    checksum_received = str(signature_block.get("checksum") or "")
-    timestamp = payload.get("timestamp")
-    data = payload.get("data") or {}
-
-    if not properties or not checksum_received or timestamp is None:
-        return {"success": False, "message": "Payload inválido"}, 400
-
-    concatenated = "".join(str(_resolve_path(data, prop)) for prop in properties)
-    concatenated += f"{timestamp}{Config.WOMPI_EVENTS_SECRET}"
-    checksum_calculado = hashlib.sha256(concatenated.encode("utf-8")).hexdigest()
-
-    if not hmac.compare_digest(checksum_calculado.lower(), checksum_received.lower()):
-        return {"success": False, "message": "Firma inválida"}, 401
-
-    transaction = data.get("transaction") or {}
-    reference = transaction.get("reference")
-    status = transaction.get("status")
-    transaction_id = transaction.get("id")
-
-    if not reference:
-        return {"success": True, "message": "Evento sin referencia, ignorado"}, 200
-
-    invoice = invoice_repository.get_invoice_by_wompi_reference(reference)
-    if not invoice:
-        return {"success": True, "message": "Factura no encontrada para esta referencia"}, 200
-
-    if status == "APPROVED":
-        invoice_repository.mark_paid_by_wompi(invoice["idFactura"], transaction_id)
-
-    return {"success": True}, 200
+    invoice_repository.update_payment_status(invoice_id, "Pagado")
+    invoice_repository.set_payment_reference(invoice_id, reference, transaction_id)
+    return {"success": True, "message": "Pago confirmado correctamente"}, 200
