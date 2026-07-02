@@ -85,7 +85,10 @@ CREATE TABLE `register` (
 --
 
 INSERT INTO `register` (`idUsuario`, `nombre`, `email`, `contrasena`, `rol`, `fotoPerfil`, `estadoCuenta`, `activo`, `fechaRegistro`) VALUES
-(1, 'Administrador', 'admin@psyai.com', '60fe74406e7f353ed979f350f2fbb6a2e8690a5fa7d1b0c32983d1d8b3f95f67', 'admin', NULL, 'Activa', 1, '2026-06-05 16:16:19');
+(1, 'Administrador', 'admin@psyai.com', '60fe74406e7f353ed979f350f2fbb6a2e8690a5fa7d1b0c32983d1d8b3f95f67', 'admin', NULL, 'Activa', 1, '2026-06-05 16:16:19'),
+(2, 'Admin Nuevo', 'admin2@psyai.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'admin', NULL, 'Activa', 1, '2026-07-01 10:00:00'),
+(3, 'Profesional Nuevo', 'profesional@psyai.com', '00624b02e1f9b996a3278f559d5d55313552ad2c0bafc82adfd975c12df61eaf', 'profesional', NULL, 'Activa', 1, '2026-07-01 10:00:00'),
+(4, 'Paciente Nuevo', 'paciente@psyai.com', '299fbb455c42239c86d2ee3b15403ed1b468259ecaedf0c3527451e1f0d63d59', 'paciente', NULL, 'Activa', 1, '2026-07-01 10:00:00');
 
 -- --------------------------------------------------------
 
