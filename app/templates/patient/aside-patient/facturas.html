@@ -60,19 +60,19 @@
     </header>
 
     <section class="row g-3 mb-4 mt-3" id="statsFacturas">
-      <div class="col-4">
+      <div class="col-6 col-md-4">
         <div class="stat-card" style="border-left:4px solid #43a047;">
           <div class="stat-value" id="statPagado" style="color:#43a047;">$0</div>
           <div class="stat-label">Pagado</div>
         </div>
       </div>
-      <div class="col-4">
+      <div class="col-6 col-md-4">
         <div class="stat-card" style="border-left:4px solid #f9a825;">
           <div class="stat-value" id="statPendiente" style="color:#f9a825;">$0</div>
           <div class="stat-label">Pendiente</div>
         </div>
       </div>
-      <div class="col-4">
+      <div class="col-6 col-md-4">
         <div class="stat-card" style="border-left:4px solid #1565C0;">
           <div class="stat-value" id="statTotal" style="color:#1565C0;">$0</div>
           <div class="stat-label">Total General</div>
@@ -181,6 +181,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/modules/auth/auth-guard.js"></script>
+<link rel="stylesheet" href="/responsive/responsive-patient.css">
 <link rel="stylesheet" href="/responsive/responsive-fix.css">
 <link rel="stylesheet" href="/css/components/custom-alerts.css">
 <script src="/js/core/shared/alerts.js"></script>
@@ -236,12 +237,12 @@ async function cargarFacturasPaciente() {
       }
 
       return '<tr class="align-middle">' +
-        '<td>' + f.fecha + '</td>' +
-        '<td class="fw-semibold">' + (f.nombreProfesional || "---") + '</td>' +
-        '<td>' + servicios + '</td>' +
-        '<td class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
-        '<td><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
-        '<td class="text-center">' + accion + '</td>' +
+        '<td data-label="Fecha">' + f.fecha + '</td>' +
+        '<td data-label="Profesional" class="fw-semibold">' + (f.nombreProfesional || "---") + '</td>' +
+        '<td data-label="Servicio(s)">' + servicios + '</td>' +
+        '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
+        '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
+        '<td data-label="Acci&#xF3;n" class="text-center">' + accion + '</td>' +
         '</tr>';
     }).join("");
   } catch(e) {

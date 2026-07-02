@@ -243,13 +243,13 @@ async function cargarFacturasAdmin() {
             var badgeClass = f.anulada ? "bg-secondary" : f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
             var badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
             return '<tr class="align-middle">' +
-                '<td class="ps-4">' + f.fecha + '</td>' +
-                '<td class="fw-semibold">' + (f.nombrePaciente || "---") + '</td>' +
-                '<td>' + (f.nombreProfesional || "---") + '</td>' +
-                '<td class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
-                '<td>' + (f.metodoPago === "banco" ? "Transferencia" : "Tarjeta") + '</td>' +
-                '<td><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
-                '<td class="text-end pe-4">' +
+                '<td data-label="Fecha" class="ps-4">' + f.fecha + '</td>' +
+                '<td data-label="Paciente" class="fw-semibold">' + (f.nombrePaciente || "---") + '</td>' +
+                '<td data-label="Profesional">' + (f.nombreProfesional || "---") + '</td>' +
+                '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
+                '<td data-label="M&#xE9;todo">' + (f.metodoPago === "banco" ? "Transferencia" : "Tarjeta") + '</td>' +
+                '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
+                '<td data-label="Acci&#xF3;n" class="text-end pe-4">' +
                     '<div class="btn-group btn-group-sm">' +
                         '<button class="btn btn-outline-primary" onclick="verFacturaAdmin(' + f.idFactura + ')"><i class="fas fa-eye"></i></button>' +
                         (f.anulada ? '' :

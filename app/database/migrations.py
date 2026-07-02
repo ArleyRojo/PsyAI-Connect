@@ -392,8 +392,8 @@ def init_db():
         for column_name, alter in (
             ("anulada", "ALTER TABLE facturas ADD COLUMN anulada BOOLEAN DEFAULT FALSE"),
             ("motivoAnulacion", "ALTER TABLE facturas ADD COLUMN motivoAnulacion VARCHAR(255) DEFAULT NULL"),
-            ("wompiReference", "ALTER TABLE facturas ADD COLUMN wompiReference VARCHAR(64) DEFAULT NULL"),
-            ("wompiTransactionId", "ALTER TABLE facturas ADD COLUMN wompiTransactionId VARCHAR(64) DEFAULT NULL"),
+            ("referenciaPago", "ALTER TABLE facturas ADD COLUMN referenciaPago VARCHAR(64) DEFAULT NULL"),
+            ("idTransaccionPago", "ALTER TABLE facturas ADD COLUMN idTransaccionPago VARCHAR(64) DEFAULT NULL"),
         ):
             cursor.execute("""
                 SELECT COUNT(*) FROM information_schema.COLUMNS
@@ -401,6 +401,19 @@ def init_db():
             """, (column_name,))
             if cursor.fetchone()[0] == 0:
                 extra_alters.append(alter)
+
+        for old_col, new_col in (("wompiReference", "referenciaPago"), ("wompiTransactionId", "idTransaccionPago")):
+            cursor.execute("""
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_NAME = 'facturas' AND COLUMN_NAME = %s AND TABLE_SCHEMA = DATABASE()
+            """, (old_col,))
+            if cursor.fetchone()[0] == 1:
+                cursor.execute("""
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_NAME = 'facturas' AND COLUMN_NAME = %s AND TABLE_SCHEMA = DATABASE()
+                """, (new_col,))
+                if cursor.fetchone()[0] == 0:
+                    extra_alters.append(f"ALTER TABLE facturas RENAME COLUMN {old_col} TO {new_col}")
 
         cursor.execute("""
             SELECT COUNT(*) FROM information_schema.COLUMNS

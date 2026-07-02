@@ -1136,6 +1136,13 @@ body.patient-agenda-page .section-card > .d-flex.justify-content-between,
   body.patient-agenda-page .citas-table td:nth-child(5)::before,
   body:has(#tablaCitas) .citas-table td:nth-child(5)::before { content: "Accion"; }
 
+  body:has(#tablaFacturas) .citas-table td:nth-child(1)::before { content: "Fecha"; }
+  body:has(#tablaFacturas) .citas-table td:nth-child(2)::before { content: "Profesional"; }
+  body:has(#tablaFacturas) .citas-table td:nth-child(3)::before { content: "Servicio"; }
+  body:has(#tablaFacturas) .citas-table td:nth-child(4)::before { content: "Monto"; }
+  body:has(#tablaFacturas) .citas-table td:nth-child(5)::before { content: "Estado"; }
+  body:has(#tablaFacturas) .citas-table td:nth-child(6)::before { content: ""; }
+
   body.patient-agenda-page .citas-table tbody td[colspan],
   body:has(#tablaCitas) .citas-table tbody td[colspan] {
     display: block !important;
@@ -1316,4 +1323,7 @@ body.patient-agenda-page .section-card > .d-flex.justify-content-between,
   body:has(#stepperCitas) .pay-methods {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
+
+  #statsFacturas .stat-value { font-size: 1.1rem; }
+  #statsFacturas .stat-label { font-size: 0.7rem; }
 }

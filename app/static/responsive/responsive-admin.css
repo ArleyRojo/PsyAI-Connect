@@ -3408,6 +3408,80 @@
   }
 }
 
+@media (max-width: 991px) {
+  #kpiFacturas .stat-card { padding: 12px; }
+
+  section:has(#filtroPacienteAdmin) {
+    row-gap: 12px;
+  }
+  #filtroPacienteAdmin, #filtroProfesionalAdmin {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+  #filtroEstadoAdmin, #filtroMetodoAdmin {
+    flex: 0 0 33.33%;
+    max-width: 33.33%;
+  }
+  #filtroFechaDesdeAdmin, #filtroFechaHastaAdmin {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 767px) {
+  #filtroPacienteAdmin, #filtroProfesionalAdmin,
+  #filtroEstadoAdmin, #filtroMetodoAdmin,
+  #filtroFechaDesdeAdmin, #filtroFechaHastaAdmin {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  body:has(#tablaFacturasAdmin) .table-responsive { overflow-x: visible; }
+
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin thead { display: none; }
+
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin,
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin tbody,
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin tr,
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin td {
+    display: block;
+    width: 100%;
+  }
+
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin tr {
+    margin-bottom: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 6px 0;
+    border: none;
+  }
+
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.78rem;
+    text-align: left;
+  }
+
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin tr td[colspan] {
+    display: block;
+    text-align: center;
+  }
+  body:has(#tablaFacturasAdmin) table#tablaFacturasAdmin tr td[colspan]::before {
+    content: none;
+  }
+}
+
 @media screen and (max-width: 480px) {
   .row.g-3.mb-4:has(.stat-card),
   #tab-u-todos ~ .row.g-3.mb-4 {

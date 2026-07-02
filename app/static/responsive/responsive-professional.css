@@ -1628,6 +1628,83 @@ body:has(#tbodyPacientes) .main-header,
   }
 }
 
+@media (max-width: 991px) {
+  section.row:has(#filtroPaciente) {
+    row-gap: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .row.g-3.mb-4:has(#filtroEstado) > [class*="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .professional-table-panel { overflow-x: visible; }
+
+  .professional-table-panel table thead { display: none; }
+
+  .professional-table-panel table,
+  .professional-table-panel table tbody,
+  .professional-table-panel table tr,
+  .professional-table-panel table td {
+    display: block;
+    width: 100%;
+  }
+
+  .professional-table-panel table tr {
+    margin-bottom: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .professional-table-panel table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 6px 0;
+    border: none;
+  }
+
+  .professional-table-panel table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.78rem;
+    text-align: left;
+  }
+
+  .professional-table-panel table tr td[colspan] {
+    display: block;
+    text-align: center;
+  }
+  .professional-table-panel table tr td[colspan]::before {
+    content: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .item-row {
+    flex-wrap: wrap;
+  }
+  .item-row .col-7 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 6px;
+  }
+  .item-row .col-3 {
+    flex: 0 0 75%;
+    max-width: 75%;
+  }
+  .item-row .col-2 {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+}
+
 /* Accordion responsive styles (compartido con responsive-patient.css y responsive-fix.css) */
 .accordion-responsive .accordion-item {
   border: 1px solid rgba(13, 71, 161, 0.15);
