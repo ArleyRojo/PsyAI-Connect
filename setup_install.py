@@ -81,6 +81,12 @@ CREDENTIALS: dict[str, str] = {
     # CORS
     "CORS_ORIGINS":             "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com",
 
+    # Wompi (pasarela de pagos)
+    "WOMPI_PUBLIC_KEY":         "pub_test_GuQ3gSJqp28qjqxxv7DCBc7YpbBIrcX3",
+    "WOMPI_INTEGRITY_SECRET":   "test_integrity_6r8k3s1x9p0m2n4b7j5h8q2w6v1c3a9f",
+    "WOMPI_PRIVATE_KEY":        "",
+    "WOMPI_EVENTS_SECRET":      "",
+
     # Session
     "SESSION_COOKIE_SECURE":    "False",
     "SESSION_COOKIE_HTTPONLY":  "True",
@@ -116,6 +122,9 @@ ENV_SECTIONS: list[tuple[str, list[str]]] = [
     ]),
     ("Session Settings", [
         "SESSION_COOKIE_SECURE", "SESSION_COOKIE_HTTPONLY", "SESSION_COOKIE_SAMESITE",
+    ]),
+    ("Wompi (pasarela de pagos)", [
+        "WOMPI_PUBLIC_KEY", "WOMPI_PRIVATE_KEY", "WOMPI_INTEGRITY_SECRET", "WOMPI_EVENTS_SECRET",
     ]),
 ]
 
@@ -278,7 +287,7 @@ def configure_env():
     ok(f".env escrito → {ENV_FILE}")
 
     # Mostrar resumen (sin exponer valores secretos)
-    secret_keys = {"SECRET_KEY", "GEMINI_API_KEY", "GEMINI_API_KEYS", "BREVO_API_KEY", "DB_PASSWORD"}
+    secret_keys = {"SECRET_KEY", "GEMINI_API_KEY", "GEMINI_API_KEYS", "BREVO_API_KEY", "DB_PASSWORD", "WOMPI_PUBLIC_KEY", "WOMPI_PRIVATE_KEY", "WOMPI_INTEGRITY_SECRET", "WOMPI_EVENTS_SECRET"}
     print()
     for section_name, keys in ENV_SECTIONS:
         print(f"  {CYAN}{section_name}{RESET}")
@@ -305,6 +314,11 @@ def verify() -> bool:
         "BREVO_FROM_NAME": "Brevo",
     }
 
+    optional = {
+        "WOMPI_PUBLIC_KEY":       "Wompi (pasarela de pagos)",
+        "WOMPI_INTEGRITY_SECRET": "Wompi (pasarela de pagos)",
+    }
+
     env = _read_existing_env()
     all_ok = True
     for key, section in required.items():
@@ -314,6 +328,13 @@ def verify() -> bool:
         else:
             warn(f"{key}  ({section}) — falta o sin valor")
             all_ok = False
+
+    for key, section in optional.items():
+        v = env.get(key, "")
+        if v and v not in ("cambia_esto_por_una_clave_segura", ""):
+            ok(f"{key}  ({section})")
+        else:
+            warn(f"{key}  ({section}) — se usará sandbox por defecto")
 
     # Flask en venv
     py_venv = _python_venv()
