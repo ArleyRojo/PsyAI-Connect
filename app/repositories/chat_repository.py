@@ -1,143 +1,108 @@
-# ============================================================
-# ARCHIVO: repositories/chat_repository.py
-# ============================================================
-
-from app.utils.db import db_cursor
-
-
-def save_conversation(patient_id, mensaje_usuario, respuesta_bot, nivel_emocional, palabras_riesgo):
-    # Guarda una interacción del chatbot en la base de datos
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            """
-            INSERT INTO conversacioneschatbot
-              (idPaciente, mensajeUsuario, respuestaChatbot, nivelEmocionalDetectado, palabrasRiesgoDetectadas)
-            VALUES (%s, %s, %s, %s, %s)
-            """,
-            (patient_id, mensaje_usuario, respuesta_bot, nivel_emocional, palabras_riesgo)
-        )
-        conn.commit()
+from sqlalchemy import select, func
+from app.database.session import db_session
+from app.models.conversaciones_chatbot import ConversacionesChatbot
+from app.models.register import Register
+from app.models.pacientes_profesional import PacientesProfesional
+from app.models.notificaciones import Notificaciones
+from app.models.citas import Citas
 
 
-def get_history(patient_id, limit=40, today_only=False):
-    date_filter = "AND DATE(fecha) = CURDATE()" if today_only else ""
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            f"""
-            SELECT 
-                mensajeUsuario,
-                respuestaChatbot,
-                DATE_FORMAT(fecha, '%%d/%%m/%%Y %%H:%%i') as fecha_formateada
-            FROM conversacioneschatbot
-            WHERE idPaciente = %s
-            {date_filter}
-            -- Cambio: ordenar por el campo datetime real, no por el alias formateado.
-            ORDER BY conversacioneschatbot.fecha DESC
-            LIMIT %s
-            """,
-            (patient_id, limit),
-        )
-        # Invierte el orden para tenerlos cronológicamente ascendentes
-        rows = list(reversed(cursor.fetchall()))
-        
-        # Convierte las filas a una lista plana de mensajes alternados usuario/bot
-        historial = []
-        for row in rows:
-            if row.get('mensajeUsuario'):
-                historial.append({'tipo': 'usuario', 'mensaje': row['mensajeUsuario']})
-            if row.get('respuestaChatbot'):
-                historial.append({'tipo': 'bot', 'mensaje': row['respuestaChatbot']})
-        
-        return historial
+class ChatRepository:
+    def save_conversation(self, patient_id, mensaje_usuario, respuesta_bot, nivel_emocional, palabras_riesgo):
+        with db_session() as session:
+            session.add(ConversacionesChatbot(
+                idPaciente=patient_id,
+                mensajeUsuario=mensaje_usuario,
+                respuestaChatbot=respuesta_bot,
+                nivelEmocionalDetectado=nivel_emocional,
+                palabrasRiesgoDetectadas=palabras_riesgo,
+            ))
 
+    def get_history(self, patient_id, limit=40, today_only=False):
+        with db_session() as session:
+            stmt = select(
+                ConversacionesChatbot.mensajeUsuario,
+                ConversacionesChatbot.respuestaChatbot,
+            ).where(ConversacionesChatbot.idPaciente == patient_id)
+            if today_only:
+                stmt = stmt.where(func.date(ConversacionesChatbot.fecha) == func.curdate())
+            stmt = stmt.order_by(ConversacionesChatbot.fecha.desc()).limit(limit)
+            rows = list(reversed(session.execute(stmt).all()))
+            historial = []
+            for row in rows:
+                if row[0]:
+                    historial.append({"tipo": "usuario", "mensaje": row[0]})
+                if row[1]:
+                    historial.append({"tipo": "bot", "mensaje": row[1]})
+            return historial
 
-def delete_history(patient_id):
-    # Elimina todo el historial de conversaciones del chatbot de un paciente
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            "DELETE FROM conversacioneschatbot WHERE idPaciente = %s",
-            (patient_id,)
-        )
-        conn.commit()
+    def delete_history(self, patient_id):
+        with db_session() as session:
+            conversaciones = session.execute(
+                select(ConversacionesChatbot).where(ConversacionesChatbot.idPaciente == patient_id)
+            ).scalars().all()
+            for c in conversaciones:
+                session.delete(c)
 
+    def count_today_messages(self, patient_id):
+        with db_session() as session:
+            return session.execute(
+                select(func.count()).select_from(ConversacionesChatbot).where(
+                    ConversacionesChatbot.idPaciente == patient_id,
+                    func.date(ConversacionesChatbot.fecha) == func.curdate(),
+                )
+            ).scalar() or 0
 
-def count_today_messages(patient_id):
-    """Retorna el numero de mensajes enviados por el paciente hoy."""
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT COUNT(*) as total
-            FROM conversacioneschatbot
-            WHERE idPaciente = %s AND DATE(fecha) = CURDATE()
-            """,
-            (patient_id,),
-        )
-        row = cursor.fetchone()
-        return row["total"] if row else 0
+    def get_assigned_professionals(self, patient_id):
+        with db_session() as session:
+            rows = session.execute(
+                select(PacientesProfesional.idProfesional).where(
+                    PacientesProfesional.idPaciente == patient_id,
+                    PacientesProfesional.idProfesional.isnot(None),
+                )
+            ).all()
+            return [r[0] for r in rows]
 
+    def get_all_professional_ids(self):
+        with db_session() as session:
+            rows = session.execute(
+                select(Register.idUsuario).where(Register.rol == "profesional")
+            ).all()
+            return [r[0] for r in rows]
 
-def get_assigned_professionals(patient_id):
-    """Retorna lista de idProfesional asignados a un paciente."""
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            "SELECT idProfesional FROM PacientesProfesional WHERE idPaciente = %s",
-            (patient_id,),
-        )
-        return [row["idProfesional"] for row in cursor.fetchall() if row.get("idProfesional")]
+    def get_patient_name(self, patient_id):
+        with db_session() as session:
+            user = session.get(Register, patient_id)
+            return user.nombre if user else None
 
+    def notificacion_reciente_existe(self, patient_name, tipo, horas=12):
+        with db_session() as session:
+            stmt = select(func.count()).select_from(Notificaciones).where(
+                Notificaciones.tipo == tipo,
+                Notificaciones.mensaje.like(f"%{patient_name}%"),
+                Notificaciones.fecha >= func.now() - func.make_interval(0, 0, 0, 0, horas, 0, 0),
+            ).limit(1)
+            count = session.execute(stmt).scalar() or 0
+            return count > 0
 
-def get_all_professional_ids():
-    """Retorna todos los idUsuario con rol profesional."""
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute("SELECT idUsuario FROM Register WHERE rol = 'profesional'")
-        return [row["idUsuario"] for row in cursor.fetchall()]
-
-
-def get_patient_name(patient_id):
-    """Retorna el nombre de un paciente por su id."""
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            "SELECT nombre FROM Register WHERE idUsuario = %s",
-            (patient_id,),
-        )
-        row = cursor.fetchone()
-        return row["nombre"] if row else None
-
-
-def notificacion_reciente_existe(patient_name, tipo, horas=12):
-    """True si ya existe una notificación de ese tipo sobre ese paciente en las últimas N horas."""
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT 1 FROM Notificaciones
-            WHERE tipo = %s
-              AND mensaje LIKE %s
-              AND fecha >= NOW() - INTERVAL %s HOUR
-            LIMIT 1
-            """,
-            (tipo, f"%{patient_name}%", horas),
-        )
-        return cursor.fetchone() is not None
-
-
-def get_low_risk_counts_for_professional(professional_id, days=7):
-    """Cuenta mensajes de riesgo bajo del chatbot por paciente en los últimos N días."""
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT c.idPaciente, COUNT(*) as total
-            FROM conversacioneschatbot c
-            JOIN Register r ON r.idUsuario = c.idPaciente AND r.rol = 'paciente'
-            LEFT JOIN PacientesProfesional pp ON pp.idPaciente = c.idPaciente AND pp.idProfesional = %s
-            LEFT JOIN Citas cit ON cit.idPaciente = c.idPaciente AND cit.idProfesional = %s
-            WHERE c.nivelEmocionalDetectado = 'Bajo'
-              AND c.fecha >= DATE_SUB(NOW(), INTERVAL %s DAY)
-              AND (
-                pp.idRegistro IS NOT NULL
-                OR (cit.idCita IS NOT NULL AND LOWER(COALESCE(cit.estado, '')) != 'cancelada')
-              )
-            GROUP BY c.idPaciente
-            """,
-            (professional_id, professional_id, days),
-        )
-        return {str(row["idPaciente"]): row["total"] for row in cursor.fetchall()}
+    def get_low_risk_counts_for_professional(self, professional_id, days=7):
+        from sqlalchemy import text
+        with db_session() as session:
+            rows = session.execute(
+                text("""
+                    SELECT c.idPaciente, COUNT(*) as total
+                    FROM conversacioneschatbot c
+                    JOIN Register r ON r.idUsuario = c.idPaciente AND r.rol = 'paciente'
+                    LEFT JOIN PacientesProfesional pp ON pp.idPaciente = c.idPaciente AND pp.idProfesional = :prof
+                    LEFT JOIN Citas cit ON cit.idPaciente = c.idPaciente AND cit.idProfesional = :prof2
+                    WHERE c.nivelEmocionalDetectado = 'Bajo'
+                      AND c.fecha >= DATE_SUB(NOW(), INTERVAL :days DAY)
+                      AND (
+                        pp.idRegistro IS NOT NULL
+                        OR (cit.idCita IS NOT NULL AND LOWER(COALESCE(cit.estado, '')) != 'cancelada')
+                      )
+                    GROUP BY c.idPaciente
+                """),
+                {"prof": professional_id, "prof2": professional_id, "days": days}
+            ).all()
+            return {str(r[0]): r[1] for r in rows}

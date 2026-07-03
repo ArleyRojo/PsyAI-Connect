@@ -11,7 +11,7 @@ class SSEConnection {
     connect() {
         if (this.source) return;
         this.active = true;
-        this.source = new EventSource(this.url);
+        this.source = new EventSource(this.url, { withCredentials: true });
         this.source.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);

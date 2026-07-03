@@ -1,262 +1,164 @@
-# ============================================================
-# ARCHIVO: repositories/invoice_repository.py
-# ============================================================
+from sqlalchemy import select
+from app.database.session import db_session
+from app.models.facturas import Facturas
+from app.models.items_factura import ItemsFactura
+from app.models.register import Register
+from app.models.pacientes_profesional import PacientesProfesional
 
-from app.utils.db import db_cursor
 
-
-def create_invoice(patient_id, professional_id, cita_id, items, metodo_pago):
-    with db_cursor(dictionary=True) as (conn, cursor):
-        try:
+class InvoiceRepository:
+    def create_invoice(self, patient_id, professional_id, cita_id, items, metodo_pago):
+        with db_session() as session:
             monto = sum(item["precioUnitario"] for item in items)
-            cursor.execute(
-                """
-                INSERT INTO Facturas
-                    (idPaciente, idProfesional, idCita, monto, metodoPago, estadoPago)
-                VALUES (%s, %s, %s, %s, %s, 'Pendiente')
-                """,
-                (patient_id, professional_id, cita_id, monto, metodo_pago),
+            factura = Facturas(
+                idPaciente=patient_id,
+                idProfesional=professional_id,
+                idCita=cita_id,
+                monto=monto,
+                metodoPago=metodo_pago,
+                estadoPago="Pendiente",
             )
-            invoice_id = cursor.lastrowid
-
+            session.add(factura)
+            session.flush()
             for item in items:
-                cursor.execute(
-                    """
-                    INSERT INTO ItemsFactura (idFactura, descripcion, precioUnitario)
-                    VALUES (%s, %s, %s)
-                    """,
-                    (invoice_id, item["descripcion"], item["precioUnitario"]),
-                )
-            conn.commit()
-            return invoice_id
-        except Exception:
-            conn.rollback()
-            raise
+                session.add(ItemsFactura(
+                    idFactura=factura.idFactura,
+                    descripcion=item["descripcion"],
+                    precioUnitario=item["precioUnitario"],
+                ))
+            return factura.idFactura
 
+    def get_invoice_by_id(self, invoice_id):
+        with db_session() as session:
+            factura = session.get(Facturas, invoice_id)
+            if not factura:
+                return None
+            result = factura.to_dict()
+            result["nombrePaciente"] = session.get(Register, factura.idPaciente).nombre if session.get(Register, factura.idPaciente) else None
+            result["nombreProfesional"] = session.get(Register, factura.idProfesional).nombre if session.get(Register, factura.idProfesional) else None
+            return result
 
-def get_invoice_by_id(invoice_id):
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT f.*, p.nombre AS nombrePaciente,
-                   pr.nombre AS nombreProfesional
-            FROM Facturas f
-            JOIN Register p ON f.idPaciente = p.idUsuario
-            JOIN Register pr ON f.idProfesional = pr.idUsuario
-            WHERE f.idFactura = %s
-            """,
-            (invoice_id,),
-        )
-        factura = cursor.fetchone()
-        if not factura:
+    def list_invoices_by_patient(self, patient_id):
+        with db_session() as session:
+            stmt = select(Facturas).where(Facturas.idPaciente == patient_id).order_by(Facturas.fecha.desc())
+            facturas = session.execute(stmt).scalars().all()
+            result = []
+            for f in facturas:
+                d = f.to_dict()
+                d["nombreProfesional"] = session.get(Register, f.idProfesional).nombre if session.get(Register, f.idProfesional) else None
+                result.append(d)
+            return result
+
+    def list_invoices_by_professional(self, professional_id, estado=None, fecha_desde=None, fecha_hasta=None):
+        with db_session() as session:
+            stmt = select(Facturas).where(Facturas.idProfesional == professional_id)
+            if estado == "Anulada":
+                stmt = stmt.where(Facturas.anulada == True)
+            elif estado:
+                stmt = stmt.where(Facturas.anulada == False, Facturas.estadoPago == estado)
+            if fecha_desde:
+                stmt = stmt.where(Facturas.fecha >= fecha_desde)
+            if fecha_hasta:
+                stmt = stmt.where(Facturas.fecha < fecha_hasta + " 23:59:59")
+            stmt = stmt.order_by(Facturas.fecha.desc())
+            facturas = session.execute(stmt).scalars().all()
+            result = []
+            for f in facturas:
+                d = f.to_dict()
+                d["nombrePaciente"] = session.get(Register, f.idPaciente).nombre if session.get(Register, f.idPaciente) else None
+                result.append(d)
+            return result
+
+    def list_all_invoices(self, paciente=None, profesional=None, estado=None, metodo_pago=None, fecha_desde=None, fecha_hasta=None):
+        with db_session() as session:
+            stmt = select(Facturas)
+            if paciente:
+                stmt = stmt.join(Register, Facturas.idPaciente == Register.idUsuario).where(Register.nombre.like(f"%{paciente}%"))
+            if estado == "Anulada":
+                stmt = stmt.where(Facturas.anulada == True)
+            elif estado:
+                stmt = stmt.where(Facturas.anulada == False, Facturas.estadoPago == estado)
+            if metodo_pago:
+                stmt = stmt.where(Facturas.metodoPago == metodo_pago)
+            if fecha_desde:
+                stmt = stmt.where(Facturas.fecha >= fecha_desde)
+            if fecha_hasta:
+                stmt = stmt.where(Facturas.fecha < fecha_hasta + " 23:59:59")
+            stmt = stmt.order_by(Facturas.fecha.desc())
+            facturas = session.execute(stmt).scalars().all()
+            result = []
+            for f in facturas:
+                d = f.to_dict()
+                d["nombrePaciente"] = session.get(Register, f.idPaciente).nombre if session.get(Register, f.idPaciente) else None
+                d["nombreProfesional"] = session.get(Register, f.idProfesional).nombre if session.get(Register, f.idProfesional) else None
+                result.append(d)
+            return result
+
+    def update_payment_status(self, invoice_id, nuevo_estado):
+        with db_session() as session:
+            factura = session.get(Facturas, invoice_id)
+            if factura:
+                factura.estadoPago = nuevo_estado
+
+    def annul_invoice(self, invoice_id, motivo):
+        with db_session() as session:
+            factura = session.get(Facturas, invoice_id)
+            if factura:
+                factura.anulada = True
+                factura.motivoAnulacion = motivo
+
+    def set_payment_reference(self, invoice_id, referencia, id_transaccion):
+        with db_session() as session:
+            factura = session.get(Facturas, invoice_id)
+            if factura:
+                factura.referenciaPago = referencia
+                factura.idTransaccionPago = id_transaccion
+
+    def get_invoice_by_reference(self, reference):
+        with db_session() as session:
+            stmt = select(Facturas.idFactura).where(Facturas.referenciaPago == reference)
+            row = session.execute(stmt).scalar_one_or_none()
+            return row
+
+    def get_invoice_owner(self, invoice_id):
+        with db_session() as session:
+            factura = session.get(Facturas, invoice_id)
+            if factura:
+                return (factura.idPaciente, factura.idProfesional, factura.anulada)
             return None
-        cursor.execute(
-            "SELECT * FROM ItemsFactura WHERE idFactura = %s",
-            (invoice_id,),
-        )
-        factura["items"] = cursor.fetchall()
-        return factura
 
+    def get_professional_patients(self, professional_id):
+        with db_session() as session:
+            stmt = select(Register.idUsuario, Register.nombre).distinct().join(
+                PacientesProfesional, PacientesProfesional.idPaciente == Register.idUsuario
+            ).where(PacientesProfesional.idProfesional == professional_id).order_by(Register.nombre)
+            rows = session.execute(stmt).all()
+            return [{"idUsuario": r[0], "nombre": r[1]} for r in rows]
 
-def list_invoices_by_patient(patient_id):
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT f.*, pr.nombre AS nombreProfesional
-            FROM Facturas f
-            JOIN Register pr ON f.idProfesional = pr.idUsuario
-            WHERE f.idPaciente = %s
-            ORDER BY f.fecha DESC
-            """,
-            (patient_id,),
-        )
-        facturas = cursor.fetchall()
-        for factura in facturas:
-            cursor.execute(
-                "SELECT * FROM ItemsFactura WHERE idFactura = %s",
-                (factura["idFactura"],),
-            )
-            factura["items"] = cursor.fetchall()
-        return facturas
+    def get_invoice_stats_by_professional(self, professional_id):
+        with db_session() as session:
+            facturas = session.execute(
+                select(Facturas).where(Facturas.idProfesional == professional_id)
+            ).scalars().all()
+            total_pagado = sum(float(f.monto) for f in facturas if not f.anulada and f.estadoPago == "Pagado" and f.monto)
+            total_pendiente = sum(float(f.monto) for f in facturas if not f.anulada and f.estadoPago in ("Pendiente", "Parcial") and f.monto)
+            total_general = sum(float(f.monto) for f in facturas if not f.anulada and f.monto)
+            return {
+                "totalPagado": total_pagado,
+                "totalPendiente": total_pendiente,
+                "totalGeneral": total_general,
+            }
 
-
-def list_invoices_by_professional(professional_id, estado=None, fecha_desde=None, fecha_hasta=None):
-    conditions = ["f.idProfesional = %s"]
-    params = [professional_id]
-
-    if estado:
-        if estado == "Anulada":
-            conditions.append("f.anulada = 1")
-        else:
-            conditions.append("f.anulada = 0 AND f.estadoPago = %s")
-            params.append(estado)
-
-    if fecha_desde:
-        conditions.append("f.fecha >= %s")
-        params.append(fecha_desde)
-    if fecha_hasta:
-        conditions.append("f.fecha < %s")
-        params.append(fecha_hasta + " 23:59:59")
-
-    sql = f"""
-        SELECT f.*, p.nombre AS nombrePaciente
-        FROM Facturas f
-        JOIN Register p ON f.idPaciente = p.idUsuario
-        WHERE {' AND '.join(conditions)}
-        ORDER BY f.fecha DESC
-    """
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(sql, tuple(params))
-        facturas = cursor.fetchall()
-        for factura in facturas:
-            cursor.execute(
-                "SELECT * FROM ItemsFactura WHERE idFactura = %s",
-                (factura["idFactura"],),
-            )
-            factura["items"] = cursor.fetchall()
-        return facturas
-
-
-def list_all_invoices(paciente=None, profesional=None, estado=None, metodo_pago=None, fecha_desde=None, fecha_hasta=None):
-    conditions = []
-    params = []
-
-    if paciente:
-        conditions.append("p.nombre LIKE %s")
-        params.append(f"%{paciente}%")
-    if profesional:
-        conditions.append("pr.nombre LIKE %s")
-        params.append(f"%{profesional}%")
-    if estado:
-        if estado == "Anulada":
-            conditions.append("f.anulada = 1")
-        else:
-            conditions.append("f.anulada = 0 AND f.estadoPago = %s")
-            params.append(estado)
-    if metodo_pago:
-        conditions.append("f.metodoPago = %s")
-        params.append(metodo_pago)
-    if fecha_desde:
-        conditions.append("f.fecha >= %s")
-        params.append(fecha_desde)
-    if fecha_hasta:
-        conditions.append("f.fecha < %s")
-        params.append(fecha_hasta + " 23:59:59")
-
-    where_clause = " AND ".join(conditions) if conditions else "1=1"
-
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            f"""
-            SELECT f.*, p.nombre AS nombrePaciente, pr.nombre AS nombreProfesional
-            FROM Facturas f
-            JOIN Register p ON f.idPaciente = p.idUsuario
-            JOIN Register pr ON f.idProfesional = pr.idUsuario
-            WHERE {where_clause}
-            ORDER BY f.fecha DESC
-            """,
-            tuple(params),
-        )
-        facturas = cursor.fetchall()
-        for factura in facturas:
-            cursor.execute(
-                "SELECT * FROM ItemsFactura WHERE idFactura = %s",
-                (factura["idFactura"],),
-            )
-            factura["items"] = cursor.fetchall()
-        return facturas
-
-
-def update_payment_status(invoice_id, nuevo_estado):
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            "UPDATE Facturas SET estadoPago = %s WHERE idFactura = %s",
-            (nuevo_estado, invoice_id),
-        )
-        conn.commit()
-        return cursor.rowcount
-
-
-def annul_invoice(invoice_id, motivo):
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            "UPDATE Facturas SET anulada = 1, motivoAnulacion = %s WHERE idFactura = %s",
-            (motivo, invoice_id),
-        )
-        conn.commit()
-        return cursor.rowcount
-
-
-def set_payment_reference(invoice_id, referencia, id_transaccion):
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            "UPDATE Facturas SET referenciaPago = %s, idTransaccionPago = %s WHERE idFactura = %s",
-            (referencia, id_transaccion, invoice_id),
-        )
-        conn.commit()
-        return cursor.rowcount
-
-
-def get_invoice_by_reference(reference):
-    with db_cursor() as (_, cursor):
-        cursor.execute(
-            "SELECT idFactura FROM Facturas WHERE referenciaPago = %s",
-            (reference,),
-        )
-        row = cursor.fetchone()
-        return row[0] if row else None
-
-
-def get_invoice_owner(invoice_id):
-    with db_cursor() as (_, cursor):
-        cursor.execute(
-            "SELECT idPaciente, idProfesional, anulada FROM Facturas WHERE idFactura = %s",
-            (invoice_id,),
-        )
-        return cursor.fetchone()
-
-
-def get_professional_patients(professional_id):
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT DISTINCT r.idUsuario, r.nombre
-            FROM PacientesProfesional pp
-            JOIN Register r ON pp.idPaciente = r.idUsuario
-            WHERE pp.idProfesional = %s
-            ORDER BY r.nombre
-            """,
-            (professional_id,),
-        )
-        return cursor.fetchall()
-
-
-def get_invoice_stats_by_professional(professional_id):
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT
-                COALESCE(SUM(CASE WHEN f.anulada = 0 AND f.estadoPago = 'Pagado' THEN f.monto ELSE 0 END), 0) AS totalPagado,
-                COALESCE(SUM(CASE WHEN f.anulada = 0 AND f.estadoPago IN ('Pendiente','Parcial') THEN f.monto ELSE 0 END), 0) AS totalPendiente,
-                COALESCE(SUM(CASE WHEN f.anulada = 0 THEN f.monto ELSE 0 END), 0) AS totalGeneral
-            FROM Facturas f
-            WHERE f.idProfesional = %s
-            """,
-            (professional_id,),
-        )
-        return cursor.fetchone()
-
-
-def get_invoice_stats_all():
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT
-                COALESCE(SUM(CASE WHEN f.anulada = 0 THEN f.monto ELSE 0 END), 0) AS totalFacturado,
-                COALESCE(SUM(CASE WHEN f.anulada = 0 AND f.estadoPago = 'Pagado' THEN f.monto ELSE 0 END), 0) AS totalPagado,
-                COALESCE(SUM(CASE WHEN f.anulada = 0 AND f.estadoPago IN ('Pendiente','Parcial') THEN f.monto ELSE 0 END), 0) AS totalPendiente,
-                COALESCE(SUM(f.anulada), 0) AS anuladas
-            FROM Facturas f
-            """,
-        )
-        return cursor.fetchone()
+    def get_invoice_stats_all(self):
+        with db_session() as session:
+            facturas = session.execute(select(Facturas)).scalars().all()
+            total_facturado = sum(float(f.monto) for f in facturas if not f.anulada and f.monto)
+            total_pagado = sum(float(f.monto) for f in facturas if not f.anulada and f.estadoPago == "Pagado" and f.monto)
+            total_pendiente = sum(float(f.monto) for f in facturas if not f.anulada and f.estadoPago in ("Pendiente", "Parcial") and f.monto)
+            anuladas = sum(1 for f in facturas if f.anulada)
+            return {
+                "totalFacturado": total_facturado,
+                "totalPagado": total_pagado,
+                "totalPendiente": total_pendiente,
+                "anuladas": anuladas,
+            }

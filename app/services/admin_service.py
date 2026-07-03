@@ -1,210 +1,186 @@
-# ============================================================
-# ARCHIVO: services/admin_service.py
-# ============================================================
-
 import secrets
 import time
-from app.repositories import admin_repository
+from app.repositories.admin_repository import AdminRepository
 
-# Caché de estadísticas para evitar consultas repetitivas en el SSE del panel admin
 _stats_cache = None
 _stats_cache_time = 0
-STATS_CACHE_TTL = 10  # segundos
+STATS_CACHE_TTL = 10
 
 
-def init_db():
-    try:
-        admin_repository.ensure_report_columns()
-    except Exception as exc:
-        from flask import current_app
-        current_app.logger.error(f"Error initializing DB: {exc}")
+class AdminService:
+    def __init__(self):
+        self.repo = AdminRepository()
 
+    def init_db(self):
+        try:
+            self.repo.ensure_report_columns()
+        except Exception as exc:
+            from flask import current_app
+            current_app.logger.error(f"Error initializing DB: {exc}")
 
-def create_report_columns():
-    admin_repository.ensure_report_columns()
-    return {"success": True, "message": "Columnas creadas correctamente"}, 200
+    def create_report_columns(self):
+        self.repo.ensure_report_columns()
+        return {"success": True, "message": "Columnas creadas correctamente"}, 200
 
+    def get_stats(self, force=False):
+        global _stats_cache, _stats_cache_time
+        now = time.time()
+        if not force and _stats_cache is not None and now - _stats_cache_time < STATS_CACHE_TTL:
+            return _stats_cache
+        from app.services.telemetry_service import telemetry_service
+        db_stats = self.repo.get_stats()
+        live_stats = telemetry_service.get_live_stats()
+        merged = {**live_stats, **db_stats}
+        result = ({"success": True, "stats": merged}, 200)
+        _stats_cache = result
+        _stats_cache_time = now
+        return result
 
-def get_stats(force=False):
-    # Retorna estadísticas combinadas (telemetría en memoria + base de datos)
-    global _stats_cache, _stats_cache_time
-    now = time.time()
-    if not force and _stats_cache is not None and now - _stats_cache_time < STATS_CACHE_TTL:
-        return _stats_cache  # Usa caché si no han pasado los segundos del TTL
-    from app.services.telemetry_service import get_live_stats
-    db_stats = admin_repository.get_stats()
-    live_stats = get_live_stats()
-    merged = {**live_stats, **db_stats}
-    result = ({"success": True, "stats": merged}, 200)
-    _stats_cache = result
-    _stats_cache_time = now
-    return result
+    def list_users(self, page=1, limit=20):
+        return {"success": True, "usuarios": self.repo.list_users(page, limit)}, 200
 
+    def get_user(self, user_id):
+        usuario = self.repo.get_user(user_id)
+        if not usuario:
+            return {"success": False, "message": "Usuario no encontrado"}, 404
+        return {"success": True, "usuario": usuario}, 200
 
-def list_users(page=1, limit=20):
-    return {"success": True, "usuarios": admin_repository.list_users(page, limit)}, 200
+    def create_user(self, data):
+        if not data.get("contrasena"):
+            temp_password = secrets.token_urlsafe(10)
+            data["contrasena"] = temp_password
+            self.repo.create_user(data)
+            return {"success": True, "message": "Usuario creado correctamente", "contrasena_temporal": temp_password}, 200
+        self.repo.create_user(data)
+        return {"success": True, "message": "Usuario creado correctamente"}, 200
 
+    def update_user(self, data):
+        self.repo.update_user(data)
+        return {"success": True, "message": "Usuario actualizado"}, 200
 
-def get_user(user_id):
-    usuario = admin_repository.get_user(user_id)
-    if not usuario:
-        return {"success": False, "message": "Usuario no encontrado"}, 404
-    return {"success": True, "usuario": usuario}, 200
+    def delete_user(self, user_id):
+        self.repo.delete_user(user_id)
+        return {"success": True, "message": "Usuario eliminado"}, 200
 
+    def block_user(self, data):
+        activo = self.repo.block_user(data.get("idUsuario"), data.get("accion"))
+        return {"success": True, "message": f"Usuario {'suspendido' if activo == 0 else 'reestablecido'}"}, 200
 
-def create_user(data):
-    if not data.get("contrasena"):
-        temp_password = secrets.token_urlsafe(10)
-        data["contrasena"] = temp_password
-        admin_repository.create_user(data)
-        return {"success": True, "message": "Usuario creado correctamente", "contrasena_temporal": temp_password}, 200
-    admin_repository.create_user(data)
-    return {"success": True, "message": "Usuario creado correctamente"}, 200
+    def list_role_users(self):
+        return {"success": True, "usuarios": self.repo.list_role_users()}, 200
 
+    def change_role(self, data):
+        self.repo.change_role(data.get("idUsuario"), data.get("nuevoRol"))
+        return {"success": True, "message": "Rol actualizado"}, 200
 
-def update_user(data):
-    admin_repository.update_user(data)
-    return {"success": True, "message": "Usuario actualizado"}, 200
+    def role_history(self):
+        historial = self.repo.get_role_history()
+        for item in historial:
+            if item.get("fecha"):
+                item["fecha"] = item["fecha"].strftime("%d/%m/%Y %H:%M")
+            item["usuario"] = item.pop("usuario_afectado", None)
+            item["rolAnterior"] = item.pop("rol_anterior", None)
+            item["rolNuevo"] = item.pop("rol_nuevo", None)
+        return {"success": True, "historial": historial}, 200
 
+    def notifications_feed(self):
+        actividades = self.repo.get_notifications_feed()
+        actividades.sort(key=lambda x: x["fecha"], reverse=True)
+        stats = self._notification_stats(actividades)
+        return {
+            "success": True,
+            "notificaciones": actividades[:100],
+            "stats": stats,
+        }, 200
 
-def delete_user(user_id):
-    admin_repository.delete_user(user_id)
-    return {"success": True, "message": "Usuario eliminado"}, 200
+    def _notification_stats(self, actividades):
+        total = len(actividades)
+        enviadas = sum(1 for item in actividades if item.get("estado") != "pendiente")
+        programadas = sum(1 for item in actividades if item.get("estado") == "pendiente")
+        alcanzados = sum(
+            1 for item in actividades
+            if item.get("estado") != "pendiente"
+            and (item.get("destinatario") or item.get("email_individual") or item.get("mensaje"))
+        )
+        return {
+            "enviadas": enviadas,
+            "programadas": programadas,
+            "tasa": f"{round((enviadas / total) * 100)}%" if total else "0%",
+            "alcanzados": alcanzados,
+        }
 
+    def create_notification(self, data):
+        self.repo.create_notification(data)
+        return {"success": True, "message": "Notificacion enviada"}, 200
 
-def block_user(data):
-    activo = admin_repository.block_user(data.get("idUsuario"), data.get("accion"))
-    return {"success": True, "message": f"Usuario {'suspendido' if activo == 0 else 'reestablecido'}"}, 200
+    def delete_notification(self, notification_id):
+        self.repo.delete_notification(notification_id)
+        return {"success": True, "message": "Notificacion eliminada"}, 200
 
+    def get_logs(self, limit=None):
+        logs = self.repo.get_logs(limit=limit)
+        logs.sort(key=lambda x: x["fecha"], reverse=True)
+        return {"success": True, "logs": logs}, 200
 
-def list_role_users():
-    return {"success": True, "usuarios": admin_repository.list_role_users()}, 200
+    def get_chatbot_historial(self, nivel="", search=""):
+        def _serialize_fecha(valor):
+            if valor is None:
+                return None
+            if hasattr(valor, "isoformat"):
+                return valor.isoformat()
+            return str(valor)
 
+        try:
+            rows = self.repo.get_chatbot_historial_rows()
+            stats = self.repo.get_chatbot_historial_stats()
+        except Exception as e:
+            estr = str(e)
+            if "1146" in estr or "doesn't exist" in estr:
+                return {
+                    "success": False,
+                    "message": "La vista vistahistorialchatbot no existe en la BD. "
+                               "Corre las migraciones: python -m app.database.migrations",
+                    "pacientes": [],
+                    "stats": {"total": 0, "alto": 0, "medio": 0, "bajo": 0},
+                }, 200
+            return {"success": False, "message": estr}, 500
 
-def change_role(data):
-    admin_repository.change_role(data.get("idUsuario"), data.get("nuevoRol"))
-    return {"success": True, "message": "Rol actualizado"}, 200
+        pacientes_map = {}
+        for row in rows:
+            key = row.get("idPaciente") or row["nombre"]
+            if key not in pacientes_map:
+                pacientes_map[key] = {
+                    "nombre": row["nombre"] or "Paciente",
+                    "idPaciente": row.get("idPaciente"),
+                    "total_mensajes": 0,
+                    "ultimo_mensaje": None,
+                    "nivel_max": "Bajo",
+                    "mensajes": [],
+                }
+            p = pacientes_map[key]
+            p["total_mensajes"] += 1
+            rnivel = row.get("nivelEmocionalDetectado", "")
+            if rnivel == "Alto":
+                p["nivel_max"] = "Alto"
+            elif rnivel == "Medio" and p["nivel_max"] != "Alto":
+                p["nivel_max"] = "Medio"
+            p["mensajes"].append({
+                "mensajeUsuario": row.get("mensajeUsuario"),
+                "respuestaChatbot": row.get("respuestaChatbot"),
+                "nivelEmocionalDetectado": rnivel,
+                "fecha": _serialize_fecha(row.get("fecha")),
+            })
+            fecha = row.get("fecha")
+            if fecha:
+                fecha_str = fecha.isoformat() if hasattr(fecha, "isoformat") else str(fecha)
+                if p["ultimo_mensaje"] is None or fecha_str > p["ultimo_mensaje"]:
+                    p["ultimo_mensaje"] = fecha_str
 
+        pacientes = list(pacientes_map.values())
+        if nivel:
+            pacientes = [p for p in pacientes if p["nivel_max"] == nivel]
+        if search:
+            s = search.lower()
+            pacientes = [p for p in pacientes if s in p["nombre"].lower()]
 
-def role_history():
-    # Obtiene el historial y renombra campos para la respuesta JSON del frontend
-    historial = admin_repository.get_role_history()
-    for item in historial:
-        if item.get("fecha"):
-            item["fecha"] = item["fecha"].strftime("%d/%m/%Y %H:%M")
-        item["usuario"] = item.pop("usuario_afectado", None)
-        item["rolAnterior"] = item.pop("rol_anterior", None)
-        item["rolNuevo"] = item.pop("rol_nuevo", None)
-    return {"success": True, "historial": historial}, 200
-
-
-def notifications_feed():
-    # Obtiene el feed de notificaciones y calcula estadísticas de envío
-    actividades = admin_repository.get_notifications_feed()
-    actividades.sort(key=lambda x: x["fecha"], reverse=True)
-    stats = _notification_stats(actividades)
-    return {
-        "success": True,
-        "notificaciones": actividades[:100],
-        "stats": stats,
-    }, 200
-
-
-def _notification_stats(actividades):
-    # Calcula estadísticas de notificaciones: enviadas, programadas, tasa de alcance
-    total = len(actividades)
-    enviadas = sum(1 for item in actividades if item.get("estado") != "pendiente")
-    programadas = sum(1 for item in actividades if item.get("estado") == "pendiente")
-    alcanzados = sum(
-        1 for item in actividades
-        if item.get("estado") != "pendiente"
-        and (item.get("destinatario") or item.get("email_individual") or item.get("mensaje"))
-    )
-    return {
-        "enviadas": enviadas,
-        "programadas": programadas,
-        "tasa": f"{round((enviadas / total) * 100)}%" if total else "0%",
-        "alcanzados": alcanzados,
-    }
-
-
-def create_notification(data):
-    admin_repository.create_notification(data)
-    return {"success": True, "message": "Notificacion enviada"}, 200
-
-
-def delete_notification(notification_id):
-    admin_repository.delete_notification(notification_id)
-    return {"success": True, "message": "Notificacion eliminada"}, 200
-
-
-def get_logs(limit=None):
-    logs = admin_repository.get_logs(limit=limit)
-    logs.sort(key=lambda x: x["fecha"], reverse=True)
-    return {"success": True, "logs": logs}, 200
-
-
-def get_chatbot_historial(nivel="", search=""):
-    # Procesa y agrupa el historial del chatbot por paciente, con filtros de nivel y búsqueda
-    def _serialize_fecha(valor):
-        if valor is None:
-            return None
-        if hasattr(valor, "isoformat"):
-            return valor.isoformat()
-        return str(valor)
-
-    try:
-        rows = admin_repository.get_chatbot_historial_rows()
-        stats = admin_repository.get_chatbot_historial_stats()
-    except Exception as e:
-        estr = str(e)
-        if "1146" in estr or "doesn't exist" in estr:
-            return {
-                "success": False,
-                "message": "La vista vistahistorialchatbot no existe en la BD. "
-                           "Corre las migraciones: python -m app.database.migrations",
-                "pacientes": [],
-                "stats": {"total": 0, "alto": 0, "medio": 0, "bajo": 0},
-            }, 200
-        return {"success": False, "message": estr}, 500
-
-    # Agrupa mensajes por paciente en un mapa
-    pacientes_map = {}
-    for row in rows:
-        key = row.get("idPaciente") or row["nombre"]
-        if key not in pacientes_map:
-            pacientes_map[key] = {
-                "nombre": row["nombre"] or "Paciente",
-                "idPaciente": row.get("idPaciente"),
-                "total_mensajes": 0,
-                "ultimo_mensaje": None,
-                "nivel_max": "Bajo",
-                "mensajes": [],
-            }
-        p = pacientes_map[key]
-        p["total_mensajes"] += 1
-        rnivel = row.get("nivelEmocionalDetectado", "")
-        if rnivel == "Alto":
-            p["nivel_max"] = "Alto"
-        elif rnivel == "Medio" and p["nivel_max"] != "Alto":
-            p["nivel_max"] = "Medio"
-        p["mensajes"].append({
-            "mensajeUsuario": row.get("mensajeUsuario"),
-            "respuestaChatbot": row.get("respuestaChatbot"),
-            "nivelEmocionalDetectado": rnivel,
-            "fecha": _serialize_fecha(row.get("fecha")),
-        })
-        fecha = row.get("fecha")
-        if fecha:
-            fecha_str = fecha.isoformat() if hasattr(fecha, "isoformat") else str(fecha)
-            if p["ultimo_mensaje"] is None or fecha_str > p["ultimo_mensaje"]:
-                p["ultimo_mensaje"] = fecha_str
-
-    pacientes = list(pacientes_map.values())
-    if nivel:
-        pacientes = [p for p in pacientes if p["nivel_max"] == nivel]
-    if search:
-        s = search.lower()
-        pacientes = [p for p in pacientes if s in p["nombre"].lower()]
-
-    return {"success": True, "pacientes": pacientes, "stats": stats}, 200
+        return {"success": True, "pacientes": pacientes, "stats": stats}, 200

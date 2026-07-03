@@ -1,166 +1,130 @@
-# ============================================================
-# ARCHIVO: repositories/patient_repository.py
-# ============================================================
-
-from app.utils.db import db_cursor
-
-
-def update_profile_photo(filename, user_id):
-    # Actualiza la foto de perfil de un usuario en la tabla Register
-    with db_cursor() as (conn, cursor):
-        cursor.execute("UPDATE Register SET fotoPerfil = %s WHERE idUsuario = %s", (filename, user_id))
-        conn.commit()
+from sqlalchemy import select
+from app.database.session import db_session
+from app.models.register import Register
+from app.models.perfil_paciente import PerfilPaciente
+from app.models.perfil_profesional import PerfilProfesional
+from app.models.encuesta_chatbot import EncuestaChatbot
+from app.models.evolucion_paciente import EvolucionPaciente
 
 
-def save_chatbot_survey(user_id, data):
-    # Guarda una encuesta de satisfacción del chatbot respondida por el paciente
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            """
-            INSERT INTO EncuestaChatbot (idPaciente, utilidad, claridad, recomendaria, comentario)
-            VALUES (%s, %s, %s, %s, %s)
-            """,
-            (
-                user_id,
-                data.get("utilidad"),
-                data.get("claridad"),
-                data.get("recomendaria"),
-                data.get("comentario"),
-            ),
-        )
-        conn.commit()
+class PatientRepository:
+    def update_profile_photo(self, filename, user_id):
+        with db_session() as session:
+            user = session.get(Register, user_id)
+            if user:
+                user.fotoPerfil = filename
 
+    def save_chatbot_survey(self, user_id, data):
+        with db_session() as session:
+            session.add(EncuestaChatbot(
+                idPaciente=user_id,
+                utilidad=data.get("utilidad"),
+                claridad=data.get("claridad"),
+                recomendaria=data.get("recomendaria"),
+                comentario=data.get("comentario"),
+            ))
 
-def get_patient_profile(user_id):
-    # Obtiene el perfil completo de un paciente combinando Register y PerfilPaciente
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT r.nombre, r.email, r.fotoPerfil, r.fechaRegistro,
-                   p.edad, p.genero, p.numeroTelefonico, p.consentimiento_chatbot
-            FROM Register r
-            LEFT JOIN PerfilPaciente p ON r.idUsuario = p.idPaciente
-            WHERE r.idUsuario = %s
-            """,
-            (user_id,),
-        )
-        return cursor.fetchone()
+    def get_patient_profile(self, user_id):
+        with db_session() as session:
+            user = session.get(Register, user_id)
+            if not user:
+                return None
+            perfil = session.get(PerfilPaciente, user_id)
+            return {
+                "nombre": user.nombre,
+                "email": user.email,
+                "fotoPerfil": user.fotoPerfil,
+                "fechaRegistro": user.fechaRegistro,
+                "edad": perfil.edad if perfil else None,
+                "genero": perfil.genero if perfil else None,
+                "numeroTelefonico": perfil.numeroTelefonico if perfil else None,
+                "consentimiento_chatbot": perfil.consentimiento_chatbot if perfil else None,
+            }
 
+    def update_patient_profile(self, data):
+        with db_session() as session:
+            perfil = session.get(PerfilPaciente, data.get("idUsuario"))
+            if perfil:
+                perfil.numeroTelefonico = data.get("numeroTelefonico")
+            else:
+                session.add(PerfilPaciente(
+                    idPaciente=data.get("idUsuario"),
+                    numeroTelefonico=data.get("numeroTelefonico"),
+                    consentimiento_chatbot=False,
+                ))
 
-def update_patient_profile(data):
-    # Actualiza los datos del perfil del paciente
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            """
-            UPDATE PerfilPaciente
-            SET numeroTelefonico = %s
-            WHERE idPaciente = %s
-            """,
-            (data.get("numeroTelefonico"), data.get("idUsuario")),
-        )
-        if cursor.rowcount == 0:
-            cursor.execute(
-                "INSERT INTO PerfilPaciente (idPaciente, numeroTelefonico, consentimiento_chatbot) VALUES (%s, %s, 0)",
-                (data.get("idUsuario"), data.get("numeroTelefonico")),
-            )
-        conn.commit()
+    def get_chatbot_consent(self, user_id):
+        with db_session() as session:
+            perfil = session.get(PerfilPaciente, user_id)
+            return bool(perfil.consentimiento_chatbot) if perfil else False
 
+    def update_chatbot_consent(self, user_id, consent):
+        with db_session() as session:
+            perfil = session.get(PerfilPaciente, user_id)
+            if perfil:
+                perfil.consentimiento_chatbot = bool(consent)
+            else:
+                session.add(PerfilPaciente(
+                    idPaciente=user_id,
+                    consentimiento_chatbot=bool(consent),
+                ))
 
-def get_chatbot_consent(user_id):
-    # Obtiene el consentimiento del paciente para usar el chatbot
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            "SELECT consentimiento_chatbot FROM PerfilPaciente WHERE idPaciente = %s",
-            (user_id,),
-        )
-        row = cursor.fetchone()
-        return bool(row["consentimiento_chatbot"]) if row else False
+    def create_patient_evolution(self, user_id, data):
+        with db_session() as session:
+            session.add(EvolucionPaciente(
+                idPaciente=user_id,
+                estadoEmocional=data.get("estadoEmocional"),
+                nivelEnergia=data.get("nivelEnergia"),
+                notasPersonales=data.get("notasPersonales"),
+            ))
 
+    def get_patient_evolution_history(self, user_id):
+        with db_session() as session:
+            stmt = select(EvolucionPaciente).where(
+                EvolucionPaciente.idPaciente == user_id
+            ).order_by(EvolucionPaciente.fecha.desc())
+            rows = session.execute(stmt).scalars().all()
+            result = []
+            for r in rows:
+                result.append({
+                    "estadoEmocional": r.estadoEmocional,
+                    "nivelEnergia": r.nivelEnergia,
+                    "notasPersonales": r.notasPersonales,
+                    "fecha": r.fecha.strftime("%d/%m/%Y") if r.fecha else None,
+                    "fechaRaw": r.fecha,
+                })
+            return result
 
-def update_chatbot_consent(user_id, consent):
-    # Actualiza o inserta el consentimiento del paciente para el chatbot
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            "UPDATE PerfilPaciente SET consentimiento_chatbot = %s WHERE idPaciente = %s",
-            (1 if consent else 0, user_id),
-        )
-        if cursor.rowcount == 0:
-            cursor.execute(
-                "INSERT INTO PerfilPaciente (idPaciente, consentimiento_chatbot) VALUES (%s, %s)",
-                (user_id, 1 if consent else 0),
-            )
-        conn.commit()
+    def list_patients(self, page=1, limit=20):
+        offset = (page - 1) * limit
+        with db_session() as session:
+            stmt = select(Register).where(
+                Register.rol == "paciente"
+            ).order_by(Register.nombre).limit(limit).offset(offset)
+            users = session.execute(stmt).scalars().all()
+            return [
+                {"idUsuario": u.idUsuario, "nombre": u.nombre, "email": u.email, "fotoPerfil": u.fotoPerfil}
+                for u in users
+            ]
 
+    def list_professionals(self):
+        with db_session() as session:
+            stmt = select(Register.idUsuario, Register.nombre).where(
+                Register.rol == "profesional"
+            ).order_by(Register.nombre)
+            rows = session.execute(stmt).all()
+            return [{"idUsuario": r[0], "nombre": r[1]} for r in rows]
 
-def create_patient_evolution(user_id, data):
-    # Crea un registro de evolución diaria del paciente (estado emocional, energía, notas)
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            """
-            INSERT INTO EvolucionPaciente (idPaciente, estadoEmocional, nivelEnergia, notasPersonales)
-            VALUES (%s, %s, %s, %s)
-            """,
-            (user_id, data.get("estadoEmocional"), data.get("nivelEnergia"), data.get("notasPersonales")),
-        )
-        conn.commit()
-
-
-def get_patient_evolution_history(user_id):
-    # Obtiene el historial de evoluciones del paciente ordenado de más reciente a más antiguo
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT estadoEmocional, nivelEnergia, notasPersonales,
-                   DATE_FORMAT(fecha, '%d/%m/%Y') as fecha,
-                   fecha as fechaRaw
-            FROM EvolucionPaciente
-            WHERE idPaciente = %s
-            ORDER BY fecha DESC
-            """,
-            (user_id,),
-        )
-        return cursor.fetchall()
-
-
-def list_patients(page=1, limit=20):
-    offset = (page - 1) * limit
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT idUsuario, nombre, email, fotoPerfil FROM Register
-            WHERE rol = 'paciente'
-            ORDER BY nombre
-            LIMIT %s OFFSET %s
-            """,
-            (limit, offset),
-        )
-        return cursor.fetchall()
-
-
-def list_professionals():
-    # Lista todos los profesionales registrados para mostrarlos al paciente
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT idUsuario, nombre FROM Register
-            WHERE rol = 'profesional'
-            ORDER BY nombre
-            """
-        )
-        return cursor.fetchall()
-
-
-def list_professionals_for_patient(patient_id):
-    """Profesionales registrados disponibles para mensajeria directa."""
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT r.idUsuario, r.nombre, r.fotoPerfil,
-                   pp.especialidad
-            FROM Register r
-            LEFT JOIN PerfilProfesional pp ON r.idUsuario = pp.idProfesional
-            WHERE r.rol = 'profesional'
-            ORDER BY r.nombre
-            """
-        )
-        return cursor.fetchall()
+    def list_professionals_for_patient(self, patient_id):
+        with db_session() as session:
+            stmt = select(
+                Register.idUsuario, Register.nombre, Register.fotoPerfil,
+                PerfilProfesional.especialidad,
+            ).outerjoin(
+                PerfilProfesional, Register.idUsuario == PerfilProfesional.idProfesional
+            ).where(Register.rol == "profesional").order_by(Register.nombre)
+            rows = session.execute(stmt).all()
+            return [
+                {"idUsuario": r[0], "nombre": r[1], "fotoPerfil": r[2], "especialidad": r[3]}
+                for r in rows
+            ]

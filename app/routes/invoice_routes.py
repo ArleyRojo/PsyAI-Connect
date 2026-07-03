@@ -1,128 +1,189 @@
-# ARCHIVO: invoice_routes.py
-# Facturación y pasarela de pagos Wompi.
-# Roles: paciente ve sus facturas; profesional/admin gestionan facturación.
 import hashlib
 import json
 
 from flask import Blueprint, jsonify, request, session, current_app
+from flask.views import MethodView
 
-from app.services import invoice_service
-from app.utils.auth import require_role
-from app.repositories import invoice_repository
+from app.services.invoice_service import InvoiceService
+from app.repositories.invoice_repository import InvoiceRepository
+from app.utils.route_helpers import RouteHelpers
 
 
 invoice_bp = Blueprint("invoices", __name__)
+invoice_service = InvoiceService()
 
 
-@invoice_bp.route("/api/facturas", methods=["POST"])
-@require_role("paciente", "profesional", "admin")
-def crear_factura():
-    data = request.get_json() or {}
-    user_role = session.get("rol")
-    user_id = session.get("idUsuario")
+class FacturaResource(MethodView):
+    def get(self, id_factura=None):
+        if id_factura:
+            err = RouteHelpers.check_role("paciente", "profesional", "admin")
+            if err:
+                return err
+            payload, status = invoice_service.get_invoice(
+                id_factura, session.get("idUsuario"), session.get("rol"),
+            )
+            return jsonify(payload), status
 
-    if user_role == "paciente":
-        id_paciente = user_id
-        id_profesional = data.get("idProfesional")
-        if not id_profesional:
-            return jsonify({"success": False, "message": "Debes especificar el profesional"}), 400
-    else:
-        id_profesional = data.get("idProfesional") or user_id
-        id_paciente = data.get("idPaciente")
-        if not id_paciente:
-            return jsonify({"success": False, "message": "Debes especificar el paciente"}), 400
+        rol = request.args.get("rol", session.get("rol"))
+        err = RouteHelpers.check_role("paciente", "profesional", "admin")
+        if err:
+            return err
 
-    payload, status = invoice_service.create_invoice(id_paciente, id_profesional, data)
-    return jsonify(payload), status
+        if rol == "paciente":
+            payload, status = invoice_service.list_patient_invoices(session.get("idUsuario"))
+        elif rol == "profesional":
+            estado = request.args.get("estado")
+            fecha_desde = request.args.get("fecha_desde")
+            fecha_hasta = request.args.get("fecha_hasta")
+            payload, status = invoice_service.list_professional_invoices(
+                session.get("idUsuario"), estado=estado,
+                fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
+            )
+        else:
+            payload, status = invoice_service.list_all_invoices(
+                paciente=request.args.get("paciente"),
+                profesional=request.args.get("profesional"),
+                estado=request.args.get("estado"),
+                metodo_pago=request.args.get("metodoPago"),
+                fecha_desde=request.args.get("fecha_desde"),
+                fecha_hasta=request.args.get("fecha_hasta"),
+            )
+        return jsonify(payload), status
 
+    def post(self):
+        err = RouteHelpers.check_role("paciente", "profesional", "admin")
+        if err:
+            return err
+        data = request.get_json() or {}
+        user_role = session.get("rol")
+        user_id = session.get("idUsuario")
 
-@invoice_bp.route("/api/facturas/mias", methods=["GET"])
-@require_role("paciente")
-def mis_facturas():
-    payload, status = invoice_service.list_patient_invoices(session.get("idUsuario"))
-    return jsonify(payload), status
+        if user_role == "paciente":
+            id_paciente = user_id
+            id_profesional = data.get("idProfesional")
+            if not id_profesional:
+                return jsonify({"success": False, "message": "Debes especificar el profesional"}), 400
+        else:
+            id_profesional = data.get("idProfesional") or user_id
+            id_paciente = data.get("idPaciente")
+            if not id_paciente:
+                return jsonify({"success": False, "message": "Debes especificar el paciente"}), 400
 
+        payload, status = invoice_service.create_invoice(id_paciente, id_profesional, data)
+        return jsonify(payload), status
 
-@invoice_bp.route("/api/facturas/emitidas", methods=["GET"])
-@require_role("profesional")
-def facturas_emitidas():
-    estado = request.args.get("estado")
-    fecha_desde = request.args.get("fecha_desde")
-    fecha_hasta = request.args.get("fecha_hasta")
-    payload, status = invoice_service.list_professional_invoices(
-        session.get("idUsuario"), estado=estado,
-        fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
-    )
-    return jsonify(payload), status
+    def patch(self, id_factura):
+        data = request.get_json() or {}
+        if data.get("anular") or data.get("motivoAnulacion"):
+            err = RouteHelpers.check_role("profesional", "admin")
+            if err:
+                return err
+            motivo = data.get("motivoAnulacion", "").strip()
+            payload, status = invoice_service.annul_invoice(
+                id_factura, motivo, session.get("idUsuario"), session.get("rol"),
+            )
+        else:
+            err = RouteHelpers.check_role("profesional", "admin")
+            if err:
+                return err
+            payload, status = invoice_service.update_status(
+                id_factura, data.get("estadoPago"), session.get("idUsuario"), session.get("rol"),
+            )
+        return jsonify(payload), status
 
-
-@invoice_bp.route("/api/facturas", methods=["GET"])
-@require_role("admin")
-def todas_facturas():
-    payload, status = invoice_service.list_all_invoices(
-        paciente=request.args.get("paciente"),
-        profesional=request.args.get("profesional"),
-        estado=request.args.get("estado"),
-        metodo_pago=request.args.get("metodoPago"),
-        fecha_desde=request.args.get("fecha_desde"),
-        fecha_hasta=request.args.get("fecha_hasta"),
-    )
-    return jsonify(payload), status
-
-
-@invoice_bp.route("/api/facturas/<int:id_factura>", methods=["GET"])
-@require_role("paciente", "profesional", "admin")
-def ver_factura(id_factura):
-    payload, status = invoice_service.get_invoice(
-        id_factura, session.get("idUsuario"), session.get("rol"),
-    )
-    return jsonify(payload), status
-
-
-@invoice_bp.route("/api/facturas/<int:id_factura>/estado", methods=["PATCH"])
-@require_role("profesional", "admin")
-def cambiar_estado_factura(id_factura):
-    data = request.get_json() or {}
-    payload, status = invoice_service.update_status(
-        id_factura, data.get("estadoPago"), session.get("idUsuario"), session.get("rol"),
-    )
-    return jsonify(payload), status
-
-
-@invoice_bp.route("/api/facturas/<int:id_factura>/anular", methods=["PATCH"])
-@require_role("profesional", "admin")
-def anular_factura(id_factura):
-    data = request.get_json() or {}
-    motivo = data.get("motivoAnulacion", "").strip()
-    payload, status = invoice_service.annul_invoice(
-        id_factura, motivo, session.get("idUsuario"), session.get("rol"),
-    )
-    return jsonify(payload), status
-
-
-@invoice_bp.route("/api/facturas/<int:id_factura>/iniciar-pago", methods=["POST"])
-@require_role("paciente")
-def iniciar_pago_wompi(id_factura):
-    payload, status = invoice_service.init_wompi_payment(id_factura, session.get("idUsuario"))
-    return jsonify(payload), status
+    def delete(self, id_factura):
+        data = request.get_json() or {}
+        err = RouteHelpers.check_role("profesional", "admin")
+        if err:
+            return err
+        motivo = data.get("motivoAnulacion", "").strip()
+        payload, status = invoice_service.annul_invoice(
+            id_factura, motivo, session.get("idUsuario"), session.get("rol"),
+        )
+        return jsonify(payload), status
 
 
-@invoice_bp.route("/api/facturas/<int:id_factura>/cancelar-pago", methods=["POST"])
-@require_role("paciente")
-def cancelar_pago_wompi(id_factura):
-    payload, status = invoice_service.cancel_payment(id_factura, session.get("idUsuario"))
-    return jsonify(payload), status
+class FacturaPagoResource(MethodView):
+    def post(self, id_factura):
+        err = RouteHelpers.check_role("paciente")
+        if err:
+            return err
+        payload, status = invoice_service.init_wompi_payment(id_factura, session.get("idUsuario"))
+        return jsonify(payload), status
+
+    def delete(self, id_factura):
+        err = RouteHelpers.check_role("paciente")
+        if err:
+            return err
+        payload, status = invoice_service.cancel_payment(id_factura, session.get("idUsuario"))
+        return jsonify(payload), status
+
+    def patch(self, id_factura):
+        err = RouteHelpers.check_role("paciente")
+        if err:
+            return err
+        data = request.get_json() or {}
+        transaction_id = data.get("transactionId", "")
+        if not transaction_id:
+            return jsonify({"success": False, "message": "Falta el ID de transacción"}), 400
+        payload, status = invoice_service.confirm_wompi_payment(
+            id_factura, transaction_id, session.get("idUsuario"),
+        )
+        return jsonify(payload), status
 
 
+class FacturaStatsResource(MethodView):
+    def get(self):
+        rol = request.args.get("rol", session.get("rol"))
+        if rol == "admin":
+            err = RouteHelpers.check_role("admin")
+            if err:
+                return err
+            payload, status = invoice_service.get_admin_stats()
+        elif rol == "paciente":
+            err = RouteHelpers.check_role("paciente")
+            if err:
+                return err
+            payload, status = invoice_service.get_patient_invoice_stats(session.get("idUsuario"))
+        else:
+            err = RouteHelpers.check_role("profesional")
+            if err:
+                return err
+            payload, status = invoice_service.get_professional_patients(session.get("idUsuario"))
+        return jsonify(payload), status
+
+
+class ProfesionalPacientesResource(MethodView):
+    def get(self):
+        err = RouteHelpers.check_role("profesional")
+        if err:
+            return err
+        payload, status = invoice_service.get_professional_patients(session.get("idUsuario"))
+        return jsonify(payload), status
+
+
+invoice_bp.add_url_rule("/api/facturas", view_func=FacturaResource.as_view("facturas"))
+invoice_bp.add_url_rule("/api/facturas/mias", view_func=FacturaResource.as_view("facturas_mias"))
+invoice_bp.add_url_rule("/api/facturas/<int:id_factura>", view_func=FacturaResource.as_view("factura"))
+invoice_bp.add_url_rule("/api/facturas/<int:id_factura>/pago", view_func=FacturaPagoResource.as_view("factura_pago"))
+invoice_bp.add_url_rule("/api/facturas/<int:id_factura>/iniciar-pago", view_func=FacturaPagoResource.as_view("factura_iniciar_pago"))
 @invoice_bp.route("/api/facturas/<int:id_factura>/confirmar-pago", methods=["POST"])
-@require_role("paciente")
 def confirmar_pago_wompi(id_factura):
+    err = RouteHelpers.check_role("paciente")
+    if err:
+        return err
     data = request.get_json() or {}
     transaction_id = data.get("transactionId", "")
     if not transaction_id:
         return jsonify({"success": False, "message": "Falta el ID de transacción"}), 400
-    payload, status = invoice_service.confirm_wompi_payment(id_factura, transaction_id, session.get("idUsuario"))
+    payload, status = invoice_service.confirm_wompi_payment(
+        id_factura, transaction_id, session.get("idUsuario"),
+    )
     return jsonify(payload), status
+invoice_bp.add_url_rule("/api/facturas/stats", view_func=FacturaStatsResource.as_view("factura_stats"))
+invoice_bp.add_url_rule("/api/facturas/estadisticas-admin", view_func=FacturaStatsResource.as_view("factura_estadisticas_admin"))
+invoice_bp.add_url_rule("/api/facturas/emitidas", view_func=FacturaResource.as_view("facturas_emitidas"))
+invoice_bp.add_url_rule("/api/facturas/pacientes-profesional", view_func=ProfesionalPacientesResource.as_view("factura_pacientes"))
 
 
 @invoice_bp.route("/api/webhooks/wompi", methods=["POST"])
@@ -177,13 +238,13 @@ def webhook_wompi():
         current_app.logger.warning("Wompi webhook: firma inválida (ref=%s)", transaction_ref)
         return "", 200
 
-    invoice_id = invoice_repository.get_invoice_by_reference(transaction_ref)
+    invoice_id = InvoiceRepository().get_invoice_by_reference(transaction_ref)
     if not invoice_id:
         current_app.logger.warning("Wompi webhook: factura no encontrada (ref=%s)", transaction_ref)
         return "", 200
 
-    invoice_repository.update_payment_status(invoice_id, "Pagado")
-    invoice_repository.set_payment_reference(invoice_id, transaction_ref, transaction_id)
+    InvoiceRepository().update_payment_status(invoice_id, "Pagado")
+    InvoiceRepository().set_payment_reference(invoice_id, transaction_ref, transaction_id)
     current_app.logger.info(
         "Factura %s pagada vía Wompi (ref=%s, tx=%s)",
         invoice_id, transaction_ref, transaction_id,
@@ -222,27 +283,3 @@ h2{{margin:0 0 8px}}p{{color:#666;margin:0 0 24px}}
 </body>
 </html>"""
     return html
-
-
-@invoice_bp.route("/api/facturas/mis-estadisticas", methods=["GET"])
-@require_role("paciente")
-def mis_estadisticas_facturas():
-    payload, status = invoice_service.get_patient_invoice_stats(session.get("idUsuario"))
-    return jsonify(payload), status
-
-
-@invoice_bp.route("/api/facturas/estadisticas-admin", methods=["GET"])
-@require_role("admin")
-def estadisticas_admin():
-    payload, status = invoice_service.get_admin_stats()
-    return jsonify(payload), status
-
-
-@invoice_bp.route("/api/facturas/pacientes-profesional", methods=["GET"])
-@require_role("profesional")
-def pacientes_del_profesional():
-    payload, status = invoice_service.get_professional_patients(session.get("idUsuario"))
-    return jsonify(payload), status
-
-
-

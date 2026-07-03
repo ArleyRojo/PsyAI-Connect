@@ -603,7 +603,7 @@ function renderizarRiskLevelCards() {
 
     list.innerHTML = filtered.map((w) => {
         const nivel = w.nivel || 'Bajo';
-        return `<span class="risk-word-chip ${nivel.toLowerCase()} detected" title="Pacientes: ${w.pacientes.join(', ')}">
+        return `<span class="risk-word-chip ${nivel.toLowerCase()} detected" title="Pacientes: ${(w.pacientes || []).join(', ')}">
             ${escapeHtml(w.palabra)}
             <span class="level-badge">${nivel}</span>
             <span class="usage-badge">${w.count} vez${w.count !== 1 ? 'es' : ''}</span>

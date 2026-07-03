@@ -9,14 +9,10 @@ from urllib.parse import urlparse
 
 from flask import Flask, current_app, g, jsonify, request, session
 from flask.json.provider import DefaultJSONProvider
-from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_wtf.csrf import CSRFProtect
 from werkzeug.exceptions import HTTPException
 
-from app.config import Config, setup_logging
-from app.database.connection import init_pool
+from app.config import config
+from app.extensions import init_extensions, csrf
 
 from app.routes.admin_routes import admin_bp
 from app.routes.appointment_routes import appointment_bp
@@ -49,12 +45,13 @@ TABLAS_CRITICAS = [
 
 
 def verificar_tablas(app):
-    from app.utils.db import db_cursor
+    from app.database.session import db_session
+    from sqlalchemy import text
     with app.app_context():
         try:
-            with db_cursor() as (_, cursor):
-                cursor.execute("SHOW TABLES")
-                existentes = {row[0] for row in cursor.fetchall()}
+            with db_session() as session:
+                result = session.execute(text("SHOW TABLES"))
+                existentes = {row[0] for row in result.fetchall()}
                 faltantes = [t for t in TABLAS_CRITICAS if t not in existentes]
                 if faltantes:
                     app.logger.critical(
@@ -422,34 +419,17 @@ def create_app():
         template_folder="templates",
         static_folder=None,
     )
-    app.config.from_object(Config)
+    app.config.from_object(config)
     if app.config.get("FLASK_ENV") != "production":
         app.config["TEMPLATES_AUTO_RELOAD"] = True
-    app.secret_key = Config.SECRET_KEY
+    app.secret_key = config.SECRET_KEY
 
-    setup_logging(app)
-    init_pool(app)
+    config.setup_logging(app)
     verificar_tablas(app)
 
     app.wsgi_app = RequestLoggingMiddleware(app.wsgi_app)
 
-    Limiter(
-        app=app,
-        key_func=get_remote_address,
-        storage_uri=Config.RATELIMIT_STORAGE_URI,
-    )
-
-    def get_limiter():
-        limiters = app.extensions.get("limiter", set())
-        return next(iter(limiters)) if limiters else None
-
-    app.get_limiter = get_limiter
-
-    CORS(app, supports_credentials=True, origins=Config.CORS_ORIGINS)
-
-    csrf = CSRFProtect(app)
-    if not Config.WTF_CSRF_ENABLED:
-        csrf.exempt(lambda: True)
+    init_extensions(app)
 
     app.json_provider_class = CustomJSONProvider
     app.json = CustomJSONProvider(app)
@@ -464,25 +444,24 @@ def create_app():
     app.register_blueprint(pages_bp)
 
     # Public endpoints: no session → no CSRF token possible
-    from app.routes.auth_routes import login, register, forgot_password, reset_password
-    csrf.exempt(login)
-    csrf.exempt(register)
-    csrf.exempt(forgot_password)
-    csrf.exempt(reset_password)
+    csrf.exempt(app.view_functions["auth.register"])
+    csrf.exempt(app.view_functions["auth.login"])
+    csrf.exempt(app.view_functions["auth.forgot_password"])
+    csrf.exempt(app.view_functions["auth.reset_password"])
 
     # Webhook de Wompi: lo llama el servidor de Wompi, no un navegador con sesión/CSRF.
     # Se autentica con la firma HMAC-SHA256 propia de Wompi (ver invoice_service.procesar_evento_wompi).
-    from app.routes.invoice_routes import webhook_wompi
-    csrf.exempt(webhook_wompi)
+    csrf.exempt(app.view_functions["invoices.webhook_wompi"])
 
     @app.route("/healthz")
     def healthz():
         db_connected = False
         try:
-            from app.utils.db import db_cursor
-            with db_cursor() as (_, cursor):
-                cursor.execute("SELECT 1")
-                db_connected = cursor.fetchone() is not None
+            from app.database.session import db_session
+            from sqlalchemy import text
+            with db_session() as session:
+                session.execute(text("SELECT 1"))
+                db_connected = True
         except Exception as exc:
             app.logger.warning("Healthcheck DB failed: %s", exc)
         return {
@@ -528,6 +507,7 @@ def create_app():
     def telemetry_hook():
         import time as _time
         from flask import request, g
+        from flask_limiter.util import get_remote_address
         g._telemetry_start = _time.time()
         if request.path.startswith("/css/") or request.path.startswith("/js/") or request.path.startswith("/img/"):
             return

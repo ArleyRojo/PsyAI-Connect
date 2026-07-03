@@ -1,118 +1,67 @@
-# ============================================================
-# ARCHIVO: repositories/mensajes_repository.py
-# ============================================================
-
-from app.utils.db import db_cursor
+from sqlalchemy import select, or_, and_
+from app.database.session import db_session
+from app.models.mensajes_chat import MensajesChat
 
 
-def enviar_mensaje(id_emisor, id_receptor, mensaje):
-    # Inserta un nuevo mensaje en la conversación entre dos usuarios
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            """
-            INSERT INTO MensajesChat (idEmisor, idReceptor, mensaje)
-            VALUES (%s, %s, %s)
-            """,
-            (id_emisor, id_receptor, mensaje),
-        )
-        conn.commit()
-        return cursor.lastrowid
+class MensajesRepository:
+    def enviar_mensaje(self, id_emisor, id_receptor, mensaje):
+        with db_session() as session:
+            msg = MensajesChat(idEmisor=id_emisor, idReceptor=id_receptor, mensaje=mensaje)
+            session.add(msg)
+            return msg.idMensaje
 
+    def get_conversacion(self, id_usuario, id_otro, desde_id=0, limit=60):
+        with db_session() as session:
+            if desde_id <= 0:
+                stmt = select(MensajesChat).where(
+                    or_(
+                        and_(MensajesChat.idEmisor == id_usuario, MensajesChat.idReceptor == id_otro),
+                        and_(MensajesChat.idEmisor == id_otro, MensajesChat.idReceptor == id_usuario),
+                    )
+                ).order_by(MensajesChat.fecha.desc(), MensajesChat.idMensaje.desc()).limit(limit)
+                rows = list(reversed(session.execute(stmt).scalars().all()))
+            else:
+                stmt = select(MensajesChat).where(
+                    MensajesChat.idMensaje > desde_id,
+                    or_(
+                        and_(MensajesChat.idEmisor == id_usuario, MensajesChat.idReceptor == id_otro),
+                        and_(MensajesChat.idEmisor == id_otro, MensajesChat.idReceptor == id_usuario),
+                    )
+                ).order_by(MensajesChat.fecha.asc(), MensajesChat.idMensaje.asc()).limit(limit)
+                rows = session.execute(stmt).scalars().all()
+            return [m.to_dict() for m in rows]
 
-def get_conversacion(id_usuario, id_otro, desde_id=0, limit=60):
-    """Devuelve mensajes entre dos usuarios. Si desde_id > 0, solo los nuevos."""
-    with db_cursor(dictionary=True) as (_, cursor):
-        if desde_id <= 0:
-            # Carga inicial: obtiene los últimos N mensajes ordenados cronológicamente
-            cursor.execute(
-                """
-                SELECT *
-                FROM (
-                    SELECT
-                        idMensaje,
-                        idEmisor,
-                        idReceptor,
-                        mensaje,
-                        leido,
-                        fecha
-                    FROM MensajesChat
-                    WHERE
-                        (idEmisor = %s AND idReceptor = %s) OR
-                        (idEmisor = %s AND idReceptor = %s)
-                    ORDER BY fecha DESC, idMensaje DESC
-                    LIMIT %s
-                ) recientes
-                ORDER BY fecha ASC, idMensaje ASC
-                """,
-                (id_usuario, id_otro, id_otro, id_usuario, limit),
+    def marcar_leidos(self, id_receptor, id_emisor):
+        with db_session() as session:
+            stmt = select(MensajesChat).where(
+                MensajesChat.idReceptor == id_receptor,
+                MensajesChat.idEmisor == id_emisor,
+                MensajesChat.leido == False,
             )
-            return cursor.fetchall()
+            mensajes = session.execute(stmt).scalars().all()
+            for m in mensajes:
+                m.leido = True
 
-        # Mensajes nuevos desde un ID específico (para polling incremental)
-        cursor.execute(
-            """
-            SELECT
-                idMensaje,
-                idEmisor,
-                idReceptor,
-                mensaje,
-                leido,
-                fecha
-            FROM MensajesChat
-            WHERE
-                idMensaje > %s AND (
-                    (idEmisor = %s AND idReceptor = %s) OR
-                    (idEmisor = %s AND idReceptor = %s)
+    def contar_no_leidos(self, id_receptor, id_emisor):
+        with db_session() as session:
+            from sqlalchemy import func
+            return session.execute(
+                select(func.count()).select_from(MensajesChat).where(
+                    MensajesChat.idReceptor == id_receptor,
+                    MensajesChat.idEmisor == id_emisor,
+                    MensajesChat.leido == False,
                 )
-            ORDER BY fecha ASC, idMensaje ASC
-            LIMIT %s
-            """,
-            (desde_id, id_usuario, id_otro, id_otro, id_usuario, limit),
-        )
-        return cursor.fetchall()
+            ).scalar() or 0
 
-
-def marcar_leidos(id_receptor, id_emisor):
-    # Marca como leídos todos los mensajes no leídos de un emisor específico
-    with db_cursor() as (conn, cursor):
-        cursor.execute(
-            """
-            UPDATE MensajesChat
-            SET leido = 1
-            WHERE idReceptor = %s AND idEmisor = %s AND leido = 0
-            """,
-            (id_receptor, id_emisor),
-        )
-        conn.commit()
-
-
-def contar_no_leidos(id_receptor, id_emisor):
-    # Cuenta los mensajes no leídos de una conversación específica
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT COUNT(*) as total FROM MensajesChat
-            WHERE idReceptor = %s AND idEmisor = %s AND leido = 0
-            """,
-            (id_receptor, id_emisor),
-        )
-        row = cursor.fetchone()
-        return row["total"] if row else 0
-
-
-def get_ultimo_mensaje(id_usuario, id_otro):
-    # Obtiene el mensaje más reciente entre dos usuarios
-    with db_cursor(dictionary=True) as (_, cursor):
-        cursor.execute(
-            """
-            SELECT idMensaje, idEmisor, mensaje, fecha
-            FROM MensajesChat
-            WHERE
-                (idEmisor = %s AND idReceptor = %s) OR
-                (idEmisor = %s AND idReceptor = %s)
-            ORDER BY fecha DESC
-            LIMIT 1
-            """,
-            (id_usuario, id_otro, id_otro, id_usuario),
-        )
-        return cursor.fetchone()
+    def get_ultimo_mensaje(self, id_usuario, id_otro):
+        with db_session() as session:
+            stmt = select(MensajesChat).where(
+                or_(
+                    and_(MensajesChat.idEmisor == id_usuario, MensajesChat.idReceptor == id_otro),
+                    and_(MensajesChat.idEmisor == id_otro, MensajesChat.idReceptor == id_usuario),
+                )
+            ).order_by(MensajesChat.fecha.desc()).limit(1)
+            msg = session.execute(stmt).scalar_one_or_none()
+            if msg:
+                return {"idMensaje": msg.idMensaje, "idEmisor": msg.idEmisor, "mensaje": msg.mensaje, "fecha": msg.fecha}
+            return None

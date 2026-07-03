@@ -1,98 +1,56 @@
-# ============================================================
-# ARCHIVO: repositories/security_repository.py
-# ============================================================
-
 from datetime import datetime
-
-from flask import current_app
-from mysql.connector.errors import ProgrammingError
-
-from app.utils.db import db_cursor
-
-
-def _table_not_found(e):
-    # Verifica si el error MySQL corresponde a "tabla no existe" (errno 1146)
-    return e.errno == 1146
+from sqlalchemy import select, text
+from sqlalchemy.exc import ProgrammingError
+from app.database.session import db_session
+from app.models.intentos_fallidos import IntentosFallidos
 
 
-def check_brute_force(email):
-    """Retorna (bloqueado, segundos_restantes) para el email dado."""
-    try:
-        with db_cursor(dictionary=True) as (_, cursor):
-            cursor.execute(
-                "SELECT intentos, bloqueado_hasta FROM intentos_fallidos WHERE email = %s",
-                (email,),
-            )
-            row = cursor.fetchone()
-    except ProgrammingError as e:
-        if _table_not_found(e):
-            current_app.logger.error("Tabla intentos_fallidos no existe en check_brute_force: %s", e)
-            return False, 0  # Si la tabla no existe, permite el login sin restricción
-        raise
-    if not row:
-        return False, 0  # No hay intentos registrados para este email
-    if row["intentos"] < 5:
-        return False, 0  # Menos de 5 intentos, aún no se bloquea
-    bloqueado_hasta = row["bloqueado_hasta"]
-    if not bloqueado_hasta:
-        return False, 0
-    ahora = datetime.now()
-    if bloqueado_hasta <= ahora:
-        return False, 0  # El bloqueo ya expiró
-    segundos = int((bloqueado_hasta - ahora).total_seconds())
-    return True, segundos
+class SecurityRepository:
+    def check_brute_force(self, email):
+        try:
+            with db_session() as session:
+                stmt = select(IntentosFallidos).where(IntentosFallidos.email == email)
+                row = session.execute(stmt).scalar_one_or_none()
+                if not row:
+                    return False, 0
+                if row.intentos < 5:
+                    return False, 0
+                if not row.bloqueado_hasta:
+                    return False, 0
+                ahora = datetime.now()
+                if row.bloqueado_hasta <= ahora:
+                    return False, 0
+                segundos = int((row.bloqueado_hasta - ahora).total_seconds())
+                return True, segundos
+        except Exception:
+            return False, 0
 
-
-def register_failed_attempt(email):
-    """Incrementa contador de intentos. Si llega a 5, bloquea 15 min."""
-    ahora = datetime.now()
-    try:
-        with db_cursor(dictionary=True) as (conn, cursor):
-            cursor.execute(
-                "SELECT id FROM intentos_fallidos WHERE email = %s",
-                (email,),
-            )
-            row = cursor.fetchone()
-            if row:
-                # Actualiza el contador existente: incrementa y bloquea si >= 5 intentos
-                cursor.execute(
-                    """
-                    UPDATE intentos_fallidos
-                    SET intentos = intentos + 1,
-                        ultimo_intento = %s,
-                        bloqueado_hasta = IF(intentos >= 4, DATE_ADD(%s, INTERVAL 15 MINUTE), NULL)
-                    WHERE email = %s
-                    """,
-                    (ahora, ahora, email),
-                )
-            else:
-                # Primera vez que este email falla, crea el registro con 1 intento
-                cursor.execute(
-                    """
-                    INSERT INTO intentos_fallidos (email, intentos, ultimo_intento, bloqueado_hasta)
-                    VALUES (%s, 1, %s, NULL)
-                    """,
-                    (email, ahora),
-                )
-            conn.commit()
-    except ProgrammingError as e:
-        if _table_not_found(e):
-            current_app.logger.error("Tabla intentos_fallidos no existe en register_failed_attempt: %s", e)
+    def register_failed_attempt(self, email):
+        ahora = datetime.now()
+        try:
+            with db_session() as session:
+                stmt = select(IntentosFallidos).where(IntentosFallidos.email == email)
+                row = session.execute(stmt).scalar_one_or_none()
+                if row:
+                    row.intentos += 1
+                    row.ultimo_intento = ahora
+                    if row.intentos >= 5:
+                        from datetime import timedelta
+                        row.bloqueado_hasta = ahora + timedelta(minutes=15)
+                else:
+                    session.add(IntentosFallidos(
+                        email=email, intentos=1, ultimo_intento=ahora,
+                    ))
+        except Exception:
             return
-        raise
 
-
-def reset_failed_attempts(email):
-    """Reinicia contador tras login exitoso."""
-    try:
-        with db_cursor(dictionary=True) as (conn, cursor):
-            cursor.execute(
-                "UPDATE intentos_fallidos SET intentos = 0, bloqueado_hasta = NULL WHERE email = %s",
-                (email,),
-            )
-            conn.commit()
-    except ProgrammingError as e:
-        if _table_not_found(e):
-            current_app.logger.error("Tabla intentos_fallidos no existe en reset_failed_attempts: %s", e)
+    def reset_failed_attempts(self, email):
+        try:
+            with db_session() as session:
+                stmt = select(IntentosFallidos).where(IntentosFallidos.email == email)
+                row = session.execute(stmt).scalar_one_or_none()
+                if row:
+                    row.intentos = 0
+                    row.bloqueado_hasta = None
+        except Exception:
             return
-        raise

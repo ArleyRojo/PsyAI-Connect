@@ -107,7 +107,7 @@ function iniciarLogsStream() {
         _logsEventSource.close();
     }
 
-    _logsEventSource = new EventSource(`${API}/api/admin/logs/stream`);
+    _logsEventSource = new EventSource(`${API}/api/admin/logs/stream`, { withCredentials: true });
 
     // Helper to generate unique key for a log entry (to handle same IDs across different sources)
     function logKey(log) {

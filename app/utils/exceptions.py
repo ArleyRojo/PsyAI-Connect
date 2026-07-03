@@ -1,6 +1,3 @@
-# ARCHIVO: utils/exceptions.py
-# Excepciones personalizadas de la API (APIError y subtipos HTTP) más helpers
-# success_response/error_response para respuestas JSON consistentes.
 import logging
 from flask import jsonify
 from werkzeug.exceptions import HTTPException
@@ -52,32 +49,20 @@ class RateLimitError(APIError):
         super().__init__(message, 429, payload)
 
 
-def handle_exception(e):
-    if isinstance(e, APIError):
-        return jsonify(e.to_dict()), e.status_code
+class ExceptionHandler:
+    @staticmethod
+    def handle(e):
+        if isinstance(e, APIError):
+            return jsonify(e.to_dict()), e.status_code
 
-    if isinstance(e, HTTPException):
+        if isinstance(e, HTTPException):
+            return jsonify({
+                "success": False,
+                "message": e.description or "Error HTTP"
+            }), e.code
+
+        logger.exception(f"Unhandled exception: {e}")
         return jsonify({
             "success": False,
-            "message": e.description or "Error HTTP"
-        }), e.code
-
-    logger.exception(f"Unhandled exception: {e}")
-    return jsonify({
-        "success": False,
-        "message": "Error interno del servidor"
-    }), 500
-
-
-def success_response(data: dict, message: str = None, status_code: int = 200):
-    response = {"success": True}
-    if message:
-        response["message"] = message
-    response.update(data)
-    return jsonify(response), status_code
-
-
-def error_response(message: str, status_code: int = 400, **kwargs):
-    response = {"success": False, "message": message}
-    response.update(kwargs)
-    return jsonify(response), status_code
+            "message": "Error interno del servidor"
+        }), 500

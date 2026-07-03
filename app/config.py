@@ -1,126 +1,106 @@
-# ============================================================
-# ARCHIVO: config.py
-# ============================================================
-
-# Importaciones de la biblioteca estándar para manejo del SO, logs, JSON, seguridad y fechas
 import os
 import logging
 import json
-import secrets
 from datetime import datetime, timedelta
 
 
+_PLACEHOLDER_KEYS = (
+    "your-secret-key-here",
+    "CHANGE_THIS_TO_A_RANDOM_SECRET_KEY_USE_secrets.token_urlsafe(50)",
+)
+
+
 class Config:
-    # Determinar entorno temprano para validaciones
-    _flask_env = os.getenv("FLASK_ENV", "development").lower()
+    def __init__(self):
+        self.flask_env = os.getenv("FLASK_ENV", "development").lower()
+        self.SECRET_KEY = self._resolve_secret_key()
+        self.SESSION_COOKIE_HTTPONLY = True
+        self.SESSION_COOKIE_SAMESITE = "Lax"
+        self.SESSION_COOKIE_SECURE = self._resolve_session_secure()
+        self.SESSION_COOKIE_PATH = "/"
+        self.CORS_ORIGINS = self._resolve_cors_origins()
+        self.DB_HOST = os.getenv("DB_HOST", "localhost")
+        self.DB_PORT = int(os.getenv("DB_PORT", "3306"))
+        self.DB_USER = os.getenv("DB_USER", "root")
+        self.DB_NAME = os.getenv("DB_NAME", "psyai_connect")
+        self.DB_PASSWORD = os.getenv("DB_PASSWORD", "root")
+        self.DB_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "10"))
+        self.DB_USE_PURE = os.getenv("DB_USE_PURE", "true").lower() == "true"
+        self.MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "5"))
+        self.ALLOWED_UPLOAD_EXTENSIONS = self._resolve_allowed_extensions()
+        self.LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
+        self.LOG_FORMAT = os.getenv("LOG_FORMAT", "text")
+        self.RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
+        self.REGISTER_RATE_LIMIT = self._resolve_rate_limit("REGISTER_RATE_LIMIT", "5 per minute", "20 per minute")
+        self.LOGIN_RATE_LIMIT = self._resolve_rate_limit("LOGIN_RATE_LIMIT", "10 per minute", "60 per minute")
+        self.PASSWORD_RECOVERY_RATE_LIMIT = self._resolve_rate_limit("PASSWORD_RECOVERY_RATE_LIMIT", "3 per minute", "10 per minute")
+        self.PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+        self.WTF_CSRF_ENABLED = os.getenv("WTF_CSRF_ENABLED", "true").lower() == "true"
+        self.WTF_CSRF_TIME_LIMIT = int(os.getenv("WTF_CSRF_TIME_LIMIT", "3600"))
+        self.WTF_CSRF_SSL_STRICT = os.getenv("WTF_CSRF_SSL_STRICT", "false").lower() == "true"
+        self.WTF_CSRF_CHECK_DEFAULT = os.getenv("WTF_CSRF_CHECK_DEFAULT", "true").lower() == "true"
+        self.WTF_CSRF_HEADERS = os.getenv("WTF_CSRF_HEADERS", "X-CSRFToken,X-CSRF-Token").split(",")
+        self.WOMPI_ENV = os.getenv("WOMPI_ENV", "test").lower()
+        self.WOMPI_PUBLIC_KEY = os.getenv("WOMPI_PUBLIC_KEY", "")
+        self.WOMPI_PRIVATE_KEY = os.getenv("WOMPI_PRIVATE_KEY", "")
+        self.WOMPI_INTEGRITY_SECRET = os.getenv("WOMPI_INTEGRITY_SECRET", "")
+        self.WOMPI_EVENTS_SECRET = os.getenv("WOMPI_EVENTS_SECRET", "")
+        self.WOMPI_API_BASE = "https://production.wompi.co/v1" if self.WOMPI_ENV == "prod" else "https://sandbox.wompi.co/v1"
+        self.WOMPI_CHECKOUT_URL = "https://checkout.wompi.co/p/"
 
-    # SECRET_KEY: obligatoria en producción, en desarrollo se genera si falta
-    _secret_key = os.getenv("SECRET_KEY")
-    # Placeholders conocidos para detectar que el usuario no configuró su propia clave
-    _placeholders = (
-        "your-secret-key-here",
-        "CHANGE_THIS_TO_A_RANDOM_SECRET_KEY_USE_secrets.token_urlsafe(50)",
-    )
-    if not _secret_key or _secret_key in _placeholders:
-        if _flask_env == "production":
-            raise ValueError(
-                "SECRET_KEY debe estar definida en producción. "
-                "Ejecuta: python -c \"import secrets; print(secrets.token_urlsafe(50))\""
+    def _resolve_secret_key(self):
+        key = os.getenv("SECRET_KEY")
+        if not key or key in _PLACEHOLDER_KEYS:
+            if self.flask_env == "production":
+                raise ValueError(
+                    "SECRET_KEY debe estar definida en producción. "
+                    "Ejecuta: python -c \"import secrets; print(secrets.token_urlsafe(50))\""
+                )
+            import secrets
+            key = secrets.token_urlsafe(50)
+            logging.warning(
+                "SECRET_KEY no configurada. Se generó una clave temporal. "
+                "Defina SECRET_KEY en .env para evitar que las sesiones se reinicien."
             )
-        import secrets
+        return key
 
-        _secret_key = secrets.token_urlsafe(50)
-        logging.warning(
-            "SECRET_KEY no configurada. Se generó una clave temporal. "
-            "Defina SECRET_KEY en .env para evitar que las sesiones se reinicien."
+    def _resolve_session_secure(self):
+        env_val = os.getenv("SESSION_COOKIE_SECURE", "false").lower()
+        return env_val == "true" or self.flask_env == "production"
+
+    def _resolve_cors_origins(self):
+        return os.getenv(
+            "CORS_ORIGINS",
+            "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com"
+        ).split(",")
+
+    def _resolve_allowed_extensions(self):
+        return set(
+            os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp,doc,docx").split(",")
         )
-    SECRET_KEY = _secret_key
 
-    FLASK_ENV = _flask_env
+    def _resolve_rate_limit(self, env_var, production_val, development_val):
+        return os.getenv(env_var, production_val if self.flask_env == "production" else development_val)
 
-    # Cookies de sesión seguras: HttpOnly, SameSite Lax, Secure solo en producción
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = "Lax"
-    SESSION_COOKIE_SECURE = (
-        os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
-        or FLASK_ENV == "production"
-    )
-    SESSION_COOKIE_PATH = "/"
+    def setup_logging(self, app):
+        werkzeug_logger = logging.getLogger("werkzeug")
+        werkzeug_logger.handlers.clear()
+        werkzeug_logger.setLevel(logging.INFO if os.getenv("SHOW_WERKZEUG_LOGS", "0") == "1" else logging.WARNING)
+        werkzeug_logger.propagate = True
 
-    # Orígenes permitidos para CORS (separados por coma en env)
-    CORS_ORIGINS = os.getenv(
-        "CORS_ORIGINS",
-        "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com"
-    ).split(",")
+        werkzeug_serving_logger = logging.getLogger("werkzeug.serving")
+        werkzeug_serving_logger.handlers.clear()
+        werkzeug_serving_logger.setLevel(werkzeug_logger.level)
+        werkzeug_serving_logger.propagate = True
 
-    # Database con defaults sensatos para desarrollo local
-    # DB_POOL_SIZE: Tamaño del pool de conexiones MySQL.
-    #   Default 10. Con SSE activo cada cliente consume una conexión,
-    #   por lo que valores <8 generan una advertencia en el log.
-    # DB_USE_PURE: Usar driver Python puro (true) o C nativo (false).
-    #   En producción con mysql-connector-python[c-ext] instalado,
-    #   usar DB_USE_PURE=false para 3-5x mejor rendimiento.
-    DB_HOST = os.getenv("DB_HOST", "localhost")
-    DB_PORT = int(os.getenv("DB_PORT", "3306"))
-    DB_USER = os.getenv("DB_USER", "root")
-    DB_NAME = os.getenv("DB_NAME", "psyai_connect")
-    DB_PASSWORD = os.getenv("DB_PASSWORD", "root")
-    DB_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "10"))
-    DB_USE_PURE = os.getenv("DB_USE_PURE", "true").lower() == "true"
+        logging.getLogger("flask-limiter").setLevel(logging.WARNING)
+        return werkzeug_logger
 
-    # Validación de tamaño máximo y extensiones permitidas para subida de archivos
-    MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "5"))
-    ALLOWED_UPLOAD_EXTENSIONS = set(
-        os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp,doc,docx").split(",")
-    )
 
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
-    LOG_FORMAT = os.getenv("LOG_FORMAT", "text")
-
-    # ADVERTENCIA: memory:// no escala con múltiples workers ni persiste entre reinicios.
-    # En producción usar: redis://localhost:6379/0
-    RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
-    _is_production = FLASK_ENV == "production"
-    # Límites de rate limiting más restrictivos en producción para evitar abusos
-    REGISTER_RATE_LIMIT = os.getenv(
-        "REGISTER_RATE_LIMIT",
-        "5 per minute" if _is_production else "20 per minute",
-    )
-    LOGIN_RATE_LIMIT = os.getenv(
-        "LOGIN_RATE_LIMIT",
-        "10 per minute" if _is_production else "60 per minute",
-    )
-    PASSWORD_RECOVERY_RATE_LIMIT = os.getenv(
-        "PASSWORD_RECOVERY_RATE_LIMIT",
-        "3 per minute" if _is_production else "10 per minute",
-    )
-
-    # Las sesiones expiran después de 7 días de inactividad
-    PERMANENT_SESSION_LIFETIME = timedelta(days=7)
-
-    # Configuración de protección CSRF (token anti-falsificación de peticiones)
-    WTF_CSRF_ENABLED = os.getenv("WTF_CSRF_ENABLED", "true").lower() == "true"
-    WTF_CSRF_TIME_LIMIT = int(os.getenv("WTF_CSRF_TIME_LIMIT", "3600"))
-    WTF_CSRF_SSL_STRICT = os.getenv("WTF_CSRF_SSL_STRICT", "false").lower() == "true"
-    WTF_CSRF_CHECK_DEFAULT = os.getenv("WTF_CSRF_CHECK_DEFAULT", "true").lower() == "true"
-    WTF_CSRF_HEADERS = os.getenv("WTF_CSRF_HEADERS", "X-CSRFToken,X-CSRF-Token").split(",")
-
-    # Wompi (pasarela de pagos PSE/tarjeta) — https://docs.wompi.co
-    # WOMPI_ENV=test usa sandbox.wompi.co con llaves pub_test_/prv_test_
-    # WOMPI_ENV=prod usa production.wompi.co con llaves pub_prod_/prv_prod_
-    WOMPI_ENV = os.getenv("WOMPI_ENV", "test").lower()
-    WOMPI_PUBLIC_KEY = os.getenv("WOMPI_PUBLIC_KEY", "")
-    WOMPI_PRIVATE_KEY = os.getenv("WOMPI_PRIVATE_KEY", "")
-    WOMPI_INTEGRITY_SECRET = os.getenv("WOMPI_INTEGRITY_SECRET", "")
-    WOMPI_EVENTS_SECRET = os.getenv("WOMPI_EVENTS_SECRET", "")
-    WOMPI_API_BASE = (
-        "https://production.wompi.co/v1" if WOMPI_ENV == "prod" else "https://sandbox.wompi.co/v1"
-    )
-    WOMPI_CHECKOUT_URL = "https://checkout.wompi.co/p/"
+config = Config()
 
 
 class JSONFormatter(logging.Formatter):
-    # Formateador de logs en JSON estructurado, ideal para ingestión en sistemas de monitoreo
     def format(self, record):
         log_data = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -143,23 +123,5 @@ class JSONFormatter(logging.Formatter):
 
 
 class TextFormatter(logging.Formatter):
-    # Formateador de logs en texto plano legible para desarrollo local
     def format(self, record):
         return f"{datetime.utcnow().isoformat()}Z | {record.levelname:8} | {record.name:20} | {record.getMessage()}"
-
-
-def setup_logging(app):
-    # Limpia los handlers de werkzeug para evitar duplicados en los logs del servidor HTTP
-    werkzeug_logger = logging.getLogger("werkzeug")
-    werkzeug_logger.handlers.clear()
-    werkzeug_logger.setLevel(logging.INFO if os.getenv("SHOW_WERKZEUG_LOGS", "0") == "1" else logging.WARNING)
-    werkzeug_logger.propagate = True
-
-    werkzeug_serving_logger = logging.getLogger("werkzeug.serving")
-    werkzeug_serving_logger.handlers.clear()
-    werkzeug_serving_logger.setLevel(werkzeug_logger.level)
-    werkzeug_serving_logger.propagate = True
-
-    # Silencia los logs verbosos de flask-limiter para no saturar la salida
-    logging.getLogger("flask-limiter").setLevel(logging.WARNING)
-    return werkzeug_logger

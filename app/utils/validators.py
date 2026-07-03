@@ -90,10 +90,10 @@ class Validator:
             raise ValidationError(f"'{field_name}' debe ser un número positivo", field_name)
         return num
 
-
-def sanitize_string(value: Optional[str], max_length: int = 1000) -> Optional[str]:
-    if value is None:
-        return None
-    value = value.strip()
-    value = re.sub(r'[<>]', '', value)
-    return value[:max_length]
+    @staticmethod
+    def sanitize(value: Optional[str], max_length: int = 1000) -> Optional[str]:
+        if value is None:
+            return None
+        value = value.strip()
+        value = re.sub(r'[<>]', '', value)
+        return value[:max_length]

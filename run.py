@@ -95,7 +95,7 @@ def hide_flask_banner():
 configure_terminal_logging()
 
 from app import create_app  # noqa: E402
-from app.database.migrations import init_db  # noqa: E402
+from app.database.migrations import MigrationRunner  # noqa: E402
 
 
 app = create_app()
@@ -103,7 +103,7 @@ app.config["REGISTERED_ROUTES"] = get_registered_routes(app)
 
 with app.app_context():
     try:
-        init_db()
+        MigrationRunner().run()
     except Exception as exc:
         app.logger.exception("No se pudo inicializar la base de datos: %s", exc)
 

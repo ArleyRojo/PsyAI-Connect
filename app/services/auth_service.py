@@ -1,174 +1,170 @@
-# ============================================================
-# ARCHIVO: services/auth_service.py
-# ============================================================
-
 import secrets
 import os
 from datetime import datetime, timedelta
 
 from flask import request as flask_request
 
-from app.repositories import auth_repository
-from app.repositories.admin_repository import registrar_evento_seguridad
-from app.utils.security import hash_password, verify_password
-from app.utils.mail import send_recovery_email
-from app.utils.validators import Validator, ValidationError
+from app.repositories.auth_repository import AuthRepository
+from app.repositories.security_repository import SecurityRepository
+from app.repositories.admin_repository import AdminRepository
+from app.utils.security import SecurityHelper
+
+admin_mod = AdminRepository()
+from app.utils.mail import MailService
+from app.schemas.auth_schemas import RegisterSchema, LoginSchema, ForgotPasswordSchema, ResetPasswordSchema
+from app.schemas.base import SchemaValidationError
 
 
-def register_user(data):
-    try:
-        # Valida y extrae cada campo del formulario de registro
-        nombre = Validator.required((data.get("nombre") or "").strip(), "nombre")
-        email = Validator.email((data.get("email") or "").strip())
-        password = Validator.password(data.get("password") or "")
-        confirmar = data.get("confirm_password") or ""
-        rol = data.get("rol") or "paciente"
-        genero = data.get("genero") or ""
-        edad = data.get("edad")
+class AuthService:
+    def __init__(self):
+        self.repo = AuthRepository()
+        self.security_repo = SecurityRepository()
 
-        if password != confirmar:
-            return {"success": False, "message": "Las contraseñas no coinciden"}, 400
-        if rol not in ("paciente", "profesional"):
-            return {"success": False, "message": "Rol inválido"}, 400
-        if not genero:
-            return {"success": False, "message": "El género es requerido"}, 400
+    def register_user(self, data):
         try:
-            edad = Validator.integer(edad, "edad")
-            if edad < 1 or edad > 120:
-                raise ValidationError("La edad debe estar entre 1 y 120", "edad")
-        except ValidationError as e:
-            return {"success": False, "message": e.message}, 400
-        # Verifica que el email no esté ya registrado
-        if auth_repository.user_exists_by_email(email):
+            validated = RegisterSchema.load(data)
+        except SchemaValidationError as e:
+            first_error = next(iter(e.errors.values()))
+            return {"success": False, "message": first_error}, 400
+
+        confirmar = data.get("confirm_password") or ""
+        if validated["password"] != confirmar:
+            return {"success": False, "message": "Las contraseñas no coinciden"}, 400
+        if not data.get("genero"):
+            return {"success": False, "message": "El género es requerido"}, 400
+
+        edad = validated.get("edad")
+        if edad is not None and (edad < 1 or edad > 120):
+            return {"success": False, "message": "La edad debe estar entre 1 y 120"}, 400
+
+        nombre = validated["nombre"]
+        email = validated["email"]
+        password = validated["password"]
+        rol = validated["rol"]
+        genero = data.get("genero", "")
+
+        if self.repo.user_exists_by_email(email):
             return {"success": False, "message": "El correo ya está registrado"}, 409
 
-        auth_repository.create_user(nombre, email, hash_password(password), rol, genero, edad)
+        self.repo.create_user(nombre, email, SecurityHelper.hash_password(password), rol, genero, edad)
         return {"success": True, "message": "Registro exitoso"}, 201
 
-    except ValidationError as e:
-        return {"success": False, "message": e.message}, 400
+    def login_user(self, data, ip_address):
+        try:
+            validated = LoginSchema.load(data)
+        except SchemaValidationError as e:
+            first_error = next(iter(e.errors.values()))
+            return {"success": False, "message": first_error}, 400, None
 
+        email = validated["email"]
+        password = validated["password"]
+        rol = data.get("rol") or "paciente"
 
-def login_user(data, ip_address):
-    from app.repositories.security_repository import check_brute_force, register_failed_attempt, reset_failed_attempts
+        bloqueado, retry_after = self.security_repo.check_brute_force(email)
+        if bloqueado:
+            return {
+                "success": False,
+                "message": f"Cuenta bloqueada. Intenta en {retry_after // 60} minutos.",
+                "retry_after": retry_after,
+            }, 429, None
 
-    email = (data.get("email") or "").strip()
-    password = data.get("password") or ""
-    rol = data.get("rol") or "paciente"
+        usuario = self.repo.get_user_by_email(email, admin_only=(rol == "admin"))
+        if not usuario:
+            return {"success": False, "message": "Credenciales incorrectas o cuenta suspendida"}, 401, None
+        if usuario["rol"] != rol:
+            return {"success": False, "message": f"Este usuario no tiene rol de {rol}"}, 403, None
 
-    if not email or not password:
-        return {"success": False, "message": "Email y contrasena requeridos"}, 400, None
+        stored_hash = usuario.get("contrasena")
+        if not SecurityHelper.verify_password(password, stored_hash):
+            self.security_repo.register_failed_attempt(email)
+            admin_mod.registrar_evento_seguridad("Login fallido", f"Email: {email} - IP: {ip_address}")
+            return {"success": False, "message": "Credenciales incorrectas"}, 401, None
 
-    # Verifica si la cuenta está bloqueada por demasiados intentos fallidos
-    bloqueado, retry_after = check_brute_force(email)
-    if bloqueado:
-        return {
-            "success": False,
-            "message": f"Cuenta bloqueada. Intenta en {retry_after // 60} minutos.",
-            "retry_after": retry_after,
-        }, 429, None
+        if stored_hash and not SecurityHelper.is_sha256_hash(stored_hash):
+            self.repo.update_password(usuario["idUsuario"], SecurityHelper.hash_password(password))
 
-    usuario = auth_repository.get_user_by_email(email, admin_only=rol == "admin")
-    if not usuario:
-        return {"success": False, "message": "Credenciales incorrectas o cuenta suspendida"}, 401, None
-    # Verifica que el rol coincida con el solicitado en el login
-    if usuario["rol"] != rol:
-        return {"success": False, "message": f"Este usuario no tiene rol de {rol}"}, 403, None
+        self.security_repo.reset_failed_attempts(email)
+        self.repo.register_login_event(usuario["idUsuario"], email, ip_address)
 
-    stored_hash = usuario.get("contrasena")
-    if not verify_password(password, stored_hash):
-        register_failed_attempt(email)
-        registrar_evento_seguridad("Login fallido", f"Email: {email} - IP: {ip_address}")
-        return {"success": False, "message": "Credenciales incorrectas"}, 401, None
+        session_user = {
+            "id": usuario["idUsuario"],
+            "nombre": usuario["nombre"],
+            "email": usuario["email"],
+            "rol": usuario["rol"],
+            "fotoPerfil": usuario.get("fotoPerfil"),
+        }
 
-    # Login exitoso: reinicia contador de intentos y registra el evento
-    reset_failed_attempts(email)
-    auth_repository.register_login_event(usuario["idUsuario"], email, ip_address)
+        if usuario["rol"] == "paciente":
+            redirect_url = "patient.dashboard.html"
+        elif usuario["rol"] == "profesional":
+            redirect_url = "professional.dashboard.html"
+        else:
+            redirect_url = "admin.dashboard.html"
 
-    session_user = {
-        "id": usuario["idUsuario"],
-        "nombre": usuario["nombre"],
-        "email": usuario["email"],
-        "rol": usuario["rol"],
-        "fotoPerfil": usuario.get("fotoPerfil"),
-    }
+        payload = {
+            "success": True,
+            "message": "Login exitoso",
+            "usuario": session_user,
+            "idUsuario": usuario["idUsuario"],
+            "nombre": usuario["nombre"],
+            "rol": usuario["rol"],
+            "redirect": redirect_url,
+            "fotoPerfil": usuario.get("fotoPerfil"),
+        }
+        return payload, 200, session_user
 
-    # Redirige al dashboard correspondiente según el rol
-    if usuario["rol"] == "paciente":
-        redirect_url = "patient.dashboard.html"
-    elif usuario["rol"] == "profesional":
-        redirect_url = "professional.dashboard.html"
-    else:
-        redirect_url = "admin.dashboard.html"
+    def recover_password(self, email):
+        try:
+            validated = ForgotPasswordSchema.load({"email": email})
+        except SchemaValidationError as e:
+            first_error = next(iter(e.errors.values()))
+            return {"success": False, "message": first_error}, 400
+        email = validated["email"]
 
-    payload = {
-        "success": True,
-        "message": "Login exitoso",
-        "usuario": session_user,
-        "idUsuario": usuario["idUsuario"],
-        "nombre": usuario["nombre"],
-        "rol": usuario["rol"],
-        "redirect": redirect_url,
-        "fotoPerfil": usuario.get("fotoPerfil"),
-    }
-    return payload, 200, session_user
+        existe = self.repo.active_user_exists_by_email(email)
+        recovery_link = None
+        email_sent = False
 
+        if existe:
+            token = secrets.token_urlsafe(32)
+            expires = datetime.now() + timedelta(hours=1)
+            self.repo.create_password_recovery_token(email, token, expires)
+            recovery_link = f"{flask_request.host_url.rstrip('/')}/recover?token={token}"
+            email_sent = MailService.send_recovery_email(email, recovery_link)
 
-def recover_password(email):
-    if not email:
-        return {"success": False, "message": "Email requerido"}, 400
+            if not email_sent:
+                print("\n[RECUPERAR PASSWORD] No se pudo enviar correo por proveedor externo.", flush=True)
+                print(f"[RECUPERAR PASSWORD] Email: {email}", flush=True)
+                print(f"[RECUPERAR PASSWORD] Enlace local: {recovery_link}\n", flush=True)
 
-    existe = auth_repository.active_user_exists_by_email(email)
+        if not existe:
+            return {"success": False, "message": "No existe una cuenta con ese correo electrónico."}, 404
 
-    recovery_link = None
-    email_sent = False
+        payload = {"success": True, "message": "Fue enviado al correo."}
+        if recovery_link and not email_sent and os.getenv("FLASK_ENV", "development").lower() != "production":
+            payload["recovery_link"] = recovery_link
 
-    if existe:
-        # Genera un token seguro de 32 bytes y lo guarda con expiración de 1 hora
-        token = secrets.token_urlsafe(32)
-        expires = datetime.now() + timedelta(hours=1)
-        auth_repository.create_password_recovery_token(email, token, expires)
+        return payload, 200
 
-        recovery_link = f"{flask_request.host_url.rstrip('/')}/recover?token={token}"
-        email_sent = send_recovery_email(email, recovery_link)
+    def reset_password(self, data):
+        try:
+            validated = ResetPasswordSchema.load(data)
+        except SchemaValidationError as e:
+            first_error = next(iter(e.errors.values()))
+            return {"success": False, "message": first_error}, 400
 
-        if not email_sent:
-            print("\n[RECUPERAR PASSWORD] No se pudo enviar correo por proveedor externo.", flush=True)
-            print(f"[RECUPERAR PASSWORD] Email: {email}", flush=True)
-            print(f"[RECUPERAR PASSWORD] Enlace local: {recovery_link}\n", flush=True)
+        token = validated["token"]
+        new_password = validated["password"]
+        confirmar = data.get("confirm_password", "")
 
-    if not existe:
-        return {"success": False, "message": "No existe una cuenta con ese correo electr\u00f3nico."}, 404
+        if new_password != confirmar:
+            return {"success": False, "message": "Las contraseñas no coinciden"}, 400
 
-    payload = {"success": True, "message": "Fue enviado al correo."}
-    # En desarrollo, devuelve el enlace directamente si no se pudo enviar el email
-    if recovery_link and not email_sent and os.getenv("FLASK_ENV", "development").lower() != "production":
-        payload["recovery_link"] = recovery_link
+        user_id = self.repo.validate_recovery_token(token)
+        if not user_id:
+            return {"success": False, "message": "Token inválido o expirado"}, 400
 
-    return payload, 200
+        self.repo.invalidate_recovery_token(token)
+        self.repo.update_password(user_id, SecurityHelper.hash_password(new_password))
 
-
-def reset_password(data):
-    token = data.get("token", "").strip()
-    new_password = data.get("new_password", "")
-    confirmar = data.get("confirm_password", "")
-
-    if not token or not new_password:
-        return {"success": False, "message": "Token y nueva contrase\u00f1a requeridos"}, 400
-    if new_password != confirmar:
-        return {"success": False, "message": "Las contrase\u00f1as no coinciden"}, 400
-
-    try:
-        new_password = Validator.password(new_password)
-    except ValidationError as e:
-        return {"success": False, "message": e.message}, 400
-
-    # Valida que el token sea válido y no haya expirado
-    user_id = auth_repository.validate_recovery_token(token)
-    if not user_id:
-        return {"success": False, "message": "Token inv\u00e1lido o expirado"}, 400
-
-    auth_repository.invalidate_recovery_token(token)
-    auth_repository.update_password(user_id, hash_password(new_password))
-
-    return {"success": True, "message": "Contrase\u00f1a actualizada exitosamente"}, 200
+        return {"success": True, "message": "Contraseña actualizada exitosamente"}, 200

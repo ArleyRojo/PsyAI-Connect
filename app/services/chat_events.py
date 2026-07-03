@@ -1,53 +1,49 @@
-# ============================================================
-# ARCHIVO: services/chat_events.py
-# ============================================================
-
 import json
 from queue import Queue
 from threading import Lock
 
-# Sistema de publicación/suscripción en memoria para eventos de mensajería en tiempo real
-_subscribers = {}
-_subscribers_lock = Lock()
+
+class ChatEventsService:
+    def __init__(self):
+        self._subscribers = {}
+        self._subscribers_lock = Lock()
+
+    def subscribe(self, user_id):
+        queue = Queue()
+        user_id = int(user_id)
+        with self._subscribers_lock:
+            self._subscribers.setdefault(user_id, []).append(queue)
+        return queue
+
+    def unsubscribe(self, user_id, queue):
+        user_id = int(user_id)
+        with self._subscribers_lock:
+            queues = self._subscribers.get(user_id, [])
+            if queue in queues:
+                queues.remove(queue)
+            if not queues and user_id in self._subscribers:
+                del self._subscribers[user_id]
+
+    def publish_message(self, id_mensaje, id_emisor, id_receptor):
+        event = json.dumps({
+            "idMensaje": id_mensaje,
+            "idEmisor": id_emisor,
+            "idReceptor": id_receptor,
+        })
+        recipients = {int(id_emisor), int(id_receptor)}
+
+        with self._subscribers_lock:
+            subscribers = [
+                queue
+                for user_id in recipients
+                for queue in self._subscribers.get(user_id, [])
+            ]
+
+        for queue in subscribers:
+            queue.put(event)
 
 
-def subscribe(user_id):
-    # Crea una cola de eventos para un usuario específico (para SSE de mensajes)
-    queue = Queue()
-    user_id = int(user_id)
-    with _subscribers_lock:
-        _subscribers.setdefault(user_id, []).append(queue)
-    return queue
-
-
-def unsubscribe(user_id, queue):
-    # Elimina la cola de un usuario cuando se desconecta
-    user_id = int(user_id)
-    with _subscribers_lock:
-        queues = _subscribers.get(user_id, [])
-        if queue in queues:
-            queues.remove(queue)
-        if not queues and user_id in _subscribers:
-            del _subscribers[user_id]
-
-
-def publish_message(id_mensaje, id_emisor, id_receptor):
-    # Publica un evento de nuevo mensaje a los suscriptores (emisor y receptor)
-    event = json.dumps({
-        "idMensaje": id_mensaje,
-        "idEmisor": id_emisor,
-        "idReceptor": id_receptor,
-    })
-    recipients = {int(id_emisor), int(id_receptor)}
-
-    with _subscribers_lock:
-        # Recolecta todas las colas del emisor y receptor
-        subscribers = [
-            queue
-            for user_id in recipients
-            for queue in _subscribers.get(user_id, [])
-        ]
-
-    # Distribuye el evento a todas las colas suscritas
-    for queue in subscribers:
-        queue.put(event)
+chat_events = ChatEventsService()
+subscribe = chat_events.subscribe
+unsubscribe = chat_events.unsubscribe
+publish_message = chat_events.publish_message
