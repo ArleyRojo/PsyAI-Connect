@@ -42,9 +42,8 @@ ENV/
 tests.py
 tests/
 
-# Docker files (don't include themselves)
-Dockerfile
-docker-compose*.yml
+# Docker files (moved to docker/)
+docker/
 .dockerignore
 
 # Documentation

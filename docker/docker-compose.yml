@@ -12,8 +12,8 @@ services:
   # ── Django App ────────────────────────────────────────────────────────────
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: dev
     container_name: psyai_app
     ports:

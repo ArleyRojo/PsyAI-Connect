@@ -14,8 +14,8 @@ services:
   # ── Django App (Production) ──────────────────────────────────────────────
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       target: prod
       args:
         SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or environment}
