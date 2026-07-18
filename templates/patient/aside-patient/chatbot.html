@@ -1,453 +1,114 @@
 <!DOCTYPE html>
 <html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
-  <title>PsyAI Connect | Chatbot Emocional</title>
-  <link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
-  <script src="/js/core/shared/theme-inline.js?v=20260711-1"></script>
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="/css/base/base.css?v=20260711-1">
-  <link rel="stylesheet" href="/css/layout/layout.css?v=20260711-1">
-<link rel="stylesheet" href="/css/themes/theme.css?v=20260711-1">
-  <link rel="stylesheet" href="/css/pages/patient.css?v=20260711-1">
-  <script src="/js/core/shared/theme.js?v=20260711-1"></script>
-  <script src="/js/core/shared/localStorage-detector.js?v=20260711-1"></script>
-
+    <title>PsyAI Connect | Chatbot Emocional</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/patient.css?v=20260711-1">
 </head>
 <body class="patient-dashboard">
 
-  <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <div class="d-flex w-100">
-    <!-- Sidebar -->
-    <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
-      <div class="sidebar__logo">
-          <div class="sidebar__logo-img-wrap">
-              <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
-              <div class="sidebar__logo-glow"></div>
-          </div>
-          <h5 class="sidebar__brand">PsyAI Connect</h5>
-          <span class="sidebar__role-badge">Paciente</span>
+<div class="d-flex w-100">
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-img-wrap">
+        <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
+        <div class="sidebar__logo-glow"></div>
       </div>
-      <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
-          <div class="sidebar__nav-section-label">Menú Principal</div>
-          <a href="../patient.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
-              <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
-              <span>Dashboard</span>
-              <div class="sidebar__nav-indicator"></div>
-          </a>
-          <a href="chatbot.html" class="sidebar__nav-item active" data-tooltip="Chatbot">
-              <div class="sidebar__nav-icon"><i class="fas fa-robot"></i></div>
-              <span>Chatbot Emocional</span>
-              <div class="sidebar__nav-indicator"></div>
-          </a>
-          <a href="agenda-quotes.html" class="sidebar__nav-item" data-tooltip="Agenda">
-              <div class="sidebar__nav-icon"><i class="fas fa-calendar-alt"></i></div>
-              <span>Agenda de Citas</span>
-              <div class="sidebar__nav-indicator"></div>
-          </a>
-          <a href="facturas.html" class="sidebar__nav-item" data-tooltip="Facturas">
-              <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-              <span>Mis Facturas</span>
-              <div class="sidebar__nav-indicator"></div>
-          </a>
-          <div class="sidebar__nav-section-label">Comunicación</div>
-          <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
-              <div class="sidebar__nav-icon"><i class="fas fa-comments"></i></div>
-              <span>Mensajes</span>
-              <div class="sidebar__nav-indicator"></div>
-          </a>
-          <div class="sidebar__nav-section-label">Seguimiento</div>
-          <a href="evolution.html" class="sidebar__nav-item" data-tooltip="Evolución">
-              <div class="sidebar__nav-icon"><i class="fas fa-chart-area"></i></div>
-              <span>Mi Evolución</span>
-              <div class="sidebar__nav-indicator"></div>
-          </a>
-          <a href="historia_clinica_paciente.html" class="sidebar__nav-item" data-tooltip="Documentos">
-              <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
-              <span>Mis Documentos</span>
-              <div class="sidebar__nav-indicator"></div>
-          </a>
-      </nav>
-      <div class="sidebar__footer">
-          <div class="sidebar__user-card">
-              <div class="sidebar__user-avatar" data-avatar="inicial">
-                  <i class="fas fa-user"></i>
-              </div>
-              <div class="sidebar__user-info">
-                  <span class="sidebar__user-name" id="sidebarUserName">Paciente</span>
-                  <span class="sidebar__user-role">Paciente</span>
-              </div>
-              <a href="my.profile.html" class="sidebar__user-settings" title="Mi Perfil">
-                  <i class="fas fa-cog"></i>
-              </a>
-          </div>
-          <div class="sidebar__actions">
-              <div class="theme-switch-container">
-                  <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                  <button id="theme-toggle" title="Cambiar modo"></button>
-                  <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-              </div>
-              <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                  <i class="fas fa-sign-out-alt"></i>
-                  <span>Cerrar Sesión</span>
-              </a>
-          </div>
+      <h5 class="sidebar__brand">PsyAI Connect</h5>
+      <span class="sidebar__role-badge">Paciente</span>
+    </div>
+    <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
+      <div class="sidebar__nav-section-label">Menú Principal</div>
+      <a href="../patient.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
+        <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
+        <span>Dashboard</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="evolution.html" class="sidebar__nav-item" data-tooltip="Evolución">
+        <div class="sidebar__nav-icon"><i class="fas fa-chart-line"></i></div>
+        <span>Evolución</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="chatbot.html" class="sidebar__nav-item active" data-tooltip="Chatbot">
+        <div class="sidebar__nav-icon"><i class="fas fa-robot"></i></div>
+        <span>Chatbot</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="agenda-quotes.html" class="sidebar__nav-item" data-tooltip="Agenda">
+        <div class="sidebar__nav-icon"><i class="fas fa-calendar-check"></i></div>
+        <span>Agenda</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
+        <div class="sidebar__nav-icon"><i class="fas fa-envelope"></i></div>
+        <span>Mensajes</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="historia_clinica_paciente.html" class="sidebar__nav-item" data-tooltip="Documentos">
+        <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
+        <span>Documentos</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="facturas.html" class="sidebar__nav-item" data-tooltip="Facturas">
+        <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+        <span>Facturas</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="my.profile.html" class="sidebar__nav-item" data-tooltip="Mi Perfil">
+        <div class="sidebar__nav-icon"><i class="fas fa-user"></i></div>
+        <span>Mi Perfil</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user-card">
+        <div class="sidebar__user-avatar" data-avatar="inicial">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="sidebar__user-info">
+          <span class="sidebar__user-name" id="sidebarUserName">Paciente</span>
+          <span class="sidebar__user-role">Paciente</span>
+        </div>
+        <a href="#" class="sidebar__user-settings" title="Configuración">
+          <i class="fas fa-cog"></i>
+        </a>
       </div>
-    </aside>
-
-    <!-- Contenido principal -->
-    <main class="main-content flex-grow-1 ms-250 p-4">
-      <header class="main-header d-flex justify-content-between align-items-start mb-4">
-        <div>
-          <h1 class="h3 fw-bold mb-1 chatbot-title"><i class="fas fa-robot me-2 chatbot-icon"></i>Chatbot Emocional</h1>
-          <p class="chatbot-subtitle small mb-0">Tu asistente de bienestar emocional  conversaciones seguras y confidenciales</p>
-        </div>
-        <div class="user-info d-flex align-items-center gap-2">
-          <div class="user-avatar-sm">
-            <i class="fas fa-user"></i>
-          </div>
-          <span class="fw-semibold chatbot-greeting" id="nombrePaciente">Hola, </span>
-        </div>
-      </header>
-
-      <!-- Chatbot -->
-      <section id="chatbot-section">
-        <!-- Encabezado del chat -->
-        <div class="chat-header">
-          <div class="chat-header__left">
-            <div class="chat-header__bot-avatar">
-              <i class="fas fa-robot"></i>
-              <span class="chat-header__status-dot"></span>
-            </div>
-            <div class="chat-header__info">
-              <h5 class="chat-header__title">Asistente Emocional</h5>
-              <span class="chat-header__subtitle">
-                <span class="chat-header__online-text">Disponible ahora</span>
-                <span class="chat-header__sep">&middot;</span>
-                <small id="msg-counter" class="chat-header__counter"></small>
-              </span>
-            </div>
-          </div>
-          <div class="chat-header__actions">
-            <button type="button" class="chat-header__btn chat-header__btn--danger" id="btn-clear-chat" title="Eliminar chat" aria-label="Eliminar chat">
-              <i class="fas fa-trash-alt"></i>
-              <span class="chat-header__btn-label">Eliminar</span>
-            </button>
-            <button type="button" class="chat-header__btn" id="btn-fullscreen" title="Pantalla completa" aria-label="Pantalla completa">
-              <i class="fas fa-expand"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Area de conversacion -->
-        <div class="chat-area" id="chat-area">
-          <!-- Scroll to bottom button -->
-          <button type="button" class="chat-scroll-btn" id="chat-scroll-btn" title="Ir al final" aria-label="Ir al final">
-            <i class="fas fa-chevron-down"></i>
-          </button>
-          <!-- Estado vacio / bienvenida -->
-          <div class="chat-welcome" id="chat-welcome">
-            <div class="chat-welcome__bg">
-              <div class="chat-welcome__orb chat-welcome__orb--1"></div>
-              <div class="chat-welcome__orb chat-welcome__orb--2"></div>
-              <div class="chat-welcome__orb chat-welcome__orb--3"></div>
-            </div>
-            <div class="chat-welcome__content">
-              <div class="chat-welcome__icon">
-                <div class="chat-welcome__icon-ring"></div>
-                <i class="fas fa-robot"></i>
-              </div>
-              <h3 class="chat-welcome__title">Hola, soy tu asistente emocional</h3>
-              <p class="chat-welcome__desc">Estoy aquí para escucharte y acompanarte. Comparte como te sientes y conversamos.</p>
-              <div class="chat-welcome__topics">
-                <button type="button" class="chat-welcome__chip" data-greeting="Hoy me siento un poco ansioso, necesito hablar de ello">
-                  <i class="fas fa-heart-pulse"></i> Ansiedad
-                </button>
-                <button type="button" class="chat-welcome__chip" data-greeting="Me siento triste sin saber exactamente por que">
-                  <i class="fas fa-cloud-rain"></i> Tristeza
-                </button>
-                <button type="button" class="chat-welcome__chip" data-greeting="Quiero hablar sobre como me siento hoy">
-                  <i class="fas fa-comments"></i> Contarte mi dia
-                </button>
-                <button type="button" class="chat-welcome__chip" data-greeting="Necesito orientacion sobre mis emociones">
-                  <i class="fas fa-compass"></i> Orientacion
-                </button>
-              </div>
-              <div class="chat-welcome__disclaimer">
-                <i class="fas fa-shield-halved"></i>
-                <span>Conversaciones confidenciales. No sustituye atención profesional.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Formulario para enviar mensajes -->
-        <div class="chat-input-wrapper">
-          <form action="#" method="post" class="chat-input-area">
-            <div class="chat-input-field">
-              <button type="button" class="btn-emoji-picker" id="btn-emoji-picker" title="Agregar emoji" aria-label="Agregar emoji" aria-expanded="false">
-                <i class="far fa-smile"></i>
-              </button>
-              <input type="text" name="mensaje" class="form-control" placeholder="Escribe tu mensaje..." autocomplete="off">
-              <div class="emoji-picker" id="emoji-picker" aria-label="Selector de emojis">
-                <button type="button">&#x1F60A;</button>
-                <button type="button">&#x1F622;</button>
-                <button type="button">&#x1F60D;</button>
-                <button type="button">&#x1F614;</button>
-                <button type="button">&#x1F621;</button>
-                <button type="button">&#x1F60E;</button>
-                <button type="button">&#x1F625;</button>
-                <button type="button">&#x1F62B;</button>
-                <button type="button">&#x1F634;</button>
-                <button type="button">&#x1F602;</button>
-                <button type="button">&#x1F62F;</button>
-                <button type="button">&#x1F914;</button>
-              </div>
-            </div>
-            <button type="submit" class="chat-send-btn" title="Enviar mensaje" aria-label="Enviar mensaje">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </form>
-          <div class="chat-input-footer">
-            <i class="fas fa-lock"></i>
-            <span>Powered by PsyAI &middot; No reemplaza ayuda profesional</span>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div class="modal fade psyai-modal psyai-modal--consent" id="consentimientoModal" tabindex="-1" aria-labelledby="consentimientoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="psyai-modal__content">
-
-        <div class="psyai-modal__header psyai-modal__header--consent">
-          <div class="psyai-modal__header-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <div>
-            <h5 class="psyai-modal__title" id="consentimientoModalLabel">Consentimiento Informado</h5>
-            <p class="psyai-modal__subtitle">Lee atentamente antes de continuar</p>
-          </div>
-          <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-
-        <div class="psyai-modal__body psyai-modal__body--consent">
-          <p>Este chatbot psicológico utiliza inteligencia artificial para brindar orientación emocional básica y apoyo conversacional.</p>
-
-          <div class="psyai-modal__important-box">
-            <p class="fw-bold mb-2"><i class="fas fa-exclamation-triangle me-1"></i>IMPORTANTE:</p>
-            <ul class="mb-0">
-              <li>No reemplaza atención psicológica profesional.</li>
-              <li>No realiza diagnósticos clínicos.</li>
-              <li>Puede cometer errores o interpretaciones inexactas.</li>
-              <li>En casos de crisis emocionales o pensamientos suicidas, busca ayuda profesional inmediata.</li>
-            </ul>
-          </div>
-
-          <p class="mb-1">El tratamiento de datos personales se realiza conforme a:</p>
-          <ul class="psyai-modal__legal-list">
-            <li>Ley 1581 de 2012</li>
-            <li>Decreto 1377 de 2013</li>
-            <li>Ley 1090 de 2006</li>
-            <li>Ley 1616 de 2013</li>
-          </ul>
-
-          <p class="mb-0 text-muted small">Al continuar, aceptas el tratamiento de datos y las condiciones de uso del sistema.</p>
-        </div>
-
-        <div class="psyai-modal__footer psyai-modal__footer--consent">
-          <span class="consent-warning" id="consentimientoWarning">Debes aceptar el consentimiento para usar el chatbot.</span>
-          <div class="psyai-modal__consent-check">
-            <input type="checkbox" id="checkConsent">
-            <label for="checkConsent">He leído y acepto el consentimiento informado y tratamiento de datos.</label>
-          </div>
-          <div class="psyai-modal__consent-actions">
-            <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" id="btn-no-acepto">NO ACEPTO</button>
-            <button type="button" class="psyai-modal__btn psyai-modal__btn--save" id="btn-acepto" disabled>ACEPTO</button>
-          </div>
-        </div>
-
+      <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+        <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+        <button id="theme-toggle" title="Cambiar modo"></button>
+        <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
       </div>
     </div>
-  </div>
+    <div class="sidebar__logout-section">
+      <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Cerrar Sesión</span>
+      </a>
+    </div>
+  </aside>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/modules/auth/auth-guard.js?v=20260711-1"></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+  <main class="main-content flex-grow-1 ms-250 p-4">
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-0"><i class="fas fa-robot me-2 text-primary"></i>Chatbot Emocional</h1>
+        <small class="text-muted">Habla con nuestro asistente de bienestar emocional</small>
+      </div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Paciente</div>
+    </header>
+    <div class="card shadow-sm border-0 p-4">
+      <p class="text-muted text-center py-5"><i class="fas fa-robot fa-3x mb-3 d-block text-primary"></i>Aquí podrás chatear con el asistente emocional.</p>
+    </div>
+  </main>
+</div>
+
+{% include 'base/partials/scripts.html' %}
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
 <script src="/js/core/shared/alerts.js?v=20260711-1"></script>
-<script src="/js/modules/patient/aside.js?v=20260711-1"></script>
-<script src="/js/modules/patient/chatbot.js?v=20260711-1"></script>
+<script src="/js/core/shared/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20260711-1"></script>
-<script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', async function() {
-    const chatbotSection = document.getElementById('chatbot-section');
-    const modalElement = document.getElementById('consentimientoModal');
-    const btnAcepto = document.getElementById('btn-acepto');
-    const btnNoAcepto = document.getElementById('btn-no-acepto');
-    const checkConsent = document.getElementById('checkConsent');
-    const warning = document.getElementById('consentimientoWarning');
-    const formControls = chatbotSection ? chatbotSection.querySelectorAll('input, button, textarea, select') : [];
-    const consentimientoModal = modalElement
-      ? new bootstrap.Modal(modalElement, {
-          backdrop: 'static',
-          keyboard: false
-        })
-      : null;
 
-    function bloquearChatbot() {
-      if (!chatbotSection) return;
-      chatbotSection.classList.add('chatbot-consent-blocked');
-      chatbotSection.setAttribute('aria-disabled', 'true');
-      formControls.forEach(function(control) {
-        control.disabled = true;
-      });
-    }
-
-    function habilitarChatbot() {
-      if (!chatbotSection) return;
-      chatbotSection.classList.remove('chatbot-consent-blocked');
-      chatbotSection.removeAttribute('aria-disabled');
-      formControls.forEach(function(control) {
-        control.disabled = false;
-      });
-    }
-
-    function obtenerUsuarioDesdeStorage() {
-      const storedUser = localStorage.getItem('usuario') || localStorage.getItem('sessionUser');
-      if (!storedUser) return null;
-
-      try {
-        return JSON.parse(storedUser);
-      } catch(e) {
-        return null;
-      }
-    }
-
-    async function obtenerClaveConsentimientoUsuario() {
-      let usuario = obtenerUsuarioDesdeStorage();
-
-      if (!usuario) {
-        try {
-          const res = await fetch('/api/session', { credentials: 'include' });
-          const data = await res.json();
-          usuario = data.usuario || null;
-        } catch(e) {
-          usuario = null;
-        }
-      }
-
-      const identificador = usuario?.id || usuario?.idUsuario || usuario?.email || 'anonimo';
-      return `consentimientoChatbot:${identificador}`;
-    }
-
-    async function obtenerConsentimientoServidor() {
-      try {
-        const res = await fetch('/api/paciente/consentimiento-chatbot', {
-          credentials: 'include'
-        });
-        if (!res.ok) return false;
-
-        const data = await res.json();
-        return data.success && data.consentimiento_chatbot === true;
-      } catch(e) {
-        return false;
-      }
-    }
-
-    async function guardarConsentimientoServidor() {
-      try {
-        await fetch('/api/paciente/consentimiento-chatbot', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ consentimiento_chatbot: true })
-        });
-      } catch(e) {}
-    }
-
-    const consentimientoKey = await obtenerClaveConsentimientoUsuario();
-
-    if (localStorage.getItem(consentimientoKey) === 'aceptado' || await obtenerConsentimientoServidor()) {
-      localStorage.setItem(consentimientoKey, 'aceptado');
-      habilitarChatbot();
-      return;
-    }
-
-    bloquearChatbot();
-    if (consentimientoModal) {
-      consentimientoModal.show();
-    }
-
-    if (btnAcepto) {
-      btnAcepto.addEventListener('click', function() {
-        if (!checkConsent || !checkConsent.checked) {
-          if (warning) {
-            warning.classList.add('is-visible');
-          }
-          return;
-        }
-        localStorage.setItem(consentimientoKey, 'aceptado');
-        guardarConsentimientoServidor();
-        habilitarChatbot();
-        if (consentimientoModal) {
-          consentimientoModal.hide();
-        }
-      });
-    }
-
-    if (checkConsent && btnAcepto) {
-      checkConsent.addEventListener('change', function() {
-        btnAcepto.disabled = !checkConsent.checked;
-        if (warning && checkConsent.checked) {
-          warning.classList.remove('is-visible');
-        }
-      });
-    }
-
-    if (btnNoAcepto && modalElement) {
-      btnNoAcepto.addEventListener('click', function() {
-        bloquearChatbot();
-        if (warning) {
-          warning.classList.add('is-visible');
-        }
-        modalElement.classList.remove('consent-shake');
-        void modalElement.offsetWidth;
-        modalElement.classList.add('consent-shake');
-      });
-    }
-  });
-</script>
-<script>
-// Forzar que todos los acordeones inicien cerrados
-document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-    el.classList.remove('show');
-    el.style.height = '';
-});
-
-// Cerrar acordeón al restaurar desde bfcache (botón atrás)
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        document.querySelectorAll('.accordion-collapse').forEach(function(el) {
-            var instance = bootstrap.Collapse.getInstance(el);
-            if (instance) {
-                instance.hide();
-            } else {
-                new bootstrap.Collapse(el, { toggle: false }).hide();
-            }
-        });
-    }
-});
-</script>
 </body>
 </html>

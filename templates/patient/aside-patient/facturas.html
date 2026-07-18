@@ -1,19 +1,9 @@
 <!DOCTYPE html>
 <html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
-<title>PsyAI Connect | Mis Facturas</title>
-<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
-<script src="/js/core/shared/theme-inline.js?v=20260711-1"></script>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="stylesheet" href="/css/base/base.css?v=20260711-1">
-<link rel="stylesheet" href="/css/layout/layout.css?v=20260711-1">
-<link rel="stylesheet" href="/css/themes/theme.css?v=20260711-1">
-<link rel="stylesheet" href="/css/pages/patient.css?v=20260711-1">
-<script src="/js/core/shared/theme.js?v=20260711-1"></script>
+    <title>PsyAI Connect | Mis Facturas</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/patient.css?v=20260711-1">
 </head>
 <body class="patient-dashboard patient-agenda-page">
 
@@ -23,478 +13,102 @@
 <div class="d-flex w-100">
   <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
     <div class="sidebar__logo">
-        <div class="sidebar__logo-img-wrap">
-            <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
-            <div class="sidebar__logo-glow"></div>
-        </div>
-        <h5 class="sidebar__brand">PsyAI Connect</h5>
-        <span class="sidebar__role-badge">Paciente</span>
+      <div class="sidebar__logo-img-wrap">
+        <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
+        <div class="sidebar__logo-glow"></div>
+      </div>
+      <h5 class="sidebar__brand">PsyAI Connect</h5>
+      <span class="sidebar__role-badge">Paciente</span>
     </div>
     <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
-        <div class="sidebar__nav-section-label">Menú Principal</div>
-        <a href="../patient.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
-            <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
-            <span>Dashboard</span>
-            <div class="sidebar__nav-indicator"></div>
-        </a>
-        <a href="chatbot.html" class="sidebar__nav-item" data-tooltip="Chatbot">
-            <div class="sidebar__nav-icon"><i class="fas fa-robot"></i></div>
-            <span>Chatbot Emocional</span>
-            <div class="sidebar__nav-indicator"></div>
-        </a>
-        <a href="agenda-quotes.html" class="sidebar__nav-item" data-tooltip="Agenda">
-            <div class="sidebar__nav-icon"><i class="fas fa-calendar-alt"></i></div>
-            <span>Agenda de Citas</span>
-            <div class="sidebar__nav-indicator"></div>
-        </a>
-        <a href="facturas.html" class="sidebar__nav-item active" data-tooltip="Facturas">
-            <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-            <span>Mis Facturas</span>
-            <div class="sidebar__nav-indicator"></div>
-        </a>
-        <div class="sidebar__nav-section-label">Comunicación</div>
-        <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
-            <div class="sidebar__nav-icon"><i class="fas fa-comments"></i></div>
-            <span>Mensajes</span>
-            <div class="sidebar__nav-indicator"></div>
-        </a>
-        <div class="sidebar__nav-section-label">Seguimiento</div>
-        <a href="evolution.html" class="sidebar__nav-item" data-tooltip="Evolución">
-            <div class="sidebar__nav-icon"><i class="fas fa-chart-area"></i></div>
-            <span>Mi Evolución</span>
-            <div class="sidebar__nav-indicator"></div>
-        </a>
-        <a href="historia_clinica_paciente.html" class="sidebar__nav-item" data-tooltip="Documentos">
-            <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
-            <span>Mis Documentos</span>
-            <div class="sidebar__nav-indicator"></div>
-        </a>
+      <div class="sidebar__nav-section-label">Menú Principal</div>
+      <a href="../patient.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
+        <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
+        <span>Dashboard</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="evolution.html" class="sidebar__nav-item" data-tooltip="Evolución">
+        <div class="sidebar__nav-icon"><i class="fas fa-chart-line"></i></div>
+        <span>Evolución</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="chatbot.html" class="sidebar__nav-item" data-tooltip="Chatbot">
+        <div class="sidebar__nav-icon"><i class="fas fa-robot"></i></div>
+        <span>Chatbot</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="agenda-quotes.html" class="sidebar__nav-item" data-tooltip="Agenda">
+        <div class="sidebar__nav-icon"><i class="fas fa-calendar-check"></i></div>
+        <span>Agenda</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
+        <div class="sidebar__nav-icon"><i class="fas fa-envelope"></i></div>
+        <span>Mensajes</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="historia_clinica_paciente.html" class="sidebar__nav-item" data-tooltip="Documentos">
+        <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
+        <span>Documentos</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="facturas.html" class="sidebar__nav-item active" data-tooltip="Facturas">
+        <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+        <span>Facturas</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="my.profile.html" class="sidebar__nav-item" data-tooltip="Mi Perfil">
+        <div class="sidebar__nav-icon"><i class="fas fa-user"></i></div>
+        <span>Mi Perfil</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
     </nav>
     <div class="sidebar__footer">
-        <div class="sidebar__user-card">
-            <div class="sidebar__user-avatar" data-avatar="inicial">
-                <i class="fas fa-user"></i>
-            </div>
-            <div class="sidebar__user-info">
-                <span class="sidebar__user-name" id="sidebarUserName">Paciente</span>
-                <span class="sidebar__user-role">Paciente</span>
-            </div>
-            <a href="my.profile.html" class="sidebar__user-settings" title="Mi Perfil">
-                <i class="fas fa-cog"></i>
-            </a>
+      <div class="sidebar__user-card">
+        <div class="sidebar__user-avatar" data-avatar="inicial">
+          <i class="fas fa-user"></i>
         </div>
-        <div class="sidebar__actions">
-            <div class="theme-switch-container">
-                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                <button id="theme-toggle" title="Cambiar modo"></button>
-                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-            </div>
-            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Cerrar Sesión</span>
-            </a>
+        <div class="sidebar__user-info">
+          <span class="sidebar__user-name" id="sidebarUserName">Paciente</span>
+          <span class="sidebar__user-role">Paciente</span>
         </div>
+        <a href="#" class="sidebar__user-settings" title="Configuración">
+          <i class="fas fa-cog"></i>
+        </a>
+      </div>
+      <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+        <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+        <button id="theme-toggle" title="Cambiar modo"></button>
+        <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+      </div>
+    </div>
+    <div class="sidebar__logout-section">
+      <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Cerrar Sesión</span>
+      </a>
     </div>
   </aside>
 
-  <main class="main-content flex-grow-1">
-    <header class="main-header d-flex justify-content-between align-items-center mb-0">
-      <h1><i class="fas fa-file-invoice-dollar me-2"></i>Mis Facturas</h1>
-      <div class="user-info d-flex align-items-center">
-        <span class="user-greeting" id="nombrePaciente">Hola, </span>
-        <button class="btn-notif" title="Notificaciones">
-          <i class="fas fa-bell"></i>
-          <span class="notif-dot"></span>
-        </button>
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23E8F1FF'/%3E%3C/svg%3E" alt="Avatar" class="user-avatar" data-avatar="inicial" data-nombre="">
+  <main class="main-content flex-grow-1 ms-250 p-4">
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-0"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Mis Facturas</h1>
+        <small class="text-muted">Historial de facturación</small>
       </div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Paciente</div>
     </header>
-
-    <section class="row g-3 mb-4 mt-3" id="statsFacturas">
-      <div class="col-6 col-md-4">
-        <div class="stat-card" style="border-left:4px solid #43a047;">
-          <div class="stat-value" id="statPagado" style="color:#43a047;">$0</div>
-          <div class="stat-label">Pagado</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-4">
-        <div class="stat-card" style="border-left:4px solid #f9a825;">
-          <div class="stat-value" id="statPendiente" style="color:#f9a825;">$0</div>
-          <div class="stat-label">Pendiente</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-4">
-        <div class="stat-card" style="border-left:4px solid #1565C0;">
-          <div class="stat-value" id="statTotal" style="color:#1565C0;">$0</div>
-          <div class="stat-label">Total General</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-card">
-      <div class="section-title"><i class="fas fa-list"></i> Historial de Facturas</div>
-      <table class="citas-table w-100">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Profesional</th>
-            <th>Servicio(s)</th>
-            <th>Monto</th>
-            <th>Estado</th>
-            <th class="text-center">Acción</th>
-          </tr>
-        </thead>
-        <tbody id="tablaFacturas"><tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr></tbody>
-      </table>
-    </section>
+    <div class="card shadow-sm border-0 p-4">
+      <p class="text-muted text-center py-5"><i class="fas fa-file-invoice-dollar fa-3x mb-3 d-block text-primary"></i>Aquí podrás ver tus facturas.</p>
+    </div>
   </main>
 </div>
 
-<div class="modal fade psyai-modal psyai-modal--receipt" id="modalVerComprobante" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered">
-<div class="psyai-modal__content">
-<div class="psyai-modal__header psyai-modal__header--receipt">
-  <div class="psyai-modal__header-icon">
-    <i class="fas fa-receipt"></i>
-  </div>
-  <div>
-    <h5 class="psyai-modal__title">Comprobante de Pago</h5>
-    <p class="psyai-modal__subtitle">Detalle de tu transacción</p>
-  </div>
-  <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
-    <i class="fas fa-times"></i>
-  </button>
-</div>
-<div class="psyai-modal__body" id="comprobanteBody">
-  <div class="text-center py-4" id="comprobanteLoading"><div class="spinner-border text-primary"></div></div>
-</div>
-<div class="psyai-modal__footer">
-  <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" onclick="window.print()"><i class="fas fa-print me-1"></i>Imprimir</button>
-  <button type="button" class="psyai-modal__btn psyai-modal__btn--save" data-bs-dismiss="modal">Cerrar</button>
-</div>
-</div>
-</div>
-</div>
-
-<div class="modal fade psyai-modal psyai-modal--payment" id="modalPagoWompi" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered">
-<div class="psyai-modal__content">
-<div class="psyai-modal__header psyai-modal__header--payment">
-  <div class="psyai-modal__header-icon">
-    <i class="fas fa-credit-card"></i>
-  </div>
-  <div>
-    <h5 class="psyai-modal__title">Pagar Factura</h5>
-    <p class="psyai-modal__subtitle">Procesa tu pago de forma segura</p>
-  </div>
-  <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
-    <i class="fas fa-times"></i>
-  </button>
-</div>
-<div class="psyai-modal__body text-center py-4">
-  <div id="wompiLoading"><div class="spinner-border text-primary mb-3"></div><p>Preparando pago...</p></div>
-  <div id="wompiSandboxInfo" class="alert alert-info text-start small p-3 mb-3" style="display:none;">
-    <i class="fas fa-info-circle me-1"></i> <strong>Estás en modo de pruebas de Wompi.</strong> Usa estos datos para simular un pago:
-    <hr class="my-2">
-    <div class="mb-1"><strong>Tarjeta — Aprobado:</strong> <code class="user-select-all">4242 4242 4242 4242</code></div>
-    <div class="mb-1"><strong>Tarjeta — Rechazado:</strong> <code class="user-select-all">4111 1111 1111 1111</code></div>
-    <div class="mb-1"><strong>Tarjeta — Cualquier otro número:</strong> genera <em>ERROR</em></div>
-    <div class="mb-1"><strong>Nequi — Aprobado:</strong> <code class="user-select-all">3991111111</code></div>
-    <div class="mb-1"><strong>Nequi — Cualquier otro número:</strong> genera <em>RECHAZADO</em></div>
-    <hr class="my-2">
-    <div><strong>Datos adicionales (tarjeta):</strong> cualquier fecha futura (ej. 12/28), CVC de 3 dígitos (ej. 123), y nombre del titular.</div>
-  </div>
-  <div id="wompiWidgetContainer" style="display:none;">
-    <i class="fas fa-credit-card text-primary" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">Procesando pago...</p>
-    <p class="text-muted small">Se abrirá el formulario de pago seguro de Wompi.</p>
-  </div>
-  <div id="wompiSuccess" style="display:none;">
-    <i class="fas fa-check-circle text-success" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">¡Pago exitoso!</p>
-    <p class="text-muted small" id="wompiSuccessMsg">Tu factura ha sido pagada.</p>
-  </div>
-  <div id="wompiError" style="display:none;">
-    <i class="fas fa-times-circle text-danger" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">Pago no completado</p>
-    <p class="text-muted small" id="wompiErrorMsg">Intenta de nuevo más tarde.</p>
-  </div>
-</div>
-<div class="psyai-modal__footer justify-content-center">
-  <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">Cerrar</button>
-</div>
-</div>
-</div>
-</div>
-
-<div class="modal fade psyai-modal psyai-modal--info" id="modalMotivoAnulacion" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered">
-<div class="psyai-modal__content">
-<div class="psyai-modal__header psyai-modal__header--info">
-  <div class="psyai-modal__header-icon psyai-modal__header-icon--muted">
-    <i class="fas fa-info-circle"></i>
-  </div>
-  <div>
-    <h5 class="psyai-modal__title">Factura Anulada</h5>
-    <p class="psyai-modal__subtitle">Detalle de la anulación</p>
-  </div>
-  <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
-    <i class="fas fa-times"></i>
-  </button>
-</div>
-<div class="psyai-modal__body text-center py-4">
-  <i class="fas fa-ban text-secondary" style="font-size:2.5rem;"></i>
-  <p class="fw-bold mt-3">Motivo de anulación</p>
-  <p class="text-muted" id="motivoAnulacionTexto">---</p>
-</div>
-<div class="psyai-modal__footer justify-content-center">
-  <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">Cerrar</button>
-</div>
-</div>
-</div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/modules/auth/auth-guard.js?v=20260711-1"></script>
-<link rel="stylesheet" href="/responsive/responsive-patient.css">
-<link rel="stylesheet" href="/responsive/responsive-fix.css">
+{% include 'base/partials/scripts.html' %}
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
 <script src="/js/core/shared/alerts.js?v=20260711-1"></script>
-<script src="/js/modules/patient/aside.js?v=20260711-1"></script>
+<script src="/js/core/shared/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20260711-1"></script>
-<script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
-<script src="https://checkout.wompi.co/widget.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  cargarStatsFacturas();
-  cargarFacturasPaciente();
-});
 
-async function cargarStatsFacturas() {
-  try {
-    const res = await fetch("/api/facturas/mias", { credentials: "include" });
-    const data = await res.json();
-    if (!data.success || !data.facturas) return;
-    let pagado = 0, pendiente = 0, total = 0;
-    data.facturas.forEach(function(f) {
-      if (f.estadoPago === "Pagado") pagado += f.monto;
-      else if (f.estadoPago === "Pendiente") pendiente += f.monto;
-      total += f.monto;
-    });
-    document.getElementById("statPagado").textContent = "$" + pagado.toLocaleString("es-CO", {minimumFractionDigits:0});
-    document.getElementById("statPendiente").textContent = "$" + pendiente.toLocaleString("es-CO", {minimumFractionDigits:0});
-    document.getElementById("statTotal").textContent = "$" + total.toLocaleString("es-CO", {minimumFractionDigits:0});
-  } catch(e) { console.error(e); }
-}
-
-async function cargarFacturasPaciente() {
-  const tbody = document.getElementById("tablaFacturas");
-  try {
-    const res = await fetch("/api/facturas/mias", { credentials: "include" });
-    const data = await res.json();
-    if (!data.success || !data.facturas || data.facturas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No tienes facturas registradas</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.facturas.map(function(f) {
-      const servicios = (f.items || []).map(function(i) { return i.descripción; }).join(", ") || "Consulta";
-      const badgeClass = f.anulada ? "bg-secondary" :
-        f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
-      const badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
-
-      let acción = "";
-      if (f.anulada || f.estadoPago === "Cancelado") {
-        acción = '<button class="btn btn-sm btn-outline-secondary" onclick="verMotivoAnulacion(\'' + (f.motivoAnulacion || "Sin motivo registrado") + '\')"><i class="fas fa-info-circle"></i></button>';
-      } else if (f.estadoPago === "Pagado") {
-        acción = '<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(' + f.idFactura + ')"><i class="fas fa-receipt"></i> Ver</button>';
-      } else {
-        acción = '<button class="btn btn-sm btn-success" onclick="pagarFactura(' + f.idFactura + ')"><i class="fas fa-credit-card"></i> Pagar</button>';
-      }
-
-      return '<tr class="align-middle">' +
-        '<td data-label="Fecha">' + f.fecha + '</td>' +
-        '<td data-label="Profesional" class="fw-semibold">' + (f.nombreProfesional || "---") + '</td>' +
-        '<td data-label="Servicio(s)">' + servicios + '</td>' +
-        '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
-        '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
-        '<td data-label="Acci&#xF3;n" class="text-center">' + acción + '</td>' +
-        '</tr>';
-    }).join("");
-  } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar facturas</td></tr>';
-  }
-}
-
-function verMotivoAnulacion(motivo) {
-  document.getElementById("motivoAnulacionTexto").textContent = motivo;
-  new bootstrap.Modal(document.getElementById("modalMotivoAnulacion")).show();
-}
-
-async function verComprobante(idFactura) {
-  const modal = new bootstrap.Modal(document.getElementById("modalVerComprobante"));
-  const body = document.getElementById("comprobanteBody");
-  modal.show();
-  body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
-  try {
-    const res = await fetch("/api/facturas/" + idFactura, { credentials: "include" });
-    const data = await res.json();
-    if (!data.success || !data.factura) {
-      body.innerHTML = '<p class="text-danger text-center">Error al cargar comprobante</p>';
-      return;
-    }
-    const f = data.factura;
-    const itemsHtml = (f.items || []).map(function(i) {
-      return '<tr><td>' + i.descripción + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
-    }).join("");
-    body.innerHTML =
-      '<div class="text-center mb-3"><h5 class="fw-bold">PsyAI Connect</h5><small class="text-muted">Comprobante de Pago</small></div>' +
-      '<hr>' +
-      '<p><strong>Factura #' + f.idFactura + '</strong></p>' +
-      '<p class="small text-muted">Fecha: ' + f.fecha + '</p>' +
-      '<table class="table table-sm"><thead><tr><th>Servicio</th><th class="text-end">Valor</th></tr></thead><tbody>' + itemsHtml + '</tbody>' +
-      '<tfoot><tr class="fw-bold"><td>Total</td><td class="text-end">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr></tfoot></table>' +
-      '<hr>' +
-      '<p class="small text-muted">Estado: <span class="badge bg-success">Completado</span></p>' +
-      (f.idTransaccionPago ? '<p class="small text-muted">Transacción: ' + f.idTransaccionPago + '</p>' : '');
-  } catch(e) {
-    body.innerHTML = '<p class="text-danger text-center">Error de conexión</p>';
-  }
-}
-
-function cancelarFacturaPagoNoCompletado(idFactura) {
-  fetch("/api/facturas/" + idFactura + "/cancelar-pago", {
-    method: "POST", credentials: "include",
-  }).catch(function() {});
-}
-
-function pagarFactura(idFactura) {
-  const modal = new bootstrap.Modal(document.getElementById("modalPagoWompi"));
-  document.getElementById("wompiLoading").style.display = "block";
-  document.getElementById("wompiWidgetContainer").style.display = "none";
-  document.getElementById("wompiSuccess").style.display = "none";
-  document.getElementById("wompiError").style.display = "none";
-  modal.show();
-
-  fetch("/api/facturas/" + idFactura + "/iniciar-pago", {
-    method: "POST", credentials: "include",
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (!data.success) {
-      document.getElementById("wompiLoading").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = data.message || "Error al iniciar pago";
-      cancelarFacturaPagoNoCompletado(idFactura);
-      cargarFacturasPaciente();
-      cargarStatsFacturas();
-      return;
-    }
-    document.getElementById("wompiLoading").style.display = "none";
-
-    var sandboxInfo = document.getElementById("wompiSandboxInfo");
-    if (sandboxInfo) {
-      sandboxInfo.style.display = data.data.sandbox ? "block" : "none";
-    }
-
-    document.getElementById("wompiWidgetContainer").style.display = "block";
-
-    var d = data.data;
-    console.log("[Wompi] initWidget data:", d);
-
-    if (typeof WidgetCheckout === "undefined") {
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "No se pudo cargar el widget de pago. Verifica tu conexi\u00f3n o desactiva bloqueadores de anuncios.";
-      cancelarFacturaPagoNoCompletado(idFactura);
-      cargarFacturasPaciente();
-      cargarStatsFacturas();
-      return;
-    }
-
-    var wompiWidget = null;
-    var wompiTimeout = setTimeout(function() {
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "El formulario de pago no carg\u00f3. Puede estar siendo bloqueado por tu navegador o extensiones. Intenta desactivar bloqueadores de anuncios/rastreadores para este sitio, o usa otro navegador.";
-    }, 120000);
-
-    try {
-      wompiWidget = new WidgetCheckout({
-        currency: d.currency,
-        amountInCents: d.amountInCents,
-        reference: d.reference,
-        publicKey: d.publicKey,
-        signature: d.signature,
-      });
-    } catch (e) {
-      clearTimeout(wompiTimeout);
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "Error al crear el widget de pago: " + e.message;
-      console.error("[Wompi] constructor error:", e);
-      cancelarFacturaPagoNoCompletado(idFactura);
-      cargarFacturasPaciente();
-      cargarStatsFacturas();
-      return;
-    }
-
-    try {
-      wompiWidget.open(function(result) {
-        clearTimeout(wompiTimeout);
-        var transaction = result.transaction || {};
-        if (transaction.status === "APPROVED") {
-          fetch("/api/facturas/" + idFactura + "/confirmar-pago", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ transactionId: transaction.id })
-          })
-          .then(function(r) { return r.json(); })
-          .then(function() {
-            document.getElementById("wompiWidgetContainer").style.display = "none";
-            document.getElementById("wompiError").style.display = "none";
-            document.getElementById("wompiSuccess").style.display = "block";
-            document.getElementById("wompiSuccessMsg").textContent = "Tu factura #" + idFactura + " ha sido pagada exitosamente.";
-            cargarFacturasPaciente();
-            cargarStatsFacturas();
-          })
-          .catch(function() {
-            document.getElementById("wompiWidgetContainer").style.display = "none";
-            document.getElementById("wompiError").style.display = "none";
-            document.getElementById("wompiSuccess").style.display = "block";
-            document.getElementById("wompiSuccessMsg").textContent = "Tu factura #" + idFactura + " ha sido pagada exitosamente.";
-            cargarFacturasPaciente();
-            cargarStatsFacturas();
-          });
-        } else {
-          document.getElementById("wompiWidgetContainer").style.display = "none";
-          document.getElementById("wompiError").style.display = "block";
-          var msg = transaction.status === "DECLINED" ? "La transacci\u00f3n fue rechazada." : "El pago no se complet\u00f3.";
-          document.getElementById("wompiErrorMsg").textContent = msg + " La factura ha sido cancelada.";
-          cancelarFacturaPagoNoCompletado(idFactura);
-          cargarFacturasPaciente();
-          cargarStatsFacturas();
-        }
-      });
-    } catch (e) {
-      clearTimeout(wompiTimeout);
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "Error al abrir el widget de pago: " + e.message;
-      console.error("[Wompi] open error:", e);
-      cancelarFacturaPagoNoCompletado(idFactura);
-      cargarFacturasPaciente();
-      cargarStatsFacturas();
-    }
-  })
-  .catch(function() {
-    document.getElementById("wompiLoading").style.display = "none";
-    document.getElementById("wompiError").style.display = "block";
-    document.getElementById("wompiErrorMsg").textContent = "Error de conexión";
-    cancelarFacturaPagoNoCompletado(idFactura);
-    cargarFacturasPaciente();
-    cargarStatsFacturas();
-  });
-}
-</script>
 </body>
 </html>
