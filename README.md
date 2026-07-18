@@ -77,18 +77,19 @@ PsyAI-Connect/
 │
 ├── manage.py
 ├── requirements.txt
-├── pytest.ini                  # Configuración de pytest
-├── conftest.py                 # Fixtures globales (SQLite override)
-├── Dockerfile                  # Multi-stage: dev / prod
-├── docker-compose.yml          # Desarrollo: app + MySQL
-├── docker-compose.prod.yml     # Producción override
+├── setup_install.py             # Instalador automático (venv + .env)
+├── pytest.ini                   # Configuración de pytest
+├── conftest.py                  # Fixtures globales (SQLite override)
 ├── .dockerignore
 ├── .env.example
 ├── .env
 ├── .gitignore
 │
 ├── docker/
-│   └── entrypoint.sh           # Espera MySQL, migra, arranca server
+│   ├── Dockerfile               # Multi-stage: dev / prod
+│   ├── docker-compose.yml       # Desarrollo: app + MySQL
+│   ├── docker-compose.prod.yml  # Producción override
+│   └── entrypoint.sh            # Espera MySQL, migra, arranca server
 │
 ├── config/
 │   ├── __init__.py
@@ -96,21 +97,21 @@ PsyAI-Connect/
 │   ├── urls.py
 │   ├── wsgi.py
 │   └── settings/
-│       ├── base.py             # Configuración común
-│       ├── dev.py              # Desarrollo (DEBUG=True)
-│       └── prod.py             # Producción (DEBUG=False, seguridad)
+│       ├── base.py              # Configuración común
+│       ├── dev.py               # Desarrollo (DEBUG=True)
+│       └── prod.py              # Producción (DEBUG=False, seguridad)
 │
 ├── apps/
 │   ├── __init__.py
-│   ├── admin_panel/            # Panel de administración
-│   ├── authentication/         # Registro, login, recuperación
-│   ├── billing/                # Facturación y pasarela de pago
-│   ├── chatbot/                # Chatbot IA con Gemini
-│   ├── core/                   # Permisos, middlewares, utilidades
-│   ├── documents/              # Documentos clínicos
-│   ├── patients/               # Portal de pacientes
-│   ├── professionals/          # Portal de profesionales
-│   └── scheduling/             # Agendamiento de citas
+│   ├── admin_panel/             # Panel de administración
+│   ├── authentication/          # Registro, login, recuperación
+│   ├── billing/                 # Facturación y pasarela de pago
+│   ├── chatbot/                 # Chatbot IA con Gemini
+│   ├── core/                    # Permisos, middlewares, utilidades
+│   ├── documents/               # Documentos clínicos
+│   ├── patients/                # Portal de pacientes
+│   ├── professionals/           # Portal de profesionales
+│   └── scheduling/              # Agendamiento de citas
 │
 ├── static/
 │   ├── css/
@@ -127,7 +128,7 @@ PsyAI-Connect/
 │   └── professional/
 │
 └── tests/
-    └── test_integration.py     # Integration tests (Django test client)
+    └── test_integration.py      # Integration tests (Django test client)
 ```
 
 ---
@@ -159,16 +160,16 @@ cd PsyAI-Connect
 
 # 2. Configurar variables de entorno
 cp .env.example .env
-# Editar . SECRET_KEY con una clave segura
+# Editar .env con SECRET_KEY y credenciales
 
 # 3. Levantar los contenedores (app + MySQL)
-docker compose up
+docker compose -f docker/docker-compose.yml up
 
 # El servidor estará disponible en http://localhost:8000
 # MySQL accesible en localhost:3307
 ```
 
-El `entrypoint.sh` se encarga automáticamente de:
+El `docker/entrypoint.sh` se encarga automáticamente de:
 - Esperar a que MySQL esté listo
 - Ejecutar las migraciones
 - Crear un superuser de prueba (`admin@psyai.com` / `Admin123`)
@@ -177,18 +178,18 @@ El `entrypoint.sh` se encarga automáticamente de:
 #### Comandos útiles con Docker
 
 ```bash
-docker compose up -d              # Arrancar en background
-docker compose logs -f app        # Ver logs de la app
-docker compose exec app bash      # Shell dentro del contenedor
-docker compose down               # Detener contenedores
-docker compose down -v            # Detener y eliminar volúmenes
+docker compose -f docker/docker-compose.yml up -d              # Arrancar en background
+docker compose -f docker/docker-compose.yml logs -f app        # Ver logs de la app
+docker compose -f docker/docker-compose.yml exec app bash      # Shell dentro del contenedor
+docker compose -f docker/docker-compose.yml down               # Detener contenedores
+docker compose -f docker/docker-compose.yml down -v            # Detener y eliminar volúmenes
 ```
 
 #### Producción con Docker
 
 ```bash
 # Usar el override de producción (waitress, sin hot-reload)
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
 ```
 
 ### Opción 2: Instalación manual
@@ -252,10 +253,10 @@ python -m pytest -v
 
 ```bash
 # Unit tests (no necesitan MySQL)
-docker compose exec app python -m pytest apps/ -q
+docker compose -f docker/docker-compose.yml exec app python -m pytest apps/ -q
 
 # Todos los tests
-docker compose exec app python -m pytest -q
+docker compose -f docker/docker-compose.yml exec app python -m pytest -q
 ```
 
 ### Estructura de tests
@@ -339,7 +340,7 @@ DB_ROOT_PASSWORD=rootpass
 - **Telemetría en vivo**: el panel admin muestra en tiempo real el uso de CPU, RAM, disco, número de peticiones, endpoints más usados y eventos de seguridad.
 - **Sistema de temas**: soporte para modo claro y oscuro persistido por usuario.
 - **Diseño responsivo**: CSS adaptativo para móvil, tablet y escritorio por cada sección.
-- **Docker**: containerización lista para desarrollo y producción con hot-reload, MySQL persistente y migraciones automáticas.
+- **Docker**: containerización lista para desarrollo y producción con hot-reload, MySQL persistente y migraciones automáticas. Archivos Docker organizados en `docker/`.
 - **219 tests**: unit tests e integration tests cubriendo las capas de servicios y endpoints HTTP.
 
 ---
