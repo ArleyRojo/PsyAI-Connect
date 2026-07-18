@@ -41,7 +41,7 @@ wheels/
 *.db
 
 # Uploads
-app/static/uploads/
+static/uploads/
 
 # OS
 .DS_Store

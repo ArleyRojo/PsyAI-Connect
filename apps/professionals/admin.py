@@ -1,0 +1,23 @@
+from django.contrib import admin
+
+from apps.professionals.models import PacientesProfesional, PerfilProfesional, Reportes
+
+
+@admin.register(PerfilProfesional)
+class PerfilProfesionalAdmin(admin.ModelAdmin):
+    list_display = ("idProfesional", "especialidad", "licencia", "estado")
+    search_fields = ("idProfesional__email", "especialidad", "licencia")
+    list_filter = ("estado",)
+
+
+@admin.register(PacientesProfesional)
+class PacientesProfesionalAdmin(admin.ModelAdmin):
+    list_display = ("idRegistro", "idProfesional", "idPaciente", "fechaDiagnostico")
+    readonly_fields = ("fecha",)
+
+
+@admin.register(Reportes)
+class ReportesAdmin(admin.ModelAdmin):
+    list_display = ("idReporte", "idProfesional", "tipoReporte", "estado", "fecha")
+    list_filter = ("estado", "eliminado")
+    readonly_fields = ("fecha",)

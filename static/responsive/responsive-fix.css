@@ -1,0 +1,2115 @@
+/* ===================================================
+   RESPONSIVE-FIX.CSS – PsyAI Connect
+   Correcciones globales de responsive.
+   Cargar SIEMPRE al final, después del resto de CSS.
+   NO modifica colores, branding ni estructura.
+   =================================================== */
+
+/* ═══════════════════════════════════════════════════
+   BREAKPOINTS UNIFICADOS
+   ═══════════════════════════════════════════════════ */
+:root {
+  --bp-sm: 576px;
+  --bp-md: 768px;
+  --bp-lg: 992px;
+  --bp-xl: 1200px;
+}
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL: BOX-SIZING y overflow
+   ═══════════════════════════════════════════════════ */
+html {
+  overflow-x: hidden;
+}
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+img, video, canvas, svg, iframe {
+  max-width: 100%;
+  height: auto;
+}
+table {
+  max-width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════
+   SIDEBAR – toggle global override
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 991px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 4.5rem !important; /* espacio para el toggle-btn fixed */
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-layout {
+    margin-left: 0 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TABLAS – scroll horizontal en mobile
+   ═══════════════════════════════════════════════════ */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-clean,
+.table {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 767.98px) {
+  .user-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .action-btn {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .status-chip {
+    font-size: 0.65rem !important;
+    padding: 2px 8px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   GRIDS – responsive columns
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 991.98px) {
+  .row > [class*="col-"] {
+    margin-bottom: 16px;
+  }
+
+  .row:last-child > [class*="col-"]:last-child {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .row > [class*="col-3"],
+  .row > [class*="col-4"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .row > [class*="col-6"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991.98px) {
+  .row > [class*="col-6"] {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .row > [class*="col-4"] {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FORMULARIOS – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .form-control,
+  .form-select,
+  .agenda-form-input {
+    font-size: 0.85rem !important;
+    padding: 8px 12px !important;
+  }
+
+  .form-label,
+  .agenda-form-label {
+    font-size: 0.78rem !important;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .toolbar-right {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .form-section {
+    padding: 14px !important;
+  }
+
+  .btn,
+  .button--primary,
+  .button--success {
+    padding: 8px 14px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MODALES – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .modal-dialog {
+    margin: 8px !important;
+  }
+
+  .modal-content {
+    border-radius: 12px !important;
+  }
+
+  .modal-header {
+    padding: 12px 14px !important;
+  }
+
+  .modal-body {
+    padding: 14px !important;
+  }
+
+  .modal-footer {
+    padding: 10px 14px !important;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .modal-dialog {
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TOAST NOTIFICATIONS – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .toast-container {
+    top: 10px !important;
+    right: 10px !important;
+    left: 10px !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  .toast {
+    padding: 10px 14px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TABS – responsive (admin tabs)
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .roles-tabs,
+  .logs-tabs,
+  .users-tabs,
+  .notif-tabs {
+    flex-wrap: wrap;
+    gap: 4px !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .roles-tab,
+  .logs-tab,
+  .users-tab,
+  .notif-tab {
+    padding: 8px 14px !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+/* AUTH PAGES – responsive */
+@media (max-width: 575.98px) {
+  .login-card,
+  .register-card,
+  .recover-card {
+    width: calc(100% - 24px) !important;
+    max-width: 400px !important;
+    padding: 24px 20px !important;
+    margin: 12px !important;
+  }
+
+  .login-header h1,
+  .register-header h1 {
+    font-size: 1.3rem !important;
+  }
+
+  .login-header img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .back-index {
+    top: 10px !important;
+    left: 12px !important;
+  }
+
+  .back-index a {
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .login-card,
+  .register-card,
+  .recover-card {
+    padding: 28px 24px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   LANDING PAGE – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .hero-section {
+    padding: 40px 16px !important;
+    text-align: center !important;
+  }
+
+  .hero-section h1 {
+    font-size: 1.6rem !important;
+  }
+
+  .hero-section p {
+    font-size: 0.9rem !important;
+  }
+
+  .content-section {
+    padding: 40px 16px !important;
+  }
+
+  .section-title {
+    font-size: 1.4rem !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .hero-section {
+    padding: 30px 12px !important;
+  }
+
+  .hero-section h1 {
+    font-size: 1.3rem !important;
+  }
+
+  .navbar-brand img {
+    height: 42px !important;
+  }
+
+  .navbar {
+    padding: 0.4rem 0.5rem !important;
+  }
+
+  .service-card {
+    padding: 1.2rem 1rem !important;
+  }
+
+  .step-circle {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN HEADER – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .main-header {
+    padding: 12px 14px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .main-header h1 {
+    font-size: 1.1rem !important;
+  }
+
+  .main-header .user-info {
+    font-size: 0.78rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   CHATBOT – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  #chatbot-section {
+    height: calc(100vh - 180px) !important;
+    border-radius: 14px !important;
+  }
+
+  #chatbot-section .chat-area {
+    min-height: 200px !important;
+    padding: 12px 14px !important;
+  }
+
+  #chatbot-section .message .bubble {
+    max-width: 85% !important;
+    padding: 10px 14px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .chat-input-area .form-control {
+    padding: 8px 4px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .chat-send-btn {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  #chatbot-section {
+    height: calc(100vh - 160px) !important;
+    border-radius: 12px !important;
+  }
+
+  .chat-header__title {
+    font-size: 0.88rem !important;
+  }
+
+  .chat-header {
+    padding: 12px 14px !important;
+  }
+
+  .chat-header__bot-avatar {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .chat-welcome__title {
+    font-size: 1rem !important;
+  }
+
+  .chat-welcome__desc {
+    font-size: 0.78rem !important;
+    max-width: 280px !important;
+  }
+
+  .chat-welcome__chip {
+    padding: 7px 10px !important;
+    font-size: 0.75rem !important;
+  }
+
+  #chatbot-section .chat-area {
+    min-height: 160px !important;
+  }
+
+  .chat-scroll-btn {
+    bottom: 10px !important;
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .chat-date-sep {
+    margin: 16px 0 12px !important;
+  }
+
+  .chat-date-sep span {
+    font-size: 0.65rem !important;
+    padding: 3px 10px !important;
+  }
+
+  .chat-input-wrapper {
+    padding: 0 14px 10px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   EVOLUTION PAGE – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .evolution-page .form-control,
+  .evolution-page .form-select {
+    font-size: 0.82rem !important;
+  }
+
+  .evolution-page .badge {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   AGENDA – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .agenda-card {
+    padding: 14px !important;
+  }
+
+  .agenda-card h5 {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN HEADER user-info row – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .main-header .d-flex.align-items-center {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .main-header .d-flex.align-items-center > div:last-child {
+    width: 100%;
+    margin-top: 4px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PAGINATION – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .pagination .page-item .page-link {
+    padding: 4px 10px !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE BOTTOM NAV – creado dinámicamente por aside.js
+   ═══════════════════════════════════════════════════ */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background: var(--color-bg-light, #fff);
+  border-top: 1px solid var(--color-border, #D6E8FA);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+  padding: 4px 0;
+  justify-content: space-around;
+  align-items: center;
+}
+.mobile-bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  color: var(--color-text-muted, #7B92AC);
+  text-decoration: none;
+  font-size: 0.65rem;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  flex: 1;
+  text-align: center;
+  max-width: 80px;
+}
+.mobile-bottom-nav__item i {
+  font-size: 1.1rem;
+  color: var(--color-text-muted, #7B92AC);
+  transition: color 0.15s ease;
+}
+.mobile-bottom-nav__item.active {
+  color: var(--color-secondary, #0D47A1);
+}
+.mobile-bottom-nav__item.active i {
+  color: var(--color-secondary, #0D47A1);
+}
+.mobile-bottom-nav__item:hover {
+  color: var(--color-secondary, #0D47A1);
+  background: var(--color-accent, #E3F2FD);
+}
+.mobile-bottom-nav__item:hover i {
+  color: var(--color-secondary, #0D47A1);
+}
+
+
+
+
+
+
+
+body.has-mobile-bottom-nav {
+  padding-bottom: 60px;
+}
+
+@media (max-width: 767.98px) {
+  .mobile-bottom-nav {
+    display: flex;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILITIES – hide on mobile
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .hide-xs { display: none !important; }
+}
+@media (max-width: 767.98px) {
+  .hide-sm { display: none !important; }
+}
+@media (max-width: 991.98px) {
+  .hide-md { display: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDIMIENTO / PERFORMANCE – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  [class*="rendimiento"] .stat-card,
+  [class*="performance"] .stat-card {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   DASHBOARD STATS ROW – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .stats-row > [class*="col-"] {
+    margin-bottom: 10px;
+  }
+
+  .stats-row > [class*="col-"]:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   NOTIFICATIONS PAGE – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .notif-preview {
+    padding: 12px 14px !important;
+  }
+
+  .notif-cell-date {
+    font-size: 0.72rem !important;
+  }
+
+  .notif-cell-title {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   LOGS PAGE – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .log-badge,
+  .badge-origin,
+  .badge-modulo,
+  .badge-usuario,
+  .badge-rol {
+    font-size: 0.65rem !important;
+    padding: 2px 7px !important;
+  }
+
+  .detalle-badge {
+    max-width: 180px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .mono {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   REPORTES / CHARTS – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  canvas.chart,
+  .chart-container canvas {
+    max-height: 250px !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  canvas.chart,
+  .chart-container canvas {
+    max-height: 200px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   USERS PAGE – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .user-detail-row {
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 0 !important;
+  }
+
+  .avatar-lg {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FOOTER – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .footer-enhanced .footer-content {
+    padding: 30px 16px 10px !important;
+  }
+
+  .footer-enhanced .footer-brand {
+    justify-content: center;
+  }
+
+  .footer-enhanced .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .footer-enhanced .footer-legal {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   STAT CARDS – ancho completo + centrado responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 991.98px) {
+  .row.g-3.mb-4 > [class*="col-"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .stat-card {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .stat-card > div:last-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .stat-value,
+  .stat-label {
+    text-align: center;
+  }
+}
+
+/* Admin responsive: cards a ancho completo en usuarios, roles, logs, notificaciones, dashboard y chatbot */
+@media (max-width: 991.98px) {
+  .main-content > .row,
+  .main-content > [id^="tab-"],
+  .main-content > .admin-panel,
+  .main-content > section,
+  .main-content .row {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .main-content .row > [class*="col-"],
+  #panel-logs .row.g-3.mb-4 > [class*="col-"],
+  #panel-rendimiento .row.g-3 > [class*="col-"],
+  #tab-u-nuevo .row > [class*="col-"],
+  #tab-agregar .row > [class*="col-"],
+  .security-card .row > [class*="col-"] {
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .main-content .card,
+  .main-content .stat-card,
+  .main-content .stat-card-modern,
+  .main-content .section-card-custom,
+  .main-content .performance-card,
+  .main-content .performance-wide-card,
+  .main-content .server-summary-card,
+  .main-content .security-card,
+  .main-content .traffic-card,
+  .main-content .small-metric-card,
+  .main-content .dash-module-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .row.g-3.mb-4:has(.stat-card),
+  #panel-logs .row.g-3.mb-4,
+  .performance-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   ACCORDION – base (compatible con todos los dashboards)
+   ═══════════════════════════════════════════════════ */
+.accordion-responsive {
+  --bs-accordion-btn-focus-box-shadow: 0 0 0 0.2rem rgba(144, 202, 249, 0.35);
+  --bs-accordion-active-color:         #0D47A1;
+  --bs-accordion-active-bg:            #E3F2FD;
+  --bs-accordion-border-radius:        16px;
+  --bs-accordion-btn-padding-x:        1.5rem;
+  --bs-accordion-btn-padding-y:        1.25rem;
+}
+
+.accordion-responsive .accordion-item {
+  border: 1px solid rgba(13, 71, 161, 0.15);
+  border-left: 3px solid #0D47A1;
+  border-radius: var(--bs-accordion-border-radius, 16px) !important;
+  margin-bottom: 12px;
+  overflow: visible;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(13, 71, 161, 0.06);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.accordion-responsive .accordion-item:first-child,
+.accordion-responsive .accordion-item:last-child {
+  border-radius: var(--bs-accordion-border-radius, 16px) !important;
+}
+
+.accordion-responsive .accordion-item:hover {
+  box-shadow: 0 6px 20px rgba(13, 71, 161, 0.12);
+  border-color: rgba(13, 71, 161, 0.28);
+}
+
+.accordion-responsive .accordion-button {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+  color: #0D1F3C;
+  border-radius: var(--bs-accordion-border-radius, 16px) !important;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.accordion-responsive .accordion-button:hover {
+  background: #F0F5FC;
+  color: #0D47A1;
+}
+
+.accordion-responsive .accordion-button:not(.collapsed) {
+  color: #0D47A1 !important;
+  background: #E3F2FD !important;
+  box-shadow: none;
+  border-bottom: 1px solid rgba(13, 71, 161, 0.15);
+}
+
+.accordion-responsive .accordion-button::after {
+  width: 28px;
+  height: 28px;
+  background-image: none !important;
+  background-size: 20px;
+  content: '\f107';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  display: inline-block;
+  color: #0D47A1 !important;
+  filter: none !important;
+  transition: transform 0.3s ease, color 0.2s ease;
+}
+
+.accordion-responsive .accordion-button:not(.collapsed)::after {
+  content: '\f00d' !important;
+  color: #0D47A1 !important;
+  transform: rotate(0deg);
+}
+
+.accordion-responsive .accordion-body {
+  padding: 0.75rem 1.5rem 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #3A526B;
+  background: #ffffff;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ═══════════════════════════════════════════════════
+   ACCORDION – responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+.accordion-responsive .accordion-button {
+    font-size: 0.9rem !important;
+    padding: 0.9rem 1rem !important;
+  }
+
+  .accordion-responsive .accordion-button::after {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .accordion-responsive .accordion-body {
+    padding: 0.5rem 1rem 1rem !important;
+    font-size: 0.88rem !important;
+  }
+
+  .accordion-responsive .accordion-item {
+    margin-bottom: 8px !important;
+  }
+
+  .accordion-responsive .accordion-body .stat-card {
+    margin-bottom: 8px;
+  }
+
+  .accordion-responsive .accordion-body .row.g-3 {
+    --bs-gutter-y: 0.5rem;
+  }
+
+  
+  
+  
+  
+  
+}
+
+@media (max-width: 575.98px) {
+.accordion-responsive .accordion-button {
+    font-size: 0.82rem !important;
+    padding: 0.75rem 0.85rem !important;
+  }
+
+  .accordion-responsive .accordion-body {
+    padding: 0.4rem 0.85rem 0.85rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .accordion-responsive .accordion-button i {
+    font-size: 0.85rem !important;
+  }
+
+  
+  
+  
+  
+  
+}
+
+/* ═══════════════════════════════════════════════════
+   AGENDA QUOTES – Price Tag Modern responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .price-tag-modern {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .price-tag-modern .price-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
+  }
+
+  .price-tag-modern .price-value {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .price-tag-modern {
+    flex-direction: row;
+    padding: 8px 12px;
+  }
+
+  .price-tag-modern .price-value {
+    font-size: 0.92rem;
+  }
+
+  .price-tag-modern .price-label {
+    font-size: 0.65rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   AGENDA QUOTES – Modality Selector responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .modality-selector-modern {
+    gap: 6px;
+  }
+
+  .modality-option {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+
+  .modality-option i {
+    font-size: 0.85rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   AGENDA QUOTES – Cash Instructions responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .cash-instructions-panel {
+    padding: 14px;
+  }
+  .cash-instructions-panel .cip-header i {
+    font-size: 1.2rem;
+  }
+  .cash-instructions-panel .cip-title {
+    font-size: 0.88rem;
+  }
+  .cash-instructions-panel .cip-step {
+    font-size: 0.8rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   AGENDA QUOTES – Bank Account Cards responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .bank-account-card {
+    padding: 10px 12px;
+  }
+  .bank-account-card .bac-bank {
+    font-size: 0.8rem;
+  }
+  .bank-account-card .bac-number {
+    font-size: 0.82rem;
+  }
+  .bank-account-card .bac-holder {
+    font-size: 0.75rem;
+  }
+  .bank-account-card .bac-copy-btn {
+    padding: 5px 12px;
+    font-size: 0.72rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   AGENDA QUOTES – Receipt Upload responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .receipt-upload-area {
+    padding: 16px;
+  }
+  .receipt-upload-area i {
+    font-size: 1.5rem;
+  }
+  .receipt-upload-area .ru-text {
+    font-size: 0.8rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   AGENDA QUOTES – Payment Modals responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .pago-section-title {
+    font-size: 0.65rem;
+  }
+  .pago-summary-row {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PAYMENT – Method Grid responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .pay-methods {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+  }
+
+  .pay-method-card {
+    padding: 12px 6px;
+  }
+
+  .pay-method-card .pm-icon {
+    font-size: 1.3rem;
+  }
+
+  .pay-method-card .pm-label {
+    font-size: 0.7rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PAYMENT – Bank Accounts responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .bank-account-card {
+    padding: 10px 12px;
+  }
+
+  .bank-account-card .bac-bank {
+    font-size: 0.8rem;
+  }
+
+  .bank-account-card .bac-number {
+    font-size: 0.82rem;
+  }
+
+  .bank-account-card .bac-holder {
+    font-size: 0.75rem;
+  }
+
+  .bank-account-card .bac-copy-btn {
+    padding: 5px 12px;
+    font-size: 0.72rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PAYMENT – Cash Instructions responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .cash-instructions-panel {
+    padding: 14px;
+  }
+
+  .cash-instructions-panel .cip-header i {
+    font-size: 1.2rem;
+  }
+
+  .cash-instructions-panel .cip-title {
+    font-size: 0.88rem;
+  }
+
+  .cash-instructions-panel .cip-step {
+    font-size: 0.8rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PAYMENT – Modal Footer buttons responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .btn-pago-continuar,
+  .btn-pago-cancelar {
+    padding: 8px 18px;
+    font-size: 0.82rem;
+    width: 100%;
+  }
+
+  .modal-footer .btn-pago-continuar,
+  .modal-footer .btn-pago-cancelar {
+    flex: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   PAYMENT – Guardar Check responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  .guardar-check {
+    padding: 8px 12px;
+  }
+
+  .guardar-check label {
+    font-size: 0.78rem;
+  }
+}
+
+/* ===========================================================
+   GLOBAL RESPONSIVE RESCUE - all HTML views
+   Loaded last to keep pages visible on phones and tablets.
+   =========================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 0;
+}
+
+.main-content,
+.main-content > *,
+main,
+section,
+.card,
+.modal-content,
+.tab-content,
+.admin-panel,
+.panel-step,
+.form-section {
+  min-width: 0;
+}
+
+.main-content {
+  max-width: 100vw;
+}
+
+.row,
+.d-flex {
+  min-width: 0;
+}
+
+.row > *,
+.d-flex > * {
+  min-width: 0;
+}
+
+.table-responsive,
+.table-responsive-wrapper,
+.table-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table,
+.table-responsive-wrapper table,
+.table-container table {
+  margin-bottom: 0;
+}
+
+pre,
+code,
+.text-break,
+.card,
+.modal-body,
+.toast,
+.alert {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 992px) {
+  .toggle-btn,
+  .menu-toggle,
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  .main-content {
+    width: calc(100% - 250px);
+  }
+
+  .main-content.ms-280 {
+    width: calc(100% - 280px);
+  }
+}
+
+@media (max-width: 991.98px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .ms-250,
+  .ms-280 {
+    margin-left: 0 !important;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    transform: translateX(-105%) !important;
+  }
+
+  .sidebar.active,
+  .sidebar.show {
+    transform: translateX(0) !important;
+  }
+
+  .toggle-btn,
+  .menu-toggle {
+    position: fixed !important;
+    top: calc(0.75rem + env(safe-area-inset-top, 0px)) !important;
+    left: calc(0.75rem + env(safe-area-inset-left, 0px)) !important;
+    z-index: 1201 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+  }
+
+  .sidebar-overlay.active,
+  .sidebar-overlay.show {
+    display: block !important;
+    pointer-events: auto !important;
+  }
+
+  .main-header {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .main-header h1,
+  .main-header .h3 {
+    min-width: 0;
+    max-width: 100%;
+    line-height: 1.2;
+  }
+
+  .main-header .user-info {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .container,
+  .container-fluid {
+    max-width: 100%;
+  }
+
+  .card,
+  section.card,
+  .admin-panel,
+  .panel-step,
+  .form-section,
+  .tabs-container,
+  .toolbar,
+  .progress-nav {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .row > [class*="col-"] {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .toolbar,
+  .card-header,
+  .modal-footer,
+  .d-flex.justify-content-between {
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  input,
+  select,
+  textarea,
+  .form-control,
+  .form-select {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .main-content {
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
+  }
+
+  .main-header {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .main-header .user-info {
+    justify-content: flex-start !important;
+    text-align: left !important;
+  }
+
+  .row > [class*="col-"],
+  .col,
+  [class*="col-md-"],
+  [class*="col-lg-"],
+  [class*="col-xl-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  .btn,
+  .button,
+  button {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .modal-dialog {
+    width: auto !important;
+    max-width: calc(100vw - 1rem) !important;
+    margin: 0.5rem auto !important;
+  }
+
+  .modal-body {
+    max-height: calc(100dvh - 9rem);
+    overflow-y: auto;
+  }
+}
+
+/* Direct messages: keep contacts and chat usable on every viewport. */
+.main-content section.chat-wrapper,
+section.chat-wrapper,
+.chat-wrapper {
+  display: flex !important;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden !important;
+}
+
+.chat-sidebar,
+.chat-panel,
+.chat-active-view,
+.chat-messages-area,
+.chat-item-info {
+  min-width: 0;
+}
+
+.chat-sidebar {
+  width: clamp(280px, 32vw, 360px);
+}
+
+.chat-list,
+.chat-messages-area {
+  min-height: 0;
+}
+
+.chat-item {
+  width: 100%;
+}
+
+.chat-item-name,
+.chat-item-preview,
+.chat-active-name,
+.chat-active-status {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 991.98px) {
+  .chat-wrapper {
+    height: calc(100dvh - 8.75rem) !important;
+    min-height: 420px !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .chat-wrapper {
+    height: calc(100dvh - 11rem - env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 390px !important;
+    border-radius: 12px !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .chat-sidebar,
+  .chat-panel {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .chat-sidebar {
+    z-index: 4;
+  }
+
+  .chat-panel {
+    z-index: 5;
+  }
+
+  .chat-panel.slide-in {
+    transform: translateX(0) !important;
+  }
+
+  .chat-sidebar.slide-out {
+    transform: translateX(-100%) !important;
+  }
+
+  .chat-sidebar__header {
+    padding: 0.85rem !important;
+  }
+
+  .chat-item {
+    gap: 0.65rem !important;
+    padding: 0.7rem 0.85rem !important;
+  }
+
+  .chat-avatar-circle {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .chat-item-meta {
+    max-width: 4.5rem;
+  }
+
+  .chat-panel-header,
+  .chat-input-bar {
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+  }
+
+  .chat-messages-area {
+    padding: 0.85rem !important;
+  }
+
+  .chat-bubble {
+    max-width: 88% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-wrapper {
+    height: calc(100dvh - 10.25rem - env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 360px !important;
+  }
+
+  .chat-bubble {
+    max-width: 92% !important;
+  }
+
+  .chat-item-time,
+  .chat-new-label {
+    display: none;
+  }
+
+  .chat-input-bar {
+    gap: 0.45rem !important;
+  }
+
+  .chat-send-btn {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+/* Reports professional: final mobile layout overrides. */
+@media (max-width: 991.98px) {
+  body.aside-professional .reports-page {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  body.aside-professional .reports-page .main-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.8rem;
+    padding: 1rem 1.1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  body.aside-professional .reports-page .main-header h1 {
+    min-width: 0;
+    font-size: 1.18rem !important;
+    line-height: 1.2;
+  }
+
+  body.aside-professional .reports-page .reports-stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.8rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats > [class*="col-"] {
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-card,
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    min-height: 98px !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    column-gap: 0.65rem !important;
+    padding: 0.8rem 0.75rem 0.8rem 0.95rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-icon-wrap {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.85rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-label {
+    font-size: 0.64rem !important;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-number {
+    font-size: 1.45rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator {
+    padding: 1rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .row {
+    --bs-gutter-x: 0.8rem;
+    --bs-gutter-y: 0.8rem;
+  }
+
+  body.aside-professional .reports-page .reports-generator .row > [class*="col-"] {
+    margin-bottom: 0 !important;
+  }
+
+  body.aside-professional .reports-page .report-toolbar {
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin: 0 !important;
+    padding: 0.95rem 1rem !important;
+  }
+
+  body.aside-professional .reports-page .report-filter-control {
+    flex: 0 1 280px;
+    min-width: min(280px, 100%);
+  }
+
+  body.aside-professional .reports-page .deleted-table-heading {
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  body.aside-professional .reports-page {
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
+  }
+
+  body.aside-professional .reports-page .main-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 0.85rem !important;
+  }
+
+  body.aside-professional .reports-page .main-header .user-info {
+    display: none !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.6rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-card,
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    min-height: 76px !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    grid-template-columns: 30px minmax(0, 1fr) !important;
+    padding: 0.68rem 0.62rem 0.68rem 0.82rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-icon-wrap {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-number {
+    font-size: 1.16rem !important;
+  }
+
+  body.aside-professional .reports-page .panel-title-row,
+  body.aside-professional .reports-page .deleted-table-heading {
+    align-items: flex-start !important;
+    gap: 0.75rem;
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  body.aside-professional .reports-page .panel-title {
+    font-size: 0.98rem !important;
+  }
+
+  body.aside-professional .reports-page .panel-title-icon,
+  body.aside-professional .reports-page .deleted-table-heading > i {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .row,
+  body.aside-professional .reports-page .reports-generator .row.mt-2,
+  body.aside-professional .reports-page .reports-generator .row.mt-4 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    margin-top: 0.7rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .row > [class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .form-control,
+  body.aside-professional .reports-page .reports-generator .form-select,
+  body.aside-professional .reports-page .report-filter-select {
+    min-height: 42px !important;
+    font-size: 0.82rem !important;
+  }
+
+  body.aside-professional .reports-page .report-form-note {
+    margin-bottom: 0 !important;
+    font-size: 0.78rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-generator .text-end,
+  body.aside-professional .reports-page .btn-generate,
+  body.aside-professional .reports-page .report-filter-control,
+  body.aside-professional .reports-page .report-filter-select {
+    width: 100% !important;
+  }
+
+  body.aside-professional .reports-page .report-toolbar {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+    margin-top: 0 !important;
+    padding: 0.85rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel {
+    overflow: visible !important;
+    border: 1px solid rgba(13, 71, 161, 0.12) !important;
+    background: var(--reports-surface, #fff) !important;
+    box-shadow: var(--reports-shadow, 0 12px 30px rgba(19, 44, 74, .07)) !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel .table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel thead {
+    display: none !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody {
+    display: grid !important;
+    gap: 0.7rem !important;
+    width: 100% !important;
+    padding: 0.75rem !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody tr {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+    width: 100% !important;
+    padding: 0.85rem !important;
+    border: 1px solid rgba(13, 71, 161, 0.1) !important;
+    border-radius: 12px !important;
+    background: var(--reports-soft, #f5f8fc) !important;
+    box-shadow: none !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td {
+    display: grid !important;
+    grid-template-columns: minmax(6.5rem, 36%) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0.48rem 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08) !important;
+    color: inherit;
+    font-size: 0.78rem !important;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td::before {
+    color: var(--reports-muted, #667085) !important;
+    font-size: 0.62rem !important;
+    font-weight: 800 !important;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body.aside-professional .reports-page #tablaReportes td:nth-child(1)::before { content: "Desde"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(2)::before { content: "Hasta"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(3)::before { content: "Paciente"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(4)::before { content: "Tipo"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(5)::before { content: "Estado"; }
+  body.aside-professional .reports-page #tablaReportes td:nth-child(6)::before { content: "Acciones"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(1)::before { content: "Desde"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(2)::before { content: "Hasta"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(3)::before { content: "Paciente"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(4)::before { content: "Tipo"; }
+  body.aside-professional .reports-page #tablaReportesEliminados td:nth-child(5)::before { content: "Estado"; }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td[colspan] {
+    display: block !important;
+    text-align: center !important;
+    border-bottom: 0 !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td[colspan]::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  body.aside-professional .reports-page #tablaReportes td:last-child {
+    grid-template-columns: minmax(6.5rem, 36%) minmax(0, 1fr) !important;
+  }
+
+  body.aside-professional .reports-page #tablaReportes td:last-child .btn {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    margin: 0.08rem 0.18rem 0.08rem 0 !important;
+  }
+
+  body.aside-professional .reports-page .badge-estado {
+    width: fit-content;
+    min-width: 0 !important;
+    max-width: 100%;
+    padding: 0.32rem 0.62rem !important;
+    font-size: 0.68rem !important;
+  }
+
+  body.aside-professional .professional-toast-wrap {
+    left: 0.65rem !important;
+    right: 0.65rem !important;
+    bottom: 0.65rem !important;
+    padding: 0 !important;
+  }
+
+  body.aside-professional #toastReporte {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body.aside-professional .reports-page .reports-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.aside-professional .reports-page .reports-stats .stat-content {
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+  }
+
+  body.aside-professional .reports-page .reports-table-panel tbody td,
+  body.aside-professional .reports-page #tablaReportes td:last-child {
+    grid-template-columns: 1fr !important;
+    gap: 0.2rem !important;
+  }
+
+  body.aside-professional .reports-page #tablaReportes td:last-child .btn {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+}
+
+/* Final override: accordions must remain visible in light + dark responsive views. */
+@media (max-width: 991.98px) {
+  .main-content .accordion,
+  .main-content .accordion-responsive,
+  .main-content .faq-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .main-content .accordion .accordion-item,
+  .main-content .accordion-responsive .accordion-item,
+  .main-content .faq-accordion .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+  }
+
+  .main-content .accordion .accordion-button,
+  .main-content .accordion-responsive .accordion-button,
+  .main-content .faq-accordion .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  .main-content .accordion .accordion-body,
+  .main-content .accordion-responsive .accordion-body,
+  .main-content .faq-accordion .accordion-body {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+  }
+
+}
+
+/* Extra override: accordions inside .main-content with :has(.sidebar) pseudo-selector */
+@media (max-width: 991.98px) {
+  body:has(.sidebar) .main-content .accordion,
+  body:has(.sidebar) .main-content .accordion-responsive,
+  body:has(.sidebar) .main-content .faq-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  body:has(.sidebar) .main-content .accordion .accordion-item,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  body:has(.sidebar) .main-content .accordion .accordion-button,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+
+
+/* Final layer fix: keep the responsive sidebar above page content in both themes. */
+@media (max-width: 991.98px) {
+.main-content {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  
+
+  
+
+  
+
+  
+
+  
+}
+
+/* ═══════════════════════════════════════════════════
+    PATIENT & PROFESSIONAL ACCORDION FIXES
+    Ensure accordion is visible on mobile when inside main-content
+    ═══════════════════════════════════════════════════ */
+
+@media (max-width: 991px) {
+body:has(.sidebar) .main-content .accordion,
+  body:has(.sidebar) .main-content .accordion-responsive,
+  body:has(.sidebar) .main-content .faq-accordion {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+
+  body:has(.sidebar) .main-content .accordion-item,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+
+  body:has(.sidebar) .main-content .accordion-button,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  body:has(.sidebar) .main-content .accordion-body,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-body {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Dark mode overrides */
+  
+
+  
+
+  
+
+  
+
+  
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE: hide bottom nav
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 991.98px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  body.has-mobile-bottom-nav {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FINAL ACCORDION OVERRIDE - Ensure visibility
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 991px) {
+  body:has(.sidebar) .accordion,
+  body:has(.sidebar) .accordion-responsive,
+  body:has(.sidebar) .faq-accordion {
+    overflow: visible !important;
+  }
+
+  body:has(.sidebar) .main-content,
+  body:has(.sidebar) .main-content > * {
+    overflow: visible !important;
+  }
+
+}
+
+/* Final mobile fix: closed accordions must stay closed when entering from another page. */
+@media (max-width: 991.98px) {
+  body.professional-dashboard .main-content .accordion-collapse:not(.show),
+  body.professional-dashboard .main-content .accordion-responsive .accordion-collapse:not(.show),
+  body:has(.sidebar) .main-content .accordion-collapse:not(.show),
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-collapse:not(.show) {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  body.professional-dashboard .main-content .accordion-collapse:not(.show) .accordion-body,
+  body.professional-dashboard .main-content .accordion-responsive .accordion-collapse:not(.show) .accordion-body,
+  body:has(.sidebar) .main-content .accordion-collapse:not(.show) .accordion-body,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-collapse:not(.show) .accordion-body {
+    display: none !important;
+  }
+
+  body.professional-dashboard .main-content .accordion-collapse.show,
+  body.professional-dashboard .main-content .accordion-responsive .accordion-collapse.show,
+  body:has(.sidebar) .main-content .accordion-collapse.show,
+  body:has(.sidebar) .main-content .accordion-responsive .accordion-collapse.show {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}

@@ -1,0 +1,76 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# PsyAI Connect — Docker Compose (Development)
+# Usage:
+#   docker compose up            — start app + MySQL
+#   docker compose up -d         — start in background
+#   docker compose down          — stop containers
+#   docker compose logs -f app   — follow app logs
+#   docker compose exec app bash — shell into app container
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Django App ────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: psyai_app
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - DEBUG=1
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME:-psyai_connect}
+      - DB_USER=${DB_USER:-psyai}
+      - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
+    volumes:
+      # Hot-reload: mount the code so changes reflect immediately
+      - .:/app
+      # Persist uploaded documents between container restarts
+      - uploads_data:/app/static/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - psyai_net
+
+  # ── MySQL 8 ───────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: psyai_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-psyai_connect}
+      MYSQL_USER: ${DB_USER:-psyai}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-psyai_pass}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - psyai_net
+
+# ── Volumes ────────────────────────────────────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+# ── Network ────────────────────────────────────────────────────────────────
+networks:
+  psyai_net:
+    driver: bridge

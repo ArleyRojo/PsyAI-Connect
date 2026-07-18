@@ -39,13 +39,10 @@ def title(msg): print(f"\n{BOLD}{'═'*52}\n  {msg}\n{'═'*52}{RESET}")
 # ── Credenciales del proyecto ─────────────────────────────────────────────────
 # Edita estos valores si cambian en el futuro.
 CREDENTIALS: dict[str, str] = {
-    # Flask
+    # Django
     "SECRET_KEY":               "fee3886d1a38c243472705ddc4b2c08e239134ecf9015030a7e812204202233f",
-    "FLASK_ENV":                "development",
-    "PORT":                     "5000",
-    "FLASK_DEBUG":              "0",
-    "SHOW_WERKZEUG_LOGS":       "0",
-    "LOG_THIRD_PARTY_DEBUG":    "0",
+    "DJANGO_SETTINGS_MODULE":   "config.settings.dev",
+    "PORT":                     "8000",
 
     # Base de datos MySQL (XAMPP)
     "DB_HOST":                  "localhost",
@@ -54,11 +51,6 @@ CREDENTIALS: dict[str, str] = {
     "DB_PASSWORD":              "root",
     "DB_NAME":                  "psyai_connect",
 
-    # Pool de conexiones
-    "DB_POOL_NAME":             "psyai_pool",
-    "DB_POOL_SIZE":             "5",
-    "DB_POOL_RESET_SESSION":    "true",
-
     # Gemini AI
     # Para activar rotación de keys en el futuro:
     #   GEMINI_API_KEYS=key1,key2,key3,...
@@ -66,65 +58,39 @@ CREDENTIALS: dict[str, str] = {
     "GEMINI_API_KEYS":          "",   # vacío = usa solo GEMINI_API_KEY
     "GEMINI_MODEL":             "gemini-3.1-flash-lite",
 
-    # Resend (emails)
-    "BREVO_API_KEY":            "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",
-    "BREVO_FROM":               "manuelrojasq21@gmail.com",
-    "BREVO_FROM_NAME":          "PsyAI Connect",
+    # Email (SMTP)
+    "EMAIL_HOST":               "smtp.gmail.com",
+    "EMAIL_PORT":               "587",
+    "EMAIL_HOST_USER":          "manuelrojasq21@gmail.com",
+    "EMAIL_HOST_PASSWORD":      "",
+    "DEFAULT_FROM_EMAIL":       "manuelrojasq21@gmail.com",
 
     # Logs
     "LOG_LEVEL":                "ERROR",
-    "LOG_FORMAT":               "werkzeug",
-
-    # Rate Limiting
-    "RATELIMIT_STORAGE_URI":    "memory://",
 
     # CORS
-    "CORS_ORIGINS":             "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com",
-
-    # Wompi (pasarela de pagos)
-    "WOMPI_PUBLIC_KEY":         "pub_test_GuQ3gSJqp28qjqxxv7DCBc7YpbBIrcX3",
-    "WOMPI_INTEGRITY_SECRET":   "test_integrity_6r8k3s1x9p0m2n4b7j5h8q2w6v1c3a9f",
-    "WOMPI_PRIVATE_KEY":        "",
-    "WOMPI_EVENTS_SECRET":      "",
-
-    # Session
-    "SESSION_COOKIE_SECURE":    "False",
-    "SESSION_COOKIE_HTTPONLY":  "True",
-    "SESSION_COOKIE_SAMESITE":  "Lax",
+    "CORS_ORIGINS":             "http://localhost:8000,http://127.0.0.1:8000,https://psyai-connect.com",
 }
 
 # Secciones para organizar el .env generado
 ENV_SECTIONS: list[tuple[str, list[str]]] = [
-    ("Flask", [
-        "SECRET_KEY", "FLASK_ENV", "PORT",
-        "FLASK_DEBUG", "SHOW_WERKZEUG_LOGS", "LOG_THIRD_PARTY_DEBUG",
+    ("Django", [
+        "SECRET_KEY", "DJANGO_SETTINGS_MODULE", "PORT",
     ]),
     ("Base de datos MySQL (XAMPP)", [
         "DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME",
     ]),
-    ("Pool de conexiones", [
-        "DB_POOL_NAME", "DB_POOL_SIZE", "DB_POOL_RESET_SESSION",
-    ]),
     ("Gemini AI", [
         "GEMINI_API_KEY", "GEMINI_API_KEYS", "GEMINI_MODEL",
     ]),
-    ("Resend (emails)", [
-        "BREVO_API_KEY", "BREVO_FROM", "BREVO_FROM_NAME",
+    ("Email (SMTP)", [
+        "EMAIL_HOST", "EMAIL_PORT", "EMAIL_HOST_USER", "EMAIL_HOST_PASSWORD",
     ]),
     ("Logs", [
-        "LOG_LEVEL", "LOG_FORMAT",
-    ]),
-    ("Rate Limiting", [
-        "RATELIMIT_STORAGE_URI",
+        "LOG_LEVEL",
     ]),
     ("CORS Origins", [
         "CORS_ORIGINS",
-    ]),
-    ("Session Settings", [
-        "SESSION_COOKIE_SECURE", "SESSION_COOKIE_HTTPONLY", "SESSION_COOKIE_SAMESITE",
-    ]),
-    ("Wompi (pasarela de pagos)", [
-        "WOMPI_PUBLIC_KEY", "WOMPI_PRIVATE_KEY", "WOMPI_INTEGRITY_SECRET", "WOMPI_EVENTS_SECRET",
     ]),
 ]
 
@@ -179,10 +145,10 @@ def _read_packages() -> list[str]:
         return pkgs
     warn("requirements.txt no encontrado — usando lista mínima.")
     return [
-        "flask>=3.0.0", "flask-cors>=4.0.0", "flask-limiter>=3.0.0",
-        "mysql-connector-python>=8.0.0", "python-dotenv>=1.0.0",
-        "waitress>=2.1.0", "filetype>=1.2.0", "psutil>=5.9.0",
-        "requests>=2.31.0", "bcrypt>=4.0.0",
+        "django>=5.0", "django-cors-headers>=4.0.0", "django-ratelimit>=4.1.0",
+        "mysqlclient>=2.2.0", "python-dotenv>=1.0.0",
+        "waitress>=2.1.0", "psutil>=5.9.0",
+        "requests>=2.31.0", "bcrypt>=4.0.0", "djangorestframework>=3.15.0",
     ]
 
 
@@ -287,7 +253,7 @@ def configure_env():
     ok(f".env escrito → {ENV_FILE}")
 
     # Mostrar resumen (sin exponer valores secretos)
-    secret_keys = {"SECRET_KEY", "GEMINI_API_KEY", "GEMINI_API_KEYS", "BREVO_API_KEY", "DB_PASSWORD", "WOMPI_PUBLIC_KEY", "WOMPI_PRIVATE_KEY", "WOMPI_INTEGRITY_SECRET", "WOMPI_EVENTS_SECRET"}
+    secret_keys = {"SECRET_KEY", "GEMINI_API_KEY", "GEMINI_API_KEYS", "EMAIL_HOST_PASSWORD", "DB_PASSWORD"}
     print()
     for section_name, keys in ENV_SECTIONS:
         print(f"  {CYAN}{section_name}{RESET}")
@@ -304,19 +270,16 @@ def verify() -> bool:
     title("VERIFICACIÓN FINAL")
 
     required = {
-        "SECRET_KEY":     "Flask",
+        "SECRET_KEY":     "Django",
         "DB_HOST":        "Base de datos",
         "DB_NAME":        "Base de datos",
         "GEMINI_API_KEY": "Gemini AI",
         "GEMINI_MODEL":   "Gemini AI",
-        "BREVO_API_KEY": "Brevo",
-        "BREVO_FROM":    "Brevo",
-        "BREVO_FROM_NAME": "Brevo",
+        "EMAIL_HOST_USER": "Email SMTP",
+        "EMAIL_HOST_PASSWORD": "Email SMTP",
     }
 
     optional = {
-        "WOMPI_PUBLIC_KEY":       "Wompi (pasarela de pagos)",
-        "WOMPI_INTEGRITY_SECRET": "Wompi (pasarela de pagos)",
     }
 
     env = _read_existing_env()
@@ -336,17 +299,17 @@ def verify() -> bool:
         else:
             warn(f"{key}  ({section}) — se usará sandbox por defecto")
 
-    # Flask en venv
+    # Django en venv
     py_venv = _python_venv()
     if py_venv:
         result = subprocess.run(
-            py_venv + ["-c", "import flask; print(flask.__version__)"],
+            py_venv + ["-c", "import django; print(django.__version__)"],
             capture_output=True, text=True,
         )
         if result.returncode == 0:
-            ok(f"Flask en venv: v{result.stdout.strip()}")
+            ok(f"Django en venv: v{result.stdout.strip()}")
         else:
-            warn("Flask no detectado en venv — revisa la instalación")
+            warn("Django no detectado en venv — revisa la instalación")
             all_ok = False
     else:
         warn("Python del venv no encontrado")
@@ -365,19 +328,19 @@ def print_banner(success: bool):
             "  PsyAI Connect — Setup completado ✅  ",
             "                                       ",
             "  Iniciar servidor:                    ",
-            "    python run.py                      ",
+            "    python manage.py runserver         ",
             "                                       ",
             "  O con el venv activado:              ",
             "    venv\\Scripts\\activate  (Windows)   ",
             "    source venv/bin/activate (Linux)   ",
-            "    python run.py                      ",
+            "    python manage.py runserver         ",
         ]
     else:
         color = YELLOW
         lines = [
             "  Setup completado con advertencias ⚠️  ",
             "  Revisa los items marcados arriba.    ",
-            "  Luego corre:  python run.py          ",
+            "  Luego corre:  python manage.py runserver",
         ]
     width = max(len(l) for l in lines) + 2
     print(f"{color}╔{'═'*width}╗{RESET}")

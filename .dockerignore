@@ -1,0 +1,67 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# PsyAI Connect — .dockerignore
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment files (NEVER bake secrets into images)
+.env
+.env.local
+.env.prod
+.env.example
+
+# Tests (not needed in production image)
+.pytest_cache
+tests.py
+tests/
+
+# Docker files (don't include themselves)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Database files
+*.sqlite
+*.db
+*.sql
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Static uploads (mounted as volume, not baked in)
+static/uploads/
+
+# Logs
+*.log

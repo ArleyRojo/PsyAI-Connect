@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+<title>PsyAI Connect | Dashboard Profesional</title>
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+<script src="/js/core/shared/theme-inline.js?v=20260711-1"></script>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- CSS propios -->
+    <link rel="stylesheet" href="/css/base/base.css?v=20260711-1">
+    <link rel="stylesheet" href="/css/layout/layout.css?v=20260711-1">
+<link rel="stylesheet" href="/css/themes/theme.css?v=20260711-1">
+    <link rel="stylesheet" href="/css/pages/professional.css?v=20260711-1">
+    <script src="/js/core/shared/theme.js?v=20260711-1"></script>
+    <script src="/js/core/shared/localStorage-detector.js?v=20260711-1"></script>
+
+</head>
+<body class="professional-dashboard">
+
+<button class="toggle-btn" id="toggleSidebar" aria-label="Abrir menú">
+    <i class="fas fa-bars"></i>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+    <!-- Sidebar -->
+    <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
+        <!-- Logo -->
+        <div class="sidebar__logo">
+            <div class="sidebar__logo-img-wrap">
+                <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
+                <div class="sidebar__logo-glow"></div>
+            </div>
+            <h5 class="sidebar__brand">PsyAI Connect</h5>
+            <span class="sidebar__role-badge">Profesional</span>
+        </div>
+
+        <!-- Main Navigation -->
+        <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
+            <div class="sidebar__nav-section-label">Menú Principal</div>
+            
+            <a href="professional.dashboard.html" class="sidebar__nav-item active" data-tooltip="Dashboard">
+                <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
+                <span>Dashboard</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="./aside-professional/patients.html" class="sidebar__nav-item" data-tooltip="Pacientes">
+                <div class="sidebar__nav-icon"><i class="fas fa-users"></i></div>
+                <span>Pacientes y Diagnósticos</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="./aside-professional/historia_clinica_pro.html" class="sidebar__nav-item" data-tooltip="Historial Clínico">
+                <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
+                <span>Historial Clínico</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="./aside-professional/my.agenda.html" class="sidebar__nav-item" data-tooltip="Mi Agenda">
+                <div class="sidebar__nav-icon"><i class="fas fa-calendar-check"></i></div>
+                <span>Mi Agenda</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+
+            <div class="sidebar__nav-section-label">Comunicación</div>
+
+            <a href="./aside-professional/mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
+                <div class="sidebar__nav-icon"><i class="fas fa-comments"></i></div>
+                <span>Mensajes</span>
+                <div class="sidebar__nav-indicator"></div>
+                <span class="sidebar__badge" id="msgBadge" style="display:none">0</span>
+            </a>
+
+            <div class="sidebar__nav-section-label">Gestión</div>
+
+            <a href="./aside-professional/reports.html" class="sidebar__nav-item" data-tooltip="Reportes">
+                <div class="sidebar__nav-icon"><i class="fas fa-chart-line"></i></div>
+                <span>Reportes</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="./aside-professional/facturacion.html" class="sidebar__nav-item" data-tooltip="Facturación">
+                <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <span>Facturación</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+        </nav>
+
+        <!-- Footer -->
+        <div class="sidebar__footer">
+            <div class="sidebar__user-card">
+                <div class="sidebar__user-avatar" data-avatar="inicial">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="sidebar__user-info">
+                    <span class="sidebar__user-name" id="sidebarUserName">Dr(a).</span>
+                    <span class="sidebar__user-role">Profesional</span>
+                </div>
+                <a href="./aside-professional/my.profile2.html" class="sidebar__user-settings" title="Mi Perfil">
+                    <i class="fas fa-cog"></i>
+                </a>
+            </div>
+            <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+            </div>
+        </div>
+        <div class="sidebar__logout-section">
+            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content flex-grow-1 ms-250 p-4">
+        <!-- Header -->
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-0"><i class="fas fa-home me-2 text-primary"></i>Dashboard Profesional</h1>
+                <small class="text-muted">Resumen de tu actividad profesional</small>
+            </div>
+            <div class="user-info d-flex align-items-center gap-3">
+                <button class="btn btn-light btn-sm" onclick="cargarDashboard()" title="Actualizar">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <div class="position-relative">
+                    <i class="fas fa-bell text-secondary fs-5" id="bellIcon" style="cursor:pointer"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notifBadge" style="font-size:0.55rem;display:none">0</span>
+                </div>
+                <div data-avatar="inicial" style="width:40px;height:40px;"></div>
+                <span class="fw-semibold" id="nombreProfesional">Hola, Dr(a).</span>
+            </div>
+        </header>
+
+        <!-- Resumen General (Alertas + Accesos Rápidos + Estadísticas) — estático, fuera del acordeón -->
+        <div class="section-card">
+            <div class="section-card__header">
+                <i class="fas fa-chart-simple me-2"></i> Resumen General
+            </div>
+            <div class="section-card__body">
+
+                <!-- Alertas -->
+                <div id="alertasContainer" class="mb-4"></div>
+
+                <!-- Accesos Rápidos -->
+                <section class="mb-4">
+                    <div class="row g-2" id="quickActionsContainer">
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/patients.html" class="quick-action-card"
+                               style="--glow-color: #64B5F6; --glow-alpha: rgba(100,181,246,0.20)">
+                                <div class="qa-icon primary"><i class="fas fa-user-plus"></i></div>
+                                <div class="qa-title">Nuevo Paciente</div>
+                                <div class="qa-desc">Registrar paciente</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/my.agenda.html" class="quick-action-card"
+                               style="--glow-color: #81C784; --glow-alpha: rgba(129,199,132,0.20)">
+                                <div class="qa-icon success"><i class="fas fa-calendar-plus"></i></div>
+                                <div class="qa-title">Nueva Cita</div>
+                                <div class="qa-desc">Agendar sesión</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/patients.html" class="quick-action-card"
+                               style="--glow-color: #FFB74D; --glow-alpha: rgba(255,183,77,0.20)">
+                                <div class="qa-icon warning"><i class="fas fa-stethoscope"></i></div>
+                                <div class="qa-title">Diagnóstico</div>
+                                <div class="qa-desc">Registrar diagnóstico</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/reports.html" class="quick-action-card"
+                               style="--glow-color: #4DD0E1; --glow-alpha: rgba(77,208,225,0.20)">
+                                <div class="qa-icon info"><i class="fas fa-chart-bar"></i></div>
+                                <div class="qa-title">Reporte</div>
+                                <div class="qa-desc">Generar reporte</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md">
+                            <a href="./aside-professional/mensajes.html" class="quick-action-card"
+                               style="--glow-color: #CE93D8; --glow-alpha: rgba(206,147,216,0.20)">
+                                <div class="qa-icon purple"><i class="fas fa-comment-dots"></i></div>
+                                <div class="qa-title">Mensajes</div>
+                                <div class="qa-desc">Chat con pacientes</div>
+                            </a>
+                        </div>
+                        <div class="col-4 col-md d-md-none"></div>
+                    </div>
+                </section>
+
+                <!-- Estadísticas Rápidas -->
+                <section>
+                    <div class="row g-3" id="statsRow">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/patients.html')">
+                                <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                                <div><div class="stat-value" id="statPacientes">0</div><div class="stat-label">Pacientes Activos</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
+                                <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
+                                <div><div class="stat-value" id="statCitasHoy">0</div><div class="stat-label">Citas Hoy</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/my.agenda.html')">
+                                <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+                                <div><div class="stat-value" id="statPendientes">0</div><div class="stat-label">Citas Pendientes</div></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card clickable" onclick="irA('./aside-professional/reports.html')">
+                                <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+                                <div><div class="stat-value" id="statReportes">0</div><div class="stat-label">Reportes Totales</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <!-- --- Secciones del Dashboard --- -->
+        <div class="d-flex flex-column gap-4">
+
+            <!-- Próximas Citas -->
+            <div class="section-card">
+                <div class="section-card__header">
+                    <i class="fas fa-calendar-alt me-2"></i> Próximas Citas
+                </div>
+                <div class="section-card__body" id="proximasCitasContainer">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                        <div>Cargando...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bienestar de Pacientes -->
+            <div class="section-card">
+                <div class="section-card__header">
+                    <i class="fas fa-heart me-2"></i> Bienestar de Pacientes
+                </div>
+                <div class="section-card__body" id="bienestarContainer">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                        <div>Cargando...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reportes rápidos -->
+            <div class="section-card">
+                <div class="section-card__header">
+                    <i class="fas fa-chart-pie me-2"></i> Resumen de Reportes
+                </div>
+                <div class="section-card__body" id="reportesResumenContainer">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                        <div>Cargando...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividades Recientes -->
+            <div class="section-card">
+                <div class="section-card__header">
+                    <i class="fas fa-clock me-2"></i> Actividades Recientes
+                </div>
+                <div class="section-card__body" id="actividadContainer">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                        <div>Cargando...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- --- Modal Videollamada --- -->
+        <div class="modal-overlay" id="modalVideo">
+            <div class="modal-glass text-center">
+                <button class="btn-close-modal" onclick="cerrarModalVideo()"><i class="fas fa-times"></i></button>
+                <div class="modal-icon"><i class="fas fa-video"></i></div>
+                <h5 class="mb-1">Iniciar Videollamada</h5>
+                <p class="mb-3" id="modalPacienteNombre">¿Deseas iniciar una videollamada con <strong>Paciente</strong>?</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button class="btn-cancel" onclick="cerrarModalVideo()">Cancelar</button>
+                    <button class="btn-confirm" onclick="iniciarVideo()">
+                        <i class="fas fa-video me-1"></i> Iniciar ahora
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Bootstrap JS (sin defer para que esté disponible antes del script inline) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<link rel="stylesheet" href="/responsive/responsive-professional.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260626-accordion-closed">
+<link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+<script src="/js/core/shared/alerts.js?v=20260711-1"></script>
+<script src="/js/modules/professional/aside.js?v=20260711-1"></script>
+<script src="/js/modules/auth/logout.js?v=20260711-1"></script>
+<script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
+<script>
+// -- Helpers --
+function irA(url) { window.location.href = url; }
+
+// -- Modal Videollamada --
+function abrirModalVideo(paciente) {
+    const p = document.getElementById('modalPacienteNombre');
+    if (p) p.innerHTML = `¿Deseas iniciar una videollamada con <strong>${paciente}</strong>?`;
+    document.getElementById('modalVideo').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function cerrarModalVideo() {
+    document.getElementById('modalVideo').classList.remove('active');
+    document.body.style.overflow = '';
+}
+function iniciarVideo() {
+    cerrarModalVideo();
+    window.location.href = './aside-professional/mensajes.html';
+}
+// Cerrar modal con tecla Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarModalVideo();
+});
+// Cerrar modal al hacer clic fuera
+document.addEventListener('click', (e) => {
+    const overlay = document.getElementById('modalVideo');
+    if (e.target === overlay) cerrarModalVideo();
+});
+
+function getDiaSemana(fechaStr) {
+    const días = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const [d, m, y] = fechaStr.split('/');
+    const date = new Date(+y, +m - 1, +d);
+    const hoy = new Date();
+    hoy.setHours(0,0,0,0);
+    date.setHours(0,0,0,0);
+    const diff = Math.round((date - hoy) / 86400000);
+    if (diff === 0) return 'Hoy';
+    if (diff === 1) return 'Mañana';
+    return días[date.getDay()];
+}
+
+function esHoy(fechaStr) {
+    const [d, m, y] = fechaStr.split('/');
+    const hoy = new Date();
+    return +d === hoy.getDate() && +m === hoy.getMonth() + 1 && +y === hoy.getFullYear();
+}
+
+function getMonthAbr(fechaStr) {
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const [, m] = fechaStr.split('/');
+    return meses[+m - 1] || '';
+}
+
+function getDayNum(fechaStr) {
+    const [d] = fechaStr.split('/');
+    return d;
+}
+
+// -- Contador de notificaciones --
+let totalAlertas = 0;
+function actualizarBadge() {
+    const badge = document.getElementById('notifBadge');
+    if (totalAlertas > 0) {
+        badge.textContent = totalAlertas;
+        badge.style.display = 'inline';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// -- Render: Alertas --
+function renderAlertas(alertas) {
+    const container = document.getElementById('alertasContainer');
+    if (!alertas || alertas.length === 0) {
+        container.innerHTML = '';
+        totalAlertas = 0;
+        actualizarBadge();
+        return;
+    }
+    totalAlertas = alertas.length;
+    actualizarBadge();
+    container.innerHTML = alertas.map((a, i) => `
+        <div class="alert-banner d-flex align-items-center gap-3 mb-2 p-3" data-alert-idx="${i}">
+            <div class="alert-icon ${a.tipo}"><i class="fas ${a.icono || 'fa-bell'}"></i></div>
+            <div class="flex-grow-1 min-width-0">
+                <div class="fw-semibold small">${a.titulo}</div>
+                <div class="text-muted" style="font-size:0.82rem">${a.mensaje}</div>
+            </div>
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:0.72rem;white-space:nowrap;flex-shrink:0" onclick="irASeccion('${a.acción || ''}')">
+                <i class="fas fa-arrow-right me-1"></i> Ir
+            </button>
+            <button class="btn-close-alert" onclick="cerrarAlerta(this)" title="Descartar"><i class="fas fa-times"></i></button>
+        </div>
+    `).join('');
+}
+
+function cerrarAlerta(btn) {
+    const alertEl = btn.closest('.alert-banner');
+    alertEl.style.transition = 'all 0.3s ease';
+    alertEl.style.opacity = '0';
+    alertEl.style.transform = 'translateX(20px)';
+    setTimeout(() => { alertEl.remove(); totalAlertas = Math.max(0, totalAlertas - 1); actualizarBadge(); }, 300);
+}
+
+function irASeccion(acción) {
+    const mapa = {
+        ver_agenda: './aside-professional/my.agenda.html',
+        ver_reportes: './aside-professional/reports.html',
+        ver_pacientes: './aside-professional/patients.html'
+    };
+    if (mapa[acción]) window.location.href = mapa[acción];
+}
+
+// -- Render: Próximas Citas --
+function renderProximasCitas(citas) {
+    const container = document.getElementById('proximasCitasContainer');
+    if (!citas || citas.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                <div>No hay citas programadas para los próximos 7 días</div>
+                <a href="./aside-professional/my.agenda.html" class="btn btn-sm btn-outline-primary mt-2 rounded-pill">Agendar cita</a>
+            </div>`;
+        return;
+    }
+    const estadoBadge = {
+        'Pendiente':  'bg-warning text-dark',
+        'Confirmada': 'bg-success',
+        'Cancelada':  'bg-danger',
+        'Completada': 'bg-secondary'
+    };
+    container.innerHTML = citas.map(c => `
+        <div class="cita-card mb-2">
+            <div class="cita-date-box ${esHoy(c.fecha) ? 'today' : ''}">
+                <div class="day">${getDayNum(c.fecha)}</div>
+                <div class="month">${getMonthAbr(c.fecha)}</div>
+            </div>
+            <div class="cita-info">
+                <div class="paciente-name">${c.paciente}</div>
+                <div class="cita-meta">
+                    <i class="far fa-clock me-1"></i>${c.hora} — ${c.tipoCita || 'Consulta'}
+                    <span class="ms-2"><i class="far fa-calendar-alt me-1"></i>${getDiaSemana(c.fecha)}</span>
+                </div>
+            </div>
+            <span class="badge-estado ${estadoBadge[c.estado] || 'bg-secondary'}">${c.estado}</span>
+            <div class="cita-actions">
+                <button class="btn-icon" data-tooltip="Ver expediente" onclick="irA('./aside-professional/patients.html')"><i class="fas fa-folder-open"></i></button>
+                <button class="btn-icon" data-tooltip="Iniciar videollamada" onclick="abrirModalVideo('${c.paciente.replace(/'/g, "\\'")}')"><i class="fas fa-video"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// -- Animar SVG rings --
+function animarRings() {
+    document.querySelectorAll('.metric-ring-svg').forEach(svg => {
+        const fill = svg.querySelector('.ring-fill');
+        if (fill) {
+            const target = fill.getAttribute('data-target');
+            setTimeout(() => { fill.style.strokeDashoffset = target; }, 150);
+        }
+    });
+}
+
+// -- Render: Bienestar --
+function renderBienestar(evo) {
+    const container = document.getElementById('bienestarContainer');
+    if (!evo || (!evo.estado_emocional_promedio && !evo.nivel_energia_promedio)) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-heart fa-2x mb-2"></i>
+                <div>Aún no hay datos de evolución de pacientes</div>
+            </div>`;
+        return;
+    }
+
+    const emo = Math.min(evo.estado_emocional_promedio / 5 * 100, 100);
+    const energy = Math.min(evo.nivel_energia_promedio / 5 * 100, 100);
+    const sinEvo = evo.pacientes_sin_evolución || 0;
+
+    const C = 226.2;
+    const emoOff = C * (1 - evo.estado_emocional_promedio / 5);
+    const energyOff = C * (1 - evo.nivel_energia_promedio / 5);
+
+    container.innerHTML = `
+        <div class="row g-3 mb-3">
+            <div class="col-6">
+                <div class="metric-ring-wrap position-relative">
+                    <div class="ring-tooltip">Estado emocional promedio</div>
+                    <svg class="metric-ring-svg" viewBox="0 0 100 100" style="--ring-glow: rgba(100,181,246,0.25)">
+                        <circle class="ring-bg" cx="50" cy="50" r="36"/>
+                        <circle class="ring-fill" cx="50" cy="50" r="36"
+                                stroke="#64B5F6" data-target="${emoOff}" style="stroke-dashoffset: 226.2"/>
+                        <g class="ring-center-text">
+                            <text class="value" x="50" y="46" fill="#64B5F6">${evo.estado_emocional_promedio}</text>
+                            <text class="suffix" x="50" y="62">/5</text>
+                        </g>
+                    </svg>
+                    <span class="ring-label"><i class="fas fa-smile me-1"></i>Estado Emocional</span>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="metric-ring-wrap position-relative">
+                    <div class="ring-tooltip">Nivel de energía promedio</div>
+                    <svg class="metric-ring-svg" viewBox="0 0 100 100" style="--ring-glow: rgba(129,199,132,0.25)">
+                        <circle class="ring-bg" cx="50" cy="50" r="36"/>
+                        <circle class="ring-fill" cx="50" cy="50" r="36"
+                                stroke="#81C784" data-target="${energyOff}" style="stroke-dashoffset: 226.2"/>
+                        <g class="ring-center-text">
+                            <text class="value" x="50" y="46" fill="#81C784">${evo.nivel_energia_promedio}</text>
+                            <text class="suffix" x="50" y="62">/5</text>
+                        </g>
+                    </svg>
+                    <span class="ring-label"><i class="fas fa-bolt me-1"></i>Nivel de Energía</span>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-4">
+                <div class="text-center p-2 rounded-3 stats-mini-card">
+                    <div class="fw-bold fs-5 color-blue">${evo.pacientes_con_citas || 0}</div>
+                    <div class="text-muted" style="font-size:0.68rem;">Activos</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="text-center p-2 rounded-3 stats-mini-card">
+                    <div class="fw-bold fs-5 color-green">${evo.pacientes_con_evolución_reciente || 0}</div>
+                    <div class="text-muted" style="font-size:0.68rem;">C/ evolución</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="text-center p-2 rounded-3 stats-mini-card">
+                    <div class="fw-bold fs-5 ${sinEvo > 0 ? 'color-orange' : 'color-green'}">${sinEvo}</div>
+                    <div class="text-muted" style="font-size:0.68rem;">Sin evolución</div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-6">
+                <div class="bienestar-stat-label mb-1">
+                    <span class="label"><i class="fas fa-smile me-1"></i>Estado Emocional</span>
+                    <span class="value">${evo.estado_emocional_promedio}</span>
+                </div>
+                <div class="bienestar-bar">
+                    <div class="fill fill-emo" style="width:${emo}%"></div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="bienestar-stat-label mb-1">
+                    <span class="label"><i class="fas fa-bolt me-1"></i>Nivel de Energía</span>
+                    <span class="value">${evo.nivel_energia_promedio}</span>
+                </div>
+                <div class="bienestar-bar">
+                    <div class="fill fill-energy" style="width:${energy}%"></div>
+                </div>
+            </div>
+        </div>
+        ${sinEvo > 0 ? `<div class="text-center mt-3">
+            <a href="./aside-professional/patients.html" class="btn btn-sm btn-outline-warning rounded-pill">
+                <i class="fas fa-exclamation-triangle me-1"></i> Revisar pacientes sin evolución
+            </a>
+        </div>` : ''}
+    `;
+
+    setTimeout(animarRings, 200);
+}
+
+// -- Render: Reportes Resumen --
+function renderReportesResumen(reportes) {
+    const container = document.getElementById('reportesResumenContainer');
+    if (!reportes) {
+        container.innerHTML = `<div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin fa-2x mb-2"></i><div>Cargando...</div></div>`;
+        return;
+    }
+    const total = reportes.total || 0;
+    const completados = reportes.completados || 0;
+    const pendientes = reportes.pendientes || 0;
+    const pctCompletados = total > 0 ? Math.round(completados / total * 100) : 0;
+    const pctPendientes = total > 0 ? Math.round(pendientes / total * 100) : 0;
+
+    const C = 226.2;
+    const compOff = C * (1 - pctCompletados / 100);
+
+    container.innerHTML = `
+        <div class="row g-3 mb-3 align-items-center">
+            <div class="col-8">
+                <div class="row g-2">
+                    <div class="col-4">
+                        <div class="stat-card p-2" style="display:block;text-align:center;cursor:pointer;padding:0.8rem !important" onclick="irA('./aside-professional/reports.html')">
+                            <div class="fs-4 fw-800 color-blue">${total}</div>
+                            <div class="stat-label" style="font-size:0.65rem">Totales</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-card p-2" style="display:block;text-align:center;cursor:pointer;padding:0.8rem !important" onclick="irA('./aside-professional/reports.html')">
+                            <div class="fs-4 fw-800 color-green">${completados}</div>
+                            <div class="stat-label" style="font-size:0.65rem">Completados</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-card p-2" style="display:block;text-align:center;cursor:pointer;padding:0.8rem !important" onclick="irA('./aside-professional/reports.html')">
+                            <div class="fs-4 fw-800 ${pendientes > 0 ? 'color-orange' : 'color-green'}">${pendientes}</div>
+                            <div class="stat-label" style="font-size:0.65rem">Pendientes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="reportes-ring-wrap">
+                    <svg class="metric-ring-svg" viewBox="0 0 100 100" style="--ring-glow: rgba(129,199,132,0.25);width:80px;height:80px">
+                        <circle class="ring-bg" cx="50" cy="50" r="36"/>
+                        <circle class="ring-fill" cx="50" cy="50" r="36"
+                                stroke="url(#rGrad)" data-target="${compOff}" style="stroke-dashoffset: 226.2"/>
+                        <g class="ring-center-text">
+                            <text class="value" x="50" y="46" fill="#81C784">${pctCompletados}</text>
+                            <text class="suffix" x="50" y="62">%</text>
+                        </g>
+                    </svg>
+                    <span class="ring-label">Tasa de finalización</span>
+                    <span class="stat-desc">${completados} de ${total} reportes</span>
+                </div>
+            </div>
+        </div>
+        <svg width="0" height="0" style="position:absolute">
+            <defs>
+                <linearGradient id="rGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#66bb6a"/>
+                    <stop offset="100%" stop-color="#388e3c"/>
+                </linearGradient>
+            </defs>
+        </svg>
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="stat-label"><i class="fas fa-check-circle text-success me-1"></i>Completados</span>
+                            <span class="fw-bold" style="font-size:0.85rem;color:#81C784">${pctCompletados}%</span>
+                        </div>
+                        <div class="bienestar-bar">
+                            <div class="fill fill-energy" style="width:${pctCompletados}%"></div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="stat-label"><i class="fas fa-clock text-warning me-1"></i>Pendientes</span>
+                            <span class="fw-bold" style="font-size:0.85rem;color:#FFB74D">${pctPendientes}%</span>
+                        </div>
+                        <div class="bienestar-bar">
+                            <div class="fill fill-emo" style="width:${pctPendientes}%"></div>
+                        </div>
+                    </div>
+                </div>
+                ${pendientes > 0 ? `<div class="text-center mt-2">
+                    <a href="./aside-professional/reports.html" class="btn btn-sm btn-outline-warning rounded-pill">
+                        <i class="fas fa-file-alt me-1"></i> Completar reportes
+                    </a>
+                </div>` : ''}
+            </div>
+        </div>
+    `;
+
+    setTimeout(animarRings, 200);
+}
+
+// -- Render: Actividades --
+function renderActividades(data) {
+    const actividadesLocal = JSON.parse(localStorage.getItem('psyai_actividades_recientes') || '[]');
+    let todas = [];
+
+    if (data.actividades && data.actividades.length > 0) {
+        todas = data.actividades.map(a => ({
+            tipo: 'cita',
+            titulo: a.paciente,
+            detalle: `${a.tipoCita} — ${a.fecha} ${a.hora}`,
+            estado: a.estado,
+            timestamp: new Date(`${a.fecha} ${a.hora}`).getTime() || 0
+        }));
+    }
+
+    actividadesLocal.forEach(a => {
+        todas.push({
+            tipo: a.tipo,
+            titulo: a.acción,
+            detalle: a.detalle,
+            estado: '',
+            timestamp: a.timestamp
+        });
+    });
+
+    todas.sort((a, b) => b.timestamp - a.timestamp);
+    todas = todas.slice(0, 10);
+
+    const container = document.getElementById('actividadContainer');
+    if (todas.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                <div>No hay actividades recientes</div>
+            </div>`;
+        return;
+    }
+
+    const estadoBadge = {
+        'Pendiente':   'warning',
+        'Confirmada':  'success',
+        'Cancelada':   'danger',
+        'Completada':  'secondary'
+    };
+    const tipoIcono = {
+        'cita': 'fa-calendar-check text-primary',
+        'diagnóstico': 'fa-stethoscope text-success',
+        'reporte': 'fa-chart-line text-info'
+    };
+
+    container.innerHTML = todas.map(a => `
+        <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+            <div class="actividad-icon">
+                <i class="fas ${tipoIcono[a.tipo] || 'fa-clipboard text-secondary'}"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="fw-semibold">${a.titulo}</div>
+                <div class="text-muted small">${a.detalle}</div>
+            </div>
+            ${a.estado ? `<span class="badge bg-${estadoBadge[a.estado] || 'secondary'}">${a.estado}</span>` : ''}
+        </div>
+    `).join('');
+}
+
+// -- Carga principal del dashboard --
+async function cargarDashboard() {
+    try {
+        const res = await fetch('/api/profesional/dashboard', { credentials: 'include' });
+        const data = await res.json();
+
+        if (!data.success) {
+            console.error('Error al cargar dashboard:', data.message);
+        }
+
+        // Estadísticas
+        document.getElementById('statPacientes').textContent = data.pacientes_activos ?? 0;
+        document.getElementById('statCitasHoy').textContent = data.citas_hoy ?? 0;
+        document.getElementById('statPendientes').textContent = data.citas_pendientes ?? 0;
+        document.getElementById('statReportes').textContent = data.reportes?.total ?? 0;
+
+        // Renderizar secciones
+        renderAlertas(data.alertas);
+        renderProximasCitas(data.proximas_citas);
+        renderBienestar(data.evolución);
+        renderReportesResumen(data.reportes);
+        renderActividades(data);
+
+    } catch (err) {
+        console.error('Error de red:', err);
+        // Fallback: mostrar actividades locales
+        const actividadesLocal = JSON.parse(localStorage.getItem('psyai_actividades_recientes') || '[]');
+        const tipoIcono = { 'diagnóstico': 'fa-stethoscope text-success', 'reporte': 'fa-chart-line text-info' };
+        const container = document.getElementById('actividadContainer');
+
+        if (actividadesLocal.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                    <div>No hay actividades recientes</div>
+                </div>`;
+            return;
+        }
+        container.innerHTML = actividadesLocal.slice(0, 10).map(a => `
+            <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+                <div class="actividad-icon">
+                    <i class="fas ${tipoIcono[a.tipo] || 'fa-clipboard text-secondary'}"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">${a.acción}</div>
+                    <div class="text-muted small">${a.detalle}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+// Cargar al entrar
+cargarDashboard();
+
+// Escuchar cambios desde otras pestañas
+window.addEventListener('storage', (e) => {
+    if (e.key === 'psyai_dashboard_update' && e.newValue) {
+        cargarDashboard();
+    }
+});
+
+// Escuchar cambios en la misma pestaña
+window.addEventListener('localStorageChange', (e) => {
+    if (e.detail.key === 'psyai_dashboard_update') {
+        cargarDashboard();
+    }
+});
+
+
+</script>
+
+</body>
+</html>

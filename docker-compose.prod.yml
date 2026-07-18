@@ -1,0 +1,56 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# PsyAI Connect — Docker Compose (Production Override)
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# This overrides the 'app' service to:
+#   - Build from the 'prod' target
+#   - Use waitress instead of runserver
+#   - Not mount code as a volume (baked into image)
+#   - Require SECRET_KEY from environment
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Django App (Production) ──────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or environment}
+    container_name: psyai_app_prod
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.prod
+      - DEBUG=0
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME:-psyai_connect}
+      - DB_USER=${DB_USER:-psyai}
+      - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
+    # No volume mount — code is baked into the image
+    # Only mount uploads for persistence
+    volumes:
+      - uploads_data:/app/static/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - psyai_net
+    # Override CMD is handled by the Dockerfile's CMD (waitress)
+    # No need to duplicate here
+
+  # ── MySQL 8 ───────────────────────────────────────────────────────────────
+  db:
+    # Production uses the same MySQL service, but you should override
+    # MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD via environment or .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-psyai_connect}
+      MYSQL_USER: ${DB_USER:-psyai}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+    # In production, consider removing the port mapping (internal only)
+    ports: []
