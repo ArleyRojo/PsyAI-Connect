@@ -1643,10 +1643,10 @@ html.dark-mode .online  { color: #4ade80 !important; }
 html.dark-mode .offline { color: var(--dm-muted) !important; }
 
 html.dark-mode .badge-rol {
-    font-size: 0.75rem !important;
+    font-size: 0.72rem !important;
     font-weight: 600 !important;
     padding: 3px 10px !important;
-    border-radius: 20px !important;
+    border-radius: 10px !important;
 }
 
 html.dark-mode .badge-emotion {
@@ -2127,14 +2127,56 @@ html.dark-mode .badge-origin {
 
 html.dark-mode .badge-usuario,
 html.dark-mode .badge-rol { 
-    background: var(--dm-elevated) !important;
-    color: var(--dm-text2) !important;
+    border-color: var(--dm-border) !important;
 }
 
-html.dark-mode .badge-rol-admin,
-html.dark-mode .badge-rol-paciente,
-html.dark-mode .badge-rol-profesional,
-html.dark-mode .badge-rol-usuario      { background: rgba(13,71,161,0.2) !important; color: var(--dm-accent) !important; }
+html.dark-mode .badge-rol-paciente {
+  background: linear-gradient(135deg, rgba(0,105,92,0.18) 0%, rgba(0,150,136,0.12) 100%) !important;
+  color: #80cbc4 !important;
+  border-color: rgba(0,150,136,0.3) !important;
+}
+html.dark-mode .badge-rol-profesional {
+  background: linear-gradient(135deg, rgba(69,39,160,0.18) 0%, rgba(126,87,194,0.12) 100%) !important;
+  color: #ce93d8 !important;
+  border-color: rgba(149,117,205,0.3) !important;
+}
+html.dark-mode .badge-rol-admin {
+  background: linear-gradient(135deg, rgba(183,28,28,0.18) 0%, rgba(229,57,53,0.12) 100%) !important;
+  color: #EF9A9A !important;
+  border-color: rgba(229,57,53,0.3) !important;
+}
+
+html.dark-mode .badge-estado-activo {
+  background: linear-gradient(135deg, rgba(27,94,32,0.18) 0%, rgba(56,142,60,0.12) 100%) !important;
+  color: #81C784 !important;
+  border-color: rgba(76,175,80,0.3) !important;
+}
+html.dark-mode .badge-estado-suspendido {
+  background: linear-gradient(135deg, rgba(183,28,28,0.18) 0%, rgba(229,57,53,0.12) 100%) !important;
+  color: #EF9A9A !important;
+  border-color: rgba(229,57,53,0.3) !important;
+}
+html.dark-mode .badge-estado-pendiente {
+  background: linear-gradient(135deg, rgba(230,81,0,0.18) 0%, rgba(245,124,0,0.12) 100%) !important;
+  color: #FFB74D !important;
+  border-color: rgba(255,152,0,0.3) !important;
+}
+
+html.dark-mode .badge-riesgo-alto {
+  background: linear-gradient(135deg, rgba(183,28,28,0.18) 0%, rgba(229,57,53,0.12) 100%) !important;
+  color: #EF9A9A !important;
+  border-color: rgba(229,57,53,0.3) !important;
+}
+html.dark-mode .badge-riesgo-medio {
+  background: linear-gradient(135deg, rgba(230,81,0,0.18) 0%, rgba(245,124,0,0.12) 100%) !important;
+  color: #FFB74D !important;
+  border-color: rgba(255,152,0,0.3) !important;
+}
+html.dark-mode .badge-riesgo-bajo {
+  background: linear-gradient(135deg, rgba(27,94,32,0.18) 0%, rgba(56,142,60,0.12) 100%) !important;
+  color: #81C784 !important;
+  border-color: rgba(76,175,80,0.3) !important;
+}
 
 html.dark-mode .log-badge {
     display: inline-block !important;
@@ -2372,6 +2414,35 @@ html.dark-mode .dash-module-footer {
 
 html.dark-mode .dashboard-section {
     background: var(--dm-deep) !important;
+}
+
+html.dark-mode .server-status-bar,
+html.dark-mode .online-users-section,
+html.dark-mode .chart-panel {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode .chart-panel-title {
+    color: var(--dm-text1) !important;
+    border-bottom-color: var(--dm-border) !important;
+}
+html.dark-mode .header-notification {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text2) !important;
+}
+html.dark-mode .header-notification:hover {
+    background: rgba(96, 165, 250, .1) !important;
+    color: #60a5fa !important;
+}
+html.dark-mode .notification-dot {
+    border-color: var(--dm-elevated) !important;
+}
+html.dark-mode .server-meta {
+    color: var(--dm-muted) !important;
+}
+html.dark-mode .online-badge-wrapper .small {
+    color: var(--dm-text1) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -3224,6 +3295,14 @@ html.dark-mode .toolbar-left,
 html.dark-mode .toolbar-right {
     background: transparent !important;
 }
+html.dark-mode .toolbar .filter-label {
+    color: var(--dm-accent) !important;
+}
+html.dark-mode #activityFilter {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+}
 
 /* ── 5. Tabs ── */
 html.dark-mode .admin-panel-tab {
@@ -3868,9 +3947,10 @@ html.dark-mode .search-bar,
 html.dark-mode .table-container,
 html.dark-mode .list-group-item,
 html.dark-mode .dropdown-menu {
-    background-color: var(--dm-elevated) !important;
+    background: var(--dm-elevated) !important;
     border-color: var(--dm-border) !important;
     color: var(--dm-text1) !important;
+    box-shadow: none !important;
 }
 
 /* Formularios e Inputs (Global) */
@@ -3880,14 +3960,14 @@ html.dark-mode .input-group-text,
 html.dark-mode input,
 html.dark-mode select,
 html.dark-mode textarea {
-    background-color: var(--dm-elevated) !important;
+    background: var(--dm-elevated) !important;
     border-color: var(--dm-border) !important;
     color: var(--dm-text1) !important;
 }
 
 html.dark-mode .form-control:focus,
 html.dark-mode .form-select:focus {
-    background-color: var(--dm-card) !important;
+    background: var(--dm-card) !important;
     border-color: var(--dm-accent) !important;
     color: var(--dm-text1) !important;
     box-shadow: 0 0 0 3px rgba(144,202,249,0.14) !important;
@@ -4649,7 +4729,7 @@ html.dark-mode .logs-tab.active {
 /* Toolbars inside logs */
 html.dark-mode .toolbar .form-control,
 html.dark-mode .toolbar .form-select {
-    background-color: var(--dm-elevated) !important;
+    background: var(--dm-elevated) !important;
     border: 1px solid var(--dm-border) !important;
     color: var(--dm-text1) !important;
 }
@@ -4662,17 +4742,24 @@ html.dark-mode .alert-pill.security{ background: rgba(156,39,176,.15) !important
 
 
 /* -- Chatbot Config Dark Mode -- */
+html.dark-mode .chat-history-layout { background: var(--dm-card) !important; border-color: var(--dm-border) !important; }
 html.dark-mode .conversation-panel { background: var(--dm-card) !important; }
-html.dark-mode .patients-list { border-right-color: var(--dm-border) !important; }
+html.dark-mode .patients-list { border-right-color: var(--dm-border) !important; background: rgba(14,31,53,.5) !important; }
 html.dark-mode .patient-card { border-color: transparent !important; }
-html.dark-mode .patient-card:hover { background: var(--dm-elevated) !important; }
-html.dark-mode .patient-card.active { background: rgba(21, 101, 192, 0.2) !important; }
-html.dark-mode .patient-card .fw-bold { color: var(--dm-heading) !important; }
-html.dark-mode .patient-card .text-muted, html.dark-mode .chat-preview { color: var(--dm-text2) !important; }
-html.dark-mode .msg-bubble.bot-bubble { background: var(--dm-elevated) !important; color: var(--dm-text1) !important; }
+html.dark-mode .patient-card:hover { background: var(--dm-elevated) !important; border-color: var(--dm-border) !important; }
+html.dark-mode .patient-card.active { background: rgba(21, 101, 192, 0.2) !important; border-color: rgba(21,101,192,.3) !important; }
+html.dark-mode .patient-card .patient-name { color: var(--dm-heading) !important; }
+html.dark-mode .patient-card .patient-preview, html.dark-mode .chat-preview { color: var(--dm-text2) !important; }
+html.dark-mode .patient-avatar { background: linear-gradient(135deg, var(--brand-600), var(--brand-400)) !important; box-shadow: 0 2px 8px rgba(0,0,0,.3) !important; }
+html.dark-mode .patient-count { background: rgba(144,202,249,.12) !important; color: var(--dm-accent) !important; }
+html.dark-mode .conversation-header { background: var(--dm-elevated) !important; border-bottom-color: var(--dm-border) !important; }
+html.dark-mode .conversation-footer { background: var(--dm-elevated) !important; border-top-color: var(--dm-border) !important; }
+html.dark-mode .msg-bubble.bot-bubble { background: var(--dm-elevated) !important; color: var(--dm-text1) !important; border-color: var(--dm-border) !important; }
 html.dark-mode .msg-bubble.user-bubble { background: var(--dm-accent) !important; color: var(--dm-deep) !important; }
 html.dark-mode .msg-bubble.user-bubble .msg-timestamp { color: rgba(16,32,57,0.7) !important; }
 html.dark-mode .msg-bubble.bot-bubble .msg-timestamp { color: var(--dm-text2) !important; }
+html.dark-mode .msg-avatar { box-shadow: 0 2px 8px rgba(0,0,0,.3) !important; }
+html.dark-mode .empty-state i { color: rgba(144,202,249,.2) !important; }
 html.dark-mode .empty-state h6 { color: var(--dm-heading) !important; }
 html.dark-mode .empty-state p { color: var(--dm-text2) !important; }
 html.dark-mode .risk-word-chip { background: var(--dm-elevated) !important; color: var(--dm-text1) !important; border-color: var(--dm-border) !important; }
@@ -4680,6 +4767,46 @@ html.dark-mode .risk-word-chip .remove-chip-btn { color: var(--dm-text2) !import
 html.dark-mode .risk-word-chip.alto { background: rgba(244,67,54,.15) !important; border-color: rgba(244,67,54,.3) !important; color: #ef5350 !important; }
 html.dark-mode .risk-word-chip.medio { background: rgba(255,152,0,.15) !important; border-color: rgba(255,152,0,.3) !important; color: #ffca28 !important; }
 html.dark-mode .risk-word-chip.bajo { background: rgba(76,175,80,.15) !important; border-color: rgba(76,175,80,.3) !important; color: #81c784 !important; }
+html.dark-mode .slider-param-custom { background: rgba(14,31,53,.5) !important; border-color: var(--dm-border) !important; }
+html.dark-mode .slider-param-custom:hover { background: rgba(19,40,67,.6) !important; }
+html.dark-mode .slider-param-custom .slider-label { color: var(--dm-text1) !important; }
+html.dark-mode .slider-param-custom .form-range::-webkit-slider-runnable-track { background: linear-gradient(90deg, var(--dm-border), var(--dm-accent)) !important; }
+html.dark-mode #formConfigChatbot .form-control,
+html.dark-mode #formConfigChatbot .form-select { background: var(--dm-elevated) !important; border-color: var(--dm-border2) !important; color: var(--dm-text1) !important; }
+html.dark-mode #formConfigChatbot .form-control:focus,
+html.dark-mode #formConfigChatbot .form-select:focus { border-color: var(--dm-accent) !important; box-shadow: 0 0 0 3px var(--dm-glow) !important; }
+html.dark-mode #formConfigChatbot .form-label { color: var(--dm-heading) !important; }
+html.dark-mode .save-bar { border-top-color: var(--dm-border) !important; }
+html.dark-mode .save-btn { box-shadow: 0 4px 14px rgba(0,0,0,.3) !important; }
+html.dark-mode .section-header-custom .filter-label { color: var(--dm-accent) !important; }
+html.dark-mode .section-header-custom .form-control,
+html.dark-mode .section-header-custom .form-select { background: var(--dm-elevated) !important; border-color: var(--dm-border2) !important; color: var(--dm-text1) !important; }
+
+/* Risk filter buttons */
+html.dark-mode .risk-filter-btn {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text2) !important;
+}
+html.dark-mode .risk-filter-btn:hover {
+    color: var(--btn-color, var(--dm-accent)) !important;
+    border-color: var(--btn-color, var(--dm-accent)) !important;
+}
+html.dark-mode .risk-filter-btn.active {
+    color: #fff !important;
+}
+html.dark-mode .risk-input-group {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border2) !important;
+}
+html.dark-mode #riskTermsContainer {
+    background: var(--dm-mid) !important;
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode #riskTermsContainer:hover {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border2) !important;
+}
 
 
 /* -- Dark Mode Fixes for Stat Icons (Colors & Contrast) -- */

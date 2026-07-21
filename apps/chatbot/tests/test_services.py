@@ -150,3 +150,73 @@ class TestNormalizeText:
 
     def test_none_input(self, chatbot_service):
         assert chatbot_service._normalize_text(None) == ""
+
+
+# ── ChatbotConfigService.save_risk_terms ──────────────────────────────────────
+
+
+from apps.chatbot.services import ChatbotConfigService
+
+
+@pytest.fixture
+def mock_config_repo():
+    return MagicMock()
+
+
+@pytest.fixture
+def config_service(mock_config_repo):
+    svc = ChatbotConfigService()
+    svc.repo = mock_config_repo
+    return svc
+
+
+class TestSaveRiskTerms:
+    def test_saves_risk_terms(self, config_service, mock_config_repo):
+        risk_terms = '[{"palabra":"suicidio","nivel":"Alto"}]'
+        mock_config_repo.get_config.return_value = {"risk_terms": risk_terms}
+
+        payload, status = config_service.save_risk_terms(risk_terms, admin_id=1)
+
+        assert status == 200
+        assert payload["success"] is True
+        mock_config_repo.save_risk_terms_only.assert_called_once_with(risk_terms, 1)
+
+    def test_empty_risk_terms(self, config_service, mock_config_repo):
+        mock_config_repo.get_config.return_value = {"risk_terms": "[]"}
+
+        payload, status = config_service.save_risk_terms("[]", admin_id=1)
+
+        assert status == 200
+        assert payload["success"] is True
+        mock_config_repo.save_risk_terms_only.assert_called_once_with("[]", 1)
+
+
+class TestClearRiskTerms:
+    def test_clears_risk_terms(self, config_service, mock_config_repo):
+        payload, status = config_service.clear_risk_terms(admin_id=1)
+
+        assert status == 200
+        assert payload["success"] is True
+        mock_config_repo.clear_risk_terms.assert_called_once_with(1)
+
+
+class TestGetConfig:
+    def test_returns_default_when_empty(self, config_service, mock_config_repo):
+        mock_config_repo.get_config.return_value = None
+
+        payload, status = config_service.get_config()
+
+        assert status == 200
+        assert payload["success"] is True
+        assert payload["config"]["risk_terms"] == "[]"
+
+    def test_returns_existing_config(self, config_service, mock_config_repo):
+        mock_config_repo.get_config.return_value = {
+            "system_prompt": "test",
+            "risk_terms": '[{"palabra":"test","nivel":"Bajo"}]',
+        }
+
+        payload, status = config_service.get_config()
+
+        assert status == 200
+        assert payload["config"]["system_prompt"] == "test"

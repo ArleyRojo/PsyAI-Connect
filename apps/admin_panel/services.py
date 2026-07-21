@@ -4,6 +4,7 @@ import logging
 
 import psutil
 from collections import Counter, deque
+from django.core.cache import cache
 
 from apps.admin_panel.repositories import AdminRepository
 
@@ -11,8 +12,7 @@ logger = logging.getLogger(__name__)
 
 psutil.cpu_percent(interval=None)
 
-_stats_cache = None
-_stats_cache_time = 0
+STATS_CACHE_KEY = "admin_panel:stats"
 STATS_CACHE_TTL = 10
 
 
@@ -31,16 +31,15 @@ class AdminService:
         return {"success": True, "message": "Columnas creadas correctamente"}, 200
 
     def get_stats(self, force=False):
-        global _stats_cache, _stats_cache_time
-        now = time.time()
-        if not force and _stats_cache is not None and now - _stats_cache_time < STATS_CACHE_TTL:
-            return _stats_cache
+        if not force:
+            cached = cache.get(STATS_CACHE_KEY)
+            if cached is not None:
+                return cached
         db_stats = self.repo.get_stats()
         live_stats = telemetry_service.get_live_stats()
         merged = {**live_stats, **db_stats}
         result = ({"success": True, "stats": merged}, 200)
-        _stats_cache = result
-        _stats_cache_time = now
+        cache.set(STATS_CACHE_KEY, result, STATS_CACHE_TTL)
         return result
 
     def list_users(self, page=1, limit=20):

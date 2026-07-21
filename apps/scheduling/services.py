@@ -1,6 +1,8 @@
 import logging
 from datetime import date, datetime, timedelta
 
+from django.utils import timezone as tz
+
 from apps.scheduling.repositories import AppointmentRepository
 
 logger = logging.getLogger(__name__)
@@ -21,6 +23,15 @@ class AppointmentService:
 
         if not professional_id or not fecha or not hora:
             return {"success": False, "message": "Datos incompletos"}, 400
+
+        try:
+            fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
+            hora_obj = datetime.strptime(hora, "%H:%M").time() if isinstance(hora, str) else hora
+            fecha_hora_cita = tz.make_aware(datetime.combine(fecha_obj, hora_obj))
+            if fecha_hora_cita < tz.now():
+                return {"success": False, "message": "No se pueden agendar citas en el pasado"}, 400
+        except (ValueError, TypeError):
+            pass
 
         if created_by_professional:
             target_patient_id = data.get("idPaciente")
@@ -228,6 +239,13 @@ class DisponibilidadService:
 
         if not all([fecha, hora_inicio, hora_fin]):
             return {"success": False, "message": "Datos incompletos (fecha, horaInicio, horaFin)"}, 400
+
+        try:
+            fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
+            if fecha_obj < tz.localdate():
+                return {"success": False, "message": "No se puede crear disponibilidad en el pasado"}, 400
+        except (ValueError, TypeError):
+            pass
 
         try:
             disp = self.repo.create_disponibilidad(

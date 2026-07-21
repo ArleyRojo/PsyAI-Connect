@@ -239,12 +239,21 @@ class AuthService:
         genero = data.get("genero", "")
         edad = validated.get("edad")
 
+        bloqueado, retry_after = self.security_repo.check_rate_limit(f"register:{email}")
+        if bloqueado:
+            return {
+                "success": False,
+                "message": f"Límite de intentos alcanzado. Intenta en {retry_after // 60} minutos.",
+            }, 429
+
         if self.repo.user_exists_by_email(email):
+            self.security_repo.register_rate_limit_hit(f"register:{email}")
             return {"success": False, "message": "El correo ya está registrado"}, 409
 
         self.repo.create_user(
             nombre, email, SecurityHelper.hash_password(password), rol, genero, edad
         )
+        self.security_repo.reset_rate_limit(f"register:{email}")
         return {"success": True, "message": "Registro exitoso"}, 201
 
     def login_user(self, data, ip_address):
@@ -275,6 +284,13 @@ class AuthService:
         if usuario["rol"] != rol:
             return (
                 {"success": False, "message": f"Este usuario no tiene rol de {rol}"},
+                403,
+                None,
+            )
+
+        if not usuario.get("activo", True):
+            return (
+                {"success": False, "message": "Tu cuenta ha sido suspendida. Contacta al administrador."},
                 403,
                 None,
             )
@@ -330,6 +346,15 @@ class AuthService:
             return {"success": False, "message": e.message}, 400
 
         email = validated["email"]
+
+        bloqueado, retry_after = self.security_repo.check_rate_limit(f"recovery:{email}")
+        if bloqueado:
+            return {
+                "success": False,
+                "message": f"Límite de intentos alcanzado. Intenta en {retry_after // 60} minutos.",
+            }, 429
+
+        self.security_repo.register_rate_limit_hit(f"recovery:{email}")
 
         existe = self.repo.active_user_exists_by_email(email)
         recovery_link = None

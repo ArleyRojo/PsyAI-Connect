@@ -1,6 +1,9 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # PsyAI Connect — Docker Compose (Production Override)
-# Usage:
+# Usage (from project root):
+#   docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
+#
+# Usage (from docker/ folder):
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
 # This overrides the 'app' service to:
@@ -21,7 +24,7 @@ services:
         SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or environment}
     container_name: psyai_app_prod
     env_file:
-      - .env
+      - ../.env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.prod
       - DEBUG=0
@@ -40,13 +43,9 @@ services:
     restart: unless-stopped
     networks:
       - psyai_net
-    # Override CMD is handled by the Dockerfile's CMD (waitress)
-    # No need to duplicate here
 
   # ── MySQL 8 ───────────────────────────────────────────────────────────────
   db:
-    # Production uses the same MySQL service, but you should override
-    # MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD via environment or .env
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME:-psyai_connect}

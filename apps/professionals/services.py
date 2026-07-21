@@ -45,6 +45,8 @@ class ProfessionalService:
     def save_diagnosis(self, professional_id, data):
         if not data.get("idPaciente"):
             return {"success": False, "message": "idPaciente es requerido"}, 400
+        if not self.repo.professional_has_patient(professional_id, data["idPaciente"]):
+            return {"success": False, "message": "No tienes asignado este paciente"}, 403
         self.repo.save_diagnosis(professional_id, data)
         return {"success": True, "message": "Diagnóstico guardado correctamente"}, 200
 

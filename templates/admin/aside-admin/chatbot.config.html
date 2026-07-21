@@ -3,7 +3,7 @@
 <head>
     <title>PsyAI Connect | Configuraci&oacute;n del Chatbot</title>
     {% include 'base/partials/head.html' %}
-    <link rel="stylesheet" href="/css/pages/admin.css?v=20260711-1">
+    <link rel="stylesheet" href="/css/pages/admin.css?v=20260719-2">
     <link rel="stylesheet" href="/responsive/responsive-admin.css">
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 </head>
@@ -140,7 +140,7 @@
     <!-- Configuración del Chatbot -->
     <div class="section-card-custom">
       <div class="section-header-custom">
-        <div class="header-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;">
+        <div class="header-icon" style="background: linear-gradient(135deg, var(--brand-600), var(--brand-700)); color: #fff;">
           <i class="fas fa-cog"></i>
         </div>
         <div>
@@ -175,15 +175,9 @@
                 <input type="text" class="form-control" id="riskTermsInput" placeholder="Escribe una palabra o frase..." style="flex: 1; border-radius: 8px;">
                 <div class="dropdown-container" style="width: 150px;">
                   <select class="form-select risk-level-select" id="riskLevelSelect">
-                    <option value="Alto" data-color="#dc3545" data-icon="fa-exclamation-triangle">
-                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#dc3545;margin-right:8px;"></span>?? Alto
-                    </option>
-                    <option value="Medio" data-color="#f59e0b" data-icon="fa-exclamation-circle">
-                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:8px;"></span>?? Medio
-                    </option>
-                    <option value="Bajo" data-color="#10b981" data-icon="fa-check-circle">
-                      <span class="level-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:8px;"></span>?? Bajo
-                    </option>
+                    <option value="Alto" data-color="var(--mood-critical)" data-icon="fa-exclamation-triangle">Alto</option>
+                    <option value="Medio" data-color="var(--mood-neutral)" data-icon="fa-exclamation-circle">Medio</option>
+                    <option value="Bajo" data-color="var(--mood-excellent)" data-icon="fa-check-circle">Bajo</option>
                   </select>
                 </div>
                 <button type="button" class="btn btn-primary px-3" id="btnAgregarPalabra" style="min-width: 42px; border-radius: 8px;">
@@ -264,7 +258,7 @@
     <!-- Palabras de Riesgo por Nivel -->
     <div class="section-card-custom" id="riskCardsSection">
       <div class="section-header-custom" style="flex-wrap:wrap;">
-        <div class="header-icon" style="background: linear-gradient(135deg, #f97316, #dc2626); color: #fff;">
+        <div class="header-icon" style="background: linear-gradient(135deg, var(--mood-low), var(--mood-critical)); color: #fff;">
           <i class="fas fa-shield-alt"></i>
         </div>
         <div class="flex-grow-1" style="min-width:160px;">
@@ -273,9 +267,9 @@
         </div>
         <div class="risk-filter-tabs" id="riskFilterTabs">
           <button class="risk-filter-btn active" data-filter="all">Todos</button>
-          <button class="risk-filter-btn" data-filter="Alto" data-color="#dc3545">Alto</button>
-          <button class="risk-filter-btn" data-filter="Medio" data-color="#f59e0b">Medio</button>
-          <button class="risk-filter-btn" data-filter="Bajo" data-color="#10b981">Bajo</button>
+          <button class="risk-filter-btn" data-filter="Alto" data-color="var(--mood-critical)">Alto</button>
+          <button class="risk-filter-btn" data-filter="Medio" data-color="var(--mood-neutral)">Medio</button>
+          <button class="risk-filter-btn" data-filter="Bajo" data-color="var(--mood-excellent)">Bajo</button>
         </div>
       </div>
       <div class="section-body-custom">
@@ -288,22 +282,28 @@
     <!-- Historial de Conversaciones -->
     <div class="section-card-custom">
       <div class="section-header-custom">
-        <div class="header-icon" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff;">
+        <div class="header-icon" style="background: linear-gradient(135deg, var(--mood-excellent), var(--mood-good)); color: #fff;">
           <i class="fas fa-history"></i>
         </div>
         <div class="flex-grow-1">
           <h5 class="mb-0 fw-bold">Historial de Conversaciones</h5>
           <small class="text-muted">Conversaciones agrupadas por paciente</small>
         </div>
-        <div class="d-flex gap-2">
-          <input type="text" class="form-control form-control-sm" id="buscarHistorial" placeholder="Buscar paciente..." style="max-width: 200px;">
-          <select class="form-select form-select-sm" id="filtroNivel" style="width:auto;">
-            <option value="">Todos los niveles</option>
-            <option value="Alto">Nivel Alto</option>
-            <option value="Medio">Nivel Medio</option>
-            <option value="Bajo">Nivel Bajo</option>
-          </select>
-          <button class="btn btn-outline-secondary btn-sm" id="btnActualizarHistorial"><i class="fas fa-sync"></i></button>
+        <div class="d-flex gap-2 align-items-center">
+          <div class="filter-group">
+            <label class="filter-label"><i class="fas fa-search me-1"></i>Buscar</label>
+            <input type="text" class="form-control form-control-sm" id="buscarHistorial" placeholder="Paciente..." style="width: 160px;">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label"><i class="fas fa-layer-group me-1"></i>Nivel</label>
+            <select class="form-select form-select-sm" id="filtroNivel" style="width:auto;">
+              <option value="">Todos</option>
+              <option value="Alto">Alto</option>
+              <option value="Medio">Medio</option>
+              <option value="Bajo">Bajo</option>
+            </select>
+          </div>
+          <button class="btn btn-outline-secondary btn-sm" id="btnActualizarHistorial" title="Actualizar"><i class="fas fa-sync-alt"></i></button>
         </div>
       </div>
       <div class="chat-history-layout">
@@ -330,10 +330,10 @@
       </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+    <div class="save-bar d-flex justify-content-between align-items-center mt-4 pt-3">
       <div class="text-muted small" id="saveInfo">Última modificación: -</div>
-      <button type="submit" class="btn btn-primary btn-lg px-4" form="formConfigChatbot" id="btnGuardar">
-        <i class="fas fa-save me-2"></i>Guardar Configuración
+      <button type="submit" class="btn btn-primary btn-lg px-5 py-2 save-btn" form="formConfigChatbot" id="btnGuardar">
+        <i class="fas fa-save me-2"></i>Guardar Configuraci&oacute;n
       </button>
     </div>
 

@@ -3,6 +3,7 @@ import uuid
 
 from django.conf import settings
 
+from apps.core.utils import validate_file_upload
 from apps.documents.repositories import DocumentoRepository
 
 UPLOAD_SUBDIR = "uploads/documentos"
@@ -13,7 +14,7 @@ class DocumentoService:
         self.repo = DocumentoRepository()
 
     def _upload_dir(self):
-        return os.path.join(settings.STATICFILES_DIRS[0], UPLOAD_SUBDIR) if settings.STATICFILES_DIRS else os.path.join(settings.BASE_DIR, "static", UPLOAD_SUBDIR)
+        return os.path.join(settings.MEDIA_ROOT, UPLOAD_SUBDIR)
 
     def _ensure_upload_dir(self):
         d = self._upload_dir()
@@ -39,16 +40,10 @@ class DocumentoService:
             return ""
         return dt.strftime("%d %b %Y") if hasattr(dt, "strftime") else str(dt)
 
-    def _validate_upload(self, file, allowed_extensions=None, max_size_mb=20):
+    def _validate_upload(self, file, allowed_extensions=None, max_size_mb=None):
         if allowed_extensions is None:
-            allowed_extensions = {"jpg", "jpeg", "png", "pdf", "doc", "docx", "gif", "webp"}
-        name = file.name or ""
-        ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
-        if ext not in allowed_extensions:
-            return None, f"Extensión no permitida: .{ext}"
-        if hasattr(file, "size") and file.size > max_size_mb * 1024 * 1024:
-            return None, f"El archivo excede el tamaño máximo de {max_size_mb}MB"
-        return name, None
+            allowed_extensions = settings.ALLOWED_UPLOAD_EXTENSIONS
+        return validate_file_upload(file, allowed_extensions=allowed_extensions)
 
     def list_patient_docs(self, professional_id, patient_id):
         docs = self.repo.list_profesional_docs(professional_id, patient_id)

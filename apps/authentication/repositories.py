@@ -131,3 +131,54 @@ class SecurityRepository:
                 row.save(update_fields=["intentos", "bloqueado_hasta"])
         except Exception:
             return
+
+    def check_rate_limit(self, key, max_attempts=10, window_minutes=60, lockout_minutes=30):
+        try:
+            row = IntentosFallidos.objects.filter(email=key).first()
+            if not row:
+                return False, 0
+            if row.bloqueado_hasta:
+                now = timezone.now()
+                if row.bloqueado_hasta > now:
+                    segundos = int((row.bloqueado_hasta - now).total_seconds())
+                    return True, segundos
+            if row.intentos >= max_attempts:
+                now = timezone.now()
+                if row.ultimo_intento:
+                    elapsed = (now - row.ultimo_intento).total_seconds() / 60
+                    if elapsed < window_minutes:
+                        row.bloqueado_hasta = now + timedelta(minutes=lockout_minutes)
+                        row.save(update_fields=["bloqueado_hasta"])
+                        return True, lockout_minutes * 60
+                    else:
+                        row.intentos = 0
+                        row.bloqueado_hasta = None
+                        row.save(update_fields=["intentos", "bloqueado_hasta"])
+            return False, 0
+        except Exception:
+            return False, 0
+
+    def register_rate_limit_hit(self, key):
+        now = timezone.now()
+        try:
+            row = IntentosFallidos.objects.filter(email=key).first()
+            if row:
+                row.intentos += 1
+                row.ultimo_intento = now
+                row.save(update_fields=["intentos", "ultimo_intento"])
+            else:
+                IntentosFallidos.objects.create(
+                    email=key, intentos=1, ultimo_intento=now
+                )
+        except Exception:
+            return
+
+    def reset_rate_limit(self, key):
+        try:
+            row = IntentosFallidos.objects.filter(email=key).first()
+            if row:
+                row.intentos = 0
+                row.bloqueado_hasta = None
+                row.save(update_fields=["intentos", "bloqueado_hasta"])
+        except Exception:
+            return

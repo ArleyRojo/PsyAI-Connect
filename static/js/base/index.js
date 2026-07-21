@@ -65,4 +65,18 @@ document.addEventListener('DOMContentLoaded', function () {
     syncNavbarState();
     window.addEventListener('scroll', syncNavbarState, { passive: true });
     setupActiveSectionObserver();
+
+    // Animate section title underlines on scroll
+    var sectionTitles = document.querySelectorAll('.section-title');
+    if (sectionTitles.length) {
+        var titleObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                    titleObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        sectionTitles.forEach(function (t) { titleObserver.observe(t); });
+    }
 });

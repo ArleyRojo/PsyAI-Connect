@@ -11,104 +11,227 @@
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <div class="d-flex w-100">
-  <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
-    <div class="sidebar__logo">
-      <div class="sidebar__logo-img-wrap">
-        <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
-        <div class="sidebar__logo-glow"></div>
-      </div>
-      <h5 class="sidebar__brand">PsyAI Connect</h5>
-      <span class="sidebar__role-badge">Profesional</span>
-    </div>
-    <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
-      <div class="sidebar__nav-section-label">Menú Principal</div>
-      <a href="../professional.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
-        <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
-        <span>Dashboard</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="patients.html" class="sidebar__nav-item" data-tooltip="Pacientes">
-        <div class="sidebar__nav-icon"><i class="fas fa-users"></i></div>
-        <span>Pacientes</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="my.agenda.html" class="sidebar__nav-item" data-tooltip="Agenda">
-        <div class="sidebar__nav-icon"><i class="fas fa-calendar-check"></i></div>
-        <span>Agenda</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
-        <div class="sidebar__nav-icon"><i class="fas fa-envelope"></i></div>
-        <span>Mensajes</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="historia_clinica_pro.html" class="sidebar__nav-item" data-tooltip="Historias Clínicas">
-        <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
-        <span>Historias Clínicas</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="reports.html" class="sidebar__nav-item" data-tooltip="Reportes">
-        <div class="sidebar__nav-icon"><i class="fas fa-chart-bar"></i></div>
-        <span>Reportes</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="facturacion.html" class="sidebar__nav-item" data-tooltip="Facturación">
-        <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-        <span>Facturación</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="my.profile2.html" class="sidebar__nav-item active" data-tooltip="Mi Perfil">
-        <div class="sidebar__nav-icon"><i class="fas fa-user"></i></div>
-        <span>Mi Perfil</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-    </nav>
-    <div class="sidebar__footer">
-      <div class="sidebar__user-card">
-        <div class="sidebar__user-avatar" data-avatar="inicial">
-          <i class="fas fa-user-md"></i>
-        </div>
-        <div class="sidebar__user-info">
-          <span class="sidebar__user-name" id="sidebarUserName">Profesional</span>
-          <span class="sidebar__user-role">Profesional</span>
-        </div>
-        <a href="#" class="sidebar__user-settings" title="Configuración">
-          <i class="fas fa-cog"></i>
-        </a>
-      </div>
-      <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
-        <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-        <button id="theme-toggle" title="Cambiar modo"></button>
-        <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-      </div>
-    </div>
-    <div class="sidebar__logout-section">
-      <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Cerrar Sesión</span>
-      </a>
-    </div>
-  </aside>
 
-  <main class="main-content flex-grow-1 ms-250 p-4">
-    <header class="main-header d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 fw-bold mb-0"><i class="fas fa-user me-2 text-primary"></i>Mi Perfil</h1>
-        <small class="text-muted">Gestiona tu información profesional</small>
-      </div>
-      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Profesional</div>
-    </header>
-    <div class="card shadow-sm border-0 p-4">
-      <p class="text-muted text-center py-5"><i class="fas fa-user fa-3x mb-3 d-block text-primary"></i>Aquí podrás gestionar tu perfil profesional.</p>
-    </div>
-  </main>
+    <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
+        <div class="sidebar__logo">
+            <div class="sidebar__logo-img-wrap">
+                <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
+                <div class="sidebar__logo-glow"></div>
+            </div>
+            <h5 class="sidebar__brand">PsyAI Connect</h5>
+            <span class="sidebar__role-badge">Profesional</span>
+        </div>
+        <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
+            <div class="sidebar__nav-section-label">Menú Principal</div>
+            <a href="../professional.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
+                <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
+                <span>Dashboard</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="patients.html" class="sidebar__nav-item" data-tooltip="Pacientes">
+                <div class="sidebar__nav-icon"><i class="fas fa-users"></i></div>
+                <span>Pacientes y Diagnosticos</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="historia_clinica_pro.html" class="sidebar__nav-item" data-tooltip="Historial Clínico">
+                <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
+                <span>Historial Clínico</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="my.agenda.html" class="sidebar__nav-item" data-tooltip="Mi Agenda">
+                <div class="sidebar__nav-icon"><i class="fas fa-calendar-check"></i></div>
+                <span>Mi Agenda</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <div class="sidebar__nav-section-label">Comunicacion</div>
+            <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
+                <div class="sidebar__nav-icon"><i class="fas fa-comments"></i></div>
+                <span>Mensajes</span>
+                <div class="sidebar__nav-indicator"></div>
+                <span class="sidebar__badge" id="msgBadge" style="display:none">0</span>
+            </a>
+            <div class="sidebar__nav-section-label">Gestion</div>
+            <a href="reports.html" class="sidebar__nav-item" data-tooltip="Reportes">
+                <div class="sidebar__nav-icon"><i class="fas fa-chart-line"></i></div>
+                <span>Reportes</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="facturacion.html" class="sidebar__nav-item" data-tooltip="Facturación">
+                <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <span>Facturación</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+        </nav>
+        <div class="sidebar__footer">
+            <div class="sidebar__user-card">
+                <div class="sidebar__user-avatar" data-avatar="inicial">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="sidebar__user-info">
+                    <span class="sidebar__user-name" id="sidebarUserName">Dr(a).</span>
+                    <span class="sidebar__user-role">Profesional</span>
+                </div>
+                <a href="my.profile2.html" class="sidebar__user-settings" title="Mi Perfil">
+                    <i class="fas fa-cog"></i>
+                </a>
+            </div>
+            <div class="sidebar__actions">
+                <div class="theme-switch-container">
+                    <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                    <button id="theme-toggle" title="Cambiar modo"></button>
+                    <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+                </div>
+                <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content flex-grow-1 ms-250 p-4">
+
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <h1>Mi Perfil Profesional</h1>
+            <div class="user-info">
+                <i class="fas fa-user-tie me-2"></i>
+                <span class="fw-semibold text-dark" id="nombreProfesional">Hola, Dr(a).</span>
+            </div>
+        </header>
+
+        <!-- Avatar -->
+        <div class="card profile-card p-4 mb-4 text-center">
+            <h5><i class="fas fa-user-circle icon-avatar"></i>Mi Avatar</h5>
+            <div class="mb-3 d-flex justify-content-center" style="position:relative;display:inline-block">
+                <div class="avatar-ring" id="avatarRingPreview">
+                    <img id="fotoPerfilPreview" src="" alt="Foto de perfil" style="width:150px;height:150px;border-radius:50%;object-fit:cover;display:none">
+                    <div data-avatar="inicial" style="width:150px;height:150px;" id="avatarInicialPreview"></div>
+                </div>
+                <button type="button" id="btnCambiarFoto" style="position:absolute;bottom:8px;right:8px;width:38px;height:38px;border:2px solid #fff;border-radius:50%;background:var(--brand-gradient,#0D47A1);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.15);font-size:.9rem" title="Cambiar foto">
+                <i class="fas fa-camera"></i>
+                </button>
+            </div>
+            <input type="file" id="inputFoto" accept="image/*" style="display:none">
+            <p class="text-muted small" id="avatarStatusText">Haz clic en el icono de la c&aacute;mara para cambiar tu foto de perfil</p>
+            <div id="avatarActions" style="display:none;margin-top:10px;gap:8px;justify-content:center">
+                <button type="button" id="btnGuardarFoto" class="btn btn-sm" style="background:var(--brand-gradient,#0D47A1);color:#fff;border:none;border-radius:6px;padding:6px 18px;font-size:.85rem;cursor:pointer;transition:all .2s">Guardar cambios</button>
+                <button type="button" id="btnCancelarFoto" class="btn btn-sm" style="background:transparent;color:#666;border:1px solid #ccc;border-radius:6px;padding:6px 18px;font-size:.85rem;cursor:pointer;transition:all .2s">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- Informaci�n Profesional -->
+        <div class="card profile-card p-4 mb-4">
+            <h5><i class="fas fa-id-card icon-id"></i>Informaci�n Profesional</h5>
+            <div class="field-row">
+                <span class="field-label"><i class="fas fa-user"></i>Nombre:</span>
+                <span class="field-value" data-field="nombre">Cargando...</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label"><i class="fas fa-stethoscope"></i>Especialidad:</span>
+                <span class="field-value" data-field="especialidad">Cargando...</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label"><i class="fas fa-venus-mars"></i>G�nero:</span>
+                <span class="field-value" data-field="genero">No especificado</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label"><i class="fas fa-envelope"></i>Correo:</span>
+                <span class="field-value" data-field="email">Cargando...</span>
+            </div>
+            <div class="field-row">
+                <span class="field-label"><i class="fas fa-id-badge"></i>Licencia:</span>
+                <span class="field-value" data-field="licencia">Cargando...</span>
+            </div>
+            <button class="btn-profile-grad mt-3" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
+                <i class="fas fa-edit"></i> Editar Informaci�n
+            </button>
+        </div>
+
+        <!-- Experiencia -->
+        <div class="card profile-card p-4 mb-4">
+            <h5><i class="fas fa-briefcase icon-briefcase"></i>Experiencia</h5>
+            <p class="card-text-block" data-field="experiencia">Cargando...</p>
+        </div>
+
+        <!-- Especialidades -->
+        <div class="card profile-card p-4 mb-4">
+            <h5><i class="fas fa-brain icon-brain"></i>Especialidades</h5>
+            <p class="card-text-block" data-field="especialidad">Cargando...</p>
+        </div>
+    </main>
 </div>
 
+<!-- Modal Editar Perfil Profesional -->
+<div class="modal fade psyai-modal" id="modalEditarPerfil" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content psyai-modal__content">
+
+            <div class="psyai-modal__header">
+                <div class="psyai-modal__header-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div>
+                    <h5 class="psyai-modal__title">Editar Perfil Profesional</h5>
+                    <p class="psyai-modal__subtitle">Actualiza tu informaci�n profesional</p>
+                </div>
+                <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="psyai-modal__body">
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-venus-mars"></i> G�nero
+                    </label>
+                    <input type="text" class="psyai-modal__input profile-readonly-field" id="editGeneroProf" readonly tabindex="-1">
+                    <small class="text-muted d-block mt-1">Definido al registrarte. No puede modificarse.</small>
+                </div>
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-brain"></i> Especialidad
+                    </label>
+                    <input type="text" class="psyai-modal__input" id="editEspecialidad" placeholder="Ej: Psicolog�a Cl�nica">
+                </div>
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-id-badge"></i> N�mero de Licencia
+                    </label>
+                    <input type="text" class="psyai-modal__input" id="editLicencia" placeholder="Tu licencia profesional">
+                </div>
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-briefcase"></i> Experiencia
+                    </label>
+                    <textarea class="psyai-modal__input" id="editExperiencia" rows="3"
+                        placeholder="Describe tu experiencia profesional"
+                        style="resize:vertical; border-radius:12px;"></textarea>
+                </div>
+            </div>
+
+            <div class="psyai-modal__footer">
+                <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <button type="button" class="psyai-modal__btn psyai-modal__btn--save" onclick="guardarPerfil()">
+                    <i class="fas fa-save me-1"></i> Guardar Cambios
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
 {% include 'base/partials/scripts.html' %}
+<link rel="stylesheet" href="/responsive/responsive-professional.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
 <script src="/js/core/shared/alerts.js?v=20260711-1"></script>
-<script src="/js/core/shared/aside.js?v=20260711-1"></script>
+<script src="/js/modules/professional/aside.js?v=20260711-1"></script>
+<script src="/js/modules/professional/my.profile2.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20260711-1"></script>
-
+    <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 </body>
 </html>

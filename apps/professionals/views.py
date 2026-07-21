@@ -278,7 +278,7 @@ class DownloadResource(View):
         if err_payload:
             return JsonResponse(err_payload, status=status)
 
-        file_path = os.path.join(settings.STATICFILES_DIRS[0], doc["rutaArchivo"])
+        file_path = os.path.join(str(settings.MEDIA_ROOT), doc["rutaArchivo"])
         if not os.path.exists(file_path):
             return JsonResponse({"success": False, "message": "Archivo no encontrado en el servidor"}, status=404)
         return FileResponse(open(file_path, "rb"), as_attachment=False, filename=doc["nombreArchivo"])

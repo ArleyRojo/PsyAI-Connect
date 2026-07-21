@@ -3,16 +3,10 @@ import uuid
 
 from django.conf import settings
 
+from apps.core.utils import validate_file_upload
 from apps.patients.repositories import PatientRepository
 
 ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
-MAGIC_BYTES = {
-    "jpg": (b"\xff\xd8\xff",),
-    "jpeg": (b"\xff\xd8\xff",),
-    "png": (b"\x89\x50\x4e\x47",),
-    "gif": (b"\x47\x49\x46\x38",),
-    "webp": (b"\x52\x49\x46\x46",),
-}
 
 
 class PatientService:
@@ -68,29 +62,14 @@ class PatientService:
         if not file:
             return {"success": False, "message": "No se envió ningún archivo"}, 400
 
-        filename = file.name
-        ext = filename.rsplit(".", 1)[1].lower() if "." in filename else ""
-        if ext not in ALLOWED_IMAGE_EXTENSIONS:
-            return {"success": False, "message": f"Extensión .{ext} no permitida"}, 400
+        name, error = validate_file_upload(file, allowed_extensions=ALLOWED_IMAGE_EXTENSIONS)
+        if error:
+            return {"success": False, "message": error}, 400
 
-        max_size = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
-        if file.size > max_size:
-            return {
-                "success": False,
-                "message": f"El archivo supera los {settings.MAX_UPLOAD_SIZE_MB} MB",
-            }, 400
-
-        raw = file.read(4096)
-        file.seek(0)
-        expected = MAGIC_BYTES.get(ext)
-        if expected and not any(raw.startswith(sig) for sig in expected):
-            return {
-                "success": False,
-                "message": "El archivo no coincide con el formato esperado (magic bytes inválidos)",
-            }, 400
+        ext = file.name.rsplit(".", 1)[1].lower() if "." in file.name else ""
 
         safe_name = f"{uuid.uuid4().hex}.{ext}"
-        upload_dir = os.path.join(settings.STATICFILES_DIRS[0], "uploads")
+        upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
         os.makedirs(upload_dir, exist_ok=True)
 
         with open(os.path.join(upload_dir, safe_name), "wb+") as dest:

@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import json
 import logging
 
@@ -225,7 +226,7 @@ class WebhookWompiView(View):
         raw_to_sign = f"{raw_values}{timestamp}{events_secret}"
         computed = hashlib.sha256(raw_to_sign.encode()).hexdigest().upper()
 
-        if computed != expected_checksum:
+        if not hmac.compare_digest(computed, expected_checksum):
             logger.warning("Wompi webhook: firma inválida (ref=%s)", transaction_ref)
             return HttpResponse("", status=200)
 

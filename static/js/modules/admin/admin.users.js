@@ -66,18 +66,20 @@ function renderizarPaginaUsuarios() {
         tbody.innerHTML = paginaUsuarios.map(u => {
             const iniciales  = u.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
             const rolLabel   = u.rol === 'profesional' ? 'Profesional' : u.rol === 'admin' ? 'Admin' : 'Paciente';
-            const rolBadge   = `<span class="badge bg-primary"><i class="fas fa-user-shield"></i> ${rolLabel}</span>`;
+            const rolClass   = u.rol === 'admin' ? 'badge-rol-admin' : u.rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
+            const rolIcon    = u.rol === 'admin' ? 'fa-user-shield' : u.rol === 'profesional' ? 'fa-user-md' : 'fa-user';
+            const rolBadge   = `<span class="badge-rol ${rolClass}"><i class="fas ${rolIcon}"></i> ${rolLabel}</span>`;
             const activoNum  = parseInt(u.activo);
             const estado = u.estadoCuenta || 'Activa';
             let estadoBadge, btnToggle;
             if (estado === 'Pendiente' || estado === 'Verificacion') {
-                estadoBadge = '<span class="badge bg-warning text-dark">Pendiente</span>';
+                estadoBadge = '<span class="badge-estado badge-estado-pendiente">Pendiente</span>';
                 btnToggle = `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','activar')" title="Activar"><i class="fas fa-check"></i></button>`;
             } else if (activoNum === 0 || estado === 'Suspendida') {
-                estadoBadge = '<span class="badge bg-danger">Suspendido</span>';
+                estadoBadge = '<span class="badge-estado badge-estado-suspendido">Suspendido</span>';
                 btnToggle = `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','activar')" title="Activar"><i class="fas fa-check"></i></button>`;
             } else {
-                estadoBadge = '<span class="badge bg-success">Activo</span>';
+                estadoBadge = '<span class="badge-estado badge-estado-activo">Activo</span>';
                 btnToggle = `<button class="btn btn-sm btn-outline-warning" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','suspender')" title="Suspender"><i class="fas fa-ban"></i></button>`;
             }
 
@@ -275,7 +277,7 @@ function abrirBloqueo(id, nombre, accion) {
 }
 
 async function confirmarBloqueo() {
-    const res = await fetch(`${API}/api/admin/usuarios/${usuarioSeleccionado.idUsuario}/bloquear`, {
+    const res = await fetch(`${API}/api/admin/usuarios/${usuarioSeleccionado.idUsuario}`, {
         method: 'PATCH', headers: {'Content-Type': 'application/json'},
         credentials: 'include',
         body: JSON.stringify({ accion: usuarioSeleccionado.accion })
@@ -332,7 +334,9 @@ function renderTablaFiltrada(tabId, lista) {
         tbody.innerHTML = lista.map(u => {
             const iniciales = u.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
             const rolLabel  = u.rol === 'profesional' ? 'Profesional' : u.rol === 'admin' ? 'Admin' : 'Paciente';
-            const rolBadge  = `<span class="badge bg-primary"><i class="fas fa-user-shield"></i> ${rolLabel}</span>`;
+            const rolClass  = u.rol === 'admin' ? 'badge-rol-admin' : u.rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
+            const rolIcon   = u.rol === 'admin' ? 'fa-user-shield' : u.rol === 'profesional' ? 'fa-user-md' : 'fa-user';
+            const rolBadge  = `<span class="badge-rol ${rolClass}"><i class="fas ${rolIcon}"></i> ${rolLabel}</span>`;
             
             return `
             <tr>
@@ -359,7 +363,9 @@ function renderTablaFiltrada(tabId, lista) {
     tbody.innerHTML = lista.map(u => {
         const iniciales = u.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
         const rolLabel  = u.rol === 'profesional' ? 'Profesional' : u.rol === 'admin' ? 'Admin' : 'Paciente';
-        const rolBadge  = `<span class="badge bg-primary"><i class="fas fa-user-shield"></i> ${rolLabel}</span>`;
+        const rolClass  = u.rol === 'admin' ? 'badge-rol-admin' : u.rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
+        const rolIcon   = u.rol === 'admin' ? 'fa-user-shield' : u.rol === 'profesional' ? 'fa-user-md' : 'fa-user';
+        const rolBadge  = `<span class="badge-rol ${rolClass}"><i class="fas ${rolIcon}"></i> ${rolLabel}</span>`;
         
         const activoNum = parseInt(u.activo);
         const btnToggle = activoNum === 0

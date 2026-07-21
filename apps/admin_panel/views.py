@@ -91,16 +91,34 @@ class AdminLogsStreamView(View):
             response["X-Accel-Buffering"] = "no"
             return response
 
+        client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
+        telemetry_service.sse_connected(client_ip)
+
         def generate():
             last_version = -1
-            while True:
-                current_version = AdminRepository.get_logs_version()
-                if current_version != last_version:
-                    last_version = current_version
-                    logs = admin_repo.get_logs(limit=10)
-                    logs.sort(key=lambda x: x.get("fecha", ""), reverse=True)
-                    yield f"data: {json.dumps({'success': True, 'logs': logs})}\n\n"
-                _time.sleep(0.5)
+            last_emit = 0
+            poll_count = 0
+            try:
+                while True:
+                    telemetry_service.sse_heartbeat(client_ip)
+                    current_version = AdminRepository.get_logs_version()
+                    now = _time.time()
+                    force = current_version != last_version
+                    timed = now - last_emit >= 3
+                    if force or timed:
+                        last_version = current_version
+                        last_emit = now
+                        logs = admin_repo.get_logs(limit=10)
+                        logs.sort(key=lambda x: x.get("fecha", ""), reverse=True)
+                        yield f"data: {json.dumps({'success': True, 'logs': logs})}\n\n"
+                        poll_count = 0
+                    else:
+                        poll_count += 1
+                        if poll_count >= 4:
+                            yield ": heartbeat\n\n"
+                    _time.sleep(1)
+            finally:
+                telemetry_service.sse_disconnected(client_ip)
 
         response = StreamingHttpResponse(
             generate(),
@@ -155,14 +173,21 @@ class AdminUsuarioView(View):
             data = json.loads(request.body) if request.body else {}
         except (json.JSONDecodeError, ValueError):
             data = {}
-        if data.get("bloquear") is not None or data.get("estadoBloqueo") is not None:
+
+        accion = data.get("accion")
+        if accion:
+            if accion not in ("bloquear", "suspender", "reestablecer", "desbloquear"):
+                return JsonResponse(
+                    {"success": False, "message": f"Acción inválida: {accion}"},
+                    status=400,
+                )
             data["idUsuario"] = id_usuario
             payload, status = admin_service.block_user(data)
-        elif data.get("rol"):
+        elif data.get("nuevoRol"):
             data["idUsuario"] = id_usuario
             payload, status = admin_service.change_role(data)
         else:
-            return JsonResponse({"success": False, "message": "Acción no especificada (bloquear o rol)"}, status=400)
+            return JsonResponse({"success": False, "message": "Acción no especificada (accion o nuevoRol)"}, status=400)
         return JsonResponse(payload, status=status)
 
     def delete(self, request, id_usuario):
@@ -206,11 +231,11 @@ class AdminNotificacionView(View):
         return JsonResponse(payload, status=status)
 
     def delete(self, request, id_notificacion=None):
-        if not id_notificacion:
-            return JsonResponse({"success": False, "message": "Falta id de notificación"}, status=400)
         user, err = require_role(request, "admin")
         if err:
             return err
+        if not id_notificacion:
+            return JsonResponse({"success": False, "message": "Falta id de notificación"}, status=400)
         payload, status = admin_service.delete_notification(id_notificacion)
         return JsonResponse(payload, status=status)
 

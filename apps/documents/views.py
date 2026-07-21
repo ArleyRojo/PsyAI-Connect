@@ -62,8 +62,8 @@ class DocumentoProfesionalDownloadView(View):
         return self._serve_file(doc)
 
     def _serve_file(self, doc):
-        static_root = settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else os.path.join(settings.BASE_DIR, "static")
-        file_path = os.path.join(static_root, doc["rutaArchivo"])
+        media_root = str(settings.MEDIA_ROOT)
+        file_path = os.path.join(media_root, doc["rutaArchivo"])
         if not os.path.isfile(file_path):
             raise Http404
         response = FileResponse(open(file_path, "rb"))
@@ -125,8 +125,8 @@ class DocumentoPacienteDownloadView(View):
         return self._serve_file(doc)
 
     def _serve_file(self, doc):
-        static_root = settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else os.path.join(settings.BASE_DIR, "static")
-        file_path = os.path.join(static_root, doc["rutaArchivo"])
+        media_root = str(settings.MEDIA_ROOT)
+        file_path = os.path.join(media_root, doc["rutaArchivo"])
         if not os.path.isfile(file_path):
             raise Http404
         response = FileResponse(open(file_path, "rb"))

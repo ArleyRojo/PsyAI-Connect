@@ -6,9 +6,8 @@ import time
 from datetime import datetime, timezone
 from queue import Queue
 from threading import Lock
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 
+import requests
 from django.conf import settings
 
 from apps.chatbot.repositories import (
@@ -630,33 +629,27 @@ class ChatbotService:
         last_exc = None
         for attempt in range(1, GEMINI_RETRIES + 2):
             try:
-                req = Request(
+                resp = requests.post(
                     GEMINI_URL_TEMPLATE.format(model=model),
-                    data=json.dumps(payload).encode("utf-8"),
-                    headers={
-                        "Content-Type": "application/json",
-                        "x-goog-api-key": api_key,
-                    },
-                    method="POST",
+                    json=payload,
+                    headers={"x-goog-api-key": api_key},
+                    timeout=8,
                 )
-                with urlopen(req, timeout=8) as res:
-                    data = json.loads(res.read().decode("utf-8"))
-                    text = self._extract_text(data)
-                    if not text:
-                        raise RuntimeError("Gemini no devolvio texto")
-                    return text.strip()
-            except HTTPError as exc:
+                if resp.status_code in GEMINI_RETRYABLE_STATUS:
+                    last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
+                    self.logger.warning("Gemini HTTP %s intento %s/%s", resp.status_code, attempt, GEMINI_RETRIES + 1)
+                    if attempt <= GEMINI_RETRIES:
+                        time.sleep(base_delay * attempt)
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                text = self._extract_text(data)
+                if not text:
+                    raise RuntimeError("Gemini no devolvio texto")
+                return text.strip()
+            except requests.exceptions.RequestException as exc:
                 last_exc = exc
-                status = getattr(exc, "code", None)
-                if status not in GEMINI_RETRYABLE_STATUS:
-                    detail = exc.read().decode("utf-8", errors="replace")
-                    raise RuntimeError(f"Gemini HTTP {status}: {detail}") from exc
-                self.logger.warning("Gemini HTTP %s intento %s/%s", status, attempt, GEMINI_RETRIES + 1)
-                if attempt <= GEMINI_RETRIES:
-                    time.sleep(base_delay * attempt)
-            except URLError as exc:
-                last_exc = exc
-                self.logger.warning("Gemini URLError intento %s/%s: %s", attempt, GEMINI_RETRIES + 1, exc.reason)
+                self.logger.warning("Gemini request error intento %s/%s: %s", attempt, GEMINI_RETRIES + 1, exc)
                 if attempt <= GEMINI_RETRIES:
                     time.sleep(base_delay * attempt)
         raise RuntimeError(f"Gemini no disponible luego de reintentos: {last_exc}")

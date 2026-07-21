@@ -1100,15 +1100,73 @@ button:focus-visible,
 /* Badges para Logs - Rol */
 .badge-rol {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: .75rem; font-weight: 600;
-  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  font-size: .72rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 10px; white-space: nowrap;
+  border: 1px solid transparent;
+  letter-spacing: 0.01em;
 }
-.badge-rol-usuario,
-.badge-rol-paciente,
-.badge-rol-profesional,
-.badge-rol-admin { background: #e3f2fd; color: #1565c0; }
+.badge-rol-paciente {
+  background: linear-gradient(135deg, rgba(0,105,92,0.12) 0%, rgba(0,150,136,0.08) 100%);
+  color: #00695c;
+  border-color: rgba(0,150,136,0.3);
+}
+.badge-rol-profesional {
+  background: linear-gradient(135deg, rgba(69,39,160,0.12) 0%, rgba(126,87,194,0.08) 100%);
+  color: #4527a0;
+  border-color: rgba(149,117,205,0.3);
+}
+.badge-rol-admin {
+  background: linear-gradient(135deg, rgba(183,28,28,0.12) 0%, rgba(229,57,53,0.08) 100%);
+  color: #b71c1c;
+  border-color: rgba(229,57,53,0.3);
+}
 
+/* Badges para Logs - Estado de cuenta */
+.badge-estado {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .72rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  border: 1px solid transparent;
+  letter-spacing: 0.01em;
+}
+.badge-estado-activo {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #1b5e20;
+  border-color: #a5d6a7;
+}
+.badge-estado-suspendido {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #b71c1c;
+  border-color: #ef9a9a;
+}
+.badge-estado-pendiente {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  color: #e65100;
+  border-color: #ffcc80;
+}
 
+/* Badges para Riesgo del chatbot */
+.badge-riesgo {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .7rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 16px; white-space: nowrap;
+  border: 1px solid transparent;
+}
+.badge-riesgo-alto {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #b71c1c;
+  border-color: #ef9a9a;
+}
+.badge-riesgo-medio {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  color: #e65100;
+  border-color: #ffcc80;
+}
+.badge-riesgo-bajo {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #1b5e20;
+  border-color: #a5d6a7;
+}
 
 /* ── Dark mode — elementos sin cobertura previa ── */
 

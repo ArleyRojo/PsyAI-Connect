@@ -111,15 +111,6 @@ class ProfessionalRepository:
             existing.tratamiento = data.get("tratamiento")
             existing.fechaDiagnostico = data.get("fecha_diagnostico")
             existing.save(update_fields=["sintomas", "diagnostico", "tratamiento", "fechaDiagnostico"])
-        else:
-            PacientesProfesional.objects.create(
-                idProfesional_id=professional_id,
-                idPaciente_id=data.get("idPaciente"),
-                sintomas=data.get("sintomas"),
-                diagnostico=data.get("diagnostico"),
-                tratamiento=data.get("tratamiento"),
-                fechaDiagnostico=data.get("fecha_diagnostico"),
-            )
 
     def get_diagnosis_history(self, professional_id):
         rows = (

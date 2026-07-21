@@ -299,6 +299,54 @@ class TestLoginUser:
         assert session["rol"] == "paciente"
         auth_service.security_repo.reset_failed_attempts.assert_called_once()
 
+    def test_suspended_user_cannot_login(self, auth_service, mock_security_repo):
+        mock_security_repo.check_brute_force.return_value = (False, 0)
+        auth_service.repo.get_user_by_email.return_value = {
+            "idUsuario": 1,
+            "email": "suspended@test.com",
+            "nombre": "Suspended User",
+            "rol": "paciente",
+            "contrasena": "correct_hash",
+            "estadoCuenta": "Suspendida",
+            "activo": False,
+            "fotoPerfil": None,
+        }
+
+        with patch("apps.authentication.services.SecurityHelper") as mock_sec:
+            mock_sec.verify_password.return_value = True
+            mock_sec.is_sha256_hash.return_value = True
+            payload, status, session = auth_service.login_user(
+                {"email": "suspended@test.com", "password": "Abc123"}, "127.0.0.1"
+            )
+        assert status == 403
+        assert payload["success"] is False
+        assert "suspendida" in payload["message"].lower()
+        assert session is None
+
+    def test_activo_false_with_activa_estado_rejected(self, auth_service, mock_security_repo):
+        mock_security_repo.check_brute_force.return_value = (False, 0)
+        auth_service.repo.get_user_by_email.return_value = {
+            "idUsuario": 1,
+            "email": "inconsistent@test.com",
+            "nombre": "Inconsistent User",
+            "rol": "paciente",
+            "contrasena": "correct_hash",
+            "estadoCuenta": "Activa",
+            "activo": False,
+            "fotoPerfil": None,
+        }
+
+        with patch("apps.authentication.services.SecurityHelper") as mock_sec:
+            mock_sec.verify_password.return_value = True
+            mock_sec.is_sha256_hash.return_value = True
+            payload, status, session = auth_service.login_user(
+                {"email": "inconsistent@test.com", "password": "Abc123"}, "127.0.0.1"
+            )
+        assert status == 403
+        assert payload["success"] is False
+        assert "suspendida" in payload["message"].lower()
+        assert session is None
+
 
 # ── AuthService.recover_password tests ───────────────────────────────────────
 

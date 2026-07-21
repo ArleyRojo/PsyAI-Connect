@@ -2,16 +2,11 @@ import json
 
 from django.http import JsonResponse
 
-from apps.core.utils import get_current_user
+from apps.core.utils import require_auth as _require_auth_strong, get_current_user
 
 
 def require_auth(request):
-    user = get_current_user(request)
-    if not user:
-        return None, JsonResponse(
-            {"success": False, "message": "No autenticado"}, status=401
-        )
-    return user, None
+    return _require_auth_strong(request)
 
 
 def require_role(request, *roles):

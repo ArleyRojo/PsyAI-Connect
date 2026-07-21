@@ -11,104 +11,460 @@
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <div class="d-flex w-100">
-  <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
-    <div class="sidebar__logo">
-      <div class="sidebar__logo-img-wrap">
-        <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
-        <div class="sidebar__logo-glow"></div>
-      </div>
-      <h5 class="sidebar__brand">PsyAI Connect</h5>
-      <span class="sidebar__role-badge">Profesional</span>
-    </div>
-    <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
-      <div class="sidebar__nav-section-label">Menú Principal</div>
-      <a href="../professional.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
-        <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
-        <span>Dashboard</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="patients.html" class="sidebar__nav-item" data-tooltip="Pacientes">
-        <div class="sidebar__nav-icon"><i class="fas fa-users"></i></div>
-        <span>Pacientes</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="my.agenda.html" class="sidebar__nav-item" data-tooltip="Agenda">
-        <div class="sidebar__nav-icon"><i class="fas fa-calendar-check"></i></div>
-        <span>Agenda</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
-        <div class="sidebar__nav-icon"><i class="fas fa-envelope"></i></div>
-        <span>Mensajes</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="historia_clinica_pro.html" class="sidebar__nav-item" data-tooltip="Historias Clínicas">
-        <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
-        <span>Historias Clínicas</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="reports.html" class="sidebar__nav-item" data-tooltip="Reportes">
-        <div class="sidebar__nav-icon"><i class="fas fa-chart-bar"></i></div>
-        <span>Reportes</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="facturacion.html" class="sidebar__nav-item active" data-tooltip="Facturación">
-        <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-        <span>Facturación</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-      <a href="my.profile2.html" class="sidebar__nav-item" data-tooltip="Mi Perfil">
-        <div class="sidebar__nav-icon"><i class="fas fa-user"></i></div>
-        <span>Mi Perfil</span>
-        <div class="sidebar__nav-indicator"></div>
-      </a>
-    </nav>
-    <div class="sidebar__footer">
-      <div class="sidebar__user-card">
-        <div class="sidebar__user-avatar" data-avatar="inicial">
-          <i class="fas fa-user-md"></i>
+    <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
+        <div class="sidebar__logo">
+            <div class="sidebar__logo-img-wrap">
+                <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
+                <div class="sidebar__logo-glow"></div>
+            </div>
+            <h5 class="sidebar__brand">PsyAI Connect</h5>
+            <span class="sidebar__role-badge">Profesional</span>
         </div>
-        <div class="sidebar__user-info">
-          <span class="sidebar__user-name" id="sidebarUserName">Profesional</span>
-          <span class="sidebar__user-role">Profesional</span>
+        <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
+            <div class="sidebar__nav-section-label">Menú Principal</div>
+            <a href="../professional.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
+                <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
+                <span>Dashboard</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="patients.html" class="sidebar__nav-item" data-tooltip="Pacientes">
+                <div class="sidebar__nav-icon"><i class="fas fa-users"></i></div>
+                <span>Pacientes y Diagnosticos</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="historia_clinica_pro.html" class="sidebar__nav-item" data-tooltip="Historial Clínico">
+                <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
+                <span>Historial Clínico</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="my.agenda.html" class="sidebar__nav-item" data-tooltip="Mi Agenda">
+                <div class="sidebar__nav-icon"><i class="fas fa-calendar-check"></i></div>
+                <span>Mi Agenda</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <div class="sidebar__nav-section-label">Comunicacion</div>
+            <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
+                <div class="sidebar__nav-icon"><i class="fas fa-comments"></i></div>
+                <span>Mensajes</span>
+                <div class="sidebar__nav-indicator"></div>
+                <span class="sidebar__badge" id="msgBadge" style="display:none">0</span>
+            </a>
+            <div class="sidebar__nav-section-label">Gestion</div>
+            <a href="reports.html" class="sidebar__nav-item" data-tooltip="Reportes">
+                <div class="sidebar__nav-icon"><i class="fas fa-chart-line"></i></div>
+                <span>Reportes</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+            <a href="facturacion.html" class="sidebar__nav-item active" data-tooltip="Facturación">
+                <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <span>Facturación</span>
+                <div class="sidebar__nav-indicator"></div>
+            </a>
+        </nav>
+        <div class="sidebar__footer">
+            <div class="sidebar__user-card">
+                <div class="sidebar__user-avatar" data-avatar="inicial">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="sidebar__user-info">
+                    <span class="sidebar__user-name" id="sidebarUserName">Dr(a).</span>
+                    <span class="sidebar__user-role">Profesional</span>
+                </div>
+                <a href="my.profile2.html" class="sidebar__user-settings" title="Mi Perfil">
+                    <i class="fas fa-cog"></i>
+                </a>
+            </div>
+            <div class="sidebar__actions">
+                <div class="theme-switch-container">
+                    <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                    <button id="theme-toggle" title="Cambiar modo"></button>
+                    <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+                </div>
+                <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </div>
         </div>
-        <a href="#" class="sidebar__user-settings" title="Configuración">
-          <i class="fas fa-cog"></i>
-        </a>
-      </div>
-      <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
-        <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-        <button id="theme-toggle" title="Cambiar modo"></button>
-        <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-      </div>
-    </div>
-    <div class="sidebar__logout-section">
-      <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Cerrar Sesión</span>
-      </a>
-    </div>
-  </aside>
+    </aside>
 
-  <main class="main-content flex-grow-1 ms-250 p-4">
-    <header class="main-header d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 fw-bold mb-0"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Facturación</h1>
-        <small class="text-muted">Gestiona tus facturas</small>
-      </div>
-      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Profesional</div>
-    </header>
-    <div class="card shadow-sm border-0 p-4">
-      <p class="text-muted text-center py-5"><i class="fas fa-file-invoice-dollar fa-3x mb-3 d-block text-primary"></i>Aquí podrás gestionar tu facturación.</p>
+    <main class="main-content flex-grow-1 ms-250 p-4">
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 fw-bold text-dark mb-0">
+                <i class="fas fa-file-invoice-dollar text-primary me-2"></i> Facturación
+            </h1>
+            <div class="user-info d-flex align-items-center">
+                <i class="fas fa-bell text-secondary fs-5 me-3"></i>
+                <span class="fw-semibold text-dark" id="nombreProfesional">Hola, Dr(a).</span>
+            </div>
+        </header>
+
+        <div class="mb-3">
+            <button class="btn btn-primary" onclick="abrirModalNuevaFactura()">
+                <i class="fas fa-plus me-2"></i>Nueva Factura
+            </button>
+        </div>
+
+        <section class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label class="form-label">Paciente</label>
+                <select id="filtroPaciente" class="form-select" onchange="filtrarFacturas()">
+                    <option value="">Todos los pacientes</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estado</label>
+                <select id="filtroEstado" class="form-select" onchange="filtrarFacturas()">
+                    <option value="">Todos</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Pagado">Completado</option>
+                    <option value="Anulada">Anulada</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" id="filtroFecha" class="form-control" onchange="filtrarFacturas()">
+            </div>
+        </section>
+
+        <div class="table-responsive professional-table-panel">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Paciente</th>
+                        <th>Monto</th>
+                        <th>Método</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaFacturasProfesional">
+                    <tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<div class="modal fade" id="modalNuevaFactura" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal-content border-0 shadow professional-modal-content">
+<div class="modal-header border-0">
+    <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice me-2 text-primary"></i>Nueva Factura</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Paciente <span class="text-danger">*</span></label>
+        <select id="selectPaciente" class="form-select"><option value="">Seleccionar paciente</option></select>
     </div>
-  </main>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Cita (opcional)</label>
+        <select id="selectCita" class="form-select"><option value="">Sin cita asociada</option></select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Método de pago</label>
+        <select id="selectMetodoPago" class="form-select">
+            <option value="tarjeta">Tarjeta</option>
+            <option value="banco">Transferencia Bancaria</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Items <span class="text-danger">*</span></label>
+        <div id="itemsContainer">
+            <div class="row g-2 mb-2 item-row">
+                <div class="col-7"><input type="text" class="form-control item-desc" placeholder="Descripción (ej: Consulta psicológica)"></div>
+                <div class="col-3"><input type="number" class="form-control item-precio" placeholder="Precio" step="0.01" min="0" oninput="calcularTotal()"></div>
+                <div class="col-2"><button class="btn btn-outline-danger btn-sm w-100" onclick="eliminarFilaItem(this)"><i class="fas fa-trash"></i></button></div>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-outline-primary mt-1" onclick="agregarFilaItem()"><i class="fas fa-plus me-1"></i>Agregar ítem</button>
+    </div>
+    <div class="text-end fw-bold fs-5">Total: $<span id="totalFactura">0</span></div>
+</div>
+<div class="modal-footer border-0">
+    <button type="button" class="btn btn-outline-secondary px-4 professional-modal-btn" data-bs-dismiss="modal">Cancelar</button>
+    <button type="button" class="btn btn-primary px-4 professional-modal-btn" id="btnGuardarFactura" onclick="guardarFactura()">Guardar Factura</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="modal fade" id="modalVerFacturaProfesional" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content border-0 shadow professional-modal-content">
+<div class="modal-header border-0">
+    <h5 class="modal-title fw-bold"><i class="fas fa-eye me-2 text-primary"></i>Detalle Factura</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body" id="detalleFacturaBody"><div class="text-center py-4"><div class="spinner-border text-primary"></div></div></div>
+<div class="modal-footer border-0">
+    <button type="button" class="btn btn-outline-secondary px-4 professional-modal-btn" data-bs-dismiss="modal">Cerrar</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="modal fade" id="modalAnularFactura" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content border-0 shadow professional-modal-content">
+<div class="modal-header border-0 pb-0">
+    <h5 class="modal-title fw-bold text-danger"><i class="fas fa-ban me-2"></i>Anular Factura</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body py-4">
+    <p class="text-muted text-center mb-3">¿Estás seguro que deseas anular esta factura? Esta acción no se puede deshacer.</p>
+    <div class="form-group text-start">
+        <label for="motivoAnulacionProf" class="form-label fw-semibold">Motivo de anulación <span class="text-danger">*</span></label>
+        <textarea class="form-control" id="motivoAnulacionProf" rows="3" placeholder="Ej: Error en el cobro..." required maxlength="255"></textarea>
+        <div class="d-flex justify-content-between mt-1">
+            <small class="text-danger d-none" id="errorMotivoAnulacionProf">El motivo es obligatorio</small>
+            <small class="text-muted ms-auto" id="charCountAnulacion">0/255</small>
+        </div>
+    </div>
+</div>
+<div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Volver</button>
+    <button type="button" class="btn btn-danger px-4" id="btnConfirmarAnular">Sí, anular</button>
+</div>
+</div>
+</div>
 </div>
 
 {% include 'base/partials/scripts.html' %}
+<link rel="stylesheet" href="/responsive/responsive-professional.css">
+<link rel="stylesheet" href="/responsive/responsive-fix.css">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
 <script src="/js/core/shared/alerts.js?v=20260711-1"></script>
-<script src="/js/core/shared/aside.js?v=20260711-1"></script>
+<script src="/js/modules/professional/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20260711-1"></script>
+<script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
+<script>
+var facturaIdAnular = null;
 
+document.addEventListener("DOMContentLoaded", function() {
+    cargarPacientesProfesional();
+    cargarFacturasProfesional();
+    document.getElementById("motivoAnulacionProf").addEventListener("input", function() {
+        var len = this.value.length;
+        document.getElementById("charCountAnulacion").textContent = len + "/255";
+        if (len > 0) {
+            document.getElementById("errorMotivoAnulacionProf").classList.add("d-none");
+            this.classList.remove("is-invalid");
+        }
+    });
+    document.getElementById("btnConfirmarAnular").addEventListener("click", confirmarAnularFactura);
+});
+
+async function cargarPacientesProfesional() {
+    try {
+        var res = await fetch("/api/facturas/pacientes-profesional", { credentials: "include" });
+        var data = await res.json();
+        if (!data.success) return;
+        var selects = ["selectPaciente", "filtroPaciente"];
+        selects.forEach(function(id) {
+            var sel = document.getElementById(id);
+            if (!sel) return;
+            sel.innerHTML = '<option value="">' + (id === "selectPaciente" ? "Seleccionar paciente" : "Todos los pacientes") + '</option>';
+            (data.pacientes || []).forEach(function(p) {
+                var opt = document.createElement("option");
+                opt.value = p.idUsuario;
+                opt.textContent = p.nombre;
+                sel.appendChild(opt);
+            });
+        });
+    } catch(e) { console.error(e); }
+}
+
+async function cargarFacturasProfesional() {
+    var filtroEstado = document.getElementById("filtroEstado").value;
+    var filtroFecha = document.getElementById("filtroFecha").value;
+    var params = new URLSearchParams();
+    if (filtroEstado) params.set("estado", filtroEstado);
+    if (filtroFecha) {
+        params.set("fecha_desde", filtroFecha);
+        params.set("fecha_hasta", filtroFecha);
+    }
+
+    var tbody = document.getElementById("tablaFacturasProfesional");
+    try {
+        var res = await fetch("/api/facturas/emitidas?" + params.toString(), { credentials: "include" });
+        var data = await res.json();
+        if (!data.success || !data.facturas || data.facturas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay facturas</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.facturas.map(function(f) {
+            var badgeClass = f.anulada ? "bg-secondary" : f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
+            var badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
+            return '<tr class="align-middle">' +
+                '<td data-label="Fecha">' + f.fecha + '</td>' +
+                '<td data-label="Paciente" class="fw-semibold">' + (f.nombrePaciente || "---") + '</td>' +
+                '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
+                '<td data-label="M&#xE9;todo">' + (f.metodoPago === "banco" ? "Transferencia" : "Tarjeta") + '</td>' +
+                '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
+                '<td data-label="Acci&#xF3;n" class="text-center">' +
+                    '<button class="btn btn-outline-primary btn-sm me-1" onclick="verFacturaProf(' + f.idFactura + ')" title="Ver"><i class="fas fa-eye"></i></button>' +
+                    (f.anulada ? '' :
+                        '<button class="btn btn-outline-danger btn-sm" onclick="abrirModalAnular(' + f.idFactura + ')" title="Anular"><i class="fas fa-ban"></i></button>'
+                    ) +
+                '</td></tr>';
+        }).join("");
+    } catch(e) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar</td></tr>';
+    }
+}
+
+function filtrarFacturas() { cargarFacturasProfesional(); }
+
+function agregarFilaItem() {
+    var container = document.getElementById("itemsContainer");
+    var row = document.createElement("div");
+    row.className = "row g-2 mb-2 item-row";
+    row.innerHTML =
+        '<div class="col-7"><input type="text" class="form-control item-desc" placeholder="Descripción"></div>' +
+        '<div class="col-3"><input type="number" class="form-control item-precio" placeholder="Precio" step="0.01" min="0" oninput="calcularTotal()"></div>' +
+        '<div class="col-2"><button class="btn btn-outline-danger btn-sm w-100" onclick="eliminarFilaItem(this)"><i class="fas fa-trash"></i></button></div>';
+    container.appendChild(row);
+}
+
+function eliminarFilaItem(btn) {
+    var row = btn.closest(".item-row");
+    if (document.querySelectorAll(".item-row").length > 1) {
+        row.remove();
+        calcularTotal();
+    }
+}
+
+function calcularTotal() {
+    var total = 0;
+    document.querySelectorAll(".item-precio").forEach(function(inp) {
+        var v = parseFloat(inp.value);
+        if (!isNaN(v) && v > 0) total += v;
+    });
+    document.getElementById("totalFactura").textContent = total.toLocaleString("es-CO", {minimumFractionDigits:0});
+}
+
+function abrirModalNuevaFactura() {
+    document.getElementById("selectCita").innerHTML = '<option value="">Sin cita asociada</option>';
+    document.getElementById("itemsContainer").innerHTML =
+        '<div class="row g-2 mb-2 item-row">' +
+            '<div class="col-7"><input type="text" class="form-control item-desc" placeholder="Descripción (ej: Consulta psicológica)"></div>' +
+            '<div class="col-3"><input type="number" class="form-control item-precio" placeholder="Precio" step="0.01" min="0" oninput="calcularTotal()"></div>' +
+            '<div class="col-2"><button class="btn btn-outline-danger btn-sm w-100" onclick="eliminarFilaItem(this)"><i class="fas fa-trash"></i></button></div>' +
+        '</div>';
+    document.getElementById("totalFactura").textContent = "0";
+    new bootstrap.Modal(document.getElementById("modalNuevaFactura")).show();
+}
+
+async function guardarFactura() {
+    var idPaciente = document.getElementById("selectPaciente").value;
+    var metodoPago = document.getElementById("selectMetodoPago").value;
+    if (!idPaciente) { PsyAIAlerts.error("Error", "Selecciona un paciente"); return; }
+    var items = [];
+    var filas = document.querySelectorAll(".item-row");
+    filas.forEach(function(row) {
+        var desc = row.querySelector(".item-desc").value.trim();
+        var precio = parseFloat(row.querySelector(".item-precio").value);
+        if (desc && !isNaN(precio) && precio > 0) {
+            items.push({descripción: desc, precioUnitario: precio});
+        }
+    });
+    if (items.length === 0) { PsyAIAlerts.error("Error", "Agrega al menos un item válido"); return; }
+    var btn = document.getElementById("btnGuardarFactura");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+    try {
+        var res = await fetch("/api/facturas", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+            body: JSON.stringify({idPaciente: parseInt(idPaciente), metodoPago: metodoPago, items: items, idCita: null}),
+        });
+        var data = await res.json();
+        if (data.success) {
+            PsyAIAlerts.success("Éxito", "Factura creada correctamente");
+            bootstrap.Modal.getInstance(document.getElementById("modalNuevaFactura")).hide();
+            cargarFacturasProfesional();
+        } else {
+            PsyAIAlerts.error("Error", data.message || "No se pudo crear");
+        }
+    } catch(e) {
+        PsyAIAlerts.error("Error", "Error de conexión");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "Guardar Factura";
+    }
+}
+
+async function verFacturaProf(id) {
+    var modal = new bootstrap.Modal(document.getElementById("modalVerFacturaProfesional"));
+    modal.show();
+    var body = document.getElementById("detalleFacturaBody");
+    body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+    try {
+        var res = await fetch("/api/facturas/" + id, { credentials: "include" });
+        var data = await res.json();
+        if (!data.success || !data.factura) { body.innerHTML = '<p class="text-danger text-center">Error</p>'; return; }
+        var f = data.factura;
+        var itemsHtml = (f.items || []).map(function(i) {
+            return '<tr><td>' + i.descripción + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
+        }).join("");
+        body.innerHTML =
+            '<p><strong>Factura #' + f.idFactura + '</strong></p>' +
+            '<p class="small text-muted">Fecha: ' + f.fecha + '</p>' +
+            '<p class="small">Paciente: <strong>' + (f.nombrePaciente || "---") + '</strong></p>' +
+            '<p class="small">Método: ' + (f.metodoPago === "banco" ? "Transferencia" : "Tarjeta") + '</p>' +
+            '<table class="table table-sm"><thead><tr><th>Servicio</th><th class="text-end">Valor</th></tr></thead><tbody>' + itemsHtml + '</tbody>' +
+            '<tfoot><tr class="fw-bold"><td>Total</td><td class="text-end">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr></tfoot></table>' +
+            '<p>Estado: <span class="badge ' + (f.anulada ? "bg-secondary" : f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark") + '">' + (f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente")) + '</span></p>' +
+            (f.anulada && f.motivoAnulacion ? '<p class="small text-muted">Motivo: ' + f.motivoAnulacion + '</p>' : '');
+    } catch(e) { body.innerHTML = '<p class="text-danger text-center">Error de conexión</p>'; }
+}
+
+function abrirModalAnular(id) {
+    facturaIdAnular = id;
+    document.getElementById("motivoAnulacionProf").value = "";
+    document.getElementById("charCountAnulacion").textContent = "0/255";
+    document.getElementById("errorMotivoAnulacionProf").classList.add("d-none");
+    document.getElementById("motivoAnulacionProf").classList.remove("is-invalid");
+    new bootstrap.Modal(document.getElementById("modalAnularFactura")).show();
+}
+
+async function confirmarAnularFactura() {
+    var motivo = document.getElementById("motivoAnulacionProf").value.trim();
+    if (!motivo) {
+        document.getElementById("motivoAnulacionProf").classList.add("is-invalid");
+        document.getElementById("errorMotivoAnulacionProf").classList.remove("d-none");
+        return;
+    }
+    var btn = document.getElementById("btnConfirmarAnular");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Anulando...';
+    try {
+        var res = await fetch("/api/facturas/" + facturaIdAnular + "/anular", {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+            body: JSON.stringify({motivoAnulacion: motivo}),
+        });
+        var data = await res.json();
+        if (data.success) {
+            PsyAIAlerts.success("Anulada", "Factura anulada correctamente");
+            bootstrap.Modal.getInstance(document.getElementById("modalAnularFactura")).hide();
+            cargarFacturasProfesional();
+        } else {
+            PsyAIAlerts.error("Error", data.message || "No se pudo anular");
+        }
+    } catch(e) {
+        PsyAIAlerts.error("Error", "Error de conexión");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "Sí, anular";
+        facturaIdAnular = null;
+    }
+}
+</script>
 </body>
 </html>

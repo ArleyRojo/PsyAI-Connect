@@ -26,6 +26,15 @@ function formatearHoraCorta(hora) {
   return `${hora12}:${minutos} ${periodo}`;
 }
 
+function avanzarStep(n) {
+  document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.add('d-none'); });
+  document.getElementById('stepPanel' + n).classList.remove('d-none');
+  document.querySelectorAll('.step-item').forEach(function(item) {
+    var step = parseInt(item.getAttribute('data-step'));
+    item.classList.toggle('active', step <= n);
+  });
+}
+
 let _citasHistorialGlobal = [];
 let _wompiPaymentCompleted = false;
 let _wompiCitaId = null;

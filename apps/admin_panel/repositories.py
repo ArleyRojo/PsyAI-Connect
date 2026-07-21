@@ -46,11 +46,11 @@ class AdminRepository:
         pass
 
     def get_stats(self):
-        total_usuarios = Register.objects.exclude(rol="admin").count()
-        usuarios_activos = Register.objects.exclude(rol="admin").filter(
+        total_usuarios = Register.objects.count()
+        usuarios_activos = Register.objects.filter(
             activo=True, estadoCuenta="Activa",
         ).count()
-        cuentas_suspendidas = Register.objects.exclude(rol="admin").filter(
+        cuentas_suspendidas = Register.objects.filter(
             Q(activo=False) | Q(estadoCuenta="Suspendida"),
         ).count()
 
@@ -174,7 +174,9 @@ class AdminRepository:
     def create_user(self, data):
         from django.contrib.auth.hashers import make_password
 
-        password = data.get("contrasena") or "1234"
+        password = data.get("contrasena")
+        if not password:
+            raise ValueError("La contraseña es requerida para crear un usuario")
         user = Register(
             nombre=data.get("nombre"),
             email=data.get("email"),
@@ -249,6 +251,7 @@ class AdminRepository:
                 "email": u.email,
                 "rol": u.rol,
                 "activo": u.activo,
+                "estadoCuenta": u.estadoCuenta,
                 "fechaRegistro": u.fechaRegistro.strftime("%d/%m/%Y") if u.fechaRegistro else "",
             }
             for u in users
@@ -280,7 +283,7 @@ class AdminRepository:
                     n.idNotificacion, n.titulo, n.mensaje, n.tipo,
                     COALESCE(n.destinatario, reg.nombre, reg.email) as destinatario,
                     n.email_individual, n.enviado_por, n.estado, n.leido,
-                    DATE_FORMAT(n.fecha, '%%d/%%m/%%Y %%H:%%i') as fecha,
+                    DATE_FORMAT(n.fecha, '%d/%m/%Y %H:%i') as fecha,
                     n.fecha_programada, 'notificacion' as tipo_registro,
                     n.fecha as fecha_orden
                 FROM notificaciones n
@@ -293,7 +296,7 @@ class AdminRepository:
                     CONCAT('profesional_', pr.idUsuario) as destinatario,
                     NULL as email_individual, pr.nombre as enviado_por,
                     'enviado' as estado, NULL as leido,
-                    DATE_FORMAT(c.fecha, '%%d/%%m/%%Y %%H:%%i') as fecha,
+                    DATE_FORMAT(c.fecha, '%d/%m/%Y %H:%i') as fecha,
                     NULL as fecha_programada, 'profesional' as tipo_registro,
                     c.fecha as fecha_orden
                 FROM Citas c
@@ -307,7 +310,7 @@ class AdminRepository:
                     CONCAT('paciente_', pa.idUsuario) as destinatario,
                     NULL as email_individual, pa.nombre as enviado_por,
                     'enviado' as estado, NULL as leido,
-                    DATE_FORMAT(c.fecha, '%%d/%%m/%%Y %%H:%%i') as fecha,
+                    DATE_FORMAT(c.fecha, '%d/%m/%Y %H:%i') as fecha,
                     NULL as fecha_programada, 'paciente' as tipo_registro,
                     c.fecha as fecha_orden
                 FROM Citas c

@@ -11,6 +11,8 @@ from django.http import (
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
+UPLOADS_DIR = os.path.join(settings.MEDIA_ROOT, "uploads")
+
 
 def _template_root():
     return os.path.join(settings.BASE_DIR, "templates")
@@ -77,6 +79,12 @@ def client_errors(request):
 
 
 def serve_pages(request, filename):
+    if ".." in filename:
+        raise Http404
+
+    if filename.startswith("uploads/"):
+        raise Http404
+
     user_role = request.session.get("rol")
 
     if filename.startswith("legal/"):

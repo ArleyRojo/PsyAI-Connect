@@ -273,7 +273,8 @@ function getBadgeRol(rol) {
         profesional: 'fa-user-md',
         admin: 'fa-user-shield'
     };
-    return `<span class="badge bg-primary"><i class="fas ${icons[rol] || 'fa-user'}"></i> ${capitalizar(rol)}</span>`;
+    const cls = rol === 'admin' ? 'badge-rol-admin' : rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
+    return `<span class="badge-rol ${cls}"><i class="fas ${icons[rol] || 'fa-user'}"></i> ${capitalizar(rol)}</span>`;
 }
 
 function getBadgeAccion(accion) {

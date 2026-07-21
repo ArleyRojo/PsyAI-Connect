@@ -1,117 +1,76 @@
-<div align="center">
+# PsyAI Connect
 
-# 🧠 PsyAI Connect
-
-**Plataforma web de gestión para consultorios de psicología, potenciada con IA**
-
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/Django-5-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
-[![MySQL](https://img.shields.io/badge/MySQL-8+-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/tests-219%20passing-brightgreen)](#-testing)
-[![Gemini](https://img.shields.io/badge/IA-Google%20Gemini-8E75B2?logo=googlegemini&logoColor=white)](https://aistudio.google.com/)
-[![Licencia](https://img.shields.io/badge/uso-educativo-lightgrey)](#-licencia)
-
-</div>
+**PsyAI Connect** es una plataforma web de gestión para consultorios de psicología que integra inteligencia artificial. Conecta pacientes con profesionales de salud mental, permitiendo agendar citas, llevar seguimiento terapéutico, chatear en tiempo real y acceder a un chatbot de triaje psicológico impulsado por la API de Google Gemini.
 
 ---
 
-**PsyAI Connect** conecta pacientes con profesionales de salud mental en un solo lugar: agendamiento de citas, seguimiento terapéutico, mensajería en tiempo real, facturación y un chatbot de triaje psicológico impulsado por la API de Google Gemini.
-
-## 📑 Tabla de contenidos
-
-- [Objetivo](#-objetivo)
-- [Tecnologías](#-tecnologías)
-- [Arquitectura](#-arquitectura)
-- [Estructura del proyecto](#-estructura-del-proyecto)
-- [Roles de usuario](#-roles-de-usuario)
-- [Instalación](#-instalación)
-- [Variables de entorno](#-variables-de-entorno)
-- [Testing](#-testing)
-- [Características principales](#-características-principales)
-- [Seguridad](#-seguridad)
-- [Licencia](#-licencia)
-
----
-
-## 🎯 Objetivo
+## Objetivo
 
 Digitalizar y centralizar la operación de un consultorio o red de psicólogos, ofreciendo:
 
-- 🧑‍⚕️ Un portal para **pacientes**: agendar citas, ver su evolución, chatear con su terapeuta, consultar el chatbot de apoyo y revisar sus facturas.
-- 👩‍⚕️ Un portal para **profesionales**: gestionar su agenda, revisar el historial de sus pacientes y generar reportes.
-- 🛠️ Un panel de **administración**: métricas en tiempo real, gestión de usuarios y roles, logs del sistema y configuración del chatbot de IA.
+- Un portal para **pacientes** donde puedan agendar citas, ver su evolución, chatear con su terapeuta y consultar un chatbot de apoyo.
+- Un portal para **profesionales** donde gestionen su agenda, revisen el historial de sus pacientes y generen reportes.
+- Un panel de **administración** con métricas en tiempo real, gestión de usuarios, roles, logs del sistema y configuración del chatbot de IA.
 
 ---
 
-## 🧩 Tecnologías
+## Tecnologías
 
 ### Backend
-
 | Tecnología | Uso |
 |---|---|
-| **Python 3.10+** | Lenguaje principal |
+| **Python 3** | Lenguaje principal |
 | **Django 5** | Framework web |
 | **Django REST Framework** | APIs REST |
-| **MySQL 8+** | Base de datos relacional |
+| **MySQL** | Base de datos relacional |
 | **mysqlclient** | Driver de conexión a MySQL |
 | **Waitress** | Servidor WSGI para producción |
 | **python-dotenv** | Gestión de variables de entorno |
 | **psutil** | Métricas del sistema (CPU, RAM, disco) |
 | **bcrypt** | Hash seguro de contraseñas |
 | **Brevo** | Envío de correos transaccionales |
-| **Wompi** | Pasarela de pago para facturación |
 
-### Inteligencia artificial
-
+### Inteligencia Artificial
 | Tecnología | Uso |
 |---|---|
 | **Google Gemini API** | Chatbot de triaje psicológico para pacientes |
 
-La integración con Gemini soporta **rotación automática de API keys** (`GEMINI_API_KEYS`) para distribuir cuota entre múltiples proyectos de Google AI Studio, y un nivel de "pensamiento" configurable (`GEMINI_THINKING_LEVEL`) desde el panel de administración.
+La integración con Gemini soporta **rotación automática de API keys** para distribuir cuota entre múltiples proyectos de Google AI Studio.
 
 ### Frontend
-
 | Tecnología | Uso |
 |---|---|
 | **HTML / Django Templates / Bootstrap 5.0.2** | Plantillas del servidor |
-| **CSS personalizado** | Estilos por módulo, tema (claro/oscuro) y responsividad |
+| **CSS personalizado** | Estilos por módulo, tema y responsividad |
 | **JavaScript vanilla** | Lógica de UI por módulo (sin frameworks) |
 | **SSE (Server-Sent Events)** | Actualizaciones en tiempo real en el panel admin y el chat |
 
-Los CDNs (Google Fonts, Bootstrap, Font Awesome) y el CSS/JS core se cargan desde un único `<head>` compartido (`templates/base/partials/head.html`), incluido en todas las páginas — cambiar una versión de librería se hace en un solo archivo.
-
 ### Testing y DevOps
-
 | Tecnología | Uso |
 |---|---|
 | **pytest + pytest-django** | Unit tests e integration tests |
 | **pytest-cov** | Cobertura de código |
 | **Docker + Docker Compose** | Containerización y desarrollo reproducible |
-| SQLite en memoria | Base de datos de test (aislada de MySQL, ver `conftest.py`) |
 
 ---
 
-## 🏗️ Arquitectura
+## Arquitectura
 
-El proyecto sigue una **arquitectura en capas** (Repository + Service Layer), replicada de forma consistente en cada app de `apps/`:
+El proyecto sigue una arquitectura en capas con separación clara de responsabilidades:
 
 ```
-Vistas (views.py) → Servicios (services.py) → Repositorios (repositories.py) → MySQL
+Vistas (Views) → Servicios (Services) → Repositorios (Repositories) → Base de datos (MySQL)
 ```
 
-- **`views.py`** — endpoints REST y de página; delegan toda la lógica a la capa de servicios.
-- **`services.py`** — lógica de negocio y validaciones. Cada servicio instancia su repositorio correspondiente.
-- **`repositories.py`** — encapsula todas las consultas a la base de datos.
-- **`models.py`** — entidades de dominio (Django ORM).
-- **`admin.py`** — registro de modelos en el admin nativo de Django.
-- **`apps/core/`** — utilidades transversales: excepciones, **permisos centralizados** (`core/permissions.py`), middlewares, autenticación y correo.
-
-Esta separación mantiene las vistas delgadas y hace que la lógica de negocio sea fácil de testear de forma aislada, mockeando el repositorio correspondiente — es la base de los 219 tests del proyecto.
+- **Views**: definen los endpoints REST y de página.
+- **Services**: contienen la lógica de negocio.
+- **Repositories**: encapsulan todas las consultas SQL.
+- **Utils**: herramientas transversales (auth, seguridad, validación, correo).
+- **Permissions**: permisos centralizados en `core/permissions.py`.
 
 ---
 
-## 📁 Estructura del proyecto
+## Estructura de carpetas
 
 ```
 PsyAI-Connect/
@@ -123,15 +82,17 @@ PsyAI-Connect/
 ├── conftest.py                  # Fixtures globales (SQLite override)
 ├── .dockerignore
 ├── .env.example
+├── .env
 ├── .gitignore
 │
 ├── docker/
 │   ├── Dockerfile               # Multi-stage: dev / prod
 │   ├── docker-compose.yml       # Desarrollo: app + MySQL
-│   ├── docker-compose.prod.yml  # Producción (override)
+│   ├── docker-compose.prod.yml  # Producción override
 │   └── entrypoint.sh            # Espera MySQL, migra, arranca server
 │
 ├── config/
+│   ├── __init__.py
 │   ├── asgi.py
 │   ├── urls.py
 │   ├── wsgi.py
@@ -141,38 +102,27 @@ PsyAI-Connect/
 │       └── prod.py              # Producción (DEBUG=False, seguridad)
 │
 ├── apps/
+│   ├── __init__.py
 │   ├── admin_panel/             # Panel de administración
 │   ├── authentication/          # Registro, login, recuperación
 │   ├── billing/                 # Facturación y pasarela de pago
 │   ├── chatbot/                 # Chatbot IA con Gemini
 │   ├── core/                    # Permisos, middlewares, utilidades
-│   ├── documents/                # Documentos clínicos
-│   ├── patients/                 # Portal de pacientes
-│   ├── professionals/            # Portal de profesionales
-│   └── scheduling/               # Agendamiento de citas
-│       ├── models.py
-│       ├── repositories.py
-│       ├── services.py
-│       ├── views.py
-│       ├── admin.py
-│       ├── migrations/
-│       └── tests/
-│           ├── conftest.py
-│           └── test_services.py
+│   ├── documents/               # Documentos clínicos
+│   ├── patients/                # Portal de pacientes
+│   ├── professionals/           # Portal de profesionales
+│   └── scheduling/              # Agendamiento de citas
 │
 ├── static/
 │   ├── css/
-│   │   ├── base/ layout/ themes/ pages/ components/
 │   ├── js/
 │   ├── img/
-│   ├── responsive/
-│   └── uploads/documentos/      # Documentos subidos por usuarios
+│   └── responsive/
 │
 ├── templates/
-│   ├── base/
-│   │   └── partials/            # head.html y scripts.html compartidos
 │   ├── admin/
 │   ├── auth/
+│   ├── base/
 │   ├── legal/
 │   ├── patient/
 │   └── professional/
@@ -181,21 +131,19 @@ PsyAI-Connect/
     └── test_integration.py      # Integration tests (Django test client)
 ```
 
-> Cada una de las 8 apps de negocio replica la misma estructura interna mostrada arriba para `scheduling`, incluyendo su propia carpeta `tests/`.
-
 ---
 
-## 👥 Roles de usuario
+## Roles de usuario
 
 | Rol | Descripción |
 |---|---|
-| 🧑‍⚕️ **Paciente** | Agenda citas, consulta su evolución, usa el chatbot de IA, chatea con su terapeuta y revisa sus facturas |
-| 👩‍⚕️ **Profesional** | Gestiona su agenda, revisa pacientes asignados y genera reportes |
-| 🛠️ **Administrador** | Panel completo: usuarios, roles, logs, métricas del servidor y configuración del chatbot |
+| **Paciente** | Agenda citas, consulta su evolución, usa el chatbot de IA y chatea con su terapeuta |
+| **Profesional** | Gestiona su agenda, revisa pacientes asignados y genera reportes |
+| **Administrador** | Panel completo: usuarios, roles, logs, métricas del servidor y configuración del chatbot |
 
 ---
 
-## 🚀 Instalación
+## Instalación
 
 ### Requisitos previos
 
@@ -224,7 +172,7 @@ docker compose -f docker/docker-compose.yml up
 El `docker/entrypoint.sh` se encarga automáticamente de:
 - Esperar a que MySQL esté listo
 - Ejecutar las migraciones
-- Crear un superuser de prueba **(solo para desarrollo local — ver [Seguridad](#-seguridad))**
+- Crear un superuser de prueba (`admin@psyai.com` / `Admin123`)
 - Arrancar el servidor de desarrollo
 
 #### Comandos útiles con Docker
@@ -234,7 +182,7 @@ docker compose -f docker/docker-compose.yml up -d              # Arrancar en bac
 docker compose -f docker/docker-compose.yml logs -f app        # Ver logs de la app
 docker compose -f docker/docker-compose.yml exec app bash      # Shell dentro del contenedor
 docker compose -f docker/docker-compose.yml down               # Detener contenedores
-docker compose -f docker/docker-compose.yml down -v             # Detener y eliminar volúmenes
+docker compose -f docker/docker-compose.yml down -v            # Detener y eliminar volúmenes
 ```
 
 #### Producción con Docker
@@ -278,71 +226,20 @@ python manage.py runserver
 
 El servidor estará disponible en `http://127.0.0.1:8000`.
 
-### Instalación asistida (opcional)
-
-```bash
-python setup_install.py
-```
-
-Automatiza la creación del entorno virtual, la instalación de dependencias y la generación del `.env`. Revisa el `.env` generado antes de usarlo — no debe contener API keys, contraseñas ni correos reales de ejemplo.
-
 ---
 
-## 🔑 Variables de entorno
+## Testing
 
-| Variable | Descripción | Default |
-|---|---|---|
-| `SECRET_KEY` | Clave secreta para firmar sesiones Django | *(sin default seguro — obligatoria en producción)* |
-| `PORT` | Puerto del servidor | `8000` |
-| `DB_HOST` | Host de MySQL | `localhost` |
-| `DB_PORT` | Puerto de MySQL | `3306` |
-| `DB_USER` | Usuario de MySQL | `root` |
-| `DB_PASSWORD` | Contraseña de MySQL | `root` |
-| `DB_NAME` | Nombre de la base de datos | `psyai_connect` |
-| `DB_ROOT_PASSWORD` | Password root de MySQL (solo Docker) | `rootpass` |
-| `GEMINI_MODEL` | Modelo de Gemini | `gemini-3.1-flash-lite` |
-| `GEMINI_THINKING_LEVEL` | Nivel de razonamiento (`minimal`, `low`, `medium`, `high`) | `low` |
-| `GEMINI_API_KEY` | API key de Google Gemini (una sola) | Para chatbot |
-| `GEMINI_API_KEYS` | API keys separadas por coma (rotación automática) | Para chatbot |
-| `EMAIL_HOST` | Servidor SMTP | `smtp.gmail.com` |
-| `EMAIL_PORT` | Puerto SMTP | `587` |
-| `EMAIL_USE_TLS` | Usar TLS | `True` |
-| `EMAIL_HOST_USER` | Usuario SMTP | — |
-| `EMAIL_HOST_PASSWORD` | Contraseña SMTP | — |
-| `DEFAULT_FROM_EMAIL` | Dirección de envío | — |
-| `LOGIN_RATE_LIMIT` | Límite para login | `60 per minute` |
-| `REGISTER_RATE_LIMIT` | Límite para registro | `20 per minute` |
-| `PASSWORD_RECOVERY_RATE_LIMIT` | Límite para recuperación | `10 per minute` |
-
-Consulta [`.env.example`](./.env.example) para la plantilla completa.
-
-### Variables de entorno para Docker
-
-Las siguientes ya tienen defaults en `docker-compose.yml` y coinciden con `.env.example`:
+### Ejecutar tests
 
 ```bash
-DB_NAME=psyai_connect
-DB_USER=psyai
-DB_PASSWORD=psyai_pass
-DB_HOST=db              # nombre del servicio MySQL en Docker
-DB_PORT=3306
-DB_ROOT_PASSWORD=rootpass
-```
-
----
-
-## ✅ Testing
-
-El proyecto tiene **219 tests** (199 unitarios + 20 de integración) con **pytest + pytest-django**.
-
-```bash
-# Todos los tests
+# Todos los tests (219 tests)
 python -m pytest
 
-# Unit tests solamente (199 tests, usan SQLite en memoria, no requieren MySQL)
+# Unit tests solamente (199 tests, usan SQLite en memoria)
 python -m pytest apps/
 
-# Integration tests (20 tests, requieren la app completa contra MySQL)
+# Integration tests (20 tests, requieren la app completa)
 python -m pytest tests/
 
 # Con cobertura
@@ -366,16 +263,72 @@ docker compose -f docker/docker-compose.yml exec app python -m pytest -q
 
 Cada app tiene su carpeta `tests/` con:
 
-- `conftest.py` — fixtures locales (mocks de repositorios, instancias de servicios)
+- `conftest.py` — fixtures (mocks de repositorios, instancias de servicios)
 - `test_services.py` — tests unitarios de la capa de servicios
 
-Los tests usan **mocking de repositorios** para aislar la lógica de negocio de la base de datos. El `conftest.py` de la raíz fuerza SQLite en memoria de forma automática (`autouse`) para todos los unit tests, por lo que corren rápido y sin depender de MySQL ni de credenciales configuradas.
+Los tests usan **mocking de repositorios** para aislar la lógica de negocio de la base de datos. Los unit tests corren sobre SQLite en memoria (configurado en `conftest.py` raíz), por lo que son rápidos y no dependen de MySQL.
 
-Los **integration tests** (`tests/test_integration.py`) usan el Django test client para hacer requests HTTP reales a los endpoints, y sí requieren la base de datos configurada.
+Los **integration tests** (`tests/test_integration.py`) usan el Django test client para hacer requests HTTP reales a los endpoints.
 
 ---
 
-## ✨ Características principales
+## Variables de entorno
+
+| Variable | Descripción | Default |
+|---|---|---|
+| `SECRET_KEY` | Clave secreta para firmar sesiones Django | `dev-insecure-key-change-me` |
+| `PORT` | Puerto del servidor | `8000` |
+| `DB_HOST` | Host de MySQL | `localhost` |
+| `DB_PORT` | Puerto de MySQL | `3306` |
+| `DB_USER` | Usuario de MySQL | `root` |
+| `DB_PASSWORD` | Contraseña de MySQL | `root` |
+| `DB_NAME` | Nombre de la base de datos | `psyai_connect` |
+| `DB_ROOT_PASSWORD` | Password root de MySQL (solo Docker) | `rootpass` |
+| `GEMINI_MODEL` | Modelo de Gemini | `gemini-3.1-flash-lite` |
+| `GEMINI_THINKING_LEVEL` | Nivel de pensamiento | `low` |
+| `GEMINI_API_KEY` | API key de Google Gemini | Para chatbot |
+| `GEMINI_API_KEYS` | API keys separadas por coma (rotación) | Para chatbot |
+| `EMAIL_HOST` | Servidor SMTP | `smtp.gmail.com` |
+| `EMAIL_PORT` | Puerto SMTP | `587` |
+| `EMAIL_USE_TLS` | Usar TLS | `True` |
+| `EMAIL_HOST_USER` | Usuario SMTP | — |
+| `EMAIL_HOST_PASSWORD` | Contraseña SMTP | — |
+| `DEFAULT_FROM_EMAIL` | Dirección de envío | — |
+| `LOGIN_RATE_LIMIT` | Límite para login | `60 per minute` |
+| `REGISTER_RATE_LIMIT` | Límite para registro | `20 per minute` |
+| `PASSWORD_RECOVERY_RATE_LIMIT` | Límite para recuperación | `10 per minute` |
+
+---
+
+## Variables de entorno para Docker
+
+Las siguientes variables ya tienen defaults en `docker-compose.yml` y coinciden con `.env.example`:
+
+```bash
+DB_NAME=psyai_connect
+DB_USER=psyai
+DB_PASSWORD=psyai_pass
+DB_HOST=db              # nombre del servicio MySQL en Docker
+DB_PORT=3306
+DB_ROOT_PASSWORD=rootpass
+```
+
+---
+
+## Seguridad
+
+- **CSRF**: protección habilitada por defecto en todos los formularios.
+- **Rate limiting**: endpoints de autenticación protegidos contra abuso.
+- **HSTS**: habilitado en producción (1 año, incluye subdominios).
+- **SSL redirect**: forzado en producción.
+- **Cookies seguras**: `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SESSION_COOKIE_HTTPONLY`, `CSRF_COOKIE_HTTPONLY` en producción.
+- **SECRET_KEY validation**: en producción, el servidor se niega a arrancar si `SECRET_KEY` no está configurada o usa el valor inseguro por defecto.
+- **Content-Type nosniff**: `X-Content-Type-Options: nosniff` habilitado.
+- **X-Frame-Options**: `DENY` para prevenir clickjacking.
+
+---
+
+## Características principales
 
 - **Autenticación completa**: registro, login, recuperación de contraseña por correo y reset con token seguro.
 - **Chatbot de triaje con IA**: integrado con Google Gemini, con prompt del sistema configurable desde el panel admin, caché de configuración, detección de palabras de riesgo y rotación automática de API keys.
@@ -383,41 +336,15 @@ Los **integration tests** (`tests/test_integration.py`) usan el Django test clie
 - **Gestión de citas**: creación, visualización y seguimiento de citas por parte de pacientes y profesionales.
 - **Historia clínica**: diagnósticos y documentos clínicos adjuntos, visibles para el paciente y gestionados por el profesional.
 - **Evolución del paciente**: seguimiento del progreso terapéutico con entradas diarias.
-- **Facturación**: creación de facturas, integración con pasarela de pago **Wompi**, gestión de estados y anulaciones.
+- **Facturación**: creación de facturas, integración con pasarela de pago Wompi, gestión de estados y anulaciones.
 - **Telemetría en vivo**: el panel admin muestra en tiempo real el uso de CPU, RAM, disco, número de peticiones, endpoints más usados y eventos de seguridad.
-- **Sistema de temas**: soporte para modo claro y oscuro persistido por usuario, con paleta de marca centralizada en variables CSS.
+- **Sistema de temas**: soporte para modo claro y oscuro persistido por usuario.
 - **Diseño responsivo**: CSS adaptativo para móvil, tablet y escritorio por cada sección.
-- **Rate limiting**: protección de endpoints sensibles contra abuso, con configuración diferenciada por entorno.
-- **CSRF**: protección contra Cross-Site Request Forgery habilitada por defecto en todos los formularios.
-- **Admin nativo de Django**: los modelos de cada app están registrados en `admin.py` para inspección y gestión rápida desde `/admin`.
-- **Docker**: containerización lista para desarrollo y producción con hot-reload, MySQL persistente y migraciones automáticas. Archivos organizados en `docker/`.
+- **Docker**: containerización lista para desarrollo y producción con hot-reload, MySQL persistente y migraciones automáticas. Archivos Docker organizados en `docker/`.
 - **219 tests**: unit tests e integration tests cubriendo las capas de servicios y endpoints HTTP.
 
 ---
 
-## 🔒 Seguridad
-
-Este proyecto maneja **datos sensibles de salud mental** (historia clínica, diagnósticos, evolución terapéutica). Medidas ya implementadas:
-
-- **CSRF**: protección habilitada por defecto en todos los formularios.
-- **Rate limiting**: endpoints de autenticación protegidos contra abuso.
-- **HSTS**: habilitado en producción (1 año, incluye subdominios).
-- **SSL redirect**: forzado en producción.
-- **Cookies seguras**: `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SESSION_COOKIE_HTTPONLY`, `CSRF_COOKIE_HTTPONLY` en producción.
-- **Validación de `SECRET_KEY`**: en producción, el servidor se niega a arrancar si `SECRET_KEY` no está configurada o usa el valor inseguro por defecto.
-- **Content-Type nosniff**: `X-Content-Type-Options: nosniff` habilitado.
-- **X-Frame-Options**: `DENY` para prevenir clickjacking.
-- **Permisos centralizados**: control de acceso por rol gestionado desde `apps/core/permissions.py`, no repetido en cada vista.
-
-A tener en cuenta:
-
-- El **superuser de prueba** que crea `docker/entrypoint.sh` automáticamente está pensado **solo para desarrollo local**. No uses ese mismo flujo de arranque automático en una instancia expuesta públicamente sin cambiar esa credencial o desactivar su creación.
-- **Nunca subas `.env` al repositorio.** Usa siempre `.env.example` como plantilla y mantén `.env` en `.gitignore`.
-- **No hardcodees credenciales en el código**, incluyendo scripts auxiliares como `setup_install.py`. Si alguna API key, contraseña o correo personal quedó escrito directamente en un script, revócala/rótala y muévela a variables de entorno.
-- Si el repositorio llegó a tener credenciales reales en algún commit anterior, cambiarlas en el archivo actual **no es suficiente**: siguen visibles en el historial de Git. Hay que rotarlas y, si aplica, limpiar el historial (por ejemplo con `git filter-repo`).
-
----
-
-## 📄 Licencia
+## Licencia
 
 Este proyecto es de uso educativo/interno. Revisa el repositorio para más detalles sobre su licencia.

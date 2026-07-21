@@ -23,9 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function cargarPalabrasDetectadas() {
     try {
-        const res = await fetch('/api/admin/chatbot-detected-words', {
+        const res = await fetch('/api/admin/chatbot-config/palabras-detectadas', {
             credentials: 'include'
         });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (data.success) {
             palabrasDetectadas = data.palabras || [];
@@ -41,6 +42,7 @@ async function cargarConfig() {
         const res = await fetch('/api/admin/chatbot-config', {
             credentials: 'include'
         });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
         if (data.success && data.config) {
@@ -107,6 +109,7 @@ async function cargarEstadisticas() {
         const res = await fetch('/api/admin/chatbot-historial', {
             credentials: 'include'
         });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
         if (data.success && data.stats) {
@@ -206,6 +209,12 @@ function configurarFormularioConfig() {
                 credentials: 'include',
                 body: JSON.stringify(currentData)
             });
+            if (!res.ok) {
+                const text = await res.text().catch(() => '');
+                let msg;
+                try { msg = JSON.parse(text).message; } catch(_) {}
+                throw new Error(msg || `Error del servidor (${res.status})`);
+            }
             const result = await res.json();
             
             if (result.success) {
@@ -221,7 +230,11 @@ function configurarFormularioConfig() {
             }
         } catch(e) {
             console.error('Error guardando configuración:', e);
-            PsyAIAlerts.error('Error', 'Error de conexión al guardar.');
+            const isNetwork = e instanceof TypeError && e.message.includes('fetch');
+            const msg = isNetwork
+                ? 'Sin conexión a la red. Verifica tu conexión a internet.'
+                : `Error al guardar: ${e.message}`;
+            PsyAIAlerts.error('Error al guardar', msg);
         } finally {
             btn.innerHTML = btnText;
             btn.disabled = false;
@@ -265,6 +278,7 @@ async function cargarHistorial() {
         const url = qs ? `/api/admin/chatbot-historial?${qs}` : '/api/admin/chatbot-historial';
         
         const res = await fetch(url, { credentials: 'include' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
         if (data.success && data.pacientes) {
@@ -283,13 +297,13 @@ async function cargarHistorial() {
 
 function getNivelBadge(nivel) {
     if (nivel === 'Alto') {
-        return '<span class="badge bg-danger">Alto</span>';
+        return '<span class="badge-riesgo badge-riesgo-alto"><i class="fas fa-exclamation-triangle"></i> Alto</span>';
     } else if (nivel === 'Medio') {
-        return '<span class="badge bg-warning text-dark">Medio</span>';
+        return '<span class="badge-riesgo badge-riesgo-medio"><i class="fas fa-exclamation-circle"></i> Medio</span>';
     } else if (nivel === 'Bajo') {
-        return '<span class="badge bg-success">Bajo</span>';
+        return '<span class="badge-riesgo badge-riesgo-bajo"><i class="fas fa-check-circle"></i> Bajo</span>';
     }
-    return '<span class="badge bg-secondary">-</span>';
+    return '<span class="badge-riesgo">-</span>';
 }
 
 function escapeHtml(text) {
@@ -347,7 +361,7 @@ function renderizarListaPacientes() {
 
     container.innerHTML = pacientesFiltrados.map(p => {
         const initials = p.nombre.split(' ').map(w => w[0]).filter(Boolean).join('').toUpperCase().substring(0, 2) || '?';
-        const color = p.nivel_max === 'Alto' ? '#dc3545' : p.nivel_max === 'Medio' ? '#f59e0b' : '#10b981';
+        const color = p.nivel_max === 'Alto' ? 'var(--mood-critical)' : p.nivel_max === 'Medio' ? 'var(--mood-neutral)' : 'var(--mood-excellent)';
         const active = pacienteSeleccionado && pacienteSeleccionado.nombre === p.nombre ? 'active' : '';
         const lastMsg = p.mensajes && p.mensajes.length > 0
             ? (p.mensajes[p.mensajes.length - 1].mensajeUsuario || '').substring(0, 50)
@@ -361,7 +375,7 @@ function renderizarListaPacientes() {
                 </div>
                 <div class="patient-meta">
                     <span class="patient-time">${formatFechaRelativa(p.ultimo_mensaje)}</span>
-                    <span class="patient-count badge ${p.nivel_max === 'Alto' ? 'bg-danger' : p.nivel_max === 'Medio' ? 'bg-warning text-dark' : 'bg-success'}">${p.total_mensajes}</span>
+                    <span class="patient-count badge-riesgo ${p.nivel_max === 'Alto' ? 'badge-riesgo-alto' : p.nivel_max === 'Medio' ? 'badge-riesgo-medio' : 'badge-riesgo-bajo'}">${p.total_mensajes}</span>
                 </div>
             </div>
         `;
@@ -380,7 +394,7 @@ function seleccionarPaciente(nombre) {
     const footer = document.getElementById('conversationFooter');
 
     const initials = paciente.nombre.split(' ').map(w => w[0]).filter(Boolean).join('').toUpperCase().substring(0, 2) || '?';
-    const color = paciente.nivel_max === 'Alto' ? '#dc3545' : paciente.nivel_max === 'Medio' ? '#f59e0b' : '#10b981';
+    const color = paciente.nivel_max === 'Alto' ? 'var(--mood-critical)' : paciente.nivel_max === 'Medio' ? 'var(--mood-neutral)' : 'var(--mood-excellent)';
 
     header.style.display = '';
     header.innerHTML = `
@@ -502,36 +516,34 @@ function renderizarRiskTerms() {
     const container = document.getElementById('riskTermsContainer');
     if (!container) return;
 
-    const isDark = document.documentElement.classList.contains('dark-mode');
-
     const estilos = {
         'Alto': {
             icono: 'fa-exclamation-triangle',
-            color: isDark ? '#f87171' : '#dc3545',
-            bg: isDark ? 'rgba(220, 53, 69, 0.15)' : '#fef2f2',
-            border: isDark ? '#f87171' : '#dc3545',
-            badge: isDark ? '#dc3545' : '#dc3545'
+            color: 'var(--mood-critical)',
+            bg: 'rgba(239,68,68,0.08)',
+            border: 'rgba(239,68,68,0.25)',
+            badgeBg: 'var(--mood-critical)'
         },
         'Medio': {
             icono: 'fa-exclamation-circle',
-            color: isDark ? '#fbbf24' : '#f59e0b',
-            bg: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb',
-            border: isDark ? '#fbbf24' : '#f59e0b',
-            badge: isDark ? '#f59e0b' : '#f59e0b'
+            color: 'var(--mood-neutral)',
+            bg: 'rgba(245,183,0,0.08)',
+            border: 'rgba(245,183,0,0.25)',
+            badgeBg: 'var(--mood-neutral)'
         },
         'Bajo': {
             icono: 'fa-check-circle',
-            color: isDark ? '#34d399' : '#10b981',
-            bg: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5',
-            border: isDark ? '#34d399' : '#10b981',
-            badge: isDark ? '#10b981' : '#10b981'
+            color: 'var(--mood-excellent)',
+            bg: 'rgba(34,197,94,0.08)',
+            border: 'rgba(34,197,94,0.25)',
+            badgeBg: 'var(--mood-excellent)'
         }
     };
 
     container.innerHTML = riskTerms.length === 0
         ? '<span class="text-muted small">No hay palabras configuradas</span>'
         : riskTerms.map((item, index) => {
-            const estilo = estilos[item.nivel] || { icono: 'fa-circle', color: '#9ca3af', bg: '#374151', border: '#4b5563', badge: '#6b7280' };
+            const estilo = estilos[item.nivel] || { icono: 'fa-circle', color: 'var(--dm-muted)', bg: 'var(--dm-elevated)', border: 'var(--dm-border)', badgeBg: 'var(--dm-muted)' };
             return `
                 <div class="risk-term-badge" style="
                     display: inline-flex;
@@ -546,18 +558,10 @@ function renderizarRiskTerms() {
                     color: ${estilo.color};
                     margin: 4px;
                     transition: all 0.2s ease;
-                    box-shadow: ${isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)'};
                 ">
                     <i class="fas ${estilo.icono}" style="font-size: 0.9rem;"></i>
-                    <span style="color: ${isDark ? '#e5e7eb' : '#1f2937'};">${escapeHtml(item.palabra)}</span>
-                    <span style="
-                        font-size: 0.7rem;
-                        padding: 2px 8px;
-                        border-radius: 12px;
-                        background: ${estilo.badge};
-                        color: white;
-                        font-weight: 600;
-                    ">${item.nivel}</span>
+                    <span>${escapeHtml(item.palabra)}</span>
+                    <span class="badge-riesgo ${item.nivel === 'Alto' ? 'badge-riesgo-alto' : item.nivel === 'Medio' ? 'badge-riesgo-medio' : 'badge-riesgo-bajo'}" style="font-size:0.65rem; padding:2px 8px;">${item.nivel}</span>
                     <button type="button" 
                         onclick="eliminarPalabra(${index})" 
                         aria-label="Eliminar"
@@ -625,12 +629,18 @@ function configurarFiltroRiesgo() {
 
 async function guardarRiskTerms() {
     try {
-        const res = await fetch('/api/admin/chatbot-risk-terms', {
-            method: 'PUT',
+        const res = await fetch('/api/admin/chatbot-config', {
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ risk_terms: JSON.stringify(riskTerms) })
         });
+        if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            let msg;
+            try { msg = JSON.parse(text).message; } catch(_) {}
+            throw new Error(msg || `Error del servidor (${res.status})`);
+        }
         const data = await res.json();
         if (!data.success) {
             console.error('Error guardando palabras de riesgo:', data.message);
@@ -638,7 +648,11 @@ async function guardarRiskTerms() {
         }
     } catch(e) {
         console.error('Error guardando palabras de riesgo:', e);
-        PsyAIAlerts.error('Error de conexión', 'No se pudieron guardar las palabras de riesgo. Verifica tu conexión.');
+        const isNetwork = e instanceof TypeError && e.message.includes('fetch');
+        const msg = isNetwork
+            ? 'Sin conexión a la red. Verifica tu conexión a internet.'
+            : `Error al guardar: ${e.message}`;
+        PsyAIAlerts.error('Error al guardar', msg);
     }
 }
 
@@ -707,10 +721,16 @@ async function configurarLimpiarPalabras() {
             if (!confirm('¿Estás seguro de eliminar todas las palabras de riesgo?')) return;
             
             try {
-                const res = await fetch('/api/admin/chatbot-config/clear-risk-terms', {
+                const res = await fetch('/api/admin/chatbot-config', {
                     method: 'DELETE',
                     credentials: 'include'
                 });
+                if (!res.ok) {
+                    const text = await res.text().catch(() => '');
+                    let msg;
+                    try { msg = JSON.parse(text).message; } catch(_) {}
+                    throw new Error(msg || `Error del servidor (${res.status})`);
+                }
                 const result = await res.json();
                 
                 if (result.success) {
@@ -722,7 +742,11 @@ async function configurarLimpiarPalabras() {
                 }
             } catch(e) {
                 console.error('Error al limpiar:', e);
-                PsyAIAlerts.error('Error', 'Error de conexión.');
+                const isNetwork = e instanceof TypeError && e.message.includes('fetch');
+                const msg = isNetwork
+                    ? 'Sin conexión a la red. Verifica tu conexión a internet.'
+                    : `Error al eliminar: ${e.message}`;
+                PsyAIAlerts.error('Error al eliminar', msg);
             }
         });
     }

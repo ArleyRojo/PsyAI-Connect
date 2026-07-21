@@ -215,16 +215,18 @@ function renderHistorial() {
 
 function getAccionBadge(accion) {
     const acc = accion?.toLowerCase() || '';
-    let clase = 'bg-secondary';
-    if (acc.includes('agreg')) clase = 'bg-success';
-    else if (acc.includes('edit')) clase = 'bg-warning text-dark';
-    else if (acc.includes('elim')) clase = 'bg-danger';
-    return `<span class="badge ${clase}">${accion||'—'}</span>`;
+    let clase = 'sistema';
+    if (acc.includes('agreg') || acc.includes('crear')) clase = 'create';
+    else if (acc.includes('edit')) clase = 'edit';
+    else if (acc.includes('elim')) clase = 'delete';
+    else if (acc.includes('rol')) clase = 'role';
+    return `<span class="log-badge ${clase}">${accion||'—'}</span>`;
 }
 
 function getRolBadge(rol) {
-    if (!rol) return '<span class="badge bg-secondary">—</span>';
-    return `<span class="badge bg-primary">${capitalizar(rol)}</span>`;
+    if (!rol) return '<span class="log-badge sistema">—</span>';
+    const cls = rol === 'admin' ? 'badge-rol-admin' : rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
+    return `<span class="badge-rol ${cls}">${capitalizar(rol)}</span>`;
 }
 
 // ── Modal editar rol ──────────────────────────────────────────────────────────
@@ -242,7 +244,7 @@ async function guardarRol() {
     const nuevoRol = document.getElementById('modalNuevoRol')?.value;
     if (!nuevoRol || !_editRolId) return;
     try {
-        const res  = await fetch(`${API}/api/admin/usuarios/${_editRolId}/rol`, {
+        const res  = await fetch(`${API}/api/admin/usuarios/${_editRolId}`, {
             method: 'PATCH', headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ nuevoRol })
@@ -259,7 +261,7 @@ window.guardarRol = guardarRol;
 async function confirmarAccion(id, nombre, accion) {
     const acc = accion === 'desactivar' ? 'bloquear' : 'desbloquear';
     try {
-        const res  = await fetch(`${API}/api/admin/usuarios/${id}/bloquear`, {
+        const res  = await fetch(`${API}/api/admin/usuarios/${id}`, {
             method: 'PATCH', headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ accion: acc })
@@ -287,7 +289,7 @@ async function asignarRol() {
     const usuario = todosUsuarios.find(u => u.email === email);
     if (!usuario) return mostrarAlerta('error', 'Usuario no encontrado.');
     try {
-        const res  = await fetch(`${API}/api/admin/usuarios/${usuario.idUsuario}/rol`, {
+        const res  = await fetch(`${API}/api/admin/usuarios/${usuario.idUsuario}`, {
             method: 'PATCH', headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ nuevoRol: rol, motivo: motivo })
@@ -327,12 +329,13 @@ function mostrarTab(tab, btn) {
 
 function rolBadge(rol) {
     if (!rol) return '—';
-    return `<span class="badge bg-primary">${capitalizar(rol)}</span>`;
+    const cls = rol === 'admin' ? 'badge-rol-admin' : rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
+    return `<span class="badge-rol ${cls}">${capitalizar(rol)}</span>`;
 }
 
 function estadoBadge(u) {
-    if (u.activo == 0) return '<span class="badge bg-warning text-dark">Inactivo</span>';
-    return '<span class="badge bg-success">Activo</span>';
+    if (u.activo == 0) return '<span class="badge-estado badge-estado-suspendido">Suspendido</span>';
+    return '<span class="badge-estado badge-estado-activo">Activo</span>';
 }
 
 function capitalizar(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }

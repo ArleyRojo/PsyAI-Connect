@@ -91,6 +91,10 @@ function initActivityBar(stats) {
 function initRealtimeLine(stats) {
     const ctx = document.getElementById('chartRealtime');
     if (!ctx) return;
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded');
+        return;
+    }
     if (_realtimeChart) { _realtimeChart.destroy(); }
     const cpu = stats.cpu || 0;
     const ram = stats.ram || 0;
@@ -102,7 +106,7 @@ function initRealtimeLine(stats) {
             datasets: [
                 {
                     label: 'CPU %',
-                    data: Array(REALTIME_POINTS - 1).fill(null).concat([cpu]),
+                    data: Array(REALTIME_POINTS).fill(cpu),
                     borderColor: '#42A5F5',
                     backgroundColor: 'rgba(66, 165, 245, 0.1)',
                     fill: true,
@@ -111,7 +115,7 @@ function initRealtimeLine(stats) {
                 },
                 {
                     label: 'RAM %',
-                    data: Array(REALTIME_POINTS - 1).fill(null).concat([ram]),
+                    data: Array(REALTIME_POINTS).fill(ram),
                     borderColor: '#66BB6A',
                     backgroundColor: 'rgba(102, 187, 106, 0.1)',
                     fill: true,
@@ -120,7 +124,7 @@ function initRealtimeLine(stats) {
                 },
                 {
                     label: 'Req/min',
-                    data: Array(REALTIME_POINTS - 1).fill(null).concat([rps]),
+                    data: Array(REALTIME_POINTS).fill(rps),
                     borderColor: '#FFA726',
                     backgroundColor: 'rgba(255, 167, 38, 0.1)',
                     fill: true,

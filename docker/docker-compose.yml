@@ -1,11 +1,14 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # PsyAI Connect — Docker Compose (Development)
-# Usage:
-#   docker compose up            — start app + MySQL
-#   docker compose up -d         — start in background
-#   docker compose down          — stop containers
-#   docker compose logs -f app   — follow app logs
-#   docker compose exec app bash — shell into app container
+# Usage (from project root):
+#   docker compose -f docker/docker-compose.yml up
+#   docker compose -f docker/docker-compose.yml up -d
+#   docker compose -f docker/docker-compose.yml down
+#   docker compose -f docker/docker-compose.yml logs -f app
+#   docker compose -f docker/docker-compose.yml exec app bash
+#
+# Usage (from docker/ folder):
+#   docker compose up
 # ──────────────────────────────────────────────────────────────────────────────
 
 services:
@@ -19,7 +22,7 @@ services:
     ports:
       - "${PORT:-8000}:8000"
     env_file:
-      - .env
+      - ../.env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
       - DEBUG=1
@@ -30,7 +33,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
     volumes:
       # Hot-reload: mount the code so changes reflect immediately
-      - .:/app
+      - ..:/app
       # Persist uploaded documents between container restarts
       - uploads_data:/app/static/uploads
     depends_on:
