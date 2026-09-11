@@ -2,34 +2,55 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
-from django.http import JsonResponse
-from django.test import RequestFactory
+from rest_framework.test import APIRequestFactory
+from rest_framework import status
 
 from apps.admin_panel.views import (
-    AdminUsuarioView,
-    AdminNotificacionView,
-    AdminLogsStreamView,
-    AdminStatsStreamView,
+    AdminUsuarioViewSet,
+    AdminNotificacionAPIView,
+    AdminLogsStreamAPIView,
+    AdminStatsStreamAPIView,
+    AdminChatbotConfigViewSet,
+    AdminChatbotPalabrasAPIView,
 )
+from apps.core.permissions import IsAuthenticatedDRF
 
 
 @pytest.fixture
 def rf():
-    return RequestFactory()
+    return APIRequestFactory()
+
+
+def _auth_admin(_self, request, view):
+    request.user_id = 1
+    request.user_role = "admin"
+    request.user_name = "Test"
+    return True
+
+
+@pytest.fixture
+def mock_auth_admin():
+    with patch.object(IsAuthenticatedDRF, "has_permission", _auth_admin):
+        yield
 
 
 @pytest.fixture
 def mock_require_auth():
-    with patch("apps.core.permissions.require_auth") as m:
-        m.return_value = ({"idUsuario": 1, "rol": "admin", "nombre": "Test"}, None)
-        yield m
+    with patch.object(IsAuthenticatedDRF, "has_permission", _auth_admin):
+        yield
+
+
+@pytest.fixture
+def mock_require_admin():
+    with patch.object(IsAuthenticatedDRF, "has_permission", _auth_admin):
+        yield
 
 
 # ── BUG 1: AdminUsuarioView.patch — validación de acción ───────────────────
 
 
 class TestAdminUsuarioPatch:
-    def test_patch_with_valid_action_suspender(self, rf, mock_require_auth):
+    def test_patch_with_valid_action_suspender(self, rf, mock_auth_admin):
         req = rf.patch(
             "/api/admin/usuarios/1",
             data=json.dumps({"accion": "suspender"}),
@@ -42,14 +63,14 @@ class TestAdminUsuarioPatch:
                 {"success": True, "message": "Usuario suspendido"},
                 200,
             )
-            resp = AdminUsuarioView.as_view()(req, id_usuario=1)
+            view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+            resp = view(req, pk="1")
 
         assert resp.status_code == 200
-        data = json.loads(resp.content)
-        assert data["success"] is True
+        assert resp.data["success"] is True
         mock_svc.block_user.assert_called_once()
 
-    def test_patch_with_valid_action_reestablecer(self, rf, mock_require_auth):
+    def test_patch_with_valid_action_reestablecer(self, rf, mock_auth_admin):
         req = rf.patch(
             "/api/admin/usuarios/1",
             data=json.dumps({"accion": "reestablecer"}),
@@ -62,13 +83,13 @@ class TestAdminUsuarioPatch:
                 {"success": True, "message": "Usuario reestablecido"},
                 200,
             )
-            resp = AdminUsuarioView.as_view()(req, id_usuario=1)
+            view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+            resp = view(req, pk="1")
 
         assert resp.status_code == 200
-        data = json.loads(resp.content)
-        assert data["success"] is True
+        assert resp.data["success"] is True
 
-    def test_patch_with_invalid_action_returns_400(self, rf, mock_require_auth):
+    def test_patch_with_invalid_action_returns_400(self, rf, mock_auth_admin):
         req = rf.patch(
             "/api/admin/usuarios/1",
             data=json.dumps({"accion": "accion_inexistente"}),
@@ -76,14 +97,14 @@ class TestAdminUsuarioPatch:
         )
         req.session = MagicMock()
 
-        resp = AdminUsuarioView.as_view()(req, id_usuario=1)
+        view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+        resp = view(req, pk="1")
 
         assert resp.status_code == 400
-        data = json.loads(resp.content)
-        assert data["success"] is False
-        assert "inválida" in data["message"]
+        assert resp.data["success"] is False
+        assert "inválida" in resp.data["message"]
 
-    def test_patch_without_action_or_rol_returns_400(self, rf, mock_require_auth):
+    def test_patch_without_action_or_rol_returns_400(self, rf, mock_auth_admin):
         req = rf.patch(
             "/api/admin/usuarios/1",
             data=json.dumps({"campo_irrelevante": True}),
@@ -91,14 +112,14 @@ class TestAdminUsuarioPatch:
         )
         req.session = MagicMock()
 
-        resp = AdminUsuarioView.as_view()(req, id_usuario=1)
+        view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+        resp = view(req, pk="1")
 
         assert resp.status_code == 400
-        data = json.loads(resp.content)
-        assert data["success"] is False
-        assert "no especificada" in data["message"]
+        assert resp.data["success"] is False
+        assert "no especificada" in resp.data["message"]
 
-    def test_patch_with_nuevoRol_calls_change_role(self, rf, mock_require_auth):
+    def test_patch_with_nuevoRol_calls_change_role(self, rf, mock_auth_admin):
         req = rf.patch(
             "/api/admin/usuarios/1",
             data=json.dumps({"nuevoRol": "profesional"}),
@@ -111,12 +132,13 @@ class TestAdminUsuarioPatch:
                 {"success": True, "message": "Rol actualizado"},
                 200,
             )
-            resp = AdminUsuarioView.as_view()(req, id_usuario=1)
+            view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+            resp = view(req, pk="1")
 
         assert resp.status_code == 200
         mock_svc.change_role.assert_called_once()
 
-    def test_patch_accion_takes_precedence_over_rol(self, rf, mock_require_auth):
+    def test_patch_accion_takes_precedence_over_rol(self, rf, mock_auth_admin):
         req = rf.patch(
             "/api/admin/usuarios/1",
             data=json.dumps({"accion": "suspender", "nuevoRol": "profesional"}),
@@ -129,13 +151,14 @@ class TestAdminUsuarioPatch:
                 {"success": True, "message": "Usuario suspendido"},
                 200,
             )
-            resp = AdminUsuarioView.as_view()(req, id_usuario=1)
+            view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+            resp = view(req, pk="1")
 
         assert resp.status_code == 200
         mock_svc.block_user.assert_called_once()
         mock_svc.change_role.assert_not_called()
 
-    def test_patch_empty_body_returns_400(self, rf, mock_require_auth):
+    def test_patch_empty_body_returns_400(self, rf, mock_auth_admin):
         req = rf.patch(
             "/api/admin/usuarios/1",
             data=b"",
@@ -143,7 +166,8 @@ class TestAdminUsuarioPatch:
         )
         req.session = MagicMock()
 
-        resp = AdminUsuarioView.as_view()(req, id_usuario=1)
+        view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+        resp = view(req, pk="1")
 
         assert resp.status_code == 400
 
@@ -152,24 +176,164 @@ class TestAdminUsuarioPatch:
 
 
 class TestAdminNotificacionDelete:
-    def test_delete_requires_role_before_id_check(self, rf):
+    def test_delete_requires_auth(self, rf):
         req = rf.delete("/api/admin/notificaciones/1")
         req.session = MagicMock()
 
-        with patch("apps.admin_panel.views.require_role") as mock_role:
-            mock_role.return_value = (None, JsonResponse(
-                {"success": False, "message": "No autorizado"}, status=403
-            ))
-            resp = AdminNotificacionView.as_view()(req, id_notificacion=1)
+        with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
+            view = AdminNotificacionAPIView.as_view()
+            resp = view(req, id_notificacion=1)
 
         assert resp.status_code == 403
 
-    def test_delete_without_id_returns_400(self, rf, mock_require_auth):
+    def test_delete_without_id_returns_400(self, rf, mock_auth_admin):
         req = rf.delete("/api/admin/notificaciones/")
         req.session = MagicMock()
 
-        resp = AdminNotificacionView.as_view()(req, id_notificacion=None)
+        view = AdminNotificacionAPIView.as_view()
+        resp = view(req, id_notificacion=None)
 
         assert resp.status_code == 400
-        data = json.loads(resp.content)
-        assert "Falta id" in data["message"]
+        assert "Falta id" in resp.data["message"]
+
+
+# ── BUG FIX: AdminChatbotConfigView.get — tuple unpacking ─────────────────
+
+
+class TestAdminChatbotConfigGet:
+    def test_returns_flat_config_object(self, rf, mock_auth_admin):
+        req = rf.get("/api/admin/chatbot-config")
+        req.session = MagicMock()
+
+        with patch("apps.chatbot.services.ChatbotConfigService") as MockCls:
+            mock_svc = MagicMock()
+            MockCls.return_value = mock_svc
+            mock_svc.get_config.return_value = (
+                {
+                    "success": True,
+                    "config": {
+                        "system_prompt": "Test prompt",
+                        "tone": "amigable",
+                        "temperature": 0.7,
+                        "top_p": 0.9,
+                        "max_tokens": 500,
+                        "max_tokens_user": 1000,
+                        "daily_message_limit": 20,
+                    },
+                },
+                200,
+            )
+            view = AdminChatbotConfigViewSet.as_view({"get": "list"})
+            resp = view(req)
+
+        assert resp.status_code == 200
+        assert resp.data["success"] is True
+        assert isinstance(resp.data["config"], dict)
+        assert resp.data["config"]["system_prompt"] == "Test prompt"
+        assert resp.data["config"]["temperature"] == 0.7
+
+    def test_config_is_not_array(self, rf, mock_auth_admin):
+        req = rf.get("/api/admin/chatbot-config")
+        req.session = MagicMock()
+
+        with patch("apps.chatbot.services.ChatbotConfigService") as MockCls:
+            mock_svc = MagicMock()
+            MockCls.return_value = mock_svc
+            mock_svc.get_config.return_value = (
+                {"success": True, "config": {"system_prompt": "", "tone": ""}},
+                200,
+            )
+            view = AdminChatbotConfigViewSet.as_view({"get": "list"})
+            resp = view(req)
+
+        assert not isinstance(resp.data["config"], list)
+
+
+# ── BUG FIX: AdminChatbotPalabrasView.get — tuple + aggregation ───────────
+
+
+class TestAdminChatbotPalabrasGet:
+    def test_returns_aggregated_palabras(self, rf, mock_auth_admin):
+        req = rf.get("/api/admin/chatbot-config/palabras-detectadas")
+        req.session = MagicMock()
+
+        with patch("apps.chatbot.services.ChatbotConfigService") as MockCls:
+            mock_svc = MagicMock()
+            MockCls.return_value = mock_svc
+            mock_svc.get_historial_palabras_riesgo.return_value = (
+                {
+                    "success": True,
+                    "palabras": [
+                        {
+                            "palabra": "suicidio",
+                            "nivel": "Alto",
+                            "count": 3,
+                            "pacientes": ["Juan", "Maria"],
+                        },
+                    ],
+                },
+                200,
+            )
+            view = AdminChatbotPalabrasAPIView.as_view()
+            resp = view(req)
+
+        assert resp.status_code == 200
+        assert resp.data["success"] is True
+        assert isinstance(resp.data["palabras"], list)
+        assert resp.data["palabras"][0]["palabra"] == "suicidio"
+        assert resp.data["palabras"][0]["count"] == 3
+        assert "Juan" in resp.data["palabras"][0]["pacientes"]
+
+    def test_palabras_not_raw_tuple(self, rf, mock_auth_admin):
+        req = rf.get("/api/admin/chatbot-config/palabras-detectadas")
+        req.session = MagicMock()
+
+        with patch("apps.chatbot.services.ChatbotConfigService") as MockCls:
+            mock_svc = MagicMock()
+            MockCls.return_value = mock_svc
+            mock_svc.get_historial_palabras_riesgo.return_value = (
+                {"success": True, "palabras": []},
+                200,
+            )
+            view = AdminChatbotPalabrasAPIView.as_view()
+            resp = view(req)
+
+        assert "palabras" in resp.data
+        assert isinstance(resp.data["palabras"], list)
+
+
+# ── ChatbotConfigService.get_historial_palabras_riesgo aggregation ────────
+
+
+class TestChatbotConfigServiceAggregation:
+    def test_aggregates_words_from_multiple_patients(self):
+        from apps.chatbot.services import ChatbotConfigService
+
+        svc = ChatbotConfigService()
+        svc.repo = MagicMock()
+        svc.repo.get_historial_palabras_riesgo.return_value = [
+            {"nombre": "Juan", "palabrasRiesgoDetectadas": "muerte,suicidio", "nivelEmocionalDetectado": "Alto"},
+            {"nombre": "Maria", "palabrasRiesgoDetectadas": "muerte", "nivelEmocionalDetectado": "Alto"},
+        ]
+
+        payload, status = svc.get_historial_palabras_riesgo()
+        assert status == 200
+        assert payload["success"] is True
+        palabras = payload["palabras"]
+        assert len(palabras) == 2
+
+        muerte = next(p for p in palabras if p["palabra"] == "muerte")
+        assert muerte["count"] == 2
+        assert "Juan" in muerte["pacientes"]
+        assert "Maria" in muerte["pacientes"]
+
+    def test_empty_rows_returns_empty_list(self):
+        from apps.chatbot.services import ChatbotConfigService
+
+        svc = ChatbotConfigService()
+        svc.repo = MagicMock()
+        svc.repo.get_historial_palabras_riesgo.return_value = []
+
+        payload, status = svc.get_historial_palabras_riesgo()
+        assert status == 200
+        assert payload["palabras"] == []

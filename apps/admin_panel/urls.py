@@ -1,83 +1,74 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from apps.admin_panel import views
 
 app_name = "admin_panel"
 
+router = DefaultRouter(trailing_slash=False)
+router.register(r"admin/usuarios", views.AdminUsuarioViewSet, basename="admin-usuarios")
+router.register(r"admin/chatbot-config", views.AdminChatbotConfigViewSet, basename="admin-chatbot-config")
+
 urlpatterns = [
     path(
+        "admin/chatbot-config/palabras-detectadas",
+        views.AdminChatbotPalabrasAPIView.as_view(),
+        name="admin_chatbot_palabras",
+    ),
+    path("", include(router.urls)),
+    path(
         "admin/crear-columnas-diagnostico",
-        views.AdminDiagnosticoView.as_view(),
+        views.AdminDiagnosticoAPIView.as_view(),
         name="admin_diagnostico",
     ),
     path(
         "admin/stats",
-        views.AdminStatsView.as_view(),
+        views.AdminStatsAPIView.as_view(),
         name="admin_stats",
     ),
     path(
         "admin/stats/stream",
-        views.AdminStatsStreamView.as_view(),
+        views.AdminStatsStreamAPIView.as_view(),
         name="admin_stats_stream",
     ),
     path(
         "admin/logs/stream",
-        views.AdminLogsStreamView.as_view(),
+        views.AdminLogsStreamAPIView.as_view(),
         name="admin_logs_stream",
     ),
     path(
-        "admin/usuarios",
-        views.AdminUsuarioView.as_view(),
-        name="admin_usuarios",
-    ),
-    path(
-        "admin/usuarios/<int:id_usuario>",
-        views.AdminUsuarioView.as_view(),
-        name="admin_usuario",
-    ),
-    path(
         "admin/roles/usuarios",
-        views.AdminRolView.as_view(),
+        views.AdminRolAPIView.as_view(),
         name="admin_roles_usuarios",
     ),
     path(
         "admin/roles/historial",
-        views.AdminRolView.as_view(),
+        views.AdminRolAPIView.as_view(),
         name="admin_roles_historial",
     ),
     path(
         "admin/notificaciones",
-        views.AdminNotificacionView.as_view(),
+        views.AdminNotificacionAPIView.as_view(),
         name="admin_notificaciones",
     ),
     path(
         "admin/notificaciones/<int:id_notificacion>",
-        views.AdminNotificacionView.as_view(),
+        views.AdminNotificacionAPIView.as_view(),
         name="admin_notificacion",
     ),
     path(
         "admin/logs",
-        views.AdminLogView.as_view(),
+        views.AdminLogAPIView.as_view(),
         name="admin_logs",
     ),
     path(
         "admin/online",
-        views.AdminOnlineView.as_view(),
+        views.AdminOnlineAPIView.as_view(),
         name="admin_online",
     ),
     path(
-        "admin/chatbot-config",
-        views.AdminChatbotConfigView.as_view(),
-        name="admin_chatbot_config",
-    ),
-    path(
-        "admin/chatbot-config/palabras-detectadas",
-        views.AdminChatbotPalabrasView.as_view(),
-        name="admin_chatbot_palabras",
-    ),
-    path(
         "admin/chatbot-historial",
-        views.AdminChatbotHistorialView.as_view(),
+        views.AdminChatbotHistorialAPIView.as_view(),
         name="admin_chatbot_historial",
     ),
 ]

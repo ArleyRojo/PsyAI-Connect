@@ -220,3 +220,77 @@ class TestGetConfig:
 
         assert status == 200
         assert payload["config"]["system_prompt"] == "test"
+
+
+# ── ChatbotConfigService.save_config validation ───────────────────────────
+
+
+class TestSaveConfigValidation:
+    def test_valid_config_passes(self, config_service, mock_config_repo):
+        mock_config_repo.get_config.return_value = {"system_prompt": "test"}
+        payload, status = config_service.save_config({
+            "system_prompt": "test",
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "max_tokens": 500,
+            "max_tokens_user": 1000,
+            "daily_message_limit": 20,
+        }, admin_id=1)
+        assert status == 200
+        assert payload["success"] is True
+
+    def test_temperature_out_of_range(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"temperature": 1.5}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+        assert "temperature" in payload["message"]
+
+    def test_temperature_negative(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"temperature": -0.1}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+
+    def test_top_p_out_of_range(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"top_p": 2.0}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+        assert "top_p" in payload["message"]
+
+    def test_max_tokens_too_low(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"max_tokens": 50}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+        assert "max_tokens" in payload["message"]
+
+    def test_max_tokens_too_high(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"max_tokens": 2000}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+
+    def test_max_tokens_user_too_low(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"max_tokens_user": 100}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+
+    def test_daily_message_limit_too_high(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"daily_message_limit": 500}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+
+    def test_daily_message_limit_zero(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"daily_message_limit": 0}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+
+    def test_non_numeric_temperature(self, config_service, mock_config_repo):
+        payload, status = config_service.save_config({"temperature": "abc"}, admin_id=1)
+        assert status == 400
+        assert payload["success"] is False
+
+    def test_text_fields_not_validated(self, config_service, mock_config_repo):
+        mock_config_repo.get_config.return_value = {"system_prompt": "test"}
+        payload, status = config_service.save_config({
+            "system_prompt": "new prompt",
+            "tone": "amigable",
+        }, admin_id=1)
+        assert status == 200

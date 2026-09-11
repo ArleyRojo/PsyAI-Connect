@@ -1989,21 +1989,18 @@ button:focus-visible,
     align-items: center;
 }
 .progress-nav__label .pct {
-.card:hover {
-        box-shadow: var(--shadow);
-        transform: translateY(-2px);
-        border-color: var(--color-primary);
-    }
     font-weight: 800;
     font-size: 0.85rem;
-    .main-content {
-        background: var(--color-bg-soft);
-        transition: background 0.3s;
-    }
-    
-    
-    
     color: var(--color-secondary, #0D47A1);
+}
+.card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    border-color: var(--color-primary);
+}
+.main-content {
+    background: var(--color-bg-soft);
+    transition: background 0.3s;
 }
 .progress-nav__bar {
     height: 6px;
@@ -2784,17 +2781,6 @@ button:focus-visible,
 /* ==============================
    ANIMACIONES
    ============================== */
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
 
 @keyframes cardLineSweep {
     0% {

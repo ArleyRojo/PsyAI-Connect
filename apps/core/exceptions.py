@@ -19,5 +19,11 @@ def custom_exception_handler(exc, context):
         }
     else:
         logger.exception("Unhandled exception: %s", exc)
+        from rest_framework.response import Response as DRFResponse
+        from rest_framework import status as drf_status
+        response = DRFResponse(
+            {"success": False, "message": "Error interno del servidor", "code": 500},
+            status=drf_status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
     return response

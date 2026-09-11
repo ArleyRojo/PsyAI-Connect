@@ -51,6 +51,8 @@ class ChatRepository:
         return ConversacionesChatbot.objects.filter(
             idPaciente_id=patient_id,
             fecha__date=timezone.now().date(),
+        ).exclude(
+            nivelEmocionalDetectado="Alto",
         ).count()
 
     def get_assigned_professionals(self, patient_id):
@@ -76,6 +78,22 @@ class ChatRepository:
         except Register.DoesNotExist:
             return None
 
+    def get_patient_email(self, patient_id):
+        try:
+            user = Register.objects.get(idUsuario=patient_id)
+            return user.email
+        except Register.DoesNotExist:
+            return None
+
+    def get_professional_emails(self, professional_ids):
+        if not professional_ids:
+            return []
+        return list(
+            Register.objects.filter(
+                idUsuario__in=professional_ids, rol="profesional"
+            ).values_list("email", flat=True)
+        )
+
     def notificacion_reciente_existe(self, patient_name, tipo, horas=12):
         from apps.scheduling.models import Notificaciones
         cutoff = timezone.now() - timedelta(hours=horas)
@@ -89,17 +107,16 @@ class ChatRepository:
         cutoff = timezone.now() - timedelta(days=days)
         try:
             from apps.professionals.models import PacientesProfesional
+
+            patient_ids = PacientesProfesional.objects.filter(
+                idProfesional_id=professional_id
+            ).values_list("idPaciente_id", flat=True)
+
             rows = (
                 ConversacionesChatbot.objects.filter(
                     nivelEmocionalDetectado="Bajo",
                     fecha__gte=cutoff,
-                )
-                .filter(
-                    Q(pacientesprofesional__idProfesional_id=professional_id)
-                    | Q(
-                        citas__idProfesional_id=professional_id,
-                        citas__estado__iexact="Pendiente",
-                    )
+                    idPaciente_id__in=patient_ids,
                 )
                 .values("idPaciente_id")
                 .annotate(total=Count("idConversacion"))
@@ -128,6 +145,10 @@ class ChatbotConfigRepository:
             "medium_terms": "medium_terms",
             "medium_response": "medium_response",
             "fallback_response": "fallback_response",
+            "crisis_phone": "crisis_phone",
+            "thinking_level": "thinking_level",
+            "prompt_history_window": "prompt_history_window",
+            "gemini_history_window": "gemini_history_window",
             "temperature": "temperature",
             "top_p": "top_p",
             "max_tokens": "max_tokens",

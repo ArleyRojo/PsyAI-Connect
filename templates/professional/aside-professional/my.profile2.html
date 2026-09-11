@@ -75,17 +75,17 @@
                     <i class="fas fa-cog"></i>
                 </a>
             </div>
-            <div class="sidebar__actions">
-                <div class="theme-switch-container">
-                    <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                    <button id="theme-toggle" title="Cambiar modo"></button>
-                    <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-                </div>
-                <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Cerrar Sesión</span>
-                </a>
+            <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
             </div>
+        </div>
+        <div class="sidebar__logout-section">
+            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </a>
         </div>
     </aside>
 
@@ -120,9 +120,9 @@
             </div>
         </div>
 
-        <!-- Informaci�n Profesional -->
+        <!-- Información Profesional -->
         <div class="card profile-card p-4 mb-4">
-            <h5><i class="fas fa-id-card icon-id"></i>Informaci�n Profesional</h5>
+            <h5><i class="fas fa-id-card icon-id"></i>Información Profesional</h5>
             <div class="field-row">
                 <span class="field-label"><i class="fas fa-user"></i>Nombre:</span>
                 <span class="field-value" data-field="nombre">Cargando...</span>
@@ -132,7 +132,7 @@
                 <span class="field-value" data-field="especialidad">Cargando...</span>
             </div>
             <div class="field-row">
-                <span class="field-label"><i class="fas fa-venus-mars"></i>G�nero:</span>
+                <span class="field-label"><i class="fas fa-venus-mars"></i>Género:</span>
                 <span class="field-value" data-field="genero">No especificado</span>
             </div>
             <div class="field-row">
@@ -144,7 +144,7 @@
                 <span class="field-value" data-field="licencia">Cargando...</span>
             </div>
             <button class="btn-profile-grad mt-3" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
-                <i class="fas fa-edit"></i> Editar Informaci�n
+                <i class="fas fa-edit"></i> Editar Información
             </button>
         </div>
 
@@ -173,7 +173,7 @@
                 </div>
                 <div>
                     <h5 class="psyai-modal__title">Editar Perfil Profesional</h5>
-                    <p class="psyai-modal__subtitle">Actualiza tu informaci�n profesional</p>
+                    <p class="psyai-modal__subtitle">Actualiza tu información profesional</p>
                 </div>
                 <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
                     <i class="fas fa-times"></i>
@@ -183,7 +183,7 @@
             <div class="psyai-modal__body">
                 <div class="psyai-modal__field">
                     <label class="psyai-modal__label">
-                        <i class="fas fa-venus-mars"></i> G�nero
+                        <i class="fas fa-venus-mars"></i> Género
                     </label>
                     <input type="text" class="psyai-modal__input profile-readonly-field" id="editGeneroProf" readonly tabindex="-1">
                     <small class="text-muted d-block mt-1">Definido al registrarte. No puede modificarse.</small>
@@ -192,11 +192,11 @@
                     <label class="psyai-modal__label">
                         <i class="fas fa-brain"></i> Especialidad
                     </label>
-                    <input type="text" class="psyai-modal__input" id="editEspecialidad" placeholder="Ej: Psicolog�a Cl�nica">
+                    <input type="text" class="psyai-modal__input" id="editEspecialidad" placeholder="Ej: Psicología Clínica">
                 </div>
                 <div class="psyai-modal__field">
                     <label class="psyai-modal__label">
-                        <i class="fas fa-id-badge"></i> N�mero de Licencia
+                        <i class="fas fa-id-badge"></i> Número de Licencia
                     </label>
                     <input type="text" class="psyai-modal__input" id="editLicencia" placeholder="Tu licencia profesional">
                 </div>

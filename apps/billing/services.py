@@ -4,12 +4,74 @@ import logging
 
 import requests
 from django.conf import settings
+from django.template.loader import render_to_string
 
 from apps.billing.repositories import InvoiceRepository
 
 logger = logging.getLogger(__name__)
 
 METODOS_PAGO_SIMULADO = {"pse", "tarjeta"}
+
+METODO_PAGO_LABELS = {
+    "banco": "Banco",
+    "tarjeta": "Tarjeta",
+    "efectivo": "Efectivo",
+    "transferencia": "Transferencia",
+    "pse": "PSE",
+}
+
+
+class InvoiceMailService:
+    @staticmethod
+    def _get_site_url():
+        return getattr(settings, "SITE_URL", "http://localhost:8000")
+
+    @staticmethod
+    def _formatear_fecha(fecha):
+        if fecha and hasattr(fecha, "strftime"):
+            return fecha.strftime("%d/%m/%Y %H:%M")
+        return str(fecha) if fecha else ""
+
+    @classmethod
+    def send_factura_notificacion(cls, recipient_email, *, titulo, mensaje, id_factura,
+                                  nombre_paciente=None, nombre_profesional=None,
+                                  monto=0, metodo_pago="tarjeta", estado_pago="Pendiente",
+                                  fecha=None, items=None, motivo_anulacion=None,
+                                  cta_link=None, cta_texto=None):
+        if not recipient_email:
+            logger.warning("No se envió correo de factura: destinatario vacío")
+            return
+
+        site_url = cls._get_site_url()
+        ctx = {
+            "titulo": titulo,
+            "mensaje": mensaje,
+            "id_factura": id_factura,
+            "fecha": cls._formatear_fecha(fecha) if fecha else "",
+            "nombre_paciente": nombre_paciente,
+            "nombre_profesional": nombre_profesional,
+            "metodo_pago": METODO_PAGO_LABELS.get(metodo_pago, metodo_pago),
+            "estado_pago": estado_pago,
+            "monto_total": f"{float(monto):,.0f}" if monto else "0",
+            "items": items or [],
+            "motivo_anulacion": motivo_anulacion,
+            "cta_link": cta_link,
+            "cta_texto": cta_texto or "Ver factura",
+            "site_url": site_url,
+        }
+
+        try:
+            subject = titulo
+            text_body = f"{titulo}\n\n{mensaje}\n\nFactura #{id_factura}\nTotal: ${float(monto):,.0f}\nEstado: {estado_pago}"
+            html_body = render_to_string("emails/factura_notificacion.html", ctx)
+
+            from django.core.mail import EmailMultiAlternatives
+            msg = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [recipient_email])
+            msg.attach_alternative(html_body, "text/html")
+            msg.send(fail_silently=True)
+            logger.info(f"Correo de factura enviado a {recipient_email}: {titulo}")
+        except Exception as e:
+            logger.error(f"Error enviando correo de factura a {recipient_email}: {e}")
 
 
 class InvoiceService:
@@ -36,6 +98,28 @@ class InvoiceService:
             invoice_id = self.repo.create_invoice(
                 patient_id, professional_id, cita_id, items, metodo_pago,
             )
+
+            try:
+                from apps.authentication.models import Register
+                paciente = Register.objects.filter(idUsuario=patient_id).first()
+                profesional = Register.objects.filter(idUsuario=professional_id).first()
+                site_url = InvoiceMailService._get_site_url()
+                InvoiceMailService.send_factura_notificacion(
+                    recipient_email=paciente.email if paciente else None,
+                    titulo="Nueva factura generada",
+                    mensaje=f"Se ha generado una factura por un valor de ${sum(i['precioUnitario'] for i in items):,.0f}.",
+                    id_factura=invoice_id,
+                    nombre_paciente=paciente.nombre if paciente else None,
+                    nombre_profesional=profesional.nombre if profesional else None,
+                    monto=sum(i["precioUnitario"] for i in items),
+                    metodo_pago=metodo_pago,
+                    estado_pago="Pendiente",
+                    items=[{"descripcion": i["descripcion"], "precio": f"{i['precioUnitario']:,.0f}"} for i in items],
+                    cta_link=f"{site_url}/aside-patient/facturas.html",
+                )
+            except Exception as e:
+                logger.error(f"Error enviando correo de factura: {e}")
+
             return {"success": True, "message": "Factura creada correctamente", "idFactura": invoice_id}, 201
         except Exception as e:
             logger.error("Error creando factura: %s", e, exc_info=True)
@@ -140,6 +224,32 @@ class InvoiceService:
             return {"success": False, "message": "No tienes permiso para anular esta factura"}, 403
 
         self.repo.annul_invoice(invoice_id, motivo.strip())
+
+        try:
+            from apps.authentication.models import Register
+            factura_data = self.repo.get_invoice_by_id(invoice_id)
+            if factura_data:
+                paciente = Register.objects.filter(idUsuario=factura_data["idPaciente"]).first()
+                profesional = Register.objects.filter(idUsuario=factura_data["idProfesional"]).first()
+                site_url = InvoiceMailService._get_site_url()
+                for recipient in [paciente, profesional]:
+                    if recipient:
+                        InvoiceMailService.send_factura_notificacion(
+                            recipient_email=recipient.email,
+                            titulo="Factura anulada",
+                            mensaje=f"La factura #{invoice_id} ha sido anulada.",
+                            id_factura=invoice_id,
+                            nombre_paciente=paciente.nombre if paciente else None,
+                            nombre_profesional=profesional.nombre if profesional else None,
+                            monto=factura_data.get("monto", 0),
+                            metodo_pago=factura_data.get("metodoPago", "tarjeta"),
+                            estado_pago="Anulada",
+                            motivo_anulacion=motivo.strip(),
+                            cta_link=f"{site_url}/aside-patient/facturas.html",
+                        )
+        except Exception as e:
+            logger.error(f"Error enviando correo de anulación: {e}")
+
         return {"success": True, "message": "Factura anulada correctamente"}, 200
 
     def init_wompi_payment(self, invoice_id, patient_id):
@@ -241,4 +351,39 @@ class InvoiceService:
 
         self.repo.update_payment_status(invoice_id, "Pagado")
         self.repo.set_payment_reference(invoice_id, reference, transaction_id)
+
+        try:
+            from apps.authentication.models import Register
+            paciente = Register.objects.filter(idUsuario=patient_id).first()
+            factura_data = self.repo.get_invoice_by_id(invoice_id)
+            if factura_data:
+                profesional = Register.objects.filter(idUsuario=factura_data["idProfesional"]).first()
+                site_url = InvoiceMailService._get_site_url()
+                InvoiceMailService.send_factura_notificacion(
+                    recipient_email=paciente.email if paciente else None,
+                    titulo="Pago confirmado",
+                    mensaje=f"Tu pago de la factura #{invoice_id} ha sido confirmado correctamente.",
+                    id_factura=invoice_id,
+                    nombre_paciente=paciente.nombre if paciente else None,
+                    nombre_profesional=profesional.nombre if profesional else None,
+                    monto=factura_data.get("monto", 0),
+                    metodo_pago=factura_data.get("metodoPago", "tarjeta"),
+                    estado_pago="Pagado",
+                    cta_link=f"{site_url}/aside-patient/facturas.html",
+                )
+                InvoiceMailService.send_factura_notificacion(
+                    recipient_email=profesional.email if profesional else None,
+                    titulo="Pago recibido",
+                    mensaje=f"El paciente {paciente.nombre if paciente else ''} ha realizado el pago de la factura #{invoice_id}.",
+                    id_factura=invoice_id,
+                    nombre_paciente=paciente.nombre if paciente else None,
+                    nombre_profesional=profesional.nombre if profesional else None,
+                    monto=factura_data.get("monto", 0),
+                    metodo_pago=factura_data.get("metodoPago", "tarjeta"),
+                    estado_pago="Pagado",
+                    cta_link=f"{site_url}/aside-professional/facturacion.html",
+                )
+        except Exception as e:
+            logger.error(f"Error enviando correo de pago confirmado: {e}")
+
         return {"success": True, "message": "Pago confirmado correctamente"}, 200

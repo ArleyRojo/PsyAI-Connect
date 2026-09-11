@@ -2,24 +2,6 @@ import pytest
 from django.test import Client
 
 
-# ── Database override ────────────────────────────────────────────────────────
-# All tests run on SQLite in-memory so they don't need MySQL.
-# Integration tests that need the full stack use Django's test client.
-
-
-@pytest.fixture(autouse=True)
-def _use_sqlite_for_tests(settings):
-    """Override MySQL with in-memory SQLite for every test."""
-    settings.DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": ":memory:",
-        }
-    }
-    settings.DEBUG = False
-    settings.ALLOWED_HOSTS = ["*"]
-
-
 # ── Reusable fixtures ────────────────────────────────────────────────────────
 
 

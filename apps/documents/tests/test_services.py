@@ -46,9 +46,10 @@ class TestUploadProfesionalDoc:
         result, status = documento_service.upload_profesional_doc(1, 5, fake_file, "general", "privado", "")
         assert status == 400
 
+    @patch("apps.documents.services.os.makedirs")
     @patch("apps.documents.services.os.path.exists", return_value=True)
     @patch("builtins.open", new_callable=MagicMock)
-    def test_valid_upload(self, mock_open, mock_exists, documento_service, mock_documento_repo):
+    def test_valid_upload(self, mock_open, mock_exists, mock_makedirs, documento_service, mock_documento_repo):
         mock_documento_repo.create_profesional_doc.return_value = 1
         fake_file = MagicMock()
         fake_file.name = "historia.pdf"
@@ -138,9 +139,10 @@ class TestUploadPatientDoc:
         result, status = documento_service.upload_patient_doc(5, fake_file, "Desc")
         assert status == 400
 
+    @patch("apps.documents.services.os.makedirs")
     @patch("apps.documents.services.os.path.exists", return_value=True)
     @patch("builtins.open", new_callable=MagicMock)
-    def test_valid_upload(self, mock_open, mock_exists, documento_service, mock_documento_repo):
+    def test_valid_upload(self, mock_open, mock_exists, mock_makedirs, documento_service, mock_documento_repo):
         mock_documento_repo.create_patient_doc.return_value = 3
         fake_file = MagicMock()
         fake_file.name = "documento.pdf"

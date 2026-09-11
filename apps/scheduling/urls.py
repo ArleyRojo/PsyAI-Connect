@@ -1,8 +1,9 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from apps.scheduling.views import (
-    CitaListResource,
-    CitaDetailResource,
+    CitaViewSet,
+    CitaDetailViewSet,
     CitaDisponibleResource,
     CitaProximaResource,
     CitaHorarioOcupadoResource,
@@ -10,13 +11,16 @@ from apps.scheduling.views import (
 
 app_name = "scheduling"
 
+router = DefaultRouter()
+router.register(r"citas", CitaViewSet, basename="cita")
+
 urlpatterns = [
-    path("citas", CitaListResource.as_view(), name="citas"),
-    path("citas/<int:id_cita>", CitaDetailResource.as_view(), name="cita"),
+    path("citas/<int:pk>", CitaDetailViewSet.as_view({"patch": "partial_update", "delete": "destroy"}), name="cita"),
     path("citas/disponibles", CitaDisponibleResource.as_view(), name="citas_disponibles"),
     path("citas/fechas-disponibles", CitaDisponibleResource.as_view(), name="citas_fechas_disponibles"),
     path("citas/proxima", CitaProximaResource.as_view(), name="cita_proxima"),
     path("citas/horarios-ocupados", CitaHorarioOcupadoResource.as_view(), name="citas_horarios_ocupados"),
-    path("citas/profesional", CitaListResource.as_view(), name="citas_profesional"),
-    path("citas/paciente", CitaListResource.as_view(), name="citas_paciente"),
+    path("citas/profesional", CitaViewSet.as_view({"get": "list"}), name="citas_profesional"),
+    path("citas/paciente", CitaViewSet.as_view({"get": "list"}), name="citas_paciente"),
+    path("", include(router.urls)),
 ]

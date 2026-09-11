@@ -1,32 +1,44 @@
 import os
 
-from django.http import JsonResponse
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from django.apps import apps
+from django.conf import settings
+from rest_framework import viewsets, status, generics
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from apps.core.permissions import parse_json_body, require_auth, require_role
+from apps.core.permissions import (
+    IsAuthenticatedDRF,
+    IsPaciente,
+    IsProfesional,
+    IsAdminOrProfesional,
+    parse_json_body,
+)
 from apps.patients.services import PatientService
+from apps.patients.serializers import (
+    ChatbotEncuestaSerializer,
+    ChatbotMessageSerializer,
+    ChatMensajeSerializer,
+    ConsentimientoSerializer,
+    DocumentoAutorizacionSerializer,
+    DocumentoUploadSerializer,
+    EvolucionSerializer,
+    PreferenciasSerializer,
+)
 
-try:
+if apps.is_installed("apps.chatbot"):
     from apps.chatbot.services import ChatbotService
-except ImportError:
-    ChatbotService = None
-
-try:
     from apps.chatbot.services import ChatEventsServiceManager as MensajesService
-except ImportError:
-    MensajesService = None
-
-try:
     from apps.chatbot.services import ChatbotConfigService, chatbot_config_events
-except ImportError:
+else:
+    ChatbotService = None
+    MensajesService = None
     ChatbotConfigService = None
     chatbot_config_events = None
 
-try:
+if apps.is_installed("apps.documents"):
     from apps.documents.services import DocumentoService
-except ImportError:
+else:
     DocumentoService = None
 
 
@@ -34,174 +46,184 @@ def _get_patient_service():
     return PatientService()
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class PerfilPacienteResource(View):
-    def get(self, request, id_usuario=None):
-        user, err = require_auth(request)
-        if err:
-            return err
-        if user["rol"] not in ("admin", "profesional") and int(user["idUsuario"]) != id_usuario:
-            return JsonResponse({"success": False, "message": "No autorizado"}, status=403)
-        payload, status = _get_patient_service().get_patient_profile(id_usuario)
-        return JsonResponse(payload, status=status)
+class PerfilPacienteViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF]
 
-    def put(self, request, id_usuario=None):
-        user, err = require_auth(request)
-        if err:
-            return err
-        if user["rol"] != "paciente":
-            return JsonResponse({"success": False, "message": "No autorizado"}, status=403)
-        data, err = parse_json_body(request)
-        if err:
-            return err
-        data["idUsuario"] = user["idUsuario"]
-        payload, status = _get_patient_service().update_patient_profile(data)
-        return JsonResponse(payload, status=status)
+    def retrieve(self, request, pk=None):
+        id_usuario = int(pk)
+        user_role = getattr(request, "user_role", None)
+        user_id = getattr(request, "user_id", None)
+        if user_role not in ("admin", "profesional") and user_id != id_usuario:
+            return Response(
+                {"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN
+            )
+        payload, status_code = _get_patient_service().get_patient_profile(id_usuario)
+        return Response(payload, status=status_code)
+
+    def update(self, request, pk=None):
+        user_role = getattr(request, "user_role", None)
+        if user_role != "paciente":
+            return Response(
+                {"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN
+            )
+        data = request.data.copy()
+        data["idUsuario"] = getattr(request, "user_id", None)
+        payload, status_code = _get_patient_service().update_patient_profile(data)
+        return Response(payload, status=status_code)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class PerfilFotoResource(View):
-    def _handle(self, request):
-        user, err = require_auth(request)
-        if err:
-            return err
+class PreferenciasPacienteViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def list(self, request):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_patient_service().get_preferences(user_id)
+        return Response(payload, status=status_code)
+
+    def update(self, request):
+        user_id = getattr(request, "user_id", None)
+        data = request.data.copy()
+        payload, status_code = _get_patient_service().save_preferences(user_id, data)
+        return Response(payload, status=status_code)
+
+
+class PerfilFotoViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF]
+
+    def update(self, request):
+        user_id = getattr(request, "user_id", None)
         file = request.FILES.get("foto") or request.FILES.get("fotoPerfil")
-        payload, status = _get_patient_service().update_profile_photo(user["idUsuario"], file)
-        return JsonResponse(payload, status=status)
+        payload, status_code = _get_patient_service().update_profile_photo(user_id, file)
+        return Response(payload, status=status_code)
 
-    def put(self, request):
-        return self._handle(request)
+    def create(self, request):
+        return self.update(request)
+
+
+class EvolucionViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def list(self, request):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_patient_service().get_evolution_history(user_id)
+        return Response(payload, status=status_code)
+
+    def create(self, request):
+        user_id = getattr(request, "user_id", None)
+        data = request.data.copy()
+        payload, status_code = _get_patient_service().save_evolution(user_id, data)
+        return Response(payload, status=status_code)
+
+
+class PacienteViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsAdminOrProfesional]
+
+    def list(self, request):
+        page = int(request.query_params.get("page", 1))
+        limit = int(request.query_params.get("limit", 20))
+        payload, status_code = _get_patient_service().list_patients(page, limit)
+        return Response(payload, status=status_code)
+
+
+class ProfesionalViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF]
+
+    def list(self, request):
+        payload, status_code = _get_patient_service().list_professionals()
+        return Response(payload, status=status_code)
+
+
+class ChatbotAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
 
     def post(self, request):
-        return self._handle(request)
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class EvolucionResource(View):
-    def get(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
-        payload, status = _get_patient_service().get_evolution_history(user["idUsuario"])
-        return JsonResponse(payload, status=status)
-
-    def post(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
-        payload, status = _get_patient_service().save_evolution(user["idUsuario"], parse_json_body(request)[0] or {})
-        return JsonResponse(payload, status=status)
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class PacienteResource(View):
-    def get(self, request):
-        user, err = require_role(request, "profesional", "admin")
-        if err:
-            return err
-        page = int(request.GET.get("page", 1))
-        limit = int(request.GET.get("limit", 20))
-        payload, status = _get_patient_service().list_patients(page, limit)
-        return JsonResponse(payload, status=status)
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class ProfesionalResource(View):
-    def get(self, request):
-        user, err = require_auth(request)
-        if err:
-            return err
-        payload, status = _get_patient_service().list_professionals()
-        return JsonResponse(payload, status=status)
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class ChatbotResource(View):
-    def post(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
         if not ChatbotService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
-        data, err = parse_json_body(request)
-        if err:
-            return err
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        data = request.data.copy()
         svc = ChatbotService()
-        payload, status = svc.build_response(user["idUsuario"], data.get("mensaje"))
-        return JsonResponse(payload, status=status)
+        payload, status_code = svc.build_response(
+            getattr(request, "user_id", None), data.get("mensaje")
+        )
+        return Response(payload, status=status_code)
 
     def get(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
         if not ChatbotService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         svc = ChatbotService()
-        payload, status = svc.get_history(user["idUsuario"])
-        return JsonResponse(payload, status=status)
+        payload, status_code = svc.get_history(getattr(request, "user_id", None))
+        return Response(payload, status=status_code)
 
     def delete(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
         if not MensajesService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         svc = MensajesService()
-        svc.eliminar_historial_chatbot(user["idUsuario"])
-        return JsonResponse({"success": True}, status=200)
+        svc.eliminar_historial_chatbot(getattr(request, "user_id", None))
+        return Response({"success": True}, status=status.HTTP_200_OK)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class ChatbotEncuestaResource(View):
-    def post(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
-        payload, status = _get_patient_service().save_chatbot_survey(user["idUsuario"], parse_json_body(request)[0] or {})
-        return JsonResponse(payload, status=status)
+class ChatbotEncuestaViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def create(self, request):
+        user_id = getattr(request, "user_id", None)
+        serializer = ChatbotEncuestaSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        payload, status_code = _get_patient_service().save_chatbot_survey(
+            user_id, serializer.validated_data
+        )
+        return Response(payload, status=status_code)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class ChatbotConfigResource(View):
-    def get(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
+class ChatbotConfigViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def list(self, request):
         if not ChatbotConfigService:
-            return JsonResponse({"success": True, "config": {
-                "max_tokens": 600,
-                "max_tokens_user": 1000,
-                "daily_message_limit": 20,
-            }}, status=200)
+            return Response(
+                {
+                    "success": True,
+                    "config": {
+                        "max_tokens": 600,
+                        "max_tokens_user": 1000,
+                        "daily_message_limit": 20,
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
         svc = ChatbotConfigService()
         config_data, _ = svc.get_config()
-        return JsonResponse({
-            "success": True,
-            "config": {
-                "max_tokens": config_data.get("config", {}).get("max_tokens", 600),
-                "max_tokens_user": config_data.get("config", {}).get("max_tokens_user", 1000),
-                "daily_message_limit": config_data.get("config", {}).get("daily_message_limit", 20),
-            }
-        }, status=200)
+        return Response(
+            {
+                "success": True,
+                "config": {
+                    "max_tokens": config_data.get("config", {}).get("max_tokens", 600),
+                    "max_tokens_user": config_data.get("config", {}).get("max_tokens_user", 1000),
+                    "daily_message_limit": config_data.get("config", {}).get("daily_message_limit", 20),
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class ChatbotConfigEventsResource(View):
+class ChatbotConfigEventsResource(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
     def get(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            from django.http import StreamingHttpResponse
-            def error_stream():
-                yield "event: auth-error\ndata: {\"message\": \"No autorizado\"}\n\n"
-            return StreamingHttpResponse(error_stream(), content_type="text/event-stream", status=200)
-
         from django.http import StreamingHttpResponse
         from queue import Empty
-        import queue
 
         if not chatbot_config_events:
             def error_stream():
-                yield "event: error\ndata: {\"message\": \"Servicio no disponible\"}\n\n"
+                yield 'event: error\ndata: {"message": "Servicio no disponible"}\n\n'
             return StreamingHttpResponse(error_stream(), content_type="text/event-stream", status=200)
 
         q = chatbot_config_events.subscribe()
@@ -221,95 +243,97 @@ class ChatbotConfigEventsResource(View):
         return StreamingHttpResponse(stream(), content_type="text/event-stream")
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class ConsentimientoChatbotResource(View):
-    def get(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
-        payload, status = _get_patient_service().get_chatbot_consent(user["idUsuario"])
-        return JsonResponse(payload, status=status)
+class ConsentimientoChatbotViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
 
-    def post(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
-        data, err = parse_json_body(request)
-        if err:
-            return err
-        consent = bool(data.get("consentimiento_chatbot"))
-        payload, status = _get_patient_service().update_chatbot_consent(user["idUsuario"], consent)
-        return JsonResponse(payload, status=status)
+    def list(self, request):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_patient_service().get_chatbot_consent(user_id)
+        return Response(payload, status=status_code)
+
+    def create(self, request):
+        user_id = getattr(request, "user_id", None)
+        serializer = ConsentimientoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        consent = serializer.validated_data["consentimiento_chatbot"]
+        payload, status_code = _get_patient_service().update_chatbot_consent(user_id, consent)
+        return Response(payload, status=status_code)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class DocumentoPacienteResource(View):
-    def get(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
+class DocumentoPacienteViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def list(self, request):
         if not DocumentoService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         svc = DocumentoService()
-        payload = svc.list_patient_dashboard(user["idUsuario"])
-        return JsonResponse(payload, status=200 if payload.get("success") else 500)
+        payload = svc.list_patient_dashboard(getattr(request, "user_id", None))
+        return Response(payload, status=200 if payload.get("success") else 500)
 
-    def post(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
+    def create(self, request):
         if not DocumentoService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         svc = DocumentoService()
         file = request.FILES.get("archivo")
-        descripcion = request.POST.get("descripcion", "")
-        payload, status = svc.upload_patient_doc(user["idUsuario"], file, descripcion)
-        return JsonResponse(payload, status=status)
+        descripcion = request.data.get("descripcion", "")
+        payload, status_code = svc.upload_patient_doc(
+            getattr(request, "user_id", None), file, descripcion
+        )
+        return Response(payload, status=status_code)
 
-    def delete(self, request, id_documento=None):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
+    def destroy(self, request, pk=None):
         if not DocumentoService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         svc = DocumentoService()
-        payload, status = svc.delete_patient_doc(id_documento, user["idUsuario"])
-        return JsonResponse(payload, status=status)
+        payload, status_code = svc.delete_patient_doc(int(pk), getattr(request, "user_id", None))
+        return Response(payload, status=status_code)
 
-    def patch(self, request, id_documento=None):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
+    def partial_update(self, request, pk=None):
         if not DocumentoService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         svc = DocumentoService()
-        data, _ = parse_json_body(request)
-        if data is None:
-            data = {}
-        professional_id = data.get("profesionalId") or request.GET.get("profesionalId")
+        data = request.data.copy()
+        professional_id = data.get("profesionalId") or request.query_params.get("profesionalId")
         if professional_id:
             professional_id = int(professional_id)
         autorizar = data.get("autorizar")
+        user_id = getattr(request, "user_id", None)
         if not professional_id and autorizar is None:
-            return JsonResponse({"success": False, "message": "Falta profesionalId o autorizar"}, status=400)
+            return Response(
+                {"success": False, "message": "Falta profesionalId o autorizar"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if autorizar is None:
-            payload, status = svc.toggle_autorizacion(id_documento, user["idUsuario"], professional_id)
+            payload, status_code = svc.toggle_autorizacion(int(pk), user_id, professional_id)
         elif autorizar:
-            payload, status = svc.autorizar_documento(id_documento, user["idUsuario"], professional_id)
+            payload, status_code = svc.autorizar_documento(int(pk), user_id, professional_id)
         else:
-            payload, status = svc.desautorizar_documento(id_documento, user["idUsuario"], professional_id)
-        return JsonResponse(payload, status=status)
+            payload, status_code = svc.desautorizar_documento(int(pk), user_id, professional_id)
+        return Response(payload, status=status_code)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class ChatContactoResource(View):
-    def get(self, request):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
+class ChatContactoViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def list(self, request):
         if not MensajesService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
-        from django.conf import settings
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        user_id = getattr(request, "user_id", None)
         msg_svc = MensajesService()
         payload, _ = _get_patient_service().list_professionals()
         profesionales = payload.get("profesionales", [])
@@ -318,41 +342,47 @@ class ChatContactoResource(View):
             fp = p.get("fotoPerfil")
             if fp and not os.path.exists(os.path.join(upload_dir, fp)):
                 p["fotoPerfil"] = None
-        resultado = msg_svc.get_contactos_con_mensajes(user["idUsuario"], profesionales)
-        return JsonResponse({"success": True, "profesionales": resultado}, status=200)
+        resultado = msg_svc.get_contactos_con_mensajes(user_id, profesionales)
+        return Response({"success": True, "profesionales": resultado}, status=status.HTTP_200_OK)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class ChatMensajeResource(View):
-    def get(self, request):
-        user, err = require_auth(request)
-        if err:
-            return err
+class ChatMensajeViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF]
+
+    def list(self, request):
         if not MensajesService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
-        id_receptor = int(request.GET.get("receptor") or 0)
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        id_receptor = int(request.query_params.get("receptor") or 0)
         if not id_receptor:
-            return JsonResponse({"success": False, "message": "Falta receptor"}, status=400)
+            return Response(
+                {"success": False, "message": "Falta receptor"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         svc = MensajesService()
-        desde = int(request.GET.get("desde", 0))
-        msgs = svc.get_mensajes(user["idUsuario"], id_receptor, desde)
-        return JsonResponse({"success": True, "mensajes": msgs}, status=200)
+        desde = int(request.query_params.get("desde", 0))
+        user_id = getattr(request, "user_id", None)
+        msgs = svc.get_mensajes(user_id, id_receptor, desde)
+        return Response({"success": True, "mensajes": msgs}, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        user, err = require_auth(request)
-        if err:
-            return err
+    def create(self, request):
         if not MensajesService:
-            return JsonResponse({"success": False, "message": "Servicio no disponible"}, status=503)
-        svc = MensajesService()
-        data, err = parse_json_body(request)
-        if err:
-            return err
-        receptor = data.get("receptor")
-        mensaje = (data.get("mensaje") or "").strip()
+            return Response(
+                {"success": False, "message": "Servicio no disponible"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        serializer = ChatMensajeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        receptor = serializer.validated_data["receptor"]
+        mensaje = serializer.validated_data["mensaje"].strip()
         if not receptor or not mensaje:
-            return JsonResponse({"success": False, "message": "Datos incompletos"}, status=400)
-        if len(mensaje) > 2000:
-            return JsonResponse({"success": False, "message": "Mensaje demasiado largo"}, status=400)
-        id_msg = svc.enviar_mensaje(user["idUsuario"], receptor, mensaje)
-        return JsonResponse({"success": True, "idMensaje": id_msg}, status=201)
+            return Response(
+                {"success": False, "message": "Datos incompletos"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        svc = MensajesService()
+        user_id = getattr(request, "user_id", None)
+        id_msg = svc.enviar_mensaje(user_id, receptor, mensaje)
+        return Response({"success": True, "idMensaje": id_msg}, status=status.HTTP_201_CREATED)

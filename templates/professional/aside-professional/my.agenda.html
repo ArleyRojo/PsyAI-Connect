@@ -74,17 +74,17 @@
                     <i class="fas fa-cog"></i>
                 </a>
             </div>
-            <div class="sidebar__actions">
-                <div class="theme-switch-container">
-                    <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                    <button id="theme-toggle" title="Cambiar modo"></button>
-                    <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-                </div>
-                <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Cerrar Sesión</span>
-                </a>
+            <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
             </div>
+        </div>
+        <div class="sidebar__logout-section">
+            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </a>
         </div>
     </aside>
 
@@ -92,10 +92,10 @@
     <main class="main-content flex-grow-1 ms-250 p-4 agenda-page">
         <!-- Header -->
         <header class="main-header d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 fw-bold text-dark mb-0"><i class="fas fa-calendar-alt text-primary me-2"></i> Mi Agenda</h1>
+            <h1 class="h3 fw-bold mb-0"><i class="fas fa-calendar-alt text-primary me-2"></i> Mi Agenda</h1>
             <div class="user-info d-flex align-items-center">
                 <i class="fas fa-bell text-secondary fs-5 me-3"></i>
-                <span class="fw-semibold text-dark" id="nombreProfesional">Hola, Dr(a).</span>
+                <span class="fw-semibold" id="nombreProfesional">Hola, Dr(a).</span>
             </div>
         </header>
 
@@ -103,29 +103,29 @@
                             <div class="stat-card">
                                 <div class="stat-icon-wrap stat-icon-blue"><i class="fas fa-calendar-check"></i></div>
                                 <div>
-                                    <div class="stat-number" id="statTotal">�</div>
+                                    <div class="stat-number" id="statTotal">0</div>
                                     <div class="stat-label">Totales</div>
                                 </div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-icon-wrap stat-icon-green"><i class="fas fa-check-circle"></i></div>
                                 <div>
-                                    <div class="stat-number" id="statConfirmadas">�</div>
+                                    <div class="stat-number" id="statConfirmadas">0</div>
                                     <div class="stat-label">Confirmadas</div>
                                 </div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-icon-wrap stat-icon-red"><i class="fas fa-times-circle"></i></div>
                                 <div>
-                                    <div class="stat-number" id="statCanceladas">�</div>
+                                    <div class="stat-number" id="statCanceladas">0</div>
                                     <div class="stat-label">Canceladas</div>
                                 </div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-icon-wrap stat-icon-amber"><i class="fas fa-clock"></i></div>
                                 <div>
-                                    <div class="stat-number" id="statProximas">�</div>
-                                    <div class="stat-label">Pr�ximas</div>
+                                    <div class="stat-number" id="statProximas">0</div>
+                                    <div class="stat-label">Próximas</div>
                                 </div>
                             </div>
                         </div>
@@ -242,7 +242,7 @@
                                     <option value="17:30-18:00">05:30 PM - 06:00 PM</option>
                                   </select>
                                 </div>
-                                <small class="form-text small text-muted"><i class="far fa-clock"></i> Duraci�n: 30 minutos</small>
+                                <small class="form-text small text-muted"><i class="far fa-clock"></i> Duración: 30 minutos</small>
                               </div>
                               <div class="col-md-3">
                                 <label class="form-label fw-semibold">Tipo de Cita:</label>
@@ -250,9 +250,9 @@
                                   <i class="fas fa-tag input-icon"></i>
                                   <select id="citaTipo" class="form-control ps-icon">
                                     <option value="">Seleccionar</option>
-                                    <option value="Primera sesi�n">Primera sesi�n</option>
+                                    <option value="Primera sesión">Primera sesión</option>
                                     <option value="Seguimiento">Seguimiento</option>
-                                    <option value="Evaluaci�n">Evaluaci�n</option>
+                                    <option value="Evaluación">Evaluación</option>
                                   </select>
                                 </div>
                               </div>
@@ -287,11 +287,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body py-3">
-        <p class="text-muted mb-3">Por favor indica el motivo por el cual deseas cancelar esta cita. El paciente ser� notificado.</p>
+        <p class="text-muted mb-3">Por favor indica el motivo por el cual deseas cancelar esta cita. El paciente será notificado.</p>
         <div class="mb-3">
-          <label for="motivoCancelacionPro" class="form-label fw-semibold">Motivo de cancelaci�n <span class="text-danger">*</span></label>
+          <label for="motivoCancelacionPro" class="form-label fw-semibold">Motivo de cancelación <span class="text-danger">*</span></label>
           <textarea id="motivoCancelacionPro" class="form-control" rows="4"
-            placeholder="Ej: Emergencia personal, reprogramaci�n de agenda, etc."
+            placeholder="Ej: Emergencia personal, reprogramación de agenda, etc."
             maxlength="500"></textarea>
           <div class="form-text text-end"><span id="charCountMotivo">0</span>/500 caracteres</div>
         </div>
@@ -299,7 +299,7 @@
       <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
         <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Volver</button>
         <button type="button" class="btn btn-danger px-4" id="btnConfirmarCancelarPro">
-          <i class="fas fa-ban me-1"></i>Confirmar Cancelaci�n
+          <i class="fas fa-ban me-1"></i>Confirmar Cancelación
         </button>
       </div>
     </div>
@@ -311,11 +311,12 @@
 <link rel="stylesheet" href="/responsive/responsive-professional.css">
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
-    <script src="/js/core/shared/alerts.js?v=20260711-1"></script>
+    <script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
 <script src="/js/modules/professional/aside.js?v=20260711-1"></script>
-<script src="/js/modules/auth/logout.js?v=20260711-1"></script>
+<script src="/js/modules/auth/logout.js?v=20260803-1"></script>
     <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
-<script src="/js/modules/professional/my.agenda.js?v=20260711-1"></script>
+<script src="/js/modules/professional/my.agenda.js?v=20260803-1"></script>
 </body>
 </html>
 

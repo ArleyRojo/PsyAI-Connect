@@ -120,6 +120,12 @@ class InvoiceRepository:
         except Facturas.DoesNotExist:
             return None
 
+    def get_invoice_model(self, invoice_id):
+        try:
+            return self._base_invoice_qs().get(idFactura=invoice_id)
+        except Facturas.DoesNotExist:
+            return None
+
     def get_professional_patients(self, professional_id):
         patients = (
             Register.objects.filter(

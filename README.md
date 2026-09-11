@@ -99,7 +99,8 @@ PsyAI-Connect/
 │   └── settings/
 │       ├── base.py              # Configuración común
 │       ├── dev.py               # Desarrollo (DEBUG=True)
-│       └── prod.py              # Producción (DEBUG=False, seguridad)
+│       ├── prod.py              # Producción (DEBUG=False, seguridad)
+│       └── test.py              # Testing (SQLite en memoria)
 │
 ├── apps/
 │   ├── __init__.py
@@ -230,33 +231,52 @@ El servidor estará disponible en `http://127.0.0.1:8000`.
 
 ## Testing
 
-### Ejecutar tests
+### Instalar dependencias de test
 
 ```bash
-# Todos los tests (219 tests)
-python -m pytest
+pip install -r requirements.txt
+```
 
-# Unit tests solamente (199 tests, usan SQLite en memoria)
-python -m pytest apps/
+Las dependencias de testing incluidas son: `pytest`, `pytest-django`, `pytest-cov`.
 
-# Integration tests (20 tests, requieren la app completa)
-python -m pytest tests/
+### Ejecutar la suite completa
 
-# Con cobertura
-python -m pytest --cov=apps --cov-report=term-missing
+```bash
+# Configurar settings de test (SQLite en memoria)
+export DJANGO_SETTINGS_MODULE=config.settings.test
 
-# Verbose
-python -m pytest -v
+# Ejecutar todos los unit tests
+pytest --tb=short -q
+
+# Ejecutar solo un tipo de test
+pytest apps/authentication/tests/ -v
+pytest apps/billing/tests/ -v
+```
+
+### Ejecutar tests de una sola app
+
+```bash
+pytest apps/scheduling/tests/ -v
+pytest apps/professionals/tests/ -v
+pytest apps/chatbot/tests/ -v
+pytest apps/documents/tests/ -v
+pytest apps/patients/tests/ -v
+pytest apps/admin_panel/tests/ -v
+pytest apps/core/tests/ -v
+```
+
+### Ver reporte de cobertura
+
+```bash
+pytest --cov=apps --cov-report=term-missing
+pytest --cov=apps --cov-report=html:htmlcov
+# Abrir htmlcov/index.html en el navegador
 ```
 
 ### Tests dentro de Docker
 
 ```bash
-# Unit tests (no necesitan MySQL)
 docker compose -f docker/docker-compose.yml exec app python -m pytest apps/ -q
-
-# Todos los tests
-docker compose -f docker/docker-compose.yml exec app python -m pytest -q
 ```
 
 ### Estructura de tests
@@ -265,10 +285,12 @@ Cada app tiene su carpeta `tests/` con:
 
 - `conftest.py` — fixtures (mocks de repositorios, instancias de servicios)
 - `test_services.py` — tests unitarios de la capa de servicios
+- `test_views.py` — tests de endpoints HTTP (RequestFactory + mock de auth)
+- `test_repositories.py` — tests de repositorios con `@pytest.mark.django_db`
 
-Los tests usan **mocking de repositorios** para aislar la lógica de negocio de la base de datos. Los unit tests corren sobre SQLite en memoria (configurado en `conftest.py` raíz), por lo que son rápidos y no dependen de MySQL.
+Los tests unitarios corren sobre **SQLite en memoria** (configurado en `config/settings/test.py`), por lo que son rápidos y no dependen de MySQL. Los repositorios usan `@pytest.mark.django_db` para tests de base de datos reales contra SQLite.
 
-Los **integration tests** (`tests/test_integration.py`) usan el Django test client para hacer requests HTTP reales a los endpoints.
+Los **integration tests** (`tests/test_integration.py`) están marcados con `@pytest.mark.integration` y requieren MySQL corriendo. Se excluyen automáticamente en CI.
 
 ---
 
@@ -341,7 +363,7 @@ DB_ROOT_PASSWORD=rootpass
 - **Sistema de temas**: soporte para modo claro y oscuro persistido por usuario.
 - **Diseño responsivo**: CSS adaptativo para móvil, tablet y escritorio por cada sección.
 - **Docker**: containerización lista para desarrollo y producción con hot-reload, MySQL persistente y migraciones automáticas. Archivos Docker organizados en `docker/`.
-- **219 tests**: unit tests e integration tests cubriendo las capas de servicios y endpoints HTTP.
+- **259+ tests**: unit tests e integration tests cubriendo las capas de servicios, repositorios y endpoints HTTP.
 
 ---
 

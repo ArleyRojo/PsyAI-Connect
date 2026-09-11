@@ -227,11 +227,13 @@ class AdminRepository:
     def block_user(self, user_id, accion):
         activo = 0 if accion in ("bloquear", "suspender") else 1
         estado = "Suspendida" if activo == 0 else "Activa"
+        user_info = None
         try:
             user = Register.objects.get(idUsuario=user_id)
             user.activo = bool(activo)
             user.estadoCuenta = estado
             user.save(update_fields=["activo", "estadoCuenta"])
+            user_info = {"nombre": user.nombre, "email": user.email}
             accion_str = "Suspender usuario" if activo == 0 else "Reestablecer usuario"
             self.registrar_log(
                 "usuarios", accion_str,
@@ -240,7 +242,7 @@ class AdminRepository:
             )
         except Register.DoesNotExist:
             pass
-        return activo
+        return activo, user_info
 
     def list_role_users(self):
         users = Register.objects.exclude(rol="admin").order_by("nombre")

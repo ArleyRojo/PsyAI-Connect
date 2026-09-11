@@ -1,23 +1,12 @@
 /* ============================================================
-   PATIENT DASHBOARD V2 — "Calm Clinical SaaS" Redesign
+   PATIENT DASHBOARD V3 — Premium "Calm Clinical" Redesign
    
-   Decision: New file instead of modifying patient.css (10.8k lines).
-   This file is imported AFTER patient.css and overrides/adds only
-   dashboard-specific styles. Keeps the 10.8k lines untouched to
-   avoid regressions on aside-patient pages that share patient.css.
-   
-   Design tokens live in base.css (:root) — this file consumes them.
+   Builds on V2 foundations. Polished gradients, refined spacing,
+   modern glass-morphism, smoother micro-interactions.
    ============================================================ */
 
 /* ════════════════════════════════════════════════════════════════
-   1. DESIGN TOKENS (added to base.css :root — consumed here)
-   Tokens are defined in base.css; this section is reference only.
-   --surface-*, --brand-*, --warm-*, --mood-*, --text-*, --border-*,
-   --elev-*, --r-*, --sp-*, --ease-out, --dur-*, --fs-*, --lh-*
-   ============================================================ */
-
-/* ════════════════════════════════════════════════════════════════
-   2. DASHBOARD LAYOUT — 3-zone architecture
+   1. DASHBOARD LAYOUT
    ============================================================ */
 
 .main-content {
@@ -25,7 +14,7 @@
     padding: 0 !important;
 }
 
-/* ── Topbar (contextual bar inside main-content) ── */
+/* ── Topbar ── */
 .dash-topbar {
     position: sticky;
     top: 0;
@@ -33,11 +22,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--sp-4) var(--sp-8);
-    background: color-mix(in srgb, var(--surface-canvas) 88%, transparent);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-subtle);
+    padding: var(--sp-3, 12px) var(--sp-8, 32px);
+    background: color-mix(in srgb, var(--surface-canvas) 85%, transparent);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 60%, transparent);
 }
 
 .dash-topbar__left {
@@ -46,26 +35,23 @@
     gap: var(--sp-3, 12px);
 }
 
-.dash-topbar__greeting {
-    font-size: var(--fs-md);
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
 .dash-topbar__date {
-    font-size: var(--fs-sm);
+    font-size: var(--fs-sm, 13px);
     color: var(--text-muted);
     background: var(--surface-card);
-    padding: var(--sp-1) var(--sp-3);
+    padding: 5px var(--sp-3, 12px);
     border-radius: var(--r-pill);
     border: 1px solid var(--border-subtle);
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    font-weight: 500;
+    box-shadow: var(--elev-1);
 }
 
 .dash-topbar__date i {
     font-size: 0.7rem;
+    color: var(--brand-500);
 }
 
 .dash-topbar__right {
@@ -75,23 +61,30 @@
 }
 
 .dash-topbar__avatar {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
     color: var(--text-on-brand);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
     flex-shrink: 0;
     text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(47,111,228,0.25);
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 
-/* ── Dashboard body (scrollable area below topbar) ── */
+.dash-topbar__avatar:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 14px rgba(47,111,228,0.35);
+}
+
+/* ── Dashboard body ── */
 .dash-body {
-    padding: var(--sp-6, 24px) var(--sp-8, 32px) var(--sp-10, 40px);
+    padding: var(--sp-6, 24px) var(--sp-8, 32px) var(--sp-12, 48px);
     max-width: 1400px;
     margin: 0 auto;
 }
@@ -101,7 +94,7 @@
     margin-bottom: var(--sp-8, 32px);
 }
 
-/* ── Zone 3: Main grid — 2 columns asymmetric ── */
+/* ── Zone 3: Main grid ── */
 .dash-main-grid {
     display: grid;
     grid-template-columns: 1.6fr 1fr;
@@ -122,21 +115,29 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   3. HERO SECTION
+   2. HERO SECTION — Refined gradient + glass effects
    ============================================================ */
 
 .dash-hero-v2 {
     position: relative;
-    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
-    border: 1px solid var(--brand-300);
-    border-radius: var(--r-xl);
-    padding: var(--sp-8) var(--sp-10);
+    background: linear-gradient(135deg, 
+        var(--brand-600) 0%, 
+        var(--brand-500) 35%, 
+        color-mix(in srgb, var(--brand-500) 85%, #4A8AF4) 70%, 
+        var(--brand-700) 100%);
+    border: 1px solid color-mix(in srgb, var(--brand-300) 50%, transparent);
+    border-radius: var(--r-xl, 28px);
+    padding: var(--sp-8, 32px) var(--sp-10, 40px);
     color: var(--text-on-brand);
     overflow: hidden;
-    margin-bottom: var(--sp-6);
+    margin-bottom: var(--sp-6, 24px);
+    box-shadow: 
+        0 4px 24px rgba(47,111,228,0.18),
+        0 12px 48px rgba(47,111,228,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.15);
 }
 
-/* ── Hero 3D glass sphere (pure CSS 3D, decorative) ── */
+/* ── Hero 3D glass sphere ── */
 .dash-hero-v2__3d {
     position: absolute;
     inset: 0;
@@ -156,35 +157,34 @@
     transform-style: preserve-3d;
     perspective: 900px;
 
-    /* 3D-ish material via layered gradients + shadows */
     background:
         radial-gradient(circle at 30% 30%,
-            rgba(255,255,255,0.35) 0%,
-            rgba(255,255,255,0.14) 18%,
-            rgba(255,255,255,0.06) 36%,
+            rgba(255,255,255,0.40) 0%,
+            rgba(255,255,255,0.16) 18%,
+            rgba(255,255,255,0.08) 36%,
             rgba(255,255,255,0.02) 52%,
             rgba(255,255,255,0) 68%),
         radial-gradient(circle at 70% 75%,
-            rgba(255,255,255,0.18) 0%,
-            rgba(255,255,255,0.06) 22%,
+            rgba(255,255,255,0.20) 0%,
+            rgba(255,255,255,0.08) 22%,
             rgba(255,255,255,0) 56%),
         radial-gradient(circle at 50% 55%,
-            rgba(47,111,228,0.28) 0%,
-            rgba(20,65,143,0.10) 45%,
-            rgba(20,65,143,0.00) 70%);
+            rgba(255,255,255,0.08) 0%,
+            rgba(255,255,255,0.02) 45%,
+            rgba(255,255,255,0) 70%);
 
     box-shadow:
-        0 40px 80px rgba(13,71,161,0.18),
-        inset 0 0 0 1px rgba(255,255,255,0.22),
-        inset 0 14px 30px rgba(255,255,255,0.10);
+        0 40px 80px rgba(13,71,161,0.15),
+        inset 0 0 0 1px rgba(255,255,255,0.25),
+        inset 0 14px 30px rgba(255,255,255,0.12);
 
-    animation: heroSphereFloat 9s var(--ease-out) infinite;
+    animation: heroSphereFloat 10s var(--ease-out) infinite;
 }
 
 @supports ((-webkit-backdrop-filter: blur(8px)) or (backdrop-filter: blur(8px))) {
     .dash-hero-v2__glass-sphere {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 }
 
@@ -196,22 +196,21 @@
     border-radius: 50%;
     transform-style: preserve-3d;
     background: radial-gradient(circle at 35% 35%,
-        rgba(255,255,255,0.32) 0%,
-        rgba(255,255,255,0.10) 22%,
+        rgba(255,255,255,0.35) 0%,
+        rgba(255,255,255,0.12) 22%,
         rgba(255,255,255,0.00) 58%);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
 }
 
 .dash-hero-v2__glass-sphere::after {
     inset: 40px;
-    opacity: 0.75;
+    opacity: 0.8;
     background: radial-gradient(circle at 60% 60%,
-        rgba(255,255,255,0.22) 0%,
-        rgba(255,255,255,0.06) 30%,
+        rgba(255,255,255,0.25) 0%,
+        rgba(255,255,255,0.08) 30%,
         rgba(255,255,255,0.00) 65%);
 }
 
-/* subtle 3D rotation to feel "real" */
 @keyframes heroSphereFloat {
     0%   { transform: translateY(-50%) translateZ(0) rotateX(10deg) rotateY(-10deg); }
     45%  { transform: translateY(-50%) translateZ(0) rotateX(-6deg) rotateY(16deg); }
@@ -232,7 +231,7 @@
     gap: var(--sp-6, 24px);
 }
 
-/* Subtle background pattern — organic blobs */
+/* Subtle background blobs */
 .dash-hero-v2::before {
     content: '';
     position: absolute;
@@ -240,7 +239,7 @@
     right: -40px;
     width: 320px;
     height: 320px;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
 }
@@ -257,7 +256,7 @@
     pointer-events: none;
 }
 
-/* Decorative curved SVG line */
+/* Decorative curved SVG */
 .dash-hero-v2__curve {
     position: absolute;
     bottom: 0;
@@ -268,15 +267,6 @@
     pointer-events: none;
 }
 
-.dash-hero-v2__content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-6, 24px);
-}
-
 .dash-hero-v2__text {
     flex: 1;
     min-width: 0;
@@ -284,20 +274,20 @@
 
 .dash-hero-v2__greeting {
     font-family: 'Lora', Georgia, serif;
-    font-size: var(--fs-2xl);
+    font-size: var(--fs-2xl, 32px);
     font-weight: 700;
     color: var(--text-on-brand);
-    margin: 0 0 var(--sp-2);
-    line-height: var(--lh-tight);
+    margin: 0 0 var(--sp-2, 8px);
+    line-height: var(--lh-tight, 1.2);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .dash-hero-v2__motivation {
-    font-size: var(--fs-md);
-    color: var(--text-on-brand);
-    margin: 0 0 var(--sp-3);
-    line-height: var(--lh-normal);
+    font-size: var(--fs-md, 16px);
+    color: rgba(255,255,255,0.88);
+    margin: 0 0 var(--sp-3, 12px);
+    line-height: var(--lh-normal, 1.5);
     max-width: 480px;
-    opacity: 0.88;
 }
 
 .dash-hero-v2__meta {
@@ -307,43 +297,28 @@
     flex-wrap: wrap;
 }
 
-.dash-hero-v2__date-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.14);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: var(--r-pill, 999px);
-    padding: var(--sp-1, 4px) var(--sp-3, 12px);
-    font-size: var(--fs-sm, 13px);
-    font-weight: 500;
-    color: rgba(255,255,255,0.9);
-    backdrop-filter: blur(8px);
-}
-
-.dash-hero-v2__date-pill i {
-    font-size: 0.7rem;
-}
-
 .dash-hero-v2__cta {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: var(--r-pill);
-    padding: var(--sp-2) var(--sp-4);
-    font-size: var(--fs-sm);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: var(--r-pill, 999px);
+    padding: 8px var(--sp-4, 16px);
+    font-size: var(--fs-sm, 13px);
     font-weight: 600;
     color: var(--text-on-brand);
     text-decoration: none;
-    transition: all var(--dur-base) var(--ease-out);
+    transition: all 0.25s var(--ease-out);
     cursor: pointer;
+    backdrop-filter: blur(6px);
 }
 
 .dash-hero-v2__cta:hover {
     background: rgba(255,255,255,0.28);
+    border-color: rgba(255,255,255,0.40);
     transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     color: var(--text-on-brand);
     text-decoration: none;
 }
@@ -353,13 +328,13 @@
     align-items: center;
     gap: 8px;
     background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.20);
     border-radius: var(--r-pill, 999px);
     padding: 6px 14px;
     font-size: var(--fs-sm, 13px);
     font-weight: 500;
-    color: rgba(255,255,255,0.9);
-    backdrop-filter: blur(8px);
+    color: rgba(255,255,255,0.92);
+    backdrop-filter: blur(6px);
 }
 
 .dash-hero-v2__mensajes i:first-child {
@@ -379,23 +354,23 @@
     border-radius: var(--r-pill, 999px);
     background: rgba(255,255,255,0.18);
     border: 1px solid rgba(255,255,255,0.25);
-    transition: all var(--dur-base, 180ms) var(--ease-out, ease);
+    transition: all 0.2s var(--ease-out);
     margin-left: 2px;
 }
 
 .dash-hero-v2__mensajes-link:hover {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.30);
     transform: translateY(-1px);
     color: #fff;
     text-decoration: none;
 }
 
+/* ── Hero Avatar ── */
 .dash-hero-v2__avatar-wrap {
     flex-shrink: 0;
     position: relative;
 }
 
-/* Avatar ring (decorative progress ring) */
 .dash-hero-v2__avatar {
     width: 72px;
     height: 72px;
@@ -410,6 +385,7 @@
     color: var(--text-on-brand);
     text-transform: uppercase;
     backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
 .dash-hero-v2__avatar-ring {
@@ -417,8 +393,8 @@
     inset: -4px;
     border-radius: 50%;
     border: 2.5px solid transparent;
-    border-top-color: rgba(255,255,255,0.4);
-    border-right-color: rgba(255,255,255,0.2);
+    border-top-color: rgba(255,255,255,0.45);
+    border-right-color: rgba(255,255,255,0.20);
     animation: avatarRingSpin 8s linear infinite;
 }
 
@@ -427,33 +403,49 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   4. STAT CARDS
+   3. STAT CARDS — Refined with gradient accents
    ============================================================ */
 
 .dash-stats-v2 {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--sp-4, 16px);
 }
 
 .stat-card-v2 {
-    background: var(--surface-card, #FFFFFF);
-    border: 1px solid var(--border-subtle, #E7EDF6);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--r-lg, 20px);
     padding: var(--sp-5, 20px);
     position: relative;
     overflow: hidden;
-    transition: transform var(--dur-base, 240ms) var(--ease-out),
-                box-shadow var(--dur-base, 240ms) var(--ease-out),
-                border-color var(--dur-base, 240ms) var(--ease-out);
+    transition: transform 0.25s var(--ease-out),
+                box-shadow 0.25s var(--ease-out),
+                border-color 0.25s var(--ease-out);
     box-shadow: var(--elev-1);
     cursor: default;
 }
 
+.stat-card-v2::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand-500), color-mix(in srgb, var(--brand-500) 40%, transparent));
+    opacity: 0;
+    transition: opacity 0.25s var(--ease-out);
+}
+
 .stat-card-v2:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--elev-2);
-    border-color: var(--border-default, #D7E1EF);
+    transform: translateY(-3px);
+    box-shadow: var(--elev-3);
+    border-color: var(--border-default);
+}
+
+.stat-card-v2:hover::before {
+    opacity: 1;
 }
 
 .stat-card-v2__top {
@@ -464,77 +456,63 @@
 }
 
 .stat-card-v2__icon {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--r-md, 14px);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 1.05rem;
     flex-shrink: 0;
+    transition: transform 0.2s var(--ease-out);
+}
+
+.stat-card-v2:hover .stat-card-v2__icon {
+    transform: scale(1.08);
 }
 
 .stat-card-v2__icon--blue {
-    background: rgba(47,111,228,0.1);
-    color: var(--brand-500, #2F6FE4);
+    background: linear-gradient(135deg, rgba(47,111,228,0.12) 0%, rgba(47,111,228,0.06) 100%);
+    color: var(--brand-500);
 }
 
 .stat-card-v2__icon--green {
-    background: rgba(34,197,94,0.1);
-    color: var(--mood-excellent, #22C55E);
+    background: linear-gradient(135deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.06) 100%);
+    color: var(--mood-excellent);
 }
 
 .stat-card-v2__icon--purple {
-    background: rgba(124,58,237,0.12);
+    background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(124,58,237,0.06) 100%);
     color: rgba(124,58,237,1);
 }
 
 .stat-card-v2__icon--amber {
-    background: rgba(245,158,11,0.12);
+    background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.06) 100%);
     color: rgba(217,119,6,1);
 }
 
 .stat-card-v2__value {
     font-size: var(--fs-2xl, 32px);
     font-weight: 800;
-    color: var(--text-primary, #0E1B33);
+    color: var(--text-primary);
     line-height: 1.1;
     margin-bottom: var(--sp-1, 4px);
+    letter-spacing: -0.02em;
 }
 
 .stat-card-v2__label {
-    font-size: var(--fs-sm, 13px);
+    font-size: var(--fs-xs, 12px);
     font-weight: 600;
-    color: var(--text-muted, #8494AC);
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
 }
 
 .stat-card-v2__detail {
     font-size: var(--fs-sm, 13px);
-    color: var(--text-secondary, #4A5B78);
+    color: var(--text-secondary);
     margin-top: var(--sp-2, 8px);
     line-height: 1.4;
-}
-
-.stat-card-v2__trend {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: var(--fs-xs, 12px);
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: var(--r-pill, 999px);
-}
-
-.stat-card-v2__trend--up {
-    background: rgba(34,197,94,0.10);
-    color: var(--mood-good);
-}
-
-.stat-card-v2__trend--down {
-    background: rgba(239,68,68,0.10);
-    color: var(--mood-critical);
 }
 
 .stat-card-v2__badge {
@@ -569,19 +547,19 @@
     color: var(--mood-critical);
 }
 
-/* Energy bar in stat card */
+/* Energy bar */
 .stat-card-v2__energy-bar {
-    height: 4px;
-    background: var(--surface-sunken, #F0F4FA);
-    border-radius: 2px;
+    height: 5px;
+    background: var(--surface-sunken);
+    border-radius: 3px;
     margin-top: var(--sp-2, 8px);
     overflow: hidden;
 }
 
 .stat-card-v2__energy-fill {
     height: 100%;
-    border-radius: 2px;
-    transition: width 0.6s var(--ease-out);
+    border-radius: 3px;
+    transition: width 0.8s var(--ease-out);
 }
 
 /* ── Emotional state card (mood) — special accent ── */
@@ -589,18 +567,17 @@
     border-left: 3px solid var(--brand-500);
 }
 
-/* mood accent uses tokens only */
 .stat-card-v2--mood[data-mood="excellent"] { border-left-color: var(--mood-excellent); }
 .stat-card-v2--mood[data-mood="good"]      { border-left-color: var(--mood-good); }
 .stat-card-v2--mood[data-mood="neutral"]   { border-left-color: var(--mood-neutral); }
 .stat-card-v2--mood[data-mood="low"]       { border-left-color: var(--mood-low); }
 .stat-card-v2--mood[data-mood="critical"]  { border-left-color: var(--mood-critical); }
 
-/* ── Mood 3D energy sphere (pure CSS 3D, decorative) ── */
 .stat-card-v2--mood {
     position: relative;
 }
 
+/* Mood 3D energy sphere */
 .stat-card-v2--mood__3d {
     position: absolute;
     right: var(--sp-5, 20px);
@@ -615,13 +592,13 @@
 
     background:
         radial-gradient(circle at 30% 30%,
-            rgba(255,255,255,0.38) 0%,
-            rgba(255,255,255,0.14) 18%,
-            rgba(255,255,255,0.06) 36%,
+            rgba(255,255,255,0.42) 0%,
+            rgba(255,255,255,0.16) 18%,
+            rgba(255,255,255,0.08) 36%,
             rgba(255,255,255,0.00) 62%),
         radial-gradient(circle at 60% 70%,
-            rgba(255,255,255,0.18) 0%,
-            rgba(255,255,255,0.06) 28%,
+            rgba(255,255,255,0.20) 0%,
+            rgba(255,255,255,0.08) 28%,
             rgba(255,255,255,0.00) 58%),
         radial-gradient(circle at 55% 55%,
             rgba(255,255,255,0.00) 0%,
@@ -630,19 +607,19 @@
 
     box-shadow:
         0 18px 40px rgba(13,71,161,0.12),
-        inset 0 0 0 1px rgba(255,255,255,0.20),
-        inset 0 14px 24px rgba(255,255,255,0.10);
+        inset 0 0 0 1px rgba(255,255,255,0.22),
+        inset 0 14px 24px rgba(255,255,255,0.12);
 
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 
     transform: rotateX(10deg) rotateY(-12deg) translateZ(0);
-    animation: moodSphereBreath 6s var(--ease-out) infinite;
+    animation: moodSphereBreath 7s var(--ease-out) infinite;
 }
 
 @keyframes moodSphereBreath {
     0%   { transform: rotateX(10deg) rotateY(-12deg) translateZ(0) scale(1); }
-    50%  { transform: rotateX(-6deg) rotateY(10deg) translateZ(0) scale(1.03); }
+    50%  { transform: rotateX(-6deg) rotateY(10deg) translateZ(0) scale(1.04); }
     100% { transform: rotateX(10deg) rotateY(-12deg) translateZ(0) scale(1); }
 }
 
@@ -650,15 +627,15 @@
     .stat-card-v2--mood__3d { animation: none !important; }
 }
 
-/* per-mood color tint */
-.stat-card-v2--mood[data-mood="excellent"] .stat-card-v2--mood__3d { background-color: transparent; box-shadow: 0 18px 40px rgba(34,197,94,0.14), inset 0 0 0 1px rgba(255,255,255,0.22); }
-.stat-card-v2--mood[data-mood="good"]      .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(132,204,22,0.14), inset 0 0 0 1px rgba(255,255,255,0.22); }
-.stat-card-v2--mood[data-mood="neutral"]   .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(245,183,0,0.14), inset 0 0 0 1px rgba(255,255,255,0.22); }
-.stat-card-v2--mood[data-mood="low"]       .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(251,146,60,0.16), inset 0 0 0 1px rgba(255,255,255,0.22); }
-.stat-card-v2--mood[data-mood="critical"]  .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(239,68,68,0.16), inset 0 0 0 1px rgba(255,255,255,0.22); }
+/* Per-mood color tints */
+.stat-card-v2--mood[data-mood="excellent"] .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(34,197,94,0.14), inset 0 0 0 1px rgba(255,255,255,0.24); }
+.stat-card-v2--mood[data-mood="good"]      .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(132,204,22,0.14), inset 0 0 0 1px rgba(255,255,255,0.24); }
+.stat-card-v2--mood[data-mood="neutral"]   .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(245,183,0,0.14), inset 0 0 0 1px rgba(255,255,255,0.24); }
+.stat-card-v2--mood[data-mood="low"]       .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(251,146,60,0.16), inset 0 0 0 1px rgba(255,255,255,0.24); }
+.stat-card-v2--mood[data-mood="critical"]  .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(239,68,68,0.16), inset 0 0 0 1px rgba(255,255,255,0.24); }
 
 /* ════════════════════════════════════════════════════════════════
-   5. SECTION HEADINGS (replaces generic <h5> with icons)
+   4. SECTION HEADINGS
    ============================================================ */
 
 .dash-section-heading {
@@ -677,51 +654,56 @@
 .dash-section-heading__title {
     font-size: var(--fs-md, 16px);
     font-weight: 700;
-    color: var(--text-primary, #0E1B33);
+    color: var(--text-primary);
     margin: 0;
 }
 
 .dash-section-heading__icon {
     font-size: 0.9rem;
-    color: var(--brand-500, #2F6FE4);
+    color: var(--brand-500);
     opacity: 0.7;
 }
 
 .dash-section-heading__action {
     font-size: var(--fs-sm, 13px);
     font-weight: 600;
-    color: var(--brand-500, #2F6FE4);
+    color: var(--brand-500);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    transition: color var(--dur-fast, 150ms);
+    transition: color 0.15s, gap 0.2s var(--ease-out);
+    padding: 4px 8px;
+    border-radius: var(--r-sm, 10px);
 }
 
 .dash-section-heading__action:hover {
-    color: var(--brand-700, #14418F);
+    color: var(--brand-700);
     text-decoration: none;
+    gap: 6px;
+    background: color-mix(in srgb, var(--brand-500) 8%, transparent);
 }
 
 /* ════════════════════════════════════════════════════════════════
-   6. WIDGET CARD BASE (evolution, citas, etc.)
+   5. WIDGET CARD BASE
    ============================================================ */
 
 .dash-widget-v2 {
-    background: var(--surface-card, #FFFFFF);
-    border: 1px solid var(--border-subtle, #E7EDF6);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--r-lg, 20px);
     padding: var(--sp-6, 24px);
     box-shadow: var(--elev-1);
-    transition: box-shadow var(--dur-base, 240ms) var(--ease-out);
+    transition: box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
 }
 
 .dash-widget-v2:hover {
     box-shadow: var(--elev-2);
+    border-color: var(--border-default);
 }
 
 /* ════════════════════════════════════════════════════════════════
-   7. EVOLUTION WIDGET — Fused (Graph + History)
+   6. EVOLUTION WIDGET — Polished tabs + panels
    ============================================================ */
 
 .dash-evolution-v2 {
@@ -731,7 +713,7 @@
 .dash-evolution-v2__tabs {
     display: flex;
     gap: 2px;
-    background: var(--surface-sunken, #F0F4FA);
+    background: var(--surface-sunken);
     border-radius: var(--r-sm, 10px);
     padding: 3px;
     margin-bottom: var(--sp-4, 16px);
@@ -739,15 +721,15 @@
 
 .dash-evolution-v2__tab {
     flex: 1;
-    padding: var(--sp-2, 8px) var(--sp-3, 12px);
+    padding: 8px var(--sp-3, 12px);
     border: none;
     background: transparent;
     border-radius: calc(var(--r-sm, 10px) - 2px);
     font-size: var(--fs-sm, 13px);
     font-weight: 600;
-    color: var(--text-muted, #8494AC);
+    color: var(--text-muted);
     cursor: pointer;
-    transition: all var(--dur-fast, 150ms);
+    transition: all 0.18s var(--ease-out);
     font-family: inherit;
     display: flex;
     align-items: center;
@@ -756,12 +738,12 @@
 }
 
 .dash-evolution-v2__tab:hover {
-    color: var(--text-secondary, #4A5B78);
+    color: var(--text-secondary);
 }
 
 .dash-evolution-v2__tab.active {
-    background: var(--surface-card, #FFFFFF);
-    color: var(--text-primary, #0E1B33);
+    background: var(--surface-card);
+    color: var(--text-primary);
     box-shadow: var(--elev-1);
 }
 
@@ -795,7 +777,8 @@
     height: 100% !important;
 }
 
-.dash-evolution-v2__legend {
+/* Sparkline legend */
+.sparkline-legend {
     display: flex;
     gap: var(--sp-3, 12px);
     justify-content: center;
@@ -803,23 +786,23 @@
     flex-wrap: wrap;
 }
 
-.dash-evolution-v2__legend-item {
+.sparkline-legend__item {
     display: flex;
     align-items: center;
     gap: 5px;
     font-size: var(--fs-xs, 12px);
-    color: var(--text-secondary, #4A5B78);
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
-.dash-evolution-v2__legend-dot {
+.sparkline-legend__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
-/* History panel — compact timeline entries */
+/* History panel */
 .dash-evolution-v2__history {
     display: flex;
     flex-direction: column;
@@ -831,22 +814,36 @@
     align-items: center;
     gap: var(--sp-3, 12px);
     padding: var(--sp-3, 12px) 0;
-    border-bottom: 1px solid var(--border-subtle, #E7EDF6);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background 0.15s;
 }
 
 .dash-evolution-v2__entry:last-child {
     border-bottom: none;
 }
 
+.dash-evolution-v2__entry:hover {
+    background: color-mix(in srgb, var(--surface-sunken) 50%, transparent);
+    margin: 0 calc(-1 * var(--sp-3, 12px));
+    padding-left: var(--sp-3, 12px);
+    padding-right: var(--sp-3, 12px);
+    border-radius: var(--r-sm, 10px);
+}
+
 .dash-evolution-v2__entry-emoji {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: var(--r-md, 14px);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     flex-shrink: 0;
+    transition: transform 0.2s var(--ease-out);
+}
+
+.dash-evolution-v2__entry:hover .dash-evolution-v2__entry-emoji {
+    transform: scale(1.08);
 }
 
 .dash-evolution-v2__entry-body {
@@ -857,13 +854,13 @@
 .dash-evolution-v2__entry-mood {
     font-size: var(--fs-base, 14.5px);
     font-weight: 600;
-    color: var(--text-primary, #0E1B33);
+    color: var(--text-primary);
     text-transform: capitalize;
 }
 
 .dash-evolution-v2__entry-note {
     font-size: var(--fs-sm, 13px);
-    color: var(--text-muted, #8494AC);
+    color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -871,9 +868,10 @@
 
 .dash-evolution-v2__entry-date {
     font-size: var(--fs-xs, 12px);
-    color: var(--text-muted, #8494AC);
+    color: var(--text-muted);
     white-space: nowrap;
     flex-shrink: 0;
+    font-weight: 500;
 }
 
 .dash-evolution-v2__empty {
@@ -882,7 +880,7 @@
     align-items: center;
     gap: var(--sp-2, 8px);
     padding: var(--sp-8, 32px) 0;
-    color: var(--text-muted, #8494AC);
+    color: var(--text-muted);
     font-size: var(--fs-sm, 13px);
 }
 
@@ -892,7 +890,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   8. CITAS TIMELINE V2
+   7. CITAS TIMELINE V2 — Refined ticket-style
    ============================================================ */
 
 .dash-citas-v2__list {
@@ -901,7 +899,6 @@
     gap: var(--sp-3, 12px);
 }
 
-/* Ticket-style cita row */
 .dash-cita-v2 {
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -909,24 +906,25 @@
     align-items: center;
     padding: var(--sp-4, 16px);
     border-radius: var(--r-md, 14px);
-    background: var(--surface-card, #FFFFFF);
-    border: 1px solid var(--border-subtle, #E7EDF6);
-    transition: all var(--dur-base, 240ms) var(--ease-out);
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    transition: all 0.22s var(--ease-out);
 }
 
 .dash-cita-v2:hover {
-    border-color: var(--border-default, #D7E1EF);
-    box-shadow: var(--elev-1);
+    border-color: var(--border-default);
+    box-shadow: var(--elev-2);
+    transform: translateX(2px);
 }
 
-/* Date column (day big + month abbr) */
+/* Date column */
 .dash-cita-v2__date {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 52px;
+    min-width: 54px;
     padding: var(--sp-2, 8px) var(--sp-3, 12px);
-    background: var(--surface-sunken, #F0F4FA);
+    background: var(--surface-sunken);
     border-radius: var(--r-sm, 10px);
     text-align: center;
 }
@@ -934,14 +932,14 @@
 .dash-cita-v2__date-day {
     font-size: var(--fs-xl, 26px);
     font-weight: 800;
-    color: var(--text-primary, #0E1B33);
+    color: var(--text-primary);
     line-height: 1;
 }
 
 .dash-cita-v2__date-month {
     font-size: var(--fs-xs, 12px);
     font-weight: 600;
-    color: var(--text-muted, #8494AC);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -954,7 +952,7 @@
 .dash-cita-v2__profesional {
     font-size: var(--fs-base, 14.5px);
     font-weight: 600;
-    color: var(--text-primary, #0E1B33);
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -962,12 +960,12 @@
 
 .dash-cita-v2__tipo {
     font-size: var(--fs-sm, 13px);
-    color: var(--text-muted, #8494AC);
+    color: var(--text-muted);
 }
 
 .dash-cita-v2__hora {
     font-size: var(--fs-sm, 13px);
-    color: var(--text-secondary, #4A5B78);
+    color: var(--text-secondary);
     font-weight: 500;
     margin-top: 2px;
 }
@@ -1023,7 +1021,6 @@
     overflow: hidden;
 }
 
-/* ── Empty state 3D calendar/isometric box (CSS 3D) ── */
 .dash-citas-v2__empty-icon::before {
     content: '';
     position: absolute;
@@ -1038,7 +1035,6 @@
     opacity: 0.9;
 }
 
-/* isometric faces */
 .dash-citas-v2__empty-icon::after {
     content: '';
     position: absolute;
@@ -1061,7 +1057,7 @@
 
 .dash-citas-v2__empty-text {
     font-size: var(--fs-base, 14.5px);
-    color: var(--text-muted, #8494AC);
+    color: var(--text-muted);
     max-width: 240px;
 }
 
@@ -1071,18 +1067,19 @@
     gap: 6px;
     font-size: var(--fs-sm, 13px);
     font-weight: 600;
-    color: var(--brand-500, #2F6FE4);
+    color: var(--brand-500);
     text-decoration: none;
-    transition: color var(--dur-fast, 150ms);
+    transition: color 0.15s, gap 0.2s var(--ease-out);
 }
 
 .dash-citas-v2__empty-cta:hover {
-    color: var(--brand-700, #14418F);
+    color: var(--brand-700);
     text-decoration: none;
+    gap: 8px;
 }
 
 /* ════════════════════════════════════════════════════════════════
-   9. QUICK ACCESS — Compact list rail
+   8. QUICK ACCESS — Polished compact rail
    ============================================================ */
 
 .dash-quick-v2 {
@@ -1095,35 +1092,36 @@
     display: flex;
     align-items: center;
     gap: var(--sp-3, 12px);
-    padding: var(--sp-3, 12px) var(--sp-4, 16px);
+    padding: 10px var(--sp-4, 16px);
     border-radius: var(--r-md, 14px);
     text-decoration: none;
-    color: var(--text-secondary, #4A5B78);
+    color: var(--text-secondary);
     font-size: var(--fs-base, 14.5px);
     font-weight: 500;
-    transition: all var(--dur-fast, 150ms);
+    transition: all 0.18s var(--ease-out);
 }
 
 .dash-quick-v2__item:hover {
-    background: var(--surface-sunken, #F0F4FA);
-    color: var(--text-primary, #0E1B33);
+    background: var(--surface-sunken);
+    color: var(--text-primary);
     text-decoration: none;
 }
 
 .dash-quick-v2__icon {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: var(--r-sm, 10px);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     flex-shrink: 0;
-    transition: transform var(--dur-fast, 150ms);
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 
 .dash-quick-v2__item:hover .dash-quick-v2__icon {
-    transform: scale(1.05);
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .dash-quick-v2__label {
@@ -1133,30 +1131,30 @@
 
 .dash-quick-v2__chevron {
     font-size: 0.7rem;
-    color: var(--text-muted, #8494AC);
-    transition: transform var(--dur-fast, 150ms);
+    color: var(--text-muted);
+    transition: transform 0.2s var(--ease-out), color 0.2s;
 }
 
 .dash-quick-v2__item:hover .dash-quick-v2__chevron {
-    transform: translateX(2px);
-    color: var(--text-secondary, #4A5B78);
+    transform: translateX(3px);
+    color: var(--text-secondary);
 }
 
 /* Icon color backgrounds */
-.dash-quick-v2__icon--chatbot   { background: rgba(47,111,228,0.1); color: var(--brand-500, #2F6FE4); }
-.dash-quick-v2__icon--agenda    { background: rgba(34,197,94,0.1); color: var(--mood-good); }
-.dash-quick-v2__icon--mensajes  { background: rgba(124,58,237,0.1); color: #7C3AED; }
-.dash-quick-v2__icon--evolucion { background: rgba(245,158,11,0.1); color: var(--mood-neutral); }
-.dash-quick-v2__icon--docs      { background: rgba(239,68,68,0.1); color: var(--mood-critical); }
-.dash-quick-v2__icon--perfil    { background: rgba(20,184,166,0.1); color: #0D9488; }
+.dash-quick-v2__icon--chatbot   { background: linear-gradient(135deg, rgba(47,111,228,0.12) 0%, rgba(47,111,228,0.06) 100%); color: var(--brand-500); }
+.dash-quick-v2__icon--agenda    { background: linear-gradient(135deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.06) 100%); color: var(--mood-good); }
+.dash-quick-v2__icon--mensajes  { background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(124,58,237,0.06) 100%); color: #7C3AED; }
+.dash-quick-v2__icon--evolucion { background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.06) 100%); color: var(--mood-neutral); }
+.dash-quick-v2__icon--docs      { background: linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.06) 100%); color: var(--mood-critical); }
+.dash-quick-v2__icon--perfil    { background: linear-gradient(135deg, rgba(20,184,166,0.12) 0%, rgba(20,184,166,0.06) 100%); color: #0D9488; }
 
 /* ════════════════════════════════════════════════════════════════
-   10. TIP OF THE DAY — Insight card
+   9. TIP OF THE DAY — Refined insight card
    ============================================================ */
 
 .dash-tip-v2 {
-    background: linear-gradient(135deg, rgba(255,159,69,0.06) 0%, rgba(255,184,107,0.04) 100%);
-    border: 1px solid rgba(255,159,69,0.15);
+    background: linear-gradient(135deg, rgba(255,159,69,0.06) 0%, rgba(255,184,107,0.03) 100%);
+    border: 1px solid rgba(255,159,69,0.18);
     border-radius: var(--r-lg, 20px);
     padding: var(--sp-5, 20px);
     position: relative;
@@ -1178,7 +1176,7 @@
 .dash-tip-v2__eyebrow {
     font-size: var(--fs-xs, 12px);
     font-weight: 700;
-    color: var(--warm-500, #FF9F45);
+    color: var(--warm-500);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: var(--sp-2, 8px);
@@ -1188,12 +1186,12 @@
 }
 
 .dash-tip-v2__eyebrow i {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
 }
 
 .dash-tip-v2__text {
     font-size: var(--fs-md, 16px);
-    color: var(--text-secondary, #4A5B78);
+    color: var(--text-secondary);
     line-height: var(--lh-normal, 1.5);
     margin: 0;
     position: relative;
@@ -1201,14 +1199,14 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   11. SKELETON LOADERS (v2 — shape-matched)
+   10. SKELETON LOADERS
    ============================================================ */
 
 .skeleton-v2 {
     background: linear-gradient(90deg,
-        var(--surface-sunken, #F0F4FA) 25%,
-        var(--surface-card, #FFFFFF) 50%,
-        var(--surface-sunken, #F0F4FA) 75%);
+        var(--surface-sunken) 25%,
+        var(--surface-card) 50%,
+        var(--surface-sunken) 75%);
     background-size: 200% 100%;
     animation: shimmerV2 1.5s ease infinite;
     border-radius: var(--r-sm, 10px);
@@ -1219,43 +1217,13 @@
     100% { background-position: -200% 0; }
 }
 
-.skeleton-v2--hero {
-    height: 180px;
-    border-radius: var(--r-xl, 28px);
-}
-
-.skeleton-v2--stat {
-    height: 130px;
-    border-radius: var(--r-lg, 20px);
-}
-
-.skeleton-v2--widget {
-    height: 200px;
-    border-radius: var(--r-lg, 20px);
-}
-
-.skeleton-v2--cita {
-    height: 80px;
-    border-radius: var(--r-md, 14px);
-    margin-bottom: var(--sp-3, 12px);
-}
-
-.skeleton-v2--line {
-    height: 14px;
-    border-radius: 7px;
-}
-
-.skeleton-v2--circle {
-    border-radius: 50%;
-}
-
 /* ════════════════════════════════════════════════════════════════
-   12. STAGGER ANIMATIONS
+   11. STAGGER ANIMATIONS
    ============================================================ */
 
 .dash-stagger > * {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
     animation: dashStaggerIn var(--dur-base, 240ms) var(--ease-out) forwards;
 }
 
@@ -1274,7 +1242,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   13. FOCUS & ACCESSIBILITY
+   12. FOCUS & ACCESSIBILITY
    ============================================================ */
 
 .dash-topbar a:focus-visible,
@@ -1289,8 +1257,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   14. SPARKLINE LEGACY COMPAT
-   (keep .sparkline-container, .sparkline-legend working)
+   13. SPARKLINE LEGACY COMPAT
    ============================================================ */
 
 .sparkline-container {
@@ -1299,9 +1266,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   15. RESPONSIVE — Desktop 2-col (>=1200px default)
-   Tablet (768-1199): stack columns, stats 2x2
-   Mobile (<768): single col, stats scroll-snap
+   14. RESPONSIVE
    ============================================================ */
 
 @media (max-width: 1199px) {
@@ -1309,7 +1274,7 @@
         grid-template-columns: 1fr;
     }
     .dash-stats-v2 {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -1394,9 +1359,8 @@
         grid-column: 2;
     }
 
-    /* Topbar */
-    .dash-topbar__greeting {
-        font-size: var(--fs-sm, 13px);
+    .dash-topbar__date {
+        font-size: var(--fs-xs, 12px);
     }
 }
 
@@ -1424,8 +1388,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   16. DARK MODE — new components
-   (consumes tokens from theme.css centralized block)
+   15. DARK MODE
    ============================================================ */
 
 html.dark-mode .dash-topbar {
@@ -1439,13 +1402,25 @@ html.dark-mode .dash-topbar__date {
 }
 
 html.dark-mode .dash-hero-v2 {
-    background: var(--brand-50, var(--surface-card));
+    background: linear-gradient(135deg,
+        var(--brand-700) 0%,
+        var(--brand-500) 40%,
+        var(--brand-600) 70%,
+        var(--brand-700) 100%);
     border-color: var(--border-subtle);
+    box-shadow: 
+        0 4px 24px rgba(0,0,0,0.25),
+        0 12px 48px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 html.dark-mode .stat-card-v2 {
     background: var(--surface-card);
     border-color: var(--border-subtle);
+}
+
+html.dark-mode .stat-card-v2:hover {
+    border-color: var(--border-default);
 }
 
 html.dark-mode .stat-card-v2__value {
@@ -1461,24 +1436,28 @@ html.dark-mode .stat-card-v2__detail {
 }
 
 html.dark-mode .stat-card-v2__icon--blue {
-    background: rgba(47,111,228,0.18);
+    background: linear-gradient(135deg, rgba(74,138,244,0.18) 0%, rgba(74,138,244,0.08) 100%);
 }
 
 html.dark-mode .stat-card-v2__icon--green {
-    background: rgba(34,197,94,0.18);
+    background: linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.08) 100%);
 }
 
 html.dark-mode .stat-card-v2__icon--purple {
-    background: rgba(124,58,237,0.18);
+    background: linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(124,58,237,0.08) 100%);
 }
 
 html.dark-mode .stat-card-v2__icon--amber {
-    background: rgba(245,158,11,0.18);
+    background: linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.08) 100%);
 }
 
 html.dark-mode .dash-widget-v2 {
     background: var(--surface-card);
     border-color: var(--border-subtle);
+}
+
+html.dark-mode .dash-widget-v2:hover {
+    border-color: var(--border-default);
 }
 
 html.dark-mode .dash-evolution-v2__tabs {
@@ -1498,6 +1477,10 @@ html.dark-mode .dash-evolution-v2__entry-mood {
     color: var(--text-primary);
 }
 
+html.dark-mode .dash-evolution-v2__entry:hover {
+    background: rgba(255,255,255,0.03);
+}
+
 html.dark-mode .dash-cita-v2 {
     background: var(--surface-card);
     border-color: var(--border-subtle);
@@ -1505,6 +1488,7 @@ html.dark-mode .dash-cita-v2 {
 
 html.dark-mode .dash-cita-v2:hover {
     border-color: var(--border-default);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
 
 html.dark-mode .dash-cita-v2__date {
@@ -1528,8 +1512,12 @@ html.dark-mode .dash-quick-v2__item {
     color: var(--text-secondary);
 }
 
+html.dark-mode .dash-quick-v2__item:hover .dash-quick-v2__icon {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
 html.dark-mode .dash-tip-v2 {
-    background: linear-gradient(135deg, rgba(255,159,69,0.08) 0%, rgba(255,184,107,0.05) 100%);
+    background: linear-gradient(135deg, rgba(255,159,69,0.08) 0%, rgba(255,184,107,0.04) 100%);
     border-color: rgba(255,159,69,0.12);
 }
 
@@ -1552,4 +1540,8 @@ html.dark-mode .dash-citas-v2__empty-icon {
 
 html.dark-mode .stat-card-v2__energy-bar {
     background: var(--surface-sunken);
+}
+
+html.dark-mode .sparkline-legend__item {
+    color: var(--text-secondary);
 }

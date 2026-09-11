@@ -21,7 +21,7 @@ class TestCreateAppointment:
         }
         payload, status = appointment_service.create_appointment(1, {
             "idProfesional": 5,
-            "fecha": "2025-06-15",
+            "fecha": "2027-06-15",
             "hora": "10:00",
             "motivo": "Sesion",
             "tipoCita": "Presencial",
@@ -36,7 +36,7 @@ class TestCreateAppointment:
         mock_appointment_repo.create_appointment.return_value = 20
         payload, status = appointment_service.create_appointment(1, {
             "idProfesional": 5,
-            "fecha": "2025-06-15",
+            "fecha": "2027-06-15",
             "hora": "10:00",
             "motivo": "Sesion",
             "tipoCita": "Presencial",
@@ -51,7 +51,7 @@ class TestCreateAppointment:
         mock_appointment_repo.create_appointment.return_value = 20
         payload, status = appointment_service.create_appointment(1, {
             "idProfesional": 5,
-            "fecha": "2025-06-15",
+            "fecha": "2027-06-15",
             "hora": "10:00",
             "motivo": "Sesion",
             "tipoCita": "Presencial",

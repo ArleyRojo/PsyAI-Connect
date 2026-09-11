@@ -4,6 +4,14 @@ from apps.authentication.models import Register
 
 
 class PerfilPaciente(models.Model):
+    NOTIF_CHOICES = [("Activadas", "Activadas"), ("Desactivadas", "Desactivadas")]
+    RECORDAT_CHOICES = [("Activados", "Activados"), ("Desactivados", "Desactivados")]
+    CONTACTO_CHOICES = [
+        ("Correo", "Correo"),
+        ("WhatsApp", "WhatsApp"),
+        ("Teléfono", "Teléfono"),
+    ]
+
     idPaciente = models.OneToOneField(
         Register,
         on_delete=models.CASCADE,
@@ -16,6 +24,15 @@ class PerfilPaciente(models.Model):
     numeroTelefonico = models.CharField(max_length=20, null=True, blank=True)
     consentimientoDatos = models.BooleanField(default=False)
     consentimiento_chatbot = models.BooleanField(default=False)
+    prefNotificaciones = models.CharField(
+        max_length=15, choices=NOTIF_CHOICES, default="Activadas"
+    )
+    prefRecordatorios = models.CharField(
+        max_length=15, choices=RECORDAT_CHOICES, default="Activados"
+    )
+    prefContacto = models.CharField(
+        max_length=15, choices=CONTACTO_CHOICES, default="Correo"
+    )
 
     class Meta:
         db_table = "PerfilPaciente"
@@ -31,6 +48,9 @@ class PerfilPaciente(models.Model):
             "numeroTelefonico": self.numeroTelefonico,
             "consentimientoDatos": self.consentimientoDatos,
             "consentimiento_chatbot": self.consentimiento_chatbot,
+            "prefNotificaciones": self.prefNotificaciones,
+            "prefRecordatorios": self.prefRecordatorios,
+            "prefContacto": self.prefContacto,
         }
 
 

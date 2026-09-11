@@ -793,25 +793,6 @@
 
 /* ==================== RESPONSIVE ASIDE PROFESSIONAL - COMPLETO ==================== */
 
-/* Overlay para móvil */
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 999;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.sidebar-overlay.active {
-    display: block;
-    opacity: 1;
-}
-
 /* Botón hamburguesa */
 .menu-toggle,
 .toggle-btn {
@@ -3824,24 +3805,6 @@
     box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
 }
 
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 999;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.sidebar-overlay.active {
-    display: block;
-    opacity: 1;
-}
-
 .menu-toggle,
 .toggle-btn {
     display: none;
@@ -4903,6 +4866,66 @@ html {
   gap: 8px;
 }
 
+.chat-filter-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  background: var(--color-bg-soft, #f0f4f8);
+  border-radius: 10px;
+  padding: 3px;
+}
+.chat-filter-tab {
+  flex: 1;
+  padding: 7px 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted, #6b7280);
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s ease;
+  font-family: var(--font-body);
+}
+.chat-filter-tab:hover {
+  color: var(--color-text-main, #1f2937);
+  background: rgba(255,255,255,.5);
+}
+.chat-filter-tab.active {
+  background: var(--color-bg-card, #fff);
+  color: var(--brand-700, #0d47a1);
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.chat-pin-btn {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity .15s, background .15s, color .15s;
+  z-index: 5;
+  font-size: .82rem;
+  color: var(--color-text-muted, #9ca3af);
+  line-height: 1;
+}
+.chat-pin-btn:hover {
+  background: rgba(0,0,0,.06);
+  color: var(--brand-600, #1565c0);
+}
+.chat-item:hover .chat-pin-btn {
+  opacity: 1;
+}
+.chat-item.is-pinned .chat-pin-btn {
+  opacity: 1;
+  color: var(--brand-600, #1565c0);
+}
+
 /* ── Search bar ── */
 .chat-search {
   position: relative;
@@ -4952,6 +4975,7 @@ html {
 
 /* ── Contact item ── */
 .chat-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -4960,15 +4984,6 @@ html {
   border-bottom: 1px solid var(--color-border-soft);
   border-left: 3px solid transparent;
   transition: background 0.18s ease, border-left-color 0.18s ease, transform 0.15s ease;
-  position: relative;
-}
-
-button.chat-item {
-  width: 100%;
-  border-top: 0;
-  border-right: 0;
-  background: transparent;
-  text-align: left;
 }
 
 .chat-item:hover {
@@ -6180,6 +6195,12 @@ button.chat-item {
     font-size: 0.9rem;
     color: var(--color-text-body);
 }
+.main-header .user-info span {
+    color: #fff;
+}
+.main-header .user-greeting {
+    color: #fff;
+}
 
 /* ── KPI Stats cards ── */
 .agenda-stats {
@@ -6792,6 +6813,12 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     z-index: 1;
     font-size: 0.9rem;
     color: var(--color-text-body);
+}
+.main-header .user-info span {
+    color: #fff;
+}
+.main-header .user-greeting {
+    color: #fff;
 }
 
 /* ── Tabs (pill premium) ── */
@@ -8202,6 +8229,12 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     font-size: 0.9rem;
     color: var(--color-text-body);
 }
+.main-header .user-info span {
+    color: #fff;
+}
+.main-header .user-greeting {
+    color: #fff;
+}
 
 /* ── Tabs (pill premium) ── */
 .tabs-container .tabs {
@@ -9227,6 +9260,12 @@ html.dark-mode .sidebar__footer {
     font-size: 0.9rem;
     color: var(--color-text-body);
 }
+.main-header .user-info span {
+    color: #fff;
+}
+.main-header .user-greeting {
+    color: #fff;
+}
 
 /* ── KPI Stats cards ── */
 .agenda-stats {
@@ -10092,6 +10131,12 @@ html.dark-mode .status-pending { background: rgba(133, 77, 14, 0.3); color: #fac
     font-size: 0.9rem;
     color: var(--color-text-body);
 }
+.main-header .user-info span {
+    color: #fff;
+}
+.main-header .user-greeting {
+    color: #fff;
+}
 
 /* ── KPI Stats cards ── */
 .agenda-stats {
@@ -10717,9 +10762,23 @@ html.dark-mode .input-icon {
    Scoped to my.agenda.html and reports.html only
    ============================================================ */
 
-body.aside-professional .main-content.agenda-page,
-body.aside-professional .main-content.reports-page {
-    background: transparent !important;
+body.aside-professional .main-content {
+    background:
+        linear-gradient(135deg,
+            #EEF4FB 0%, #E0ECFA 12%, #D6E5F9 24%,
+            #E4EEFB 38%, #DCE9FA 52%,
+            #E2EDFB 66%, #E6F0FD 80%, #EAF3FE 100%),
+        radial-gradient(ellipse 60% 55% at 3% 6%,   rgba(144,202,249,.65) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 45% at 96% 10%,  rgba(187,222,251,.75) 0%, transparent 65%),
+        radial-gradient(ellipse 42% 38% at 18% 92%,  rgba(13,71,161,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 55% 50% at 85% 85%,  rgba(100,181,246,.30) 0%, transparent 70%),
+        radial-gradient(ellipse 35% 30% at 50% 3%,   rgba(227,242,253,.70) 0%, transparent 60%),
+        radial-gradient(ellipse 38% 34% at 6% 55%,   rgba(33,150,243,.14) 0%, transparent 65%),
+        radial-gradient(ellipse 32% 28% at 90% 50%,  rgba(144,202,249,.22) 0%, transparent 65%),
+        radial-gradient(ellipse 28% 25% at 72% 20%,  rgba(129,199,244,.16) 0%, transparent 60%),
+        radial-gradient(ellipse 24% 22% at 30% 40%,  rgba(200,230,253,.28) 0%, transparent 55%),
+        radial-gradient(ellipse 20% 18% at 60% 75%,  rgba(144,202,249,.14) 0%, transparent 55%);
+    background-attachment: fixed;
     font-family: var(--font-body);
     min-height: 100vh;
 }
@@ -11137,16 +11196,9 @@ body.aside-professional .reports-page {
 
 body.aside-professional .reports-page .main-header {
     padding: 1.25rem 1.4rem;
-    border-radius: 8px;
-    background:
-        linear-gradient(135deg, rgba(227, 242, 253, .9), rgba(255, 255, 255, .96) 48%),
-        var(--reports-surface);
-    border: 1px solid var(--reports-line);
-    box-shadow: var(--reports-shadow);
 }
 
 body.aside-professional .reports-page .main-header h1 {
-    color: var(--reports-ink) !important;
     font-size: clamp(1.35rem, 2vw, 1.75rem);
 }
 

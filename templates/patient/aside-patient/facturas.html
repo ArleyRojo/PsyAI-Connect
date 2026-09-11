@@ -3,7 +3,7 @@
 <head>
     <title>PsyAI Connect | Mis Facturas</title>
     {% include 'base/partials/head.html' %}
-    <link rel="stylesheet" href="/css/pages/patient.css?v=20260711-1">
+    <link rel="stylesheet" href="/css/pages/patient.css?v=20260723-1">
 </head>
 <body class="patient-dashboard patient-agenda-page">
 
@@ -73,17 +73,17 @@
                 <i class="fas fa-cog"></i>
             </a>
         </div>
-        <div class="sidebar__actions">
-            <div class="theme-switch-container">
-                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                <button id="theme-toggle" title="Cambiar modo"></button>
-                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-            </div>
-            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Cerrar Sesión</span>
-            </a>
+        <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+            <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+            <button id="theme-toggle" title="Cambiar modo"></button>
+            <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
         </div>
+    </div>
+    <div class="sidebar__logout-section">
+        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span>
+        </a>
     </div>
   </aside>
 
@@ -248,9 +248,10 @@
 <link rel="stylesheet" href="/responsive/responsive-patient.css">
 <link rel="stylesheet" href="/responsive/responsive-fix.css">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
-<script src="/js/core/shared/alerts.js?v=20260711-1"></script>
+<script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
 <script src="/js/modules/patient/aside.js?v=20260711-1"></script>
-<script src="/js/modules/auth/logout.js?v=20260711-1"></script>
+<script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script src="https://checkout.wompi.co/widget.js"></script>
 <script>
@@ -286,18 +287,18 @@ async function cargarFacturasPaciente() {
       return;
     }
     tbody.innerHTML = data.facturas.map(function(f) {
-      const servicios = (f.items || []).map(function(i) { return i.descripción; }).join(", ") || "Consulta";
+      const servicios = (f.items || []).map(function(i) { return i.descripci\u00f3n; }).join(", ") || "Consulta";
       const badgeClass = f.anulada ? "bg-secondary" :
         f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
       const badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
 
-      let acción = "";
+      let accion = "";
       if (f.anulada || f.estadoPago === "Cancelado") {
-        acción = '<button class="btn btn-sm btn-outline-secondary" onclick="verMotivoAnulacion(\'' + (f.motivoAnulacion || "Sin motivo registrado") + '\')"><i class="fas fa-info-circle"></i></button>';
+        accion = '<button class="btn btn-sm btn-outline-secondary" onclick="verMotivoAnulacion(\'' + (f.motivoAnulacion || "Sin motivo registrado") + '\')"><i class="fas fa-info-circle"></i></button>';
       } else if (f.estadoPago === "Pagado") {
-        acción = '<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(' + f.idFactura + ')"><i class="fas fa-receipt"></i> Ver</button>';
+        accion = '<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(' + f.idFactura + ')"><i class="fas fa-receipt"></i> Ver</button>';
       } else {
-        acción = '<button class="btn btn-sm btn-success" onclick="pagarFactura(' + f.idFactura + ')"><i class="fas fa-credit-card"></i> Pagar</button>';
+        accion = '<button class="btn btn-sm btn-success" onclick="pagarFactura(' + f.idFactura + ')"><i class="fas fa-credit-card"></i> Pagar</button>';
       }
 
       return '<tr class="align-middle">' +
@@ -306,7 +307,7 @@ async function cargarFacturasPaciente() {
         '<td data-label="Servicio(s)">' + servicios + '</td>' +
         '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
         '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
-        '<td data-label="Acci&#xF3;n" class="text-center">' + acción + '</td>' +
+        '<td data-label="Acci\u00f3n" class="text-center">' + accion + '</td>' +
         '</tr>';
     }).join("");
   } catch(e) {
@@ -333,7 +334,7 @@ async function verComprobante(idFactura) {
     }
     const f = data.factura;
     const itemsHtml = (f.items || []).map(function(i) {
-      return '<tr><td>' + i.descripción + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
+      return '<tr><td>' + i.descripci\u00f3n + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
     }).join("");
     body.innerHTML =
       '<div class="text-center mb-3"><h5 class="fw-bold">PsyAI Connect</h5><small class="text-muted">Comprobante de Pago</small></div>' +
@@ -344,7 +345,7 @@ async function verComprobante(idFactura) {
       '<tfoot><tr class="fw-bold"><td>Total</td><td class="text-end">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr></tfoot></table>' +
       '<hr>' +
       '<p class="small text-muted">Estado: <span class="badge bg-success">Completado</span></p>' +
-      (f.idTransaccionPago ? '<p class="small text-muted">Transacción: ' + f.idTransaccionPago + '</p>' : '');
+      (f.idTransaccionPago ? '<p class="small text-muted">Transacci\u00f3n: ' + f.idTransaccionPago + '</p>' : '');
   } catch(e) {
     body.innerHTML = '<p class="text-danger text-center">Error de conexión</p>';
   }
@@ -479,7 +480,7 @@ function pagarFactura(idFactura) {
   .catch(function() {
     document.getElementById("wompiLoading").style.display = "none";
     document.getElementById("wompiError").style.display = "block";
-    document.getElementById("wompiErrorMsg").textContent = "Error de conexión";
+    document.getElementById("wompiErrorMsg").textContent = "Error de conexi\u00f3n";
     cancelarFacturaPagoNoCompletado(idFactura);
     cargarFacturasPaciente();
     cargarStatsFacturas();

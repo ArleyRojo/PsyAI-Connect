@@ -76,17 +76,17 @@
           <i class="fas fa-cog"></i>
         </a>
       </div>
-      <div class="sidebar__actions">
-        <div class="theme-switch-container">
-          <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-          <button id="theme-toggle" title="Cambiar modo"></button>
-          <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-        </div>
-        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-          <i class="fas fa-sign-out-alt"></i>
-          <span>Cerrar Sesión</span>
-        </a>
+      <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+        <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+        <button id="theme-toggle" title="Cambiar modo"></button>
+        <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
       </div>
+    </div>
+    <div class="sidebar__logout-section">
+      <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Cerrar Sesión</span>
+      </a>
     </div>
   </aside>
 
@@ -95,7 +95,7 @@
     <header class="main-header d-flex justify-content-between align-items-center mb-4">
       <h1 class="h3 fw-bold mb-0"><i class="fas fa-file-medical me-2"></i>Mis Documentos</h1>
       <div class="user-info d-flex align-items-center">
-        <span class="user-greeting me-3">Hola, <strong id="patient-display-name">Arley Rojo</strong></span>
+        <span class="user-greeting me-3" id="nombrePaciente">Hola, </span>
         <button class="btn-notif" title="Notificaciones">
           <i class="fas fa-bell"></i>
           <span class="notif-dot"></span>
@@ -108,7 +108,7 @@
     <div class="welcome-banner">
       <div class="welcome-avatar" id="welcome-avatar">A</div>
       <div class="welcome-info">
-        <div class="welcome-name" id="welcome-name">Arley Rojo</div>
+        <div class="welcome-name" id="welcome-name"></div>
         <div class="welcome-sub">Aquí encuentras todos los documentos de tu proceso terapéutico</div>
       </div>
       <span class="welcome-badge">Paciente activo</span>
@@ -247,7 +247,7 @@
 <!-- -- TOAST -- -->
 <div class="toast" id="toast">
   <i class="fas fa-check-circle"></i>
-  <span id="toast-msg">Cambio guardado</span>
+  <span id="toast-msg"></span>
 </div>
 
 {% include 'base/partials/scripts.html' %}

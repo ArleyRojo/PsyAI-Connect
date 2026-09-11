@@ -1,6 +1,7 @@
 import logging
 from datetime import date, timedelta
 
+from django.db import transaction
 from django.db.models import Q, Count, F
 from django.db.models.functions import TruncDate
 
@@ -37,7 +38,7 @@ class AppointmentRepository:
 
     def get_appointment_in_slot(self, professional_id, fecha, hora):
         try:
-            cita = Citas.objects.get(
+            cita = Citas.objects.select_for_update().get(
                 idProfesional_id=professional_id,
                 fecha=fecha,
                 hora=hora,
@@ -46,7 +47,7 @@ class AppointmentRepository:
             return {"idCita": cita.idCita, "idPaciente": cita.idPaciente_id}
         except Citas.DoesNotExist:
             try:
-                cita = Citas.objects.filter(
+                cita = Citas.objects.select_for_update().filter(
                     idProfesional_id=professional_id,
                     fecha=fecha,
                     hora=hora,
@@ -58,17 +59,18 @@ class AppointmentRepository:
             return None
 
     def create_appointment(self, patient_id, professional_id, fecha, hora, tipo_cita, motivo, creado_por_profesional=False):
-        cita = Citas.objects.create(
-            idPaciente_id=patient_id,
-            idProfesional_id=professional_id,
-            fecha=fecha,
-            hora=hora,
-            tipoCita=tipo_cita,
-            motivo=motivo,
-            estado="Pendiente",
-            creado_por_profesional=creado_por_profesional,
-        )
-        return cita.idCita
+        with transaction.atomic():
+            cita = Citas.objects.create(
+                idPaciente_id=patient_id,
+                idProfesional_id=professional_id,
+                fecha=fecha,
+                hora=hora,
+                tipoCita=tipo_cita,
+                motivo=motivo,
+                estado="Pendiente",
+                creado_por_profesional=creado_por_profesional,
+            )
+            return cita.idCita
 
     def get_daily_availability(self, professional_id, fecha):
         rows = Disponibilidad.objects.filter(
@@ -174,6 +176,16 @@ class AppointmentRepository:
         try:
             cita = Citas.objects.get(idCita=appointment_id)
             return (cita.idProfesional_id, cita.idPaciente_id)
+        except Citas.DoesNotExist:
+            return None
+
+    def get_appointment_full(self, appointment_id):
+        try:
+            cita = (
+                Citas.objects.select_related("idPaciente", "idProfesional")
+                .get(idCita=appointment_id)
+            )
+            return cita
         except Citas.DoesNotExist:
             return None
 

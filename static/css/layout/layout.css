@@ -79,20 +79,22 @@
 
 .sidebar__logo-img-wrap {
     position: relative;
-    width: 72px;
-    height: 72px;
+    width: 76px;
+    height: 76px;
 }
 
 .sidebar__logo-img {
-    width: 72px;
-    height: 72px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2.5px solid #fff;
-    box-shadow: 0 0 0 4px rgba(255,255,255,.25);
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
     display: block;
     position: relative;
     z-index: 2;
+    background: rgba(255,255,255,.1);
+    padding: 6px;
 }
 
 /* Aside navegable (zona de menú) - fondo diferenciado vs sidebar mesh */
@@ -109,10 +111,9 @@
 
 .sidebar__logo-glow {
     position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);
-    animation: sidebarGlow 3s ease-in-out infinite;
+    inset: -4px;
+    border-radius: 18px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
     z-index: 1;
 }
 

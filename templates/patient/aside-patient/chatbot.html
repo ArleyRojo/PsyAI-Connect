@@ -74,17 +74,17 @@
                   <i class="fas fa-cog"></i>
               </a>
           </div>
-          <div class="sidebar__actions">
-              <div class="theme-switch-container">
-                  <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                  <button id="theme-toggle" title="Cambiar modo"></button>
-                  <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-              </div>
-              <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                  <i class="fas fa-sign-out-alt"></i>
-                  <span>Cerrar Sesión</span>
-              </a>
+          <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+              <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+              <button id="theme-toggle" title="Cambiar modo"></button>
+              <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
           </div>
+      </div>
+      <div class="sidebar__logout-section">
+          <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Cerrar Sesión</span>
+          </a>
       </div>
     </aside>
 
@@ -222,7 +222,7 @@
             <h5 class="psyai-modal__title" id="consentimientoModalLabel">Consentimiento Informado</h5>
             <p class="psyai-modal__subtitle">Lee atentamente antes de continuar</p>
           </div>
-          <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
+          <button type="button" class="psyai-modal__close" id="btn-modal-close-consent">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -340,7 +340,7 @@
 
     async function obtenerConsentimientoServidor() {
       try {
-        const res = await fetch('/api/paciente/consentimiento-chatbot', {
+        const res = await fetch('/api/paciente/consentimiento-chatbot/', {
           credentials: 'include'
         });
         if (!res.ok) return false;
@@ -354,13 +354,21 @@
 
     async function guardarConsentimientoServidor() {
       try {
-        await fetch('/api/paciente/consentimiento-chatbot', {
+        await fetch('/api/paciente/consentimiento-chatbot/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+          },
           credentials: 'include',
           body: JSON.stringify({ consentimiento_chatbot: true })
         });
       } catch(e) {}
+    }
+
+    function getCsrfToken() {
+      var match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]*)/);
+      return match ? decodeURIComponent(match[1]) : '';
     }
 
     const consentimientoKey = await obtenerClaveConsentimientoUsuario();
@@ -402,15 +410,16 @@
       });
     }
 
-    if (btnNoAcepto && modalElement) {
+    if (btnNoAcepto) {
       btnNoAcepto.addEventListener('click', function() {
-        bloquearChatbot();
-        if (warning) {
-          warning.classList.add('is-visible');
-        }
-        modalElement.classList.remove('consent-shake');
-        void modalElement.offsetWidth;
-        modalElement.classList.add('consent-shake');
+        window.location.href = '../patient.dashboard.html';
+      });
+    }
+
+    const btnCloseConsent = document.getElementById('btn-modal-close-consent');
+    if (btnCloseConsent) {
+      btnCloseConsent.addEventListener('click', function() {
+        window.location.href = '../patient.dashboard.html';
       });
     }
   });

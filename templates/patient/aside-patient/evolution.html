@@ -4,6 +4,7 @@
     <title>PsyAI Connect | Mi Evoluci&oacute;n</title>
     {% include 'base/partials/head.html' %}
     <link rel="stylesheet" href="/css/pages/patient.css?v=20260711-1">
+    <link rel="stylesheet" href="/css/pages/evolution-polish.css?v=20260729-1">
 </head>
 <body class="patient-dashboard">
     <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
@@ -73,17 +74,17 @@
                     <i class="fas fa-cog"></i>
                 </a>
             </div>
-            <div class="sidebar__actions">
-                <div class="theme-switch-container">
-                    <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                    <button id="theme-toggle" title="Cambiar modo"></button>
-                    <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-                </div>
-                <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Cerrar Sesión</span>
-                </a>
+            <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
             </div>
+        </div>
+        <div class="sidebar__logout-section">
+            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </a>
         </div>
     </aside>
 
@@ -184,7 +185,10 @@
                     <label for="notas_personales" class="form-label fw-semibold">
                         <i class="fas fa-pen me-1"></i>Notas Personales
                     </label>
-                    <textarea id="notas_personales" class="form-control notes-textarea" rows="3" placeholder="¿Cómo ha sido tu semana? Cuéntame cómo te has sentido..."></textarea>
+                    <textarea id="notas_personales" class="form-control notes-textarea" rows="3" maxlength="500" placeholder="¿Cómo ha sido tu semana? Cuéntame cómo te has sentido..."></textarea>
+                    <div style="display:flex;justify-content:flex-end;margin-top:4px">
+                        <small id="notesCounter" style="font-size:0.7rem;font-weight:600;color:var(--color-text-muted);transition:color .3s">0 / 500</small>
+                    </div>
                 </div>
 
                 <button type="button" id="btnGuardarEvolucion" class="btn btn-save-gradient w-100 py-2 fw-bold">
@@ -241,11 +245,12 @@
 <script src="/js/modules/auth/auth-guard.js?v=20260711-1"></script>
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
-<script src="/js/core/shared/alerts.js?v=20260711-1"></script>
+<script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
 <script src="/js/modules/patient/aside.js?v=20260711-1"></script>
-<script src="/js/modules/auth/logout.js?v=20260711-1"></script>
+<script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
-<script src="/js/modules/patient/evolution.js?v=20260711-1"></script>
+<script src="/js/modules/patient/evolution.js?v=20260803-1"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -286,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
         else color = '#66bb6a';
 
         energyBadge.style.background = color;
+        energyBadge.style.boxShadow = '0 3px 14px ' + color + '40, 0 0 0 0 transparent';
     }
 
     energySlider.addEventListener('input', function() {
@@ -293,6 +299,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     updateEnergy(energySlider.value);
+
+    // --- Notes character counter ---
+    var notesTextarea = document.getElementById('notas_personales');
+    var notesCounter = document.getElementById('notesCounter');
+
+    if (notesTextarea && notesCounter) {
+        notesTextarea.addEventListener('input', function() {
+            var len = this.value.length;
+            notesCounter.textContent = len + ' / 500';
+            if (len >= 450) {
+                notesCounter.style.color = '#ef4444';
+            } else if (len >= 350) {
+                notesCounter.style.color = '#f59e0b';
+            } else {
+                notesCounter.style.color = '';
+            }
+        });
+    }
 
     // --- Observer: when historial re-renders, reset visual form ---
     var tableObs = document.getElementById('tablaHistorialEvolucion');

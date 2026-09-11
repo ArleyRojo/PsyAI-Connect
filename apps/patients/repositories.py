@@ -28,6 +28,9 @@ class PatientRepository:
             "genero": perfil.genero if perfil else None,
             "numeroTelefonico": perfil.numeroTelefonico if perfil else None,
             "consentimiento_chatbot": perfil.consentimiento_chatbot if perfil else None,
+            "prefNotificaciones": perfil.prefNotificaciones if perfil else "Activadas",
+            "prefRecordatorios": perfil.prefRecordatorios if perfil else "Activados",
+            "prefContacto": perfil.prefContacto if perfil else "Correo",
         }
 
     def save_chatbot_survey(self, user_id, data):
@@ -52,6 +55,31 @@ class PatientRepository:
         )
         perfil.numeroTelefonico = numero
         perfil.save(update_fields=["numeroTelefonico"])
+
+    def get_preferences(self, user_id):
+        try:
+            perfil = PerfilPaciente.objects.get(idPaciente=user_id)
+            return {
+                "notificaciones": perfil.prefNotificaciones,
+                "recordatorios": perfil.prefRecordatorios,
+                "contacto": perfil.prefContacto,
+            }
+        except PerfilPaciente.DoesNotExist:
+            return {
+                "notificaciones": "Activadas",
+                "recordatorios": "Activados",
+                "contacto": "Correo",
+            }
+
+    def save_preferences(self, user_id, notificaciones, recordatorios, contacto):
+        perfil, _ = PerfilPaciente.objects.get_or_create(
+            idPaciente_id=user_id,
+            defaults={"consentimiento_chatbot": False},
+        )
+        perfil.prefNotificaciones = notificaciones
+        perfil.prefRecordatorios = recordatorios
+        perfil.prefContacto = contacto
+        perfil.save(update_fields=["prefNotificaciones", "prefRecordatorios", "prefContacto"])
 
     def get_chatbot_consent(self, user_id):
         try:

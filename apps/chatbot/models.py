@@ -74,10 +74,14 @@ class ChatbotConfig(models.Model):
     medium_terms = models.TextField(null=True, blank=True)
     medium_response = models.TextField(null=True, blank=True)
     fallback_response = models.TextField(null=True, blank=True)
+    crisis_phone = models.CharField(max_length=30, default="106", null=True, blank=True)
+    thinking_level = models.CharField(max_length=20, default="low", null=True, blank=True)
+    prompt_history_window = models.IntegerField(default=4, null=True, blank=True)
+    gemini_history_window = models.IntegerField(default=12, null=True, blank=True)
     temperature = models.FloatField(default=0.55, null=True, blank=True)
     top_p = models.FloatField(default=0.9, null=True, blank=True)
-    max_tokens = models.IntegerField(default=420, null=True, blank=True)
-    max_tokens_user = models.IntegerField(default=2000, null=True, blank=True)
+    max_tokens = models.IntegerField(default=600, null=True, blank=True)
+    max_tokens_user = models.IntegerField(default=1000, null=True, blank=True)
     daily_message_limit = models.IntegerField(default=20, null=True, blank=True)
     actualizado_por = models.ForeignKey(
         Register,
@@ -102,6 +106,10 @@ class ChatbotConfig(models.Model):
             "medium_terms": self.medium_terms,
             "medium_response": self.medium_response,
             "fallback_response": self.fallback_response,
+            "crisis_phone": self.crisis_phone,
+            "thinking_level": self.thinking_level,
+            "prompt_history_window": self.prompt_history_window,
+            "gemini_history_window": self.gemini_history_window,
             "temperature": self.temperature,
             "top_p": self.top_p,
             "max_tokens": self.max_tokens,

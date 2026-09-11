@@ -20,8 +20,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     "corsheaders",
     "rest_framework",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+
     "apps.authentication.apps.AuthenticationConfig",
     "apps.patients.apps.PatientsConfig",
     "apps.professionals.apps.ProfessionalsConfig",
@@ -44,10 +50,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "apps.core.middleware.security_headers.SecurityHeadersMiddleware",
     "apps.core.middleware.request_logging.RequestLoggingMiddleware",
-    "apps.core.middleware.client_errors.ClientErrorReporterMiddleware",
-    "apps.core.middleware.csrf_meta.CSRFMetaMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -116,6 +121,15 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
@@ -171,6 +185,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 GEMINI_THINKING_LEVEL = os.getenv("GEMINI_THINKING_LEVEL", "low")
 
+SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
+
 # Django email (SMTP)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
@@ -178,7 +194,7 @@ EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "PsyAI Connect <noreply@psyaiconnect.com>")
 
 # En desarrollo sin credenciales SMTP, imprime el correo en consola
 if DEBUG and not EMAIL_HOST_USER:
@@ -238,3 +254,43 @@ CACHES = {
 # WHITENOISE_USE_FINDERS = True
 # WHITENOISE_MANIFEST_STRICT = False
 # WHITENOISE_MAX_AGE = 31536000
+
+# ── Django Sites ──────────────────────────────────────────────────────────────
+SITE_ID = 1
+
+# ── django-allauth ────────────────────────────────────────────────────────────
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# URL de redirecionamiento tras login/logout exitoso
+LOGIN_REDIRECT_URL = "/api/social-redirect"
+LOGOUT_REDIRECT_URL = "/"
+LOGIN_URL = "/login.html"
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.authentication.adapters.SocialAccountAdapter"
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+# Providers de redes sociales
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET", ""),
+            "key": "",
+        },
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "CALLBACK_URL": "http://localhost:8000/accounts/google/login/callback/",
+    },
+
+}
+
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_BASE_URL = "http://localhost:8000"
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = "/"

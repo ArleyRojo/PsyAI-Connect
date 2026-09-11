@@ -11,7 +11,10 @@ def mock_auth_repo():
 
 @pytest.fixture
 def mock_security_repo():
-    return MagicMock()
+    repo = MagicMock()
+    repo.check_rate_limit.return_value = (False, 0)
+    repo.check_brute_force.return_value = (False, 0)
+    return repo
 
 
 @pytest.fixture

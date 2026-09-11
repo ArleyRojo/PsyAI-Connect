@@ -4,7 +4,7 @@
     <title>PsyAI Connect | Dashboard Paciente</title>
     {% include 'base/partials/head.html' %}
     <link rel="stylesheet" href="/css/pages/patient.css?v=20260712-1">
-    <link rel="stylesheet" href="/css/pages/patient-dashboard-v2.css?v=20260712-2">
+    <link rel="stylesheet" href="/css/pages/patient-dashboard-v2.css?v=20260722-1">
 </head>
 <body class="patient-dashboard">
     <button class="toggle-btn" id="toggleSidebar" aria-label="Abrir menú"><i class="fas fa-bars"></i></button>
@@ -328,9 +328,10 @@
     <script src="/js/modules/auth/auth-guard.js?v=20260712-1"></script>
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260712-1">
     <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260712-1">
-    <script src="/js/core/shared/alerts.js?v=20260712-1"></script>
+    <script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
     <script src="/js/modules/patient/aside.js?v=20260712-1"></script>
-    <script src="/js/modules/auth/logout.js?v=20260712-1"></script>
+    <script src="/js/modules/auth/logout.js?v=20260803-1"></script>
     <script src="/js/core/shared/nombre.usuario.js?v=20260712-1"></script>
 
     <script>
@@ -345,11 +346,11 @@
         const PHRASES = [
             'Cada día es una nueva oportunidad para crecer.',
             'Tu bienestar emocional es tu mayor fortaleza.',
-            'Peque\u00f1os pasos llevan a grandes cambios.',
+            'Pequeños pasos llevan a grandes cambios.',
             'Mereces sentirte en paz contigo mismo.',
-            'La vulnerabilidad es un acto de valent\u00eda.',
-            'Hoy es un buen d\u00eda para cuidar de ti.',
-            'Tu progreso importa, por peque\u00f1o que sea.',
+            'La vulnerabilidad es un acto de valentía.',
+            'Hoy es un buen día para cuidar de ti.',
+            'Tu progreso importa, por pequeño que sea.',
             'Reconocer tus emociones es el primer paso.',
             'No tienes que tener todas las respuestas hoy.',
             'Cada momento de calma es una victoria.'
@@ -357,16 +358,16 @@
 
         // -- Tips of the Day --
         const TIPS = [
-            'Intenta dedicar 5 minutos al d\u00eda a la respiraci\u00f3n profunda. Inhala 4 segundos, sost\u00e9n 4 y exhala 6.',
-            'Escribir un diario de gratitud puede mejorar significativamente tu estado de \u00e1nimo.',
-            'El ejercicio f\u00edsico, incluso una caminata de 15 minutos, libera endorfinas naturales.',
+            'Intenta dedicar 5 minutos al día a la respiración profunda. Inhala 4 segundos, sostén 4 y exhala 6.',
+            'Escribir un diario de gratitud puede mejorar significativamente tu estado de ánimo.',
+            'El ejercicio físico, incluso una caminata de 15 minutos, libera endorfinas naturales.',
             'Limitar el tiempo en redes sociales puede reducir la ansiedad hasta en un 30%.',
-            'Mantener una rutina de sue\u00f1o regular es fundamental para la salud mental.',
-            'Hablar sobre lo que sientes con alguien de confianza reduce el estr\u00e9s emocional.',
-            'La meditaci\u00f3n de 10 minutos diarios puede cambiar la estructura de tu cerebro positivamente.',
-            'Hidr\u00e1tate bien: la deshidrataci\u00f3n leve puede afectar tu estado de \u00e1nimo y concentraci\u00f3n.',
-            'Celebra tus logros, por peque\u00f1os que sean. El auto-reconocimiento fortalece la autoestima.',
-            'Practicar la amabilidad con otros genera bienestar propio. Un acto amable al d\u00eda marca la diferencia.'
+            'Mantener una rutina de sueño regular es fundamental para la salud mental.',
+            'Hablar sobre lo que sientes con alguien de confianza reduce el estrés emocional.',
+            'La meditación de 10 minutos diarios puede cambiar la estructura de tu cerebro positivamente.',
+            'Hidrátate bien: la deshidratación leve puede afectar tu estado de ánimo y concentración.',
+            'Celebra tus logros, por pequeños que sean. El auto-reconocimiento fortalece la autoestima.',
+            'Practicar la amabilidad con otros genera bienestar propio. Un acto amable al día marca la diferencia.'
         ];
 
         // -- Mood Emoji/Color Maps --
@@ -478,9 +479,9 @@
                 const energia = latest.nivelEnergia || 3;
                 const barColor = MOOD_COLORS[mood] || '#F5B700';
                 detailEl.innerHTML = `
-                    Energ\u00eda: <strong>${energia}/5</strong>
+                    Energ\u00eda: <strong>${energia}/10</strong>
                     <div class="stat-card-v2__energy-bar">
-                        <div class="stat-card-v2__energy-fill" style="width:${energia * 20}%;background:${barColor};"></div>
+                        <div class="stat-card-v2__energy-fill" style="width:${energia * 10}%;background:${barColor};"></div>
                     </div>`;
 
                 // Set mood attribute for left border color

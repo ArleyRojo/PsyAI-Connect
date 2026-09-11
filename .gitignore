@@ -46,3 +46,6 @@ static/uploads/
 # OS
 .DS_Store
 Thumbs.db
+
+# Ignorar carpeta js suelta
+js/

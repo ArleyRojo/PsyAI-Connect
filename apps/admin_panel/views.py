@@ -1,8 +1,10 @@
 import json
 import time as _time
 
-from django.http import JsonResponse, StreamingHttpResponse
-from django.views import View
+from django.http import StreamingHttpResponse
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.admin_panel.services import (
     AdminService,
@@ -10,37 +12,33 @@ from apps.admin_panel.services import (
     _normalize_ip,
     get_active_user_ids,
 )
-from apps.core.permissions import require_role
+from apps.core.permissions import IsAuthenticatedDRF, IsAdmin
 from apps.admin_panel.repositories import AdminRepository
 
 admin_service = AdminService()
 admin_repo = AdminRepository()
 
 
-class AdminDiagnosticoView(View):
+class AdminDiagnosticoAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def post(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        payload, status = admin_service.create_report_columns()
-        return JsonResponse(payload, status=status)
+        payload, status_code = admin_service.create_report_columns()
+        return Response(payload, status=status_code)
 
 
-class AdminStatsView(View):
+class AdminStatsAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        payload, status = admin_service.get_stats()
-        return JsonResponse(payload, status=status)
+        payload, status_code = admin_service.get_stats()
+        return Response(payload, status=status_code)
 
 
-class AdminStatsStreamView(View):
+class AdminStatsStreamAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-
         client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
         telemetry_service.sse_connected(client_ip)
 
@@ -78,19 +76,10 @@ class AdminStatsStreamView(View):
         return response
 
 
-class AdminLogsStreamView(View):
-    def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            def _empty():
-                while True:
-                    yield ": keepalive\n\n"
-                    _time.sleep(30)
-            response = StreamingHttpResponse(_empty(), content_type="text/event-stream")
-            response["Cache-Control"] = "no-cache"
-            response["X-Accel-Buffering"] = "no"
-            return response
+class AdminLogsStreamAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
 
+    def get(self, request):
         client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
         telemetry_service.sse_connected(client_ip)
 
@@ -129,212 +118,169 @@ class AdminLogsStreamView(View):
         return response
 
 
-class AdminUsuarioView(View):
-    def get(self, request, id_usuario=None):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        if id_usuario:
-            payload, status = admin_service.get_user(id_usuario)
-        else:
-            page = int(request.GET.get("page", 1))
-            limit = int(request.GET.get("limit", 20))
-            payload, status = admin_service.list_users(page, limit)
-        return JsonResponse(payload, status=status)
+class AdminUsuarioViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
 
-    def post(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
-        payload, status = admin_service.create_user(data)
-        return JsonResponse(payload, status=status)
+    def list(self, request):
+        page = int(request.query_params.get("page", 1))
+        limit = int(request.query_params.get("limit", 20))
+        payload, status_code = admin_service.list_users(page, limit)
+        return Response(payload, status=status_code)
 
-    def put(self, request, id_usuario):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
-        data["idUsuario"] = id_usuario
-        payload, status = admin_service.update_user(data)
-        return JsonResponse(payload, status=status)
+    def retrieve(self, request, pk=None):
+        payload, status_code = admin_service.get_user(int(pk))
+        return Response(payload, status=status_code)
 
-    def patch(self, request, id_usuario):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
+    def create(self, request):
+        data = request.data.copy() if request.data else {}
+        payload, status_code = admin_service.create_user(data)
+        return Response(payload, status=status_code)
+
+    def update(self, request, pk=None):
+        data = request.data.copy() if request.data else {}
+        data["idUsuario"] = int(pk)
+        payload, status_code = admin_service.update_user(data)
+        return Response(payload, status=status_code)
+
+    def partial_update(self, request, pk=None):
+        data = request.data.copy() if request.data else {}
 
         accion = data.get("accion")
         if accion:
             if accion not in ("bloquear", "suspender", "reestablecer", "desbloquear"):
-                return JsonResponse(
+                return Response(
                     {"success": False, "message": f"Acción inválida: {accion}"},
-                    status=400,
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            data["idUsuario"] = id_usuario
-            payload, status = admin_service.block_user(data)
+            data["idUsuario"] = int(pk)
+            payload, status_code = admin_service.block_user(data)
         elif data.get("nuevoRol"):
-            data["idUsuario"] = id_usuario
-            payload, status = admin_service.change_role(data)
+            data["idUsuario"] = int(pk)
+            payload, status_code = admin_service.change_role(data)
         else:
-            return JsonResponse({"success": False, "message": "Acción no especificada (accion o nuevoRol)"}, status=400)
-        return JsonResponse(payload, status=status)
+            return Response(
+                {"success": False, "message": "Acción no especificada (accion o nuevoRol)"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(payload, status=status_code)
 
-    def delete(self, request, id_usuario):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        payload, status = admin_service.delete_user(id_usuario)
-        return JsonResponse(payload, status=status)
+    def destroy(self, request, pk=None):
+        payload, status_code = admin_service.delete_user(int(pk))
+        return Response(payload, status=status_code)
 
 
-class AdminRolView(View):
+class AdminRolAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        filter_param = request.GET.get("filter", "")
+        filter_param = request.query_params.get("filter", "")
         if filter_param == "historial":
-            payload, status = admin_service.role_history()
+            payload, status_code = admin_service.role_history()
         else:
-            payload, status = admin_service.list_role_users()
-        return JsonResponse(payload, status=status)
+            payload, status_code = admin_service.list_role_users()
+        return Response(payload, status=status_code)
 
 
-class AdminNotificacionView(View):
+class AdminNotificacionAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        payload, status = admin_service.notifications_feed()
-        return JsonResponse(payload, status=status)
+        payload, status_code = admin_service.notifications_feed()
+        return Response(payload, status=status_code)
 
     def post(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
-        payload, status = admin_service.create_notification(data)
-        return JsonResponse(payload, status=status)
+        data = request.data.copy() if request.data else {}
+        payload, status_code = admin_service.create_notification(data)
+        return Response(payload, status=status_code)
 
     def delete(self, request, id_notificacion=None):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
         if not id_notificacion:
-            return JsonResponse({"success": False, "message": "Falta id de notificación"}, status=400)
-        payload, status = admin_service.delete_notification(id_notificacion)
-        return JsonResponse(payload, status=status)
+            return Response(
+                {"success": False, "message": "Falta id de notificación"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        payload, status_code = admin_service.delete_notification(id_notificacion)
+        return Response(payload, status=status_code)
 
 
-class AdminLogView(View):
+class AdminLogAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        payload, status = admin_service.get_logs()
-        return JsonResponse(payload, status=status)
+        payload, status_code = admin_service.get_logs()
+        return Response(payload, status=status_code)
 
 
-class AdminOnlineView(View):
+class AdminOnlineAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
         ids = get_active_user_ids()
         usuarios = admin_repo.get_users_by_ids(ids)
-        return JsonResponse({"success": True, "usuarios": usuarios, "total": len(usuarios)}, status=200)
+        return Response({"success": True, "usuarios": usuarios, "total": len(usuarios)}, status=200)
 
 
-class AdminChatbotHistorialView(View):
+class AdminChatbotHistorialAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
-        nivel = request.GET.get("nivel", "")
-        search = request.GET.get("q", "")
-        payload, status = admin_service.get_chatbot_historial(nivel, search)
-        return JsonResponse(payload, status=status)
+        nivel = request.query_params.get("nivel", "")
+        search = request.query_params.get("q", "")
+        payload, status_code = admin_service.get_chatbot_historial(nivel, search)
+        return Response(payload, status=status_code)
 
 
-class AdminChatbotConfigView(View):
-    def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
+class AdminChatbotConfigViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def list(self, request):
         from apps.chatbot.services import ChatbotConfigService
         chatbot_config_service = ChatbotConfigService()
-        payload = chatbot_config_service.get_config()
-        return JsonResponse({"success": True, "config": payload}, status=200)
+        payload, status_code = chatbot_config_service.get_config()
+        return Response(payload, status=status_code)
 
-    def put(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
+    def create(self, request):
         from apps.chatbot.services import ChatbotConfigService, ChatbotConfigEventsService
         chatbot_config_service = ChatbotConfigService()
         chatbot_config_events = ChatbotConfigEventsService()
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
-        admin_id = request.session.get("idUsuario")
-        payload, status = chatbot_config_service.save_config(data, admin_id)
-        if status < 400 and payload.get("success"):
+        data = request.data.copy() if request.data else {}
+        admin_id = getattr(request, "user_id", None)
+        payload, status_code = chatbot_config_service.save_config(data, admin_id)
+        if status_code < 400 and payload.get("success"):
             chatbot_config_events.publish_config_update({
                 "max_tokens": data.get("max_tokens"),
                 "max_tokens_user": data.get("max_tokens_user"),
                 "daily_message_limit": data.get("daily_message_limit"),
             })
-        return JsonResponse(payload, status=status)
+        return Response(payload, status=status_code)
 
-    def patch(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
+    def partial_update(self, request, pk=None):
         from apps.chatbot.services import ChatbotConfigService
         chatbot_config_service = ChatbotConfigService()
-        admin_id = request.session.get("idUsuario")
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
+        admin_id = getattr(request, "user_id", None)
+        data = request.data.copy() if request.data else {}
         risk_terms_str = data.get("risk_terms")
         if risk_terms_str is not None:
-            body, status = chatbot_config_service.save_risk_terms(risk_terms_str, admin_id)
-            return JsonResponse(body, status=status)
-        return JsonResponse({"success": False, "message": "Falta risk_terms en el body"}, status=400)
+            body, status_code = chatbot_config_service.save_risk_terms(risk_terms_str, admin_id)
+            return Response(body, status=status_code)
+        return Response(
+            {"success": False, "message": "Falta risk_terms en el body"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-    def delete(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
+    def destroy(self, request, pk=None):
         from apps.chatbot.services import ChatbotConfigService
         chatbot_config_service = ChatbotConfigService()
-        admin_id = request.session.get("idUsuario")
-        body, status = chatbot_config_service.clear_risk_terms(admin_id)
-        return JsonResponse(body, status=status)
+        admin_id = getattr(request, "user_id", None)
+        body, status_code = chatbot_config_service.clear_risk_terms(admin_id)
+        return Response(body, status=status_code)
 
 
-class AdminChatbotPalabrasView(View):
+class AdminChatbotPalabrasAPIView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
     def get(self, request):
-        user, err = require_role(request, "admin")
-        if err:
-            return err
         from apps.chatbot.services import ChatbotConfigService
         chatbot_config_service = ChatbotConfigService()
-        palabras = chatbot_config_service.get_historial_palabras_riesgo()
-        return JsonResponse({"success": True, "palabras": palabras}, status=200)
+        payload, status_code = chatbot_config_service.get_historial_palabras_riesgo()
+        return Response(payload, status=status_code)

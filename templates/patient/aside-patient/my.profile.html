@@ -73,17 +73,17 @@
                     <i class="fas fa-cog"></i>
                 </a>
             </div>
-            <div class="sidebar__actions">
-                <div class="theme-switch-container">
-                    <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                    <button id="theme-toggle" title="Cambiar modo"></button>
-                    <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-                </div>
-                <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Cerrar Sesión</span>
-                </a>
+            <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+                <button id="theme-toggle" title="Cambiar modo"></button>
+                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
             </div>
+        </div>
+        <div class="sidebar__logout-section">
+            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </a>
         </div>
     </aside>
 
@@ -139,7 +139,7 @@
             </div>
             <div class="field-row">
                 <span class="field-label"><i class="fas fa-phone"></i>Teléfono:</span>
-                <span class="field-value" data-field="teléfono">Cargando...</span>
+                <span class="field-value" data-field="telefono">Cargando...</span>
             </div>
             <button class="button btn-profile-grad mt-3" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">
                 <i class="fas fa-edit"></i> Editar Perfil
@@ -241,8 +241,8 @@
                         <i class="fas fa-bell"></i> Notificaciones
                     </label>
                     <select class="psyai-modal__select" id="prefNotificaciones">
-                        <option value="Activadas">? Activadas</option>
-                        <option value="Desactivadas">? Desactivadas</option>
+                        <option value="Activadas">Activadas</option>
+                        <option value="Desactivadas">Desactivadas</option>
                     </select>
                 </div>
                 <div class="psyai-modal__field">
@@ -250,8 +250,8 @@
                         <i class="fas fa-clock"></i> Recordatorios
                     </label>
                     <select class="psyai-modal__select" id="prefRecordatorios">
-                        <option value="Activados">? Activados</option>
-                        <option value="Desactivados">? Desactivados</option>
+                        <option value="Activados">Activados</option>
+                        <option value="Desactivados">Desactivados</option>
                     </select>
                 </div>
                 <div class="psyai-modal__field">
@@ -259,9 +259,9 @@
                         <i class="fas fa-paper-plane"></i> Medio de contacto
                     </label>
                     <select class="psyai-modal__select" id="prefContacto">
-                        <option value="Correo">? Correo</option>
+                        <option value="Correo">Correo</option>
                         <option value="WhatsApp">WhatsApp</option>
-                        <option value="Teléfono">? Teléfono</option>
+                        <option value="Teléfono">Teléfono</option>
                     </select>
                 </div>
             </div>
@@ -284,10 +284,11 @@
 <script src="/js/modules/auth/auth-guard.js?v=20260711-1"></script>
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
-<script src="/js/core/shared/alerts.js?v=20260711-1"></script>
+<script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
 <script src="/js/modules/patient/aside.js?v=20260711-1"></script>
-<script src="/js/modules/patient/my.profile.js?v=20260711-1"></script>
-<script src="/js/modules/auth/logout.js?v=20260711-1"></script>
+<script src="/js/modules/patient/my.profile.js?v=20260803-1"></script>
+<script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script>
 // Forzar que todos los acordeones inicien cerrados

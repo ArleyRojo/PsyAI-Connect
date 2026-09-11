@@ -76,17 +76,17 @@
                 <i class="fas fa-cog"></i>
             </a>
         </div>
-        <div class="sidebar__actions">
-            <div class="theme-switch-container">
-                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                <button id="theme-toggle" title="Cambiar modo"></button>
-                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-            </div>
-            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Cerrar Sesión</span>
-            </a>
+        <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+            <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+            <button id="theme-toggle" title="Cambiar modo"></button>
+            <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
         </div>
+    </div>
+    <div class="sidebar__logout-section">
+        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span>
+        </a>
     </div>
   </aside>
 
@@ -387,10 +387,11 @@
 {% include 'base/partials/scripts.html' %}
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
-<script src="/js/core/shared/alerts.js?v=20260711-1"></script>
+<script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
 <script src="/js/core/shared/aside.js?v=20260711-1"></script>
-<script src="/js/modules/admin/admin.notifications.js?v=20260711-1"></script>
-<script src="/js/modules/auth/logout.js?v=20260711-1"></script>
+<script src="/js/modules/admin/admin.notifications.js?v=20260803-1"></script>
+<script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 
 </body>
 </html>

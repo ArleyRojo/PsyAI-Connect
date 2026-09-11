@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 from apps.authentication.models import Register
 
@@ -40,6 +41,7 @@ class Disponibilidad(models.Model):
 class Citas(models.Model):
     ESTADO_CHOICES = [
         ("Pendiente", "Pendiente"),
+        ("Confirmada", "Confirmada"),
         ("Completada", "Completada"),
         ("Cancelada", "Cancelada"),
     ]
@@ -71,6 +73,13 @@ class Citas(models.Model):
 
     class Meta:
         db_table = "Citas"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["idProfesional", "fecha", "hora"],
+                condition=Q(estado__in=["Pendiente", "Confirmada"]),
+                name="uniq_cita_prof_fecha_hora_active",
+            ),
+        ]
 
     def to_dict(self):
         return {

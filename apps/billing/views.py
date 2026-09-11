@@ -4,14 +4,19 @@ import json
 import logging
 
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.core.mail import EmailMultiAlternatives
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status as drf_status
 
 from apps.billing.services import InvoiceService
 from apps.billing.repositories import InvoiceRepository
-from apps.core.permissions import require_auth, require_role
+from apps.core.permissions import IsAuthenticatedDRF, IsPaciente, IsProfesional
 
 logger = logging.getLogger(__name__)
 
@@ -19,162 +24,237 @@ invoice_service = InvoiceService()
 invoice_repo = InvoiceRepository()
 
 
-class FacturaListView(View):
-    def get(self, request):
-        user, err = require_auth(request)
-        if err:
-            return err
+class FacturaListView(APIView):
+    permission_classes = [IsAuthenticatedDRF]
 
-        rol = request.GET.get("rol", user["rol"])
+    def get(self, request):
+        user_role = getattr(request, "user_role", None)
+        user_id = getattr(request, "user_id", None)
+
+        rol = request.query_params.get("rol", user_role)
         if rol == "paciente":
-            payload, status = invoice_service.list_patient_invoices(user["idUsuario"])
+            payload, status_code = invoice_service.list_patient_invoices(user_id)
         elif rol == "profesional":
-            estado = request.GET.get("estado")
-            fecha_desde = request.GET.get("fecha_desde")
-            fecha_hasta = request.GET.get("fecha_hasta")
-            payload, status = invoice_service.list_professional_invoices(
-                user["idUsuario"], estado=estado,
-                fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
+            estado = request.query_params.get("estado")
+            fecha_desde = request.query_params.get("fecha_desde")
+            fecha_hasta = request.query_params.get("fecha_hasta")
+            payload, status_code = invoice_service.list_professional_invoices(
+                user_id,
+                estado=estado,
+                fecha_desde=fecha_desde,
+                fecha_hasta=fecha_hasta,
             )
         else:
-            payload, status = invoice_service.list_all_invoices(
-                paciente=request.GET.get("paciente"),
-                profesional=request.GET.get("profesionales"),
-                estado=request.GET.get("estado"),
-                metodo_pago=request.GET.get("metodoPago"),
-                fecha_desde=request.GET.get("fecha_desde"),
-                fecha_hasta=request.GET.get("fecha_hasta"),
+            payload, status_code = invoice_service.list_all_invoices(
+                paciente=request.query_params.get("paciente"),
+                profesional=request.query_params.get("profesionales"),
+                estado=request.query_params.get("estado"),
+                metodo_pago=request.query_params.get("metodoPago"),
+                fecha_desde=request.query_params.get("fecha_desde"),
+                fecha_hasta=request.query_params.get("fecha_hasta"),
             )
-        return JsonResponse(payload, status=status)
+        return Response(payload, status=status_code)
 
     def post(self, request):
-        user, err = require_auth(request)
-        if err:
-            return err
+        user_role = getattr(request, "user_role", None)
+        user_id = getattr(request, "user_id", None)
 
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
+        data = request.data if isinstance(request.data, dict) else {}
 
-        if user["rol"] == "paciente":
-            id_paciente = user["idUsuario"]
+        if user_role == "paciente":
+            id_paciente = user_id
             id_profesional = data.get("idProfesional")
             if not id_profesional:
-                return JsonResponse({"success": False, "message": "Debes especificar el profesional"}, status=400)
+                return Response(
+                    {"success": False, "message": "Debes especificar el profesional"},
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
         else:
-            id_profesional = data.get("idProfesional") or user["idUsuario"]
+            id_profesional = data.get("idProfesional") or user_id
             id_paciente = data.get("idPaciente")
             if not id_paciente:
-                return JsonResponse({"success": False, "message": "Debes especificar el paciente"}, status=400)
+                return Response(
+                    {"success": False, "message": "Debes especificar el paciente"},
+                    status=drf_status.HTTP_400_BAD_REQUEST,
+                )
 
-        payload, status = invoice_service.create_invoice(id_paciente, id_profesional, data)
-        return JsonResponse(payload, status=status)
+        payload, status_code = invoice_service.create_invoice(
+            id_paciente, id_profesional, data
+        )
+        return Response(payload, status=status_code)
 
 
-class FacturaDetailView(View):
+class FacturaDetailView(APIView):
+    permission_classes = [IsAuthenticatedDRF]
+
     def get(self, request, id_factura):
-        user, err = require_auth(request)
-        if err:
-            return err
-        payload, status = invoice_service.get_invoice(id_factura, user["idUsuario"], user["rol"])
-        return JsonResponse(payload, status=status)
+        user_id = getattr(request, "user_id", None)
+        user_role = getattr(request, "user_role", None)
+        payload, status_code = invoice_service.get_invoice(
+            id_factura, user_id, user_role
+        )
+        return Response(payload, status=status_code)
 
     def patch(self, request, id_factura):
-        user, err = require_auth(request)
-        if err:
-            return err
+        user_id = getattr(request, "user_id", None)
+        user_role = getattr(request, "user_role", None)
 
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
+        data = request.data if isinstance(request.data, dict) else {}
 
         if data.get("anular") or data.get("motivoAnulacion"):
             motivo = data.get("motivoAnulacion", "").strip()
-            payload, status = invoice_service.annul_invoice(
-                id_factura, motivo, user["idUsuario"], user["rol"],
+            payload, status_code = invoice_service.annul_invoice(
+                id_factura, motivo, user_id, user_role
             )
         else:
-            payload, status = invoice_service.update_status(
-                id_factura, data.get("estadoPago"), user_id, user_role,
+            payload, status_code = invoice_service.update_status(
+                id_factura, data.get("estadoPago"), user_id, user_role
             )
-        return JsonResponse(payload, status=status)
+        return Response(payload, status=status_code)
 
     def delete(self, request, id_factura):
-        user, err = require_auth(request)
-        if err:
-            return err
+        user_id = getattr(request, "user_id", None)
+        user_role = getattr(request, "user_role", None)
 
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
+        data = request.data if isinstance(request.data, dict) else {}
 
         motivo = data.get("motivoAnulacion", "").strip()
-        payload, status = invoice_service.annul_invoice(
-            id_factura, motivo, user["idUsuario"], user["rol"],
+        payload, status_code = invoice_service.annul_invoice(
+            id_factura, motivo, user_id, user_role
         )
-        return JsonResponse(payload, status=status)
+        return Response(payload, status=status_code)
 
 
-class FacturaPagoView(View):
+class FacturaPagoView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
     def post(self, request, id_factura):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
-        payload, status = invoice_service.init_wompi_payment(id_factura, user["idUsuario"])
-        return JsonResponse(payload, status=status)
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = invoice_service.init_wompi_payment(
+            id_factura, user_id
+        )
+        return Response(payload, status=status_code)
 
     def delete(self, request, id_factura):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
-        payload, status = invoice_service.cancel_payment(id_factura, user["idUsuario"])
-        return JsonResponse(payload, status=status)
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = invoice_service.cancel_payment(
+            id_factura, user_id
+        )
+        return Response(payload, status=status_code)
 
     def patch(self, request, id_factura):
-        user, err = require_role(request, "paciente")
-        if err:
-            return err
+        user_id = getattr(request, "user_id", None)
 
-        try:
-            data = json.loads(request.body) if request.body else {}
-        except (json.JSONDecodeError, ValueError):
-            data = {}
+        data = request.data if isinstance(request.data, dict) else {}
 
         transaction_id = data.get("transactionId", "")
         if not transaction_id:
-            return JsonResponse({"success": False, "message": "Falta el ID de transacción"}, status=400)
-        payload, status = invoice_service.confirm_wompi_payment(
-            id_factura, transaction_id, user["idUsuario"],
+            return Response(
+                {"success": False, "message": "Falta el ID de transacción"},
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+        payload, status_code = invoice_service.confirm_wompi_payment(
+            id_factura, transaction_id, user_id
         )
-        return JsonResponse(payload, status=status)
+        return Response(payload, status=status_code)
 
 
-class FacturaStatsView(View):
+class FacturaStatsView(APIView):
+    permission_classes = [IsAuthenticatedDRF]
+
     def get(self, request):
-        user, err = require_auth(request)
-        if err:
-            return err
+        user_role = getattr(request, "user_role", None)
+        user_id = getattr(request, "user_id", None)
 
-        rol = request.GET.get("rol", user["rol"])
+        rol = request.query_params.get("rol", user_role)
         if rol == "admin":
-            payload, status = invoice_service.get_admin_stats()
+            payload, status_code = invoice_service.get_admin_stats()
         elif rol == "paciente":
-            payload, status = invoice_service.get_patient_invoice_stats(user["idUsuario"])
+            payload, status_code = invoice_service.get_patient_invoice_stats(
+                user_id
+            )
         else:
-            payload, status = invoice_service.get_professional_patients(user["idUsuario"])
-        return JsonResponse(payload, status=status)
+            payload, status_code = invoice_service.get_professional_patients(
+                user_id
+            )
+        return Response(payload, status=status_code)
 
 
-class ProfesionalPacientesView(View):
+class ProfesionalPacientesView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
     def get(self, request):
-        user, err = require_role(request, "profesional")
-        if err:
-            return err
-        payload, status = invoice_service.get_professional_patients(user["idUsuario"])
-        return JsonResponse(payload, status=status)
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = invoice_service.get_professional_patients(user_id)
+        return Response(payload, status=status_code)
+
+
+def _send_webhook_payment_emails(invoice_repo, invoice_id):
+    try:
+        from apps.authentication.models import Register
+
+        factura = invoice_repo.get_invoice_by_id(invoice_id)
+        if not factura:
+            return
+        paciente = Register.objects.filter(
+            idUsuario=factura.get("idPaciente")
+        ).first()
+        profesional = Register.objects.filter(
+            idUsuario=factura.get("idProfesional")
+        ).first()
+        site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
+        fecha = ""
+        if factura.get("fecha"):
+            f = factura["fecha"]
+            fecha = (
+                f.strftime("%d/%m/%Y %H:%M") if hasattr(f, "strftime") else str(f)
+            )
+        base_ctx = {
+            "id_factura": invoice_id,
+            "fecha": fecha,
+            "monto": factura.get("monto", 0),
+            "metodo_pago": factura.get("metodoPago", "tarjeta"),
+            "nombre_paciente": paciente.nombre if paciente else None,
+            "nombre_profesional": profesional.nombre if profesional else None,
+        }
+        if paciente and paciente.email:
+            html = render_to_string(
+                "emails/pago_confirmado_webhook.html",
+                {
+                    **base_ctx,
+                    "nombre": paciente.nombre,
+                    "cta_link": f"{site_url}/aside-patient/facturas.html",
+                    "cta_texto": "Ver factura",
+                },
+            )
+            msg = EmailMultiAlternatives(
+                "PsyAI Connect — Pago confirmado",
+                f"Tu pago de la factura #{invoice_id} ha sido confirmado.",
+                to=[paciente.email],
+            )
+            msg.attach_alternative(html, "text/html")
+            msg.send(fail_silently=True)
+        if profesional and profesional.email:
+            html = render_to_string(
+                "emails/pago_confirmado_webhook.html",
+                {
+                    **base_ctx,
+                    "nombre": profesional.nombre,
+                    "cta_link": f"{site_url}/aside-professional/facturacion.html",
+                    "cta_texto": "Ver factura",
+                },
+            )
+            msg = EmailMultiAlternatives(
+                "PsyAI Connect — Pago recibido",
+                f"El paciente {paciente.nombre if paciente else ''} ha realizado el pago de la factura #{invoice_id}.",
+                to=[profesional.email],
+            )
+            msg.attach_alternative(html, "text/html")
+            msg.send(fail_silently=True)
+    except Exception:
+        logger.exception(
+            "Error enviando correos de pago vía webhook (factura %s)", invoice_id
+        )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -227,20 +307,27 @@ class WebhookWompiView(View):
         computed = hashlib.sha256(raw_to_sign.encode()).hexdigest().upper()
 
         if not hmac.compare_digest(computed, expected_checksum):
-            logger.warning("Wompi webhook: firma inválida (ref=%s)", transaction_ref)
+            logger.warning(
+                "Wompi webhook: firma inválida (ref=%s)", transaction_ref
+            )
             return HttpResponse("", status=200)
 
         invoice_id = invoice_repo.get_invoice_by_reference(transaction_ref)
         if not invoice_id:
-            logger.warning("Wompi webhook: factura no encontrada (ref=%s)", transaction_ref)
+            logger.warning(
+                "Wompi webhook: factura no encontrada (ref=%s)", transaction_ref
+            )
             return HttpResponse("", status=200)
 
         invoice_repo.update_payment_status(invoice_id, "Pagado")
         invoice_repo.set_payment_reference(invoice_id, transaction_ref, transaction_id)
         logger.info(
             "Factura %s pagada vía Wompi (ref=%s, tx=%s)",
-            invoice_id, transaction_ref, transaction_id,
+            invoice_id,
+            transaction_ref,
+            transaction_id,
         )
+        _send_webhook_payment_emails(invoice_repo, invoice_id)
         return HttpResponse("", status=200)
 
 

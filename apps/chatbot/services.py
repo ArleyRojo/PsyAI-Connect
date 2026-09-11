@@ -9,6 +9,8 @@ from threading import Lock
 
 import requests
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from apps.chatbot.repositories import (
     ChatRepository,
@@ -124,6 +126,8 @@ subscribe_chat = chat_events.subscribe
 unsubscribe_chat = chat_events.unsubscribe
 publish_message = chat_events.publish_message
 
+_chatbot_service_registry = []
+
 
 class ChatbotConfigService:
     def __init__(self):
@@ -140,10 +144,15 @@ class ChatbotConfigService:
                     "interaction_rules": "",
                     "risk_terms": "[]",
                     "crisis_response": "",
+                    "medium_response": "",
                     "fallback_response": "",
-                    "temperature": 0.7,
+                    "crisis_phone": "106",
+                    "thinking_level": "low",
+                    "prompt_history_window": 4,
+                    "gemini_history_window": 12,
+                    "temperature": 0.55,
                     "top_p": 0.9,
-                    "max_tokens": 500,
+                    "max_tokens": 600,
                     "max_tokens_user": 1000,
                     "daily_message_limit": 20,
                     "fecha_actualizacion": None,
@@ -153,25 +162,81 @@ class ChatbotConfigService:
         return {"success": True, "config": config}, 200
 
     def save_config(self, data, admin_id):
+        error = self._validate_config(data)
+        if error:
+            return {"success": False, "message": error}, 400
         self.repo.save_config(data, admin_id)
         nueva_config = self.repo.get_config()
         publish_config_update(nueva_config)
+        self._invalidate_chatbot_caches()
         return {"success": True, "message": "Configuración guardada correctamente"}, 200
 
     def save_risk_terms(self, risk_terms_str, admin_id):
         self.repo.save_risk_terms_only(risk_terms_str, admin_id)
         config = self.repo.get_config()
         publish_config_update(config)
+        self._invalidate_chatbot_caches()
         return {"success": True, "message": "Términos de riesgo guardados"}, 200
 
     def clear_risk_terms(self, admin_id):
         self.repo.clear_risk_terms(admin_id)
         publish_config_update({"risk_terms": "[]"})
+        self._invalidate_chatbot_caches()
         return {"success": True, "message": "Términos de riesgo eliminados"}, 200
+
+    def _invalidate_chatbot_caches(self):
+        for svc in list(_chatbot_service_registry):
+            svc.invalidate_config_cache()
+
+    def _validate_config(self, data):
+        validators = {
+            "temperature": (0.0, 1.0),
+            "top_p": (0.0, 1.0),
+            "max_tokens": (100, 1000),
+            "max_tokens_user": (200, 1000),
+            "daily_message_limit": (1, 200),
+            "prompt_history_window": (1, 20),
+            "gemini_history_window": (4, 50),
+        }
+        for field, (lo, hi) in validators.items():
+            if field in data:
+                try:
+                    val = float(data[field])
+                except (TypeError, ValueError):
+                    return f"El campo {field} debe ser un número."
+                if val < lo or val > hi:
+                    return f"El campo {field} debe estar entre {lo} y {hi}."
+        if "thinking_level" in data:
+            allowed = {"low", "medium", "high", "none"}
+            if data["thinking_level"] not in allowed:
+                return f"thinking_level debe ser uno de: {', '.join(sorted(allowed))}"
+        return None
 
     def get_historial_palabras_riesgo(self):
         rows = self.repo.get_historial_palabras_riesgo()
-        return {"success": True, "historial": rows}, 200
+        aggregated = {}
+        for row in rows:
+            nombre = row.get("nombre", "")
+            nivel = row.get("nivelEmocionalDetectado", "Bajo")
+            palabras_raw = row.get("palabrasRiesgoDetectadas", "")
+            if not palabras_raw:
+                continue
+            for palabra in palabras_raw.split(","):
+                palabra = palabra.strip().lower()
+                if not palabra:
+                    continue
+                key = (palabra, nivel)
+                if key not in aggregated:
+                    aggregated[key] = {"palabra": palabra, "nivel": nivel, "count": 0, "pacientes": set()}
+                aggregated[key]["count"] += 1
+                if nombre and nombre not in aggregated[key]["pacientes"]:
+                    aggregated[key]["pacientes"].add(nombre)
+        result = []
+        for item in aggregated.values():
+            item["pacientes"] = sorted(item["pacientes"])
+            result.append(item)
+        result.sort(key=lambda x: x["count"], reverse=True)
+        return {"success": True, "palabras": result}, 200
 
 
 class ChatEventsServiceManager:
@@ -240,9 +305,15 @@ class ChatbotService:
         self._cached_system_prompt = None
         self._cached_config_ts = 0.0
         self._key_index = 0
+        _chatbot_service_registry.append(self)
 
     def _now_ts(self):
         return datetime.now(timezone.utc).timestamp()
+
+    def invalidate_config_cache(self):
+        self._cached_config = None
+        self._cached_config_version = None
+        self._cached_config_ts = 0.0
 
     def _get_api_keys(self):
         multi = os.getenv("GEMINI_API_KEYS", "").strip()
@@ -282,24 +353,32 @@ class ChatbotService:
                 "system_prompt": SYSTEM_PROMPT_FALLBACK,
                 "risk_terms": "[]",
                 "crisis_response": "Si hay riesgo, llama al 123.",
+                "medium_response": "",
                 "fallback_response": "¿Cómo te sientes hoy?",
+                "crisis_phone": "106",
+                "thinking_level": "low",
+                "tone": None,
+                "interaction_rules": None,
+                "prompt_history_window": 4,
+                "gemini_history_window": 12,
                 "temperature": 0.55,
                 "top_p": 0.9,
                 "max_tokens": 600,
                 "max_tokens_user": 1000,
                 "daily_message_limit": 20,
-                "thinking_level": None,
-                "tone": None,
-                "interaction_rules": None,
             }
         result.setdefault("risk_terms", result.get("risk_terms") or "[]")
         result.setdefault("crisis_response", result.get("crisis_response") or "")
+        result.setdefault("medium_response", result.get("medium_response") or "")
         result.setdefault("fallback_response", result.get("fallback_response") or "")
+        result.setdefault("crisis_phone", result.get("crisis_phone") or "106")
+        result.setdefault("thinking_level", result.get("thinking_level") or "low")
         result.setdefault("temperature", result.get("temperature", 0.55))
         result.setdefault("top_p", result.get("top_p", 0.9))
         result.setdefault("max_tokens", result.get("max_tokens", 600))
         result.setdefault("max_tokens_user", result.get("max_tokens_user", 1000))
-        result.setdefault("thinking_level", result.get("thinking_level") or None)
+        result.setdefault("prompt_history_window", result.get("prompt_history_window", 4))
+        result.setdefault("gemini_history_window", result.get("gemini_history_window", 12))
         result.setdefault("daily_message_limit", result.get("daily_message_limit", 20))
         self._cached_config = result
         self._cached_config_version = version
@@ -313,6 +392,7 @@ class ChatbotService:
 
         config, _ = self._get_chatbot_config()
         daily_limit = int(config.get("daily_message_limit") or 20)
+        crisis_phone = config.get("crisis_phone") or "106"
         used_today = self.chat_repo.count_today_messages(patient_id)
         if used_today >= daily_limit:
             return {
@@ -323,29 +403,31 @@ class ChatbotService:
                 "message": (
                     f"Has alcanzado el límite de {daily_limit} mensajes por hoy. "
                     "Si estás en una situación de urgencia, contacta a tu profesional "
-                    "asignado o llama a la línea de crisis: 106."
+                    f"asignado o llama a la línea de crisis: {crisis_phone}."
                 ),
             }, 429
 
-        history = self.chat_repo.get_history(patient_id, today_only=False, limit=12)
+        prompt_window = int(config.get("prompt_history_window") or 4)
+        gemini_window = int(config.get("gemini_history_window") or 12)
+        history = self.chat_repo.get_history(patient_id, today_only=False, limit=gemini_window)
 
         try:
             risk_list = json.loads(config.get("risk_terms") or "[]")
         except Exception:
             risk_list = []
 
-        alto_terms = [r["palabra"].strip().lower() for r in risk_list if r.get("nivel") == "Alto" and r.get("palabra")]
-        medio_terms = [r["palabra"].strip().lower() for r in risk_list if r.get("nivel") == "Medio" and r.get("palabra")]
-        bajo_terms = [r["palabra"].strip().lower() for r in risk_list if r.get("nivel") == "Bajo" and r.get("palabra")]
+        alto_terms = [self._normalize_text(r["palabra"].strip()) for r in risk_list if r.get("nivel") == "Alto" and r.get("palabra")]
+        medio_terms = [self._normalize_text(r["palabra"].strip()) for r in risk_list if r.get("nivel") == "Medio" and r.get("palabra")]
+        bajo_terms = [self._normalize_text(r["palabra"].strip()) for r in risk_list if r.get("nivel") == "Bajo" and r.get("palabra")]
 
-        normalized = message.lower()
-        es_alto = any(t in normalized for t in alto_terms)
-        es_medio = any(t in normalized for t in medio_terms)
-        es_bajo = any(t in normalized for t in bajo_terms)
+        normalized = self._normalize_text(message)
+        es_alto = any(re.search(rf"\b{re.escape(t)}\b", normalized) for t in alto_terms)
+        es_medio = any(re.search(rf"\b{re.escape(t)}\b", normalized) for t in medio_terms)
+        es_bajo = any(re.search(rf"\b{re.escape(t)}\b", normalized) for t in bajo_terms)
 
         if es_alto:
             nivel_emocional = "Alto"
-            risk_words = ",".join([t for t in alto_terms if t in normalized])
+            risk_words = ",".join([t for t in alto_terms if re.search(rf"\b{re.escape(t)}\b", normalized)])
             self._notify_high_risk(patient_id)
             self.chat_repo.save_conversation(
                 patient_id, message, config.get("crisis_response", ""), nivel_emocional, risk_words
@@ -360,11 +442,11 @@ class ChatbotService:
 
         if es_medio:
             nivel_emocional = "Medio"
-            risk_words = ",".join([t for t in medio_terms if t in normalized])
+            risk_words = ",".join([t for t in medio_terms if re.search(rf"\b{re.escape(t)}\b", normalized)])
             self._notify_medium_risk(patient_id, risk_words)
         elif es_bajo:
             nivel_emocional = "Bajo"
-            risk_words = ",".join([t for t in bajo_terms if t in normalized])
+            risk_words = ",".join([t for t in bajo_terms if re.search(rf"\b{re.escape(t)}\b", normalized)])
         else:
             nivel_emocional = "Sin riesgo"
             risk_words = None
@@ -388,10 +470,12 @@ class ChatbotService:
         if es_medio or es_bajo:
             thinking_level = "medium"
         else:
-            thinking_level = None
+            thinking_level = config.get("thinking_level") or "low"
 
         try:
             response_text = self._call_gemini_with_rotation(keys, model, message, history or [], config, contexto_riesgo, thinking_level)
+            if not response_text or not response_text.strip():
+                raise RuntimeError("Gemini devolvio texto vacio")
             self.chat_repo.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
             return {
                 "success": True,
@@ -414,6 +498,9 @@ class ChatbotService:
 
     def _build_risk_context(self, es_medio=False, es_bajo=False):
         if es_medio:
+            medium_response = (self._cached_config.get("medium_response") or "").strip()
+            if medium_response:
+                return medium_response
             return (
                 "El paciente mostró señales de riesgo emocional medio. "
                 "Responde con calidez y, si es natural, sugiere hablar con su profesional sin sonar alarmante."
@@ -505,7 +592,7 @@ class ChatbotService:
                 "Entiendo la duda. Que respuesta esperarias encontrar o que necesitas decidir con esto?",
             ]
         else:
-            configured_fallback = (config.get("fallback_response") or config.get("empathetic_message") or "").strip()
+            configured_fallback = (config.get("fallback_response") or "").strip()
             options = [
                 configured_fallback,
                 "Gracias por contarmelo. Si tuvieras que ponerle nombre a lo que sientes ahora, cual seria?",
@@ -549,6 +636,31 @@ class ChatbotService:
         destinos = profesionales if profesionales else self._get_all_professional_ids()
         for profesional_id in destinos:
             self.appointment_repo.create_notification(profesional_id, "profesional", titulo, mensaje, "Alerta")
+        self._send_risk_email(patient_id, patient_name, destinos, es_alto=True)
+
+    def _send_risk_email(self, patient_id, patient_name, professional_ids, es_alto=False):
+        site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
+        patient_email = self.chat_repo.get_patient_email(patient_id)
+        prof_emails = self.chat_repo.get_professional_emails(professional_ids)
+        if not prof_emails:
+            return
+        nivel = "alto" if es_alto else "medio"
+        asunto = f"PsyAI Connect — Alerta de riesgo {nivel}: {patient_name}"
+        cta = f"{site_url}/aside-professional/my.chatbot.html"
+        for email in prof_emails:
+            ctx = {
+                "nombre_profesional": email.split("@")[0].replace(".", " ").title(),
+                "nombre_paciente": patient_name,
+                "nivel_riesgo": nivel,
+                "cta_link": cta,
+            }
+            html = render_to_string("emails/alerta_riesgo.html", ctx)
+            msg = EmailMultiAlternatives(asunto, f"Alerta de riesgo {nivel}: el paciente {patient_name} requiere seguimiento.", to=[email])
+            msg.attach_alternative(html, "text/html")
+            try:
+                msg.send(fail_silently=True)
+            except Exception:
+                self.logger.exception("Error enviando correo de riesgo %s a %s", nivel, email)
 
     def _get_assigned_professionals(self, patient_id):
         return self.chat_repo.get_assigned_professionals(patient_id)
@@ -576,6 +688,7 @@ class ChatbotService:
         for profesional_id in destinos:
             self.appointment_repo.create_notification(profesional_id, "profesional", titulo, mensaje, "Seguimiento")
         self.logger.info("Notificación de seguimiento enviada a %d profesional(es) sobre %s", len(destinos), patient_name)
+        self._send_risk_email(patient_id, patient_name, destinos, es_alto=False)
 
     def _get_patient_name(self, patient_id):
         return self.chat_repo.get_patient_name(patient_id)
@@ -591,7 +704,8 @@ class ChatbotService:
         if contexto_riesgo:
             system_prompt = f"{system_prompt}\n\nCONTEXTO DE RIESGO DETECTADO: {contexto_riesgo}"
         if history:
-            ultimos = history[-4:]
+            prompt_window = int(config.get("prompt_history_window") or 4)
+            ultimos = history[-prompt_window:]
             if ultimos:
                 resumen = " | ".join(
                     f"{'Paciente' if h['tipo'] == 'usuario' else 'Bot'}: {h['mensaje']}"
@@ -608,16 +722,16 @@ class ChatbotService:
         max_user_chars = int(config.get("max_tokens_user") or 1000)
 
         if thinking_level is None:
-            thinking_level = config.get("thinking_level")
-        if thinking_level is None:
-            thinking_level = os.getenv("GEMINI_THINKING_LEVEL", "low").strip() or "low"
+            thinking_level = config.get("thinking_level") or "low"
+        if thinking_level == "none":
+            thinking_level = None
 
         generation_config = {
             "temperature": float(config.get("temperature", 0.55)),
             "topP": float(config.get("top_p", 0.9)),
             "maxOutputTokens": int(config.get("max_tokens", 600)),
         }
-        if thinking_level:
+        if thinking_level and self._model_supports_thinking(model):
             generation_config["thinkingConfig"] = {"thinkingLevel": thinking_level}
 
         payload = {
@@ -641,7 +755,16 @@ class ChatbotService:
                     if attempt <= GEMINI_RETRIES:
                         time.sleep(base_delay * attempt)
                     continue
-                resp.raise_for_status()
+                if resp.status_code != 200:
+                    body = resp.text[:2000]
+                    self.logger.error(
+                        "Gemini respondio %s en intento %s/%s body: %s",
+                        resp.status_code, attempt, GEMINI_RETRIES + 1, body,
+                    )
+                    last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}: {body[:200]}")
+                    if attempt <= GEMINI_RETRIES:
+                        time.sleep(base_delay * attempt)
+                    continue
                 data = resp.json()
                 text = self._extract_text(data)
                 if not text:
@@ -656,7 +779,8 @@ class ChatbotService:
 
     def _build_contents(self, history, message, max_user_chars=1000):
         contents = []
-        for item in (history or [])[-12:]:
+        gemini_window = int(self._cached_config.get("gemini_history_window", 12) if self._cached_config else 12)
+        for item in (history or [])[-gemini_window:]:
             if not isinstance(item, dict):
                 continue
             text = (item.get("mensaje") or "").strip()
@@ -664,7 +788,12 @@ class ChatbotService:
                 continue
             role = "model" if item.get("tipo") == "bot" else "user"
             history_limit = max_user_chars // 2
-            contents.append({"role": role, "parts": [{"text": text[:history_limit]}]})
+            if contents and contents[-1]["role"] == role:
+                contents[-1]["parts"][0]["text"] += "\n" + text[:history_limit]
+            else:
+                contents.append({"role": role, "parts": [{"text": text[:history_limit]}]})
+        while contents and contents[0]["role"] != "user":
+            contents.pop(0)
         contents.append({"role": "user", "parts": [{"text": message[:max_user_chars]}]})
         return contents
 
@@ -675,6 +804,13 @@ class ChatbotService:
             .get("parts", [])
         )
         return "".join(part.get("text", "") for part in parts)
+
+    @staticmethod
+    def _model_supports_thinking(model):
+        model_lower = model.lower()
+        if any(m in model_lower for m in ("2.5-flash", "2.5-pro", "3-flash", "3.1-flash", "3.1-pro")):
+            return True
+        return False
 
     def get_history(self, patient_id):
         self.logger.info("get_history llamado con patient_id: %s", patient_id)

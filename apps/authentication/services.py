@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings as dj_settings
 from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 from apps.authentication.repositories import AuthRepository, SecurityRepository
@@ -81,22 +82,14 @@ class MailService:
     def send_recovery_email(recipient_email, recovery_link):
         subject = "Recuperación de contraseña — PsyAI Connect"
 
-        body_html = f"""
-        <html>
-        <body style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; padding: 20px; background-color: #f0f5fc;">
-            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; padding: 32px; border: 1.5px solid #D6E8FA;">
-                <h2 style="color: #0D47A1; font-family: 'Lora', Georgia, serif;">Recuperación de contraseña</h2>
-                <p style="color: #0D1F3C; font-size: 16px;">Has solicitado recuperar tu contraseña en PsyAI Connect.</p>
-                <p style="color: #0D1F3C; font-size: 16px;">Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
-                <div style="text-align: center; margin: 32px 0;">
-                    <a href="{recovery_link}" style="background-color: #0D47A1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: bold; display: inline-block;">Restablecer contraseña</a>
-                </div>
-                <p style="color: #7B92AC; font-size: 14px;">Este enlace expirará en 1 hora.</p>
-                <p style="color: #7B92AC; font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este correo en forma segura.</p>
-            </div>
-        </body>
-        </html>
-        """
+        from urllib.parse import urlparse
+        parsed = urlparse(recovery_link)
+        site_url = f"{parsed.scheme}://{parsed.netloc}"
+
+        body_html = render_to_string("emails/password_recovery.html", {
+            "recovery_link": recovery_link,
+            "site_url": site_url,
+        })
 
         try:
             msg = EmailMultiAlternatives(
@@ -365,7 +358,7 @@ class AuthService:
             expires = timezone.now() + timedelta(hours=1)
             self.repo.create_password_recovery_token(email, token, expires)
             host = request_host or "localhost"
-            recovery_link = f"http://{host}/recover?token={token}"
+            recovery_link = f"http://{host}/reset-password.html?token={token}"
             email_sent = MailService.send_recovery_email(email, recovery_link)
 
             if not email_sent:

@@ -1,13 +1,98 @@
 import logging
 from datetime import date, datetime, timedelta
 
+from django.conf import settings
+from django.db import IntegrityError, transaction
+from django.template.loader import render_to_string
 from django.utils import timezone as tz
 
 from apps.scheduling.repositories import AppointmentRepository
 
 logger = logging.getLogger(__name__)
 
-VALID_CITAS_ESTADOS = {"Pendiente", "Completada", "Cancelada"}
+VALID_CITAS_ESTADOS = {"Pendiente", "Confirmada", "Completada", "Cancelada"}
+
+
+class AppointmentMailService:
+    @staticmethod
+    def _get_site_url():
+        return getattr(settings, "SITE_URL", "http://localhost:8000")
+
+    @staticmethod
+    def _formatear_fecha(fecha):
+        if hasattr(fecha, "strftime"):
+            meses = [
+                "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+            ]
+            dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+            return f"{dias[fecha.weekday()]} {fecha.day} de {meses[fecha.month]} de {fecha.year}"
+        return str(fecha)
+
+    @staticmethod
+    def _formatear_hora(hora):
+        if hora is None:
+            return ""
+        if isinstance(hora, timedelta):
+            total_seconds = int(hora.total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            return f"{hours:02d}:{minutes:02d}"
+        if hasattr(hora, "strftime"):
+            return hora.strftime("%H:%M")
+        return str(hora)
+
+    @classmethod
+    def send_cita_notificacion(cls, recipient_email, titulo, mensaje, *, nombre_contraparte=None,
+                               contraparte_label="Contacto", fecha=None, hora=None, tipo_cita=None,
+                               motivo=None, estado=None, motivo_cancelacion=None, cta_link=None,
+                               cta_texto=None, recipient_user_id=None):
+        if not recipient_email:
+            logger.warning("No se envió correo de cita: destinatario vacío")
+            return
+
+        if recipient_user_id:
+            try:
+                from apps.patients.models import PerfilPaciente
+                perfil = PerfilPaciente.objects.filter(idPaciente=recipient_user_id).first()
+                if perfil and perfil.prefNotificaciones == "Desactivadas":
+                    logger.info(f"Correo omitido (notificaciones desactivadas): {recipient_email}")
+                    return
+            except Exception:
+                pass
+        if not recipient_email:
+            logger.warning("No se envió correo de cita: destinatario vacío")
+            return
+
+        site_url = cls._get_site_url()
+        ctx = {
+            "titulo": titulo,
+            "mensaje": mensaje,
+            "nombre_contraparte": nombre_contraparte,
+            "contraparte_label": contraparte_label,
+            "fecha": cls._formatear_fecha(fecha) if fecha else "",
+            "hora": cls._formatear_hora(hora) if hora else "",
+            "tipo_cita": tipo_cita,
+            "motivo": motivo,
+            "estado": estado,
+            "motivo_cancelacion": motivo_cancelacion,
+            "cta_link": cta_link,
+            "cta_texto": cta_texto or "Ver cita",
+            "site_url": site_url,
+        }
+
+        try:
+            subject = titulo
+            text_body = f"{titulo}\n\n{mensaje}\n\nFecha: {ctx['fecha']}\nHora: {ctx['hora']}"
+            html_body = render_to_string("emails/cita_notificacion.html", ctx)
+
+            from django.core.mail import EmailMultiAlternatives
+            msg = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [recipient_email])
+            msg.attach_alternative(html_body, "text/html")
+            msg.send(fail_silently=True)
+            logger.info(f"Correo enviado a {recipient_email}: {titulo}")
+        except Exception as e:
+            logger.error(f"Error enviando correo a {recipient_email}: {e}")
 
 
 class AppointmentService:
@@ -41,6 +126,7 @@ class AppointmentService:
             target_patient_id = patient_id
             if not target_patient_id:
                 return {"success": False, "message": "Sesión de usuario inválida"}, 401
+
         existing = self.repo.get_appointment_in_slot(professional_id, fecha, hora)
         if existing:
             if existing["idPaciente"] == target_patient_id:
@@ -52,10 +138,61 @@ class AppointmentService:
                 msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
                 return {"success": False, "message": msg}, 409
 
-        cita_id = self.repo.create_appointment(
-            target_patient_id, professional_id, fecha, hora, tipo_cita, motivo,
-            created_by_professional if created_by_professional else False,
-        )
+        try:
+            cita_id = self.repo.create_appointment(
+                target_patient_id, professional_id, fecha, hora, tipo_cita, motivo,
+                created_by_professional if created_by_professional else False,
+            )
+        except IntegrityError:
+            msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
+            return {"success": False, "message": msg}, 409
+
+        try:
+            cita = self.repo.get_appointment_full(cita_id)
+            if cita:
+                site_url = AppointmentMailService._get_site_url()
+                prof = cita.idProfesional
+                pac = cita.idPaciente
+                if created_by_professional:
+                    AppointmentMailService.send_cita_notificacion(
+                        recipient_email=pac.email,
+                        titulo="Nueva cita agendada",
+                        mensaje=f"Se ha agendado una cita contigo. {prof.nombre if prof else 'Tu profesional'} te ha asignado una sesión.",
+                        nombre_contraparte=prof.nombre if prof else None,
+                        contraparte_label="Profesional",
+                        fecha=cita.fecha, hora=cita.hora,
+                        tipo_cita=cita.tipoCita, motivo=cita.motivo,
+                        estado=cita.estado,
+                        cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
+                        recipient_user_id=pac.idUsuario if pac else None,
+                    )
+                else:
+                    AppointmentMailService.send_cita_notificacion(
+                        recipient_email=prof.email if prof else None,
+                        titulo="Nueva cita agendada",
+                        mensaje=f"El paciente {pac.nombre if pac else ''} ha agendado una cita contigo.",
+                        nombre_contraparte=pac.nombre if pac else None,
+                        contraparte_label="Paciente",
+                        fecha=cita.fecha, hora=cita.hora,
+                        tipo_cita=cita.tipoCita, motivo=cita.motivo,
+                        estado=cita.estado,
+                        cta_link=f"{site_url}/aside-professional/my.agenda.html",
+                    )
+                    AppointmentMailService.send_cita_notificacion(
+                        recipient_email=pac.email if pac else None,
+                        titulo="Cita agendada correctamente",
+                        mensaje=f"Tu cita con {prof.nombre if prof else 'tu profesional'} ha sido agendada exitosamente.",
+                        nombre_contraparte=prof.nombre if prof else None,
+                        contraparte_label="Profesional",
+                        fecha=cita.fecha, hora=cita.hora,
+                        tipo_cita=cita.tipoCita, motivo=cita.motivo,
+                        estado=cita.estado,
+                        cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
+                        recipient_user_id=pac.idUsuario if pac else None,
+                    )
+        except Exception as e:
+            logger.error(f"Error enviando correo de nueva cita: {e}")
+
         return {"success": True, "message": "Cita agendada correctamente", "idCita": cita_id}, 200
 
     def get_available_times(self, professional_id, fecha):
@@ -130,6 +267,28 @@ class AppointmentService:
             return {"success": False, "message": "No tienes permiso"}, 403
 
         self.repo.update_appointment_status(appointment_id, estado)
+
+        try:
+            cita = self.repo.get_appointment_full(appointment_id)
+            if cita:
+                site_url = AppointmentMailService._get_site_url()
+                pac = cita.idPaciente
+                prof = cita.idProfesional
+                AppointmentMailService.send_cita_notificacion(
+                    recipient_email=pac.email if pac else None,
+                    titulo=f"Cita actualizada: {estado}",
+                    mensaje=f"Tu cita ha sido actualizada a estado \"{estado}\".",
+                    nombre_contraparte=prof.nombre if prof else None,
+                    contraparte_label="Profesional",
+                    fecha=cita.fecha, hora=cita.hora,
+                    tipo_cita=cita.tipoCita, motivo=cita.motivo,
+                    estado=estado,
+                    cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
+                    recipient_user_id=pac.idUsuario if pac else None,
+                )
+        except Exception as e:
+            logger.error(f"Error enviando correo de actualización de estado: {e}")
+
         return {"success": True, "message": f"Cita {estado}"}, 200
 
     def list_patient_appointments(self, patient_id):
@@ -161,6 +320,41 @@ class AppointmentService:
                 mensaje=f"El paciente ha cancelado su cita. Motivo: {motivo_cancelacion.strip()}",
                 tipo="Alerta",
             )
+
+        try:
+            cita = self.repo.get_appointment_full(appointment_id)
+            if cita:
+                site_url = AppointmentMailService._get_site_url()
+                prof = cita.idProfesional
+                pac = cita.idPaciente
+                AppointmentMailService.send_cita_notificacion(
+                    recipient_email=prof.email if prof else None,
+                    titulo="Cita cancelada por paciente",
+                    mensaje=f"El paciente {pac.nombre if pac else ''} ha cancelado la cita.",
+                    nombre_contraparte=pac.nombre if pac else None,
+                    contraparte_label="Paciente",
+                    fecha=cita.fecha, hora=cita.hora,
+                    tipo_cita=cita.tipoCita, motivo=cita.motivo,
+                    estado="Cancelada",
+                    motivo_cancelacion=motivo_cancelacion.strip(),
+                    cta_link=f"{site_url}/aside-professional/my.agenda.html",
+                )
+                AppointmentMailService.send_cita_notificacion(
+                    recipient_email=pac.email if pac else None,
+                    titulo="Cita cancelada",
+                    mensaje=f"Has cancelado tu cita con {prof.nombre if prof else 'tu profesional'}.",
+                    nombre_contraparte=prof.nombre if prof else None,
+                    contraparte_label="Profesional",
+                    fecha=cita.fecha, hora=cita.hora,
+                    tipo_cita=cita.tipoCita, motivo=cita.motivo,
+                    estado="Cancelada",
+                    motivo_cancelacion=motivo_cancelacion.strip(),
+                    cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
+                    recipient_user_id=pac.idUsuario if pac else None,
+                )
+        except Exception as e:
+            logger.error(f"Error enviando correo de cancelación (paciente): {e}")
+
         return {"success": True, "message": "Cita cancelada correctamente"}, 200
 
     def cancel_professional_appointment(self, appointment_id, professional_id, motivo_cancelacion):
@@ -187,6 +381,29 @@ class AppointmentService:
                 mensaje=f"El profesional ha cancelado tu cita. Motivo: {motivo_cancelacion.strip()}",
                 tipo="Alerta",
             )
+
+        try:
+            cita = self.repo.get_appointment_full(appointment_id)
+            if cita:
+                site_url = AppointmentMailService._get_site_url()
+                prof = cita.idProfesional
+                pac = cita.idPaciente
+                AppointmentMailService.send_cita_notificacion(
+                    recipient_email=pac.email if pac else None,
+                    titulo="Cita cancelada por el profesional",
+                    mensaje=f"El profesional {prof.nombre if prof else ''} ha cancelado tu cita.",
+                    nombre_contraparte=prof.nombre if prof else None,
+                    contraparte_label="Profesional",
+                    fecha=cita.fecha, hora=cita.hora,
+                    tipo_cita=cita.tipoCita, motivo=cita.motivo,
+                    estado="Cancelada",
+                    motivo_cancelacion=motivo_cancelacion.strip(),
+                    cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
+                    recipient_user_id=pac.idUsuario if pac else None,
+                )
+        except Exception as e:
+            logger.error(f"Error enviando correo de cancelación (profesional): {e}")
+
         return {"success": True, "message": "Cita cancelada correctamente"}, 200
 
     def get_available_dates(self, professional_id, anio, mes):

@@ -1,46 +1,51 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from apps.patients.views import (
-    PerfilPacienteResource,
-    PerfilFotoResource,
-    EvolucionResource,
-    PacienteResource,
-    ProfesionalResource,
-    ChatbotResource,
-    ChatbotEncuestaResource,
-    ChatbotConfigResource,
+    PerfilPacienteViewSet,
+    PerfilFotoViewSet,
+    PreferenciasPacienteViewSet,
+    EvolucionViewSet,
+    PacienteViewSet,
+    ProfesionalViewSet,
+    ChatbotAPIView,
+    ChatbotEncuestaViewSet,
+    ChatbotConfigViewSet,
     ChatbotConfigEventsResource,
-    ConsentimientoChatbotResource,
-    DocumentoPacienteResource,
-    ChatContactoResource,
-    ChatMensajeResource,
+    ConsentimientoChatbotViewSet,
+    DocumentoPacienteViewSet,
+    ChatContactoViewSet,
+    ChatMensajeViewSet,
 )
 
 app_name = "patients"
 
+router = DefaultRouter()
+router.register(r"perfil/paciente", PerfilPacienteViewSet, basename="perfil-paciente")
+router.register(r"preferencias/paciente", PreferenciasPacienteViewSet, basename="preferencias-paciente")
+router.register(r"evolucion", EvolucionViewSet, basename="evolucion")
+router.register(r"pacientes", PacienteViewSet, basename="pacientes")
+router.register(r"profesionales", ProfesionalViewSet, basename="profesionales")
+router.register(r"chatbot/encuesta", ChatbotEncuestaViewSet, basename="chatbot-encuesta")
+router.register(r"chatbot/config", ChatbotConfigViewSet, basename="chatbot-config")
+router.register(r"paciente/consentimiento-chatbot", ConsentimientoChatbotViewSet, basename="consentimiento-chatbot")
+router.register(r"paciente/documentos", DocumentoPacienteViewSet, basename="documento-paciente")
+router.register(r"chat/contactos", ChatContactoViewSet, basename="chat-contactos")
+router.register(r"chat/mensajes", ChatMensajeViewSet, basename="chat-mensajes")
+
 urlpatterns = [
-    path("perfil/paciente/<int:id_usuario>", PerfilPacienteResource.as_view(), name="perfil_paciente"),
-    path("perfil/paciente", PerfilPacienteResource.as_view(), name="perfil_paciente_update"),
-    path("perfil/paciente/foto", PerfilFotoResource.as_view(), name="perfil_foto"),
-    path("evolucion", EvolucionResource.as_view(), name="evolucion"),
-    path("pacientes", PacienteResource.as_view(), name="pacientes"),
-    path("profesionales", ProfesionalResource.as_view(), name="profesionales"),
-    path("chatbot", ChatbotResource.as_view(), name="chatbot"),
-    path("chatbot/historial", ChatbotResource.as_view(), name="chatbot_historial"),
-    path("chatbot/encuesta", ChatbotEncuestaResource.as_view(), name="chatbot_encuesta"),
-    path("chatbot/config", ChatbotConfigResource.as_view(), name="chatbot_config"),
+    path("", include(router.urls)),
+    path("perfil/paciente/foto", PerfilFotoViewSet.as_view({"put": "update", "post": "create"}), name="perfil-foto"),
+    path("chatbot", ChatbotAPIView.as_view(), name="chatbot"),
+    path("chatbot/historial", ChatbotAPIView.as_view(), name="chatbot_historial"),
     path("chatbot/config/events", ChatbotConfigEventsResource.as_view(), name="chatbot_config_events"),
-    path("paciente/consentimiento-chatbot", ConsentimientoChatbotResource.as_view(), name="consentimiento_chatbot"),
-    path("paciente/documentos/subir", DocumentoPacienteResource.as_view(), name="documento_subir"),
-    path("paciente/documentos/<int:id_documento>", DocumentoPacienteResource.as_view(), name="documento_paciente"),
-    path("paciente/documentos", DocumentoPacienteResource.as_view(), name="documentos_paciente"),
-    path("chat/contactos", ChatContactoResource.as_view(), name="chat_contactos"),
-    path("chat/mensajes", ChatMensajeResource.as_view(), name="chat_mensajes"),
-    # Legacy aliases
-    path("chatbot/enviar", ChatbotResource.as_view(), name="chatbot_enviar_legacy"),
-    path("perfil/foto", PerfilFotoResource.as_view(), name="perfil_foto_legacy"),
-    path("chat/profesionales", ChatContactoResource.as_view(), name="chat_profesionales_legacy"),
-    path("paciente/chat/mensajes", ChatMensajeResource.as_view(), name="chat_mensajes_paciente_legacy"),
-    path("chat/enviar", ChatMensajeResource.as_view(), name="chat_enviar_legacy"),
-    path("paciente/chat/enviar", ChatMensajeResource.as_view(), name="chat_paciente_enviar_legacy"),
+    path("paciente/documentos/subir", DocumentoPacienteViewSet.as_view({"post": "create"}), name="documento_subir"),
+    path("paciente/documentos", DocumentoPacienteViewSet.as_view({"get": "list"}), name="documento_list"),
+    path("chatbot/enviar", ChatbotAPIView.as_view(), name="chatbot_enviar_legacy"),
+    path("perfil/foto", PerfilFotoViewSet.as_view({"put": "update", "post": "create"}), name="perfil_foto_legacy"),
+    path("chat/profesionales", ChatContactoViewSet.as_view({"get": "list"}), name="chat_profesionales_legacy"),
+    path("paciente/chat/mensajes", ChatMensajeViewSet.as_view({"get": "list", "post": "create"}), name="chat_mensajes_paciente_legacy"),
+    path("chat/enviar", ChatMensajeViewSet.as_view({"post": "create"}), name="chat_enviar_legacy"),
+    path("paciente/chat/enviar", ChatMensajeViewSet.as_view({"post": "create"}), name="chat_paciente_enviar_legacy"),
+    path("evolucion", EvolucionViewSet.as_view({"get": "list", "post": "create"}), name="evolucion"),
 ]

@@ -654,7 +654,7 @@ hr.divider {
   font-size: 13px;
   padding: 14px 22px;
   border-radius: var(--radius-md);
-  display: flex;
+  display: none;
   align-items: center;
   gap: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,.2);
@@ -664,7 +664,7 @@ hr.divider {
   z-index: 9999;
   pointer-events: none;
 }
-.toast.show { opacity: 1; transform: translateY(0); }
+.toast.show { display: flex; opacity: 1; transform: translateY(0); }
 .toast i { font-size: 18px; color: #4ade80; }
 
 /* Ocultar selector de archivo nativo */

@@ -253,19 +253,23 @@ table {
   .register-card,
   .recover-card {
     width: calc(100% - 24px) !important;
-    max-width: 400px !important;
-    padding: 24px 20px !important;
+    max-width: 460px !important;
+    padding: 28px 22px !important;
     margin: 12px !important;
   }
 
   .login-header h1,
   .register-header h1 {
-    font-size: 1.3rem !important;
+    font-size: 1.6rem !important;
+  }
+
+  .login-header p {
+    font-size: 0.95rem !important;
   }
 
   .login-header img {
-    width: 60px !important;
-    height: 60px !important;
+    width: 76px !important;
+    height: 76px !important;
   }
 
   .back-index {
@@ -274,7 +278,7 @@ table {
   }
 
   .back-index a {
-    font-size: 0.8rem !important;
+    font-size: 1rem !important;
   }
 }
 
@@ -282,7 +286,7 @@ table {
   .login-card,
   .register-card,
   .recover-card {
-    padding: 28px 24px !important;
+    padding: 32px 28px !important;
   }
 }
 
@@ -1288,11 +1292,16 @@ code,
     overflow-y: auto !important;
     overflow-x: hidden !important;
     transform: translateX(-105%) !important;
+    z-index: 1100 !important;
   }
 
   .sidebar.active,
   .sidebar.show {
     transform: translateX(0) !important;
+  }
+
+  .sidebar-overlay {
+    z-index: 1099 !important;
   }
 
   .toggle-btn,

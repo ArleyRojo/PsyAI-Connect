@@ -4,7 +4,10 @@ import logging
 
 import psutil
 from collections import Counter, deque
+from django.conf import settings
 from django.core.cache import cache
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from apps.admin_panel.repositories import AdminRepository
 
@@ -69,8 +72,22 @@ class AdminService:
         return {"success": True, "message": "Usuario eliminado"}, 200
 
     def block_user(self, data):
-        activo = self.repo.block_user(data.get("idUsuario"), data.get("accion"))
+        activo, user_info = self.repo.block_user(data.get("idUsuario"), data.get("accion"))
+        if activo == 0 and user_info and user_info.get("email"):
+            self._send_suspension_email(user_info["email"], user_info["nombre"], data.get("motivo", ""))
         return {"success": True, "message": f"Usuario {'suspendido' if activo == 0 else 'reestablecido'}"}, 200
+
+    def _send_suspension_email(self, email, nombre, motivo=""):
+        site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
+        asunto = "PsyAI Connect — Tu cuenta ha sido suspendida"
+        ctx = {"nombre": nombre, "motivo": motivo or None, "site_url": site_url}
+        html = render_to_string("emails/cuenta_bloqueada.html", ctx)
+        msg = EmailMultiAlternatives(asunto, f"Hola {nombre}, tu cuenta en PsyAI Connect ha sido suspendida.", to=[email])
+        msg.attach_alternative(html, "text/html")
+        try:
+            msg.send(fail_silently=True)
+        except Exception:
+            logger.exception("Error enviando correo de suspensión a %s", email)
 
     def list_role_users(self):
         return {"success": True, "usuarios": self.repo.list_role_users()}, 200

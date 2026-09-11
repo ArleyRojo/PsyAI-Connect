@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
 <head>
-    <title>PsyAI Connect | Gesti&oacute;n de Citas</title>
+    <title>PsyAI Connect | Gestión de Citas</title>
     {% include 'base/partials/head.html' %}
-    <link rel="stylesheet" href="/css/pages/patient.css?v=20260711-1">
+    <link rel="stylesheet" href="/css/pages/patient.css?v=20260723-1">
+    <link rel="stylesheet" href="/css/pages/patient-agenda-v2.css?v=20260723-1">
     <link rel="stylesheet" href="/css/components/components.css?v=20260711-1">
     <script src="https://checkout.wompi.co/widget.js"></script>
 </head>
@@ -76,24 +77,24 @@
                 <i class="fas fa-cog"></i>
             </a>
         </div>
-        <div class="sidebar__actions">
-            <div class="theme-switch-container">
-                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                <button id="theme-toggle" title="Cambiar modo"></button>
-                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-            </div>
-            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Cerrar Sesión</span>
-            </a>
+        <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+            <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+            <button id="theme-toggle" title="Cambiar modo"></button>
+            <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
         </div>
+    </div>
+    <div class="sidebar__logout-section">
+        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span>
+        </a>
     </div>
   </aside>
 
   <!-- Contenido principal -->
   <main class="main-content flex-grow-1">
     <header class="main-header d-flex justify-content-between align-items-center">
-      <h1><i class="fas fa-calendar-alt me-2"></i>Gesti&oacute;n de Citas</h1>
+      <h1><i class="fas fa-calendar-alt me-2"></i>Gestión de Citas</h1>
       <div class="user-info d-flex align-items-center">
         <span class="user-greeting" id="nombrePaciente">Hola, </span>
         <button class="btn-notif" title="Notificaciones">
@@ -104,10 +105,10 @@
       </div>
     </header>
 
-    <!-- Pr&oacute;ximas Citas -->
+    <!-- Próximas Citas -->
     <section class="section-card">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="section-title mb-0"><i class="fas fa-clock"></i> Pr&oacute;ximas Citas</div>
+        <div class="section-title mb-0"><i class="fas fa-clock"></i> Próximas Citas</div>
         <button type="button" class="btn-historial" id="btnVerHistorialPaciente" data-bs-toggle="modal" data-bs-target="#modalHistorialCitasPaciente">
           <i class="fas fa-history"></i>
           <span class="btn-historial__label">Historial</span>
@@ -121,8 +122,8 @@
             <th>Horario</th>
             <th>Tipo</th>
             <th>Motivo</th>
-            <th>Pago</th>
-            <th>Acci�n</th>
+            <th>Estado</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody id="tablaCitas"><tr><td colspan="6" class="text-center text-muted py-3">Cargando citas...</td></tr></tbody>
@@ -137,15 +138,15 @@
       <div class="stepper-wrapper" id="stepperCitas">
         <div class="step-item active" data-step="1">
           <div class="step-circle">1</div>
-          <span class="step-label">Tipo &amp; Profesional</span>
+          <span class="step-label">Tipo & Profesional</span>
         </div>
         <div class="step-item" data-step="2">
           <div class="step-circle">2</div>
-          <span class="step-label">Fecha &amp; Hora</span>
+          <span class="step-label">Fecha & Hora</span>
         </div>
         <div class="step-item" data-step="3">
           <div class="step-circle">3</div>
-          <span class="step-label">Detalles &amp; Confirmar</span>
+          <span class="step-label">Detalles & Confirmar</span>
         </div>
       </div>
 
@@ -183,9 +184,9 @@
             <label for="tipoCita" class="form-label">Tipo de Cita</label>
             <select id="tipoCita" class="form-select">
               <option value="">Seleccionar tipo de cita</option>
-              <option>Ansiedad</option><option>Estr&eacute;s</option><option>Depresi&oacute;n</option>
-              <option>Autoestima</option><option>Duelo</option><option>Trastornos del Sue&ntilde;o</option>
-              <option>Adicciones</option><option>Orientaci&oacute;n Emocional</option>
+              <option>Ansiedad</option><option>Estrés</option><option>Depresión</option>
+              <option>Autoestima</option><option>Duelo</option><option>Trastornos del Sueño</option>
+              <option>Adicciones</option><option>Orientación Emocional</option>
               <option>Terapia de Pareja</option><option>Otro</option>
             </select>
           </div>
@@ -193,7 +194,7 @@
             <label for="profesional" class="form-label">Profesional</label>
             <select id="profesional" class="form-select">
               <option value="">Seleccionar profesional</option>
-              <option value="2">Psic&oacute;logo 1</option>
+              <option value="2">Psicólogo 1</option>
             </select>
           </div>
           <div class="text-end mt-4">
@@ -261,29 +262,29 @@
   </main>
 </div>
 
-<!-- MODAL: ELEGIR M�TODO DE PAGO -->
+<!-- MODAL: ELEGIR MÉTODO DE PAGO -->
 <div class="modal fade" id="modalElegirPago" tabindex="-1" data-bs-backdrop="static">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content border-0 shadow">
 <div class="modal-header border-0">
-  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>M�todo de pago</h5>
+  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Método de pago</h5>
   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 </div>
 <div class="modal-body py-4">
-  <p class="text-muted text-center mb-4">Elige c�mo quieres pagar esta consulta</p>
+  <p class="text-muted text-center mb-4">Elige cómo quieres pagar esta consulta</p>
   <div class="payment-method-grid">
-    <div class="payment-option" data-método="ahora" onclick="elegirMetodoPago(this)">
+    <div class="payment-option" data-metodo="ahora" onclick="elegirMetodoPago(this)">
       <div class="payment-option-icon"><i class="fas fa-credit-card"></i></div>
       <div class="payment-option-info">
         <span class="payment-option-title">Pagar ahora</span>
-        <span class="payment-option-desc">Tarjeta, PSE o efectivo � v�a Wompi</span>
+        <span class="payment-option-desc">Tarjeta, PSE o efectivo vía Wompi</span>
       </div>
       <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
     </div>
-    <div class="payment-option" data-método="después" onclick="elegirMetodoPago(this)">
+    <div class="payment-option" data-metodo="despues" onclick="elegirMetodoPago(this)">
       <div class="payment-option-icon"><i class="fas fa-clock"></i></div>
       <div class="payment-option-info">
-        <span class="payment-option-title">Pagar despu�s</span>
+        <span class="payment-option-title">Pagar después</span>
         <span class="payment-option-desc">La factura queda pendiente, puedes pagar desde Mis Facturas</span>
       </div>
       <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
@@ -305,20 +306,20 @@
 <div class="modal-body text-center py-4">
   <div id="wompiLoading"><div class="spinner-border text-primary mb-3"></div><p class="fw-semibold">Preparando pago...</p></div>
   <div id="wompiSandboxInfo" class="alert alert-info text-start small p-3 mb-3" style="display:none;">
-    <i class="fas fa-info-circle me-1"></i> <strong>Est�s en modo de pruebas de Wompi.</strong> Usa estos datos para simular un pago:
+    <i class="fas fa-info-circle me-1"></i> <strong>Estás en modo de pruebas de Wompi.</strong> Usa estos datos para simular un pago:
     <hr class="my-2">
-    <div class="mb-1"><strong>Tarjeta � Aprobado:</strong> <code class="user-select-all">4242 4242 4242 4242</code></div>
-    <div class="mb-1"><strong>Tarjeta � Rechazado:</strong> <code class="user-select-all">4111 1111 1111 1111</code></div>
-    <div class="mb-1"><strong>Tarjeta � Cualquier otro n�mero:</strong> genera <em>ERROR</em></div>
-    <div class="mb-1"><strong>Nequi � Aprobado:</strong> <code class="user-select-all">3991111111</code></div>
-    <div class="mb-1"><strong>Nequi � Cualquier otro n�mero:</strong> genera <em>RECHAZADO</em></div>
+    <div class="mb-1"><strong>Tarjeta — Aprobado:</strong> <code class="user-select-all">4242 4242 4242 4242</code></div>
+    <div class="mb-1"><strong>Tarjeta — Rechazado:</strong> <code class="user-select-all">4111 1111 1111 1111</code></div>
+    <div class="mb-1"><strong>Tarjeta — Cualquier otro número:</strong> genera <em>ERROR</em></div>
+    <div class="mb-1"><strong>Nequi — Aprobado:</strong> <code class="user-select-all">3991111111</code></div>
+    <div class="mb-1"><strong>Nequi — Cualquier otro número:</strong> genera <em>RECHAZADO</em></div>
     <hr class="my-2">
-    <div><strong>Datos adicionales (tarjeta):</strong> cualquier fecha futura (ej. 12/28), CVC de 3 d�gitos (ej. 123), y nombre del titular.</div>
+    <div><strong>Datos adicionales (tarjeta):</strong> cualquier fecha futura (ej. 12/28), CVC de 3 dígitos (ej. 123), y nombre del titular.</div>
   </div>
   <div id="wompiWidgetContainer" style="display:none;">
     <i class="fas fa-credit-card text-primary" style="font-size:3rem;"></i>
     <p class="fw-bold mt-3">Procesando pago...</p>
-    <p class="text-muted small">Se abrir� el formulario de pago seguro de Wompi.</p>
+    <p class="text-muted small">Se abrirá el formulario de pago seguro de Wompi.</p>
   </div>
   <div id="wompiSuccess" style="display:none;">
     <i class="fas fa-check-circle text-success" style="font-size:3rem;"></i>
@@ -328,7 +329,7 @@
   <div id="wompiError" style="display:none;">
     <i class="fas fa-times-circle text-danger" style="font-size:3rem;"></i>
     <p class="fw-bold mt-3">Pago no completado</p>
-    <p class="text-muted small" id="wompiErrorMsg">Puedes pagar despu�s desde Mis Facturas.</p>
+    <p class="text-muted small" id="wompiErrorMsg">Puedes pagar después desde Mis Facturas.</p>
   </div>
 </div>
 <div class="modal-footer border-0 justify-content-center">
@@ -347,10 +348,10 @@
   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 </div>
 <div class="modal-body py-4">
-  <p class="text-muted text-center mb-3">�Est&aacute;s seguro que deseas cancelar esta cita? Esta acci&oacute;n no se puede deshacer.</p>
+  <p class="text-muted text-center mb-3">¿Estás seguro que deseas cancelar esta cita? Esta acción no se puede deshacer.</p>
   <div class="form-group text-start">
-    <label for="motivoCancelacion" class="form-label fw-semibold">Motivo de cancelaci&oacute;n <span class="text-danger">*</span></label>
-    <textarea class="form-control" id="motivoCancelacion" rows="3" placeholder="Ej: Me surgi&oacute; un inconveniente familiar..." required maxlength="500"></textarea>
+    <label for="motivoCancelacion" class="form-label fw-semibold">Motivo de cancelación <span class="text-danger">*</span></label>
+    <textarea class="form-control" id="motivoCancelacion" rows="3" placeholder="Ej: Me surgió un inconveniente familiar..." required maxlength="500"></textarea>
     <div class="d-flex justify-content-between mt-1">
       <small class="text-danger d-none" id="errorMotivoCancelacion">El motivo es obligatorio</small>
       <small class="text-muted ms-auto" id="charCountCancelacion">0/500</small>
@@ -359,7 +360,7 @@
 </div>
 <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
   <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Volver</button>
-  <button type="button" class="btn btn-danger px-4" id="btnConfirmarCancelar">S&iacute;, cancelar</button>
+  <button type="button" class="btn btn-danger px-4" id="btnConfirmarCancelar">Sí, cancelar</button>
 </div>
 </div>
 </div>
@@ -393,11 +394,12 @@
 <script src="/js/modules/auth/auth-guard.js?v=20260711-1"></script>
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
-<script src="/js/core/shared/alerts.js?v=20260711-1"></script>
+<script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
 <script src="/js/modules/patient/aside.js?v=20260711-1"></script>
-<script src="/js/modules/auth/logout.js?v=20260711-1"></script>
+<script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
-<script src="/js/modules/patient/agendaquotes.js?v=20260711-1"></script>
+<script src="/js/modules/patient/agendaquotes.js?v=20260803-1"></script>
 <script>
 // Forzar que todos los acordeones inicien cerrados
 document.querySelectorAll('.accordion-collapse').forEach(function(el) {

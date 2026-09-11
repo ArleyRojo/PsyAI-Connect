@@ -7,6 +7,7 @@ from apps.authentication.views import (
     RegisterView,
     ResetPasswordView,
     SessionView,
+    social_login_redirect,
 )
 
 app_name = "authentication"
@@ -18,4 +19,5 @@ urlpatterns = [
     path("session", SessionView.as_view(), name="session"),
     path("forgot-password", ForgotPasswordView.as_view(), name="forgot_password"),
     path("reset-password", ResetPasswordView.as_view(), name="reset_password"),
+    path("social-redirect", social_login_redirect, name="social_redirect"),
 ]

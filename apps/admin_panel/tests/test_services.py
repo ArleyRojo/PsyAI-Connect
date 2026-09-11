@@ -105,13 +105,13 @@ class TestDeleteUser:
 
 class TestBlockUser:
     def test_suspend(self, admin_service, mock_admin_repo):
-        mock_admin_repo.block_user.return_value = 0
+        mock_admin_repo.block_user.return_value = (0, {"nombre": "Test", "email": "test@test.com"})
         payload, status = admin_service.block_user({"idUsuario": 1, "accion": "bloquear"})
         assert status == 200
         assert "suspendido" in payload["message"]
 
     def test_restore(self, admin_service, mock_admin_repo):
-        mock_admin_repo.block_user.return_value = 1
+        mock_admin_repo.block_user.return_value = (1, {"nombre": "Test", "email": "test@test.com"})
         payload, status = admin_service.block_user({"idUsuario": 1, "accion": "reestablecer"})
         assert status == 200
         assert "reestablecido" in payload["message"]

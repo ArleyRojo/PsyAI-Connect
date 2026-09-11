@@ -76,17 +76,17 @@
                 <i class="fas fa-cog"></i>
             </a>
         </div>
-        <div class="sidebar__actions">
-            <div class="theme-switch-container">
-                <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
-                <button id="theme-toggle" title="Cambiar modo"></button>
-                <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
-            </div>
-            <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Cerrar Sesión</span>
-            </a>
+        <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+            <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+            <button id="theme-toggle" title="Cambiar modo"></button>
+            <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
         </div>
+    </div>
+    <div class="sidebar__logout-section">
+        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span>
+        </a>
     </div>
   </aside>
 
@@ -102,19 +102,19 @@
 
     <!-- Stats -->
     <div class="row g-3 mb-4">
-      <div class="col-sm-6 col-lg-3">
+      <div class="col-sm-6 col-lg-4">
         <div class="stat-card">
           <div class="stat-icon blue"><i class="fas fa-users"></i></div>
           <div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total usuarios</div></div>
         </div>
       </div>
-      <div class="col-sm-6 col-lg-3">
+      <div class="col-sm-6 col-lg-4">
         <div class="stat-card">
           <div class="stat-icon green"><i class="fas fa-user-check"></i></div>
           <div><div class="stat-value" id="statActivos">0</div><div class="stat-label">Activos</div></div>
         </div>
       </div>
-      <div class="col-sm-6 col-lg-3">
+      <div class="col-sm-6 col-lg-4">
         <div class="stat-card">
           <div class="stat-icon red"><i class="fas fa-user-slash"></i></div>
           <div><div class="stat-value" id="statSuspendidos">0</div><div class="stat-label">Suspendidos</div></div>
