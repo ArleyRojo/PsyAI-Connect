@@ -178,6 +178,34 @@ class TestCitaViewSetCreate:
         assert resp.data["success"] is True
         mock_service.create_appointment.assert_called_once()
 
+    def test_profesional_creates_for_authenticated_profesional(
+        self, rf, mock_role_profesional, mock_service
+    ):
+        req = rf.post(
+            "/api/citas",
+            data=json.dumps({
+                "idPaciente": 8,
+                "idProfesional": 3,
+                "fecha": "2027-06-15",
+                "hora": "10:00",
+                "tipoCita": "Presencial",
+                "motivo": "Seguimiento",
+                "creado_por_profesional": True,
+            }),
+            content_type="application/json",
+        )
+
+        mock_service.create_appointment.return_value = (
+            {"success": True, "idCita": 1}, 200,
+        )
+        view = CitaViewSet.as_view({"post": "create"})
+        resp = view(req)
+
+        assert resp.status_code == 200
+        call_args = mock_service.create_appointment.call_args
+        assert call_args.args[1]["idProfesional"] == 5
+        assert call_args.kwargs["created_by_professional"] is True
+
     def test_empty_body_returns_400(self, rf, mock_role_paciente, mock_service):
         req = rf.post(
             "/api/citas",

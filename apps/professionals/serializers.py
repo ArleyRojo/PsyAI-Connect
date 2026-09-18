@@ -10,8 +10,11 @@ class PerfilProfesionalSerializer(serializers.Serializer):
 
 class DisponibilidadSerializer(serializers.Serializer):
     dia = serializers.CharField(required=False)
+    fecha = serializers.CharField(required=False)
     horaInicio = serializers.CharField(required=False)
     horaFin = serializers.CharField(required=False)
+    hora_inicio = serializers.CharField(required=False)
+    hora_fin = serializers.CharField(required=False)
 
 
 class DiagnosticoSerializer(serializers.Serializer):

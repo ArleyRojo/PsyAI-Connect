@@ -8,6 +8,26 @@ from apps.documents.repositories import DocumentoRepository
 
 UPLOAD_SUBDIR = "uploads/documentos"
 
+CATEGORIA_MAP = {
+    "sesion_inicial": "Historia Clinica",
+    "evaluacion": "Diagnostico",
+    "evolucion": "Evolucion",
+    "consentimiento": "Consentimiento",
+    "plan_terapeutico": "Otro",
+    "otro": "Otro",
+    "Historia Clinica": "Historia Clinica",
+    "Evolucion": "Evolucion",
+    "Diagnostico": "Diagnostico",
+    "Consentimiento": "Consentimiento",
+    "Otro": "Otro",
+}
+
+
+def _normalize_categoria(categoria):
+    if not categoria:
+        return "Otro"
+    return CATEGORIA_MAP.get(categoria, "Otro")
+
 
 class DocumentoService:
     def __init__(self):
@@ -83,7 +103,7 @@ class DocumentoService:
             ruta=ruta_relativa,
             mime=mime,
             tamano=file_size,
-            categoria=categoria or "Otro",
+            categoria=_normalize_categoria(categoria),
             visibilidad=visibilidad or "privado",
             notas=notas or None,
         )

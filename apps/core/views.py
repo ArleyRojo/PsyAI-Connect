@@ -114,19 +114,23 @@ def serve_pages(request, filename):
             return render(request, info["template"], {"title": info["title"], "updated": "18 de junio de 2026"})
         return HttpResponseRedirect("/")
 
-    if filename == "admin.dashboard.html" or filename.startswith("aside-admin/"):
+    if settings.DEBUG:
+        # En desarrollo permitimos abrir las pantallas protegidas sin sesión para
+        # facilitar la vista previa del frontend y la depuración local.
+        pass
+    elif filename == "admin.dashboard.html" or filename.startswith("aside-admin/"):
         if user_role is None:
             return HttpResponseRedirect("/login.html")
         if user_role != "admin":
             raise PermissionDenied
 
-    if filename == "patient.dashboard.html" or filename.startswith("aside-patient/"):
+    elif filename == "patient.dashboard.html" or filename.startswith("aside-patient/"):
         if user_role is None:
             return HttpResponseRedirect("/login.html")
         if user_role != "paciente":
             raise PermissionDenied
 
-    if filename == "professional.dashboard.html" or filename.startswith("aside-professional/"):
+    elif filename == "professional.dashboard.html" or filename.startswith("aside-professional/"):
         if user_role is None:
             return HttpResponseRedirect("/login.html")
         if user_role != "profesional":

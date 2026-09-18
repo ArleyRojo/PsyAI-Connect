@@ -268,7 +268,7 @@
   </div>
 
 {% include 'base/partials/scripts.html' %}
-<script src="/js/modules/auth/auth-guard.js?v=20260711-1"></script>
+<script src="/js/modules/auth/auth-guard.js?v=20260918-2"></script>
 <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
 <script src="/js/core/shared/alerts.js?v=20260711-1"></script>
@@ -285,12 +285,13 @@
     const checkConsent = document.getElementById('checkConsent');
     const warning = document.getElementById('consentimientoWarning');
     const formControls = chatbotSection ? chatbotSection.querySelectorAll('input, button, textarea, select') : [];
-    const consentimientoModal = modalElement
+    const consentimientoModal = modalElement && typeof bootstrap !== 'undefined'
       ? new bootstrap.Modal(modalElement, {
           backdrop: 'static',
           keyboard: false
         })
       : null;
+    let consentimientoKey = null;
 
     function bloquearChatbot() {
       if (!chatbotSection) return;
@@ -371,32 +372,23 @@
       return match ? decodeURIComponent(match[1]) : '';
     }
 
-    const consentimientoKey = await obtenerClaveConsentimientoUsuario();
-
-    if (localStorage.getItem(consentimientoKey) === 'aceptado' || await obtenerConsentimientoServidor()) {
-      localStorage.setItem(consentimientoKey, 'aceptado');
-      habilitarChatbot();
-      return;
-    }
-
-    bloquearChatbot();
-    if (consentimientoModal) {
-      consentimientoModal.show();
-    }
-
     if (btnAcepto) {
-      btnAcepto.addEventListener('click', function() {
+      btnAcepto.addEventListener('click', async function() {
         if (!checkConsent || !checkConsent.checked) {
           if (warning) {
             warning.classList.add('is-visible');
           }
           return;
         }
+        consentimientoKey = consentimientoKey || await obtenerClaveConsentimientoUsuario();
         localStorage.setItem(consentimientoKey, 'aceptado');
         guardarConsentimientoServidor();
         habilitarChatbot();
         if (consentimientoModal) {
           consentimientoModal.hide();
+        } else if (modalElement) {
+          modalElement.classList.remove('show');
+          modalElement.setAttribute('aria-hidden', 'true');
         }
       });
     }
@@ -422,6 +414,20 @@
         window.location.href = '../patient.dashboard.html';
       });
     }
+
+    consentimientoKey = await obtenerClaveConsentimientoUsuario();
+
+    if (localStorage.getItem(consentimientoKey) === 'aceptado' || await obtenerConsentimientoServidor()) {
+      localStorage.setItem(consentimientoKey, 'aceptado');
+      habilitarChatbot();
+      return;
+    }
+
+    bloquearChatbot();
+    if (consentimientoModal) {
+      consentimientoModal.show();
+    }
+
   });
 </script>
 <script>

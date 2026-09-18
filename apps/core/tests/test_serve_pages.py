@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
 
 from apps.core.views import serve_pages
 
@@ -152,9 +152,21 @@ class TestUnaffectedPages:
         resp = serve_pages(request, "index.html")
         assert resp.status_code == 200
 
+    def test_landing_assets_are_served(self, rf):
+        request = _make_request(rf, "/js/core/shared/theme-inline.js")
+        resp = serve_pages(request, "js/core/shared/theme-inline.js")
+        assert resp.status_code == 200
+        assert resp["Content-Type"].startswith("text/javascript")
+
     def test_login_still_works(self, rf):
         request = _make_request(rf, "/login.html")
         resp = serve_pages(request, "login.html")
+        assert resp.status_code == 200
+
+    @override_settings(DEBUG=True)
+    def test_professional_patient_page_is_available_in_debug_mode(self, rf):
+        request = _make_request(rf, "/aside-professional/patients.html")
+        resp = serve_pages(request, "aside-professional/patients.html")
         assert resp.status_code == 200
 
     def test_nonexistent_page_raises_404(self, rf):

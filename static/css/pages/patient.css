@@ -1252,6 +1252,20 @@ html.dark-mode .psyai-modal--info .psyai-modal__content {
     backdrop-filter: blur(7px);
 }
 
+#consentimientoModal {
+    z-index: 1060;
+    pointer-events: auto;
+}
+
+#consentimientoModal .modal-dialog,
+#consentimientoModal .psyai-modal__content,
+#consentimientoModal .psyai-modal__consent-check,
+#consentimientoModal .psyai-modal__consent-check label,
+#consentimientoModal .psyai-modal__consent-check input,
+#consentimientoModal .psyai-modal__consent-actions {
+    pointer-events: auto;
+}
+
 /* â”€â”€ psyai-modal variants: consent, receipt, payment, info â”€â”€â”€ */
 
 .psyai-modal--consent .psyai-modal__content,

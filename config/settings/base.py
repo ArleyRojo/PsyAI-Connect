@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -52,7 +53,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "apps.core.middleware.security_headers.SecurityHeadersMiddleware",
-    "apps.core.middleware.request_logging.RequestLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -182,7 +182,7 @@ WOMPI_API_BASE = (
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 GEMINI_THINKING_LEVEL = os.getenv("GEMINI_THINKING_LEVEL", "low")
 
 SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
@@ -200,16 +200,18 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "PsyAI C
 if DEBUG and not EMAIL_HOST_USER:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+# Logging por consola estilo Django (validado para dev, prod y test)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
+        "django.server": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{server_time}] {message}",
             "style": "{",
         },
-        "simple": {
-            "format": "{levelname} {message}",
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
             "style": "{",
         },
     },
@@ -217,11 +219,13 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
+            "stream": sys.stdout,
         },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
+        "django.server": {
+            "class": "logging.StreamHandler",
+            "formatter": "django.server",
+            "stream": sys.stdout,
+        },
     },
     "loggers": {
         "django": {
@@ -229,9 +233,29 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "django.server": {
+            "handlers": ["django.server"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.security": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
         "apps": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": False,
         },
     },

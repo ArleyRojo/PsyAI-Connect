@@ -38,6 +38,7 @@ urlpatterns = [
     path("perfil/paciente/foto", PerfilFotoViewSet.as_view({"put": "update", "post": "create"}), name="perfil-foto"),
     path("chatbot", ChatbotAPIView.as_view(), name="chatbot"),
     path("chatbot/historial", ChatbotAPIView.as_view(), name="chatbot_historial"),
+    path("chatbot/config", ChatbotConfigViewSet.as_view({"get": "list"}), name="chatbot_config_legacy"),
     path("chatbot/config/events", ChatbotConfigEventsResource.as_view(), name="chatbot_config_events"),
     path("paciente/documentos/subir", DocumentoPacienteViewSet.as_view({"post": "create"}), name="documento_subir"),
     path("paciente/documentos", DocumentoPacienteViewSet.as_view({"get": "list"}), name="documento_list"),
@@ -48,4 +49,7 @@ urlpatterns = [
     path("chat/enviar", ChatMensajeViewSet.as_view({"post": "create"}), name="chat_enviar_legacy"),
     path("paciente/chat/enviar", ChatMensajeViewSet.as_view({"post": "create"}), name="chat_paciente_enviar_legacy"),
     path("evolucion", EvolucionViewSet.as_view({"get": "list", "post": "create"}), name="evolucion"),
+    # Legacy aliases sin barra final (compatibles con API.md y el frontend)
+    path("pacientes", PacienteViewSet.as_view({"get": "list"}), name="pacientes"),
+    path("profesionales", ProfesionalViewSet.as_view({"get": "list"}), name="profesionales"),
 ]

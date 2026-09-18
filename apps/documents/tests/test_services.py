@@ -61,6 +61,31 @@ class TestUploadProfesionalDoc:
         assert result["success"] is True
         mock_documento_repo.create_profesional_doc.assert_called_once()
 
+    @patch("apps.documents.services.os.makedirs")
+    @patch("apps.documents.services.os.path.exists", return_value=True)
+    @patch("builtins.open", new_callable=MagicMock)
+    def test_upload_normalizes_ui_categories(self, mock_open, mock_exists, mock_makedirs, documento_service, mock_documento_repo):
+        mock_documento_repo.create_profesional_doc.return_value = 1
+        fake_file = MagicMock()
+        fake_file.name = "historia.pdf"
+        fake_file.size = 1000
+        fake_file.read.return_value = b"%PDF-1.4" + b"\x00" * 100
+        fake_file.content_type = "application/pdf"
+        for categoria_ui, expected in [
+            ("sesion_inicial", "Historia Clinica"),
+            ("evaluacion", "Diagnostico"),
+            ("evolucion", "Evolucion"),
+            ("consentimiento", "Consentimiento"),
+            ("plan_terapeutico", "Otro"),
+            ("otro", "Otro"),
+            ("", "Otro"),
+        ]:
+            mock_documento_repo.create_profesional_doc.reset_mock()
+            result, status = documento_service.upload_profesional_doc(1, 5, fake_file, categoria_ui, "privado", "")
+            assert status == 201
+            kwargs = mock_documento_repo.create_profesional_doc.call_args.kwargs
+            assert kwargs["categoria"] == expected
+
 
 # ── DocumentoService.toggle_doc_visibility ────────────────────────────────────
 

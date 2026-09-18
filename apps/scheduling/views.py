@@ -58,8 +58,11 @@ class CitaViewSet(viewsets.ViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        data = request.data
+        data = request.data.copy()
         created_by_professional = data.get("creado_por_profesional", False)
+
+        if user_role == "profesional" and created_by_professional:
+            data["idProfesional"] = user_id
 
         payload, status_code = appointment_service.create_appointment(
             user_id, data,

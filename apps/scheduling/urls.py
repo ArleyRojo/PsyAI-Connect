@@ -15,6 +15,7 @@ router = DefaultRouter()
 router.register(r"citas", CitaViewSet, basename="cita")
 
 urlpatterns = [
+    path("citas", CitaViewSet.as_view({"post": "create"}), name="citas_crear"),
     path("citas/<int:pk>", CitaDetailViewSet.as_view({"patch": "partial_update", "delete": "destroy"}), name="cita"),
     path("citas/disponibles", CitaDisponibleResource.as_view(), name="citas_disponibles"),
     path("citas/fechas-disponibles", CitaDisponibleResource.as_view(), name="citas_fechas_disponibles"),

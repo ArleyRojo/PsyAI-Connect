@@ -38,7 +38,7 @@ class AppointmentRepository:
 
     def get_appointment_in_slot(self, professional_id, fecha, hora):
         try:
-            cita = Citas.objects.select_for_update().get(
+            cita = Citas.objects.get(
                 idProfesional_id=professional_id,
                 fecha=fecha,
                 hora=hora,
@@ -47,7 +47,7 @@ class AppointmentRepository:
             return {"idCita": cita.idCita, "idPaciente": cita.idPaciente_id}
         except Citas.DoesNotExist:
             try:
-                cita = Citas.objects.select_for_update().filter(
+                cita = Citas.objects.filter(
                     idProfesional_id=professional_id,
                     fecha=fecha,
                     hora=hora,

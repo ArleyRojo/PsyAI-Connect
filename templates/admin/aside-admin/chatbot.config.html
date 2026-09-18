@@ -23,8 +23,8 @@
         <h5 class="sidebar__brand">PsyAI Connect</h5>
         <span class="sidebar__role-badge">Admin</span>
     </div>
-    <nav class="sidebar__nav flex-column" aria-label="Navegaci�n principal">
-        <div class="sidebar__nav-section-label">Men� Principal</div>
+    <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
+        <div class="sidebar__nav-section-label">Menú Principal</div>
         <a href="../admin.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
             <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
             <span>Dashboard</span>
@@ -52,15 +52,15 @@
             <span>Logs</span>
             <div class="sidebar__nav-indicator"></div>
         </a>
-        <div class="sidebar__nav-section-label">Configuraci�n</div>
+        <div class="sidebar__nav-section-label">Configuración</div>
         <a href="chatbot.config.html" class="sidebar__nav-item active" data-tooltip="Chatbot">
             <div class="sidebar__nav-icon"><i class="fas fa-robot"></i></div>
             <span>Chatbot</span>
             <div class="sidebar__nav-indicator"></div>
         </a>
-        <a href="facturacion.html" class="sidebar__nav-item" data-tooltip="Facturaci�n">
+        <a href="facturacion.html" class="sidebar__nav-item" data-tooltip="Facturación">
             <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-            <span>Facturaci�n</span>
+            <span>Facturación</span>
             <div class="sidebar__nav-indicator"></div>
         </a>
     </nav>
@@ -73,7 +73,7 @@
                 <span class="sidebar__user-name" id="sidebarUserName">Admin</span>
                 <span class="sidebar__user-role">Administrador</span>
             </div>
-            <a href="#" class="sidebar__user-settings" title="Configuraci�n">
+            <a href="#" class="sidebar__user-settings" title="Configuración">
                 <i class="fas fa-cog"></i>
             </a>
         </div>
@@ -84,9 +84,9 @@
         </div>
     </div>
     <div class="sidebar__logout-section">
-        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesi�n">
+        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
             <i class="fas fa-sign-out-alt"></i>
-            <span>Cerrar Sesi�n</span>
+            <span>Cerrar Sesión</span>
         </a>
     </div>
   </aside>
@@ -95,13 +95,13 @@
 
     <header class="main-header d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h1 class="h3 fw-bold mb-1 section-title-config"><i class="fas fa-robot me-2"></i>Configuraci�n del Chatbot</h1>
-        <small class="text-muted" id="ultimaModificacion">�ltima modificaci�n: -</small>
+        <h1 class="h3 fw-bold mb-1 section-title-config"><i class="fas fa-robot me-2"></i>Configuración del Chatbot</h1>
+        <small class="text-muted" id="ultimaModificacion">Última modificación: -</small>
       </div>
       <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
     </header>
 
-    <!-- Estad�sticas -->
+    <!-- Estadísticas -->
     <div class="row g-3 mb-4">
       <div class="col-sm-6 col-lg-3">
         <div class="stat-card-modern total">
@@ -137,15 +137,15 @@
       </div>
     </div>
 
-    <!-- Configuraci�n del Chatbot -->
+    <!-- Configuración del Chatbot -->
     <div class="section-card-custom">
       <div class="section-header-custom">
         <div class="header-icon" style="background: linear-gradient(135deg, var(--brand-600), var(--brand-700)); color: #fff;">
           <i class="fas fa-cog"></i>
         </div>
         <div>
-          <h5 class="mb-0 fw-bold section-title-config">Configuraci�n del Chatbot</h5>
-          <small class="text-muted">Ajusta los par�metros del asistente</small>
+          <h5 class="mb-0 fw-bold section-title-config">Configuración del Chatbot</h5>
+          <small class="text-muted">Ajusta los parámetros del asistente</small>
         </div>
       </div>
       <div class="section-body-custom">
@@ -153,11 +153,11 @@
           <div class="mb-3">
             <label for="systemPrompt" class="form-label section-title-config">Prompt del sistema</label>
             <div class="preset-chips mb-2" id="promptPresets">
-              <small class="text-muted d-block mb-1">Plantillas r�pidas:</small>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="systemPrompt" data-value="Act�a como un asistente de triaje psicol�gico emp�tico para PsyAI Connect. Tu objetivo es escuchar al paciente, validar sus emociones y guiarlo hacia ayuda profesional cuando sea necesario. Nunca des diagn�sticos m�dicos."><i class="fas fa-stethoscope"></i>Triage psicol�gico</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="systemPrompt" data-value="Eres un companion emocional para pacientes de salud mental. Tu rol es ofrecer escucha activa, empat�a y validaci�n emocional. No eres terapeuta ni sustituyes al profesional asignado. Si el paciente muestra deterioro, sugiere contactar a su profesional."><i class="fas fa-heart"></i>Companion emocional</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="systemPrompt" data-value="Eres un asistente de bienestar emocional enfocado en h�bitos saludables. Ayudas al paciente a identificar patrones de �nimo, mejorar sue�o, alimentaci�n y actividad f�sica. Respondes de forma breve y pr�ctica. Refuerzas conductas positivas."><i class="fas fa-leaf"></i>Bienestar hol�stico</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="systemPrompt" data-value="Eres un asistente de primera acogida en crisis. Tu prioridad es evaluar la seguridad inmediata del paciente. Si detectas riesgo, gu�alo urgentemente hacia recursos de crisis (l�nea 106, servicios de emergencia). Respuestas m�ximas de 2 oraciones."><i class="fas fa-bolt"></i>Primeros auxilios emocionales</button>
+              <small class="text-muted d-block mb-1">Plantillas rápidas:</small>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="systemPrompt" data-value="Actúa como un asistente de triaje psicológico empático para PsyAI Connect. Tu objetivo es escuchar al paciente, validar sus emociones y guiarlo hacia ayuda profesional cuando sea necesario. Nunca des diagnósticos médicos."><i class="fas fa-stethoscope"></i>Triage psicológico</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="systemPrompt" data-value="Eres un acompañante emocional para pacientes de salud mental. Tu rol es ofrecer escucha activa, empatía y validación emocional. No eres terapeuta ni sustituyes al profesional asignado. Si el paciente muestra deterioro, sugiere contactar a su profesional."><i class="fas fa-heart"></i>Acompañante emocional</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="systemPrompt" data-value="Eres un asistente de bienestar emocional enfocado en hábitos saludables. Ayudas al paciente a identificar patrones de ánimo, mejorar sueño, alimentación y actividad física. Respondes de forma breve y práctica. Refuerzas conductas positivas."><i class="fas fa-leaf"></i>Bienestar holístico</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="systemPrompt" data-value="Eres un asistente de primera acogida en crisis. Tu prioridad es evaluar la seguridad inmediata del paciente. Si detectas riesgo, guíalo urgentemente hacia recursos de crisis (línea 106, servicios de emergencia). Respuestas máximas de 2 oraciones."><i class="fas fa-bolt"></i>Primeros auxilios emocionales</button>
             </div>
             <textarea class="form-control" id="systemPrompt" rows="5" placeholder="Selecciona una plantilla arriba..." readonly></textarea>
             <small class="text-muted">Selecciona una plantilla o escribe directamente si necesitas personalizar</small>
@@ -166,27 +166,27 @@
           <div class="mb-3">
             <label for="tone" class="form-label section-title-config">Tono del chatbot</label>
             <div class="preset-chips mb-2" id="tonePresets">
-              <small class="text-muted d-block mb-1">Opciones r�pidas:</small>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="tone" data-value="c�lido y emp�tico">C�lido y emp�tico</button>
+              <small class="text-muted d-block mb-1">Opciones rápidas:</small>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="tone" data-value="cálido y empático">Cálido y empático</button>
               <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="tone" data-value="profesional y cercano">Profesional y cercano</button>
               <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="tone" data-value="amigable y relajado">Amigable y relajado</button>
               <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="tone" data-value="formal y respetuoso">Formal y respetuoso</button>
               <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="tone" data-value="juvenil y cercano">Juvenil y cercano</button>
               <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="tone" data-value="sereno y tranquilizador">Sereno y tranquilizador</button>
             </div>
-            <input class="form-control" id="tone" type="text" placeholder="Selecciona una opci�n arriba..." readonly>
-            <small class="text-muted">Este valor a�ade un matiz al estilo de comunicaci�n del asistente.</small>
+            <input class="form-control" id="tone" type="text" placeholder="Selecciona una opción arriba..." readonly>
+            <small class="text-muted">Este valor añade un matiz al estilo de comunicación del asistente.</small>
           </div>
 
           <div class="mb-3">
-            <label for="interactionRules" class="form-label section-title-config">Reglas de interacci�n</label>
+            <label for="interactionRules" class="form-label section-title-config">Reglas de interacción</label>
             <div class="preset-chips mb-2" id="rulesPresets">
-              <small class="text-muted d-block mb-1">Plantillas r�pidas:</small>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="M�ximo 2 oraciones por respuesta. Una sola pregunta a la vez. Valida el sentimiento antes de sugerir cualquier acci�n."><i class="fas fa-compress"></i>Respuestas cortas</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="Nunca des diagn�sticos m�dicos. Si el paciente pregunta por medicaci�n o tratamiento, redirige a su profesional. No uses lenguaje t�cnico."><i class="fas fa-ban"></i>Sin diagn�sticos</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="Usa el tuteo informal. Evita frases hechas como \u201centiendo perfectamente\u201d o \u201cclaro que s�\u201d. Var�a siempre la apertura de cada mensaje."><i class="fas fa-comment-dots"></i>Tono informal</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="Si el paciente no responde a una pregunta, reformula en vez de repetir. Despu�s de 3 mensajes sin respuesta, ofrece opciones m�ltiples para facilitar la respuesta."><i class="fas fa-sync-alt"></i>Reformulaci�n</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="En cada respuesta, valida primero la emoci�n del paciente (\u201cEso suena dif�cil\u201d, \u201cTiene sentido que te sientas as�\u201d). Despu�s haz una pregunta abierta."><i class="fas fa-hand-holding-heart"></i>Validaci�n emocional</button>
+              <small class="text-muted d-block mb-1">Plantillas rápidas:</small>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="Máximo 2 oraciones por respuesta. Una sola pregunta a la vez. Valida el sentimiento antes de sugerir cualquier acción."><i class="fas fa-compress"></i>Respuestas cortas</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="Nunca des diagnósticos médicos. Si el paciente pregunta por medicación o tratamiento, redirige a su profesional. No uses lenguaje técnico."><i class="fas fa-ban"></i>Sin diagnósticos</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="Usa el tuteo informal. Evita frases hechas como “entiendo perfectamente” o “claro que sí”. Varía siempre la apertura de cada mensaje."><i class="fas fa-comment-dots"></i>Tono informal</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="Si el paciente no responde a una pregunta, reformula en vez de repetir. Después de 3 mensajes sin respuesta, ofrece opciones múltiples para facilitar la respuesta."><i class="fas fa-sync-alt"></i>Reformulación</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm preset-chip" data-field="interactionRules" data-value="En cada respuesta, valida primero la emoción del paciente (“Eso suena difícil”, “Tiene sentido que te sientas así”). Después haz una pregunta abierta."><i class="fas fa-hand-holding-heart"></i>Validación emocional</button>
             </div>
             <textarea class="form-control" id="interactionRules" rows="3" placeholder="Selecciona una plantilla arriba..." readonly></textarea>
             <small class="text-muted">Selecciona una o varias plantillas. Se van acumulando.</small>
@@ -214,7 +214,7 @@
             </div>
             <div id="riskTermsContainer" class="d-flex flex-wrap gap-1 mt-3 p-2 rounded-3" style="min-height: 50px;"></div>
             <div class="mt-2 d-flex gap-3 flex-wrap">
-              <small class="text-danger fw-semibold"><i class="fas fa-exclamation-triangle me-1"></i>Alto: interrumpe y env�a crisis</small>
+              <small class="text-danger fw-semibold"><i class="fas fa-exclamation-triangle me-1"></i>Alto: interrumpe y envía crisis</small>
               <small class="text-warning fw-semibold"><i class="fas fa-exclamation-circle me-1"></i>Medio: responde normal + registra</small>
               <small class="text-success fw-semibold"><i class="fas fa-check-circle me-1"></i>Bajo: solo registro</small>
             </div>
@@ -222,14 +222,14 @@
 
           <div class="mb-3">
             <label for="crisisResponse" class="form-label section-title-config">Respuesta ante crisis</label>
-            <textarea class="form-control" id="crisisResponse" rows="3" placeholder="Mensaje que env�a el bot cuando detecta riesgo Alto..."></textarea>
-            <small class="text-muted">Mensaje que env�a el bot cuando detecta riesgo Alto</small>
+            <textarea class="form-control" id="crisisResponse" rows="3" placeholder="Mensaje que envía el bot cuando detecta riesgo Alto..."></textarea>
+            <small class="text-muted">Mensaje que envía el bot cuando detecta riesgo Alto</small>
           </div>
 
           <div class="mb-3">
             <label for="mediumResponse" class="form-label section-title-config">Contexto de riesgo medio</label>
             <textarea class="form-control" id="mediumResponse" rows="3" placeholder="Instrucciones para el bot cuando detecta riesgo medio..."></textarea>
-            <small class="text-muted">Contexto que se env�a al Gemini cuando se detecta riesgo medio. Si est� vac�o, usa el predeterminado del sistema.</small>
+            <small class="text-muted">Contexto que se envía al Gemini cuando se detecta riesgo medio. Si está vacío, usa el predeterminado del sistema.</small>
           </div>
 
           <div class="mb-3">
@@ -239,18 +239,18 @@
           </div>
 
           <div class="mb-3">
-            <label for="crisisPhone" class="form-label section-title-config">Tel�fono de crisis</label>
+            <label for="crisisPhone" class="form-label section-title-config">Teléfono de crisis</label>
             <input class="form-control" id="crisisPhone" type="text" placeholder="106" value="106">
-            <small class="text-muted">N�mero que se muestra al paciente cuando alcanza el l�mite diario de mensajes</small>
+            <small class="text-muted">Número que se muestra al paciente cuando alcanza el límite diario de mensajes</small>
           </div>
 
           <div class="mb-3">
             <label for="thinkingLevel" class="form-label section-title-config">Nivel de razonamiento (Thinking Level)</label>
             <select class="form-select" id="thinkingLevel">
-              <option value="low">Bajo (r�pido, menos profundo)</option>
+              <option value="low">Bajo (rápido, menos profundo)</option>
               <option value="medium">Medio (balanceado)</option>
-              <option value="high">Alto (m�s profundo, m�s lento)</option>
-              <option value="none">Ninguno (sin razonamiento expl�cito)</option>
+              <option value="high">Alto (más profundo, más lento)</option>
+              <option value="none">Ninguno (sin razonamiento explícito)</option>
             </select>
             <small class="text-muted">Controla la profundidad del razonamiento de Gemini. En riesgo medio/bajo se fuerza a "medium".</small>
           </div>
@@ -279,7 +279,7 @@
               <span class="slider-value-custom" id="maxTokensValue">600</span>
             </div>
             <input type="range" class="form-range" id="maxTokens" min="100" max="1000" step="10" value="600">
-            <small class="text-muted">Tokens m�ximos para la respuesta del bot (100-1000)</small>
+            <small class="text-muted">Tokens máximos para la respuesta del bot (100-1000)</small>
           </div>
 
           <div class="slider-param-custom mb-3">
@@ -288,11 +288,11 @@
               <span class="slider-value-custom" id="maxTokensUserValue">1000</span>
             </div>
             <input type="range" class="form-range" id="maxTokensUser" min="200" max="1000" step="10" value="1000">
-            <small class="text-muted">L�mite de caracteres para el mensaje del usuario (200-1000)</small>
+            <small class="text-muted">Límite de caracteres para el mensaje del usuario (200-1000)</small>
           </div>
 
           <div class="mb-3">
-            <label for="dailyMessageLimit" class="form-label section-title-config">L�mite diario de mensajes</label>
+            <label for="dailyMessageLimit" class="form-label section-title-config">Límite diario de mensajes</label>
             <input type="number" class="form-control" id="dailyMessageLimit" min="1" max="200" value="20">
             <small class="text-muted">Mensajes diarios permitidos por paciente (1-200)</small>
           </div>
@@ -378,7 +378,7 @@
     </div>
 
     <div class="save-bar d-flex justify-content-between align-items-center mt-4 pt-3">
-      <div class="text-muted small" id="saveInfo">�ltima modificaci�n: -</div>
+      <div class="text-muted small" id="saveInfo">Última modificación: -</div>
       <button type="submit" class="btn btn-primary btn-lg px-5 py-2 save-btn" form="formConfigChatbot" id="btnGuardar">
         <i class="fas fa-save me-2"></i>Guardar Configuraci&oacute;n
       </button>
@@ -458,7 +458,7 @@
     font-size: 0.72rem;
   }
   /* Tone chips - color-coded */
-  #tonePresets .preset-chip[data-value*="c�lido"] { --accent: #e74c3c; }
+  #tonePresets .preset-chip[data-value*="cálido"] { --accent: #e74c3c; }
   #tonePresets .preset-chip[data-value*="profesional"] { --accent: #3498db; }
   #tonePresets .preset-chip[data-value*="amigable"] { --accent: #2ecc71; }
   #tonePresets .preset-chip[data-value*="formal"] { --accent: #9b59b6; }

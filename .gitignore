@@ -42,6 +42,7 @@ wheels/
 
 # Uploads
 static/uploads/
+media/
 
 # OS
 .DS_Store

@@ -103,6 +103,8 @@ class AppointmentService:
         professional_id = data.get("idProfesional")
         fecha = data.get("fecha")
         hora = data.get("hora")
+        if isinstance(hora, str) and "-" in hora:
+            hora = hora.split("-")[0]
         motivo = data.get("motivo", "")
         tipo_cita = data.get("tipoCita")
 

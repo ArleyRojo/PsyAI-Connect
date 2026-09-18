@@ -464,7 +464,7 @@ class ChatbotService:
                 "limit": daily_limit,
             }, 200
 
-        model = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite").strip() or "gemini-3.1-flash-lite"
+        model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
         contexto_riesgo = self._build_risk_context(es_medio, es_bajo)
 
         if es_medio or es_bajo:
@@ -808,7 +808,7 @@ class ChatbotService:
     @staticmethod
     def _model_supports_thinking(model):
         model_lower = model.lower()
-        if any(m in model_lower for m in ("2.5-flash", "2.5-pro", "3-flash", "3.1-flash", "3.1-pro")):
+        if any(m in model_lower for m in ("2.5-flash", "2.5-pro", "3-flash", "3.1-flash", "3.1-pro", "3.5-flash", "3.5-pro")):
             return True
         return False
 

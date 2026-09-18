@@ -306,7 +306,7 @@ Los **integration tests** (`tests/test_integration.py`) están marcados con `@py
 | `DB_PASSWORD` | Contraseña de MySQL | `root` |
 | `DB_NAME` | Nombre de la base de datos | `psyai_connect` |
 | `DB_ROOT_PASSWORD` | Password root de MySQL (solo Docker) | `rootpass` |
-| `GEMINI_MODEL` | Modelo de Gemini | `gemini-3.1-flash-lite` |
+| `GEMINI_MODEL` | Modelo de Gemini | `gemini-3.5-flash-lite` |
 | `GEMINI_THINKING_LEVEL` | Nivel de pensamiento | `low` |
 | `GEMINI_API_KEY` | API key de Google Gemini | Para chatbot |
 | `GEMINI_API_KEYS` | API keys separadas por coma (rotación) | Para chatbot |
