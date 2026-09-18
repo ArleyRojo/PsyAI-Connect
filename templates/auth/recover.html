@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>PsyAI Connect | Recuperar contrase&ntilde;a</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/auth.css?v=20260711-1">
+</head>
+<body>
+    <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+    <main class="register-shell">
+        <section class="register-art" aria-label="PsyAI Connect">
+            <a class="brand-mark" href="/">
+                <img src="/img/Logo.webp" alt="Logo PsyAI Connect">
+                <span>PsyAI Connect</span>
+            </a>
+
+            <div class="art-copy">
+                <h1>Recupera tu acceso.</h1>
+                <p>Ingresa tu correo electr&oacute;nico y te enviaremos un enlace para restablecer tu contrase&ntilde;a de forma segura.</p>
+            </div>
+
+            <div class="art-strip" aria-hidden="true">
+                <div class="art-chip"><strong>01</strong><span>Escribe tu correo registrado.</span></div>
+                <div class="art-chip"><strong>02</strong><span>Recibir&aacute;s un enlace seguro.</span></div>
+                <div class="art-chip"><strong>03</strong><span>Crea una nueva contrase&ntilde;a.</span></div>
+            </div>
+        </section>
+
+        <section class="register-stage">
+            <div class="login-card login-card--register">
+                <div class="auth-topbar">
+                    <div class="back-index">
+                        <a href="/"><i class="fas fa-arrow-left"></i> Inicio</a>
+                    </div>
+                    <a class="mini-link" href="login.html">Iniciar sesi&oacute;n</a>
+                </div>
+
+                <div class="login-header">
+                    <div class="recover-icon" aria-hidden="true">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <span class="eyebrow">Recuperaci&oacute;n</span>
+                    <h1>&iquest;Olvidaste tu contrase&ntilde;a?</h1>
+                    <p>Ingresa tu correo electr&oacute;nico y te enviaremos las instrucciones para restablecerla.</p>
+                </div>
+
+                <form id="recoverForm">
+                    <div class="reg-field">
+                        <label for="email" class="form-label">Correo electr&oacute;nico</label>
+                        <div class="field-wrap">
+                            <i class="fas fa-envelope field-icon" aria-hidden="true"></i>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="tu@correo.com" autocomplete="email" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i> Enviar enlace
+                        </button>
+                    </div>
+                </form>
+
+                <div class="auth-links">
+                    <a href="login.html" class="link-action">Volver a iniciar sesi&oacute;n</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    {% include 'base/partials/scripts.html' %}
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+    <script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+    <script src="/js/modules/auth/recover.js?v=20260803-1"></script>
+</body>
+</html>

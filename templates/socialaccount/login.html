@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>PsyAI Connect | Conectar con {{ provider.name }}</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/auth.css?v=20260731-1">
+</head>
+<body>
+    <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+    <main class="register-shell">
+        <section class="register-art" aria-label="PsyAI Connect">
+            <a class="brand-mark" href="/">
+                <img src="/img/Logo.webp" alt="Logo PsyAI Connect">
+                <span>PsyAI Connect</span>
+            </a>
+
+            <div class="art-copy">
+                <h1>Conectando tu cuenta.</h1>
+                <p>Estamos vinculando tu cuenta de {{ provider.name }} para darte acceso rápido y seguro.</p>
+            </div>
+
+            <div class="art-strip" aria-hidden="true">
+                <div class="art-chip"><strong>01</strong><span>Conexión segura con OAuth2.</span></div>
+                <div class="art-chip"><strong>02</strong><span>Validación de credenciales.</span></div>
+                <div class="art-chip"><strong>03</strong><span>Acceso inmediato a tu cuenta.</span></div>
+            </div>
+        </section>
+
+        <section class="register-stage">
+            <div class="login-card login-card--register">
+                <div class="auth-topbar">
+                    <div class="back-index">
+                        <a href="/"><i class="fas fa-arrow-left"></i> Inicio</a>
+                    </div>
+                </div>
+
+                <div class="login-header">
+                    <img src="/img/Logo.webp" alt="Logo" loading="lazy" width="76" height="76">
+                    <span class="eyebrow">Conectar</span>
+                    <h1>{{ provider.name }}</h1>
+                    {% if process == "connect" %}
+                        <p>Estás conectando tu cuenta de <strong>{{ provider.name }}</strong> a PsyAI Connect.</p>
+                    {% else %}
+                        <p>Estás iniciando sesión con tu cuenta de <strong>{{ provider.name }}</strong>.</p>
+                    {% endif %}
+                </div>
+
+                <form method="post" class="d-grid mb-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">
+                            {% if process == "connect" %}
+                                <i class="fas fa-link me-1"></i> Conectar cuenta
+                            {% else %}
+                                <i class="fas fa-sign-in-alt me-1"></i> Continuar con {{ provider.name }}
+                            {% endif %}
+                        </span>
+                    </button>
+                </form>
+
+                <div class="auth-links">
+                    <a href="/" class="link-action">Cancelar</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    {% include 'base/partials/scripts.html' %}
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260731">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260731">
+    <script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+    <script src="/js/modules/auth/auth-ui.js?v=20260804-1"></script>
+</body>
+</html>

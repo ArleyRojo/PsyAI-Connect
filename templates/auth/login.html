@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>PsyAI Connect | Inicio de sesión</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/auth.css?v=20260711-1">
+</head>
+<body>
+    <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+    <main class="register-shell">
+        <section class="register-art" aria-label="PsyAI Connect">
+            <a class="brand-mark" href="/">
+                <img src="/img/Logo.webp" alt="Logo PsyAI Connect">
+                <span>PsyAI Connect</span>
+            </a>
+
+            <div class="art-copy">
+                <h1>Vuelve a tu espacio.</h1>
+                <p>Ingresa para continuar tu seguimiento, revisar tus herramientas y conectar con tu proceso de bienestar.</p>
+            </div>
+
+            <div class="art-strip" aria-hidden="true">
+                <div class="art-chip"><strong>01</strong><span>Acceso seguro con tu correo.</span></div>
+                <div class="art-chip"><strong>02</strong><span>Elige el rol de tu cuenta.</span></div>
+                <div class="art-chip"><strong>03</strong><span>Continua donde lo dejaste.</span></div>
+            </div>
+        </section>
+
+        <section class="register-stage">
+            <div class="login-card login-card--register">
+                <div class="auth-topbar">
+                    <div class="back-index">
+                        <a href="/"><i class="fas fa-arrow-left"></i> Inicio</a>
+                    </div>
+                </div>
+
+                <div class="login-header">
+                    <img src="/img/Logo.webp" alt="Logo" loading="lazy" width="96" height="96">
+                    <span class="eyebrow">Acceso</span>
+                    <h1>Iniciar sesi&oacute;n</h1>
+                    <p>Entra con tus datos y selecciona el rol correspondiente a tu cuenta.</p>
+                </div>
+
+                <form>
+                    <div class="reg-field">
+                        <label for="email" class="form-label">Correo electr&oacute;nico</label>
+                        <div class="field-wrap">
+                            <i class="fas fa-envelope field-icon" aria-hidden="true"></i>
+                            <input type="email" class="form-control" id="email" placeholder="usuario@example.com" aria-describedby="emailHelp" autocomplete="email">
+                        </div>
+                        <small id="emailHelp" class="form-text text-muted"></small>
+                    </div>
+
+                    <div class="reg-field">
+                        <label for="password" class="form-label">Contrase&ntilde;a</label>
+                        <div class="field-wrap">
+                            <i class="fas fa-lock field-icon" aria-hidden="true"></i>
+                            <input type="password" class="form-control" id="password" placeholder="Contrase&ntilde;a" autocomplete="current-password" required>
+                            <button type="button" class="pwd-toggle" onclick="togglePassword('password', this)" tabindex="-1" aria-label="Mostrar u ocultar contrase&ntilde;a">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="role-selection" role="group" aria-label="Seleccionar rol de usuario">
+                        <div class="role-btn active" data-role="paciente" role="button" tabindex="0" aria-pressed="true">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span>Paciente</span>
+                        </div>
+                        <div class="role-btn" data-role="profesional" role="button" tabindex="0" aria-pressed="false">
+                            <i class="fas fa-stethoscope" aria-hidden="true"></i>
+                            <span>Profesional</span>
+                        </div>
+                        <div class="role-btn" data-role="admin" role="button" tabindex="0" aria-pressed="false">
+                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                            <span>Admin</span>
+                        </div>
+                    </div>
+
+                    <div class="reg-field d-flex align-items-center justify-content-center" style="gap: 10px; margin-bottom: 20px;">
+                        <input type="checkbox" id="recordar-login" style="width: 22px; height: 22px; accent-color: var(--brand); cursor: pointer;">
+                        <label for="recordar-login" style="font-size: 1rem; font-weight: 600; color: var(--muted); cursor: pointer; margin: 0;">Recordar mis datos de acceso</label>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary" aria-describedby="submitHelp">
+                            <span class="btn-text">Entrar</span>
+                        </button>
+                        <small id="submitHelp" class="form-text text-muted d-none">Presione Entrar o haga clic en el bot&oacute;n para iniciar sesi&oacute;n</small>
+                    </div>
+
+                    <div class="social-divider">
+                        <span>o continua con</span>
+                    </div>
+
+                    <div class="social-buttons">
+                        <a href="{% url 'google_login' %}" class="btn-social btn-google">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                            <span>Continuar con Google</span>
+                        </a>
+
+                    </div>
+
+                    <div class="auth-links">
+                        <a href="recover.html" class="link-action">&iquest;Olvidaste tu contrase&ntilde;a?</a>
+                    </div>
+                </form>
+
+            </div>
+        </section>
+    </main>
+
+    {% include 'base/partials/scripts.html' %}
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+    <script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+    <script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
+    <script src="/js/modules/auth/login.js?v=20260803-1"></script>
+</body>
+</html>

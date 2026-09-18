@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>PsyAI Connect | {{ title }}</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <style>
+        .legal-page { padding: 120px 0 60px; max-width: 800px; margin: 0 auto; }
+        .legal-page h1 { font-family: var(--font-heading); color: var(--color-secondary); font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .legal-page .legal-meta { color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 2rem; display: block; }
+        .legal-page h2 { color: var(--color-secondary); font-size: 1.3rem; font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; }
+        .legal-page h3 { color: var(--color-secondary); font-size: 1.1rem; font-weight: 600; margin-top: 1.5rem; }
+        .legal-page p, .legal-page li { color: var(--color-text-body); line-height: 1.8; font-size: 0.95rem; }
+        .legal-page ul, .legal-page ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+        .legal-page li { margin-bottom: 0.5rem; }
+        .legal-page .legal-highlight { background: var(--color-accent); border-left: 4px solid var(--color-secondary); padding: 1rem 1.5rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; }
+        .legal-page .legal-highlight p { margin: 0; }
+        .legal-page .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-secondary); font-weight: 600; text-decoration: none; margin-bottom: 2rem; transition: gap 0.2s; }
+        .legal-page .back-link:hover { gap: 0.75rem; color: var(--color-primary-dark); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <img src="/img/Logo.webp" alt="PsyAI Connect" width="48" height="48" decoding="async"> PsyAI Connect
+            </a>
+            <a href="{% url 'index' %}" class="btn btn-outline-primary btn-sm ms-auto">{{ title }}</a>
+        </div>
+    </nav>
+
+    <main class="legal-page container">
+        <a href="{% url 'index' %}" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Volver al inicio
+        </a>
+        <h1>{{ title }}</h1>
+        <span class="legal-meta">Última actualización: {{ updated }}</span>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer-enhanced" style="background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%); background-color: #1a237e;">
+        <div class="container">
+            <div class="footer-bottom text-center">
+                <p class="mb-1">&copy; 2026 PsyAI Connect — Todos los derechos reservados.</p>
+                <div class="footer-legal">
+                    <a href="/legal/terminos" class="text-decoration-none me-2">Términos</a>
+                    <a href="/legal/privacidad" class="text-decoration-none me-2">Privacidad</a>
+                    <a href="/legal/cookies" class="text-decoration-none">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% include 'base/partials/scripts.html' %}
+</body>
+</html>

@@ -1,0 +1,55 @@
+{# Bootstrap JS bundle + client error reporter — PsyAI Connect #}
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+  if (window.__psyaiErrorReporterInstalled) return;
+  window.__psyaiErrorReporterInstalled = true;
+
+  function describeReason(reason) {
+    if (!reason) return "";
+    if (reason.stack) return reason.stack;
+    if (reason.message) return reason.message;
+    try { return JSON.stringify(reason); } catch (_) { return String(reason); }
+  }
+
+  var _sending = false;
+  function sendClientError(type, message, details) {
+    if (_sending) return;
+    _sending = true;
+    try {
+      var payload = JSON.stringify({
+        type: type,
+        message: message || "",
+        details: details || "",
+        page: window.location.pathname + window.location.search
+      });
+      var blob = new Blob([payload], { type: "application/json" });
+      var url = "/api/client-errors";
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(url, blob);
+      } else {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(payload);
+      }
+    } catch (_) {}
+    _sending = false;
+  }
+
+  window.addEventListener("error", function (event) {
+    sendClientError("javascript", event.message, [
+      event.filename || "",
+      event.lineno || "",
+      event.colno || "",
+      event.error && event.error.stack ? event.error.stack : ""
+    ].filter(Boolean).join(" | "));
+  });
+
+  window.addEventListener("unhandledrejection", function (event) {
+    sendClientError("promise", describeReason(event.reason), "");
+  });
+})();
+</script>
+
+

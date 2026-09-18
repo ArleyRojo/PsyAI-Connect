@@ -1,0 +1,79 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# PsyAI Connect — Docker Compose (Development)
+# Usage (from project root):
+#   docker compose -f docker/docker-compose.yml up
+#   docker compose -f docker/docker-compose.yml up -d
+#   docker compose -f docker/docker-compose.yml down
+#   docker compose -f docker/docker-compose.yml logs -f app
+#   docker compose -f docker/docker-compose.yml exec app bash
+#
+# Usage (from docker/ folder):
+#   docker compose up
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Django App ────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: dev
+    container_name: psyai_app
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - ../.env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - DEBUG=1
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME:-psyai_connect}
+      - DB_USER=${DB_USER:-psyai}
+      - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
+    volumes:
+      # Hot-reload: mount the code so changes reflect immediately
+      - ..:/app
+      # Persist uploaded documents between container restarts
+      - uploads_data:/app/static/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - psyai_net
+
+  # ── MySQL 8 ───────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: psyai_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-psyai_connect}
+      MYSQL_USER: ${DB_USER:-psyai}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-psyai_pass}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - psyai_net
+
+# ── Volumes ────────────────────────────────────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+# ── Network ────────────────────────────────────────────────────────────────
+networks:
+  psyai_net:
+    driver: bridge

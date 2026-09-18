@@ -1,0 +1,35 @@
+{# CDN + CSS core compartido — PsyAI Connect #}
+{% load core_tags %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{% csrf_token_value %}">
+<script>
+function getCsrfToken() {
+  var m = document.querySelector('meta[name="csrf-token"]');
+  if (m && m.content) return m.content;
+  var c = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]*)/);
+  return c ? decodeURIComponent(c[1]) : '';
+}
+</script>
+<link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+
+{# Google Fonts (local) #}
+<link href="/vendor/fonts/fonts.css" rel="stylesheet">
+
+{# Bootstrap 5 (local) #}
+<link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+{# Icons - Font Awesome 6.4.0 (local) #}
+<link rel="stylesheet" href="/vendor/font-awesome/css/all.min.css">
+
+{# Core CSS #}
+<link rel="stylesheet" href="/css/base/base.css?v=20260718-1">
+<link rel="stylesheet" href="/css/layout/layout.css?v=20260718-1">
+<link rel="stylesheet" href="/css/themes/theme.css?v=20260718-1">
+
+
+
+{# Core JS (debe ir en head para evitar flash de tema incorrecto) #}
+<script src="/js/core/shared/theme-inline.js?v=20260718-1"></script>
+<script src="/js/core/shared/theme.js?v=20260718-1"></script>
+<script src="/js/core/shared/localStorage-detector.js?v=20260718-1"></script>
