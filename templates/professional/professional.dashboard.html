@@ -303,6 +303,19 @@
 // -- Helpers --
 function irA(url) { window.location.href = url; }
 
+function registrarActividadReciente(tipo, accion, detalle) {
+    const actividades = JSON.parse(localStorage.getItem('psyai_actividades_recientes') || '[]');
+    actividades.unshift({
+        tipo: tipo,
+        accion: accion,
+        detalle: detalle,
+        timestamp: Date.now()
+    });
+    if (actividades.length > 50) actividades.length = 50;
+    localStorage.setItem('psyai_actividades_recientes', JSON.stringify(actividades));
+    window.dispatchEvent(new CustomEvent('localStorageChange', { detail: { key: 'psyai_dashboard_update' } }));
+}
+
 // -- Modal Videollamada --
 function abrirModalVideo(paciente) {
     const p = document.getElementById('modalPacienteNombre');
@@ -683,7 +696,7 @@ function renderActividades(data) {
     actividadesLocal.forEach(a => {
         todas.push({
             tipo: a.tipo,
-            titulo: a.acción,
+            titulo: a.accion,
             detalle: a.detalle,
             estado: '',
             timestamp: a.timestamp
@@ -711,8 +724,12 @@ function renderActividades(data) {
     };
     const tipoIcono = {
         'cita': 'fa-calendar-check text-primary',
+        'citas': 'fa-calendar-check text-primary',
         'diagnóstico': 'fa-stethoscope text-success',
-        'reporte': 'fa-chart-line text-info'
+        'diagnostico': 'fa-stethoscope text-success',
+        'reporte': 'fa-chart-line text-info',
+        'evolucion': 'fa-chart-line text-info',
+        'evolución': 'fa-chart-line text-info'
     };
 
     container.innerHTML = todas.map(a => `
@@ -756,7 +773,7 @@ async function cargarDashboard() {
         console.error('Error de red:', err);
         // Fallback: mostrar actividades locales
         const actividadesLocal = JSON.parse(localStorage.getItem('psyai_actividades_recientes') || '[]');
-        const tipoIcono = { 'diagnóstico': 'fa-stethoscope text-success', 'reporte': 'fa-chart-line text-info' };
+        const tipoIcono = { 'cita': 'fa-calendar-check text-primary', 'citas': 'fa-calendar-check text-primary', 'diagnóstico': 'fa-stethoscope text-success', 'diagnostico': 'fa-stethoscope text-success', 'reporte': 'fa-chart-line text-info', 'evolucion': 'fa-chart-line text-info', 'evolución': 'fa-chart-line text-info' };
         const container = document.getElementById('actividadContainer');
 
         if (actividadesLocal.length === 0) {
@@ -773,7 +790,7 @@ async function cargarDashboard() {
                     <i class="fas ${tipoIcono[a.tipo] || 'fa-clipboard text-secondary'}"></i>
                 </div>
                 <div class="flex-grow-1">
-                    <div class="fw-semibold">${a.acción}</div>
+                    <div class="fw-semibold">${a.accion}</div>
                     <div class="text-muted small">${a.detalle}</div>
                 </div>
             </div>
