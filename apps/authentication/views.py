@@ -1,3 +1,4 @@
+import logging
 import os
 
 from django.http import HttpResponseRedirect
@@ -13,6 +14,8 @@ from apps.authentication.serializers import (
     ResetPasswordSerializer,
 )
 from apps.authentication.services import AuthService
+
+logger = logging.getLogger(__name__)
 
 
 auth_service = AuthService()
@@ -30,8 +33,10 @@ class RegisterView(APIView):
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
     def post(self, request):
+        logger.info("LoginView.post called: method=%s, path=%s", request.method, request.path)
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

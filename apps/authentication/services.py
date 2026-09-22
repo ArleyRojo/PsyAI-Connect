@@ -250,6 +250,7 @@ class AuthService:
         return {"success": True, "message": "Registro exitoso"}, 201
 
     def login_user(self, data, ip_address):
+        logger.info("login_user called: email=%s, ip=%s", data.get("email"), ip_address)
         try:
             validated = self._validate_login_data(data)
         except ValidationError as e:
@@ -275,6 +276,10 @@ class AuthService:
                 None,
             )
         if usuario["rol"] != rol:
+            logger.warning(
+                "Login 403 – rol mismatch: email=%s, esperado=%s, real=%s",
+                email, rol, usuario["rol"],
+            )
             return (
                 {"success": False, "message": f"Este usuario no tiene rol de {rol}"},
                 403,
@@ -282,6 +287,10 @@ class AuthService:
             )
 
         if not usuario.get("activo", True):
+            logger.warning(
+                "Login 403 – cuenta inactiva: email=%s, id=%s",
+                email, usuario.get("idUsuario"),
+            )
             return (
                 {"success": False, "message": "Tu cuenta ha sido suspendida. Contacta al administrador."},
                 403,
