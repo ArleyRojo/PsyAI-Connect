@@ -122,7 +122,7 @@ X_FRAME_OPTIONS = "DENY"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
+        "apps.authentication.authentication.CsrfEnforcedSessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -160,6 +160,20 @@ SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_AGE = 604800
 SESSION_SAVE_EVERY_REQUEST = False
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# CSRF
+CSRF_COOKIE_HTTPONLY = True  # En producción True; en dev se puede poner False en dev.py
+CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SECURE = False
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com",
+    ).split(",") if origin.strip()
+]
+
+# Content Security Policy
+CSP_ENABLED = True
 
 ALLOWED_UPLOAD_EXTENSIONS: set[str] = set(
     os.getenv("ALLOWED_UPLOAD_EXTENSIONS", "jpg,jpeg,png,pdf,gif,webp,doc,docx").split(",")

@@ -370,3 +370,20 @@ DB_ROOT_PASSWORD=rootpass
 ## Licencia
 
 Este proyecto es de uso educativo/interno. Revisa el repositorio para más detalles sobre su licencia.
+
+---
+
+## Documentación técnica adicional
+
+Toda la documentación técnica detallada vive en la carpeta [`docs/`](docs/):
+
+- [`docs/README.md`](docs/README.md) — Índice de toda la documentación técnica
+- [`docs/api.md`](docs/api.md) — Referencia completa de endpoints REST
+- [`docs/seguridad.md`](docs/seguridad.md) — Estado de seguridad y hardening
+- [`docs/modelos-de-datos.md`](docs/modelos-de-datos.md) — Modelo de datos y diagrama ER
+- [`docs/roles-y-permisos.md`](docs/roles-y-permisos.md) — Roles, pantallas y permisos DRF
+- [`docs/frontend.md`](docs/frontend.md) — Organización del frontend (JS, CSS, alertas, tema)
+- [`docs/chatbot-ia.md`](docs/chatbot-ia.md) — Chatbot con Google Gemini
+- [`docs/pagos-facturacion.md`](docs/pagos-facturacion.md) — Flujo de facturación y Wompi
+- [`docs/despliegue.md`](docs/despliegue.md) — Docker, variables de entorno, producción
+- [`docs/testing.md`](docs/testing.md) — Tests, capas, cobertura, CI

@@ -137,6 +137,167 @@ class TestContainsAny:
         assert chatbot_service._contains_any("cualquier texto", []) is False
 
 
+# ── ChatbotService._get_fallback_model / cascada Gemini -> Gemma ─────────────
+
+
+class TestFallbackModel:
+    def test_returns_default_when_env_not_set(self, chatbot_service, monkeypatch):
+        monkeypatch.delenv("GEMINI_FALLBACK_MODEL", raising=False)
+        assert chatbot_service._get_fallback_model() == "gemma-4-26b-a4b-it"
+
+    def test_returns_env_value(self, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemma-3-27b-it")
+        assert chatbot_service._get_fallback_model() == "gemma-3-27b-it"
+
+    def test_strips_whitespace(self, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "  gemma-4-26b-a4b-it  ")
+        assert chatbot_service._get_fallback_model() == "gemma-4-26b-a4b-it"
+
+
+class TestModelSupportsThinking:
+    def test_gemma_does_not_support_thinking(self):
+        assert ChatbotService._model_supports_thinking("gemma-4-26b-a4b-it") is False
+
+    def test_gemini_flash_lite_supports_thinking(self):
+        assert ChatbotService._model_supports_thinking("gemini-3.5-flash-lite") is True
+
+    def test_unknown_model_does_not_support_thinking(self):
+        assert ChatbotService._model_supports_thinking("otro-modelo-3.5") is False
+
+
+class TestGemmaFallbackCascade:
+    @patch("apps.chatbot.services.ChatbotService._call_gemini")
+    def test_attempts_fallback_when_all_keys_exhaust_quota(self, mock_gemini, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemma-4-26b-a4b-it")
+        mock_gemini.side_effect = [
+            RuntimeError("Gemini HTTP 429"),
+            RuntimeError("Gemini HTTP 429"),
+            "respuesta de gemma",
+        ]
+        result = chatbot_service._call_gemini_with_rotation(
+            ["key-1", "key-2"],
+            "gemini-3.5-flash-lite",
+            "Hola",
+            [],
+            {},
+            None,
+            "low",
+        )
+        assert result == "respuesta de gemma"
+        assert mock_gemini.call_count == 3
+        last_args = mock_gemini.call_args_list[-1][0]
+        assert last_args[0] == "key-1"
+        assert last_args[1] == "gemma-4-26b-a4b-it"
+
+    @patch("apps.chatbot.services.ChatbotService._call_gemini")
+    def test_fallback_attempted_with_single_key(self, mock_gemini, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemma-4-26b-a4b-it")
+        mock_gemini.side_effect = [
+            RuntimeError("Gemini HTTP 429"),
+            "respuesta de gemma",
+        ]
+        result = chatbot_service._call_gemini_with_rotation(
+            ["key-1"],
+            "gemini-3.5-flash-lite",
+            "Hola",
+            [],
+            {},
+            None,
+            "low",
+        )
+        assert result == "respuesta de gemma"
+        assert mock_gemini.call_count == 2
+        assert mock_gemini.call_args_list[-1][0][1] == "gemma-4-26b-a4b-it"
+
+    @patch("apps.chatbot.services.ChatbotService._call_gemini")
+    def test_raises_when_fallback_also_fails(self, mock_gemini, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemma-4-26b-a4b-it")
+        mock_gemini.side_effect = RuntimeError("Gemini HTTP 429")
+        with pytest.raises(RuntimeError) as excinfo:
+            chatbot_service._call_gemini_with_rotation(
+                ["key-1", "key-2"],
+                "gemini-3.5-flash-lite",
+                "Hola",
+                [],
+                {},
+                None,
+                "low",
+            )
+        assert "modelo de respaldo" in str(excinfo.value)
+        assert mock_gemini.call_count == 3
+
+    @patch("apps.chatbot.services.ChatbotService._call_gemini")
+    def test_non_quota_error_raises_without_fallback(self, mock_gemini, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemma-4-26b-a4b-it")
+        mock_gemini.side_effect = [RuntimeError("Gemini HTTP 500 error interno"), "no deberia llamarse"]
+        with pytest.raises(RuntimeError):
+            chatbot_service._call_gemini_with_rotation(
+                ["key-1", "key-2"],
+                "gemini-3.5-flash-lite",
+                "Hola",
+                [],
+                {},
+                None,
+                "low",
+            )
+        assert mock_gemini.call_count == 1
+
+    @patch("apps.chatbot.services.ChatbotService._call_gemini")
+    def test_skips_fallback_when_model_equals_primary(self, mock_gemini, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemini-3.5-flash-lite")
+        mock_gemini.side_effect = RuntimeError("Gemini HTTP 429")
+        with pytest.raises(RuntimeError):
+            chatbot_service._call_gemini_with_rotation(
+                ["key-1", "key-2"],
+                "gemini-3.5-flash-lite",
+                "Hola",
+                [],
+                {},
+                None,
+                "low",
+            )
+        assert mock_gemini.call_count == 2
+
+    @patch("apps.chatbot.services.ChatbotService._get_chatbot_config")
+    def test_build_response_uses_fallback_when_primary_quota(self, mock_config, chatbot_service, mock_chat_repo, monkeypatch):
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemma-4-26b-a4b-it")
+        mock_config.return_value = (
+            {"risk_terms": "[]", "daily_message_limit": "50"},
+            "1.0",
+        )
+        mock_chat_repo.count_today_messages.return_value = 0
+        mock_chat_repo.get_history.return_value = []
+
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["primary-key"]):
+            with patch.object(
+                chatbot_service,
+                "_call_gemini",
+                side_effect=[RuntimeError("Gemini HTTP 429"), "respuesta de gemma"],
+            ):
+                payload, status = chatbot_service.build_response(1, "Hola")
+
+        assert status == 200
+        assert payload["respuesta"] == "respuesta de gemma"
+        assert payload.get("fallback") is None
+
+    @patch("apps.chatbot.services.ChatbotService._call_gemini_with_rotation")
+    @patch("apps.chatbot.services.ChatbotService._get_chatbot_config")
+    def test_build_response_uses_local_fallback_when_all_models_fail(self, mock_config, mock_gemini, chatbot_service, mock_chat_repo):
+        mock_config.return_value = (
+            {"risk_terms": "[]", "daily_message_limit": "50"},
+            "1.0",
+        )
+        mock_chat_repo.count_today_messages.return_value = 0
+        mock_chat_repo.get_history.return_value = []
+        mock_gemini.side_effect = RuntimeError(
+            "Todas las API keys agotaron su cuota por hoy, incluido el modelo de respaldo."
+        )
+
+        payload, status = chatbot_service.build_response(1, "Hola")
+        assert status == 200
+        assert payload["fallback"] is True
+
+
 # ── ChatbotService._normalize_text ───────────────────────────────────────────
 
 

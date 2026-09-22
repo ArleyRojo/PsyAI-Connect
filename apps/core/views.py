@@ -215,6 +215,26 @@ def error_403(request, exception=None):
 
 
 @csrf_exempt
+def theme_preference(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        import json
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"error": "Datos invalidos"}, status=400)
+
+    theme = (data.get("theme") or "").strip().lower()
+    if theme not in ("light", "dark"):
+        return JsonResponse({"error": "Tema invalido"}, status=400)
+
+    response = JsonResponse({"status": "ok", "theme": theme})
+    response.set_cookie("theme", theme, max_age=365 * 24 * 60 * 60, path="/", samesite="Lax")
+    return response
+
+
+@csrf_exempt
 def newsletter_subscribe(request):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)

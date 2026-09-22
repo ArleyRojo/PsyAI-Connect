@@ -4222,21 +4222,21 @@ html.dark-mode.dark-mode .content-section.section-alt {
 html.dark-mode.dark-mode #servicios {
     background:
         linear-gradient(135deg,
-            #0a1428 0%, #0b1529 25%, #0a1327 50%, #0b1529 75%, #0a1428 100%),
-        radial-gradient(ellipse 60% 55% at 8% 12%,  rgba(100,181,246,.16) 0%, transparent 70%),
-        radial-gradient(ellipse 52% 48% at 92% 88%, rgba(144,202,249,.12) 0%, transparent 65%),
-        radial-gradient(ellipse 40% 36% at 50% 40%, rgba(33,150,243,.08) 0%, transparent 60%),
-        radial-gradient(ellipse 30% 26% at 75% 15%, rgba(227,242,253,.18) 0%, transparent 55%) !important;
+            #070e1a 0%, #0a1528 25%, #070e1a 50%, #0a1528 75%, #070e1a 100%),
+        radial-gradient(ellipse 60% 55% at 8% 12%,  rgba(100,181,246,.12) 0%, transparent 70%),
+        radial-gradient(ellipse 52% 48% at 92% 88%, rgba(144,202,249,.10) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 36% at 50% 40%, rgba(33,150,243,.06) 0%, transparent 60%),
+        radial-gradient(ellipse 30% 26% at 75% 15%, rgba(227,242,253,.12) 0%, transparent 55%) !important;
     background-attachment: fixed;
     color: var(--dm-text1) !important;
 }
 
 html.dark-mode.dark-mode #funciona {
     background:
-        linear-gradient(160deg, #060e1c 0%, #081624 30%, #071420 60%, #060e1c 100%),
+        linear-gradient(160deg, #0f2744 0%, #123052 30%, #0f2744 60%, #0d2340 100%),
         radial-gradient(ellipse 55% 50% at 10% 15%, rgba(0,188,212,.14) 0%, transparent 70%),
         radial-gradient(ellipse 45% 40% at 90% 85%, rgba(38,166,154,.10) 0%, transparent 65%),
-        radial-gradient(ellipse 38% 34% at 50% 5%,  rgba(128,222,234,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 38% 34% at 50% 5%,  rgba(128,222,234,.16) 0%, transparent 60%),
         radial-gradient(ellipse 30% 26% at 75% 50%, rgba(0,188,212,.08) 0%, transparent 55%) !important;
     background-attachment: fixed;
     color: var(--dm-text1) !important;
@@ -4244,11 +4244,11 @@ html.dark-mode.dark-mode #funciona {
 
 html.dark-mode.dark-mode #faq {
     background:
-        linear-gradient(200deg, #060e1c 0%, #0a1428 35%, #060e1c 65%, #081624 100%),
-        radial-gradient(ellipse 50% 45% at 85% 10%, rgba(33,150,243,.16) 0%, transparent 70%),
-        radial-gradient(ellipse 42% 38% at 15% 90%, rgba(100,181,246,.12) 0%, transparent 65%),
-        radial-gradient(ellipse 32% 28% at 55% 45%, rgba(187,222,251,.18) 0%, transparent 60%),
-        radial-gradient(ellipse 25% 22% at 30% 25%, rgba(33,150,243,.08) 0%, transparent 55%) !important;
+        linear-gradient(200deg, #070e1a 0%, #0a1528 35%, #070e1a 65%, #0a1528 100%),
+        radial-gradient(ellipse 50% 45% at 85% 10%, rgba(33,150,243,.12) 0%, transparent 70%),
+        radial-gradient(ellipse 42% 38% at 15% 90%, rgba(100,181,246,.10) 0%, transparent 65%),
+        radial-gradient(ellipse 32% 28% at 55% 45%, rgba(187,222,251,.14) 0%, transparent 60%),
+        radial-gradient(ellipse 25% 22% at 30% 25%, rgba(33,150,243,.06) 0%, transparent 55%) !important;
     background-attachment: fixed;
     color: var(--dm-text1) !important;
 }
@@ -4256,10 +4256,10 @@ html.dark-mode.dark-mode #faq {
 html.dark-mode.dark-mode #profesional {
     background:
         linear-gradient(200deg,
-            #091322 0%, #0a1428 25%, #0b1529 50%, #091322 75%, #0a1428 100%),
+            #0f2744 0%, #123052 25%, #0f2744 50%, #0d2340 75%, #0f2744 100%),
         radial-gradient(ellipse 50% 45% at 5% 8%,   rgba(121,134,203,.14) 0%, transparent 70%),
-        radial-gradient(ellipse 42% 38% at 92% 90%, rgba(144,202,249,.16) 0%, transparent 65%),
-        radial-gradient(ellipse 30% 26% at 50% 15%, rgba(197,202,244,.12) 0%, transparent 60%) !important;
+        radial-gradient(ellipse 42% 38% at 92% 90%, rgba(144,202,249,.14) 0%, transparent 65%),
+        radial-gradient(ellipse 30% 26% at 50% 15%, rgba(197,202,244,.10) 0%, transparent 60%) !important;
     background-attachment: fixed;
     color: var(--dm-text1) !important;
 }
@@ -5696,4 +5696,623 @@ html.dark-mode #privacidad::before { color: rgba(159,168,218,.48) !important; }
 html.dark-mode #faq::before { color: rgba(144,202,249,.45) !important; }
 html.dark-mode #profesional::before { color: rgba(179,157,239,.55) !important; }
 html.dark-mode .cta-band::before { color: rgba(255,255,255,.40) !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   LANDING DARK MODE — wins over landing.css by specificity
+   (html.dark-mode.dark-mode = +1 class vs every html.dark-mode rule)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Base surfaces ── */
+html.dark-mode.dark-mode body {
+    background:
+        linear-gradient(180deg, #030610 0%, #060e1c 24%, #081624 48%, #060e1c 73%, #030610 100%) !important;
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode #mainNav,
+html.dark-mode.dark-mode #mainNav.scrolled {
+    background: rgba(6, 14, 28, .94) !important;
+    border-bottom-color: var(--dm-border) !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .45) !important;
+}
+
+html.dark-mode.dark-mode #mainNav .navbar-brand,
+html.dark-mode.dark-mode #mainNav .footer-logo-text {
+    color: var(--dm-heading) !important;
+}
+
+html.dark-mode.dark-mode #mainNav .nav-link {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode #mainNav .nav-link:hover,
+html.dark-mode.dark-mode #mainNav .nav-link.active {
+    color: var(--dm-accent) !important;
+    background: rgba(144, 202, 249, .10) !important;
+}
+
+html.dark-mode.dark-mode #hero-section {
+    background:
+        linear-gradient(115deg, #0b2244 0%, #0f2f58 48%, #0a1e3a 100%) !important;
+}
+
+html.dark-mode.dark-mode #acerca {
+    background: #070e1a !important;
+    background-image: none !important;
+}
+
+/* Light "white" bands → near-black; light "blue" bands → navy (clear alternation) */
+html.dark-mode.dark-mode #servicios,
+html.dark-mode.dark-mode #privacidad,
+html.dark-mode.dark-mode #faq,
+html.dark-mode.dark-mode .cta-band-section {
+    background: #070e1a !important;
+    background-image: none !important;
+}
+
+html.dark-mode.dark-mode #funciona,
+html.dark-mode.dark-mode #impacto,
+html.dark-mode.dark-mode #profesional {
+    background: #0f2744 !important;
+    background-image: none !important;
+}
+
+html.dark-mode.dark-mode #servicios.content-section,
+html.dark-mode.dark-mode #privacidad.content-section,
+html.dark-mode.dark-mode #faq.content-section,
+html.dark-mode.dark-mode .cta-band-section {
+    background: #070e1a !important;
+    background-image: none !important;
+}
+
+html.dark-mode.dark-mode #funciona.content-section,
+html.dark-mode.dark-mode #impacto.content-section,
+html.dark-mode.dark-mode #profesional.content-section {
+    background: #0f2744 !important;
+    background-image: none !important;
+}
+
+html.dark-mode.dark-mode #hero-section.hero-section {
+    background:
+        linear-gradient(115deg, #0b2244 0%, #0f2f58 48%, #0a1e3a 100%) !important;
+}
+
+/* ── Typography ── */
+html.dark-mode.dark-mode #hero-section .hero-title,
+html.dark-mode.dark-mode .section-title,
+html.dark-mode.dark-mode .about-title,
+html.dark-mode.dark-mode .service-tile h3,
+html.dark-mode.dark-mode .privacy-grid-card h3,
+html.dark-mode.dark-mode .step-item h3,
+html.dark-mode.dark-mode .prof-name,
+html.dark-mode.dark-mode .faq-toggle,
+html.dark-mode.dark-mode .impact-card strong,
+html.dark-mode.dark-mode .professional-card h3 {
+    color: var(--dm-heading) !important;
+}
+
+html.dark-mode.dark-mode #hero-section .hero-title .text-brand,
+html.dark-mode.dark-mode .about-title .text-brand,
+html.dark-mode.dark-mode .section-title .text-brand {
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode #hero-section .hero-subtitle,
+html.dark-mode.dark-mode .section-subtitle,
+html.dark-mode.dark-mode .service-tile p,
+html.dark-mode.dark-mode .privacy-grid-card p,
+html.dark-mode.dark-mode .step-item p,
+html.dark-mode.dark-mode .impact-card span,
+html.dark-mode.dark-mode .faq-answer,
+html.dark-mode.dark-mode .faq-answer p,
+html.dark-mode.dark-mode .prof-title,
+html.dark-mode.dark-mode .prof-cred-item,
+html.dark-mode.dark-mode .prof-quote p,
+html.dark-mode.dark-mode .about-text,
+html.dark-mode.dark-mode .professional-card p {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode .highlight {
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .feature-item span {
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode .feature-check {
+    color: var(--dm-accent) !important;
+}
+
+/* ── Hero chips / badges / buttons ── */
+html.dark-mode.dark-mode .hero-kicker,
+html.dark-mode.dark-mode .hero-kicker-hero {
+    background: rgba(144, 202, 249, .12) !important;
+    border-color: rgba(144, 202, 249, .35) !important;
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode #hero-section .hero-badge,
+html.dark-mode.dark-mode .hero-badge {
+    background: rgba(14, 31, 53, .85) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode .hero-badge i {
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .hero-btn-secondary {
+    background: transparent !important;
+    color: var(--dm-text1) !important;
+    border-color: var(--dm-border) !important;
+}
+
+html.dark-mode.dark-mode .hero-btn-secondary:hover {
+    background: rgba(144, 202, 249, .08) !important;
+    border-color: var(--dm-accent) !important;
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .hero-scene {
+    background-color: var(--dm-card) !important;
+    background-image: none !important;
+}
+
+/* ── Cards & tiles ── */
+html.dark-mode.dark-mode .service-tile,
+html.dark-mode.dark-mode .impact-card,
+html.dark-mode.dark-mode .privacy-grid-card,
+html.dark-mode.dark-mode .professional-card,
+html.dark-mode.dark-mode .faq-item,
+html.dark-mode.dark-mode .faq-toggle,
+html.dark-mode.dark-mode .chat-mockup,
+html.dark-mode.dark-mode .hero-chat-card,
+html.dark-mode.dark-mode .step-item,
+html.dark-mode.dark-mode .about-card-float,
+html.dark-mode.dark-mode .card-1,
+html.dark-mode.dark-mode .card-2,
+html.dark-mode.dark-mode .card-3 {
+    background: var(--dm-card) !important;
+    background-image: none !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .35) !important;
+}
+
+html.dark-mode.dark-mode .service-tile:hover,
+html.dark-mode.dark-mode .impact-card:hover,
+html.dark-mode.dark-mode .privacy-grid-card:hover {
+    border-color: var(--dm-accent) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .45) !important;
+}
+
+html.dark-mode.dark-mode .service-tile-icon {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .service-tile-icon--blue,
+html.dark-mode.dark-mode .service-tile-icon--green,
+html.dark-mode.dark-mode .service-tile-icon--violet {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .step-circle {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-accent) !important;
+    box-shadow: none !important;
+}
+
+html.dark-mode.dark-mode .steps-container .col-md-3:not(:last-child)::after {
+    border-color: var(--dm-border) !important;
+}
+
+html.dark-mode.dark-mode .process-3d-object {
+    filter: drop-shadow(0 18px 14px rgba(0, 0, 0, .5)) !important;
+}
+
+html.dark-mode.dark-mode .process-3d-head {
+    border-color: var(--dm-border) !important;
+    background: linear-gradient(145deg, #132843 0%, #0e1f35 58%, #0b1828 100%) !important;
+    box-shadow: inset -9px -8px 0 rgba(0, 0, 0, .35), inset 8px 7px 0 rgba(144, 202, 249, .08), 0 9px 20px rgba(0, 0, 0, .4) !important;
+}
+
+html.dark-mode.dark-mode .process-3d-body {
+    border-color: var(--dm-border) !important;
+    background: linear-gradient(145deg, #132843, #0e1f35 65%, #0b1828) !important;
+    box-shadow: inset -8px -8px 0 rgba(0, 0, 0, .3), 0 8px 16px rgba(0, 0, 0, .4) !important;
+}
+
+html.dark-mode.dark-mode .process-3d-arm {
+    background: linear-gradient(90deg, #1a3555, #0e1f35) !important;
+    box-shadow: 0 5px 9px rgba(0, 0, 0, .35) !important;
+}
+
+html.dark-mode.dark-mode .process-chat-layout {
+    background: rgba(14, 31, 53, .72) !important;
+    border-color: var(--dm-border) !important;
+}
+
+/* ── Chat mockup ── */
+html.dark-mode.dark-mode .chat-header {
+    color: var(--dm-heading) !important;
+    border-bottom-color: var(--dm-border) !important;
+}
+
+html.dark-mode.dark-mode .chat-header small,
+html.dark-mode.dark-mode .chat-input {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode .chat-bubble-bot,
+html.dark-mode.dark-mode .chat-bubble {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode .chat-replies span {
+    background: rgba(144, 202, 249, .10) !important;
+    color: var(--dm-accent) !important;
+    border-color: var(--dm-border) !important;
+}
+
+html.dark-mode.dark-mode .chat-input b {
+    background: var(--dm-accent) !important;
+    color: var(--dm-bg, #030610) !important;
+}
+
+/* ── FAQ ── */
+html.dark-mode.dark-mode .faq-icon {
+    background-color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode #faq-1,
+html.dark-mode.dark-mode #faq-2,
+html.dark-mode.dark-mode #faq-3,
+html.dark-mode.dark-mode #faq-4,
+html.dark-mode.dark-mode #faq-5 {
+    background: transparent !important;
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode #faq-1 p,
+html.dark-mode.dark-mode #faq-2 p,
+html.dark-mode.dark-mode #faq-3 p,
+html.dark-mode.dark-mode #faq-4 p,
+html.dark-mode.dark-mode #faq-5 p {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode #faqAccordion {
+    color: var(--dm-text1) !important;
+}
+
+/* ── Professional ── */
+html.dark-mode.dark-mode .prof-cred-item i,
+html.dark-mode.dark-mode .prof-quote i {
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .prof-cred-item strong {
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode .prof-quote {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+}
+
+html.dark-mode.dark-mode .prof-badge {
+    background: rgba(144, 202, 249, .12) !important;
+    border-color: rgba(144, 202, 249, .35) !important;
+    color: var(--dm-accent) !important;
+}
+
+/* ── About floating cards ── */
+html.dark-mode.dark-mode .card-icon {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .card-content h5 {
+    color: var(--dm-heading) !important;
+}
+
+html.dark-mode.dark-mode .card-content p {
+    color: var(--dm-text2) !important;
+}
+
+/* ── Footer (fully dark) ── */
+html.dark-mode.dark-mode .footer-new,
+html.dark-mode.dark-mode #contacto.footer-new {
+    background: #050d1a !important;
+    background-image: none !important;
+    color: var(--dm-text2) !important;
+    border-top: none !important;
+}
+
+html.dark-mode.dark-mode .footer-new::before {
+    background: linear-gradient(90deg, var(--dm-border), var(--dm-accent), var(--dm-border)) !important;
+    opacity: .55 !important;
+    height: 3px !important;
+    inset: 0 0 auto !important;
+}
+
+html.dark-mode.dark-mode .footer-new::after {
+    background: none !important;
+    opacity: 0 !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-logo-text,
+html.dark-mode.dark-mode .footer-new .footer-col h4,
+html.dark-mode.dark-mode #footerLogo {
+    color: var(--dm-heading) !important;
+    text-shadow: none !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-brand-new img {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .45) !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-col {
+    background: var(--dm-card) !important;
+    border-color: var(--dm-border) !important;
+    backdrop-filter: none !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-col:hover {
+    background: var(--dm-elevated) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, .4) !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-col p,
+html.dark-mode.dark-mode .footer-new .footer-col li,
+html.dark-mode.dark-mode .footer-new .footer-col a,
+html.dark-mode.dark-mode .footer-new .footer-nav a,
+html.dark-mode.dark-mode .footer-new .footer-legal-new a,
+html.dark-mode.dark-mode .footer-new .footer-bottom-new p,
+html.dark-mode.dark-mode .footer-social-new a {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-col a:hover,
+html.dark-mode.dark-mode .footer-new .footer-nav a:hover,
+html.dark-mode.dark-mode .footer-new .footer-legal-new a:hover,
+html.dark-mode.dark-mode .footer-social-new a:hover {
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-top {
+    border-bottom-color: var(--dm-border) !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-bottom-new {
+    background: rgba(6, 14, 28, .85) !important;
+    border-top-color: var(--dm-border) !important;
+    backdrop-filter: none !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-col ul li i {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-accent) !important;
+    box-shadow: none !important;
+}
+
+html.dark-mode.dark-mode .footer-new .footer-col ul li:hover i {
+    background: var(--dm-accent) !important;
+    color: var(--dm-bg, #030610) !important;
+}
+
+html.dark-mode.dark-mode .footer-form input,
+html.dark-mode.dark-mode #newsletterEmail {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode .footer-form input:focus,
+html.dark-mode.dark-mode #newsletterEmail:focus {
+    background: var(--dm-card) !important;
+    border-color: var(--dm-accent) !important;
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode .footer-form input::placeholder,
+html.dark-mode.dark-mode #newsletterEmail::placeholder {
+    color: var(--dm-muted) !important;
+}
+
+html.dark-mode.dark-mode .footer-form button,
+html.dark-mode.dark-mode #newsletterBtn {
+    background: var(--dm-accent) !important;
+    background-image: none !important;
+    border-color: var(--dm-accent) !important;
+    color: var(--dm-bg, #030610) !important;
+}
+
+html.dark-mode.dark-mode .footer-form button:hover,
+html.dark-mode.dark-mode #newsletterBtn:hover {
+    background: var(--dm-soft) !important;
+}
+
+html.dark-mode.dark-mode #newsletterForm,
+html.dark-mode.dark-mode #newsletterMsg {
+    color: var(--dm-text2) !important;
+}
+
+/* ── Theme toggle icons ── */
+html.dark-mode.dark-mode #moon-icon {
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode #sun-icon {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode .theme-switch-container {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+}
+
+html.dark-mode.dark-mode .theme-icon {
+    color: var(--dm-accent) !important;
+}
+
+/* ── Modals ── */
+html.dark-mode.dark-mode .modal-premium .modal-content,
+html.dark-mode.dark-mode .modal-content,
+html.dark-mode.dark-mode .logo-modal-wrapper,
+html.dark-mode.dark-mode .chatbot-modal-content {
+    background: var(--dm-card) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode .modal-premium .modal-title,
+html.dark-mode.dark-mode .modal-title,
+html.dark-mode.dark-mode .logo-modal-title,
+html.dark-mode.dark-mode .chatbot-modal-title,
+html.dark-mode.dark-mode .logo-modal-subtitle {
+    color: var(--dm-heading) !important;
+}
+
+html.dark-mode.dark-mode .modal-premium .modal-label,
+html.dark-mode.dark-mode .modal-premium .modal-intro p,
+html.dark-mode.dark-mode .logo-modal-features span,
+html.dark-mode.dark-mode .logo-modal-features .feature-item {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode .logo-modal-features .feature-icon {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode #logoModalLabel,
+html.dark-mode.dark-mode #chatbotModalLabel {
+    color: var(--dm-heading) !important;
+}
+
+/* ── Contact section ── */
+html.dark-mode.dark-mode #contacto,
+html.dark-mode.dark-mode #contacto.content-section {
+    color: var(--dm-text1) !important;
+}
+
+html.dark-mode.dark-mode #contacto .section-title,
+html.dark-mode.dark-mode #contacto h3,
+html.dark-mode.dark-mode #contacto h4,
+html.dark-mode.dark-mode #contacto label {
+    color: var(--dm-heading) !important;
+}
+
+html.dark-mode.dark-mode #contacto p,
+html.dark-mode.dark-mode #contacto .form-text {
+    color: var(--dm-text2) !important;
+}
+
+/* ── Nav collapse (mobile) ── */
+html.dark-mode.dark-mode body #navmenu.navbar-collapse {
+    background: transparent !important;
+}
+
+@media (min-width: 992px) {
+    html.dark-mode.dark-mode body #mainNav #navmenu.navbar-collapse {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: 0 !important;
+    }
+}
+
+@media (max-width: 991.98px) {
+    html.dark-mode.dark-mode body #mainNav #navmenu.navbar-collapse {
+        background: rgba(6, 14, 28, .97) !important;
+        border: 1px solid var(--dm-border) !important;
+    }
+}
+
+/* ── Gaps pass 2: beat high-specificity landing locks ── */
+
+/* Theme icons: base.css forces #fff / #e0e7ff pills */
+html.dark-mode.dark-mode .theme-icon,
+html.dark-mode.dark-mode #moon-icon,
+html.dark-mode.dark-mode #sun-icon,
+html.dark-mode.dark-mode .theme-icon.moon.active,
+html.dark-mode.dark-mode .theme-icon.sun.active {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode #mainNav .theme-icon,
+html.dark-mode.dark-mode #mainNav #moon-icon,
+html.dark-mode.dark-mode #mainNav #sun-icon {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-accent) !important;
+}
+
+/* Hero badge icon pills (#hero-section .hero-badge i forces #e7f4ff) */
+html.dark-mode.dark-mode #hero-section .hero-badge i {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-accent) !important;
+}
+
+/* Impact card icon circle */
+html.dark-mode.dark-mode .impact-card i {
+    background: var(--dm-elevated) !important;
+    color: var(--dm-accent) !important;
+}
+
+/* #funciona step cards (body #funciona .step-item + nth-child gradients) */
+html.dark-mode.dark-mode body #funciona .step-item,
+html.dark-mode.dark-mode #funciona .step-item,
+html.dark-mode.dark-mode body #funciona .steps-container .col-md-3 .step-item {
+    background: var(--dm-card) !important;
+    background-image: none !important;
+    border-color: var(--dm-border) !important;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .35) !important;
+}
+
+html.dark-mode.dark-mode body #funciona .step-item::after {
+    background: rgba(144, 202, 249, .08) !important;
+}
+
+html.dark-mode.dark-mode body #funciona .step-item h3,
+html.dark-mode.dark-mode body #funciona .step-item h3 {
+    color: var(--dm-heading) !important;
+}
+
+html.dark-mode.dark-mode body #funciona .step-item p {
+    color: var(--dm-text2) !important;
+}
+
+html.dark-mode.dark-mode body #funciona .step-item .step-circle {
+    background: var(--dm-accent) !important;
+    color: var(--dm-bg, #030610) !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .4) !important;
+}
+
+/* Process robot LED dots (bright cyan on light head) */
+html.dark-mode.dark-mode .process-3d-head span,
+html.dark-mode.dark-mode .process-3d-head span::after {
+    background: var(--dm-accent) !important;
+    box-shadow: 0 0 8px rgba(144, 202, 249, .55) !important;
+}
+
+/* Footer social icon pills (landing forces white) */
+html.dark-mode.dark-mode .footer-social-new a {
+    background: var(--dm-elevated) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-accent) !important;
+}
+
+html.dark-mode.dark-mode .footer-social-new a:hover {
+    background: rgba(144, 202, 249, .12) !important;
+    color: var(--dm-accent) !important;
+}
 

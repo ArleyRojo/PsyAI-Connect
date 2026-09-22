@@ -204,7 +204,7 @@ function configurarFormularioConfig() {
         
         try {
             const res = await fetch('/api/admin/chatbot-config', {
-                method: 'PUT',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify(currentData)

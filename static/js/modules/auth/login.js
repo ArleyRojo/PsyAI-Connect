@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (res.status === 401) {
                 mostrarToast('Credenciales incorrectas. Verifica tu correo y contrasena.', 'danger');
             } else if (res.status === 403) {
-                mostrarToast('Tu cuenta esta inactiva o suspendida. Contacta al soporte.', 'danger');
+                mostrarToast(data.message || 'No tienes permiso para iniciar sesión con este rol.', 'danger');
             } else if (res.status === 400) {
                 mostrarToast('Datos incompletos. Por favor completa todos los campos.', 'warning');
             } else {

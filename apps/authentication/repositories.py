@@ -18,12 +18,13 @@ class AuthRepository:
     def user_exists_by_email(self, email):
         return Register.objects.filter(email=email).exists()
 
-    def create_user(self, nombre, email, password_hash, rol, genero=None, edad=None):
+    def create_user(self, nombre, email, password_hash, rol, genero=None, edad=None, email_verificado=True):
         user = Register(
             email=Register.objects.normalize_email(email),
             nombre=nombre,
             contrasena=password_hash,
             rol=rol,
+            email_verificado=email_verificado,
         )
         user.set_unusable_password()
         user.save()
@@ -69,6 +70,37 @@ class AuthRepository:
             rt.save(update_fields=["used"])
             return True
         return False
+
+    def create_email_verification_token(self, user_id, token, expires):
+        user = Register.objects.filter(idUsuario=user_id).first()
+        if user:
+            EmailVerificationToken.objects.filter(
+                idUsuario=user, used=False
+            ).update(used=True)
+            EmailVerificationToken.objects.create(
+                idUsuario=user, token=token, expires=expires
+            )
+
+    def validate_email_verification_token(self, token):
+        vt = EmailVerificationToken.objects.filter(token=token, used=False).first()
+        if not vt:
+            return None
+        now = timezone.now()
+        if vt.expires < now:
+            return None
+        return vt.idUsuario_id
+
+    def invalidate_email_verification_token(self, token):
+        vt = EmailVerificationToken.objects.filter(token=token).first()
+        if vt:
+            vt.used = True
+            vt.save(update_fields=["used"])
+            return True
+        return False
+
+    def mark_email_verified(self, user_id):
+        updated = Register.objects.filter(idUsuario=user_id).update(email_verificado=True)
+        return updated > 0
 
     def update_password(self, user_id, new_password_hash):
         updated = Register.objects.filter(idUsuario=user_id).update(
@@ -182,3 +214,35 @@ class SecurityRepository:
                 row.save(update_fields=["intentos", "bloqueado_hasta"])
         except Exception:
             return
+
+    # ── TOTP / 2FA ────────────────────────────────────────────────
+
+    def get_totp_device(self, user_id):
+        from apps.authentication.models import TOTPDevice
+        try:
+            return TOTPDevice.objects.get(idUsuario_id=user_id)
+        except TOTPDevice.DoesNotExist:
+            return None
+
+    def create_totp_device(self, user_id, name="", secret=None):
+        from apps.authentication.models import TOTPDevice
+        device, created = TOTPDevice.objects.update_or_create(
+            idUsuario_id=user_id,
+            defaults={
+                "name": name,
+                "secret": secret,
+                "confirmed": False,
+            }
+        )
+        return device
+
+    def delete_totp_device(self, user_id):
+        from apps.authentication.models import TOTPDevice
+        TOTPDevice.objects.filter(idUsuario_id=user_id).delete()
+
+    def get_totp_device_by_user(self, user_id):
+        from apps.authentication.models import TOTPDevice
+        try:
+            return TOTPDevice.objects.get(idUsuario_id=user_id)
+        except TOTPDevice.DoesNotExist:
+            return None

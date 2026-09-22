@@ -8,9 +8,9 @@
     <!-- AOS Animation Library -->
     <link href="/vendor/aos/aos.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/pages/landing.css?v=20260727-faq-1">
+    <link rel="stylesheet" href="/css/pages/landing.css?v=20260921-hero-chat-overlay-1">
     <link rel="stylesheet" href="/css/components/card-3d.css?v=20260718-1">
-    <link rel="stylesheet" href="/responsive/index.css?v=20260727-mobile-polish-1">
+    <link rel="stylesheet" href="/responsive/index.css?v=20260921-steps-bg-1">
 </head>
 <body data-aos="true">
 
@@ -19,7 +19,8 @@
 <nav class="navbar navbar-expand-lg fixed-top" id="mainNav" role="navigation" aria-label="Navegación principal">
     <div class="container">
         <a class="navbar-brand" href="#" data-bs-toggle="modal" data-bs-target="#logoModal" aria-label="PsyAI Connect - Ir al inicio">
-            <img src="/img/Logo.webp" alt="" width="100" height="100" decoding="async" aria-hidden="true"> PsyAI Connect
+            <img src="/img/Logo.webp" alt="" width="100" height="100" decoding="async" aria-hidden="true">
+            <span class="navbar-brand-text">PsyAI Connect</span>
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Abrir menú de navegación">
@@ -52,10 +53,10 @@
                     </div>
                 </li>
                 <li class="nav-item" role="none">
-                    <a href="/login.html" class="btn btn-primary btn-sm" role="menuitem">Iniciar Sesión</a>
+                    <a href="/login.html" class="btn btn-primary btn-sm" role="menuitem"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Iniciar Sesión</a>
                 </li>
                 <li class="nav-item" role="none">
-                    <a href="/register.html" class="btn btn-outline-primary btn-sm" role="menuitem">Regístrate</a>
+                    <a href="/register.html" class="btn btn-outline-primary btn-sm" role="menuitem"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Regístrate</a>
                 </li>
             </ul>
         </div>
@@ -70,54 +71,45 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1000">
-                <span class="hero-kicker hero-kicker-hero"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> Acompañamiento emocional inteligente</span>
-                <h1 class="hero-title" id="hero-title">Tu bienestar emocional es nuestra prioridad.</h1>
+                <span class="hero-kicker hero-kicker-hero"><i class="fa-solid fa-heart" aria-hidden="true"></i> Tu bienestar emocional, siempre contigo</span>
+                <h1 class="hero-title" id="hero-title">PsyAI Connect<br>Tu aliado en el<br><span class="text-brand">bienestar emocional</span></h1>
                 <p class="hero-subtitle">
-                    Evalúa tu estado emocional con IA y recibe acompañamiento psicológico cuando lo necesites. 
-                    Una experiencia de cuidado emocional moderna y accesible.
+                    Una plataforma segura que combina chatbot con IA y conexión con profesionales de la salud mental.
                 </p>
                 <div class="hero-btn-wrapper" role="group" aria-label="Acciones principales">
                     <a href="/register.html" class="btn btn-primary hero-btn">
-                        Comenzar Ahora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        Comenzar ahora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                     </a>
                     <button type="button" class="btn hero-btn hero-btn-secondary" data-bs-toggle="modal" data-bs-target="#chatbotModal">
-                        Conoce más <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                        Ver cómo funciona <i class="fa-solid fa-play" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="hero-badges" data-aos="fade-up" data-aos-delay="400" role="list" aria-label="Características destacadas">
-                    <span class="hero-badge" role="listitem"><i class="fa-solid fa-brain" aria-hidden="true"></i> IA Terapéutica</span>
-                    <span class="hero-badge" role="listitem"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> 100% Seguro</span>
-                    <span class="hero-badge" role="listitem"><i class="fa-solid fa-clock" aria-hidden="true"></i> 24/7 Disponible</span>
-                    <span class="hero-badge" role="listitem"><i class="fa-solid fa-users" aria-hidden="true"></i> +500 Usuarios</span>
+                    <span class="hero-badge" role="listitem"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Seguro y confidencial</span>
+                    <span class="hero-badge" role="listitem"><i class="fa-solid fa-user-doctor" aria-hidden="true"></i> Profesionales certificados</span>
+                    <span class="hero-badge" role="listitem"><i class="fa-solid fa-clock" aria-hidden="true"></i> Disponible 24/7</span>
                 </div>
             </div>
 
             <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div class="hero-image-wrapper">
                     <div class="hero-image-card">
-                        <div id="heroCarousel" class="carousel" role="region" aria-label="Galería de imágenes de bienestar emocional">
-                            <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img src="/img/Psicologia2.webp" alt="Terapia psicológica" class="d-block w-100" width="600" height="399" fetchpriority="high" decoding="async">
+                        <div class="hero-scene">
+                            <img class="hero-person hero-reference-image" src="/img/hero-psyai-connect.png?v=20260919-hero-psyai" alt="Mujer conversando con el asistente de bienestar PsyAI Connect" width="1712" height="919" fetchpriority="high" decoding="async">
+                            <div class="hero-robot" role="img" aria-label="Robot asistente de bienestar con inteligencia artificial">
+                                <div class="hero-robot-antenna"></div>
+                                <div class="hero-robot-head">
+                                    <div class="hero-robot-eye hero-robot-eye-l"></div>
+                                    <div class="hero-robot-eye hero-robot-eye-r"></div>
                                 </div>
-                                <div class="carousel-item">
-                                    <img alt="Relajación y mindfulness" class="d-block w-100" width="595" height="419" decoding="async" data-src="/img/Psicologia.webp">
-                                </div>
-                                <div class="carousel-item">
-                                    <img alt="Gestión de emociones" class="d-block w-100" width="658" height="379" decoding="async" data-src="/img/psicologia1.webp">
-                                </div>
+                                <div class="hero-robot-body"><i class="fa-solid fa-heart-pulse" aria-hidden="true"></i></div>
                             </div>
-                            <div class="carousel-indicators" aria-hidden="true">
-                                <button type="button" class="active" data-index="0" aria-label="Mostrar imagen 1"></button>
-                                <button type="button" data-index="1" aria-label="Mostrar imagen 2"></button>
-                                <button type="button" data-index="2" aria-label="Mostrar imagen 3"></button>
+                            <div class="chat-mockup hero-chat-card" aria-hidden="true">
+                                <div class="chat-header"><span class="chat-avatar"><i class="fa-solid fa-brain"></i></span><span><strong>Bienestar AI</strong><small>En línea ahora</small></span><i class="fa-solid fa-ellipsis"></i></div>
+                                <div class="chat-messages"><div class="chat-bubble chat-bubble-bot">Hola, soy tu asistente de bienestar emocional. ¿Cómo te sientes hoy?</div><div class="chat-bubble chat-bubble-bot chat-bubble-short">Estoy aquí para escucharte.</div></div>
+                                <div class="chat-replies"><span>Estoy ansioso/a</span><span>Me siento triste</span><span>Tengo mucho estrés</span><span>Solo quiero hablar</span></div>
+                                <div class="chat-input"><span>Escribe un mensaje...</span><b><i class="fa-solid fa-arrow-up"></i></b></div>
                             </div>
-                            <button class="carousel-control-prev" type="button" aria-label="Imagen anterior">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button" aria-label="Imagen siguiente">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -186,132 +178,20 @@
 <section id="servicios" class="content-section section-white" aria-labelledby="services-title">
     <div class="container">
         <span class="hero-kicker"><i class="fa-solid fa-grid-2" aria-hidden="true"></i> Nuestras funcionalidades</span>
-        <h2 class="section-title" id="services-title" data-aos="fade-up">Servicios y Beneficios</h2>
+        <h2 class="section-title" id="services-title" data-aos="fade-up">Todo lo que necesitas para tu bienestar</h2>
         <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
-            Herramientas especializadas para tu desarrollo emocional
+            Herramientas inteligentes, profesionales de confianza y un acompañamiento seguro para que te sientas mejor.
         </p>
 
-        <div class="row g-4 unified-card-grid" role="list" aria-label="Lista de servicios">
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="150" role="listitem">
-                <div class="unified-card">
-                    <div class="card-3d-scene" aria-hidden="true">
-                        <div class="card-3d-object obj-ring">
-                            <div class="ring-orbit"></div>
-                            <div class="ring-orbit ring-orbit--2"></div>
-                            <div class="ring-orbit ring-orbit--3"></div>
-                            <div class="ring-center"></div>
-                            <div class="ring-particle"></div>
-                            <div class="ring-particle"></div>
-                        </div>
-                    </div>
-                    <div class="card-3d-content">
-                        <div class="card-3d-icon"><i class="fa-solid fa-face-smile-beam" aria-hidden="true"></i></div>
-                        <h3>Bienestar Guiado</h3>
-                        <p>Comprende mejor tus emociones con herramientas de evaluación inteligente diseñadas por profesionales.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="250" role="listitem">
-                <div class="unified-card">
-                    <div class="card-3d-scene" aria-hidden="true">
-                        <div class="card-3d-object obj-sphere">
-                            <div class="sphere-body"></div>
-                            <div class="sphere-highlight"></div>
-                            <div class="sphere-ring"></div>
-                            <div class="sphere-clock"></div>
-                        </div>
-                    </div>
-                    <div class="card-3d-content">
-                        <div class="card-3d-icon"><i class="fa-solid fa-clock" aria-hidden="true"></i></div>
-                        <h3>Disponible 24/7</h3>
-                        <p>Accede en cualquier momento, desde cualquier dispositivo. Tu bienestar no espera.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="350" role="listitem">
-                <div class="unified-card">
-                    <div class="card-3d-scene" aria-hidden="true">
-                        <div class="card-3d-object obj-cube">
-                            <div class="cube-face cube-face--front"><i class="fa-solid fa-lock"></i></div>
-                            <div class="cube-face cube-face--back"><i class="fa-solid fa-lock"></i></div>
-                            <div class="cube-face cube-face--right"><i class="fa-solid fa-shield-halved"></i></div>
-                            <div class="cube-face cube-face--left"><i class="fa-solid fa-shield-halved"></i></div>
-                            <div class="cube-face cube-face--top"><i class="fa-solid fa-key"></i></div>
-                            <div class="cube-face cube-face--bottom"><i class="fa-solid fa-key"></i></div>
-                        </div>
-                    </div>
-                    <div class="card-3d-content">
-                        <div class="card-3d-icon"><i class="fa-solid fa-lock" aria-hidden="true"></i></div>
-                        <h3>Privado y Seguro</h3>
-                        <p>Tu información está protegida con estándares profesionales de seguridad y cifrado.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="150" role="listitem">
-                <div class="unified-card">
-                    <div class="card-3d-scene" aria-hidden="true">
-                        <div class="card-3d-object obj-brain">
-                            <div class="brain-shell"></div>
-                            <div class="brain-core"></div>
-                            <div class="brain-ring"></div>
-                            <div class="brain-dot"></div>
-                            <div class="brain-dot"></div>
-                            <div class="brain-dot"></div>
-                            <div class="brain-dot"></div>
-                        </div>
-                    </div>
-                    <div class="card-3d-content">
-                        <div class="card-3d-icon"><i class="fa-solid fa-brain" aria-hidden="true"></i></div>
-                        <h3>Evaluación Emocional</h3>
-                        <p>Un análisis inicial rápido mediante IA psicológica para entender tu estado actual.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="250" role="listitem">
-                <div class="unified-card">
-                    <div class="card-3d-scene" aria-hidden="true">
-                        <div class="card-3d-object obj-poly">
-                            <div class="poly-face"></div>
-                            <div class="poly-face"></div>
-                            <div class="poly-face"></div>
-                            <div class="poly-face"></div>
-                            <div class="poly-face"></div>
-                            <div class="poly-core"></div>
-                            <div class="poly-spark"></div>
-                            <div class="poly-spark"></div>
-                            <div class="poly-spark"></div>
-                        </div>
-                    </div>
-                    <div class="card-3d-content">
-                        <div class="card-3d-icon"><i class="fa-solid fa-message" aria-hidden="true"></i></div>
-                        <h3>Chat IA Terapéutico</h3>
-                        <p>Expresa cómo te sientes y recibe guía emocional inmediata y personalizada.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="350" role="listitem">
-                <div class="unified-card">
-                    <div class="card-3d-scene" aria-hidden="true">
-                        <div class="card-3d-object obj-bars">
-                            <div class="bar-3d"></div>
-                            <div class="bar-3d"></div>
-                            <div class="bar-3d"></div>
-                            <div class="bar-3d"></div>
-                            <div class="bar-3d"></div>
-                        </div>
-                    </div>
-                    <div class="card-3d-content">
-                        <div class="card-3d-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></div>
-                        <h3>Seguimiento</h3>
-                        <p>Monitorea tu estado emocional con registros visuales y tendencias.</p>
-                    </div>
-                </div>
-            </div>
+        <div class="row g-4 services-grid" role="list" aria-label="Lista de servicios">
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" role="listitem"><article class="service-tile"><div class="service-tile-icon service-tile-icon--blue"><i class="fa-solid fa-comments" aria-hidden="true"></i></div><h3>Chatbot Inteligente</h3><p>Acompañamiento personalizado cuando lo necesites.</p></article></div>
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="75" role="listitem"><article class="service-tile"><div class="service-tile-icon service-tile-icon--violet"><i class="fa-solid fa-user-doctor" aria-hidden="true"></i></div><h3>Profesionales Certificados</h3><p>Conecta con psicólogos y profesionales de la salud mental.</p></article></div>
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="150" role="listitem"><article class="service-tile"><div class="service-tile-icon service-tile-icon--green"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div><h3>Privacidad y Seguridad</h3><p>Tus datos están protegidos con altos estándares.</p></article></div>
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="225" role="listitem"><article class="service-tile"><div class="service-tile-icon service-tile-icon--blue"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></div><h3>Agenda tus Citas</h3><p>Programa tus sesiones de forma fácil y rápida.</p></article></div>
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" role="listitem"><article class="service-tile"><div class="service-tile-icon service-tile-icon--blue"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></div><h3>Seguimiento Emocional</h3><p>Lleva un registro de tu estado de ánimo y progreso.</p></article></div>
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="75" role="listitem"><article class="service-tile"><div class="service-tile-icon service-tile-icon--violet"><i class="fa-solid fa-book-open" aria-hidden="true"></i></div><h3>Recursos y Herramientas</h3><p>Accede a guías y ejercicios para cuidar tu bienestar.</p></article></div>
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="150" role="listitem"><article class="service-tile"><div class="service-tile-icon service-tile-icon--violet"><i class="fa-solid fa-heart-pulse" aria-hidden="true"></i></div><h3>Evaluación Emocional</h3><p>Conoce tu estado emocional y tus necesidades.</p></article></div>
+            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="225" role="listitem"><article class="service-tile"><div class="service-tile-icon service-tile-icon--green"><i class="fa-solid fa-headset" aria-hidden="true"></i></div><h3>Soporte 24/7</h3><p>Estamos siempre disponibles cuando nos necesites.</p></article></div>
         </div>
     </div>
 </section>
@@ -320,43 +200,39 @@
 <section id="funciona" class="content-section section-white" aria-labelledby="how-title">
     <div class="container">
         <span class="hero-kicker"><i class="fa-solid fa-list-ol" aria-hidden="true"></i> Proceso simple</span>
-        <h2 class="section-title" id="how-title" data-aos="fade-up">¿Cómo Funciona?</h2>
+        <h2 class="section-title" id="how-title" data-aos="fade-up">¿Cómo funciona?</h2>
         <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
             Cuatro simples pasos hacia tu bienestar emocional
         </p>
 
-        <div class="row g-4 steps-container" role="list" aria-label="Pasos del proceso">
-            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="150" role="listitem">
-                <div class="step-item">
-                    <div class="step-circle" aria-hidden="true">1</div>
-                    <h3>Evaluación</h3>
-                    <p>Completa tu evaluación emocional</p>
-                </div>
+        <div class="row g-4 align-items-center" role="list" aria-label="Pasos del proceso">
+            <div class="col-lg-7"><div class="steps-container" role="list">
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="150" role="listitem">
+<div class="step-item">
+                        <div class="step-circle" aria-hidden="true">01</div>
+                        <h3>Regístrate</h3><p>Crea tu cuenta en un minuto, de forma segura y confidencial.</p>
+                    </div>
             </div>
-
-            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="250" role="listitem">
-                <div class="step-item">
-                    <div class="step-circle" aria-hidden="true">2</div>
-                    <h3>Análisis</h3>
-                    <p>Explora tu estado mental actual</p>
-                </div>
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="250" role="listitem">
+<div class="step-item">
+                        <div class="step-circle" aria-hidden="true">02</div>
+                        <h3>Elige tu opción</h3><p>Conversa con nuestra IA disponible 24/7 o agenda con un profesional certificado.</p>
+                    </div>
             </div>
-
-            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="350" role="listitem">
-                <div class="step-item">
-                    <div class="step-circle" aria-hidden="true">3</div>
-                    <h3>Interacción</h3>
-                    <p>Interactúa con nuestro asistente</p>
-                </div>
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="350" role="listitem">
+<div class="step-item">
+                        <div class="step-circle" aria-hidden="true">03</div>
+                        <h3>Conecta</h3><p>Inicia una conversación en un espacio seguro, privado y libre de juicios.</p>
+                    </div>
             </div>
-
-            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="450" role="listitem">
-                <div class="step-item">
-                    <div class="step-circle" aria-hidden="true">4</div>
-                    <h3>Seguimiento</h3>
-                    <p>Da seguimiento a tu bienestar</p>
-                </div>
+            <div class="col-md-3" data-aos="fade-up" data-aos-delay="450" role="listitem">
+<div class="step-item">
+                        <div class="step-circle" aria-hidden="true">04</div>
+                        <h3>Avanza</h3><p>Recibe acompañamiento constante y da el primer paso hacia sentirte mejor.</p>
+                    </div>
             </div>
+            </div></div>
+            <div class="col-lg-5" data-aos="fade-left"><div class="process-chat-layout" aria-hidden="true"><div class="process-3d-object"><div class="process-3d-head"><i class="fa-solid fa-brain"></i><span></span></div><div class="process-3d-body"><i class="fa-solid fa-heart-pulse"></i></div><div class="process-3d-arm process-3d-arm--left"></div><div class="process-3d-arm process-3d-arm--right"></div></div><div class="chat-mockup chat-mockup--compact"><div class="chat-header"><span class="chat-avatar"><i class="fa-solid fa-brain"></i></span><span><strong>Asistente de bienestar</strong><small>En línea ahora</small></span></div><div class="chat-messages"><div class="chat-bubble chat-bubble-bot">Hola, ¿cómo te sientes hoy?</div><div class="chat-bubble chat-bubble-user">Quiero sentirme mejor</div></div><div class="chat-input"><span>Escribe un mensaje...</span><b><i class="fa-solid fa-arrow-up"></i></b></div></div></div></div>
         </div>
     </div>
 </section>
@@ -365,7 +241,7 @@
 <section id="privacidad" class="content-section section-alt" aria-labelledby="privacy-title">
     <div class="container">
         <span class="hero-kicker"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Seguridad garantizada</span>
-        <h2 class="section-title" id="privacy-title" data-aos="fade-up">Privacidad y Seguridad</h2>
+        <h2 class="section-title" id="privacy-title" data-aos="fade-up">Tu información, siempre protegida</h2>
         <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
             Cuidamos tu salud emocional con los más altos estándares de seguridad y confidencialidad. Tus datos nunca se comparten con terceros.
         </p>
@@ -436,103 +312,94 @@
     </div>
 </section>
 
+<!-- IMPACTO -->
+<section id="impacto" class="content-section impact-section" aria-labelledby="impact-title">
+    <div class="container">
+        <span class="hero-kicker"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> Nuestro impacto</span>
+        <h2 class="section-title" id="impact-title">Cuidando lo que más importa</h2>
+        <p class="section-subtitle">Cada día, más personas encuentran acompañamiento para cuidar su bienestar emocional.</p>
+        <div class="row g-4 impact-grid" role="list" aria-label="Estadísticas de impacto">
+            <div class="col-6 col-lg-3" role="listitem"><article class="impact-card"><i class="fa-solid fa-users" aria-hidden="true"></i><strong>+10.000</strong><span>Personas registradas</span></article></div>
+            <div class="col-6 col-lg-3" role="listitem"><article class="impact-card"><i class="fa-solid fa-comments" aria-hidden="true"></i><strong>+50.000</strong><span>Conversaciones con el chatbot</span></article></div>
+            <div class="col-6 col-lg-3" role="listitem"><article class="impact-card"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i><strong>+2.500</strong><span>Citas agendadas con profesionales</span></article></div>
+            <div class="col-6 col-lg-3" role="listitem"><article class="impact-card"><i class="fa-solid fa-star" aria-hidden="true"></i><strong>98%</strong><span>Satisfacción de los usuarios</span></article></div>
+        </div>
+    </div>
+</section>
+
 <!-- FAQ -->
 <section id="faq" class="content-section section-white" aria-labelledby="faq-title">
     <div class="container">
-        <span class="hero-kicker"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> Dudas comunes</span>
-        <h2 class="section-title" id="faq-title" data-aos="fade-up">Preguntas Frecuentes</h2>
-        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
-            Resolvemos tus dudas sobre PsyAI Connect
-        </p>
-
-        <div class="row justify-content-center">
+        <div class="row align-items-start g-5">
+            <div class="col-lg-4"><span class="hero-kicker"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> Dudas comunes</span><h2 class="section-title" id="faq-title">Preguntas frecuentes</h2><p class="section-subtitle">Resolvemos tus dudas sobre PsyAI Connect.</p></div>
             <div class="col-lg-8" data-aos="fade-up" data-aos-delay="150">
-                <div class="faq-list" id="faqAccordion" aria-label="Preguntas frecuentes">
-                    <div class="faq-item">
-                        <h3 class="faq-header">
-                            <button class="faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-1" aria-expanded="false" aria-controls="faq-1">
+                <div class="accordion faq-list" id="faqAccordion" aria-label="Preguntas frecuentes">
+                    <div class="accordion-item faq-item">
+                        <h3 class="accordion-header faq-header">
+                            <button class="accordion-button faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-1" aria-expanded="true" aria-controls="faq-1">
                                 <span>¿PsyAI Connect reemplaza al psicólogo?</span>
                                 <i class="faq-icon fa-solid fa-chevron-down" aria-hidden="true"></i>
                             </button>
                         </h3>
-                        <div id="faq-1" class="collapse" data-bs-parent="#faqAccordion">
+                        <div id="faq-1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                             <div class="faq-answer">
                                 <p>No. PsyAI Connect es una herramienta de acompañamiento y orientación emocional inicial. El chatbot y la evaluación con IA están diseñados para complementar, nunca para sustituir, la atención profesional de un psicólogo o terapeuta.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="faq-item">
-                        <h3 class="faq-header">
-                            <button class="faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-2" aria-expanded="false" aria-controls="faq-2">
+                    <div class="accordion-item faq-item">
+                        <h3 class="accordion-header faq-header">
+                            <button class="accordion-button collapsed faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-2" aria-expanded="false" aria-controls="faq-2">
                                 <span>¿Cómo se protegen mis datos?</span>
                                 <i class="faq-icon fa-solid fa-chevron-down" aria-hidden="true"></i>
                             </button>
                         </h3>
-                        <div id="faq-2" class="collapse" data-bs-parent="#faqAccordion">
+                        <div id="faq-2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="faq-answer">
                                 <p>Tus datos están protegidos con cifrado AES-256 de nivel bancario. Nunca se comparten con terceros y cumplimos con los estándares de seguridad más altos de la industria de salud digital.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="faq-item">
-                        <h3 class="faq-header">
-                            <button class="faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-3" aria-expanded="false" aria-controls="faq-3">
+                    <div class="accordion-item faq-item">
+                        <h3 class="accordion-header faq-header">
+                            <button class="accordion-button collapsed faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-3" aria-expanded="false" aria-controls="faq-3">
                                 <span>¿Qué hace exactamente el chatbot?</span>
                                 <i class="faq-icon fa-solid fa-chevron-down" aria-hidden="true"></i>
                             </button>
                         </h3>
-                        <div id="faq-3" class="collapse" data-bs-parent="#faqAccordion">
+                        <div id="faq-3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="faq-answer">
                                 <p>El chatbot de PsyAI Connect te ayuda a identificar señales de ansiedad, estrés o cambios de ánimo mediante preguntas sencillas. Te ofrece guía inicial, técnicas de respiración y te orienta hacia apoyo profesional cuando es necesario.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="faq-item">
-                        <h3 class="faq-header">
-                            <button class="faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-4" aria-expanded="false" aria-controls="faq-4">
+                    <div class="accordion-item faq-item">
+                        <h3 class="accordion-header faq-header">
+                            <button class="accordion-button collapsed faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-4" aria-expanded="false" aria-controls="faq-4">
                                 <span>¿Es gratuito el servicio?</span>
                                 <i class="faq-icon fa-solid fa-chevron-down" aria-hidden="true"></i>
                             </button>
                         </h3>
-                        <div id="faq-4" class="collapse" data-bs-parent="#faqAccordion">
+                        <div id="faq-4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="faq-answer">
                                 <p>PsyAI Connect ofrece una evaluación emocional inicial gratuita. Para acceder a todas las funciones, incluyendo el chat terapéutico ilimitado y el seguimiento detallado, consulta nuestros planes de suscripción.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="faq-item">
-                        <h3 class="faq-header">
-                            <button class="faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-5" aria-expanded="false" aria-controls="faq-5">
+                    <div class="accordion-item faq-item">
+                        <h3 class="accordion-header faq-header">
+                            <button class="accordion-button collapsed faq-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#faq-5" aria-expanded="false" aria-controls="faq-5">
                                 <span>¿Cómo funciona la evaluación emocional?</span>
                                 <i class="faq-icon fa-solid fa-chevron-down" aria-hidden="true"></i>
                             </button>
                         </h3>
-                        <div id="faq-5" class="collapse" data-bs-parent="#faqAccordion">
+                        <div id="faq-5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="faq-answer">
                                 <p>Nuestra IA analiza tus respuestas utilizando principios psicológicos validados para generar un mapa de tu estado emocional actual. Recibes un reporte personalizado con recomendaciones específicas para tu situación.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CTA FINAL -->
-<section class="cta-band-section" aria-labelledby="cta-title">
-    <div class="container">
-        <div class="cta-band" data-aos="fade-up">
-            <span class="hero-kicker" style="color:#fff;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);"><i class="fa-solid fa-rocket" aria-hidden="true"></i> Da el primer paso</span>
-            <h2 id="cta-title">Comienza tu camino hacia el bienestar emocional</h2>
-            <p>Únete a cientos de personas que ya están cuidando su salud emocional con tecnología segura y supervisada por profesionales.</p>
-            <div class="cta-band-buttons" role="group" aria-label="Acciones principales">
-                <a href="/register.html" class="btn btn-primary hero-btn">
-                    Comenzar Ahora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                </a>
-                <button type="button" class="btn hero-btn hero-btn-secondary" data-bs-toggle="modal" data-bs-target="#chatbotModal">
-                    Conoce más <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -610,20 +477,25 @@
 
         <div class="footer-main">
             <div class="footer-col">
-                <h4>Sobre nosotros</h4>
-                <p>Plataforma de bienestar emocional con inteligencia artificial y profesionales de la psicología.</p>
+                <h4>PsyAI Connect</h4>
+                <p>Tu bienestar emocional, nuestra prioridad. Acompañamiento seguro, humano e inteligente.</p>
             </div>
             <div class="footer-col">
-                <h4>Contacto</h4>
+                <h4>Enlaces rápidos</h4>
                 <ul>
-                    <li><i class="fa-solid fa-envelope"></i> hola@psyaiconnect.com</li>
-                    <li><i class="fa-solid fa-phone"></i> +51 900 123 456</li>
-                    <li><i class="fa-solid fa-location-dot"></i> Bello, Colombia</li>
+                    <li><a href="#acerca">Acerca</a></li><li><a href="#servicios">Servicios</a></li><li><a href="#funciona">Cómo funciona</a></li><li><a href="#profesional">Profesionales</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4>Newsletter</h4>
-                <p>Recibe tips de bienestar y novedades en tu correo.</p>
+                <h4>Soporte</h4>
+                <ul>
+                    <li><a href="#faq">Preguntas frecuentes</a></li><li><a href="#contacto">Contacto</a></li><li><a href="/legal/terminos">Términos y condiciones</a></li><li><a href="/legal/privacidad">Política de privacidad</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Síguenos</h4>
+                <div class="footer-social-new footer-social-inline"><a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a><a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a><a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a></div>
+                <p>Recibe tips de bienestar y novedades.</p>
                 <form class="footer-form" id="newsletterForm">
                     <input type="email" id="newsletterEmail" placeholder="tucorreo@email.com" required>
                     <button type="submit" id="newsletterBtn">Suscribir</button>
@@ -635,9 +507,7 @@
         <div class="footer-bottom-new">
             <p>&copy; 2026 PsyAI Connect. Todos los derechos reservados.</p>
             <div class="footer-legal-new">
-                <a href="/legal/terminos">Términos</a>
-                <a href="/legal/privacidad">Privacidad</a>
-                <a href="/legal/cookies">Cookies</a>
+                <a href="/legal/terminos">Términos</a><a href="/legal/privacidad">Privacidad</a><a href="#">Hecho con <span aria-hidden="true">♥</span> para tu bienestar</a>
             </div>
         </div>
     </div>
@@ -745,7 +615,6 @@
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
     <script src="/js/core/shared/alerts.js?v=20260803-1"></script>
     <script src="/js/core/shared/mobile-navbar-toggle.js?v=20260727-mobile-polish-1"></script>
-    <script src="/js/base/hero-carousel.js?v=20260711-1"></script>
     <script src="/js/base/index.js?v=20260727-faq-1"></script>
 
     <script>
@@ -775,7 +644,7 @@
                 msg.style.display = 'block';
                 if (result.ok) {
                     msg.style.color = '#22C55E';
-                    msg.textContent = result.data.message || 'Suscripcion exitosa';
+                    msg.textContent = result.data.message || 'Suscripción exitosa';
                     emailInput.value = '';
                 } else {
                     msg.style.color = '#EF4444';
@@ -785,7 +654,7 @@
             .catch(function() {
                 msg.style.display = 'block';
                 msg.style.color = '#EF4444';
-                msg.textContent = 'Error de conexion';
+                msg.textContent = 'Error de conexión';
             })
             .finally(function() {
                 btn.disabled = false;

@@ -3,7 +3,7 @@
    Consolidated static stylesheet
    ============================================================ */
 
-/* ── Page entrance animation (from mensajes.html) ── */
+/* â”€â”€ Page entrance animation (from mensajes.html) â”€â”€ */
 @keyframes pageFadeIn {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -39,14 +39,14 @@
 
 /* ===== Source: app\static\css\pages\profesional.css ===== */
 
-/* ══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PROFESSIONAL DASHBOARD & ASIDE-PROFESSIONAL
    PsyAI Connect - Consolidated Styles
-   ══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* ==================== LAYOUT & SIDEBAR (from layout.professional.css) ==================== */
 
-/* Overlay para móvil */
+/* Overlay para mÃ³vil */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -65,7 +65,7 @@
     opacity: 1;
 }
 
-/* Botón hamburguesa */
+/* BotÃ³n hamburguesa */
 .menu-toggle,
 .toggle-btn {
     display: none;
@@ -127,7 +127,7 @@
     }
 }
 
-/* ========== MUY PEQUEÑOS (≤375px) ========== */
+/* ========== MUY PEQUEÃ‘OS (â‰¤375px) ========== */
 @media (max-width: 375px) {
     .main-header h1 {
         font-size: 1rem;
@@ -599,7 +599,7 @@
 
 
 
-/* ========== ACORDEÓN (BOOSTRAP) ========== */
+/* ========== ACORDEÃ“N (BOOSTRAP) ========== */
 .accordion {
     --bs-accordion-border-radius: 16px;
     --bs-accordion-btn-padding-x: 1.5rem;
@@ -702,7 +702,7 @@
    my.profile2.css styles
    ======================================================= */
 
-/* ── Modal PsyAI ───────────────────── */
+/* â”€â”€ Modal PsyAI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .psyai-modal .modal-dialog { max-width: 460px; }
 .psyai-modal__content {
     border: none; border-radius: 20px; overflow: hidden;
@@ -793,7 +793,7 @@
 
 /* ==================== RESPONSIVE ASIDE PROFESSIONAL - COMPLETO ==================== */
 
-/* Botón hamburguesa */
+/* BotÃ³n hamburguesa */
 .menu-toggle,
 .toggle-btn {
     display: none;
@@ -849,7 +849,7 @@
         font-size: 1.5rem;
     }
 
-    /* Cards estadísticas */
+    /* Cards estadÃ­sticas */
     .card {
         padding: 20px !important;
     }
@@ -862,13 +862,13 @@
         font-size: 1.8rem;
     }
 
-    /* Accesos rápidos */
+    /* Accesos rÃ¡pidos */
     .button {
         font-size: 0.9rem;
     }
 }
 
-/* ========== MÓVILES GRANDES (576px - 767px) ========== */
+/* ========== MÃ“VILES GRANDES (576px - 767px) ========== */
 @media (max-width: 767px) {
     .menu-toggle,
     .toggle-btn {
@@ -919,7 +919,7 @@
         font-size: 0.85rem;
     }
 
-    /* Cards estadísticas */
+    /* Cards estadÃ­sticas */
     .card {
         padding: 15px !important;
         margin-bottom: 15px !important;
@@ -938,14 +938,14 @@
         font-size: 0.9rem;
     }
 
-    /* Accesos rápidos */
+    /* Accesos rÃ¡pidos */
     .button {
         font-size: 0.85rem;
         padding: 10px 15px;
     }
 }
 
-/* ========== MÓVILES (hasta 575px) ========== */
+/* ========== MÃ“VILES (hasta 575px) ========== */
 @media (max-width: 575px) {
     .menu-toggle,
     .toggle-btn {
@@ -1000,7 +1000,7 @@
         font-size: 0.8rem;
     }
 
-    /* Cards estadísticas */
+    /* Cards estadÃ­sticas */
     .card {
         padding: 12px !important;
         border-radius: 10px;
@@ -1030,7 +1030,7 @@
         font-size: 0.8rem;
     }
 
-    /* Accesos rápidos */
+    /* Accesos rÃ¡pidos */
     .button {
         font-size: 0.85rem;
         padding: 8px 12px;
@@ -1044,7 +1044,7 @@
     }
 }
 
-/* ========== MÓVILES MUY PEQUEÑOS (hasta 375px) ========== */
+/* ========== MÃ“VILES MUY PEQUEÃ‘OS (hasta 375px) ========== */
 @media (max-width: 375px) {
     .menu-toggle,
     .toggle-btn {
@@ -1089,7 +1089,7 @@
         font-size: 0.75rem;
     }
 
-    /* Cards estadísticas */
+    /* Cards estadÃ­sticas */
     .card {
         padding: 10px !important;
     }
@@ -1111,14 +1111,14 @@
         font-size: 0.8rem;
     }
 
-    /* Accesos rápidos */
+    /* Accesos rÃ¡pidos */
     .button {
         font-size: 0.8rem;
         padding: 7px 10px;
     }
 }
 
-/* ========== MODO LANDSCAPE EN MÓVILES ========== */
+/* ========== MODO LANDSCAPE EN MÃ“VILES ========== */
 @media (max-height: 600px) and (orientation: landscape) {
     .main-content {
         padding: 10px !important;
@@ -1165,7 +1165,7 @@
 
 /* ========== MEJORAS GENERALES ========== */
 
-/* Botones más táctiles en móvil */
+/* Botones mÃ¡s tÃ¡ctiles en mÃ³vil */
 @media (max-width: 767px) {
     .button,
     .btn {
@@ -1176,14 +1176,14 @@
     }
 }
 
-/* Ocultar elementos innecesarios en móvil muy pequeño */
+/* Ocultar elementos innecesarios en mÃ³vil muy pequeÃ±o */
 @media (max-width: 375px) {
     .main-header .user-info i {
         display: none;
     }
 }
 
-/* Grid responsive para estadísticas */
+/* Grid responsive para estadÃ­sticas */
 @media (max-width: 575px) {
     .row.g-3 {
         gap: 12px !important;
@@ -1208,10 +1208,10 @@
 
 /* ===== Source: app\static\responsive\professional.css ===== */
 
-/* ══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PROFESSIONAL DASHBOARD & ASIDE-PROFESSIONAL RESPONSIVE
    PsyAI Connect
-   ══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* ========== TOGGLE SIDEBAR BUTTON ========== */
 .toggle-btn {
@@ -1325,7 +1325,7 @@
     }
 }
 
-/* ========== TABLETS (≤991px) ========== */
+/* ========== TABLETS (â‰¤991px) ========== */
 @media (max-width: 991px) {
     .main-header h1 {
         font-size: 1.4rem;
@@ -1336,7 +1336,7 @@
     }
 }
 
-/* ========== MÓVILES GRANDES (≤767px) ========== */
+/* ========== MÃ“VILES GRANDES (â‰¤767px) ========== */
 @media (max-width: 767px) {
     .main-content {
         padding: 15px !important;
@@ -1427,7 +1427,7 @@
         font-size: 0.7rem;
     }
     
-    /* Accesos Rápidos / Quick Actions */
+    /* Accesos RÃ¡pidos / Quick Actions */
     .card.p-4 {
         padding: 15px !important;
     }
@@ -1528,7 +1528,7 @@
     }
 }
 
-/* ========== MÓVILES PEQUEÑOS (≤480px) ========== */
+/* ========== MÃ“VILES PEQUEÃ‘OS (â‰¤480px) ========== */
 @media (max-width: 480px) {
     .main-content {
         padding: 12px !important;
@@ -1628,7 +1628,7 @@
     }
 }
 
-/* ========== MUY PEQUEÑOS (≤375px) ========== */
+/* ========== MUY PEQUEÃ‘OS (â‰¤375px) ========== */
 @media (max-width: 375px) {
     .main-header h1 {
         font-size: 1rem;
@@ -2100,7 +2100,7 @@
 
 
 
-/* ========== ACORDEÓN (BOOSTRAP) ========== */
+/* ========== ACORDEÃ“N (BOOSTRAP) ========== */
 .accordion {
     --bs-accordion-border-radius: 16px;
     --bs-accordion-btn-padding-x: 1.5rem;
@@ -2204,7 +2204,7 @@
 /* ===== Source: app\static\responsive\profesional-responsive.css ===== */
 
 /* ============================================================
-   PROFESSIONAL RESPONSIVE — Mobile & Tablet styles for Professional Dashboard
+   PROFESSIONAL RESPONSIVE â€” Mobile & Tablet styles for Professional Dashboard
    extracted from profesional.css
    ============================================================ */
 
@@ -2239,7 +2239,7 @@
         font-size: 1.5rem;
     }
 
-    /* Cards estadísticas */
+    /* Cards estadÃ­sticas */
     .card {
         padding: 20px !important;
     }
@@ -2252,13 +2252,13 @@
         font-size: 1.8rem;
     }
 
-    /* Accesos rápidos */
+    /* Accesos rÃ¡pidos */
     .button {
         font-size: 0.9rem;
     }
 }
 
-/* ========== MÓVILES GRANDES (576px - 767px) ========== */
+/* ========== MÃ“VILES GRANDES (576px - 767px) ========== */
 @media (max-width: 767px) {
     .menu-toggle,
     .toggle-btn {
@@ -2309,7 +2309,7 @@
         font-size: 0.85rem;
     }
 
-    /* Cards estadísticas */
+    /* Cards estadÃ­sticas */
     .card {
         padding: 15px !important;
         margin-bottom: 15px !important;
@@ -2328,14 +2328,14 @@
         font-size: 0.9rem;
     }
 
-    /* Accesos rápidos */
+    /* Accesos rÃ¡pidos */
     .button {
         font-size: 0.85rem;
         padding: 10px 15px;
     }
 }
 
-/* ========== MÓVILES (hasta 575px) ========== */
+/* ========== MÃ“VILES (hasta 575px) ========== */
 @media (max-width: 575px) {
     .menu-toggle,
     .toggle-btn {
@@ -2390,7 +2390,7 @@
         font-size: 0.8rem;
     }
 
-    /* Cards estadísticas */
+    /* Cards estadÃ­sticas */
     .card {
         padding: 12px !important;
         border-radius: 10px;
@@ -2420,7 +2420,7 @@
         font-size: 0.8rem;
     }
 
-    /* Accesos rápidos */
+    /* Accesos rÃ¡pidos */
     .button {
         font-size: 0.85rem;
         padding: 8px 12px;
@@ -2434,7 +2434,7 @@
     }
 }
 
-/* ========== MÓVILES MUY PEQUEÑOS (hasta 375px) ========== */
+/* ========== MÃ“VILES MUY PEQUEÃ‘OS (hasta 375px) ========== */
 @media (max-width: 375px) {
     .menu-toggle,
     .toggle-btn {
@@ -2479,7 +2479,7 @@
         font-size: 0.75rem;
     }
 
-    /* Cards estadísticas */
+    /* Cards estadÃ­sticas */
     .card {
         padding: 10px !important;
     }
@@ -2501,14 +2501,14 @@
         font-size: 0.8rem;
     }
 
-    /* Accesos rápidos */
+    /* Accesos rÃ¡pidos */
     .button {
         font-size: 0.8rem;
         padding: 7px 10px;
     }
 }
 
-/* ========== MODO LANDSCAPE EN MÓVILES ========== */
+/* ========== MODO LANDSCAPE EN MÃ“VILES ========== */
 @media (max-height: 600px) and (orientation: landscape) {
     .main-content {
         padding: 10px !important;
@@ -2533,7 +2533,7 @@
     }
 }
 
-/* Botones más táctiles en móvil */
+/* Botones mÃ¡s tÃ¡ctiles en mÃ³vil */
 @media (max-width: 767px) {
     .button,
     .btn {
@@ -2544,14 +2544,14 @@
     }
 }
 
-/* Ocultar elementos innecesarios en móvil muy pequeño */
+/* Ocultar elementos innecesarios en mÃ³vil muy pequeÃ±o */
 @media (max-width: 375px) {
     .main-header .user-info i {
         display: none;
     }
 }
 
-/* Grid responsive para estadísticas */
+/* Grid responsive para estadÃ­sticas */
 @media (max-width: 575px) {
     .row.g-3 {
         gap: 12px !important;
@@ -3039,7 +3039,7 @@
 
 
 
-/* ── Tabs ─────────────────────────────────────────── */
+/* â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .tabs-container { border-bottom: 2px solid #e8edf3; margin-bottom: 1.5rem; }
 .tabs { display: flex; gap: 0; }
 .tab {
@@ -3060,7 +3060,7 @@
 .tab:hover { color: var(--brand-600); }
 .tab.active { color: var(--brand-600); border-bottom-color: var(--brand-600); }
 
-/* ── Progress steps ───────────────────────────────── */
+/* â”€â”€ Progress steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .progress-nav { background: #fff; border-radius: 14px; padding: 20px 24px; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 1.5rem; }
 .progress-nav__label { display: flex; justify-content: space-between; font-size: .85rem; font-weight: 600; color: #4a5568; margin-bottom: 10px; }
 .progress-nav__label .pct { color: var(--brand-600); }
@@ -3083,7 +3083,7 @@
 .progress-step.done { color: #388e3c; }
 .progress-step.done i { background: #e8f5e9; color: #388e3c; }
 
-/* ── Tabla pacientes ──────────────────────────────── */
+/* â”€â”€ Tabla pacientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .patient-row { cursor: pointer; transition: background .15s; }
 .patient-row:hover td { background: #f0f7ff !important; }
 .patient-row.selected-patient td { background: #e3f0ff !important; }
@@ -3101,9 +3101,9 @@
     border-color: #1565C0 !important;
     color: #fff !important;
 }
-.btn-seleccionar.active-btn::before { content: "✓ "; }
+.btn-seleccionar.active-btn::before { content: "âœ“ "; }
 
-/* ── Card paciente seleccionado ───────────────────── */
+/* â”€â”€ Card paciente seleccionado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .selected-patient-banner {
     display: flex; align-items: center; gap: 14px;
     background: linear-gradient(135deg, #e3f0ff 0%, #f0f7ff 100%);
@@ -3120,7 +3120,7 @@
 .selected-patient-banner .email { font-size: .82rem; color: #5c7a99; }
 .selected-patient-banner .actions { display: flex; gap: 8px; }
 
-/* ── Paso 2 header paciente ───────────────────────── */
+/* â”€â”€ Paso 2 header paciente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .step2-patient-header {
     display: flex; align-items: center; gap: 12px;
     background: #f0f7ff; border-radius: 10px; padding: 12px 16px;
@@ -3130,18 +3130,18 @@
 .step2-patient-header .name { font-weight: 700; color: #1a3c5e; }
 .step2-patient-header .change-link { font-size: .8rem; color: var(--brand-600); cursor: pointer; margin-left: auto; text-decoration: underline; }
 
-/* ── Resumen paso 3 ───────────────────────────────── */
+/* â”€â”€ Resumen paso 3 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .resumen-grid { display: grid; gap: 10px; }
 .resumen-item { background: #f8fafc; border-radius: 8px; padding: 10px 14px; border-left: 3px solid #1565C0; }
 .resumen-item label { font-size: .75rem; font-weight: 700; color: #6c7a8d; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 2px; }
 .resumen-item span { font-size: .92rem; color: #1a2e44; }
 
-/* ── Badge energía / estado ───────────────────────── */
+/* â”€â”€ Badge energÃ­a / estado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .energia-bar { display: flex; align-items: center; gap: 8px; }
 .energia-bar .bar { height: 6px; width: 60px; background: #e8edf3; border-radius: 99px; overflow: hidden; }
 .energia-bar .fill { height: 100%; border-radius: 99px; }
 
-/* ── Animación panel ──────────────────────────────── */
+/* â”€â”€ AnimaciÃ³n panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .panel-step { animation: fadePanel .22s ease; }
 @keyframes fadePanel { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
@@ -4692,7 +4692,7 @@ html {
    my.profile.css styles
    ======================================================= */
 
-/* ── Modal PsyAI ──────────────────────────────────────────── */
+/* â”€â”€ Modal PsyAI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .psyai-modal .modal-dialog { max-width: 460px; }
 
 .psyai-modal__content {
@@ -4813,7 +4813,7 @@ html {
     background: linear-gradient(135deg, #0D47A1, #1565C0);
 }
 
-/* ── Dark mode ──────────────────────────────────────────────── */
+/* â”€â”€ Dark mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 
 
@@ -4824,7 +4824,7 @@ html {
 
 
 /* ============================================================
-   MENSAJERÍA DIRECTA — Chat estilo WhatsApp (Paciente)
+   MENSAJERÃA DIRECTA â€” Chat estilo WhatsApp (Paciente)
    ============================================================ */
 
 /* Wrapper general */
@@ -4839,7 +4839,7 @@ html {
   border: 1px solid var(--color-border);
 }
 
-/* ── Panel izquierdo ── */
+/* â”€â”€ Panel izquierdo â”€â”€ */
 .chat-sidebar {
   width: 320px;
   min-width: 260px;
@@ -4926,7 +4926,7 @@ html {
   color: var(--brand-600, #1565c0);
 }
 
-/* ── Search bar ── */
+/* â”€â”€ Search bar â”€â”€ */
 .chat-search {
   position: relative;
 }
@@ -4964,7 +4964,7 @@ html {
   color: var(--color-secondary, #1565C0);
 }
 
-/* ── Contact list ── */
+/* â”€â”€ Contact list â”€â”€ */
 .chat-list {
   flex: 1;
   overflow-y: auto;
@@ -4973,7 +4973,7 @@ html {
 .chat-list::-webkit-scrollbar { width: 4px; }
 .chat-list::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
 
-/* ── Contact item ── */
+/* â”€â”€ Contact item â”€â”€ */
 .chat-item {
   position: relative;
   display: flex;
@@ -5033,7 +5033,7 @@ html {
   box-shadow: 0 0 0 3px rgba(34,197,94,.25);
 }
 
-/* ── Avatar circle ── */
+/* â”€â”€ Avatar circle â”€â”€ */
 .chat-avatar-circle {
   width: 46px;
   height: 46px;
@@ -5072,7 +5072,7 @@ html {
   background: #b0b8c4;
 }
 
-/* ── Item text ── */
+/* â”€â”€ Item text â”€â”€ */
 .chat-item-info {
   flex: 1;
   min-width: 0;
@@ -5134,7 +5134,7 @@ html {
   text-transform: uppercase;
 }
 
-/* ── Empty state ── */
+/* â”€â”€ Empty state â”€â”€ */
 .chat-empty-state {
   display: flex;
   flex-direction: column;
@@ -5173,7 +5173,7 @@ html {
   max-width: 185px;
 }
 
-/* ── Panel derecho ── */
+/* â”€â”€ Panel derecho â”€â”€ */
 .chat-panel {
   flex: 1;
   display: flex;
@@ -5186,7 +5186,7 @@ html {
   min-height: 0;
 }
 
-/* ── Placeholder (sin conversación) ── */
+/* â”€â”€ Placeholder (sin conversaciÃ³n) â”€â”€ */
 .chat-panel-placeholder {
   flex: 1;
   display: flex;
@@ -5222,7 +5222,7 @@ html {
   opacity: 1;
 }
 
-/* ── Chat header (conversación activa) ── */
+/* â”€â”€ Chat header (conversaciÃ³n activa) â”€â”€ */
 .chat-panel-header {
   display: flex;
   align-items: center;
@@ -5269,7 +5269,7 @@ html {
   font-weight: 500;
 }
 
-/* ── Área de mensajes ── */
+/* â”€â”€ Ãrea de mensajes â”€â”€ */
 .chat-messages-area {
   flex: 1;
   overflow-y: auto;
@@ -5283,7 +5283,7 @@ html {
 .chat-messages-area::-webkit-scrollbar { width: 5px; }
 .chat-messages-area::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 
-/* ── Separador de fecha ── */
+/* â”€â”€ Separador de fecha â”€â”€ */
 .chat-date-divider {
   display: flex;
   align-items: center;
@@ -5311,7 +5311,7 @@ html {
   white-space: nowrap;
 }
 
-/* ── Burbujas de mensajes ── */
+/* â”€â”€ Burbujas de mensajes â”€â”€ */
 .chat-bubble {
   display: flex;
   max-width: 68%;
@@ -5386,7 +5386,7 @@ html {
 
 .chat-check-icon { color: #90CAF9; }
 
-/* ── Typing dots ── */
+/* â”€â”€ Typing dots â”€â”€ */
 .chat-typing {
   align-self: flex-start;
   padding: 4px 0;
@@ -5419,7 +5419,7 @@ html {
   30% { transform: translateY(-5px); opacity: 1; }
 }
 
-/* ── Input de mensaje ── */
+/* â”€â”€ Input de mensaje â”€â”€ */
 .chat-input-bar {
   padding: 12px 16px;
   border-top: 1px solid var(--color-border);
@@ -5481,7 +5481,7 @@ html {
 
 .chat-send-btn:disabled { opacity: 0.45; transform: none; cursor: default; }
 
-/* ── Skeleton loader ── */
+/* â”€â”€ Skeleton loader â”€â”€ */
 .chat-skeleton-item {
   display: flex;
   align-items: center;
@@ -5518,7 +5518,7 @@ html {
   100% { background-position:  200% 0; }
 }
 
-/* ── Dark mode ── */
+/* â”€â”€ Dark mode â”€â”€ */
 
 
 
@@ -5555,7 +5555,7 @@ html {
 
 
 
-/* ── Responsive ── */
+/* â”€â”€ Responsive â”€â”€ */
 @media (max-width: 768px) {
   .chat-wrapper {
     height: calc(100vh - 120px);
@@ -5661,7 +5661,7 @@ html {
 /* ============================================================
    From: app/templates/professional/aside-professional/mensajes.html
    ============================================================ */
-/* ── Avatar circles — project color system ── */
+/* â”€â”€ Avatar circles â€” project color system â”€â”€ */
 .avatar,
 .patient-avatar,
 .chat-avatar,
@@ -5673,7 +5673,7 @@ html {
 }
 .avatar-wrap { position: relative; flex-shrink: 0; }
 
-/* ── Presence dot ── */
+/* â”€â”€ Presence dot â”€â”€ */
 .presence-dot {
     width: 10px; height: 10px;
     border-radius: 50%;
@@ -5685,7 +5685,7 @@ html {
 .presence-dot.online  { background: #43a047; }
 .presence-dot.offline { background: #9e9e9e; }
 
-/* ── Patient list items — richer rows ── */
+/* â”€â”€ Patient list items â€” richer rows â”€â”€ */
 .patient-list-item {
     display: flex;
     align-items: center;
@@ -5735,7 +5735,7 @@ html {
     margin-top: 2px;
 }
 
-/* ── Unread badge ── */
+/* â”€â”€ Unread badge â”€â”€ */
 .unread-badge {
     min-width: 18px; height: 18px;
     background: var(--color-secondary);
@@ -5747,7 +5747,7 @@ html {
     padding: 0 4px;
 }
 
-/* ── Panel header ── */
+/* â”€â”€ Panel header â”€â”€ */
 .panel-header {
     display: flex;
     align-items: center;
@@ -5767,7 +5767,7 @@ html {
     font-weight: 500;
 }
 
-/* ── Search bar ── */
+/* â”€â”€ Search bar â”€â”€ */
 .search-patients {
     width: 100%;
     padding: 0.55rem 0.85rem 0.55rem 2.4rem;
@@ -5799,14 +5799,14 @@ html {
     transition: color var(--transition);
 }
 
-/* ── Left panel shadow ── */
+/* â”€â”€ Left panel shadow â”€â”€ */
 .chat-sidebar {
     box-shadow: 2px 0 12px rgba(0,0,0,.06);
     position: relative;
     z-index: 1;
 }
 
-/* ── Empty state ── */
+/* â”€â”€ Empty state â”€â”€ */
 .chat-empty-state {
     display: flex;
     flex-direction: column;
@@ -5839,7 +5839,7 @@ html {
     line-height: 1.5;
 }
 
-/* ── Dark mode ── */
+/* â”€â”€ Dark mode â”€â”€ */
 
 
 
@@ -5861,7 +5861,7 @@ html {
    From: app/templates/professional/aside-professional/my.profile2.html
    ============================================================ */
 /* ============================================================
-   PROFILE PAGE (Professional) — Design enhancements
+   PROFILE PAGE (Professional) â€” Design enhancements
    ============================================================ */
 
 /* Header accent line */
@@ -5991,7 +5991,7 @@ html {
    From: app/templates/professional/professional.dashboard.html
    ============================================================ */
 /* ============================================================
-   DASHBOARD PROFESIONAL — Design enhancements
+   DASHBOARD PROFESIONAL â€” Design enhancements
    ============================================================ */
 
 /* Header */
@@ -6132,11 +6132,11 @@ html {
    From: app/templates/professional/aside-professional/my.agenda.html
    ============================================================ */
 /* ============================================================
-   MI AGENDA — SaaS Premium Redesign v2
-   Design tokens: #90CAF9 · #0D47A1 · #E3F2FD
+   MI AGENDA â€” SaaS Premium Redesign v2
+   Design tokens: #90CAF9 Â· #0D47A1 Â· #E3F2FD
    ============================================================ */
 
-/* ── Background subtle pattern ── */
+/* â”€â”€ Background subtle pattern â”€â”€ */
 .aside-professional {
     background:
         radial-gradient(ellipse at 20% 50%, rgba(144,202,249,.08) 0%, transparent 50%),
@@ -6144,7 +6144,7 @@ html {
         var(--color-bg-light);
 }
 
-/* ── Header with glassmorphism ── */
+/* â”€â”€ Header with glassmorphism â”€â”€ */
 .main-header {
     position: relative;
     padding: 1.5rem 1.75rem;
@@ -6202,7 +6202,7 @@ html {
     color: #fff;
 }
 
-/* ── KPI Stats cards ── */
+/* â”€â”€ KPI Stats cards â”€â”€ */
 .agenda-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -6247,7 +6247,7 @@ html {
     margin-top: 2px;
 }
 
-/* ── Section cards (premium) ── */
+/* â”€â”€ Section cards (premium) â”€â”€ */
 section.card {
     border: none !important;
     border-radius: var(--radius) !important;
@@ -6296,7 +6296,7 @@ section.card h5 .icon-clock    { background: linear-gradient(135deg,#e3f2fd,#bbd
 section.card h5 .icon-plus     { background: linear-gradient(135deg,#e8f5e9,#c8e6c9); color: #2e7d32; }
 section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffcdd2); color: #c62828; }
 
-/* ── Timeline appointment list ── */
+/* â”€â”€ Timeline appointment list â”€â”€ */
 #contenedorCitas {
     position: relative;
 }
@@ -6372,7 +6372,7 @@ section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffc
     letter-spacing: 0.2px;
 }
 
-/* ── Form labels ── */
+/* â”€â”€ Form labels â”€â”€ */
 .form-label.fw-semibold {
     display: flex;
     align-items: center;
@@ -6384,7 +6384,7 @@ section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffc
     letter-spacing: 0.15px;
 }
 
-/* ── Premium form controls ── */
+/* â”€â”€ Premium form controls â”€â”€ */
 section.card .form-control,
 section.card .form-select {
     border-radius: var(--radius-sm) !important;
@@ -6430,7 +6430,7 @@ section.card select.form-select option:checked {
     color: var(--color-secondary);
 }
 
-/* ── Appointment row with left accent ── */
+/* â”€â”€ Appointment row with left accent â”€â”€ */
 .cita-row,
 #listaCitas .list-group-item {
     border-left: 4px solid transparent;
@@ -6456,7 +6456,7 @@ section.card select.form-select option:checked {
 #listaCitas .list-group-item:has(.badge.bg-success) { border-left-color: #43a047; }
 #listaCitas .list-group-item:has(.badge.bg-danger)  { border-left-color: #e53935; }
 
-/* ── Availability panel ── */
+/* â”€â”€ Availability panel â”€â”€ */
 .availability-panel {
     background: var(--color-bg-soft);
     border-left: 4px solid var(--color-primary);
@@ -6464,7 +6464,7 @@ section.card select.form-select option:checked {
     padding: 1.5rem;
 }
 
-/* ── Section title with decorative line ── */
+/* â”€â”€ Section title with decorative line â”€â”€ */
 .section-title {
     position: relative;
     padding-bottom: 0.6rem;
@@ -6485,7 +6485,7 @@ section.card select.form-select option:checked {
     background: linear-gradient(to right, var(--color-border-soft), transparent);
 }
 
-/* ── Input with icon ── */
+/* â”€â”€ Input with icon â”€â”€ */
 .input-with-icon { display: flex; align-items: center; gap: 0.75rem; }
 .input-with-icon select,
 .input-with-icon input { flex: 1; min-width: 0; }
@@ -6493,7 +6493,7 @@ section.card select.form-select option:checked {
 
 /* Helper text */
 
-/* ── Premium Bootstrap buttons ── */
+/* â”€â”€ Premium Bootstrap buttons â”€â”€ */
 .btn-primary {
     background: var(--gradient-primary) !important;
     border: none !important;
@@ -6536,7 +6536,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 6px 20px rgba(46,125,50,.35) !important;
 }
 
-/* ── Legacy gradient buttons ── */
+/* â”€â”€ Legacy gradient buttons â”€â”€ */
 .btn-agenda-grad {
     display: inline-flex;
     align-items: center;
@@ -6581,7 +6581,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 6px 20px rgba(46,125,50,.35) !important;
 }
 
-/* ── Modal premium ── */
+/* â”€â”€ Modal premium â”€â”€ */
 .modal-cancel-custom .modal-content {
     border-radius: var(--radius);
     border: none;
@@ -6626,7 +6626,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 4px 16px rgba(198,40,40,.3);
 }
 
-/* ── Empty state ── */
+/* â”€â”€ Empty state â”€â”€ */
 .empty-agenda {
     text-align: center;
     padding: 2.5rem 1.5rem;
@@ -6649,7 +6649,7 @@ section.card select.form-select option:checked {
     margin-bottom: 1rem;
 }
 
-/* ── Entrance animation ── */
+/* â”€â”€ Entrance animation â”€â”€ */
 @keyframes agendaFadeIn {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -6673,7 +6673,7 @@ section.card:nth-of-type(1) { animation-delay: 0.05s; }
 section.card:nth-of-type(2) { animation-delay: 0.15s; }
 section.card:nth-of-type(3) { animation-delay: 0.25s; }
 
-/* ── Loading skeleton shimmer ── */
+/* â”€â”€ Loading skeleton shimmer â”€â”€ */
 @keyframes shimmer {
     0%   { background-position: -200px 0; }
     100% { background-position: 200px 0; }
@@ -6711,7 +6711,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     margin-bottom: 0;
 }
 
-/* ── DARK MODE ── */
+/* â”€â”€ DARK MODE â”€â”€ */
 
 
 
@@ -6755,11 +6755,11 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
    From: app/templates/professional/aside-professional/patients.html
    ============================================================ */
 /* ============================================================
-   PACIENTES — SaaS Premium Redesign
-   Design tokens: #90CAF9 · #0D47A1 · #E3F2FD
+   PACIENTES â€” SaaS Premium Redesign
+   Design tokens: #90CAF9 Â· #0D47A1 Â· #E3F2FD
    ============================================================ */
 
-/* ── Background ── */
+/* â”€â”€ Background â”€â”€ */
 .aside-professional {
     background:
         radial-gradient(ellipse at 20% 50%, rgba(144,202,249,.08) 0%, transparent 50%),
@@ -6767,7 +6767,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
         var(--color-bg-light);
 }
 
-/* ── Header ── */
+/* â”€â”€ Header â”€â”€ */
 .main-header {
     position: relative;
     padding: 1.5rem 1.75rem;
@@ -6821,7 +6821,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: #fff;
 }
 
-/* ── Tabs (pill premium) ── */
+/* â”€â”€ Tabs (pill premium) â”€â”€ */
 .tabs-container .tabs {
     display: flex;
     gap: 6px;
@@ -6855,7 +6855,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     font-size: 0.85rem;
 }
 
-/* ── Premium cards ── */
+/* â”€â”€ Premium cards â”€â”€ */
 .card.panel-step, .card {
     border: none !important;
     border-radius: var(--radius) !important;
@@ -6903,7 +6903,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 .card h4 i:not(.text-success) { background: linear-gradient(135deg,#e3f2fd,#bbdefb); color: var(--brand-600); }
 .card h4 i.text-success { background: linear-gradient(135deg,#e8f5e9,#c8e6c9); color: #2e7d32; }
 
-/* ── Form controls (premium) ── */
+/* â”€â”€ Form controls (premium) â”€â”€ */
 .card .form-control,
 .card .form-select {
     border-radius: var(--radius-sm) !important;
@@ -6949,7 +6949,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--color-secondary);
 }
 
-/* ── Premium table ── */
+/* â”€â”€ Premium table â”€â”€ */
 .table {
     margin-bottom: 0;
 }
@@ -6977,7 +6977,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     background: var(--color-secondary-lt);
 }
 
-/* ── Patient avatar in tables ── */
+/* â”€â”€ Patient avatar in tables â”€â”€ */
 #tbodyPacientes tr td:first-child,
 #tbodyHistorial tr td:first-child {
     display: flex;
@@ -7017,7 +7017,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--brand-600);
 }
 
-/* ── Tab badge counter ── */
+/* â”€â”€ Tab badge counter â”€â”€ */
 .tab-badge {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 20px; height: 20px;
@@ -7031,7 +7031,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--color-secondary);
 }
 
-/* ── Breadcrumb ── */
+/* â”€â”€ Breadcrumb â”€â”€ */
 .breadcrumb-custom {
     position: relative;
     z-index: 1;
@@ -7069,7 +7069,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     font-weight: 600;
 }
 
-/* ── Empty state ── */
+/* â”€â”€ Empty state â”€â”€ */
 .empty-state {
     text-align: center;
     padding: 1rem;
@@ -7090,7 +7090,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--color-text-muted);
 }
 
-/* ── Resumen divider ── */
+/* â”€â”€ Resumen divider â”€â”€ */
 .resumen-divider {
     grid-column: 1 / -1;
     height: 1px;
@@ -7098,7 +7098,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     margin: 0.2rem 0;
 }
 
-/* ── Progress nav (enhanced) ── */
+/* â”€â”€ Progress nav (enhanced) â”€â”€ */
 .progress-nav {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border-soft);
@@ -7218,7 +7218,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     justify-content: center;
 }
 
-/* ── Patient banner (selected) ── */
+/* â”€â”€ Patient banner (selected) â”€â”€ */
 .selected-patient-banner {
     display: flex;
     align-items: center;
@@ -7286,7 +7286,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     opacity: 0.75;
 }
 
-/* ── Premium buttons ── */
+/* â”€â”€ Premium buttons â”€â”€ */
 .btn.btn-primary {
     border-radius: var(--radius-sm) !important;
     padding: 0.55rem 1.35rem !important;
@@ -7347,7 +7347,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--color-secondary);
 }
 
-/* ── Resumen grid ── */
+/* â”€â”€ Resumen grid â”€â”€ */
 .resumen-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -7380,7 +7380,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     font-size: 0.9rem;
 }
 
-/* ── Select button active state ── */
+/* â”€â”€ Select button active state â”€â”€ */
 .btn-seleccionar.active-btn {
     background: linear-gradient(135deg, #2e7d32, #43a047) !important;
     border-color: transparent !important;
@@ -7391,13 +7391,13 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     box-shadow: 0 4px 14px rgba(46,125,50,.35);
 }
 
-/* ── Loading spinner text ── */
+/* â”€â”€ Loading spinner text â”€â”€ */
 .text-center.py-3 i.fa-spinner,
 .text-center .fa-spinner {
     color: var(--color-secondary);
 }
 
-/* ── Form label ── */
+/* â”€â”€ Form label â”€â”€ */
 .form-label.fw-semibold {
     display: flex;
     align-items: center;
@@ -7409,7 +7409,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     letter-spacing: 0.15px;
 }
 
-/* ── Dark Mode ── */
+/* â”€â”€ Dark Mode â”€â”€ */
 
 
 
@@ -7451,7 +7451,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 
 
 
-/* ========== ACORDEÓN RESPONSIVE MOBILE - FINAL OVERRIDE ========== */
+/* ========== ACORDEÃ“N RESPONSIVE MOBILE - FINAL OVERRIDE ========== */
 @media (max-width: 767px) {
 .accordion-responsive .accordion-button {
         font-size: 0.9rem !important;
@@ -7497,10 +7497,10 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 /* === Extraido de professional/professional.dashboard.html === */
 .accordion-collapse:not(.show) { display: none !important; }
 /* ============================================================
-   DASHBOARD PROFESIONAL — Design v2
+   DASHBOARD PROFESIONAL â€” Design v2
    ============================================================ */
 
-/* ── Header ── */
+/* â”€â”€ Header â”€â”€ */
 .main-header {
     position: relative;
     padding-bottom: 1.25rem;
@@ -7516,7 +7516,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     border-radius: 3px;
 }
 
-/* ── Alert Banner ── */
+/* â”€â”€ Alert Banner â”€â”€ */
 .alert-banner {
     border-radius: 14px;
     border: 1px solid var(--color-border-soft, #EAF3FD);
@@ -7553,7 +7553,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 
 
 
-/* ── Stat cards (KPI Metrics) ── */
+/* â”€â”€ Stat cards (KPI Metrics) â”€â”€ */
 .stat-card {
     display: flex;
     align-items: center;
@@ -7609,7 +7609,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     margin-top: 0.15rem;
 }
 
-/* ── Section Card (Resumen General, estático fuera del acordeón) ── */
+/* â”€â”€ Section Card (Resumen General, estÃ¡tico fuera del acordeÃ³n) â”€â”€ */
 .section-card {
     background: var(--color-bg-card, #fff);
     border: 1px solid var(--color-border-soft, #EAF3FD);
@@ -7644,7 +7644,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 
 
 
-/* ── Cita card (próximas citas) ── */
+/* â”€â”€ Cita card (prÃ³ximas citas) â”€â”€ */
 .cita-card {
     display: flex;
     align-items: center;
@@ -7708,7 +7708,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     flex-shrink: 0;
 }
 
-/* ── Tooltips en botones de cita ── */
+/* â”€â”€ Tooltips en botones de cita â”€â”€ */
 .cita-actions .btn-icon {
     position: relative;
 }
@@ -7754,7 +7754,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     transform: translateX(-50%) scale(1);
 }
 
-/* ── Modal Oscuro ── */
+/* â”€â”€ Modal Oscuro â”€â”€ */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -7859,7 +7859,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     border-color: rgba(144,202,249,0.25);
 }
 
-/* ── Quick Actions (Glassmorphism + Glow) ── */
+/* â”€â”€ Quick Actions (Glassmorphism + Glow) â”€â”€ */
 .quick-action-card {
     display: flex;
     flex-direction: column;
@@ -7938,7 +7938,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 .qa-icon.purple    { background: linear-gradient(135deg,rgba(156,39,176,0.2),rgba(74,20,140,0.3)); color: #CE93D8; }
 .qa-icon.pink      { background: linear-gradient(135deg,rgba(233,30,99,0.2),rgba(136,14,79,0.3)); color: #F48FB1; }
 
-/* ── Bienestar chart bars ── */
+/* â”€â”€ Bienestar chart bars â”€â”€ */
 .bienestar-bar {
     height: 10px;
     border-radius: 10px;
@@ -7963,7 +7963,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 .bienestar-stat-label .label { color: var(--color-text-muted, #7B92AC); }
 .bienestar-stat-label .value { font-weight: 700; color: var(--color-text-main, #0D1F3C); }
 
-/* ── SVG Metric Rings ── */
+/* â”€â”€ SVG Metric Rings â”€â”€ */
 .metric-ring-wrap {
     display: flex;
     flex-direction: column;
@@ -8040,7 +8040,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     transform: translateX(-50%) scale(1);
 }
 
-/* ── Reportes Ring Compact ── */
+/* â”€â”€ Reportes Ring Compact â”€â”€ */
 .reportes-ring-wrap {
     display: flex;
     flex-direction: column;
@@ -8061,7 +8061,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     text-align: center;
 }
 
-/* ── Activity items ── */
+/* â”€â”€ Activity items â”€â”€ */
 #actividadContainer .d-flex {
     padding: 0.7rem 0 !important;
     border-bottom: 1px solid var(--color-border-soft, #EAF3FD) !important;
@@ -8086,7 +8086,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 }
 .actividad-icon i { font-size: 0.9rem; }
 
-/* ── Page entrance animation ── */
+/* â”€â”€ Page entrance animation â”€â”€ */
 @keyframes pageFadeIn {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -8102,7 +8102,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 .main-content > *:nth-child(6) { animation-delay: 0.32s; }
 .main-content > *:nth-child(7) { animation-delay: 0.38s; }
 
-/* ── Button refresh ── */
+/* â”€â”€ Button refresh â”€â”€ */
 .btn-light.btn-sm {
     border-radius: 10px !important;
     border: 1px solid var(--color-border-soft, #EAF3FD) !important;
@@ -8113,7 +8113,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     border-color: #90CAF9 !important;
 }
 
-/* ── Eskeleton loading ── */
+/* â”€â”€ Eskeleton loading â”€â”€ */
 @keyframes shimmer {
     0%   { background-position: -200px 0; }
     100% { background-position: calc(200px + 100%) 0; }
@@ -8125,7 +8125,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     border-radius: 8px;
 }
 
-/* ── Dark mode ── */
+/* â”€â”€ Dark mode â”€â”€ */
 
 
 
@@ -8170,11 +8170,11 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 /* === Extraido de professional/aside-professional/patients.html === */
 .accordion-collapse:not(.show) { display: none !important; }
 /* ============================================================
-   PACIENTES — SaaS Premium Redesign
-   Design tokens: #90CAF9 · #0D47A1 · #E3F2FD
+   PACIENTES â€” SaaS Premium Redesign
+   Design tokens: #90CAF9 Â· #0D47A1 Â· #E3F2FD
    ============================================================ */
 
-/* ── Background ── */
+/* â”€â”€ Background â”€â”€ */
 .aside-professional {
     background:
         radial-gradient(ellipse at 20% 50%, rgba(144,202,249,.08) 0%, transparent 50%),
@@ -8182,7 +8182,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
         var(--color-bg-light);
 }
 
-/* ── Header ── */
+/* â”€â”€ Header â”€â”€ */
 .main-header {
     position: relative;
     padding: 1.5rem 1.75rem;
@@ -8236,7 +8236,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: #fff;
 }
 
-/* ── Tabs (pill premium) ── */
+/* â”€â”€ Tabs (pill premium) â”€â”€ */
 .tabs-container .tabs {
     display: flex;
     gap: 6px;
@@ -8270,7 +8270,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     font-size: 0.85rem;
 }
 
-/* ── Premium cards ── */
+/* â”€â”€ Premium cards â”€â”€ */
 .card.panel-step, .card {
     border: none !important;
     border-radius: var(--radius) !important;
@@ -8318,7 +8318,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 .card h4 i:not(.text-success) { background: linear-gradient(135deg,#e3f2fd,#bbdefb); color: var(--brand-600); }
 .card h4 i.text-success { background: linear-gradient(135deg,#e8f5e9,#c8e6c9); color: #2e7d32; }
 
-/* ── Form controls (premium) ── */
+/* â”€â”€ Form controls (premium) â”€â”€ */
 .card .form-control,
 .card .form-select {
     border-radius: var(--radius-sm) !important;
@@ -8364,7 +8364,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--color-secondary);
 }
 
-/* ── Premium table ── */
+/* â”€â”€ Premium table â”€â”€ */
 .table {
     margin-bottom: 0;
 }
@@ -8392,7 +8392,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     background: var(--color-secondary-lt);
 }
 
-/* ── Patient avatar in tables ── */
+/* â”€â”€ Patient avatar in tables â”€â”€ */
 #tbodyPacientes tr td:first-child,
 #tbodyHistorial tr td:first-child {
     display: flex;
@@ -8432,7 +8432,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--brand-600);
 }
 
-/* ── Tab badge counter ── */
+/* â”€â”€ Tab badge counter â”€â”€ */
 .tab-badge {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 20px; height: 20px;
@@ -8446,7 +8446,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--color-secondary);
 }
 
-/* ── Breadcrumb ── */
+/* â”€â”€ Breadcrumb â”€â”€ */
 .breadcrumb-custom {
     position: relative;
     z-index: 1;
@@ -8484,7 +8484,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     font-weight: 600;
 }
 
-/* ── Empty state ── */
+/* â”€â”€ Empty state â”€â”€ */
 .empty-state {
     text-align: center;
     padding: 1rem;
@@ -8505,7 +8505,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--color-text-muted);
 }
 
-/* ── Resumen divider ── */
+/* â”€â”€ Resumen divider â”€â”€ */
 .resumen-divider {
     grid-column: 1 / -1;
     height: 1px;
@@ -8513,7 +8513,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     margin: 0.2rem 0;
 }
 
-/* ── Progress nav (enhanced) ── */
+/* â”€â”€ Progress nav (enhanced) â”€â”€ */
 .progress-nav {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border-soft);
@@ -8633,7 +8633,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     justify-content: center;
 }
 
-/* ── Patient banner (selected) ── */
+/* â”€â”€ Patient banner (selected) â”€â”€ */
 .selected-patient-banner {
     display: flex;
     align-items: center;
@@ -8701,7 +8701,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     opacity: 0.75;
 }
 
-/* ── Premium buttons ── */
+/* â”€â”€ Premium buttons â”€â”€ */
 .btn.btn-primary {
     border-radius: var(--radius-sm) !important;
     padding: 0.55rem 1.35rem !important;
@@ -8762,7 +8762,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     color: var(--color-secondary);
 }
 
-/* ── Resumen grid ── */
+/* â”€â”€ Resumen grid â”€â”€ */
 .resumen-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -8795,7 +8795,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     font-size: 0.9rem;
 }
 
-/* ── Select button active state ── */
+/* â”€â”€ Select button active state â”€â”€ */
 .btn-seleccionar.active-btn {
     background: linear-gradient(135deg, #2e7d32, #43a047) !important;
     border-color: transparent !important;
@@ -8806,13 +8806,13 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     box-shadow: 0 4px 14px rgba(46,125,50,.35);
 }
 
-/* ── Loading spinner text ── */
+/* â”€â”€ Loading spinner text â”€â”€ */
 .text-center.py-3 i.fa-spinner,
 .text-center .fa-spinner {
     color: var(--color-secondary);
 }
 
-/* ── Form label ── */
+/* â”€â”€ Form label â”€â”€ */
 .form-label.fw-semibold {
     display: flex;
     align-items: center;
@@ -8824,7 +8824,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     letter-spacing: 0.15px;
 }
 
-/* ── Dark Mode ── */
+/* â”€â”€ Dark Mode â”€â”€ */
 html.dark-mode .progress-nav {
     background: var(--dm-elevated) !important;
     border-color: var(--dm-border) !important;
@@ -8940,7 +8940,7 @@ html.dark-mode #tbodyPacientes .empty-state p {
     color: var(--dm-text2) !important;
 }
 
-/* ── AGENDA DARK MODE FIXES ── */
+/* â”€â”€ AGENDA DARK MODE FIXES â”€â”€ */
 html.dark-mode section.card,
 html.dark-mode .card {
     background: var(--dm-card) !important;
@@ -9017,7 +9017,7 @@ html.dark-mode .icon-schedule {
     color: var(--dm-accent) !important;
 }
 
-/* ── DIRECT CHAT DARK MODE FIXES ── */
+/* â”€â”€ DIRECT CHAT DARK MODE FIXES â”€â”€ */
 html.dark-mode .chat-wrapper {
     background: var(--dm-card) !important;
     border-color: var(--dm-border) !important;
@@ -9118,7 +9118,7 @@ html.dark-mode .chat-date-divider span {
     border-color: var(--dm-border) !important;
 }
 
-/* ── REPORTS STAT CARDS DARK MODE OVERRIDES ── */
+/* â”€â”€ REPORTS STAT CARDS DARK MODE OVERRIDES â”€â”€ */
 html.dark-mode .stat-blue .stat-icon-wrap {
     background: var(--stat-blue, #1565C0) !important;
     color: #fff !important;
@@ -9180,7 +9180,7 @@ html.dark-mode .sidebar__footer {
 
 
 
-/* ── Page entrance animation ── */
+/* â”€â”€ Page entrance animation â”€â”€ */
 @keyframes pageFadeIn {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -9197,11 +9197,11 @@ html.dark-mode .sidebar__footer {
 /* === Extraido de professional/aside-professional/my.agenda.html === */
 .accordion-collapse:not(.show) { display: none !important; }
 /* ============================================================
-   MI AGENDA — SaaS Premium Redesign v2
-   Design tokens: #90CAF9 · #0D47A1 · #E3F2FD
+   MI AGENDA â€” SaaS Premium Redesign v2
+   Design tokens: #90CAF9 Â· #0D47A1 Â· #E3F2FD
    ============================================================ */
 
-/* ── Background subtle pattern ── */
+/* â”€â”€ Background subtle pattern â”€â”€ */
 .aside-professional {
     background:
         radial-gradient(ellipse at 20% 50%, rgba(144,202,249,.08) 0%, transparent 50%),
@@ -9209,7 +9209,7 @@ html.dark-mode .sidebar__footer {
         var(--color-bg-light);
 }
 
-/* ── Header with glassmorphism ── */
+/* â”€â”€ Header with glassmorphism â”€â”€ */
 .main-header {
     position: relative;
     padding: 1.5rem 1.75rem;
@@ -9267,7 +9267,7 @@ html.dark-mode .sidebar__footer {
     color: #fff;
 }
 
-/* ── KPI Stats cards ── */
+/* â”€â”€ KPI Stats cards â”€â”€ */
 .agenda-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -9312,7 +9312,7 @@ html.dark-mode .sidebar__footer {
     margin-top: 2px;
 }
 
-/* ── Section cards (premium) ── */
+/* â”€â”€ Section cards (premium) â”€â”€ */
 section.card {
     border: none !important;
     border-radius: var(--radius) !important;
@@ -9361,7 +9361,7 @@ section.card h5 .icon-clock    { background: linear-gradient(135deg,#e3f2fd,#bbd
 section.card h5 .icon-plus     { background: linear-gradient(135deg,#e8f5e9,#c8e6c9); color: #2e7d32; }
 section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffcdd2); color: #c62828; }
 
-/* ── Timeline appointment list ── */
+/* â”€â”€ Timeline appointment list â”€â”€ */
 #contenedorCitas {
     position: relative;
 }
@@ -9437,7 +9437,7 @@ section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffc
     letter-spacing: 0.2px;
 }
 
-/* ── Form labels ── */
+/* â”€â”€ Form labels â”€â”€ */
 .form-label.fw-semibold {
     display: flex;
     align-items: center;
@@ -9449,7 +9449,7 @@ section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffc
     letter-spacing: 0.15px;
 }
 
-/* ── Premium form controls ── */
+/* â”€â”€ Premium form controls â”€â”€ */
 section.card .form-control,
 section.card .form-select {
     border-radius: var(--radius-sm) !important;
@@ -9495,7 +9495,7 @@ section.card select.form-select option:checked {
     color: var(--color-secondary);
 }
 
-/* ── Appointment row with left accent ── */
+/* â”€â”€ Appointment row with left accent â”€â”€ */
 .cita-row,
 #listaCitas .list-group-item {
     border-left: 4px solid transparent;
@@ -9521,7 +9521,7 @@ section.card select.form-select option:checked {
 #listaCitas .list-group-item:has(.badge.bg-success) { border-left-color: #43a047; }
 #listaCitas .list-group-item:has(.badge.bg-danger)  { border-left-color: #e53935; }
 
-/* ── Availability panel ── */
+/* â”€â”€ Availability panel â”€â”€ */
 .availability-panel {
     background: var(--color-bg-soft);
     border-left: 4px solid var(--color-primary);
@@ -9529,7 +9529,7 @@ section.card select.form-select option:checked {
     padding: 1.5rem;
 }
 
-/* ── Section title with decorative line ── */
+/* â”€â”€ Section title with decorative line â”€â”€ */
 .section-title {
     position: relative;
     padding-bottom: 0.6rem;
@@ -9550,7 +9550,7 @@ section.card select.form-select option:checked {
     background: linear-gradient(to right, var(--color-border-soft), transparent);
 }
 
-/* ── Input with icon ── */
+/* â”€â”€ Input with icon â”€â”€ */
 .input-with-icon { display: flex; align-items: center; gap: 0.75rem; }
 .input-with-icon select,
 .input-with-icon input { flex: 1; min-width: 0; }
@@ -9558,7 +9558,7 @@ section.card select.form-select option:checked {
 
 /* Helper text */
 
-/* ── Premium Bootstrap buttons ── */
+/* â”€â”€ Premium Bootstrap buttons â”€â”€ */
 .btn-primary {
     background: var(--gradient-primary) !important;
     border: none !important;
@@ -9601,7 +9601,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 6px 20px rgba(46,125,50,.35) !important;
 }
 
-/* ── Legacy gradient buttons ── */
+/* â”€â”€ Legacy gradient buttons â”€â”€ */
 .btn-agenda-grad {
     display: inline-flex;
     align-items: center;
@@ -9646,7 +9646,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 6px 20px rgba(46,125,50,.35) !important;
 }
 
-/* ── Modal premium ── */
+/* â”€â”€ Modal premium â”€â”€ */
 .modal-cancel-custom .modal-content {
     border-radius: var(--radius);
     border: none;
@@ -9691,7 +9691,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 4px 16px rgba(198,40,40,.3);
 }
 
-/* ── Empty state ── */
+/* â”€â”€ Empty state â”€â”€ */
 .empty-agenda {
     text-align: center;
     padding: 2.5rem 1.5rem;
@@ -9714,7 +9714,7 @@ section.card select.form-select option:checked {
     margin-bottom: 1rem;
 }
 
-/* ── Entrance animation ── */
+/* â”€â”€ Entrance animation â”€â”€ */
 @keyframes agendaFadeIn {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -9738,7 +9738,7 @@ section.card:nth-of-type(1) { animation-delay: 0.05s; }
 section.card:nth-of-type(2) { animation-delay: 0.15s; }
 section.card:nth-of-type(3) { animation-delay: 0.25s; }
 
-/* ── Loading skeleton shimmer ── */
+/* â”€â”€ Loading skeleton shimmer â”€â”€ */
 @keyframes shimmer {
     0%   { background-position: -200px 0; }
     100% { background-position: 200px 0; }
@@ -9776,7 +9776,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     margin-bottom: 0;
 }
 
-/* ── DARK MODE ── */
+/* â”€â”€ DARK MODE â”€â”€ */
 
 
 
@@ -10074,13 +10074,13 @@ html.dark-mode .status-completed { background: rgba(22, 101, 52, 0.3); color: #4
 html.dark-mode .status-pending { background: rgba(133, 77, 14, 0.3); color: #facc15; }
 
 /* ============================================================
-   MI AGENDA — SaaS Premium Redesign v2
-   Design tokens: #90CAF9 · #0D47A1 · #E3F2FD
+   MI AGENDA â€” SaaS Premium Redesign v2
+   Design tokens: #90CAF9 Â· #0D47A1 Â· #E3F2FD
    ============================================================ */
 
-/* ── Background subtle pattern ── */
+/* â”€â”€ Background subtle pattern â”€â”€ */
 
-/* ── Header with glassmorphism ── */
+/* â”€â”€ Header with glassmorphism â”€â”€ */
 .main-header {
     position: relative;
     padding: 1.5rem 1.75rem;
@@ -10138,7 +10138,7 @@ html.dark-mode .status-pending { background: rgba(133, 77, 14, 0.3); color: #fac
     color: #fff;
 }
 
-/* ── KPI Stats cards ── */
+/* â”€â”€ KPI Stats cards â”€â”€ */
 .agenda-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -10183,7 +10183,7 @@ html.dark-mode .status-pending { background: rgba(133, 77, 14, 0.3); color: #fac
     margin-top: 2px;
 }
 
-/* ── Section cards (premium) ── */
+/* â”€â”€ Section cards (premium) â”€â”€ */
 section.card {
     border: none !important;
     border-radius: var(--radius) !important;
@@ -10232,7 +10232,7 @@ section.card h5 .icon-clock    { background: linear-gradient(135deg,#e3f2fd,#bbd
 section.card h5 .icon-plus     { background: linear-gradient(135deg,#e8f5e9,#c8e6c9); color: #2e7d32; }
 section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffcdd2); color: #c62828; }
 
-/* ── Timeline appointment list ── */
+/* â”€â”€ Timeline appointment list â”€â”€ */
 #contenedorCitas {
     position: relative;
 }
@@ -10308,7 +10308,7 @@ section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffc
     letter-spacing: 0.2px;
 }
 
-/* ── Form labels ── */
+/* â”€â”€ Form labels â”€â”€ */
 .form-label.fw-semibold {
     display: flex;
     align-items: center;
@@ -10320,7 +10320,7 @@ section.card h5 .icon-schedule { background: linear-gradient(135deg,#fce4ec,#ffc
     letter-spacing: 0.15px;
 }
 
-/* ── Premium form controls ── */
+/* â”€â”€ Premium form controls â”€â”€ */
 section.card .form-control,
 section.card .form-select {
     border-radius: var(--radius-sm) !important;
@@ -10366,7 +10366,7 @@ section.card select.form-select option:checked {
     color: var(--color-secondary);
 }
 
-/* ── Appointment row with left accent ── */
+/* â”€â”€ Appointment row with left accent â”€â”€ */
 .cita-row,
 #listaCitas .list-group-item {
     border-left: 4px solid transparent;
@@ -10392,7 +10392,7 @@ section.card select.form-select option:checked {
 #listaCitas .list-group-item:has(.badge.bg-success) { border-left-color: #43a047; }
 #listaCitas .list-group-item:has(.badge.bg-danger)  { border-left-color: #e53935; }
 
-/* ── Availability panel ── */
+/* â”€â”€ Availability panel â”€â”€ */
 .availability-panel {
     background: var(--color-bg-soft);
     border-left: 4px solid var(--color-primary);
@@ -10400,7 +10400,7 @@ section.card select.form-select option:checked {
     padding: 1.5rem;
 }
 
-/* ── Section title with decorative line ── */
+/* â”€â”€ Section title with decorative line â”€â”€ */
 .section-title {
     position: relative;
     padding-bottom: 0.6rem;
@@ -10421,7 +10421,7 @@ section.card select.form-select option:checked {
     background: linear-gradient(to right, var(--color-border-soft), transparent);
 }
 
-/* ── Input with icon ── */
+/* â”€â”€ Input with icon â”€â”€ */
 .input-with-icon { display: flex; align-items: center; gap: 0.75rem; }
 .input-with-icon select,
 .input-with-icon input { flex: 1; min-width: 0; }
@@ -10429,7 +10429,7 @@ section.card select.form-select option:checked {
 
 /* Helper text */
 
-/* ── Premium Bootstrap buttons ── */
+/* â”€â”€ Premium Bootstrap buttons â”€â”€ */
 .btn-primary {
     background: var(--gradient-primary) !important;
     border: none !important;
@@ -10472,7 +10472,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 6px 20px rgba(46,125,50,.35) !important;
 }
 
-/* ── Legacy gradient buttons ── */
+/* â”€â”€ Legacy gradient buttons â”€â”€ */
 .btn-agenda-grad {
     display: inline-flex;
     align-items: center;
@@ -10517,7 +10517,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 6px 20px rgba(46,125,50,.35) !important;
 }
 
-/* ── Modal premium ── */
+/* â”€â”€ Modal premium â”€â”€ */
 .modal-cancel-custom .modal-content {
     border-radius: var(--radius);
     border: none;
@@ -10562,7 +10562,7 @@ section.card select.form-select option:checked {
     box-shadow: 0 4px 16px rgba(198,40,40,.3);
 }
 
-/* ── Empty state ── */
+/* â”€â”€ Empty state â”€â”€ */
 .empty-agenda {
     text-align: center;
     padding: 2.5rem 1.5rem;
@@ -10585,7 +10585,7 @@ section.card select.form-select option:checked {
     margin-bottom: 1rem;
 }
 
-/* ── Entrance animation ── */
+/* â”€â”€ Entrance animation â”€â”€ */
 @keyframes agendaFadeIn {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -10609,7 +10609,7 @@ section.card:nth-of-type(1) { animation-delay: 0.05s; }
 section.card:nth-of-type(2) { animation-delay: 0.15s; }
 section.card:nth-of-type(3) { animation-delay: 0.25s; }
 
-/* ── Loading skeleton shimmer ── */
+/* â”€â”€ Loading skeleton shimmer â”€â”€ */
 @keyframes shimmer {
     0%   { background-position: -200px 0; }
     100% { background-position: 200px 0; }
@@ -10647,7 +10647,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     margin-bottom: 0;
 }
 
-/* ── DARK MODE ── */
+/* â”€â”€ DARK MODE â”€â”€ */
 html.dark-mode .main-header {
     background: var(--dm-card);
     border-color: var(--dm-border);
@@ -11629,7 +11629,7 @@ body.aside-professional .reports-page .report-filter-select {
     border-radius: 12px !important;
 }
 
-/* Indicador de riesgo bajo en evolución del paciente (chatbot) */
+/* Indicador de riesgo bajo en evoluciÃ³n del paciente (chatbot) */
 .riesgo-bajo-resumen {
     display: flex;
     align-items: center;

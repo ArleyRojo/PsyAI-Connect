@@ -2,6 +2,7 @@ import os
 
 from django.apps import apps
 from django.conf import settings
+from django.views import View
 from rest_framework import viewsets, status, generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -214,7 +215,7 @@ class ChatbotConfigViewSet(viewsets.ViewSet):
         )
 
 
-class ChatbotConfigEventsResource(APIView):
+class ChatbotConfigEventsResource(View):
     permission_classes = [IsAuthenticatedDRF, IsPaciente]
 
     def get(self, request):

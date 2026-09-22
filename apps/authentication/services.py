@@ -9,6 +9,16 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+try:
+    import pyotp
+    import qrcode
+    import qrcode.image.svg
+    TOTP_AVAILABLE = True
+except ImportError:
+    pyotp = None
+    qrcode = None
+    TOTP_AVAILABLE = False
+
 from apps.authentication.repositories import AuthRepository, SecurityRepository
 from apps.authentication.security import SecurityHelper
 
@@ -213,7 +223,7 @@ class AuthService:
 
         return {"token": token, "password": password}
 
-    def register_user(self, data):
+    def register_user(self, data, request=None):
         try:
             validated = self._validate_register_data(data)
         except ValidationError as e:
@@ -243,14 +253,69 @@ class AuthService:
             self.security_repo.register_rate_limit_hit(f"register:{email}")
             return {"success": False, "message": "El correo ya está registrado"}, 409
 
-        self.repo.create_user(
-            nombre, email, SecurityHelper.hash_password(password), rol, genero, edad
+        # Para profesionales, requerir verificación de email obligatoria
+        email_verificado = (rol != "profesional")
+        # Por seguridad, también podríamos requerir verificación para todos en producción
+        # if not settings.DEBUG:
+        #     email_verificado = False
+
+        user_id = self.repo.create_user(
+            nombre, email, SecurityHelper.hash_password(password), rol, genero, edad,
+            email_verificado=email_verificado
         )
+
+        # Si es profesional o email no verificado, crear token de verificación y enviar email
+        if not email_verificado:
+            self._create_and_send_verification_email(user_id, email, request)
+
         self.security_repo.reset_rate_limit(f"register:{email}")
-        return {"success": True, "message": "Registro exitoso"}, 201
+        if email_verificado:
+            return {"success": True, "message": "Registro exitoso"}, 201
+        else:
+            return {
+                "success": True,
+                "message": "Registro exitoso. Revisa tu correo para verificar tu cuenta.",
+                "email_verification_required": True
+            }, 201
+
+    def _create_and_send_verification_email(self, user_id, email, request=None):
+        """Crea token de verificación y envía email de verificación."""
+        token = secrets.token_urlsafe(32)
+        expires = timezone.now() + timedelta(hours=24)  # 24 horas para verificar
+        self.repo.create_email_verification_token(user_id, token, expires)
+
+        host = request.get_host() if request else "localhost"
+        scheme = request.scheme if request else "http"
+        from django.conf import settings
+        if not settings.DEBUG:
+            scheme = "https"
+        verification_link = f"{scheme}://{host}/verify-email.html?token={token}"
+
+        subject = "Verifica tu correo — PsyAI Connect"
+        body_html = f"""
+        <p>Hola,</p>
+        <p>Gracias por registrarte en PsyAI Connect. Para completar tu registro, verifica tu correo electrónico:</p>
+        <p><a href="{verification_link}" style="background:#1565C0;color:#fff;padding:12px 24px;text-decoration:none;border-radius:4px;display:inline-block;">Verificar mi correo</a></p>
+        <p>O copia este enlace en tu navegador: {verification_link}</p>
+        <p>Este enlace expira en 24 horas.</p>
+        <hr>
+        <small>Si no te registraste en PsyAI Connect, ignora este correo.</small>
+        """
+
+        try:
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=f"Verifica tu correo en PsyAI Connect: {verification_link}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[email],
+            )
+            msg.attach_alternative(body_html, "text/html")
+            msg.send(fail_silently=False)
+            logger.info(f"Correo de verificación enviado a {email}")
+        except Exception as e:
+            logger.error(f"Error enviando correo de verificación: {e}")
 
     def login_user(self, data, ip_address):
-        logger.info("login_user called: email=%s, ip=%s", data.get("email"), ip_address)
         try:
             validated = self._validate_login_data(data)
         except ValidationError as e:
@@ -293,6 +358,14 @@ class AuthService:
             )
             return (
                 {"success": False, "message": "Tu cuenta ha sido suspendida. Contacta al administrador."},
+                403,
+                None,
+            )
+
+        # Verificar email para roles que lo requieran (obligatorio para profesional)
+        if not usuario.get("email_verificado", False) and usuario.get("rol") == "profesional":
+            return (
+                {"success": False, "message": "Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada."},
                 403,
                 None,
             )
@@ -341,7 +414,7 @@ class AuthService:
         }
         return payload, 200, session_user
 
-    def recover_password(self, email, request_host=None):
+    def recover_password(self, email, request=None):
         try:
             validated = self._validate_forgot_password_data({"email": email})
         except ValidationError as e:
@@ -366,8 +439,13 @@ class AuthService:
             token = secrets.token_urlsafe(32)
             expires = timezone.now() + timedelta(hours=1)
             self.repo.create_password_recovery_token(email, token, expires)
-            host = request_host or "localhost"
-            recovery_link = f"http://{host}/reset-password.html?token={token}"
+            host = request.get_host() if request else "localhost"
+            scheme = request.scheme if request else "http"
+            # Forzar HTTPS en producción (DEBUG=False)
+            from django.conf import settings
+            if not settings.DEBUG:
+                scheme = "https"
+            recovery_link = f"{scheme}://{host}/reset-password.html?token={token}"
             email_sent = MailService.send_recovery_email(email, recovery_link)
 
             if not email_sent:
@@ -416,3 +494,99 @@ class AuthService:
         self.repo.update_password(user_id, SecurityHelper.hash_password(new_password))
 
         return {"success": True, "message": "Contraseña actualizada exitosamente"}, 200
+
+    # ── TOTP / 2FA ────────────────────────────────────────────────
+
+    def _check_totp_available(self):
+        if not TOTP_AVAILABLE:
+            raise ValidationError("Funcionalidad 2FA no disponible. Instale pyotp y qrcode.")
+
+    def get_totp_device(self, user_id):
+        """Obtiene o crea el dispositivo TOTP del usuario."""
+        from apps.authentication.models import TOTPDevice
+        try:
+            return TOTPDevice.objects.get(idUsuario_id=user_id)
+        except TOTPDevice.DoesNotExist:
+            return None
+
+    def create_totp_device(self, user_id, name=""):
+        """Crea un nuevo secreto TOTP para el usuario (aún no confirmado)."""
+        self._check_totp_available()
+
+        device = self.get_totp_device(user_id)
+        if device:
+            # Regenerar secreto si ya existe
+            device.secret = pyotp.random_base32()
+            device.name = name
+            device.confirmed = False
+            device.save()
+        else:
+            device = TOTPDevice.objects.create(
+                idUsuario_id=user_id,
+                secret=pyotp.random_base32(),
+                name=name,
+                confirmed=False,
+            )
+        return device
+
+    def get_totp_provisioning_uri(self, user_id, email):
+        """Genera la URI para QR code (otpauth://...)."""
+        self._check_totp_available()
+        device = self.get_totp_device(user_id)
+        if not device:
+            return None
+        totp = pyotp.TOTP(device.secret)
+        return totp.provisioning_uri(name=email, issuer_name="PsyAI Connect")
+
+    def get_totp_qr_code_svg(self, user_id, email):
+        """Genera el código QR en formato SVG."""
+        self._check_totp_available()
+        uri = self.get_totp_provisioning_uri(user_id, email)
+        if not uri:
+            return None
+        qr = qrcode.make(uri, image_factory=qrcode.image.svg.SvgImage)
+        from io import BytesIO
+        buffer = BytesIO()
+        qr.save(buffer)
+        return buffer.getvalue().decode("utf-8")
+
+    def verify_totp_token(self, user_id, token):
+        """Verifica un token TOTP (código de 6 dígitos)."""
+        self._check_totp_available()
+        device = self.get_totp_device(user_id)
+        if not device or not device.confirmed:
+            return False
+        totp = pyotp.TOTP(device.secret)
+        return totp.verify(token, valid_window=1)  # ventana de 30s antes/después
+
+    def confirm_totp_device(self, user_id, token):
+        """Confirma el dispositivo TOTP tras verificar el primer token."""
+        self._check_totp_available()
+        device = self.get_totp_device(user_id)
+        if not device:
+            return False, "Dispositivo no encontrado"
+        if device.confirmed:
+            return False, "El dispositivo ya está confirmado"
+        if not self.verify_totp_token(user_id, token):
+            return False, "Código inválido"
+        device.confirmed = True
+        device.last_used = timezone.now()
+        device.save()
+        return True, "2FA activado correctamente"
+
+    def disable_totp_device(self, user_id):
+        """Desactiva/elimina el dispositivo 2FA del usuario."""
+        device = self.get_totp_device(user_id)
+        if device:
+            device.delete()
+            return True
+        return False
+
+    def is_totp_enabled(self, user_id):
+        """Verifica si el usuario tiene 2FA activado y confirmado."""
+        device = self.get_totp_device(user_id)
+        return device is not None and device.confirmed
+
+    def require_totp_for_role(self, role):
+        """Determina si el rol requiere 2FA obligatorio."""
+        return role in ("admin", "profesional")

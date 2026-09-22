@@ -74,6 +74,7 @@ class ChatbotConfig(models.Model):
     medium_terms = models.TextField(null=True, blank=True)
     medium_response = models.TextField(null=True, blank=True)
     fallback_response = models.TextField(null=True, blank=True)
+    off_topic_response = models.TextField(null=True, blank=True)
     crisis_phone = models.CharField(max_length=30, default="106", null=True, blank=True)
     thinking_level = models.CharField(max_length=20, default="low", null=True, blank=True)
     prompt_history_window = models.IntegerField(default=4, null=True, blank=True)
@@ -106,6 +107,7 @@ class ChatbotConfig(models.Model):
             "medium_terms": self.medium_terms,
             "medium_response": self.medium_response,
             "fallback_response": self.fallback_response,
+            "off_topic_response": self.off_topic_response,
             "crisis_phone": self.crisis_phone,
             "thinking_level": self.thinking_level,
             "prompt_history_window": self.prompt_history_window,
@@ -150,3 +152,6 @@ class MensajesChat(models.Model):
             "leido": self.leido,
             "fecha": self.fecha.isoformat() if self.fecha else None,
         }
+
+
+

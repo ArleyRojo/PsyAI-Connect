@@ -41,3 +41,19 @@ class ResetPasswordSerializer(serializers.Serializer):
         if data["new_password"] != data["confirm_password"]:
             raise serializers.ValidationError("Las contraseñas no coinciden")
         return data
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+
+# ── TOTP / 2FA Serializers ──
+
+class TOTPSetupSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=100, required=False, default="")
+
+class TOTPVerifySerializer(serializers.Serializer):
+    token = serializers.CharField(min_length=6, max_length=6)
+
+class TOTPDisableSerializer(serializers.Serializer):
+    password = serializers.CharField()

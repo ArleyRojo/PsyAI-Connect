@@ -28,6 +28,69 @@ CONFIG_CACHE_TTL_SECONDS = 30
 
 _PROMPT_SUFFIX = """
 
+ALCANCE TEMÁTICO — LÍMITES ESTRICTOS:
+
+Tu único propósito es acompañar al usuario en temas de bienestar emocional,
+salud mental y orientación psicológica básica. NO eres un asistente general.
+
+PUEDES responder sobre:
+- Emociones, estados de ánimo, estrés, ansiedad, tristeza, relaciones
+  personales, autoestima, hábitos de sueño, manejo de conflictos,
+  motivación, duelo, y temas afines al bienestar psicológico.
+- Preguntas sobre cómo funciona la plataforma, cómo agendar cita con un
+  profesional, o cómo usar el chatbot.
+- Charla breve y cálida de cortesía (saludos, cómo está el usuario), siempre
+  que sirva para abrir o mantener la conversación emocional, no como fin en
+  sí misma.
+
+NO PUEDES responder, ni aunque el usuario insista, sobre:
+- Tareas académicas, programación, matemáticas, cultura general, deportes,
+  noticias, entretenimiento, recetas, traducción de textos, o cualquier
+  tema sin relación con salud emocional/mental.
+- Diagnósticos médicos generales no psicológicos (ej. "me duele la cabeza,
+  ¿qué tomo?", síntomas físicos): redirige siempre a un médico general,
+  no dentro de tu alcance.
+- Escribir código, ensayos, resúmenes de libros, contenido creativo sin
+  relación con el bienestar del usuario, o cualquier tarea que use al
+  chatbot como herramienta general de productividad.
+- Opiniones sobre política, religión, temas legales, financieros o
+  cualquier consejo fuera del ámbito psicológico.
+
+CÓMO RESPONDER A UN TEMA FUERA DE ALCANCE:
+1. No expliques ni resuelvas el tema pedido, ni parcialmente.
+2. Redirige con calidez en 1-2 frases, sin sonar como un mensaje de error
+   automático. Ejemplos de tono (no los repitas literal, varía la redacción):
+   - "Esa no es un área en la que pueda ayudarte, pero cuéntame, ¿cómo te
+     has sentido últimamente?"
+   - "Eso se sale un poco de lo que puedo acompañarte aquí. Si quieres,
+     hablemos de cómo has estado emocionalmente."
+ 3. Si el usuario insiste varias veces seguidas en el mismo tema fuera de
+    alcance, mantén el límite con la misma calidez, sin ceder ni explicar el
+    tema "solo un poco". No niegues cortésmente y luego respondas parcialmente.
+ 4. Nunca digas "no tengo permitido" ni expliques que sigues una regla
+    interna — simplemente redirige de forma natural, como lo haría una
+    persona que no maneja ese tema.
+
+OPCIÓN DETERMINISTA — ETIQUETA DE SALIDA:
+- Cuando el tema esté CLARAMENTE fuera de alcance (sin relación alguna con
+  bienestar emocional, salud mental u orientación psicológica) y no exista
+  un ángulo emocional al cual redirigirlo de forma natural, responde
+  EXACTAMENTE con esta etiqueta y nada más (sin texto adicional):
+
+  [FUERA_DE_TEMA]
+
+- Usa la etiqueta únicamente en casos inequívocos. Si existe alguna conexión
+  emocional posible (aunque sea remota), prefiere siempre la redirección
+  cálida de los puntos anteriores en lugar de la etiqueta. La etiqueta NO se
+  usa cuando hay indicios de riesgo emocional: ahí siempre responde con la
+  respuesta de riesgo correspondiente.
+
+CASOS AMBIGUOS (síntomas físicos con causa emocional):
+- Si el usuario menciona síntomas físicos que suelen tener origen emocional
+  (insomnio, fatiga, tensión muscular, pérdida de apetito ligada a ansiedad
+  o tristeza), SÍ puedes explorarlos como parte del acompañamiento
+  emocional, pero deja claro que para lo físico debe consultar a un médico.
+
 COMPORTAMIENTO OBLIGATORIO:
 - Responde en texto plano, sin listas, viñetas ni encabezados.
 - Máximo 3 oraciones por respuesta.
@@ -50,6 +113,50 @@ BIEN: "Qué día tan duro. ¿Qué fue lo más que te afectó?"
 Usuario: "no sé si puedo más"
 MAL: "Entiendo que estás pasando por un momento difícil. Es importante buscar ayuda profesional."
 BIEN: "Suena a que estás cargando mucho. ¿Qué es lo que más te está pesando ahorita?"
+
+COHERENCIA CONVERSACIONAL — OBLIGATORIO:
+
+Tienes acceso al historial reciente de esta conversación (los últimos
+mensajes intercambiados). Úsalo siempre antes de responder. Reglas:
+
+1. NO vuelvas a preguntar algo que el usuario ya te contó en mensajes
+   anteriores de esta misma conversación (su nombre, motivo de consulta,
+   situación que describió, cómo se sentía, etc.). Si necesitas retomarlo,
+   haz referencia a ello en vez de preguntarlo de nuevo.
+   Mal ejemplo: usuario ya dijo "me peleé con mi pareja" → bot pregunta
+   luego "¿qué te trae por aquí hoy?" (ignora lo ya dicho).
+   Bien: "Volviendo a lo de la pelea con tu pareja, ¿cómo te sientes ahora?"
+
+2. NO te contradigas de un mensaje a otro. Si en un mensaje sugeriste algo
+   (ej. "podría ayudarte escribir lo que sientes"), no des una indicación
+   opuesta más adelante sin explicar por qué cambia tu recomendación.
+
+3. Mantén el mismo tono y nivel de formalidad a lo largo de TODA la
+   conversación (definido por la configuración de tono del sistema). No
+   cambies de repente a un registro más formal o más informal sin razón.
+
+4. Si el usuario cambia de tema abruptamente, puedes seguirlo, pero si el
+   nuevo tema sigue relacionado con lo emocional, intenta conectar
+   brevemente con lo anterior si tiene sentido (sin forzarlo si de verdad
+   son cosas distintas).
+
+5. Antes de responder, ubica mentalmente en qué punto va la conversación:
+   ¿es el primer mensaje?, ¿ya se habló del motivo de consulta?, ¿ya
+   ofreciste una sugerencia que el usuario no ha comentado si le sirvió?
+   Actúa en consecuencia, no como si cada mensaje fuera aislado.
+
+6. No repitas la misma sugerencia, frase de apertura o estructura de
+   respuesta dos veces seguidas en la conversación. Varía la redacción,
+   pero mantén la misma línea de acompañamiento.
+
+7. Si el usuario responde algo breve tipo "sí", "no", "no sé", interpreta
+   la respuesta en el contexto de tu pregunta anterior — nunca trates un
+   "sí"/"no" como si fuera un mensaje nuevo sin contexto.
+
+8. Si en algún punto detectas que ya no tienes claridad sobre algo que el
+   usuario mencionó antes (por ejemplo, si el historial disponible es muy
+   corto y no alcanza a ver todo el contexto), es preferible preguntar con
+   naturalidad ("recuérdame, ¿qué me dijiste que...") a asumir o inventar.
 """
 
 
@@ -144,9 +251,10 @@ class ChatbotConfigService:
                     "interaction_rules": "",
                     "risk_terms": "[]",
                     "crisis_response": "",
-                    "medium_response": "",
-                    "fallback_response": "",
-                    "crisis_phone": "106",
+                 "medium_response": "",
+                "fallback_response": "",
+                "off_topic_response": "Ese tema se sale de mi alcance, pero si quieres cuéntame cómo te has sentido emocionalmente.",
+                "crisis_phone": "106",
                     "thinking_level": "low",
                     "prompt_history_window": 4,
                     "gemini_history_window": 12,
@@ -330,6 +438,9 @@ class ChatbotService:
         self._key_index = (self._key_index + 1) % len(keys)
         return keys[self._key_index]
 
+    def _get_fallback_model(self):
+        return os.getenv("GEMINI_FALLBACK_MODEL", "gemma-4-26b-a4b-it").strip()
+
     def _get_chatbot_config(self):
         now = self._now_ts()
         if self._cached_config is not None and now - self._cached_config_ts < CONFIG_CACHE_TTL_SECONDS:
@@ -355,6 +466,7 @@ class ChatbotService:
                 "crisis_response": "Si hay riesgo, llama al 123.",
                 "medium_response": "",
                 "fallback_response": "¿Cómo te sientes hoy?",
+                "off_topic_response": "Eso se sale un poco del lugar donde puedo acompañarte hoy. Cuéntame: ¿cómo te has sentido emocionalmente?",
                 "crisis_phone": "106",
                 "thinking_level": "low",
                 "tone": None,
@@ -451,6 +563,7 @@ class ChatbotService:
             nivel_emocional = "Sin riesgo"
             risk_words = None
 
+
         keys = self._get_api_keys()
         if not keys:
             response_text = self._build_local_fallback(message, history, config, es_medio, es_bajo)
@@ -473,9 +586,15 @@ class ChatbotService:
             thinking_level = config.get("thinking_level") or "low"
 
         try:
-            response_text = self._call_gemini_with_rotation(keys, model, message, history or [], config, contexto_riesgo, thinking_level)
+            response_text = self._call_gemini_with_rotation(keys, model, message, history, config, contexto_riesgo, thinking_level)
             if not response_text or not response_text.strip():
                 raise RuntimeError("Gemini devolvio texto vacio")
+            if "[FUERA_DE_TEMA" in response_text or "[FUERA_DE_ALCANCE" in response_text:
+                off_topic = (config.get("off_topic_response") or "").strip()
+                response_text = off_topic or (
+                    "Ese tema se sale un poco de mi alcance, pero si quieres "
+                    "cuéntame cómo te has sentido últimamente."
+                )
             self.chat_repo.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
             return {
                 "success": True,
@@ -519,21 +638,84 @@ class ChatbotService:
         for attempt in range(total_keys):
             current_key = keys[self._key_index]
             try:
-                return self._call_gemini(current_key, model, message, history, config, contexto_riesgo, thinking_level)
+                response_text = self._call_gemini(current_key, model, message, history, config, contexto_riesgo, thinking_level)
+                self.logger.info("Chatbot: respuesta generada por el modelo IA principal: %s", model)
+                return response_text
             except RuntimeError as exc:
                 error_str = str(exc)
                 is_quota = "429" in error_str or "RESOURCE_EXHAUSTED" in error_str
-                if is_quota and total_keys > 1:
-                    self._next_key(keys)
-                    self.logger.warning(
-                        "Key %s/%s agotó cuota (429). Rotando a key %s/%s.",
-                        attempt + 1, total_keys,
-                        self._key_index + 1, total_keys,
-                    )
-                else:
-                    raise
+                if is_quota:
+                    if total_keys > 1:
+                        self._next_key(keys)
+                        self.logger.warning(
+                            "Key %s/%s agotó cuota (429). Rotando a key %s/%s.",
+                            attempt + 1, total_keys,
+                            self._key_index + 1, total_keys,
+                        )
+                        continue
+                    break
+                raise
 
-        raise RuntimeError("Todas las API keys agotaron su cuota por hoy.")
+        fallback_model = self._get_fallback_model()
+        if keys and fallback_model and fallback_model != model:
+            try:
+                self.logger.warning(
+                    "Modelo principal (%s) agotó cuota. Intentando modelo de respaldo: %s",
+                    model, fallback_model,
+                )
+                response_text = self._call_gemini(
+                    keys[0], fallback_model, message, history, config, contexto_riesgo, thinking_level
+                )
+                self.logger.info("Chatbot: respuesta generada por el modelo IA de respaldo: %s", fallback_model)
+                return response_text
+            except RuntimeError as exc:
+                self.logger.warning("Modelo de respaldo (%s) también falló: %s", fallback_model, exc)
+
+        raise RuntimeError("Todas las API keys agotaron su cuota por hoy, incluido el modelo de respaldo.")
+
+    def _call_gemini_json(self, api_key, model, system_prompt, user_prompt, temperature=0.3, max_tokens=1600):
+        payload = {
+            "systemInstruction": {"parts": [{"text": system_prompt}]},
+            "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
+            "generationConfig": {
+                "temperature": float(temperature),
+                "maxOutputTokens": int(max_tokens),
+            },
+        }
+        base_delay = GEMINI_RETRY_BASE_DELAY
+        last_exc = None
+        for attempt in range(1, GEMINI_RETRIES + 2):
+            try:
+                resp = requests.post(
+                    GEMINI_URL_TEMPLATE.format(model=model),
+                    json=payload,
+                    headers={"x-goog-api-key": api_key},
+                    timeout=20,
+                )
+                if resp.status_code in GEMINI_RETRYABLE_STATUS:
+                    last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
+                    self.logger.warning("Gemini JSON HTTP %s intento %s/%s", resp.status_code, attempt, GEMINI_RETRIES + 1)
+                    if attempt <= GEMINI_RETRIES:
+                        time.sleep(base_delay * attempt)
+                    continue
+                if resp.status_code != 200:
+                    body = resp.text[:2000]
+                    self.logger.error("Gemini JSON respondio %s body: %s", resp.status_code, body)
+                    last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}: {body[:200]}")
+                    if attempt <= GEMINI_RETRIES:
+                        time.sleep(base_delay * attempt)
+                    continue
+                data = resp.json()
+                text = self._extract_text(data)
+                if not text:
+                    raise RuntimeError("Gemini no devolvio texto")
+                return text.strip()
+            except requests.exceptions.RequestException as exc:
+                last_exc = exc
+                self.logger.warning("Gemini JSON request error intento %s/%s: %s", attempt, GEMINI_RETRIES + 1, exc)
+                if attempt <= GEMINI_RETRIES:
+                    time.sleep(base_delay * attempt)
+        raise RuntimeError(f"Gemini no disponible luego de reintentos: {last_exc}")
 
     def _build_local_fallback(self, message, history, config, es_medio=False, es_bajo=False):
         normalized = self._normalize_text(message)
@@ -646,7 +828,7 @@ class ChatbotService:
             return
         nivel = "alto" if es_alto else "medio"
         asunto = f"PsyAI Connect — Alerta de riesgo {nivel}: {patient_name}"
-        cta = f"{site_url}/aside-professional/my.chatbot.html"
+        cta = f"{site_url}/aside-professional/patients.html"
         for email in prof_emails:
             ctx = {
                 "nombre_profesional": email.split("@")[0].replace(".", " ").title(),
@@ -808,6 +990,8 @@ class ChatbotService:
     @staticmethod
     def _model_supports_thinking(model):
         model_lower = model.lower()
+        if "gemma" in model_lower:
+            return False
         if any(m in model_lower for m in ("2.5-flash", "2.5-pro", "3-flash", "3.1-flash", "3.1-pro", "3.5-flash", "3.5-pro")):
             return True
         return False

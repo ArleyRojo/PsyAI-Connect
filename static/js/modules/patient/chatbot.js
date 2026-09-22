@@ -386,13 +386,25 @@ async function enviarMensaje(mensaje) {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
+    // Guardar mensaje para posible reintento
+    window.__lastChatbotMessage = mensaje;
+
     try {
-        var res = await fetch('/api/chatbot/enviar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ mensaje: mensaje })
-        });
+        // Usar fetchConTimeout del módulo de conexión (timeout 8s para chatbot)
+        var res = await (window.PsyAIConnection?.fetchConTimeout
+            ? window.PsyAIConnection.fetchConTimeout('/api/chatbot/enviar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ mensaje: mensaje })
+              }, 8000)
+            : fetch('/api/chatbot/enviar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ mensaje: mensaje })
+              })
+        );
         var data = await res.json();
 
         var typingMessage = chatContainer && chatContainer.querySelector('.typing-msg');
@@ -408,11 +420,23 @@ async function enviarMensaje(mensaje) {
 
         var botReply = data.respuesta || data.message || 'Disculpa, no pude procesar tu mensaje. Intentalo de nuevo.';
         agregarMensajeBot(botReply);
+        // Limpiar mensaje guardado al éxito
+        window.__lastChatbotMessage = null;
     } catch (err) {
         var typingMessage = chatContainer && chatContainer.querySelector('.typing-msg');
         if (typingMessage) typingMessage.remove();
         console.error('Error chatbot:', err);
-        agregarMensajeBot('No hay conexion con el asistente en este momento. Intentalo de nuevo mas tarde. Si es una emergencia o hay riesgo inmediato, llama al 123.');
+
+        // Usar nuevo componente de error de chatbot con botón Reintentar
+        if (window.PsyAIConnection?.showChatbotError) {
+          window.PsyAIConnection.showChatbotError(mensaje, function(retryMsg) {
+            // Reintentar con el mismo mensaje
+            enviarMensaje(retryMsg);
+          });
+        } else {
+          // Fallback al comportamiento original
+          agregarMensajeBot('No hay conexion con el asistente en este momento. Intentalo de nuevo mas tarde. Si es una emergencia o hay riesgo inmediato, llama al 123.');
+        }
     }
 }
 

@@ -61,7 +61,14 @@ class ProfessionalRepository:
             )
         }
 
-        users = Register.objects.filter(rol="paciente").order_by("nombre")
+        assigned_ids = (
+            PacientesProfesional.objects.filter(idProfesional_id=professional_id)
+            .values_list("idPaciente_id", flat=True)
+            .distinct()
+        )
+        users = Register.objects.filter(
+            rol="paciente", idUsuario__in=assigned_ids
+        ).order_by("nombre")
         result = []
         for u in users:
             p = perfil_data.get(u.idUsuario)

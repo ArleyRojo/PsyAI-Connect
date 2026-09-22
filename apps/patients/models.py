@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 
 from apps.authentication.models import Register
 
@@ -68,7 +67,7 @@ class EvolucionPaciente(models.Model):
     nivelEnergia = models.IntegerField(null=True, blank=True)
     notasPersonales = models.TextField(null=True, blank=True)
     resultadoEmocional = models.CharField(max_length=100, null=True, blank=True)
-    fecha = models.DateTimeField(default=timezone.now)
+    fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "EvolucionPaciente"

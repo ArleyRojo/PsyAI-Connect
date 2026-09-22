@@ -5,7 +5,6 @@ from django.http import StreamingHttpResponse
 from django.views import View
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from apps.core.permissions import IsAuthenticatedDRF, IsPaciente
 from apps.chatbot.serializers import (

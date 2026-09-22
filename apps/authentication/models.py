@@ -40,6 +40,8 @@ class Register(AbstractBaseUser):
         max_length=20, choices=ESTADO_CHOICES, default="Activa"
     )
     activo = models.BooleanField(default=True)
+    # Verificación de email
+    email_verificado = models.BooleanField(default=False)
     fechaRegistro = models.DateTimeField(auto_now_add=True)
 
     objects = CustomUserManager()
@@ -70,6 +72,7 @@ class Register(AbstractBaseUser):
             "rol": self.rol,
             "activo": self.activo,
             "estadoCuenta": self.estadoCuenta,
+            "email_verificado": self.email_verificado,
             "fechaRegistro": (
                 self.fechaRegistro.isoformat() if self.fechaRegistro else None
             ),
@@ -128,6 +131,36 @@ class RecoveryTokens(models.Model):
         }
 
 
+class EmailVerificationToken(models.Model):
+    """
+    Token para verificación de email al registrarse.
+    Requerido obligatoriamente para rol 'profesional', opcional para 'paciente'.
+    """
+    id = models.AutoField(primary_key=True)
+    idUsuario = models.ForeignKey(
+        Register,
+        on_delete=models.CASCADE,
+        db_column="idUsuario",
+    )
+    token = models.CharField(max_length=100, unique=True)
+    expires = models.DateTimeField()
+    used = models.BooleanField(default=False)
+    createdAt = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "EmailVerificationTokens"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "idUsuario": self.idUsuario_id,
+            "token": self.token,
+            "expires": self.expires.isoformat() if self.expires else None,
+            "used": self.used,
+            "createdAt": self.createdAt.isoformat() if self.createdAt else None,
+        }
+
+
 class IntentosFallidos(models.Model):
     id = models.AutoField(primary_key=True)
     email = models.CharField(max_length=255, unique=True)
@@ -149,4 +182,42 @@ class IntentosFallidos(models.Model):
             "bloqueado_hasta": (
                 self.bloqueado_hasta.isoformat() if self.bloqueado_hasta else None
             ),
+        }
+
+
+class TOTPDevice(models.Model):
+    """
+    Dispositivo TOTP (Time-based One-Time Password) para autenticación de dos factores (2FA).
+    Opcional para roles 'admin' y 'profesional'.
+    Usa RFC 6238 / RFC 4226 compatible (compatible con Google Authenticator, Authy, etc.).
+    """
+    id = models.AutoField(primary_key=True)
+    idUsuario = models.OneToOneField(
+        Register,
+        on_delete=models.CASCADE,
+        db_column="idUsuario",
+        related_name="totp_device",
+    )
+    # Secreto en base32 (RFC 3548), generado con secrets.token_bytes(20) y codificado en base32
+    secret = models.CharField(max_length=64)
+    # Nombre amigable del dispositivo (ej: "Mi móvil", "Authenticator")
+    name = models.CharField(max_length=100, blank=True, default="")
+    # Si el 2FA está confirmado/activo
+    confirmed = models.BooleanField(default=False)
+    # Fecha de creación
+    createdAt = models.DateTimeField(auto_now_add=True)
+    # Último uso exitoso
+    last_used = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "TOTPDevices"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "idUsuario": self.idUsuario_id,
+            "name": self.name,
+            "confirmed": self.confirmed,
+            "createdAt": self.createdAt.isoformat() if self.createdAt else None,
+            "last_used": self.last_used.isoformat() if self.last_used else None,
         }

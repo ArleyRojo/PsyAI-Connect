@@ -254,6 +254,21 @@ class AdminChatbotConfigViewSet(viewsets.ViewSet):
             })
         return Response(payload, status=status_code)
 
+    def update(self, request, pk=None):
+        from apps.chatbot.services import ChatbotConfigService, ChatbotConfigEventsService
+        chatbot_config_service = ChatbotConfigService()
+        chatbot_config_events = ChatbotConfigEventsService()
+        data = request.data.copy() if request.data else {}
+        admin_id = getattr(request, "user_id", None)
+        payload, status_code = chatbot_config_service.save_config(data, admin_id)
+        if status_code < 400 and payload.get("success"):
+            chatbot_config_events.publish_config_update({
+                "max_tokens": data.get("max_tokens"),
+                "max_tokens_user": data.get("max_tokens_user"),
+                "daily_message_limit": data.get("daily_message_limit"),
+            })
+        return Response(payload, status=status_code)
+
     def partial_update(self, request, pk=None):
         from apps.chatbot.services import ChatbotConfigService
         chatbot_config_service = ChatbotConfigService()
