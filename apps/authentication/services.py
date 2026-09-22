@@ -362,14 +362,6 @@ class AuthService:
                 None,
             )
 
-        # Verificar email para roles que lo requieran (obligatorio para profesional)
-        if not usuario.get("email_verificado", False) and usuario.get("rol") == "profesional":
-            return (
-                {"success": False, "message": "Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada."},
-                403,
-                None,
-            )
-
         stored_hash = usuario.get("contrasena")
         if not SecurityHelper.verify_password(password, stored_hash):
             self.security_repo.register_failed_attempt(email)
