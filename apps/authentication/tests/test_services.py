@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -371,9 +371,12 @@ class TestRecoverPassword:
     def test_existing_email_sends_token(self, mock_mail, auth_service, mock_auth_repo):
         mock_auth_repo.active_user_exists_by_email.return_value = True
         mock_mail.return_value = True
+        mock_request = MagicMock()
+        mock_request.get_host.return_value = "localhost"
+        mock_request.scheme = "http"
 
         payload, status = auth_service.recover_password(
-            "user@test.com", request_host="localhost"
+            "user@test.com", request=mock_request
         )
         assert status == 200
         assert payload["success"] is True
