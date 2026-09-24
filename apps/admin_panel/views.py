@@ -13,6 +13,7 @@ from apps.admin_panel.services import (
     get_active_user_ids,
 )
 from apps.core.permissions import IsAuthenticatedDRF, IsAdmin
+from apps.core.renderers import EventStreamRenderer
 from apps.admin_panel.repositories import AdminRepository
 
 admin_service = AdminService()
@@ -37,6 +38,7 @@ class AdminStatsAPIView(APIView):
 
 class AdminStatsStreamAPIView(APIView):
     permission_classes = [IsAuthenticatedDRF, IsAdmin]
+    renderer_classes = [EventStreamRenderer]
 
     def get(self, request):
         client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
@@ -78,6 +80,7 @@ class AdminStatsStreamAPIView(APIView):
 
 class AdminLogsStreamAPIView(APIView):
     permission_classes = [IsAuthenticatedDRF, IsAdmin]
+    renderer_classes = [EventStreamRenderer]
 
     def get(self, request):
         client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
