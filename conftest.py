@@ -1,14 +1,22 @@
 import pytest
-from django.test import Client
+from rest_framework.test import APIRequestFactory
+
+
+class SessionRequestFactory(APIRequestFactory):
+    def generic(self, *args, **kwargs):
+        from django.contrib.sessions.backends.db import SessionStore
+
+        request = super().generic(*args, **kwargs)
+        request.session = SessionStore()
+        return request
 
 
 # ── Reusable fixtures ────────────────────────────────────────────────────────
 
 
 @pytest.fixture
-def anon_client():
-    """Unauthenticated Django test client."""
-    return Client()
+def rf():
+    return SessionRequestFactory()
 
 
 @pytest.fixture
@@ -22,23 +30,4 @@ def db_user(django_user_model):
     )
 
 
-@pytest.fixture
-def db_professional(django_user_model):
-    """Create a professional user in the test DB."""
-    return django_user_model.objects.create_user(
-        email="pro@test.com",
-        nombre="Test Pro",
-        password="TestPass123",
-        rol="profesional",
-    )
 
-
-@pytest.fixture
-def db_admin(django_user_model):
-    """Create an admin user in the test DB."""
-    return django_user_model.objects.create_user(
-        email="admin@test.com",
-        nombre="Test Admin",
-        password="TestPass123",
-        rol="admin",
-    )
