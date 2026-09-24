@@ -2,7 +2,6 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
-from django.test import RequestFactory
 
 from apps.authentication.views import (
     RegisterView,
@@ -12,11 +11,6 @@ from apps.authentication.views import (
     ForgotPasswordView,
     ResetPasswordView,
 )
-
-
-@pytest.fixture
-def rf():
-    return RequestFactory()
 
 
 # ── RegisterView ─────────────────────────────────────────────────────────────
@@ -75,7 +69,9 @@ class TestLoginView:
             data=json.dumps({"email": "test@test.com", "password": "Abc123"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        mock_session = MagicMock()
+        mock_session.get.return_value = None
+        req.session = mock_session
 
         session_user = {
             "id": 1,
@@ -91,7 +87,13 @@ class TestLoginView:
                 200,
                 session_user,
             )
-            resp = LoginView.as_view()(req)
+            mock_svc.is_totp_enabled.return_value = False
+            with patch("apps.authentication.views.Register") as mock_reg:
+                mock_user = MagicMock()
+                mock_user.idUsuario = 1
+                mock_reg.objects.get.return_value = mock_user
+                with patch("apps.authentication.views.django_login"):
+                    resp = LoginView.as_view()(req)
 
         resp.render()
         assert resp.status_code == 200
@@ -108,7 +110,9 @@ class TestLoginView:
             data=json.dumps({"email": "test@test.com", "password": "Wrong1"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        mock_session = MagicMock()
+        mock_session.get.return_value = None
+        req.session = mock_session
 
         with patch("apps.authentication.views.auth_service") as mock_svc:
             mock_svc.login_user.return_value = (
@@ -129,7 +133,9 @@ class TestLoginView:
             data=json.dumps({"email": "test@test.com", "password": "Abc123"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        mock_session = MagicMock()
+        mock_session.get.return_value = None
+        req.session = mock_session
 
         session_user = {
             "id": 5,
@@ -145,7 +151,13 @@ class TestLoginView:
                 200,
                 session_user,
             )
-            resp = LoginView.as_view()(req)
+            mock_svc.is_totp_enabled.return_value = False
+            with patch("apps.authentication.views.Register") as mock_reg:
+                mock_user = MagicMock()
+                mock_user.idUsuario = 5
+                mock_reg.objects.get.return_value = mock_user
+                with patch("apps.authentication.views.django_login"):
+                    resp = LoginView.as_view()(req)
 
         resp.render()
         assert resp.status_code == 200
@@ -163,7 +175,9 @@ class TestLoginView:
 class TestLogoutView:
     def test_logout_returns_200(self, rf):
         req = rf.post("/api/auth/logout")
-        req.session = MagicMock()
+        mock_session = MagicMock()
+        mock_session.get.return_value = None
+        req.session = mock_session
 
         resp = LogoutView.as_view()(req)
 
@@ -179,6 +193,7 @@ class TestLogoutView:
 
 
 class TestSessionView:
+    @pytest.mark.django_db
     def test_logged_in_returns_user_data(self, rf):
         req = rf.get("/api/auth/session")
         req.session = {

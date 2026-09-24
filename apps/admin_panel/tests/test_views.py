@@ -2,7 +2,6 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
-from rest_framework.test import APIRequestFactory
 from rest_framework import status
 
 from apps.admin_panel.views import (
@@ -14,11 +13,6 @@ from apps.admin_panel.views import (
     AdminChatbotPalabrasAPIView,
 )
 from apps.core.permissions import IsAuthenticatedDRF
-
-
-@pytest.fixture
-def rf():
-    return APIRequestFactory()
 
 
 def _auth_admin(_self, request, view):
@@ -56,7 +50,7 @@ class TestAdminUsuarioPatch:
             data=json.dumps({"accion": "suspender"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.admin_panel.views.admin_service") as mock_svc:
             mock_svc.block_user.return_value = (
@@ -76,7 +70,7 @@ class TestAdminUsuarioPatch:
             data=json.dumps({"accion": "reestablecer"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.admin_panel.views.admin_service") as mock_svc:
             mock_svc.block_user.return_value = (
@@ -95,7 +89,7 @@ class TestAdminUsuarioPatch:
             data=json.dumps({"accion": "accion_inexistente"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
         resp = view(req, pk="1")
@@ -110,7 +104,7 @@ class TestAdminUsuarioPatch:
             data=json.dumps({"campo_irrelevante": True}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
         resp = view(req, pk="1")
@@ -125,7 +119,7 @@ class TestAdminUsuarioPatch:
             data=json.dumps({"nuevoRol": "profesional"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.admin_panel.views.admin_service") as mock_svc:
             mock_svc.change_role.return_value = (
@@ -144,7 +138,7 @@ class TestAdminUsuarioPatch:
             data=json.dumps({"accion": "suspender", "nuevoRol": "profesional"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.admin_panel.views.admin_service") as mock_svc:
             mock_svc.block_user.return_value = (
@@ -164,7 +158,7 @@ class TestAdminUsuarioPatch:
             data=b"",
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
         resp = view(req, pk="1")
@@ -178,7 +172,7 @@ class TestAdminUsuarioPatch:
 class TestAdminNotificacionDelete:
     def test_delete_requires_auth(self, rf):
         req = rf.delete("/api/admin/notificaciones/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = AdminNotificacionAPIView.as_view()
@@ -188,7 +182,7 @@ class TestAdminNotificacionDelete:
 
     def test_delete_without_id_returns_400(self, rf, mock_auth_admin):
         req = rf.delete("/api/admin/notificaciones/")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         view = AdminNotificacionAPIView.as_view()
         resp = view(req, id_notificacion=None)
@@ -203,7 +197,7 @@ class TestAdminNotificacionDelete:
 class TestAdminChatbotConfigGet:
     def test_returns_flat_config_object(self, rf, mock_auth_admin):
         req = rf.get("/api/admin/chatbot-config")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.chatbot.services.ChatbotConfigService") as MockCls:
             mock_svc = MagicMock()
@@ -234,7 +228,7 @@ class TestAdminChatbotConfigGet:
 
     def test_config_is_not_array(self, rf, mock_auth_admin):
         req = rf.get("/api/admin/chatbot-config")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.chatbot.services.ChatbotConfigService") as MockCls:
             mock_svc = MagicMock()
@@ -255,7 +249,7 @@ class TestAdminChatbotConfigGet:
 class TestAdminChatbotPalabrasGet:
     def test_returns_aggregated_palabras(self, rf, mock_auth_admin):
         req = rf.get("/api/admin/chatbot-config/palabras-detectadas")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.chatbot.services.ChatbotConfigService") as MockCls:
             mock_svc = MagicMock()
@@ -286,7 +280,7 @@ class TestAdminChatbotPalabrasGet:
 
     def test_palabras_not_raw_tuple(self, rf, mock_auth_admin):
         req = rf.get("/api/admin/chatbot-config/palabras-detectadas")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.chatbot.services.ChatbotConfigService") as MockCls:
             mock_svc = MagicMock()

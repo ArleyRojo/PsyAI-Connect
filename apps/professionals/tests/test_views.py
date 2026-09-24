@@ -2,7 +2,6 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
-from rest_framework.test import APIRequestFactory
 from rest_framework import status
 
 from apps.professionals.views import (
@@ -13,11 +12,6 @@ from apps.professionals.views import (
     EvolucionProfesionalResource,
 )
 from apps.core.permissions import IsAuthenticatedDRF, IsProfesional
-
-
-@pytest.fixture
-def rf():
-    return APIRequestFactory()
 
 
 @pytest.fixture
@@ -66,7 +60,7 @@ def mock_role_profesional():
 class TestPerfilProfesionalGET:
     def test_unauthenticated_returns_403(self, rf):
         req = rf.get("/api/perfil/profesional/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PerfilProfesionalViewSet.as_view({"get": "retrieve"})
@@ -75,7 +69,7 @@ class TestPerfilProfesionalGET:
 
     def test_wrong_role_returns_403(self, rf):
         req = rf.get("/api/perfil/profesional/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PerfilProfesionalViewSet.as_view({"get": "retrieve"})
@@ -84,7 +78,7 @@ class TestPerfilProfesionalGET:
 
     def test_profesional_can_access(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/perfil/profesional/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.get_profile.return_value = (
             {"success": True, "perfil": {"nombre": "Dr. García"}},
@@ -97,7 +91,7 @@ class TestPerfilProfesionalGET:
 
     def test_admin_can_access(self, rf, mock_service):
         req = rf.get("/api/perfil/profesional/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", _auth_admin):
             mock_service.get_profile.return_value = (
@@ -111,7 +105,7 @@ class TestPerfilProfesionalGET:
 
     def test_paciente_can_access(self, rf, mock_service):
         req = rf.get("/api/perfil/profesional/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", _auth_paciente):
             mock_service.get_profile.return_value = (
@@ -134,7 +128,7 @@ class TestPerfilProfesionalPUT:
             data=json.dumps({}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PerfilProfesionalViewSet.as_view({"put": "update"})
@@ -147,7 +141,7 @@ class TestPerfilProfesionalPUT:
             data=json.dumps({"idUsuario": 99, "especialidad": "Psicología"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", _auth_profesional):
             view = PerfilProfesionalViewSet.as_view({"put": "update"})
@@ -160,7 +154,7 @@ class TestPerfilProfesionalPUT:
             data=json.dumps({"idUsuario": 5, "especialidad": "Psicología"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.update_profile.return_value = (
             {"success": True, "message": "Perfil actualizado"},
@@ -177,7 +171,7 @@ class TestPerfilProfesionalPUT:
             data=json.dumps({"especialidad": "Psicología"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.update_profile.return_value = (
             {"success": True, "message": "Perfil actualizado"},
@@ -201,7 +195,7 @@ class TestDisponibilidadResourcePOST:
             data=json.dumps({"dia": "lunes"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DisponibilidadViewSet.as_view({"post": "create"})
@@ -214,7 +208,7 @@ class TestDisponibilidadResourcePOST:
             data=json.dumps({"dia": "lunes", "horaInicio": "09:00"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.scheduling.services.DisponibilidadService") as MockSvc:
             mock_svc = MagicMock()
@@ -235,7 +229,7 @@ class TestDisponibilidadResourcePOST:
 class TestDisponibilidadResourceGET:
     def test_unauthenticated_returns_403(self, rf):
         req = rf.get("/api/disponibilidad/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DisponibilidadViewSet.as_view({"get": "retrieve"})
@@ -244,7 +238,7 @@ class TestDisponibilidadResourceGET:
 
     def test_profesional_can_access(self, rf, mock_auth_profesional):
         req = rf.get("/api/disponibilidad/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.scheduling.services.DisponibilidadService") as MockSvc:
             mock_svc = MagicMock()
@@ -260,7 +254,7 @@ class TestDisponibilidadResourceGET:
 
     def test_paciente_can_access(self, rf):
         req = rf.get("/api/disponibilidad/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", _auth_paciente):
             with patch("apps.scheduling.services.DisponibilidadService") as MockSvc:
@@ -282,7 +276,7 @@ class TestDisponibilidadResourceGET:
 class TestDashboardResourceGET:
     def test_wrong_role_returns_403(self, rf):
         req = rf.get("/api/profesional/dashboard")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             resp = DashboardResource.as_view()(req)
@@ -290,7 +284,7 @@ class TestDashboardResourceGET:
 
     def test_success(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/profesional/dashboard")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.get_dashboard.return_value = (
             {"success": True, "pacientes_activos": 5},
@@ -307,7 +301,7 @@ class TestDashboardResourceGET:
 class TestReporteResourceGET:
     def test_wrong_role_returns_403(self, rf):
         req = rf.get("/api/reportes")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = ReporteViewSet.as_view({"get": "list"})
@@ -316,7 +310,7 @@ class TestReporteResourceGET:
 
     def test_success(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/reportes")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.report_overview.return_value = (
             {"success": True, "stats": {}},
@@ -329,7 +323,7 @@ class TestReporteResourceGET:
 
     def test_deleted_filter(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/reportes?filter=eliminados")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.get_deleted_reports.return_value = (
             {"success": True, "reportes": []},
@@ -349,7 +343,7 @@ class TestReporteResourcePOST:
             data=json.dumps({"tipoReporte": "general"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = ReporteViewSet.as_view({"post": "create"})
@@ -362,7 +356,7 @@ class TestReporteResourcePOST:
             data=json.dumps({"tipoReporte": "general", "idPaciente": 5}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.create_report.return_value = (
             {"success": True, "message": "Reporte generado"},
@@ -380,7 +374,7 @@ class TestReporteResourcePOST:
 class TestEvolucionProfesionalResourceGET:
     def test_wrong_role_returns_403(self, rf):
         req = rf.get("/api/evolucion/profesional")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             resp = EvolucionProfesionalResource.as_view()(req)
@@ -388,7 +382,7 @@ class TestEvolucionProfesionalResourceGET:
 
     def test_success(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/evolucion/profesional")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.all_evolution.return_value = (
             {"success": True, "historial": []},

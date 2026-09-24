@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from rest_framework import status
-from rest_framework.test import APIRequestFactory
 
 from apps.core.permissions import IsAuthenticatedDRF
 from apps.documents.views import (
@@ -12,11 +11,6 @@ from apps.documents.views import (
     DocumentoPacienteOwnViewSet,
     DocumentoProfesionalViewSet,
 )
-
-
-@pytest.fixture
-def rf():
-    return APIRequestFactory()
 
 
 def _auth_profesional(_self, request, view):
@@ -51,7 +45,7 @@ def mock_auth_paciente():
 class TestDocumentoProfesionalListViewGET:
     def test_requires_auth(self, rf):
         req = rf.get("/api/documentos/profesional/5")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DocumentoProfesionalViewSet.as_view({"get": "list"})
@@ -61,7 +55,7 @@ class TestDocumentoProfesionalListViewGET:
 
     def test_returns_docs(self, rf, mock_auth_profesional):
         req = rf.get("/api/documentos/profesional/5")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.documents.views.documento_service") as mock_svc:
             mock_svc.list_patient_docs.return_value = (
@@ -81,7 +75,7 @@ class TestDocumentoProfesionalListViewGET:
 class TestDocumentoProfesionalListViewPOST:
     def test_requires_auth(self, rf):
         req = rf.post("/api/documentos/profesional/5")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DocumentoProfesionalViewSet.as_view({"post": "create"})
@@ -91,7 +85,7 @@ class TestDocumentoProfesionalListViewPOST:
 
     def test_upload_requires_file(self, rf, mock_auth_profesional):
         req = rf.post("/api/documentos/profesional/5")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         view = DocumentoProfesionalViewSet.as_view({"post": "create"})
         resp = view(req, id_paciente=5)
@@ -110,7 +104,7 @@ class TestDocumentoProfesionalListViewPOST:
             {"categoria": "Otro", "visibilidad": "privado", "notasInternas": ""},
         )
         req.FILES["archivo"] = file
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.documents.views.documento_service") as mock_svc:
             mock_svc.upload_profesional_doc.return_value = (
@@ -130,7 +124,7 @@ class TestDocumentoProfesionalListViewPOST:
 class TestDocumentoProfesionalDetailViewPATCH:
     def test_requires_auth(self, rf):
         req = rf.patch("/api/documentos/profesional/doc/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DocumentoProfesionalViewSet.as_view({"patch": "partial_update"})
@@ -140,7 +134,7 @@ class TestDocumentoProfesionalDetailViewPATCH:
 
     def test_toggles_visibility(self, rf, mock_auth_profesional):
         req = rf.patch("/api/documentos/profesional/doc/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.documents.views.documento_service") as mock_svc:
             mock_svc.toggle_doc_visibility.return_value = (
@@ -160,7 +154,7 @@ class TestDocumentoProfesionalDetailViewPATCH:
 class TestDocumentoProfesionalDetailViewDELETE:
     def test_requires_auth(self, rf):
         req = rf.delete("/api/documentos/profesional/doc/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DocumentoProfesionalViewSet.as_view({"delete": "destroy"})
@@ -170,7 +164,7 @@ class TestDocumentoProfesionalDetailViewDELETE:
 
     def test_delete_success(self, rf, mock_auth_profesional):
         req = rf.delete("/api/documentos/profesional/doc/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.documents.views.documento_service") as mock_svc:
             mock_svc.delete_profesional_doc.return_value = (
@@ -190,7 +184,7 @@ class TestDocumentoProfesionalDetailViewDELETE:
 class TestDocumentoPacienteDashboardViewGET:
     def test_requires_auth(self, rf):
         req = rf.get("/api/documentos/paciente/dashboard")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DocumentoPacienteDashboardViewSet.as_view({"get": "list"})
@@ -200,7 +194,7 @@ class TestDocumentoPacienteDashboardViewGET:
 
     def test_returns_dashboard(self, rf, mock_auth_paciente):
         req = rf.get("/api/documentos/paciente/dashboard")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.documents.views.documento_service") as mock_svc:
             mock_svc.list_patient_dashboard.return_value = {
@@ -221,7 +215,7 @@ class TestDocumentoPacienteDashboardViewGET:
 class TestDocumentoPacienteOwnListViewGET:
     def test_requires_auth(self, rf):
         req = rf.get("/api/documentos/paciente")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DocumentoPacienteOwnViewSet.as_view({"get": "list"})
@@ -231,7 +225,7 @@ class TestDocumentoPacienteOwnListViewGET:
 
     def test_returns_own_docs(self, rf, mock_auth_paciente):
         req = rf.get("/api/documentos/paciente")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.documents.views.documento_service") as mock_svc:
             mock_svc.repo = MagicMock()
@@ -251,7 +245,7 @@ class TestDocumentoPacienteOwnListViewGET:
 class TestDocumentoPacienteOwnListViewPOST:
     def test_requires_auth(self, rf):
         req = rf.post("/api/documentos/paciente")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DocumentoPacienteOwnViewSet.as_view({"post": "create"})
@@ -261,7 +255,7 @@ class TestDocumentoPacienteOwnListViewPOST:
 
     def test_upload_requires_file(self, rf, mock_auth_paciente):
         req = rf.post("/api/documentos/paciente")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         view = DocumentoPacienteOwnViewSet.as_view({"post": "create"})
         resp = view(req)
@@ -276,7 +270,7 @@ class TestDocumentoPacienteOwnListViewPOST:
         )
         req = rf.post("/api/documentos/paciente", {"descripcion": "Test"})
         req.FILES["archivo"] = file
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.documents.views.documento_service") as mock_svc:
             mock_svc.upload_patient_doc.return_value = (
@@ -296,7 +290,7 @@ class TestDocumentoPacienteOwnListViewPOST:
 class TestAutorizacionToggleViewPOST:
     def test_requires_auth(self, rf):
         req = rf.post("/api/documentos/autorizacion/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = AutorizacionToggleView.as_view()
@@ -310,7 +304,7 @@ class TestAutorizacionToggleViewPOST:
             data=json.dumps({"idPaciente": 5}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch("apps.documents.views.documento_service") as mock_svc:
             mock_svc.toggle_autorizacion.return_value = (

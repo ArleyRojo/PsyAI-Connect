@@ -2,6 +2,7 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
+from django.contrib.sessions.backends.db import SessionStore
 from rest_framework.test import APIRequestFactory
 
 from apps.billing.views import (
@@ -50,6 +51,7 @@ def _make_request(method="get", path="/facturas/", body=None):
         req = factory.delete(
             path, data=json.dumps(body) if body else b"", **kwargs
         )
+    req.session = SessionStore()
     return req
 
 
@@ -230,6 +232,7 @@ class TestFacturaListViewPost:
                     data=b"not json",
                     content_type="application/json",
                 )
+                req.session = SessionStore()
                 resp = FacturaListView.as_view()(req)
                 assert resp.status_code in (200, 201, 400)
 
@@ -332,6 +335,7 @@ class TestFacturaDetailViewDelete:
                 req = factory.delete(
                     "/facturas/6", data=b"", content_type="application/json"
                 )
+                req.session = SessionStore()
                 resp = FacturaDetailView.as_view()(req, id_factura=6)
                 mock_svc.annul_invoice.assert_called_once_with(
                     6, "", 1, "admin"

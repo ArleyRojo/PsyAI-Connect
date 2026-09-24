@@ -2,8 +2,16 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
+from django.contrib.sessions.backends.db import SessionStore
 from rest_framework.test import APIRequestFactory
 from rest_framework import status
+
+
+class SessionRequestFactory(APIRequestFactory):
+    def generic(self, *args, **kwargs):
+        request = super().generic(*args, **kwargs)
+        request.session = SessionStore()
+        return request
 
 from apps.chatbot.views import (
     ChatbotViewSet,
@@ -16,7 +24,7 @@ from apps.core.permissions import IsAuthenticatedDRF
 
 PACIENTE_USER = {"idUsuario": 1, "rol": "paciente", "nombre": "Test"}
 
-FACTORY = APIRequestFactory()
+FACTORY = SessionRequestFactory()
 
 
 def _auth_paciente(_self, request, view):
@@ -78,12 +86,14 @@ class TestChatbotViewSetDelete:
 
 
 class TestChatbotConfigViewSetGet:
+    @patch("apps.chatbot.views.chatbot_service")
     @patch("apps.chatbot.views.chatbot_config_service")
-    def test_get_returns_config(self, mock_svc, mock_auth_paciente):
+    def test_get_returns_config(self, mock_svc, mock_chat_svc, mock_auth_paciente):
         mock_svc.get_config.return_value = (
             {"success": True, "config": {"max_tokens": 600, "max_tokens_user": 1000, "daily_message_limit": 20}},
             200,
         )
+        mock_chat_svc.chat_repo.count_today_messages.return_value = 0
         req = FACTORY.get("/chatbot/config")
         view = ChatbotConfigViewSet.as_view({"get": "list"})
         resp = view(req)

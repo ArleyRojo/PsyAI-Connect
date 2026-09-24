@@ -3,14 +3,9 @@ from unittest.mock import MagicMock
 import pytest
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.test import RequestFactory, override_settings
+from django.test import override_settings
 
 from apps.core.views import serve_pages
-
-
-@pytest.fixture
-def rf():
-    return RequestFactory()
 
 
 def _make_request(rf, path, session_data=None):

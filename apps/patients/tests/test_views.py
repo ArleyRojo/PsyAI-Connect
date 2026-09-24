@@ -2,7 +2,6 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
-from rest_framework.test import APIRequestFactory
 from rest_framework import status
 
 from apps.patients.views import (
@@ -19,11 +18,6 @@ from apps.patients.views import (
     ChatMensajeViewSet,
 )
 from apps.core.permissions import IsAuthenticatedDRF
-
-
-@pytest.fixture
-def rf():
-    return APIRequestFactory()
 
 
 @pytest.fixture
@@ -78,7 +72,7 @@ def mock_role_profesional():
 class TestPerfilPacienteGet:
     def test_requires_auth(self, rf):
         req = rf.get("/api/patients/perfil/paciente/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PerfilPacienteViewSet.as_view({"get": "retrieve"})
@@ -88,7 +82,7 @@ class TestPerfilPacienteGet:
 
     def test_returns_profile(self, rf, mock_auth_paciente, mock_service):
         req = rf.get("/api/patients/perfil/paciente/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.get_patient_profile.return_value = (
             {"success": True, "perfil": {"nombre": "Juan"}},
@@ -103,7 +97,7 @@ class TestPerfilPacienteGet:
 
     def test_rejects_other_patient(self, rf, mock_auth_paciente, mock_service):
         req = rf.get("/api/patients/perfil/paciente/99")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         view = PerfilPacienteViewSet.as_view({"get": "retrieve"})
         resp = view(req, pk="99")
@@ -112,7 +106,7 @@ class TestPerfilPacienteGet:
 
     def test_allows_profesional_to_view(self, rf, mock_service):
         req = rf.get("/api/patients/perfil/paciente/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", _auth_profesional):
             mock_service.get_patient_profile.return_value = (
@@ -126,7 +120,7 @@ class TestPerfilPacienteGet:
 
     def test_allows_admin_to_view(self, rf, mock_service):
         req = rf.get("/api/patients/perfil/paciente/1")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", _auth_admin):
             mock_service.get_patient_profile.return_value = (
@@ -149,7 +143,7 @@ class TestPerfilPacientePut:
             data=json.dumps({"numeroTelefonico": "300123"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PerfilPacienteViewSet.as_view({"put": "update"})
@@ -163,7 +157,7 @@ class TestPerfilPacientePut:
             data=json.dumps({"numeroTelefonico": "300123"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", _auth_profesional):
             view = PerfilPacienteViewSet.as_view({"put": "update"})
@@ -177,7 +171,7 @@ class TestPerfilPacientePut:
             data=json.dumps({"numeroTelefonico": "300123"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.update_patient_profile.return_value = (
             {"success": True, "message": "Perfil actualizado"},
@@ -197,7 +191,7 @@ class TestPerfilPacientePut:
 class TestEvolucionGet:
     def test_requires_paciente_role(self, rf):
         req = rf.get("/api/patients/evolucion")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = EvolucionViewSet.as_view({"get": "list"})
@@ -207,7 +201,7 @@ class TestEvolucionGet:
 
     def test_returns_evolution_history(self, rf, mock_role_paciente, mock_service):
         req = rf.get("/api/patients/evolucion")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.get_evolution_history.return_value = (
             {"success": True, "historial": []},
@@ -231,7 +225,7 @@ class TestEvolucionPost:
             data=json.dumps({"estadoEmocional": "Ansioso"}),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = EvolucionViewSet.as_view({"post": "create"})
@@ -249,7 +243,7 @@ class TestEvolucionPost:
             }),
             content_type="application/json",
         )
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.save_evolution.return_value = (
             {"success": True, "message": "Evolucion guardada correctamente"},
@@ -269,7 +263,7 @@ class TestEvolucionPost:
 class TestPacienteGet:
     def test_requires_profesional_or_admin(self, rf):
         req = rf.get("/api/patients/pacientes")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PacienteViewSet.as_view({"get": "list"})
@@ -279,7 +273,7 @@ class TestPacienteGet:
 
     def test_profesional_can_list(self, rf, mock_role_profesional, mock_service):
         req = rf.get("/api/patients/pacientes")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.list_patients.return_value = (
             {"success": True, "pacientes": []},
@@ -294,7 +288,7 @@ class TestPacienteGet:
 
     def test_pagination_params(self, rf, mock_role_profesional, mock_service):
         req = rf.get("/api/patients/pacientes", {"page": "2", "limit": "10"})
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.list_patients.return_value = (
             {"success": True, "pacientes": []},
@@ -313,7 +307,7 @@ class TestPacienteGet:
 class TestProfesionalGet:
     def test_requires_auth(self, rf):
         req = rf.get("/api/patients/profesionales")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = ProfesionalViewSet.as_view({"get": "list"})
@@ -323,7 +317,7 @@ class TestProfesionalGet:
 
     def test_returns_professionals(self, rf, mock_auth_paciente, mock_service):
         req = rf.get("/api/patients/profesionales")
-        req.session = MagicMock()
+        pass  # session provided by shared rf fixture
 
         mock_service.list_professionals.return_value = (
             {"success": True, "profesionales": [{"idUsuario": 5, "nombre": "Dr"}]},

@@ -9,11 +9,6 @@ from apps.core.utils import get_current_user, require_auth, require_role
 DoesNotExist = type("DoesNotExist", (Exception,), {})
 
 
-@pytest.fixture
-def rf():
-    return RequestFactory()
-
-
 def _make_request(session_data=None):
     factory = RequestFactory()
     request = factory.get("/api/test")

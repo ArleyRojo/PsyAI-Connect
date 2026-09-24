@@ -2,7 +2,6 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
-from rest_framework.test import APIRequestFactory
 from rest_framework import status
 
 from apps.scheduling.views import (
@@ -13,11 +12,6 @@ from apps.scheduling.views import (
     CitaHorarioOcupadoResource,
 )
 from apps.core.permissions import IsAuthenticatedDRF
-
-
-@pytest.fixture
-def rf():
-    return APIRequestFactory()
 
 
 def _auth_paciente(_self, request, view):
