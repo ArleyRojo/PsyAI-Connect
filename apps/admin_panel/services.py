@@ -7,6 +7,7 @@ from collections import Counter, deque
 from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
+from django.db import IntegrityError
 from django.template.loader import render_to_string
 
 from apps.admin_panel.repositories import AdminRepository
@@ -55,12 +56,18 @@ class AdminService:
         return {"success": True, "usuario": usuario}, 200
 
     def create_user(self, data):
+        temp_password = None
         if not data.get("contrasena"):
             temp_password = secrets.token_urlsafe(10)
             data["contrasena"] = temp_password
+        try:
             self.repo.create_user(data)
+        except ValueError as e:
+            return {"success": False, "message": str(e)}, 400
+        except IntegrityError:
+            return {"success": False, "message": f"El email '{data.get('email')}' ya está registrado"}, 400
+        if temp_password:
             return {"success": True, "message": "Usuario creado correctamente", "contrasena_temporal": temp_password}, 200
-        self.repo.create_user(data)
         return {"success": True, "message": "Usuario creado correctamente"}, 200
 
     def update_user(self, data):

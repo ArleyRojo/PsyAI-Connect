@@ -2,7 +2,7 @@ import logging
 
 from django.db.models import Count, Q
 from django.db.models.functions import Coalesce
-from django.db import connection
+from django.db import connection, transaction
 
 from apps.admin_panel.models import AuditoriaAccesos, Logs
 from apps.authentication.models import Register
@@ -177,19 +177,25 @@ class AdminRepository:
         password = data.get("contrasena")
         if not password:
             raise ValueError("La contraseña es requerida para crear un usuario")
+        email = data.get("email")
+        if not email:
+            raise ValueError("El email es requerido para crear un usuario")
+        if Register.objects.filter(email=email).exists():
+            raise ValueError(f"El email '{email}' ya está registrado")
         user = Register(
             nombre=data.get("nombre"),
-            email=data.get("email"),
+            email=email,
             contrasena=make_password(password),
             rol=data.get("rol", "paciente"),
         )
-        user.save()
-        if data.get("rol") == "paciente":
-            from apps.patients.models import PerfilPaciente
-            PerfilPaciente.objects.create(idPaciente=user.idUsuario)
-        elif data.get("rol") == "profesional":
-            from apps.professionals.models import PerfilProfesional
-            PerfilProfesional.objects.create(idProfesional=user.idUsuario)
+        with transaction.atomic():
+            user.save()
+            if data.get("rol") == "paciente":
+                from apps.patients.models import PerfilPaciente
+                PerfilPaciente.objects.create(idPaciente=user)
+            elif data.get("rol") == "profesional":
+                from apps.professionals.models import PerfilProfesional
+                PerfilProfesional.objects.create(idProfesional=user)
         self.registrar_log(
             "usuarios", "Crear usuario",
             f"Usuario creado: {data.get('nombre')} - Rol: {data.get('rol')}",

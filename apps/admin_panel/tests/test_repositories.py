@@ -37,12 +37,14 @@ class TestRepositoryCreateUser:
                 "rol": "paciente",
             })
 
+    @pytest.mark.django_db
     @patch("apps.admin_panel.repositories.Register")
     @patch("django.contrib.auth.hashers.make_password")
     @patch("apps.admin_panel.repositories.AdminRepository.registrar_log")
     def test_creates_user_when_password_provided(self, mock_log, mock_make_password, mock_register):
         repo = AdminRepository()
         mock_register.DoesNotExist = type("DoesNotExist", (), {})
+        mock_register.objects.filter.return_value.exists.return_value = False
         mock_register.return_value.save = MagicMock()
         mock_register.return_value.idUsuario = 1
         mock_make_password.return_value = "hashed_pw"
@@ -56,6 +58,18 @@ class TestRepositoryCreateUser:
 
         mock_make_password.assert_called_once_with("Secure123!")
         mock_register.return_value.save.assert_called_once()
+
+    @patch("apps.admin_panel.repositories.Register")
+    def test_raises_valueerror_when_email_duplicate(self, mock_register):
+        repo = AdminRepository()
+        mock_register.objects.filter.return_value.exists.return_value = True
+        with pytest.raises(ValueError, match="ya está registrado"):
+            repo.create_user({
+                "nombre": "Test",
+                "email": "dup@test.com",
+                "contrasena": "Secure123!",
+                "rol": "paciente",
+            })
 
 
 # ── BUG 4: Cache behavior ─────────────────────────────────────────────────

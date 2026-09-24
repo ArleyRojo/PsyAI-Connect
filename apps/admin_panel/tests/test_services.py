@@ -77,6 +77,15 @@ class TestCreateUser:
         assert status == 200
         assert "contrasena_temporal" not in payload
 
+    def test_duplicate_email_returns_400(self, admin_service, mock_admin_repo):
+        mock_admin_repo.create_user.side_effect = ValueError("El email 'dup@test.com' ya está registrado")
+        payload, status = admin_service.create_user({
+            "nombre": "Juan", "email": "dup@test.com", "contrasena": "Abc123", "rol": "paciente",
+        })
+        assert status == 400
+        assert payload["success"] is False
+        assert "ya está registrado" in payload["message"]
+
 
 # ── AdminService.update_user ──────────────────────────────────────────────────
 
