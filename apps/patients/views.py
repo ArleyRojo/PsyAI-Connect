@@ -95,6 +95,11 @@ class PerfilFotoViewSet(viewsets.ViewSet):
         user_id = getattr(request, "user_id", None)
         file = request.FILES.get("foto") or request.FILES.get("fotoPerfil")
         payload, status_code = _get_patient_service().update_profile_photo(user_id, file)
+        if payload.get("success") and payload.get("fotoPerfil"):
+            request.session["fotoPerfil"] = payload["fotoPerfil"]
+            if "usuario" in request.session and isinstance(request.session["usuario"], dict):
+                request.session["usuario"]["fotoPerfil"] = payload["fotoPerfil"]
+            request.session.modified = True
         return Response(payload, status=status_code)
 
     def create(self, request):

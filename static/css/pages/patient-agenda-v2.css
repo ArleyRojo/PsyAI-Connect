@@ -13,11 +13,56 @@ body.patient-agenda-page {
     min-height: 100vh;
 }
 
-/* ── Page header — hereda estilo de patient.css ── */
+/* ── Page header — fondo azul gradiente como page canvas ───── */
+
+.patient-agenda-page .main-header {
+    background:
+        linear-gradient(135deg,
+            var(--brand-500) 0%,
+            var(--brand-700) 100%);
+    border: none;
+    box-shadow: var(--elev-2);
+    padding: var(--sp-5) var(--sp-6);
+    margin-bottom: var(--sp-6);
+    border-radius: var(--r-lg);
+    color: white;
+}
+
+.patient-agenda-page .main-header h1 {
+    color: white;
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    background-clip: initial;
+}
 
 .patient-agenda-page .main-header h1 i {
-    color: var(--brand-500);
-    font-size: 1.15em;
+    color: rgba(255,255,255,0.95);
+}
+
+.patient-agenda-page .main-header .user-greeting {
+    color: rgba(255,255,255,0.85);
+}
+
+.patient-agenda-page .main-header .btn-notif {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.25);
+    color: white;
+}
+
+.patient-agenda-page .main-header .btn-notif:hover {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.4);
+    color: white;
+}
+
+.patient-agenda-page .main-header .user-avatar {
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+}
+
+.patient-agenda-page .main-header::after {
+    display: none;
 }
 
 .patient-agenda-page .user-info {
@@ -1109,22 +1154,46 @@ body.patient-agenda-page {
 
 /* ── Dark mode overrides ───────────────────────────── */
 html.dark-mode .patient-agenda-page .main-header {
-    background: var(--dm-card);
-    border-color: var(--dm-border);
+    background:
+        linear-gradient(135deg,
+            var(--brand-500) 0%,
+            var(--brand-700) 100%);
+    border: none;
+    box-shadow: var(--elev-3);
 }
 
 html.dark-mode .patient-agenda-page .main-header h1 {
-    color: var(--dm-heading);
+    color: white;
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    background-clip: initial;
+}
+
+html.dark-mode .patient-agenda-page .main-header h1 i {
+    color: rgba(255,255,255,0.95);
 }
 
 html.dark-mode .patient-agenda-page .user-greeting {
-    color: var(--dm-text2);
+    color: rgba(255,255,255,0.85);
 }
 
 html.dark-mode .patient-agenda-page .btn-notif {
-    background: var(--dm-card);
-    border-color: var(--dm-border);
-    color: var(--dm-text2);
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.25);
+    color: white;
+}
+
+html.dark-mode .patient-agenda-page .btn-notif:hover {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.4);
+    color: white;
+}
+
+html.dark-mode .patient-agenda-page .user-avatar {
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+}
 }
 
 html.dark-mode .patient-agenda-page .section-card {

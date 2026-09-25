@@ -36,54 +36,13 @@ body, .aside-patient {
 }
 
 /* ── HEADER premium ── */
-.main-header {
-  position: relative;
-  padding: 1.5rem 1.75rem;
-  margin-bottom: 1.5rem;
-  background: var(--color-bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-soft);
-  box-shadow: var(--shadow-xs);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  overflow: hidden;
-}
-
-.main-header::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, rgba(144,202,249,.08), transparent 60%);
-  pointer-events: none;
-}
-
-.main-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0;
-  width: 80px; height: 3px;
-  background: var(--gradient-primary);
-  border-radius: 0 3px 3px 0;
-}
-
+/* .main-header, .main-header h1 y .main-header .user-info: se reutiliza el
+   estilo compartido (gradiente azul) definido en patient.css — el mismo que
+   usa "Mi Evolución" — en vez de duplicarlo con un fondo plano aquí. */
 .main-header h1 {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  color: var(--color-text-main);
   display: flex;
   align-items: center;
   gap: 0.75rem;
-}
-
-.main-header .user-info {
-  position: relative;
-  z-index: 1;
-  font-size: 0.9rem;
-  color: var(--color-text-body);
 }
 
 .user-greeting { font-size: 0.875rem; color: var(--color-text-body); }

@@ -634,6 +634,49 @@
 .stat-card-v2--mood[data-mood="low"]       .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(251,146,60,0.16), inset 0 0 0 1px rgba(255,255,255,0.24); }
 .stat-card-v2--mood[data-mood="critical"]  .stat-card-v2--mood__3d { box-shadow: 0 18px 40px rgba(239,68,68,0.16), inset 0 0 0 1px rgba(255,255,255,0.24); }
 
+/* Light mode fix for 3D mood sphere - use brand color instead of white */
+.stat-card-v2--mood__3d {
+    background:
+        radial-gradient(circle at 30% 30%,
+            rgba(47,111,228,0.28) 0%,
+            rgba(47,111,228,0.14) 18%,
+            rgba(47,111,228,0.06) 36%,
+            rgba(47,111,228,0.00) 62%),
+        radial-gradient(circle at 60% 70%,
+            rgba(47,111,228,0.14) 0%,
+            rgba(47,111,228,0.06) 28%,
+            rgba(47,111,228,0.00) 58%),
+        radial-gradient(circle at 55% 55%,
+            rgba(47,111,228,0.10) 0%,
+            rgba(47,111,228,0.04) 40%,
+            rgba(47,111,228,0.00) 100%);
+    box-shadow:
+        0 18px 40px rgba(13,71,161,0.12),
+        inset 0 0 0 1px rgba(47,111,228,0.18),
+        inset 0 14px 24px rgba(47,111,228,0.08);
+}
+
+html.dark-mode .stat-card-v2--mood__3d {
+    background:
+        radial-gradient(circle at 30% 30%,
+            rgba(255,255,255,0.42) 0%,
+            rgba(255,255,255,0.16) 18%,
+            rgba(255,255,255,0.08) 36%,
+            rgba(255,255,255,0.00) 62%),
+        radial-gradient(circle at 60% 70%,
+            rgba(255,255,255,0.20) 0%,
+            rgba(255,255,255,0.08) 28%,
+            rgba(255,255,255,0.00) 58%),
+        radial-gradient(circle at 55% 55%,
+            rgba(255,255,255,0.00) 0%,
+            rgba(255,255,255,0.00) 40%,
+            rgba(255,255,255,0.00) 100%);
+    box-shadow:
+        0 18px 40px rgba(0,0,0,0.35),
+        inset 0 0 0 1px rgba(255,255,255,0.22),
+        inset 0 14px 24px rgba(255,255,255,0.12);
+}
+
 /* ════════════════════════════════════════════════════════════════
    4. SECTION HEADINGS
    ============================================================ */
