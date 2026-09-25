@@ -1523,32 +1523,56 @@ section.chat-wrapper,
   }
 
   .chat-sidebar__header {
-    padding: 0.85rem !important;
+    padding: 0.75rem !important;
   }
 
   .chat-item {
-    gap: 0.65rem !important;
-    padding: 0.7rem 0.85rem !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+    min-height: 60px !important;
+  }
+
+  .chat-item-info {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 2px !important;
   }
 
   .chat-avatar-circle {
-    width: 40px !important;
-    height: 40px !important;
+    width: 38px !important;
+    height: 38px !important;
     font-size: 0.85rem !important;
   }
 
   .chat-item-meta {
-    max-width: 4.5rem;
+    max-width: none !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.5rem !important;
+    min-width: auto !important;
+    padding-right: 0 !important;
+  }
+
+  .chat-item-time {
+    font-size: 0.68rem !important;
+  }
+
+  .chat-badge-unread {
+    font-size: 0.65rem !important;
+    padding: 1px 6px !important;
+    min-width: 18px !important;
   }
 
   .chat-panel-header,
   .chat-input-bar {
-    padding-left: 0.85rem !important;
-    padding-right: 0.85rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
   }
 
   .chat-messages-area {
-    padding: 0.85rem !important;
+    padding: 0.75rem !important;
   }
 
   .chat-bubble {
@@ -1566,9 +1590,37 @@ section.chat-wrapper,
     max-width: 92% !important;
   }
 
-  .chat-item-time,
-  .chat-new-label {
-    display: none;
+  .chat-item {
+    min-height: 56px !important;
+    padding: 0.6rem 0.75rem !important;
+  }
+
+  .chat-avatar-circle {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .chat-item-name {
+    font-size: 0.85rem !important;
+  }
+
+  .chat-item-preview {
+    font-size: 0.72rem !important;
+  }
+
+  .chat-item-time {
+    font-size: 0.65rem !important;
+  }
+
+  .chat-badge-unread {
+    font-size: 0.6rem !important;
+    padding: 1px 5px !important;
+    min-width: 16px !important;
+  }
+
+  .chat-item-meta {
+    gap: 0.4rem !important;
   }
 
   .chat-input-bar {

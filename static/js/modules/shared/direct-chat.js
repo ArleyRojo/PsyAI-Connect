@@ -57,7 +57,7 @@
   function chatAvatarSrc(nombre, size, fz) {
     var inits = initials(nombre);
     var letra = inits.charAt(0).toUpperCase() || '?';
-    return svgAvatar(letra, size || 44, fz || 18);
+    return svgAvatar(letra, size || 38, fz || 15);
   }
 
   function avatarHtml(contact) {
@@ -65,9 +65,9 @@
     var rawName = contact.nombre || "Usuario";
     var dotClass = contact.isOnline ? "chat-online-dot" : "chat-online-dot offline";
     if (contact.fotoPerfil) {
-      return `<div class="chat-avatar-circle"><img class="chat-avatar-img" src="${photoUrl(contact.fotoPerfil)}" alt="${escapeHtml(rawName)}" data-nombre="${escapeHtml(rawName)}" data-size="44" onerror="chatFallbackImg(this)"><span class="${dotClass}"></span></div>`;
+      return `<div class="chat-avatar-circle"><img class="chat-avatar-img" src="${photoUrl(contact.fotoPerfil)}" alt="${escapeHtml(rawName)}" data-nombre="${escapeHtml(rawName)}" data-size="38" onerror="chatFallbackImg(this)"><span class="${dotClass}"></span></div>`;
     }
-    return `<div class="chat-avatar-circle"><img src="${chatAvatarSrc(contact.nombre, 44, 18)}" alt="${name}" style="width:100%;height:100%;border-radius:50%"><span class="${dotClass}"></span></div>`;
+    return `<div class="chat-avatar-circle"><img src="${chatAvatarSrc(contact.nombre, 38, 15)}" alt="${name}" style="width:100%;height:100%;border-radius:50%"><span class="${dotClass}"></span></div>`;
   }
 
   function parseDate(value) {
@@ -124,6 +124,20 @@
       return parts.join(" - ") || "Paciente";
     }
     return contact.especialidad || "Profesional";
+  }
+
+  function contactRole(contact, mode) {
+    if (mode === "patient") {
+      return "Paciente";
+    }
+    return "Profesional";
+  }
+
+  function contactSecondaryInfo(contact, mode) {
+    if (mode === "patient") {
+      return contact.contacto || contact.email || "";
+    }
+    return contact.especialidad || "";
   }
 
   function normalizeRole(value) {
@@ -185,6 +199,9 @@
     const textarea = qs(root, ".chat-message-input");
     const sendButton = qs(root, ".chat-send-btn");
     const backButton = qs(root, ".chat-back-btn");
+    const sidebarHeader = qs(root, ".chat-sidebar__header");
+    const panelTitle = sidebarHeader ? qs(sidebarHeader, ".panel-title") : null;
+    const panelCount = sidebarHeader ? qs(sidebarHeader, ".panel-count") : null;
 
     let contacts = [];
     let activeContact = null;
@@ -194,6 +211,24 @@
     let pollTimer = null;
     let contactPollTimer = null;
     let loadingContacts = false;
+
+    function getSearchPlaceholder() {
+      return contactMode === "patient" ? "Buscar profesional..." : "Buscar paciente...";
+    }
+
+    function getHeaderTitle() {
+      return contactMode === "patient" ? "Conversaciones" : "Conversaciones";
+    }
+
+    function getHeaderSubtitle(count) {
+      return contactMode === "patient" ? `${count} profesional${count !== 1 ? 'es' : ''}` : `${count} paciente${count !== 1 ? 's' : ''}`;
+    }
+
+    function updateHeader(count) {
+      if (panelTitle) panelTitle.textContent = getHeaderTitle();
+      if (panelCount) panelCount.textContent = getHeaderSubtitle(count);
+      if (search) search.placeholder = getSearchPlaceholder();
+    }
 
     function renderAuthState(icon, text) {
       list.innerHTML = `
@@ -286,7 +321,7 @@
       const term = search.value.trim().toLowerCase();
       const orderedContacts = sortContacts(contacts);
       const visible = orderedContacts.filter((contact) => {
-        const haystack = `${contact.nombre || ""} ${contact.especialidad || ""} ${contact.genero || ""}`.toLowerCase();
+        const haystack = `${contact.nombre || ""} ${contact.especialidad || ""} ${contact.genero || ""} ${contact.ultimoMensaje || ""}`.toLowerCase();
         return haystack.includes(term);
       });
 
@@ -304,7 +339,7 @@
         list.innerHTML = `
           <div class="chat-empty-state">
             <i class="fas fa-comments"></i>
-            <div>No hay usuarios registrados para mostrar</div>
+            <div>No hay conversaciones para mostrar</div>
           </div>
         `;
         return;
@@ -312,26 +347,25 @@
 
       list.innerHTML = visible.map((contact) => {
         const active = activeContact && Number(activeContact.idUsuario) === Number(contact.idUsuario) ? " active" : "";
-        const preview = contact.ultimoMensaje || contactSubtitle(contact, contactMode);
         const unread = Number(contact.noLeidos || 0);
         const unreadClass = unread > 0 ? " has-unread" : "";
+        const lastMessage = contact.ultimoMensaje ? escapeHtml(contact.ultimoMensaje) : "";
+        const time = escapeHtml(formatTime(contact.ultimaFecha));
         return `
           <button type="button" class="chat-item${active}${unreadClass}" data-contact-id="${contact.idUsuario}">
             ${avatarHtml(contact)}
             <span class="chat-item-info">
               <span class="chat-item-name">${escapeHtml(contact.nombre)}</span>
-              <span class="chat-item-preview">${escapeHtml(preview)}</span>
+              ${lastMessage ? `<span class="chat-item-preview">${lastMessage}</span>` : ""}
             </span>
             <span class="chat-item-meta">
-              <span class="chat-item-time">${escapeHtml(formatTime(contact.ultimaFecha))}</span>
+              <span class="chat-item-time">${time}</span>
               ${unread > 0 ? `<span class="chat-badge-unread">${unread}</span>` : ""}
-              ${unread > 0 ? `<span class="chat-new-label">Nuevo</span>` : ""}
             </span>
           </button>
         `;
       }).join("");
-      const countEl = document.getElementById('patientCount');
-      if (countEl) countEl.textContent = '· ' + contacts.length;
+      updateHeader(contacts.length);
     }
 
     function sortContacts(items) {

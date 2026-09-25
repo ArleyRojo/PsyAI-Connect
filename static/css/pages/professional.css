@@ -4929,14 +4929,15 @@ html {
 /* â”€â”€ Search bar â”€â”€ */
 .chat-search {
   position: relative;
+  margin-bottom: 8px;
 }
 
 .chat-search input {
   width: 100%;
-  padding: 9px 14px 9px 36px;
-  border: 1.5px solid var(--color-border);
-  border-radius: 50px;
-  background: var(--color-bg-card);
+  padding: 8px 14px 8px 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-soft);
   font-size: 0.85rem;
   color: var(--color-text-body);
   outline: none;
@@ -4945,8 +4946,8 @@ html {
 
 .chat-search input:focus {
   border-color: var(--color-secondary, #1565C0);
-  background: var(--color-bg-card);
-  box-shadow: 0 0 0 3px rgba(144,202,249,.22);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.15);
 }
 
 .chat-search i {
@@ -4955,73 +4956,108 @@ html {
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-text-muted);
-  font-size: 0.8rem;
-  transition: color 0.2s ease;
+  font-size: 0.85rem;
   pointer-events: none;
+  transition: color 0.2s ease;
 }
 
 .chat-search:focus-within i {
   color: var(--color-secondary, #1565C0);
 }
 
-/* â”€â”€ Contact list â”€â”€ */
 .chat-list {
   flex: 1;
   overflow-y: auto;
+  padding-right: 2px;
 }
 
-.chat-list::-webkit-scrollbar { width: 4px; }
-.chat-list::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+.chat-list::-webkit-scrollbar { width: 6px; }
+.chat-list::-webkit-scrollbar-track { background: transparent; }
+.chat-list::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+.chat-list::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* â”€â”€ Contact item â”€â”€ */
 .chat-item {
   position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 12px 14px;
+  min-height: 68px;
   cursor: pointer;
-  border-bottom: 1px solid var(--color-border-soft);
-  border-left: 3px solid transparent;
-  transition: background 0.18s ease, border-left-color 0.18s ease, transform 0.15s ease;
+  border-bottom: 1px solid rgba(21, 101, 192, 0.05);
+  transition: background 0.15s ease;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.chat-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: transparent;
+  border-radius: 0 3px 3px 0;
+  transition: background 0.15s ease;
+}
+
+.chat-item:last-child {
+  border-bottom: none;
+}
+
+.chat-item:focus,
+.chat-item:focus-visible,
+.chat-item:focus-within {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .chat-item:hover {
-  background: linear-gradient(90deg, rgba(21,101,192,.08) 0%, rgba(21,101,192,.02) 100%);
-  border-left-color: var(--color-secondary, #1565C0);
-  transform: translateX(3px);
+  background: rgba(21, 101, 192, 0.035);
 }
 
-.chat-item:hover .chat-item-name {
-  color: var(--color-secondary, #1565C0);
-}
-
-.chat-item:hover .chat-avatar-circle {
-  box-shadow: 0 0 0 3px rgba(21,101,192,.18);
+.chat-item:hover::before {
+  background: transparent;
 }
 
 .chat-item.active {
-  background: linear-gradient(90deg, rgba(21,101,192,.11) 0%, rgba(21,101,192,.03) 100%);
-  border-left: 3px solid var(--color-secondary, #1565C0);
+  background: rgba(21, 101, 192, 0.05);
+}
+
+.chat-item.active::before {
+  background: var(--color-secondary, #1565C0);
 }
 
 .chat-item.active .chat-item-name {
   color: var(--color-secondary, #1565C0);
-  font-weight: 700;
+  font-weight: 600;
 }
 
-.chat-item.active .chat-avatar-circle {
-  box-shadow: 0 0 0 3px rgba(21,101,192,.2);
+.chat-item.active .chat-item-preview {
+  color: var(--color-text-muted);
 }
 
 .chat-item.has-unread {
-  background: rgba(34,197,94,.10);
-  border-left: 3px solid #22c55e;
+  background: transparent;
+}
+
+.chat-item.has-unread::before {
+  background: transparent;
+}
+
+.chat-item.has-unread.active::before {
+  background: #22c55e;
 }
 
 .chat-item.has-unread .chat-item-name {
-  color: var(--color-primary-dark);
-  font-weight: 800;
+  color: var(--color-text-main);
+  font-weight: 700;
 }
 
 .chat-item.has-unread .chat-item-preview {
@@ -5029,14 +5065,9 @@ html {
   font-weight: 600;
 }
 
-.chat-item.has-unread .chat-avatar-circle {
-  box-shadow: 0 0 0 3px rgba(34,197,94,.25);
-}
-
-/* â”€â”€ Avatar circle â”€â”€ */
 .chat-avatar-circle {
-  width: 46px;
-  height: 46px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: var(--gradient-primary);
   display: flex;
@@ -5044,11 +5075,12 @@ html {
   justify-content: center;
   color: #fff;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.85rem;
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.18s ease;
+  transition: box-shadow 0.15s ease;
+  border: none;
 }
 
 .chat-avatar-circle img {
@@ -5056,29 +5088,35 @@ html {
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
+  border: none;
+  display: block;
 }
 
 .chat-online-dot {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
   background: #22c55e;
   border-radius: 50%;
-  border: 2px solid var(--color-bg-card);
+  border: 2px solid #fff;
   position: absolute;
-  bottom: 1px;
-  right: 1px;
+  bottom: 0;
+  right: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
 }
 .chat-online-dot.offline {
   background: #b0b8c4;
 }
 
-/* â”€â”€ Item text â”€â”€ */
 .chat-item-info {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  outline: none;
+  box-shadow: none;
 }
 
 .chat-item-name {
@@ -5088,7 +5126,11 @@ html {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.18s ease;
+  line-height: 1.3;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 .chat-item-preview {
@@ -5097,6 +5139,7 @@ html {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .chat-item-meta {
@@ -5104,10 +5147,12 @@ html {
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  min-width: 56px;
+  padding-right: 4px;
 }
 
 .chat-item-time {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--color-text-muted);
   white-space: nowrap;
 }
@@ -5115,62 +5160,40 @@ html {
 .chat-badge-unread {
   background: var(--color-secondary, #1565C0);
   color: #fff;
-  border-radius: 50px;
-  font-size: 0.68rem;
+  border-radius: 10px;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 2px 7px;
-  min-width: 20px;
+  padding: 2px 6px;
+  min-width: 18px;
   text-align: center;
+  box-shadow: 0 1px 2px rgba(21, 101, 192, 0.25);
 }
 
-.chat-new-label {
-  background: #22c55e;
-  color: #fff;
-  border-radius: 50px;
-  font-size: 0.62rem;
-  font-weight: 800;
-  line-height: 1;
-  padding: 3px 7px;
-  text-transform: uppercase;
-}
-
-/* â”€â”€ Empty state â”€â”€ */
 .chat-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 1.25rem;
+  padding: 40px 20px;
   text-align: center;
-  gap: 6px;
+  color: var(--color-text-muted);
+  gap: 10px;
 }
 
 .chat-empty-state i {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #e3f2fd, #dbeafe);
-  color: var(--color-secondary, #1565C0);
-  font-size: 1.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 10px;
-  opacity: 1;
-  box-shadow: 0 2px 12px rgba(13,71,161,.12);
+  font-size: 2.5rem;
+  opacity: 0.2;
 }
 
 .chat-empty-state .chat-empty-title {
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--color-text-main);
 }
 
 .chat-empty-state .chat-empty-hint {
-  font-size: 0.76rem;
-  color: var(--color-text-muted);
-  line-height: 1.4;
-  max-width: 185px;
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 
 /* â”€â”€ Panel derecho â”€â”€ */
@@ -9057,11 +9080,9 @@ html.dark-mode .chat-item {
 }
 html.dark-mode .chat-item:hover {
     background: rgba(255, 255, 255, 0.05) !important;
-    border-left-color: var(--dm-accent) !important;
 }
 html.dark-mode .chat-item.active {
     background: rgba(255, 255, 255, 0.08) !important;
-    border-left-color: var(--dm-accent) !important;
 }
 html.dark-mode .chat-item-name {
     color: var(--dm-text1) !important;
@@ -9070,7 +9091,6 @@ html.dark-mode .chat-item:hover .chat-item-name,
 html.dark-mode .chat-item.active .chat-item-name {
     color: var(--dm-accent) !important;
 }
-html.dark-mode .chat-item-preview,
 html.dark-mode .chat-item-time {
     color: var(--dm-text2) !important;
 }
@@ -11662,4 +11682,199 @@ body.aside-professional .reports-page .report-filter-select {
     background: #ffb300;
     flex-shrink: 0;
     display: inline-block;
+}
+
+
+/* =======================================================================
+   TITLE BAR UNIFICADO — "Gestión de Citas" style
+   Unifica el look de TODOS los <header class="main-header"> del área
+   profesional (dashboard + todas las páginas de aside-professional) en
+   un solo banner azul en degradé. Colocado al final del archivo a
+   propósito para que gane sobre las reglas .main-header ya existentes
+   más arriba (misma especificidad, pero declaradas después).
+   Selector deliberadamente SIN depender de la clase del <body>
+   (professional.css solo se carga en las 8 páginas del área profesional,
+   así que ".main-header" a secas es seguro y evita que una página sin
+   la clase "aside-professional" en el <body> se quede sin el estilo).
+   ======================================================================= */
+
+.main-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 1rem !important;
+    background: linear-gradient(120deg, #4E7EEA 0%, #2F5CD6 50%, #17389C 100%) !important;
+    border: none !important;
+    border-radius: 18px !important;
+    padding: 1.05rem 1.75rem !important;
+    margin: 0 0 1.75rem 0 !important;
+    box-shadow: 0 10px 26px -8px rgba(23, 56, 156, .45) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.main-header::before,
+.main-header::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Baseline: every bit of text/icon inside the banner reads white by
+   default. Specific elements below (badges, avatars) opt back out. */
+.main-header * {
+    color: #FFFFFF;
+}
+
+/* ── Title ─────────────────────────────────────────── */
+.main-header h1 {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    color: #FFFFFF !important;
+    font-family: var(--font-heading), 'Lora', Georgia, serif !important;
+    font-weight: 700 !important;
+    font-size: 1.4rem !important;
+    line-height: 1.25 !important;
+    letter-spacing: .2px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.main-header h1 i,
+.main-header h1 svg {
+    color: #FFFFFF !important;
+    opacity: .95 !important;
+    font-size: .95em !important;
+    margin-right: .55rem !important;
+}
+
+/* ── Optional subtitle under the title (dashboard) ────── */
+.main-header small {
+    color: rgba(255, 255, 255, .78) !important;
+    font-weight: 500 !important;
+}
+
+/* ── Breadcrumbs living inside the banner ─────────────── */
+.main-header nav.breadcrumb,
+.main-header .breadcrumb-custom {
+    background: transparent !important;
+    margin: .15rem 0 0 0 !important;
+    padding: 0 !important;
+}
+
+.main-header nav.breadcrumb a,
+.main-header nav.breadcrumb .sep,
+.main-header nav.breadcrumb span,
+.main-header .breadcrumb-custom a,
+.main-header .breadcrumb-custom li {
+    color: rgba(255, 255, 255, .75) !important;
+    font-size: .8rem !important;
+}
+
+.main-header nav.breadcrumb a:hover,
+.main-header .breadcrumb-custom a:hover {
+    color: #FFFFFF !important;
+}
+
+.main-header .breadcrumb-custom .active {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+/* ── Right side: greeting + bell + avatar ─────────────── */
+.main-header .user-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: .85rem !important;
+    flex-shrink: 0 !important;
+}
+
+.main-header .user-info span,
+.main-header .user-info small,
+.main-header .user-greeting {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    font-size: .92rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 220px !important;
+}
+
+.main-header .user-greeting strong,
+.main-header .user-info strong {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+
+/* Any bell / status icon sitting loose in the banner (not just .btn-notif) */
+.main-header .user-info > i,
+.main-header .user-info i.fa-bell,
+.main-header .user-info i.fa-user-tie {
+    color: #FFFFFF !important;
+    opacity: .95 !important;
+}
+
+.main-header .btn-notif,
+.main-header .user-info .btn-light {
+    background: rgba(255, 255, 255, .16) !important;
+    border: 1.5px solid rgba(255, 255, 255, .35) !important;
+    color: #FFFFFF !important;
+}
+
+.main-header .btn-notif:hover,
+.main-header .user-info .btn-light:hover {
+    background: rgba(255, 255, 255, .28) !important;
+    border-color: rgba(255, 255, 255, .6) !important;
+    color: #FFFFFF !important;
+    box-shadow: none !important;
+}
+
+.main-header .user-avatar,
+.main-header .user-avatar-circle,
+.main-header .user-info [data-avatar="inicial"] {
+    border-radius: 50% !important;
+    border: 2px solid rgba(255, 255, 255, .6) !important;
+    box-shadow: none !important;
+}
+
+.main-header .user-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    background: rgba(255, 255, 255, .18) !important;
+}
+
+/* ── Dark mode: keep the same banner (it already reads well) ── */
+html.dark-mode .main-header {
+    background: linear-gradient(120deg, #4E7EEA 0%, #2F5CD6 50%, #17389C 100%) !important;
+    box-shadow: 0 10px 26px -8px rgba(0, 0, 0, .55) !important;
+}
+
+html.dark-mode .main-header h1,
+html.dark-mode .main-header .user-greeting {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    color: #FFFFFF !important;
+}
+
+/* ── Small screens: stack gracefully, keep the banner look ── */
+@media (max-width: 576px) {
+    .main-header {
+        flex-wrap: wrap !important;
+        padding: .9rem 1.1rem !important;
+        border-radius: 14px !important;
+    }
+
+    .main-header h1 {
+        font-size: 1.15rem !important;
+    }
 }

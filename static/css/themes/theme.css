@@ -4921,6 +4921,9 @@ html.dark-mode .chat-search-input:focus {
 html.dark-mode .chat-search i {
     color: var(--dm-text2) !important;
 }
+html.dark-mode .chat-search:focus-within i {
+    color: var(--dm-accent) !important;
+}
 
 /* Contact list */
 html.dark-mode .chat-list::-webkit-scrollbar-thumb {
@@ -4928,34 +4931,66 @@ html.dark-mode .chat-list::-webkit-scrollbar-thumb {
 }
 html.dark-mode .chat-item {
     background: transparent !important;
-    border-color: var(--dm-border) !important;
+    border-color: var(--dm-border-subtle, rgba(255,255,255,0.06)) !important;
     color: var(--dm-text1) !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 html.dark-mode .chat-item:hover {
-    background: rgba(255,255,255,0.04) !important;
+    background: rgba(100,181,246,0.05) !important;
+}
+html.dark-mode .chat-item:hover::before {
+    background: transparent !important;
+}
+html.dark-mode .chat-item:focus,
+html.dark-mode .chat-item:focus-visible,
+html.dark-mode .chat-item:focus-within {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 html.dark-mode .chat-item.active {
-    background: rgba(100,181,246,0.10) !important;
-    border-left-color: var(--dm-accent) !important;
+    background: rgba(100,181,246,0.08) !important;
+}
+html.dark-mode .chat-item.active::before {
+    background: var(--dm-accent) !important;
+}
+html.dark-mode .chat-item.active .chat-item-name {
+    color: var(--dm-accent) !important;
+    font-weight: 600 !important;
+}
+html.dark-mode .chat-item.active .chat-item-preview {
+    color: var(--dm-text2) !important;
 }
 html.dark-mode .chat-item.has-unread {
-    background: rgba(34,197,94,0.08) !important;
-    border-left-color: #22c55e !important;
+    background: transparent !important;
+}
+html.dark-mode .chat-item.has-unread::before {
+    background: transparent !important;
+}
+html.dark-mode .chat-item.has-unread.active::before {
+    background: #22c55e !important;
 }
 html.dark-mode .chat-item.has-unread .chat-item-name {
-    color: var(--dm-accent) !important;
+    color: var(--dm-heading) !important;
+    font-weight: 700 !important;
 }
 html.dark-mode .chat-item.has-unread .chat-item-preview {
     color: var(--dm-heading) !important;
-}
-html.dark-mode .chat-item.has-unread .chat-avatar-circle {
-    box-shadow: 0 0 0 3px rgba(34,197,94,0.25) !important;
+    font-weight: 600;
 }
 html.dark-mode .chat-item-name {
     color: var(--dm-heading) !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 html.dark-mode .chat-item-preview {
     color: var(--dm-text2) !important;
+    border: none !important;
+    outline: none !important;
 }
 html.dark-mode .chat-item-time {
     color: var(--dm-muted) !important;
@@ -4964,7 +4999,7 @@ html.dark-mode .chat-avatar-circle {
     background: linear-gradient(135deg, var(--dm-accent), var(--dm-soft)) !important;
 }
 html.dark-mode .chat-online-dot {
-    border-color: var(--dm-card) !important;
+    border-color: var(--dm-bg, #0f1419) !important;
 }
 html.dark-mode .chat-badge-unread {
     background: var(--dm-accent) !important;
@@ -4973,6 +5008,18 @@ html.dark-mode .chat-badge-unread {
 html.dark-mode .chat-new-label {
     background: #22c55e !important;
     color: #fff !important;
+}
+html.dark-mode .chat-empty-state i {
+    opacity: 0.25 !important;
+}
+html.dark-mode .chat-empty-state .chat-empty-title {
+    color: var(--dm-heading) !important;
+}
+html.dark-mode .chat-empty-state .chat-empty-hint {
+    color: var(--dm-text2) !important;
+}
+html.dark-mode .chat-empty-state .chat-empty-hint {
+    color: var(--dm-text2) !important;
 }
 
 html.dark-mode .chat-filter-tabs {
