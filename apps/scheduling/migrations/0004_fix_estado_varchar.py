@@ -17,6 +17,10 @@ def reverse_fix_estado_column(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
+    # MySQL no puede hacer rollback de DDL: sin esto, Django bloquea el ALTER TABLE
+    # ejecutado dentro de RunPython (TransactionManagementError).
+    atomic = False
+
     dependencies = [
         ('scheduling', '0003_add_confirmada_estado'),
     ]

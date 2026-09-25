@@ -1,11 +1,13 @@
 #!/bin/bash
+#!/bin/bash
 set -e
 
 # ──────────────────────────────────────────────────────────────────────────────
 # PsyAI Connect — Container Entrypoint
 # 1. Wait for MySQL to be ready
 # 2. Run migrations
-# 3. Start the server (CMD)
+# 3. Create dev admin (dev only)
+# 4. Start the server (CMD)
 # ──────────────────────────────────────────────────────────────────────────────
 
 echo "==> PsyAI Connect — Entrypoint starting..."
@@ -14,17 +16,17 @@ echo "==> PsyAI Connect — Entrypoint starting..."
 # Only wait if DB_HOST is set (tests may use SQLite instead)
 if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ]; then
     echo "==> Waiting for MySQL at $DB_HOST:${DB_PORT:-3306}..."
-    until python -c "
-import socket, sys
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.settimeout(2)
+    until python - <<'PY'
+import os, socket, sys
+host = os.environ["DB_HOST"].strip()
+port = int(os.environ.get("DB_PORT", "3306").strip())
 try:
-    s.connect(('$DB_HOST', int('${DB_PORT:-3306}')))
-    s.close()
-    sys.exit(0)
-except:
+    socket.create_connection((host, port), timeout=2).close()
+except Exception as e:
+    print(f"    connect to {host}:{port} failed: {e}", file=sys.stderr)
     sys.exit(1)
-" 2>/dev/null; do
+PY
+    do
         echo "    MySQL not ready yet, retrying in 2s..."
         sleep 2
     done
