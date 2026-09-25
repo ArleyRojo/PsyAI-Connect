@@ -44,6 +44,7 @@ urlpatterns = [
     path("paciente/documentos", DocumentoPacienteViewSet.as_view({"get": "list"}), name="documento_list"),
     path("chatbot/enviar", ChatbotAPIView.as_view(), name="chatbot_enviar_legacy"),
     path("perfil/foto", PerfilFotoViewSet.as_view({"put": "update", "post": "create"}), name="perfil_foto_legacy"),
+    path("perfil/paciente/<int:pk>", PerfilPacienteViewSet.as_view({"get": "retrieve", "put": "update", "patch": "partial_update"}), name="perfil-paciente-detail"),
     path("chat/profesionales", ChatContactoViewSet.as_view({"get": "list"}), name="chat_profesionales_legacy"),
     path("paciente/chat/mensajes", ChatMensajeViewSet.as_view({"get": "list", "post": "create"}), name="chat_mensajes_paciente_legacy"),
     path("chat/enviar", ChatMensajeViewSet.as_view({"post": "create"}), name="chat_enviar_legacy"),
