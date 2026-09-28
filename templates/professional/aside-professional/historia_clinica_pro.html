@@ -117,7 +117,7 @@
       </div>
     </header>
 
-            <div class="card p-4 mb-3" id="patient-selector" style="display:none;">
+            <div class="card p-4 mb-3" id="patient-selector">
               <h4 class="fw-bold mb-2"><i class="fas fa-user-check me-2 text-primary"></i>Seleccionar paciente</h4>
               <p class="text-muted mb-3">Elige un paciente para ver su historia clínica y subir documentos.</p>
               <div style="max-width:420px;">
@@ -189,62 +189,65 @@
               </button>
             </div>
 
-            <div class="section-label"><i class="fas fa-lock"></i> Mis documentos</div>
-            <div class="file-list" id="my-docs-list">
-              <div class="file-row">
-                <div class="ficon pdf"><i class="fas fa-file-pdf"></i></div>
-                <div class="fmeta">
-                  <div class="fname">Historia_clínica_inicial.pdf</div>
-                  <div class="finfo">02 jun 2026 &nbsp;·&nbsp; 1.2 MB &nbsp;·&nbsp; Solo yo lo veo</div>
+            <div class="card p-3" style="background:var(--gray-50); border:1px solid var(--gray-200); border-radius:var(--radius-md);">
+              <div class="section-label"><i class="fas fa-lock"></i> Mis documentos</div>
+              <div class="file-list" id="my-docs-list">
+                <div class="file-row">
+                  <div class="ficon pdf"><i class="fas fa-file-pdf"></i></div>
+                  <div class="fmeta">
+                    <div class="fname">Historia_clínica_inicial.pdf</div>
+                    <div class="finfo">02 jun 2026 &nbsp;·&nbsp; 1.2 MB &nbsp;·&nbsp; Solo yo lo veo</div>
+                  </div>
+                  <span class="tag privado">Privado</span>
+                  <div class="factions">
+                    <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
+                    <button class="faction-btn" title="Compartir con paciente" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
+                    <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
+                    <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
+                  </div>
                 </div>
-                <span class="tag privado">Privado</span>
-                <div class="factions">
-                  <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
-                  <button class="faction-btn" title="Compartir con paciente" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
-                  <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
-                  <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
+                <div class="file-row">
+                  <div class="ficon doc"><i class="fas fa-file-alt"></i></div>
+                  <div class="fmeta">
+                    <div class="fname">Informe_evolución_mes1.pdf</div>
+                    <div class="finfo">01 jun 2026 &nbsp;·&nbsp; 340 KB &nbsp;·&nbsp; Visible para el paciente</div>
+                  </div>
+                  <span class="tag compartido">Compartido</span>
+                  <div class="factions">
+                    <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
+                    <button class="faction-btn" title="Revocar acceso" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
+                    <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
+                    <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
+                  </div>
                 </div>
-              </div>
-              <div class="file-row">
-                <div class="ficon doc"><i class="fas fa-file-alt"></i></div>
-                <div class="fmeta">
-                  <div class="fname">Informe_evolución_mes1.pdf</div>
-                  <div class="finfo">01 jun 2026 &nbsp;·&nbsp; 340 KB &nbsp;·&nbsp; Visible para el paciente</div>
-                </div>
-                <span class="tag compartido">Compartido</span>
-                <div class="factions">
-                  <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
-                  <button class="faction-btn" title="Revocar acceso" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
-                  <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
-                  <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
-                </div>
-              </div>
-              <div class="file-row">
-                <div class="ficon doc"><i class="fas fa-file-contract"></i></div>
-                <div class="fmeta">
-                  <div class="fname">Consentimiento_informado_firmado.pdf</div>
-                  <div class="finfo">15 may 2026 &nbsp;·&nbsp; 210 KB &nbsp;·&nbsp; Visible para el paciente</div>
-                </div>
-                <span class="tag compartido">Compartido</span>
-                <div class="factions">
-                  <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
-                  <button class="faction-btn" title="Revocar acceso" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
-                  <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
-                  <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
+                <div class="file-row">
+                  <div class="ficon doc"><i class="fas fa-file-contract"></i></div>
+                  <div class="fmeta">
+                    <div class="fname">Consentimiento_informado_firmado.pdf</div>
+                    <div class="finfo">15 may 2026 &nbsp;·&nbsp; 210 KB &nbsp;·&nbsp; Visible para el paciente</div>
+                  </div>
+                  <span class="tag compartido">Compartido</span>
+                  <div class="factions">
+                    <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
+                    <button class="faction-btn" title="Revocar acceso" onclick="toggleShare(this)"><i class="fas fa-share"></i></button>
+                    <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
+                    <button class="faction-btn danger" title="Eliminar" onclick="openDeleteModal(this)"><i class="fas fa-trash"></i></button>
+                  </div>
                 </div>
               </div>
             </div>
 
             <hr class="divider">
 
-            <div class="section-label"><i class="fas fa-history"></i> Historial previo · aportado por el paciente</div>
+            <div class="card p-3" style="background:var(--gray-50); border:1px solid var(--gray-200); border-radius:var(--radius-md);">
+              <div class="section-label"><i class="fas fa-history"></i> Historial previo · aportado por el paciente</div>
 
-            <div class="notice blue">
-              <i class="fas fa-shield-alt"></i>
-              <span>El paciente autorizó que veas estos documentos. Son registros de atenciones con otros profesionales, subidos y compartidos por el propio paciente. No puedes editarlos ni eliminarlos.</span>
-            </div>
+              <div class="notice blue">
+                <i class="fas fa-shield-alt"></i>
+                <span>El paciente autorizó que veas estos documentos. Son registros de atenciones con otros profesionales, subidos y compartidos por el propio paciente. No puedes editarlos ni eliminarlos.</span>
+              </div>
 
-            <div class="file-list" id="prev-docs-list">
+              <div class="file-list" id="prev-docs-list">
               <div class="file-row">
                 <div class="ficon prev"><i class="fas fa-file-upload"></i></div>
                 <div class="fmeta">
@@ -256,8 +259,9 @@
                   <button class="faction-btn" title="Ver"><i class="fas fa-eye"></i></button>
                   <button class="faction-btn" title="Descargar"><i class="fas fa-download"></i></button>
                 </div>
-              </div>
-            </div>
+</div>
+             </div>
+           </div>
 
             <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:14px;">
               <i class="fas fa-info-circle" style="vertical-align:-2px;font-size:14px"></i>

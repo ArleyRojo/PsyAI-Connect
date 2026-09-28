@@ -74,10 +74,14 @@ def subscribe_newsletter(email):
 def log_client_error(request_body):
     try:
         data = json.loads(request_body)
+        msg = data.get("message", "")
+        # Ignore benign View Transition opt‑in warnings from browsers that don't support the API yet
+        if "ViewTransition opt-in disabled" in msg:
+            return
         logger.warning(
             "[ClientError] %s: %s | %s | page=%s",
             data.get("type", "unknown"),
-            data.get("message", ""),
+            msg,
             data.get("details", ""),
             data.get("page", ""),
         )

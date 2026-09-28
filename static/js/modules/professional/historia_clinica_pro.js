@@ -14,10 +14,18 @@ function cargarDatosPaciente() {
   fetch('/api/profesional/pacientes')
     .then(r => r.json())
     .then(data => {
-      if (!data.success) return;
-      const paciente = data.pacientes.find(p => p.idUsuario == pacienteSeleccionado);
+      let pacientes = [];
+      if (Array.isArray(data)) {
+        pacientes = data;
+      } else if (data && data.success && Array.isArray(data.pacientes)) {
+        pacientes = data.pacientes;
+      }
+      const paciente = pacientes.find(p => p.idUsuario == pacienteSeleccionado);
       if (!paciente) { mostrarSelector(); return; }
       actualizarBanner(paciente);
+      // hide selector when a patient is loaded
+      const sel = document.getElementById('patient-selector');
+      if (sel) sel.style.display = 'none';
     })
     .catch(() => {});
 
@@ -59,30 +67,135 @@ function escapeHtml(value) {
     .replace(/'/g, '&#039;');
 }
 
-function cargarSelectorPacientes() {
-  const select = document.getElementById('selector-paciente');
-  if (!select) return;
-  fetch('/api/profesional/pacientes')
-    .then(r => r.json())
-    .then(data => {
-      const pacientes = (data.success && data.pacientes) ? data.pacientes : [];
-      select.innerHTML = '<option value="">Selecciona un paciente...</option>' +
-        pacientes.map(p => {
-          const nombre = escapeHtml(p.nombre || 'Paciente');
-          const email = escapeHtml(p.contacto || p.email || '');
-          return '<option value="' + p.idUsuario + '" data-email="' + email + '">' + nombre + '</option>';
-        }).join('');
-    })
-    .catch(() => { select.innerHTML = '<option value="">No se pudieron cargar los pacientes</option>'; });
+// Helper: safe JSON fetch with ok check
+async function fetchJson(url) {
+  try {
+    const r = await fetch(url, { credentials: 'same-origin' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const ct = r.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) throw new Error('Not JSON');
+    return await r.json();
+  } catch (e) {
+    console.warn('fetchJson error', url, e);
+    throw e;
+  }
 }
 
-function elegirPaciente() {
+// Normalise patient list from either endpoint
+function normalizarPacientes(data) {
+  let arr = [];
+  if (Array.isArray(data)) arr = data;
+  else if (data && data.success && Array.isArray(data.pacientes)) arr = data.pacientes;
+  return arr.map(p => ({
+    id: p.idUsuario ?? p.idPaciente ?? p.id ?? '',
+    nombre: p.nombre ?? p.nombreCompleto ?? 'Paciente',
+    correo: p.contacto ?? p.email ?? ''
+  })).filter(p => p.id);
+}
+
+function setSelectorState(state, msg) {
+  const sel = document.getElementById('selector-paciente');
+  const wrap = document.getElementById('patient-selector');
+  if (!sel || !wrap) return;
+  // remove previous retry button
+  const old = wrap.querySelector('.retry-btn');
+  if (old) old.remove();
+  switch (state) {
+    case 'loading':
+      sel.disabled = true;
+      sel.innerHTML = '<option value="">Cargando pacientes…</option>';
+      break;
+    case 'empty':
+      sel.disabled = true;
+      sel.innerHTML = '<option value="">No hay pacientes registrados</option>';
+      break;
+    case 'error':
+      sel.disabled = true;
+      sel.innerHTML = `<option value="">${escapeHtml(msg || 'No se pudieron cargar los pacientes')}</option>`;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-sm btn-outline-primary retry-btn mt-2';
+      btn.textContent = 'Reintentar';
+      btn.onclick = () => cargarSelectorPacientes();
+      wrap.appendChild(btn);
+      break;
+    case 'ready':
+      sel.disabled = false;
+      break;
+  }
+}
+
+async function cargarSelectorPacientes() {
+  setSelectorState('loading');
+  // 1️⃣ assigned patients
+  let pacientes = await fetchJson('/api/profesional/pacientes').catch(() => []);
+  pacientes = normalizarPacientes(pacientes);
+  // 2️⃣ fallback to global list (accessible to professional) if none
+  if (!pacientes.length) {
+    const all = await fetchJson('/api/profesional/pacientes/todos').catch(() => []);
+    pacientes = normalizarPacientes(all);
+  }
+  const select = document.getElementById('selector-paciente');
+  if (!select) return;
+  if (!pacientes.length) {
+    setSelectorState('empty');
+    return;
+  }
+  select.innerHTML = '<option value="">Selecciona un paciente…</option>' +
+    pacientes.map(p => {
+      const label = `${escapeHtml(p.nombre)}${p.correo ? ` (${escapeHtml(p.correo)})` : ''}`;
+      return `<option value="${p.id}" data-email="${escapeHtml(p.correo)}">${label}</option>`;
+    }).join('');
+  setSelectorState('ready');
+
+  // Preselect if URL has pacienteId
+  const urlParams = new URLSearchParams(window.location.search);
+  const pid = urlParams.get('pacienteId');
+  if (pid) {
+    const opt = select.querySelector(`option[value="${pid}"]`);
+    if (opt) {
+      select.value = pid;
+      elegirPaciente();
+    }
+  }
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+async function elegirPaciente() {
   const select = document.getElementById('selector-paciente');
   if (!select || !select.value) return;
   const option = select.options[select.selectedIndex];
   pacienteSeleccionado = select.value;
+
+  // Assign patient to professional (idempotent) before proceeding
+  try {
+    await fetch(`/api/profesional/pacientes/${pacienteSeleccionado}/asignar`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken')
+      }
+    });
+  } catch (_) {
+    // If assignment fails, document creation will try again server‑side
+  }
+
   actualizarBanner({
-    nombre: option ? option.text : 'Paciente',
+    nombre: option ? option.text.split(' (')[0] : 'Paciente',
     contacto: option ? option.dataset.email || '' : '',
   });
   const sel = document.getElementById('patient-selector');

@@ -3040,46 +3040,142 @@
 
 
 /* â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.tabs-container { border-bottom: 2px solid #e8edf3; margin-bottom: 1.5rem; }
-.tabs { display: flex; gap: 0; }
-.tab {
-    padding: 12px 28px;
-    font-size: .9rem;
-    font-weight: 600;
-    color: #6c7a8d;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    cursor: pointer;
-    transition: color .2s, border-color .2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+/* ============================================================
+   SAAS‑LEVEL SEGMENTED TABS (Diagnósticos / Evolución)
+   ============================================================ */
+.tabs-container {
+  --tab-bg: #f3f6fb;
+  --tab-hover: #e8efff;
+  --tab-active: var(--brand-600);
+  --tab-text: #4a5568;
+  --tab-active-text: #fff;
+  --tab-radius: 10px;
+  --tab-gap: 4px;
+  --tab-height: 44px;
+  --indicator-speed: 250ms;
+
+  display: inline-flex;
+  align-items: center;
+  background: var(--tab-bg);
+  border-radius: var(--tab-radius);
+  padding: var(--tab-gap);
+  gap: var(--tab-gap);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(13,71,161,.08), inset 0 0 0 1px rgba(13,71,161,.06);
+  position: relative;
+  user-select: none;
 }
-.tab:hover { color: var(--brand-600); }
-.tab.active { color: var(--brand-600); border-bottom-color: var(--brand-600); }
+
+/* Accessibility: focus ring on container */
+.tabs-container:focus-within {
+  box-shadow: 0 0 0 3px rgba(21,101,192,.25), 0 1px 3px rgba(13,71,161,.08);
+}
+
+.tabs {
+  display: flex;
+  gap: 0;               /* tabs butt up; container gap handles spacing */
+}
+
+/* Each tab button */
+.tab {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  height: var(--tab-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 1.25rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--tab-text);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--tab-radius) - 2px);
+  cursor: pointer;
+  transition: color var(--indicator-speed) ease, background var(--indicator-speed) ease;
+  white-space: nowrap;
+}
+
+/* Hover / focus */
+.tab:hover,
+.tab:focus-visible {
+  color: var(--brand-600);
+  background: var(--tab-hover);
+  outline: none;
+}
+
+/* Active tab – solid brand background + subtle elevation */
+.tab.active {
+  color: var(--tab-active-text);
+  background: var(--tab-active);
+  box-shadow: 0 2px 6px rgba(21,101,192,.35);
+}
+
+/* Icon sizing */
+.tab i {
+  font-size: .95rem;
+  line-height: 1;
+}
+
+/* -----------------------------------------------------------
+   Responsive – stack on very small screens
+   ----------------------------------------------------------- */
+@media (max-width: 480px) {
+  .tabs-container {
+    flex-direction: column;
+    width: 100%;
+    border-radius: 12px;
+  }
+  .tab {
+    width: 100%;
+    border-radius: 8px;
+    height: 40px;
+    padding: 0 1rem;
+  }
+}
+
+/* Dark‑mode tweaks (uses existing .dark-mode on <html>) */
+html.dark-mode .tabs-container {
+  --tab-bg: #1e293b;
+  --tab-hover: #273549;
+  --tab-text: #cbd5e1;
+  --tab-active: var(--brand-500);
+  box-shadow: 0 1px 3px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.06);
+}
+html.dark-mode .tab:hover,
+html.dark-mode .tab:focus-visible {
+  background: var(--tab-hover);
+  color: var(--brand-300);
+}
+html.dark-mode .tab.active {
+  background: var(--tab-active);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(21,101,192,.45);
+}
 
 /* â”€â”€ Progress steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.progress-nav { background: #fff; border-radius: 14px; padding: 20px 24px; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 1.5rem; }
-.progress-nav__label { display: flex; justify-content: space-between; font-size: .85rem; font-weight: 600; color: #4a5568; margin-bottom: 10px; }
+.progress-nav { background: #fff; border-radius: 12px; padding: 16px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 1.25rem; }
+.progress-nav__label { display: flex; justify-content: space-between; font-size: .78rem; font-weight: 600; color: #4a5568; margin-bottom: 8px; }
 .progress-nav__label .pct { color: var(--brand-600); }
-.progress-nav__bar { background: #e8edf3; border-radius: 99px; height: 6px; margin-bottom: 20px; overflow: hidden; }
-.progress-nav__fill { background: linear-gradient(90deg, #1565C0, #42A5F5); height: 100%; border-radius: 99px; transition: width .4s cubic-bezier(.4,0,.2,1); }
-.progress-nav__steps { display: flex; justify-content: space-between; }
+.progress-nav__bar { background: #e8edf3; border-radius: 99px; height: 5px; margin-bottom: 16px; overflow: hidden; }
+.progress-nav__fill { background: linear-gradient(90deg, #1565C0, #42A5F5); height: 100%; border-radius: 99px; transition: width .35s cubic-bezier(.4,0,.2,1); }
+.progress-nav__steps { display: flex; justify-content: space-between; gap: 6px; }
 .progress-step {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    font-size: .78rem; font-weight: 600; color: #9aa5b4; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: .65rem; font-weight: 600; color: #9aa5b4; cursor: pointer;
     transition: color .2s;
+    padding: 3px 6px;
 }
 .progress-step i {
-    width: 38px; height: 38px; border-radius: 50%;
+    width: 24px; height: 24px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    background: #e8edf3; color: #9aa5b4; font-size: .9rem;
-    transition: background .25s, color .25s, box-shadow .25s;
+    background: #e8edf3; color: #9aa5b4; font-size: .7rem;
+    transition: background .2s, color .2s, box-shadow .2s;
 }
 .progress-step.active { color: var(--brand-600); }
-.progress-step.active i { background: #1565C0; color: #fff; box-shadow: 0 4px 14px rgba(21,101,192,.35); }
+.progress-step.active i { background: #1565C0; color: #fff; box-shadow: 0 2px 6px rgba(21,101,192,.3); }
 .progress-step.done { color: #388e3c; }
 .progress-step.done i { background: #e8f5e9; color: #388e3c; }
 
@@ -3144,6 +3240,25 @@
 /* â”€â”€ AnimaciÃ³n panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .panel-step { animation: fadePanel .22s ease; }
 @keyframes fadePanel { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* Compact cards on patients page */
+.patients-page .card {
+    padding: 1rem !important;
+}
+.patients-page .card h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+}
+.patients-page .card .form-control,
+.patients-page .card .form-select {
+    padding: 0.4rem 0.7rem !important;
+    font-size: 0.85rem;
+}
+.patients-page .card .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
 
 /* ============================================================
    DARK MODE ADDITIONS

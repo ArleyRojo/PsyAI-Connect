@@ -391,3 +391,18 @@ class ChatMensajeProfesionalResource(APIView):
         svc = MensajesService()
         id_msg = svc.enviar_mensaje(user_id, receptor, mensaje)
         return Response({"success": True, "idMensaje": id_msg}, status=status.HTTP_201_CREATED)
+
+
+class AllPacientesProfesionalResource(APIView):
+    permission_classes = [IsAuthenticatedDRF]
+
+    def get(self, request):
+        # Ensure the user is professional or admin
+        user_role = getattr(request, "user_role", None)
+        if user_role not in ("profesional", "admin"):
+            return Response({"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
+        from apps.patients.services import PatientService
+        svc = PatientService()
+        # Return a large page to get all patients
+        payload, status_code = svc.list_patients(page=1, limit=1000)
+        return Response(payload, status=status_code)
