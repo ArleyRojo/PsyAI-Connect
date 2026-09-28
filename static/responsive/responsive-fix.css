@@ -1483,6 +1483,37 @@ section.chat-wrapper,
   text-overflow: ellipsis;
 }
 
+/* Unified sidebar animation for mobile (≤991px) */
+@media (max-width: 991.98px) {
+  .sidebar {
+    transform: translate3d(-100%,0,0);
+    transition: transform 280ms cubic-bezier(.22,1,.36,1);
+    will-change: transform;
+    contain: layout paint;
+  }
+  .sidebar.active {
+    transform: translate3d(0,0,0);
+  }
+  .sidebar-overlay {
+    background: rgba(13,47,97,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms, visibility 200ms;
+  }
+  .sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-overlay {
+    transition: none !important;
+  }
+}
+
 @media (max-width: 767.98px) {
   .chat-wrapper {
     position: relative !important;

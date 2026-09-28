@@ -3698,6 +3698,60 @@ html.dark-mode .table > :not(caption) > * > * {
     color: var(--dm-text1) !important;
 }
 
+/* Table header variants */
+html.dark-mode .table-light,
+html.dark-mode .thead-light th {
+    background-color: var(--dm-elevated) !important;
+    color: var(--dm-heading) !important;
+    border-color: var(--dm-border) !important;
+}
+
+/* Tabs */
+html.dark-mode .tabs-container,
+html.dark-mode .tabs {
+    background-color: var(--dm-card) !important;
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode .tab {
+    background-color: var(--dm-elevated) !important;
+    color: var(--dm-text1) !important;
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode .tab.active,
+html.dark-mode .tab:hover {
+    background-color: var(--dm-accent) !important;
+    color: var(--dm-on-accent) !important;
+    border-color: var(--dm-accent) !important;
+}
+
+/* Progress navigator */
+html.dark-mode .progress-nav {
+    background-color: var(--dm-card) !important;
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode .progress-step {
+    background-color: var(--dm-elevated) !important;
+    color: var(--dm-text1) !important;
+    border-color: var(--dm-border) !important;
+}
+html.dark-mode .progress-step.active,
+html.dark-mode .progress-step:hover {
+    background-color: var(--dm-accent) !important;
+    color: var(--dm-on-accent) !important;
+    border-color: var(--dm-accent) !important;
+}
+
+/* Selected patient banner */
+html.dark-mode .selected-patient-banner {
+    background-color: var(--dm-card) !important;
+    border-color: var(--dm-border) !important;
+}
+
+/* Empty state */
+html.dark-mode .empty-state {
+    color: var(--dm-text2) !important;
+}
+
 /* ── 21. Bootstrap Utilities Overrides ── */
 html.dark-mode .bg-white {
     background-color: var(--dm-card) !important;

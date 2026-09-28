@@ -32,7 +32,6 @@
     max-width: var(--pro-sidebar-width, 300px) !important;
     height: 100dvh;
     z-index: 1100;
-    background: var(--color-bg-light, #fff);
     border-radius: 0 20px 20px 0;
     overflow-y: auto;
     overflow-x: hidden;
@@ -176,7 +175,6 @@
     padding: 1rem 1.1rem !important;
     border: 1px solid var(--color-border, #d6e8fa) !important;
     border-radius: var(--pro-card-radius, 14px);
-    background: var(--color-bg-light, #fff);
   }
 
   
@@ -953,7 +951,7 @@
 .aside-professional .main-content,
   body:has(#tablaReportes) .main-content,
   body:has(#tbodyPacientes) .main-content {
-    background: var(--color-bg, #f0f5fc) !important;
+    
   }
 
   body:has(#tbodyPacientes) .tabs-container,
@@ -969,7 +967,7 @@
 
   body:has(#tbodyPacientes) .tabs-container {
     padding: 0.45rem;
-    background: #fff;
+    
   }
 
   
@@ -985,7 +983,7 @@
   }
 
   body:has(#tbodyPacientes) .progress-nav {
-    background: #fff;
+    
     border: 1px solid rgba(13, 71, 161, 0.1);
     padding: 0.6rem !important;
   }
@@ -1060,7 +1058,7 @@
     max-width: 100%;
     border: 1px solid rgba(13, 71, 161, 0.1);
     border-radius: 12px;
-    background: #fff;
+    
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: thin;
@@ -1294,7 +1292,7 @@ body:has(#tbodyPacientes) .main-header,
     padding: 0.85rem;
     border: 1px solid rgba(13, 71, 161, 0.12);
     border-radius: 12px;
-    background: #fff;
+    
     box-shadow: 0 6px 18px rgba(13, 71, 161, 0.06);
   }
 
@@ -1712,7 +1710,7 @@ body:has(#tbodyPacientes) .main-header,
   border-radius: 16px !important;
   margin-bottom: 12px;
   overflow: visible;
-  background: #ffffff;
+  
   box-shadow: 0 2px 8px rgba(13, 71, 161, 0.06);
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
@@ -1729,18 +1727,18 @@ body:has(#tbodyPacientes) .main-header,
   font-size: 1rem;
   font-weight: 600;
   padding: 1.25rem 1.5rem;
-  background: #ffffff;
+  
   color: #0D1F3C;
   border-radius: 16px !important;
   transition: background 0.2s ease, color 0.2s ease;
 }
 .accordion-responsive .accordion-button:hover {
-  background: #F0F5FC;
+  
   color: #0D47A1;
 }
 .accordion-responsive .accordion-button:not(.collapsed) {
   color: #0D47A1 !important;
-  background: #E3F2FD !important;
+  
   box-shadow: none;
   border-bottom: 1px solid rgba(13, 71, 161, 0.15);
 }
@@ -1767,7 +1765,7 @@ body:has(#tbodyPacientes) .main-header,
   font-size: 0.95rem;
   line-height: 1.7;
   color: #3A526B;
-  background: #ffffff;
+  
 }
 
 @media (max-width: 767px) {

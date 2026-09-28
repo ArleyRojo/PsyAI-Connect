@@ -15,6 +15,10 @@ function getCsrfToken() {
 
 {# Google Fonts (local) #}
 <link href="/vendor/fonts/fonts.css" rel="stylesheet">
+{# Font preloads (WOFF2) #}
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/PlusJakartaSans-Regular.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/PlusJakartaSans-SemiBold.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/Lora-Bold.woff2">
 
 {# Bootstrap 5 (local) #}
 <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -23,11 +27,16 @@ function getCsrfToken() {
 <link rel="stylesheet" href="/vendor/font-awesome/css/all.min.css">
 
 {# Core CSS #}
-<link rel="stylesheet" href="/css/base/base.css?v=20260718-1">
-<link rel="stylesheet" href="/css/layout/layout.css?v=20260718-1">
-<link rel="stylesheet" href="/css/themes/theme.css?v=20260928-1">
-<link rel="stylesheet" href="/css/components/components.css?v=20260921-1">
-<link rel="stylesheet" href="/css/themes/dark-polish.css?v=20260924-1">
+<link rel="preload" as="style" href="/css/base/base.css?v=20260718-1">
+<link rel="preload" as="style" href="/css/layout/layout.css?v=20260718-1">
+<link rel="preload" as="style" href="/css/themes/theme.css?v=20260928-1">
+<link rel="preload" as="style" href="/css/components/components.css?v=20260921-1">
+<link rel="preload" as="style" href="/css/themes/dark-polish.css?v=20260924-1">
+<link rel="stylesheet" href="/css/base/base.css?v=20260718-1" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/css/layout/layout.css?v=20260718-1" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/css/themes/theme.css?v=20260928-1" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/css/components/components.css?v=20260921-1" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/css/themes/dark-polish.css?v=20260924-1" media="print" onload="this.media='all'">
 
 
 {# Core JS (debe ir en head para evitar flash de tema incorrecto) #}

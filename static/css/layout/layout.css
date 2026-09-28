@@ -466,7 +466,7 @@
 .ms-250, .ms-280 { margin-left: 260px !important; }
 
 @media (max-width: 991px) {
-    .sidebar { transform: translateX(-100%); transition: transform .35s ease; }
+    .sidebar { transform: translateX(-100%); }
     .sidebar.active { transform: translateX(0); }
     .main-content { margin-left: 0; padding: 20px 15px; }
     .ms-250, .ms-280 { margin-left: 0 !important; }
