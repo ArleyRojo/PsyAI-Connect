@@ -312,6 +312,8 @@ function addFileToList(d, prepend) {
   const tagLabel = d.visibilidad === 'privado' ? 'Privado' : 'Compartido';
   const infoText = d.visibilidad === 'privado' ? 'Solo yo lo veo' : 'Visible para el paciente';
 
+  const pacienteNombre = d.pacienteNombre || d.paciente || d.nombrePaciente || '';
+  const pacientePart = pacienteNombre ? ` &nbsp;·&nbsp; Paciente: ${escapeHtml(pacienteNombre)}` : '';
   const row = document.createElement('div');
   row.className = 'file-row';
   row.dataset.id = d.id;
@@ -320,7 +322,7 @@ function addFileToList(d, prepend) {
     <div class="ficon ${ext}"><i class="fas ${faIcon}"></i></div>
     <div class="fmeta">
       <div class="fname">${d.nombre}</div>
-      <div class="finfo">${d.fecha} &nbsp;·&nbsp; ${d.tamano} &nbsp;·&nbsp; ${infoText}</div>
+      <div class="finfo">${d.fecha} &nbsp;·&nbsp; ${d.tamano} &nbsp;·&nbsp; ${infoText}${pacientePart}</div>
     </div>
     <span class="tag ${tagClass}">${tagLabel}</span>
     <div class="factions">

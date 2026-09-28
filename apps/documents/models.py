@@ -54,10 +54,13 @@ class DocumentosClinicos(models.Model):
         return self.nombreArchivo
 
     def to_dict(self):
+        paciente = self.idPaciente
         return {
             "idDocumento": self.idDocumento,
             "idProfesional": self.idProfesional_id,
             "idPaciente": self.idPaciente_id,
+            "pacienteNombre": getattr(paciente, "nombre", "") if paciente else "",
+            "pacienteEmail": getattr(paciente, "email", "") if paciente else "",
             "nombreArchivo": self.nombreArchivo,
             "rutaArchivo": self.rutaArchivo,
             "tipoMime": self.tipoMime,
