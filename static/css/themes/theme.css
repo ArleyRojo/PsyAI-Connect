@@ -3072,7 +3072,7 @@ html.dark-mode .main-content::after {
         width: 255px !important;
         min-width: 255px !important;
         transform: translateX(-100%) !important;
-        z-index: 1050 !important;
+        z-index: 1100 !important; /* debe ser > overlay (1099) */
     }
 
     html.dark-mode .sidebar.active,
@@ -3096,10 +3096,6 @@ html.dark-mode .main-content::after {
 
     html.dark-mode .stat-card--enhanced {
         padding: 14px !important;
-    }
-
-    html.dark-mode .chat-wrapper {
-        height: calc(100vh - 120px) !important;
     }
 
     html.dark-mode .mobile-bottom-nav {
@@ -6362,4 +6358,3 @@ html.dark-mode.dark-mode .footer-social-new a:hover {
     background: rgba(144, 202, 249, .12) !important;
     color: var(--dm-accent) !important;
 }
-
