@@ -405,3 +405,110 @@ function getRolLabel(rol) {
         administrador: 'Administrador'
     }[rol.toLowerCase()] || 'Paciente';
 }
+
+/* ---------- Notificaciones ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('notif-prefs-form');
+    if (!form) return;
+
+    const canalRadios = form.querySelectorAll('input[name="canalNotificacion"]');
+    const telWrap = document.getElementById('tel-wrap');
+    const consentWrap = document.getElementById('consent-wrap');
+    const telInput = document.getElementById('numeroTelefonico');
+    const consentChk = document.getElementById('whatsappConsentimiento');
+    const btnGuardar = document.getElementById('btnGuardarNotif');
+    const btnProbar = document.getElementById('btnProbarNotif');
+
+    function updateVisibility() {
+        const val = form.querySelector('input[name="canalNotificacion"]:checked').value;
+        const showTel = val === 'whatsapp' || val === 'ambos';
+        telWrap.style.display = showTel ? 'block' : 'none';
+        consentWrap.style.display = showTel ? 'block' : 'none';
+        telInput.required = showTel;
+        consentChk.required = showTel;
+    }
+    canalRadios.forEach(r => r.addEventListener('change', updateVisibility));
+    updateVisibility();
+
+    /* ---- Guardar ---- */
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando…';
+
+        const payload = {
+            canalNotificacion: form.canalNotificacion.value,
+            numeroTelefonico: telInput.value.trim(),
+            whatsappConsentimiento: consentChk.checked,
+            recibirRecordatorioCita: form.recibirRecordatorioCita.checked,
+            recibirConfirmacion: form.recibirConfirmacion.checked,
+            recibirMensajePro: form.recibirMensajePro.checked,
+        };
+
+        try {
+            const usuario = JSON.parse(localStorage.getItem('usuario'))
+                         || JSON.parse(localStorage.getItem('sessionUser'));
+            const resp = await fetch(`/api/perfil/paciente/${usuario.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(payload),
+                credentials: 'same-origin',
+            });
+            const data = await resp.json();
+            if (data.success) {
+                showAlert('success', data.message || 'Preferencias guardadas');
+            } else {
+                showAlert('danger', data.message || 'Error al guardar');
+                if (data.errors) {
+                    Object.entries(data.errors).forEach(([k, msgs]) => {
+                        const el = form.querySelector(`[name="${k}"]`);
+                        if (el) el.classList.add('is-invalid');
+                    });
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            showAlert('danger', 'Error de conexión');
+        } finally {
+            btnGuardar.disabled = false;
+            btnGuardar.innerHTML = '<i class="fas fa-save me-1"></i> Guardar preferencias';
+        }
+    });
+
+    /* ---- Probar canal ---- */
+    btnProbar.addEventListener('click', async () => {
+        const canal = form.canalNotificacion.value;
+        if (canal === 'ninguno') return showAlert('warning','Canal “Ninguno” no envía pruebas');
+        btnProbar.disabled = true;
+        btnProbar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Enviando…';
+        try {
+            const resp = await fetch('/api/notificaciones/probar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ canal }),
+                credentials: 'same-origin',
+            });
+            const data = await resp.json();
+            showAlert(data.success ? 'success' : 'danger', data.message);
+        } catch (_) { showAlert('danger','Error de conexión'); }
+        finally {
+            btnProbar.disabled = false;
+            btnProbar.innerHTML = '<i class="fas fa-paper-plane me-1"></i> Enviar prueba';
+        }
+    });
+});
+
+/* tiny helpers (already present in project) */
+function getCookie(name){
+    let v=null; if(document.cookie){ document.cookie.split(';').forEach(c=>{c=c.trim(); if(c.startsWith(name+'=')) v=decodeURIComponent(c.slice(name.length+1));}); } return v;
+}
+function showAlert(type,msg){
+    // usa static/js/core/shared/alerts.js  (asumimos función global showAlert)
+    if(window.showAlert) window.showAlert(type,msg); else alert(msg);
+}

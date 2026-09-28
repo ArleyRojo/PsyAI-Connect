@@ -70,6 +70,7 @@ class Citas(models.Model):
     )
     creado_por_profesional = models.BooleanField(default=False, null=True, blank=True)
     motivoCancelacion = models.TextField(null=True, blank=True)
+    recordatorio_enviado = models.BooleanField(default=False)
 
     class Meta:
         db_table = "Citas"
@@ -95,6 +96,7 @@ class Citas(models.Model):
             "estado": self.estado,
             "creado_por_profesional": self.creado_por_profesional,
             "motivoCancelacion": self.motivoCancelacion,
+            "recordatorio_enviado": self.recordatorio_enviado,
         }
 
 
@@ -107,6 +109,12 @@ class Notificaciones(models.Model):
     ESTADO_CHOICES = [
         ("enviado", "enviado"),
         ("pendiente", "pendiente"),
+        ("fallido", "fallido"),
+    ]
+    CANAL_CHOICES = [
+        ("email", "Correo"),
+        ("whatsapp", "WhatsApp"),
+        ("interno", "Interno"),
     ]
 
     idNotificacion = models.AutoField(primary_key=True)
@@ -125,8 +133,11 @@ class Notificaciones(models.Model):
     email_individual = models.CharField(max_length=120, null=True, blank=True)
     enviado_por = models.CharField(max_length=120, null=True, blank=True)
     estado = models.CharField(
-        max_length=20, choices=ESTADO_CHOICES, default="enviado", null=True, blank=True
+        max_length=20, choices=ESTADO_CHOICES, default="pendiente", null=True, blank=True
     )
+    canal = models.CharField(max_length=12, choices=CANAL_CHOICES, default="interno")
+    errorDetalle = models.TextField(blank=True, null=True)
+    providerMsgId = models.CharField(max_length=100, blank=True, null=True)
     leido = models.BooleanField(default=False, null=True, blank=True)
     fecha = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     fecha_programada = models.DateTimeField(null=True, blank=True)
@@ -146,6 +157,9 @@ class Notificaciones(models.Model):
             "email_individual": self.email_individual,
             "enviado_por": self.enviado_por,
             "estado": self.estado,
+            "canal": self.canal,
+            "errorDetalle": self.errorDetalle,
+            "providerMsgId": self.providerMsgId,
             "leido": self.leido,
             "fecha": self.fecha.isoformat() if self.fecha else None,
             "fecha_programada": self.fecha_programada.isoformat() if self.fecha_programada else None,

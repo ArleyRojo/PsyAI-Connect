@@ -167,6 +167,106 @@
                 <i class="fas fa-sliders-h"></i> Editar Preferencias
             </button>
         </div>
+
+        <!-- Preferencias de notificaciones (nuevo) -->
+        <div class="card profile-card p-4 mb-4">
+            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="fas fa-bell text-primary"></i> Preferencias de notificaciones
+            </h5>
+
+            <form id="notif-prefs-form" novalidate>
+                <!-- Canal -->
+                <fieldset class="mb-3">
+                    <legend class="form-label fw-semibold">Canal de recepción</legend>
+                    <div class="d-flex flex-wrap gap-3">
+                        {% for val,label,icon in [
+                            ("email","Correo","fa-envelope"),
+                            ("whatsapp","WhatsApp","fa-whatsapp"),
+                            ("ambos","Ambos","fa-envelope-open-text"),
+                            ("ninguno","Ninguno","fa-bell-slash")
+                        ] %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio"
+                                   name="canalNotificacion" id="canal-{{val}}"
+                                   value="{{val}}"
+                                   {% if perfil.canalNotificacion == val %}checked{% endif %}>
+                            <label class="form-check-label d-flex align-items-center gap-1"
+                                   for="canal-{{val}}">
+                                <i class="fas {{icon}}"></i> {{label}}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+
+                <!-- Teléfono (solo si whatsapp/ambos) -->
+                <div id="tel-wrap" class="mb-3" style="display:none;">
+                    <label for="numeroTelefonico" class="form-label fw-semibold">
+                        Teléfono (E.164, ej. +573001234567) <span class="text-danger">*</span>
+                    </label>
+                    <input type="tel" class="form-control" id="numeroTelefonico"
+                           name="numeroTelefonico"
+                           value="{{ perfil.numeroTelefonico|default:'' }}"
+                           placeholder="+57 3XX XXX XXXX"
+                           pattern="\+\d{10,15}" required>
+                    <div class="form-text">Se usará sólo para envíos por WhatsApp.</div>
+                </div>
+
+                <!-- Consentimiento -->
+                <div id="consent-wrap" class="mb-3" style="display:none;">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                               id="whatsappConsentimiento" name="whatsappConsentimiento"
+                               {% if perfil.whatsappConsentimiento %}checked{% endif %}>
+                        <label class="form-check-label" for="whatsappConsentimiento">
+                            Acepto recibir notificaciones por WhatsApp (recordatorios de cita,
+                            confirmaciones y mensajes de mi profesional). Puedo darme de baja
+                            respondiendo “STOP” en cualquier momento.
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tipos de aviso (opcional) -->
+                <fieldset class="mb-3">
+                    <legend class="form-label fw-semibold">Tipos de aviso</legend>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox"
+                                       id="recibirRecordatorioCita" name="recibirRecordatorioCita"
+                                       {% if perfil.recibirRecordatorioCita %}checked{% endif %}>
+                                <label class="form-check-label" for="recibirRecordatorioCita">Recordatorio de cita (24 h)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox"
+                                       id="recibirConfirmacion" name="recibirConfirmacion"
+                                       {% if perfil.recibirConfirmacion %}checked{% endif %}>
+                                <label class="form-check-label" for="recibirConfirmacion">Confirmación / cancelación de cita</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox"
+                                       id="recibirMensajePro" name="recibirMensajePro"
+                                       {% if perfil.recibirMensajePro %}checked{% endif %}>
+                                <label class="form-check-label" for="recibirMensajePro">Mensajes del profesional</label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary" id="btnGuardarNotif">
+                        <i class="fas fa-save me-1"></i> Guardar preferencias
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnProbarNotif">
+                        <i class="fas fa-paper-plane me-1"></i> Enviar prueba
+                    </button>
+                </div>
+            </form>
+        </div>
     </main>
 </div>
 

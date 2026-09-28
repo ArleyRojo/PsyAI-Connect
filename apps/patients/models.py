@@ -11,6 +11,12 @@ class PerfilPaciente(models.Model):
         ("WhatsApp", "WhatsApp"),
         ("Teléfono", "Teléfono"),
     ]
+    CANAL_CHOICES = [
+        ("email", "Correo"),
+        ("whatsapp", "WhatsApp"),
+        ("ambos", "Ambos"),
+        ("ninguno", "Ninguno"),
+    ]
 
     idPaciente = models.OneToOneField(
         Register,
@@ -33,6 +39,24 @@ class PerfilPaciente(models.Model):
     prefContacto = models.CharField(
         max_length=15, choices=CONTACTO_CHOICES, default="Correo"
     )
+    # Nuevas preferencias de notificación
+    canalNotificacion = models.CharField(
+        max_length=10,
+        choices=CANAL_CHOICES,
+        default="email",
+        verbose_name="Canal de notificación",
+    )
+    whatsappConsentimiento = models.BooleanField(
+        default=False,
+        verbose_name="Consentimiento WhatsApp",
+    )
+    whatsappConsentimientoFecha = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="Fecha consentimiento WhatsApp",
+    )
+    recibirRecordatorioCita = models.BooleanField(default=True)
+    recibirConfirmacion = models.BooleanField(default=True)
+    recibirMensajePro = models.BooleanField(default=True)
 
     class Meta:
         db_table = "PerfilPaciente"
@@ -51,6 +75,12 @@ class PerfilPaciente(models.Model):
             "prefNotificaciones": self.prefNotificaciones,
             "prefRecordatorios": self.prefRecordatorios,
             "prefContacto": self.prefContacto,
+            "canalNotificacion": self.canalNotificacion,
+            "whatsappConsentimiento": self.whatsappConsentimiento,
+            "whatsappConsentimientoFecha": self.whatsappConsentimientoFecha.isoformat() if self.whatsappConsentimientoFecha else None,
+            "recibirRecordatorioCita": self.recibirRecordatorioCita,
+            "recibirConfirmacion": self.recibirConfirmacion,
+            "recibirMensajePro": self.recibirMensajePro,
         }
 
 

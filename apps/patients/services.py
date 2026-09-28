@@ -33,22 +33,8 @@ class PatientService:
         return {"success": True, "preferencias": prefs}, 200
 
     def save_preferences(self, user_id, data):
-        notificaciones = data.get("notificaciones", "Activadas")
-        recordatorios = data.get("recordatorios", "Activados")
-        contacto = data.get("contacto", "Correo")
-
-        valid_notif = {"Activadas", "Desactivadas"}
-        valid_recordat = {"Activados", "Desactivados"}
-        valid_contacto = {"Correo", "WhatsApp", "Teléfono"}
-
-        if notificaciones not in valid_notif:
-            return {"success": False, "message": "Valor de notificaciones inválido"}, 400
-        if recordatorios not in valid_recordat:
-            return {"success": False, "message": "Valor de recordatorios inválido"}, 400
-        if contacto not in valid_contacto:
-            return {"success": False, "message": "Valor de contacto inválido"}, 400
-
-        self.repo.save_preferences(user_id, notificaciones, recordatorios, contacto)
+        # validation is done in serializer
+        self.repo.save_preferences(user_id, data)
         return {"success": True, "message": "Preferencias guardadas"}, 200
 
     def get_chatbot_consent(self, user_id):

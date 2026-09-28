@@ -17,6 +17,7 @@ from apps.patients.views import (
     ChatContactoViewSet,
     ChatMensajeViewSet,
 )
+from apps.core.webhooks import WhatsAppWebhook
 
 app_name = "patients"
 
@@ -53,4 +54,6 @@ urlpatterns = [
     # Legacy aliases sin barra final (compatibles con API.md y el frontend)
     path("pacientes", PacienteViewSet.as_view({"get": "list"}), name="pacientes"),
     path("profesionales", ProfesionalViewSet.as_view({"get": "list"}), name="profesionales"),
+    # Webhook WhatsApp
+    path("whatsapp/webhook/", WhatsAppWebhook.as_view(), name="whatsapp-webhook"),
 ]

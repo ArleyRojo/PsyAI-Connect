@@ -31,55 +31,68 @@ class PatientRepository:
             "prefNotificaciones": perfil.prefNotificaciones if perfil else "Activadas",
             "prefRecordatorios": perfil.prefRecordatorios if perfil else "Activados",
             "prefContacto": perfil.prefContacto if perfil else "Correo",
+            # nuevos
+            "canalNotificacion": perfil.canalNotificacion if perfil else "email",
+            "whatsappConsentimiento": perfil.whatsappConsentimiento if perfil else False,
+            "whatsappConsentimientoFecha": perfil.whatsappConsentimientoFecha.isoformat() if perfil and perfil.whatsappConsentimientoFecha else None,
+            "recibirRecordatorioCita": perfil.recibirRecordatorioCita if perfil else True,
+            "recibirConfirmacion": perfil.recibirConfirmacion if perfil else True,
+            "recibirMensajePro": perfil.recibirMensajePro if perfil else True,
         }
 
-    def save_chatbot_survey(self, user_id, data):
-        try:
-            from apps.chatbot.models import EncuestaChatbot
-            EncuestaChatbot.objects.create(
-                idPaciente_id=user_id,
-                utilidad=data.get("utilidad"),
-                claridad=data.get("claridad"),
-                recomendaria=data.get("recomendaria"),
-                comentario=data.get("comentario"),
-            )
-        except (ImportError, LookupError):
-            pass
-
-    def update_patient_profile(self, data):
-        user_id = data.get("idUsuario")
-        numero = data.get("numeroTelefonico")
-        perfil, created = PerfilPaciente.objects.get_or_create(
-            idPaciente_id=user_id,
-            defaults={"consentimiento_chatbot": False},
-        )
-        perfil.numeroTelefonico = numero
-        perfil.save(update_fields=["numeroTelefonico"])
+    # ... keep other methods ...
 
     def get_preferences(self, user_id):
         try:
             perfil = PerfilPaciente.objects.get(idPaciente=user_id)
             return {
-                "notificaciones": perfil.prefNotificaciones,
-                "recordatorios": perfil.prefRecordatorios,
-                "contacto": perfil.prefContacto,
+                "canalNotificacion": perfil.canalNotificacion,
+                "whatsappConsentimiento": perfil.whatsappConsentimiento,
+                "whatsappConsentimientoFecha": perfil.whatsappConsentimientoFecha.isoformat() if perfil.whatsappConsentimientoFecha else None,
+                "numeroTelefonico": perfil.numeroTelefonico,
+                "recibirRecordatorioCita": perfil.recibirRecordatorioCita,
+                "recibirConfirmacion": perfil.recibirConfirmacion,
+                "recibirMensajePro": perfil.recibirMensajePro,
             }
         except PerfilPaciente.DoesNotExist:
             return {
-                "notificaciones": "Activadas",
-                "recordatorios": "Activados",
-                "contacto": "Correo",
+                "canalNotificacion": "email",
+                "whatsappConsentimiento": False,
+                "whatsappConsentimientoFecha": None,
+                "numeroTelefonico": "",
+                "recibirRecordatorioCita": True,
+                "recibirConfirmacion": True,
+                "recibirMensajePro": True,
             }
 
-    def save_preferences(self, user_id, notificaciones, recordatorios, contacto):
+    def save_preferences(self, user_id, data):
         perfil, _ = PerfilPaciente.objects.get_or_create(
             idPaciente_id=user_id,
             defaults={"consentimiento_chatbot": False},
         )
-        perfil.prefNotificaciones = notificaciones
-        perfil.prefRecordatorios = recordatorios
-        perfil.prefContacto = contacto
-        perfil.save(update_fields=["prefNotificaciones", "prefRecordatorios", "prefContacto"])
+        allowed = [
+            "canalNotificacion", "whatsappConsentimiento",
+            "numeroTelefonico", "recibirRecordatorioCita",
+            "recibirConfirmacion", "recibirMensajePro",
+        ]
+        for k in allowed:
+            if k in data:
+                setattr(perfil, k, data[k])
+
+        # consentimiento -> fecha
+        if "whatsappConsentimiento" in data:
+            if data["whatsappConsentimiento"] and not perfil.whatsappConsentimientoFecha:
+                from django.utils import timezone
+                perfil.whatsappConsentimientoFecha = timezone.now()
+            elif not data["whatsappConsentimiento"]:
+                perfil.whatsappConsentimientoFecha = None
+
+        perfil.save(update_fields=[
+            "canalNotificacion", "whatsappConsentimiento",
+            "whatsappConsentimientoFecha", "numeroTelefonico",
+            "recibirRecordatorioCita", "recibirConfirmacion",
+            "recibirMensajePro",
+        ])
 
     def get_chatbot_consent(self, user_id):
         try:

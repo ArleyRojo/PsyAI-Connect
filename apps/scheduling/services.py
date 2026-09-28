@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.template.loader import render_to_string
 from django.utils import timezone as tz
-
+from apps.core.notifier import notificar_paciente
 from apps.scheduling.repositories import AppointmentRepository
 
 logger = logging.getLogger(__name__)
@@ -99,6 +99,22 @@ class AppointmentService:
     def __init__(self):
         self.repo = AppointmentRepository()
 
+    @staticmethod
+    def _notify(paciente, tipo, **ctx):
+        textos = {
+            "recordatorio_cita": ("Recordatorio de cita",
+                "Tu cita es mañana a las {hora}. Dirección: {lugar}."),
+            "confirmacion_cita": ("Cita confirmada",
+                "Tu cita del {fecha} a las {hora} ha sido confirmada."),
+            "cancelacion_cita": ("Cita cancelada",
+                "La cita del {fecha} a las {hora} ha sido cancelada."),
+            "mensaje_profesional": ("Nuevo mensaje",
+                "Tienes un mensaje de tu profesional. Ingresa a la plataforma."),
+        }
+        tit, plantilla = textos[tipo]
+        mensaje = plantilla.format(**ctx)
+        notificar_paciente(paciente, tit, mensaje, tipo)
+
     def create_appointment(self, patient_id, data, *, created_by_professional=False):
         professional_id = data.get("idProfesional")
         fecha = data.get("fecha")
@@ -168,6 +184,11 @@ class AppointmentService:
                         cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                         recipient_user_id=pac.idUsuario if pac else None,
                     )
+                    # notificación centralizada
+                    self._notify(pac, "confirmacion_cita",
+                                 fecha=cita.fecha.strftime("%d/%m/%Y"),
+                                 hora=cita.hora.strftime("%H:%M"),
+                                 lugar=cita.lugar or "Por definir")
                 else:
                     AppointmentMailService.send_cita_notificacion(
                         recipient_email=prof.email if prof else None,
@@ -192,6 +213,11 @@ class AppointmentService:
                         cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                         recipient_user_id=pac.idUsuario if pac else None,
                     )
+                    # notificación centralizada
+                    self._notify(pac, "confirmacion_cita",
+                                 fecha=cita.fecha.strftime("%d/%m/%Y"),
+                                 hora=cita.hora.strftime("%H:%M"),
+                                 lugar=cita.lugar or "Por definir")
         except Exception as e:
             logger.error(f"Error enviando correo de nueva cita: {e}")
 
@@ -288,6 +314,17 @@ class AppointmentService:
                     cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                     recipient_user_id=pac.idUsuario if pac else None,
                 )
+                # notificación centralizada
+                if estado == "Confirmada":
+                    self._notify(pac, "confirmacion_cita",
+                                 fecha=cita.fecha.strftime("%d/%m/%Y"),
+                                 hora=cita.hora.strftime("%H:%M"),
+                                 lugar=cita.lugar or "Por definir")
+                elif estado == "Cancelada":
+                    self._notify(pac, "cancelacion_cita",
+                                 fecha=cita.fecha.strftime("%d/%m/%Y"),
+                                 hora=cita.hora.strftime("%H:%M"),
+                                 lugar=cita.lugar or "Por definir")
         except Exception as e:
             logger.error(f"Error enviando correo de actualización de estado: {e}")
 
@@ -354,6 +391,11 @@ class AppointmentService:
                     cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                     recipient_user_id=pac.idUsuario if pac else None,
                 )
+                # notificación centralizada
+                self._notify(pac, "cancelacion_cita",
+                             fecha=cita.fecha.strftime("%d/%m/%Y"),
+                             hora=cita.hora.strftime("%H:%M"),
+                             lugar=cita.lugar or "Por definir")
         except Exception as e:
             logger.error(f"Error enviando correo de cancelación (paciente): {e}")
 
@@ -403,6 +445,11 @@ class AppointmentService:
                     cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                     recipient_user_id=pac.idUsuario if pac else None,
                 )
+                # notificación centralizada
+                self._notify(pac, "cancelacion_cita",
+                             fecha=cita.fecha.strftime("%d/%m/%Y"),
+                             hora=cita.hora.strftime("%H:%M"),
+                             lugar=cita.lugar or "Por definir")
         except Exception as e:
             logger.error(f"Error enviando correo de cancelación (profesional): {e}")
 
