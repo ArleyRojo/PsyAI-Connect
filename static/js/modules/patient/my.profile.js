@@ -420,7 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnProbar = document.getElementById('btnProbarNotif');
 
     function updateVisibility() {
-        const val = form.querySelector('input[name="canalNotificacion"]:checked').value;
+        const checked = form.querySelector('input[name="canalNotificacion"]:checked');
+        const val = checked ? checked.value : 'email';
         const showTel = val === 'whatsapp' || val === 'ambos';
         telWrap.style.display = showTel ? 'block' : 'none';
         consentWrap.style.display = showTel ? 'block' : 'none';
@@ -436,8 +437,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnGuardar.disabled = true;
         btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando…';
 
+        const checkedCanal = form.querySelector('input[name="canalNotificacion"]:checked');
         const payload = {
-            canalNotificacion: form.canalNotificacion.value,
+            canalNotificacion: checkedCanal ? checkedCanal.value : 'email',
             numeroTelefonico: telInput.value.trim(),
             whatsappConsentimiento: consentChk.checked,
             recibirRecordatorioCita: form.recibirRecordatorioCita.checked,
