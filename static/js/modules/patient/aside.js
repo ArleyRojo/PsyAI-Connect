@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     overlay.addEventListener('click', closeSidebar);
 
     // Cerrar sidebar al hacer clic en un enlace (solo en móvil)
-    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    const navLinks = document.querySelectorAll('.sidebar .nav-link, .sidebar .sidebar__nav-item');
     navLinks.forEach(link => {
         link.addEventListener('click', function() {
             if (window.innerWidth <= 991) {

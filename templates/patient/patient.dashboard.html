@@ -68,8 +68,8 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="sidebar__user-info">
-                        <span class="sidebar__user-name" id="sidebarUserName">Paciente</span>
-                        <span class="sidebar__user-role">Paciente</span>
+                        <span class="sidebar__user-name" id="sidebarUserName" data-sidebar-user-name>{{ request.user.nombre|default:"Paciente" }}</span>
+                        <span class="sidebar__user-role">{{ request.user.rol|default:"Paciente" }}</span>
                     </div>
                     <a href="aside-patient/my.profile.html" class="sidebar__user-settings" title="Mi Perfil">
                         <i class="fas fa-cog"></i>
@@ -94,12 +94,12 @@
 
             <!-- ── ZONE 1: Topbar ── -->
             <div class="dash-topbar">
-                <div class="dash-topbar__left">
-                    <span class="dash-topbar__date" id="heroDate"><i class="fas fa-calendar-day"></i> Cargando...</span>
-                </div>
-                <div class="dash-topbar__right">
-                    <div class="dash-topbar__avatar" id="heroAvatar" data-avatar="inicial"></div>
-                </div>
+<div class="dash-topbar__left">
+                <span class="dash-topbar__date" id="heroDate"><i class="fas fa-calendar-day"></i> {% now "j \d\e F \d\e Y" %}</span>
+            </div>
+            <div class="dash-topbar__right">
+                <div class="dash-topbar__avatar" id="heroAvatar" data-avatar="inicial" data-nombre="{{ request.user.nombre|default:'' }}" data-foto="{{ request.user.foto_perfil|default:'' }}"></div>
+            </div>
             </div>
 
             <!-- ── ZONE 2: Hero + Stats Band ── -->

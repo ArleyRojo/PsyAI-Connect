@@ -213,15 +213,17 @@
     let loadingContacts = false;
 
     function getSearchPlaceholder() {
-      return contactMode === "patient" ? "Buscar profesional..." : "Buscar paciente...";
+      return contactMode === "professional" ? "Buscar profesional..." : "Buscar paciente...";
     }
 
     function getHeaderTitle() {
-      return contactMode === "patient" ? "Conversaciones" : "Conversaciones";
+      return "Conversaciones";
     }
 
     function getHeaderSubtitle(count) {
-      return contactMode === "patient" ? `${count} profesional${count !== 1 ? 'es' : ''}` : `${count} paciente${count !== 1 ? 's' : ''}`;
+      return contactMode === "professional"
+        ? `${count} profesional${count !== 1 ? 'es' : ''}`
+        : `${count} paciente${count !== 1 ? 's' : ''}`;
     }
 
     function updateHeader(count) {
@@ -255,14 +257,30 @@
       }
     }
 
+    function getCachedUser() {
+      try {
+        const cached = localStorage.getItem('usuario') || localStorage.getItem('sessionUser');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.idUsuario) return parsed;
+        }
+      } catch {}
+      return null;
+    }
+
     async function ensureAllowedSession() {
       if (!requiredRole) return true;
 
-      renderAuthState("fas fa-circle-notch fa-spin", "Verificando sesion...");
+      // Try cached user first to avoid visible "Verificando sesión..." flash
+      const cached = getCachedUser();
+      if (cached && rolesMatch(cached.rol || cached.role, requiredRole)) {
+        return true;
+      }
+
       const user = await getSessionUser();
 
       if (!user) {
-        renderAuthState("fas fa-lock", "Redirigiendo al inicio de sesion...");
+        renderAuthState("fas fa-lock", "Redirigiendo al inicio de sesión...");
         return false;
       }
 

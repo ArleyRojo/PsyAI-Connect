@@ -1260,29 +1260,25 @@ html.dark-mode .stat-card-v2--mood__3d {
     100% { background-position: -200% 0; }
 }
 
-/* ════════════════════════════════════════════════════════════════
-   11. STAGGER ANIMATIONS
+/* ═══════════════════════════════════════════════════════════════
+   11. STAGGER ANIMATIONS (disabled – content rendered server‑side)
    ============================================================ */
 
 .dash-stagger > * {
-    opacity: 0;
-    transform: translateY(10px);
-    animation: dashStaggerIn var(--dur-base, 240ms) var(--ease-out) forwards;
+    opacity: 1;
+    transform: none;
+    animation: none;
 }
 
-.dash-stagger > *:nth-child(1) { animation-delay: 60ms; }
-.dash-stagger > *:nth-child(2) { animation-delay: 120ms; }
-.dash-stagger > *:nth-child(3) { animation-delay: 180ms; }
-.dash-stagger > *:nth-child(4) { animation-delay: 240ms; }
-.dash-stagger > *:nth-child(5) { animation-delay: 300ms; }
-.dash-stagger > *:nth-child(6) { animation-delay: 360ms; }
+/* Delays kept for reference but have no effect */
+.dash-stagger > *:nth-child(1) { /* animation-delay: 60ms; */ }
+.dash-stagger > *:nth-child(2) { /* animation-delay: 120ms; */ }
+.dash-stagger > *:nth-child(3) { /* animation-delay: 180ms; */ }
+.dash-stagger > *:nth-child(4) { /* animation-delay: 240ms; */ }
+.dash-stagger > *:nth-child(5) { /* animation-delay: 300ms; */ }
+.dash-stagger > *:nth-child(6) { /* animation-delay: 360ms; */ }
 
-@keyframes dashStaggerIn {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+/* @keyframes dashStaggerIn removed */
 
 /* ════════════════════════════════════════════════════════════════
    12. FOCUS & ACCESSIBILITY

@@ -152,20 +152,27 @@ function actualizarNombresEnPagina(nombre, rol) {
     elementos.forEach(el => {
         if (!el) return;
         
+        let nuevoTexto = '';
         if (el.id === 'nombrePaciente' || el.id === 'nombrPaciente') {
-            el.textContent = `Hola, ${nombre}`;
+            nuevoTexto = `Hola, ${nombre}`;
         } else if (el.id === 'nombreProfesional') {
             const prefijo = (rol === 'profesional' || rol === 'professional') ? 'Dr(a). ' : '';
-            el.textContent = `Hola, ${prefijo}${nombre}`;
+            nuevoTexto = `Hola, ${prefijo}${nombre}`;
         } else if (el.textContent.includes('Hola')) {
-            el.textContent = `Hola, ${nombre}`;
+            nuevoTexto = `Hola, ${nombre}`;
+        } else {
+            return;
+        }
+        if (el.textContent !== nuevoTexto) {
+            el.textContent = nuevoTexto;
         }
     });
 
     const headerSpans = document.querySelectorAll('.user-info > span');
     headerSpans.forEach(span => {
         if (!span.id && (span.textContent.trim() === '' || span.textContent === 'Hola, ')) {
-            span.textContent = `Hola, ${nombre}`;
+            const nuevo = `Hola, ${nombre}`;
+            if (span.textContent !== nuevo) span.textContent = nuevo;
         }
     });
 }

@@ -35,3 +35,18 @@ function getCsrfToken() {
 <script src="/js/core/shared/theme.js?v=20260718-1"></script>
 <script src="/js/core/shared/localStorage-detector.js?v=20260718-1"></script>
 <script src="/js/core/shared/csrf.js?v=20260921-1"></script>
+
+{# Speculation Rules – prefetch same‑origin navigations (Phase 2) #}
+<script type="speculationrules">
+{
+  "prefetch": [{
+    "where": {
+      "and": [
+        { "href_matches": "/*" },
+        { "not": { "href_matches": ["/api/*", "/logout*"] } }
+      ]
+    },
+    "eagerness": "moderate"
+  }]
+}
+</script>
