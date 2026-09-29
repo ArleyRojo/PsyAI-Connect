@@ -406,3 +406,20 @@ class AllPacientesProfesionalResource(APIView):
         # Return a large page to get all patients
         payload, status_code = svc.list_patients(page=1, limit=1000)
         return Response(payload, status=status_code)
+
+
+class PacienteAsignarResource(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def post(self, request, id_paciente):
+        from apps.professionals.models import PacientesProfesional
+        user_id = getattr(request, "user_id", None)
+        PacientesProfesional.objects.get_or_create(
+            idProfesional_id=user_id,
+            idPaciente_id=id_paciente,
+        )
+        return Response(
+            {"success": True, "message": "Paciente asignado correctamente"},
+            status=status.HTTP_200_OK,
+        )
+

@@ -115,40 +115,36 @@
             <div class="tabs-container mb-4">
                 <div class="tabs">
                     <button class="tab active" id="tabDiag" onclick="mostrarPestana('diagnosticos', this)">
-                        <i class="fas fa-stethoscope"></i>Diagnósticos
+                        <i class="fas fa-file-medical-alt"></i> Anamnesis
                         <span class="tab-badge" id="badgeDiag">0</span>
                     </button>
                     <button class="tab" id="tabEvol" onclick="mostrarPestana('evolucion', this)">
-                        <i class="fas fa-chart-line"></i>Evolución
+                        <i class="fas fa-chart-line"></i> Evolución
                         <span class="tab-badge" id="badgeEvol">0</span>
                     </button>
                 </div>
             </div>
 
-            <!-- ══ DIAGNÓSTICOS ══ -->
+            <!-- ══ ANAMNESIS Y DIAGNÓSTICOS ══ -->
             <div id="pestana-diagnosticos">
 
                 <!-- Barra de progreso -->
                 <div class="progress-nav mb-4">
                     <div class="progress-nav__label">
-                        <span id="progressLabel">Paso 1 de 3 — Seleccionar paciente</span>
-                        <span class="pct" id="progressPct">33%</span>
+                        <span id="progressLabel">Paso 1 de 2 — Seleccionar paciente</span>
+                        <span class="pct" id="progressPct">50%</span>
                     </div>
                     <div class="progress-nav__bar">
-                        <div class="progress-nav__fill" id="progressFill" style="width:33%"></div>
+                        <div class="progress-nav__fill" id="progressFill" style="width:50%"></div>
                     </div>
                     <div class="progress-nav__steps">
-                        <div class="progress-step active" id="step1" onclick="goToStep(1)">
+                        <div class="progress-step active" id="step1" onclick="irAPaso(1)">
                             <span class="step-circle">1</span>
                             <i class="fas fa-user-check"></i><span>Seleccionar Paciente</span>
                         </div>
-                        <div class="progress-step" id="step2" onclick="goToStep(2)">
+                        <div class="progress-step" id="step2" onclick="irAPaso(2)">
                             <span class="step-circle">2</span>
-                            <i class="fas fa-stethoscope"></i><span>Registrar Diagnóstico</span>
-                        </div>
-                        <div class="progress-step" id="step3" onclick="goToStep(3)">
-                            <span class="step-circle">3</span>
-                            <i class="fas fa-check-circle"></i><span>Confirmar y Guardar</span>
+                            <i class="fas fa-file-medical-alt"></i><span>Ficha de Anamnesis</span>
                         </div>
                     </div>
                 </div>
@@ -198,8 +194,8 @@
                                 <button class="btn btn-sm btn-outline-secondary" onclick="deseleccionarPaciente()">
                                     <i class="fas fa-times me-1"></i>Cambiar
                                 </button>
-                                <button class="btn btn-sm btn-primary" id="btnContinuarDiag" onclick="goToStep(2)">
-                                    Continuar <i class="fas fa-arrow-right ms-1"></i>
+                                <button class="btn btn-sm btn-primary" id="btnContinuarDiag" onclick="irAPaso(2)">
+                                    Continuar a Anamnesis <i class="fas fa-arrow-right ms-1"></i>
                                 </button>
                             </div>
                         </div>
@@ -207,7 +203,7 @@
 
                     <!-- Botón cuando no hay selección -->
                     <div class="mt-3 text-end" id="wrapBtnContinuar">
-                        <button class="btn btn-primary" id="btnContinuarDiagSolo" onclick="goToStep(2)" disabled>
+                        <button class="btn btn-primary" id="btnContinuarDiagSolo" onclick="irAPaso(2)" disabled>
                             Continuar <i class="fas fa-arrow-right ms-1"></i>
                         </button>
                     </div>
@@ -215,67 +211,421 @@
                     <input type="hidden" id="idPacienteSeleccionado">
                 </div>
 
-                <!-- ── Paso 2: Formulario diagnóstico ── -->
+                <!-- ── Paso 2: Formulario de Anamnesis ── -->
                 <div id="panelStep2" class="d-none card p-4 mb-4 panel-step">
-                    <!-- Mini-header del paciente seleccionado -->
-                    <div class="step2-patient-header">
-                        <img id="step2Photo" src="" alt="Foto">
-                        <div>
-                            <div class="name" id="step2Name">—</div>
-                            <small class="text-muted" id="step2Email">—</small>
+                    <!-- Header del paciente seleccionado -->
+                    <div class="step2-patient-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <img id="step2Photo" src="" alt="Foto" class="rounded-circle" style="width:48px;height:48px;object-fit:cover;">
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h5 class="name fw-bold mb-0" id="step2Name">—</h5>
+                                    <span id="badgeEstadoAnamnesis" class="badge bg-secondary-subtle text-secondary px-2 py-1">
+                                        <i class="fas fa-info-circle me-1"></i>Selecciona un paciente
+                                    </span>
+                                </div>
+                                <small class="text-muted" id="step2Email">—</small>
+                                <span id="fechaActualizacionAnamnesis" class="text-muted small ms-2"></span>
+                            </div>
                         </div>
-                        <span class="change-link" onclick="goToStep(1)"><i class="fas fa-exchange-alt me-1"></i>Cambiar paciente</span>
+                        <span class="change-link text-primary fw-semibold" style="cursor:pointer;" onclick="irAPaso(1)">
+                            <i class="fas fa-exchange-alt me-1"></i>Cambiar paciente
+                        </span>
                     </div>
 
-                    <h4 class="fw-bold mb-3"><i class="fas fa-stethoscope me-2 text-primary"></i>Registrar Diagnóstico</h4>
-                    <form id="formDiagnostico">
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="fechaDiagnostico">
+                    <form id="formAnamnesis" onsubmit="event.preventDefault();">
+
+                        <!-- SECCIÓN 1: DATOS PERSONALES -->
+                        <div class="anamnesis-section">
+                            <div class="anamnesis-section__header">
+                                <h5 class="anamnesis-section__title">
+                                    <i class="fas fa-id-card"></i> A. Datos Personales y de Identificación
+                                </h5>
                             </div>
-                            <div class="col-md-8">
-                                <label class="form-label fw-semibold">Profesional <span class="text-danger">*</span></label>
-                                <select class="form-select" id="profesional">
-                                    <option value="">Seleccionar profesional...</option>
-                                </select>
+                            <div class="anam-form-grid grid-3">
+                                <div>
+                                    <label class="form-label fw-semibold">Tipo de Documento</label>
+                                    <select class="form-select" id="anam_tipoDocumento">
+                                        <option value="">Seleccione...</option>
+                                        <option value="CC">Cédula de Ciudadanía (CC)</option>
+                                        <option value="CE">Cédula de Extranjería (CE)</option>
+                                        <option value="TI">Tarjeta de Identidad (TI)</option>
+                                        <option value="Pasaporte">Pasaporte</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Número de Documento</label>
+                                    <input type="text" class="form-control" id="anam_numeroDocumento" placeholder="Ej. 1020304050">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Fecha de Nacimiento <span class="req-badge">*</span></label>
+                                    <input type="date" class="form-control" id="anam_fechaNacimiento" onchange="onFechaNacimientoChange()" required>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Edad (calculada)</label>
+                                    <input type="number" class="form-control" id="anam_edad" placeholder="Edad" readonly style="background-color: #f8fafc;">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Género</label>
+                                    <select class="form-select" id="anam_genero">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Femenino">Femenino</option>
+                                        <option value="No binario">No binario</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Estado Civil</label>
+                                    <select class="form-select" id="anam_estadoCivil">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Soltero/a">Soltero/a</option>
+                                        <option value="Casado/a">Casado/a</option>
+                                        <option value="Unión libre">Unión libre</option>
+                                        <option value="Divorciado/a">Divorciado/a</option>
+                                        <option value="Viudo/a">Viudo/a</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Orientación Sexual</label>
+                                    <input type="text" class="form-control" id="anam_orientacionSexual" placeholder="Orientación sexual">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Identidad / Raza Étnica</label>
+                                    <input type="text" class="form-control" id="anam_razaEtnica" placeholder="Etnia o raza">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Lugar de Nacimiento</label>
+                                    <input type="text" class="form-control" id="anam_lugarNacimiento" placeholder="Ciudad, País">
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Síntomas <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="sintomas" rows="2" placeholder="Describir síntomas observados..."></textarea>
+
+                        <!-- SECCIÓN 2: CONTACTO Y RESIDENCIA -->
+                        <div class="anamnesis-section">
+                            <div class="anamnesis-section__header">
+                                <h5 class="anamnesis-section__title">
+                                    <i class="fas fa-map-marker-alt"></i> B. Información de Contacto y Residencia
+                                </h5>
+                            </div>
+                            <div class="anam-form-grid grid-3">
+                                <div>
+                                    <label class="form-label fw-semibold">Teléfono Principal <span class="req-badge">*</span></label>
+                                    <input type="tel" class="form-control" id="anam_telefonoPrincipal" placeholder="Teléfono de contacto" required>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Teléfono Alterno</label>
+                                    <input type="tel" class="form-control" id="anam_telefonoAlterno" placeholder="Teléfono secundario">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">WhatsApp</label>
+                                    <input type="tel" class="form-control" id="anam_whatsapp" placeholder="WhatsApp">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Correo Alterno</label>
+                                    <input type="email" class="form-control" id="anam_correoAlterno" placeholder="correo@ejemplo.com">
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label class="form-label fw-semibold">Dirección de Residencia <span class="req-badge">*</span></label>
+                                    <input type="text" class="form-control" id="anam_direccionResidencia" placeholder="Dirección completa" required>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Ciudad</label>
+                                    <input type="text" class="form-control" id="anam_ciudad" placeholder="Ciudad">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Departamento / Región</label>
+                                    <input type="text" class="form-control" id="anam_departamento" placeholder="Departamento">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Barrio</label>
+                                    <input type="text" class="form-control" id="anam_barrio" placeholder="Barrio">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Código Postal</label>
+                                    <input type="text" class="form-control" id="anam_codigoPostal" placeholder="Código postal">
+                                </div>
+                            </div>
+                            <h6 class="fw-bold mt-4 mb-3 text-secondary"><i class="fas fa-phone-volume me-2"></i>Contacto de Emergencia</h6>
+                            <div class="anam-form-grid grid-3">
+                                <div>
+                                    <label class="form-label fw-semibold">Nombre de Contacto</label>
+                                    <input type="text" class="form-control" id="anam_emergenciaNombre" placeholder="Nombre completo">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Parentesco</label>
+                                    <input type="text" class="form-control" id="anam_emergenciaParentesco" placeholder="Ej. Madre, Cónyuge">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Teléfono de Emergencia</label>
+                                    <input type="tel" class="form-control" id="anam_emergenciaTelefono" placeholder="Teléfono de contacto">
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Diagnóstico clínico <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="diagnostico" rows="2" placeholder="Diagnóstico clínico..."></textarea>
+
+                        <!-- SECCIÓN 3: ESCOLAR Y OCUPACIÓN -->
+                        <div class="anamnesis-section">
+                            <div class="anamnesis-section__header">
+                                <h5 class="anamnesis-section__title">
+                                    <i class="fas fa-graduation-cap"></i> C. Nivel Escolar y Ocupación
+                                </h5>
+                            </div>
+                            <div class="anam-form-grid grid-3">
+                                <div>
+                                    <label class="form-label fw-semibold">Nivel Escolar <span class="req-badge">*</span></label>
+                                    <select class="form-select" id="anam_nivelEscolar" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="ninguno">Ninguno</option>
+                                        <option value="primaria">Primaria</option>
+                                        <option value="secundaria">Secundaria / Bachillerato</option>
+                                        <option value="tecnico">Técnico / Tecnólogo</option>
+                                        <option value="universitario">Universitario</option>
+                                        <option value="posgrado">Posgrado</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Institución Educativa</label>
+                                    <input type="text" class="form-control" id="anam_institucionEducativa" placeholder="Nombre de la institución">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Año de Graduación</label>
+                                    <input type="number" class="form-control" id="anam_anoGraduacion" placeholder="Ej. 2020" min="1930" max="2099">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Carrera / Área Estudiada</label>
+                                    <input type="text" class="form-control" id="anam_carreraEstudiada" placeholder="Título o especialidad">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">¿Estudia Actualmente?</label>
+                                    <select class="form-select" id="anam_estudiaActualmente">
+                                        <option value="">—</option>
+                                        <option value="true">Sí</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Ocupación</label>
+                                    <input type="text" class="form-control" id="anam_ocupacion" placeholder="Ocupación actual">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Situación Laboral</label>
+                                    <select class="form-select" id="anam_situacionLaboral">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Empleado">Empleado/a</option>
+                                        <option value="Independiente">Independiente</option>
+                                        <option value="Desempleado">Desempleado/a</option>
+                                        <option value="Estudiante">Estudiante</option>
+                                        <option value="Jubilado/Pensionado">Jubilado/a o Pensionado/a</option>
+                                        <option value="Hogar">Dedicado/a al hogar</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Empresa / Lugar de Trabajo</label>
+                                    <input type="text" class="form-control" id="anam_empresa" placeholder="Empresa">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Cargo</label>
+                                    <input type="text" class="form-control" id="anam_cargo" placeholder="Cargo">
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label class="form-label fw-semibold">Rango de Ingresos Mensuales</label>
+                                    <select class="form-select" id="anam_rangoIngresosMensuales">
+                                        <option value="">Seleccione rango...</option>
+                                        <option value="NO_INFORMA">No informa</option>
+                                        <option value="SIN_INGRESOS">Sin ingresos</option>
+                                        <option value="MENOS1SMM">Menos de 1 SMMLV</option>
+                                        <option value="1SMM2SMM">Entre 1 y 2 SMMLV</option>
+                                        <option value="2SMM4SMM">Entre 2 y 4 SMMLV</option>
+                                        <option value="4SMM6SMM">Entre 4 y 6 SMMLV</option>
+                                        <option value="6SMM10SMM">Entre 6 y 10 SMMLV</option>
+                                        <option value="MAS10SMM">Más de 10 SMMLV</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Plan de tratamiento <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="tratamiento" rows="2" placeholder="Tratamiento recomendado..."></textarea>
+
+                        <!-- SECCIÓN 4: SALUD, ESTILO DE VIDA Y CONSULTA -->
+                        <div class="anamnesis-section">
+                            <div class="anamnesis-section__header">
+                                <h5 class="anamnesis-section__title">
+                                    <i class="fas fa-heartbeat"></i> D. Salud General, Estilo de Vida y Consulta
+                                </h5>
+                            </div>
+                            <div class="anam-form-grid grid-3">
+                                <div>
+                                    <label class="form-label fw-semibold">¿Cuenta con Seguro de Salud / EPS?</label>
+                                    <select class="form-select" id="anam_seguroSalud">
+                                        <option value="">—</option>
+                                        <option value="true">Sí</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Nombre de la EPS</label>
+                                    <input type="text" class="form-control" id="anam_epsNombre" placeholder="EPS o aseguradora">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">¿Presenta alguna Discapacidad?</label>
+                                    <select class="form-select" id="anam_discapacidad">
+                                        <option value="">—</option>
+                                        <option value="true">Sí</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                                <div style="grid-column: span 3;">
+                                    <label class="form-label fw-semibold">Tipo de Discapacidad</label>
+                                    <input type="text" class="form-control" id="anam_tipoDiscapacidad" placeholder="Descripción de la discapacidad si aplica">
+                                </div>
+                                <div style="grid-column: span 3;">
+                                    <label class="form-label fw-semibold">Alergias Conocidas</label>
+                                    <textarea class="form-control" id="anam_alergias" rows="2" placeholder="Medicamentos, alimentos, ambientales..."></textarea>
+                                </div>
+                                <div style="grid-column: span 3;">
+                                    <label class="form-label fw-semibold">Cirugías Previas</label>
+                                    <textarea class="form-control" id="anam_cirugiasPrevias" rows="2" placeholder="Procedimientos quirúrgicos e intervenciones previas..."></textarea>
+                                </div>
+                                <div style="grid-column: span 3;">
+                                    <label class="form-label fw-semibold">Enfermedades Crónicas</label>
+                                    <textarea class="form-control" id="anam_enfermedadesCronicas" rows="2" placeholder="Hipertensión, diabetes, afecciones psicológicas/psiquiátricas previas..."></textarea>
+                                </div>
+                                <div style="grid-column: span 3;">
+                                    <label class="form-label fw-semibold">Medicamentos Actuales</label>
+                                    <textarea class="form-control" id="anam_medicamentosActuales" rows="2" placeholder="Fármacos actuales, dosis y frecuencia..."></textarea>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mt-4 mb-3 text-secondary"><i class="fas fa-home me-2"></i>Entorno Psicosocial y Hábitos</h6>
+                            <div class="anam-form-grid grid-3">
+                                <div>
+                                    <label class="form-label fw-semibold">Convive con</label>
+                                    <input type="text" class="form-control" id="anam_conviveCon" placeholder="Ej. Padres, Pareja, Solo">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">N° Personas en el Hogar</label>
+                                    <input type="number" class="form-control" id="anam_personasQueVivenCon" placeholder="Cantidad" min="0">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Cantidad de Hijos</label>
+                                    <input type="number" class="form-control" id="anam_cantidadHijos" placeholder="Hijos" min="0">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Consumo de Alcohol</label>
+                                    <select class="form-select" id="anam_consumoAlcohol">
+                                        <option value="">Seleccione...</option>
+                                        <option value="No consume">No consume</option>
+                                        <option value="Ocasional">Ocasional</option>
+                                        <option value="Frecuente">Frecuente</option>
+                                        <option value="Problemático">Problemático</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Consumo de Tabaco</label>
+                                    <select class="form-select" id="anam_consumoTabaco">
+                                        <option value="">Seleccione...</option>
+                                        <option value="No consume">No consume</option>
+                                        <option value="Ocasional">Ocasional</option>
+                                        <option value="Frecuente">Frecuente</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Horas de Sueño / día</label>
+                                    <input type="number" class="form-control" id="anam_suenoHoras" placeholder="Ej. 7.5" step="0.5" min="0" max="24">
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Calidad del Sueño</label>
+                                    <select class="form-select" id="anam_calidadSueno">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Buena">Buena / Reparadora</option>
+                                        <option value="Regular">Regular</option>
+                                        <option value="Mala">Mala</option>
+                                        <option value="Insomnio frecuente">Insomnio frecuente</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label fw-semibold">Actividad Física</label>
+                                    <select class="form-select" id="anam_actividadFisica">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Sedentario">Sedentario</option>
+                                        <option value="Ligera (1-2 veces/sem)">Ligera (1-2 veces/sem)</option>
+                                        <option value="Moderada (3-4 veces/sem)">Moderada (3-4 veces/sem)</option>
+                                        <option value="Intensa (5+ veces/sem)">Intensa (5+ veces/sem)</option>
+                                    </select>
+                                </div>
+                                <div style="grid-column: span 3;">
+                                    <label class="form-label fw-semibold">Otras Sustancias Psicoactivas</label>
+                                    <textarea class="form-control" id="anam_consumoSustancias" rows="2" placeholder="Sustancias, frecuencia y tiempo de uso si aplica..."></textarea>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mt-4 mb-3 text-secondary"><i class="fas fa-stethoscope me-2"></i>Entrevista y Motivo de Consulta</h6>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Motivo Principal de Consulta <span class="req-badge">*</span></label>
+                                <textarea class="form-control" id="anam_motivoConsulta" rows="3" placeholder="Motivo manifestado por el paciente y expectativas terapéuticas..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Antecedentes Familiares (Psicológicos / Psiquiátricos / Médicos)</label>
+                                <textarea class="form-control" id="anam_antecedentesFamiliares" rows="2" placeholder="Historial familiar relevante..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Narrativa / Historia del Problema Actual</label>
+                                <textarea class="form-control" id="anam_narrativa" rows="3" placeholder="Descripción cronológica y desarrollo del motivo de consulta..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Observaciones Clínicas Generales</label>
+                                <textarea class="form-control" id="anam_observaciones" rows="2" placeholder="Observaciones de conducta, actitud, examen general..."></textarea>
+                            </div>
+                            <div>
+                                <label class="form-label fw-semibold">Nombre del Entrevistador / Profesional</label>
+                                <input type="text" class="form-control" id="anam_entrevistador" placeholder="Dr(a). Nombre del profesional">
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between mt-2">
-                            <button type="button" class="btn btn-outline-secondary" onclick="goToStep(1)">
-                                <i class="fas fa-arrow-left me-1"></i>Volver
+
+                        <!-- SECCIÓN 5: DINÁMICA FAMILIAR -->
+                        <div class="anamnesis-section">
+                            <div class="anamnesis-section__header">
+                                <h5 class="anamnesis-section__title">
+                                    <i class="fas fa-users-cog"></i> E. Dinámica e Historia Familiar
+                                </h5>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarFamiliar()">
+                                    <i class="fas fa-plus me-1"></i> Agregar Familiar
+                                </button>
+                            </div>
+                            <div class="fam-table-container">
+                                <table class="table table-hover align-middle fam-table" id="tablaFamiliares">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px;" class="text-center">#</th>
+                                            <th style="min-width: 140px;">Parentesco</th>
+                                            <th style="min-width: 180px;">Nombre Completo</th>
+                                            <th style="width: 90px;">Edad</th>
+                                            <th style="width: 90px;">¿Vivo?</th>
+                                            <th style="min-width: 140px;">Estado Salud</th>
+                                            <th style="min-width: 180px;">Diagnóstico / Enfermedad</th>
+                                            <th style="min-width: 130px;">Ocupación</th>
+                                            <th style="min-width: 120px;">Teléfono</th>
+                                            <th style="width: 50px;" class="text-center">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaFamiliaresBody">
+                                        <!-- Filas añadidas dinámicamente con agregarFamiliar() -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="emptyFamiliaresMsg" class="text-center py-4 text-muted">
+                                <i class="fas fa-user-friends me-2"></i>No se han registrado parientes en la ficha familiar. Haz clic en <strong>"Agregar Familiar"</strong> para añadir parientes relevantes.
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción al pie de la Anamnesis -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <button type="button" class="btn btn-outline-secondary" onclick="irAPaso(1)">
+                                <i class="fas fa-arrow-left me-1"></i> Volver a Pacientes
                             </button>
-                            <button type="button" class="btn btn-primary" onclick="goToStep(3)">
-                                Revisar <i class="fas fa-arrow-right ms-1"></i>
+                            <button type="button" class="btn btn-success px-4" id="btnGuardarAnamnesis" onclick="guardarOActualizarAnamnesis()">
+                                <i class="fas fa-save me-2"></i> Guardar anamnesis
                             </button>
                         </div>
                     </form>
-                </div>
-
-                <!-- ── Paso 3: Confirmación ── -->
-                <div id="panelStep3" class="d-none card p-4 mb-4 panel-step">
-                    <h4 class="fw-bold mb-4"><i class="fas fa-check-circle me-2 text-success"></i>Confirmar diagnóstico</h4>
-                    <div id="resumenContent" class="resumen-grid mb-4"></div>
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-secondary" onclick="goToStep(2)">
-                            <i class="fas fa-edit me-1"></i>Editar
-                        </button>
-                        <button type="button" class="btn btn-success px-4" onclick="guardarDiagnostico()">
-                            <i class="fas fa-save me-2"></i>Guardar diagnóstico
-                        </button>
-                    </div>
                 </div>
 
                 <!-- ── Historial ── -->
@@ -329,6 +679,7 @@
 <script src="/js/modules/professional/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
+<script src="/js/modules/professional/anamnesis.js?v=20260929-1"></script>
 <script src="/js/modules/professional/patients.js?v=20260803-1"></script>
 <script src="/js/modules/professional/patients.evolution.js?v=20260803-1"></script>
 </body>

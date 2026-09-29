@@ -19,7 +19,10 @@ class DisponibilidadSerializer(serializers.Serializer):
 
 class DiagnosticoSerializer(serializers.Serializer):
     idPaciente = serializers.IntegerField()
-    diagnostico = serializers.CharField(required=False, allow_blank=True)
+    sintomas = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    diagnostico = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    tratamiento = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    fecha_diagnostico = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
 
 class ReporteCreateSerializer(serializers.Serializer):

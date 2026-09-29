@@ -69,6 +69,10 @@ All endpoints are prefixed with `/api/`. Authentication is session-based (no JWT
 | POST | `/api/evolucion` | Yes | paciente | Save evolution entry |
 | GET | `/api/pacientes` | Yes | profesional, admin | List patients |
 | GET | `/api/profesionales` | Yes | All | List professionals |
+| GET | `/api/paciente/<id>/anamnesis` | Yes | profesional, admin | Get patient anamnesis |
+| POST | `/api/paciente/<id>/anamnesis` | Yes | profesional, admin | Create patient anamnesis |
+| PUT | `/api/paciente/<id>/anamnesis` | Yes | profesional, admin | Update patient anamnesis |
+| DELETE | `/api/paciente/<id>/anamnesis` | Yes | profesional, admin | Delete patient anamnesis |
 
 ---
 
@@ -82,6 +86,8 @@ All endpoints are prefixed with `/api/`. Authentication is session-based (no JWT
 | GET | `/api/disponibilidad/<id>` | Yes | admin, profesional, paciente | Get availability slot |
 | GET | `/api/profesional/dashboard` | Yes | profesional | Dashboard data |
 | GET | `/api/profesional/pacientes` | Yes | profesional | Patient list |
+| GET | `/api/profesional/pacientes/todos` | Yes | profesional, admin | All patients (for assignment) |
+| POST | `/api/profesional/pacientes/<id>/asignar` | Yes | profesional | Assign patient to professional |
 | GET | `/api/diagnosticos` | Yes | profesional | List diagnoses |
 | POST | `/api/diagnosticos` | Yes | profesional | Create diagnosis |
 | GET | `/api/reportes` | Yes | profesional | List reports |

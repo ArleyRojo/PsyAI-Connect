@@ -111,12 +111,16 @@ function cargarPacientes() {
                 var fotoSafe  = (p.fotoPerfil || "").replace(/"/g, '&quot;');
                 var pacienteId = Number(p.idUsuario);
 
+                var badgeAnamnesis = p.tieneAnamnesis
+                    ? '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="fas fa-check-circle me-1"></i>Registrada</span>'
+                    : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1"><i class="fas fa-clock me-1"></i>Pendiente</span>';
+
                 return '<tr class="patient-row' + (isSelected ? " selected-patient" : "") + '">' +
                     '<td><img src="' + fotoUrl + '" class="rounded-circle me-2" style="width:35px;height:35px;object-fit:cover;" data-inicial="' + inicial + '" data-color="' + colorLetra + '" data-size="35" data-fz="14" onerror="fallbackAvatar(this)">' + (p.nombre || "—") + '</td>' +
                     "<td>—</td>" +
                     "<td>—</td>" +
                     "<td>" + (p.email || "—") + "</td>" +
-                    "<td>—</td>" +
+                    "<td>" + badgeAnamnesis + "</td>" +
                     '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + pacienteId + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this)\'>' + btnTxt + "</button></td>" +
                     '<td><a href="historia_clinica_pro.html?pacienteId=' + pacienteId + '" class="btn btn-sm btn-outline-info" title="Ver historia clínica"><i class="fas fa-file-medical"></i></a></td>' +
                     "</tr>";
@@ -189,6 +193,11 @@ function seleccionarPaciente(id, nombre, fotoPerfil, email, btn) {
         document.getElementById("step2Name").textContent   = nombre;
         document.getElementById("step2Email").textContent  = email || '—';
 
+        // Llamar verificación de anamnesis si está disponible
+        if (typeof verificarAnamnesis === 'function') {
+            verificarAnamnesis(id);
+        }
+
         if (typeof PsyAIAlerts !== 'undefined') {
             PsyAIAlerts.success('Paciente seleccionado', nombre + ' ha sido seleccionado');
         }
@@ -217,151 +226,20 @@ function deseleccionarPaciente() {
         filaSeleccionadaAnterior.btn.textContent = 'Seleccionar';
         filaSeleccionadaAnterior = null;
     }
+
+    if (typeof limpiarFormulario === 'function') {
+        limpiarFormulario();
+    }
 }
 
-// ── Navegación entre pasos ────────────────────────────────────
+// ── Delegar navegación de pasos a Anamnesis ───────────────────
 
 function goToStep(n) {
-    // Validaciones
-    if (n === 2 && !pacienteSeleccionado) {
-        PsyAIAlerts
-            ? PsyAIAlerts.warning('Selecciona un paciente', 'Debes seleccionar un paciente antes de continuar')
-            : alert('Selecciona un paciente primero');
-        return;
-    }
-    if (n === 3) {
-        if (!validarFormulario()) return;
-        buildResumen();
-    }
-    if (n === 1) {
-        // Al volver al paso 1, limpiar selección de fila visualmente pero mantener el paciente
-        // para que no se pierda si el usuario quiere editar el formulario
-    }
-
-    // Actualizar pasos visuales
-    for (var i = 1; i <= 3; i++) {
-        var panel = document.getElementById("panelStep" + i);
-        var step  = document.getElementById("step" + i);
-        panel.classList.add("d-none");
-        step.classList.remove("active", "done");
-        if (i < n) step.classList.add("done");
-        else if (i === n) step.classList.add("active");
-    }
-    document.getElementById("panelStep" + n).classList.remove("d-none");
-
-    // Barra de progreso
-    var labels = { 1: "Paso 1 de 3 — Seleccionar paciente", 2: "Paso 2 de 3 — Registrar diagnóstico", 3: "Paso 3 de 3 — Confirmar y guardar" };
-    var pcts   = { 1: "33%", 2: "66%", 3: "100%" };
-    document.getElementById("progressLabel").textContent = labels[n];
-    document.getElementById("progressPct").textContent   = pcts[n];
-    document.getElementById("progressFill").style.width  = pcts[n];
-
-    // Scroll al top del contenido
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ── Validar formulario paso 2 ────────────────────────────────
-
-function validarFormulario() {
-    var campos = [
-        { id: "profesional",    msg: "Selecciona un profesional" },
-        { id: "fechaDiagnostico", msg: "Selecciona una fecha" },
-        { id: "sintomas",       msg: "Describe los síntomas" },
-        { id: "diagnostico",    msg: "Ingresa el diagnóstico clínico" },
-        { id: "tratamiento",    msg: "Ingresa el plan de tratamiento" }
-    ];
-    for (var i = 0; i < campos.length; i++) {
-        var val = document.getElementById(campos[i].id)?.value?.trim();
-        if (!val) {
-            PsyAIAlerts
-                ? PsyAIAlerts.warning('Campo requerido', campos[i].msg)
-                : alert(campos[i].msg);
-            document.getElementById(campos[i].id)?.focus();
-            return false;
-        }
-    }
-    return true;
-}
-
-// ── Resumen paso 3 ────────────────────────────────────────────
-
-function buildResumen() {
-    var campos = [
-        { label: "Paciente",    val: document.getElementById("selectedPatientName").textContent },
-        { label: "Profesional", val: document.getElementById("profesional").value },
-        { label: "Fecha",       val: document.getElementById("fechaDiagnostico").value },
-        { label: "Síntomas",    val: document.getElementById("sintomas").value },
-        { label: "Diagnóstico", val: document.getElementById("diagnostico").value },
-        { label: "Tratamiento", val: document.getElementById("tratamiento").value }
-    ];
-
-    document.getElementById("resumenContent").innerHTML = campos.map(function (c) {
-        return '<div class="resumen-item"><label>' + c.label + '</label><span>' + (c.val || '—') + '</span></div>';
-    }).join('');
-}
-
-// ── Guardar diagnóstico ───────────────────────────────────────
-
-async function guardarDiagnostico() {
-    if (!validarFormulario()) return;
-
-    var body = {
-        idPaciente:        pacienteSeleccionado,
-        fecha_diagnostico: document.getElementById("fechaDiagnostico").value,
-        profesional:       document.getElementById("profesional").value,
-        sintomas:          document.getElementById("sintomas").value,
-        diagnostico:       document.getElementById("diagnostico").value,
-        tratamiento:       document.getElementById("tratamiento").value
-    };
-
-    try {
-        var res  = await fetch("/api/diagnosticos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify(body)
-        });
-        var data = await res.json();
-
-        if (data.success) {
-            PsyAIAlerts
-                ? PsyAIAlerts.success('Guardado', 'Diagnóstico registrado correctamente')
-                : alert('Diagnóstico guardado');
-
-            localStorage.setItem('psyai_dashboard_update', Date.now());
-            registrarActividadReciente('diagnostico', 'Diagnóstico registrado', 'Paciente: ' + document.getElementById("selectedPatientName").textContent);
-            cargarHistorial();
-            resetearFlujo();
-        } else {
-            PsyAIAlerts
-                ? PsyAIAlerts.error('Error', data.message || 'No se pudo guardar')
-                : alert('Error: ' + data.message);
-        }
-    } catch (e) {
-        console.error(e);
-        PsyAIAlerts
-            ? PsyAIAlerts.error('Error de conexión', e.message)
-            : alert('Error de conexión');
+    if (typeof irAPaso === 'function') {
+        irAPaso(n);
     }
 }
 
-// ── Resetear flujo tras guardar ───────────────────────────────
-
-function resetearFlujo() {
-    pacienteSeleccionado = null;
-    if (filaSeleccionadaAnterior) {
-        filaSeleccionadaAnterior.fila.classList.remove('selected-patient');
-        filaSeleccionadaAnterior.btn.classList.remove('active-btn');
-        filaSeleccionadaAnterior.btn.textContent = 'Seleccionar';
-        filaSeleccionadaAnterior = null;
-    }
-    document.getElementById("formDiagnostico").reset();
-    document.getElementById("paciente-seleccionado-card").classList.add('d-none');
-    document.getElementById("wrapBtnContinuar").style.display   = '';
-    document.getElementById("btnContinuarDiagSolo").disabled    = true;
-    document.getElementById("idPacienteSeleccionado").value     = '';
-    goToStep(1);
-}
 
 // ── Historial de diagnósticos ─────────────────────────────────
 

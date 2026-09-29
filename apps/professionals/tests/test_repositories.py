@@ -2,7 +2,7 @@ import pytest
 from datetime import date, timedelta
 
 from apps.authentication.models import Register
-from apps.professionals.models import PerfilProfesional, PacientesProfesional, Reportes
+from apps.professionals.models import PerfilProfesional, PacientesProfesional, Reportes, Diagnostico
 from apps.professionals.repositories import ProfessionalRepository
 from apps.patients.models import PerfilPaciente
 
@@ -151,14 +151,15 @@ class TestDiagnosisCRUD:
         }
         repo.save_diagnosis(professional_user.idUsuario, data)
 
-        pp = PacientesProfesional.objects.get(
-            idProfesional=professional_user,
-            idPaciente=patient_user,
-        )
-        assert pp.sintomas == "Ansiedad generalizada"
-        assert pp.diagnostico == "Trastorno de Ansiedad"
+        d = Diagnostico.objects.filter(
+            idAsignacion__idProfesional=professional_user,
+            idAsignacion__idPaciente=patient_user,
+        ).first()
+        assert d is not None
+        assert d.sintomas == "Ansiedad generalizada"
+        assert d.diagnostico == "Trastorno de Ansiedad"
 
-    def test_save_updates_existing_diagnosis(self, repo, professional_user, patient_user, professional_patient):
+    def test_save_accumulates_diagnoses(self, repo, professional_user, patient_user, professional_patient):
         data = {
             "idPaciente": patient_user.idUsuario,
             "sintomas": "Ansiedad",
@@ -171,11 +172,11 @@ class TestDiagnosisCRUD:
         data["sintomas"] = "Ansiedad severa"
         repo.save_diagnosis(professional_user.idUsuario, data)
 
-        pp = PacientesProfesional.objects.get(
-            idProfesional=professional_user,
-            idPaciente=patient_user,
+        diagnosticos = Diagnostico.objects.filter(
+            idAsignacion__idProfesional=professional_user,
+            idAsignacion__idPaciente=patient_user,
         )
-        assert pp.sintomas == "Ansiedad severa"
+        assert diagnosticos.count() == 2
 
     def test_get_history_returns_list(self, repo, professional_user, patient_user, professional_patient):
         data = {
@@ -193,12 +194,14 @@ class TestDiagnosisCRUD:
         assert history[0]["diagnostico"] == "TAD"
 
     def test_history_excludes_empty_diagnosis(self, repo, professional_user, patient_user, professional_patient):
-        pp = PacientesProfesional.objects.get(
-            idProfesional=professional_user,
-            idPaciente=patient_user,
-        )
-        pp.diagnostico = ""
-        pp.save(update_fields=["diagnostico"])
+        data = {
+            "idPaciente": patient_user.idUsuario,
+            "sintomas": "Ninguno",
+            "diagnostico": "",
+            "tratamiento": "Ninguno",
+            "fecha_diagnostico": date.today(),
+        }
+        repo.save_diagnosis(professional_user.idUsuario, data)
 
         history = repo.get_diagnosis_history(professional_user.idUsuario)
         assert len(history) == 0

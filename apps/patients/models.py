@@ -252,14 +252,25 @@ class Anamnesis(models.Model):
         import datetime
         if not self.fechaNacimiento:
             return None
+        fn = self.fechaNacimiento
+        if isinstance(fn, str):
+            try:
+                fn = datetime.date.fromisoformat(fn)
+            except Exception:
+                return None
         hoy = datetime.date.today()
-        cumple_este_anio = self.fechaNacimiento.replace(year=hoy.year)
-        anios = hoy.year - self.fechaNacimiento.year
+        cumple_este_anio = fn.replace(year=hoy.year)
+        anios = hoy.year - fn.year
         if cumple_este_anio > hoy:
             anios -= 1
         return anios
 
     def to_dict(self, include_familiares=False):
+        fn_str = (
+            self.fechaNacimiento.isoformat()
+            if hasattr(self.fechaNacimiento, "isoformat")
+            else (str(self.fechaNacimiento) if self.fechaNacimiento else None)
+        )
         data = {
             "idAnamnesis": self.idAnamnesis,
             "idPaciente": self.idPaciente_id,
@@ -268,7 +279,7 @@ class Anamnesis(models.Model):
             # A. Personales
             "tipoDocumento": self.tipoDocumento,
             "numeroDocumento": self.numeroDocumento,
-            "fechaNacimiento": self.fechaNacimiento.isoformat() if self.fechaNacimiento else None,
+            "fechaNacimiento": fn_str,
             "edad": self.edad,
             "edadCalculada": self.edad_calculada,
             "genero": self.genero,
@@ -398,7 +409,11 @@ class Familiar(models.Model):
             "idAnamnesis": self.idAnamnesis_id,
             "tipoParentesco": self.tipoParentesco,
             "nombreCompleto": self.nombreCompleto,
-            "fechaNacimiento": self.fechaNacimiento.isoformat() if self.fechaNacimiento else None,
+            "fechaNacimiento": (
+                self.fechaNacimiento.isoformat()
+                if hasattr(self.fechaNacimiento, "isoformat")
+                else (str(self.fechaNacimiento) if self.fechaNacimiento else None)
+            ),
             "edad": self.edad,
             "sexo": self.sexo,
             "vivo": self.vivo,

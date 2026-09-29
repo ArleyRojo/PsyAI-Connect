@@ -5,6 +5,7 @@ from apps.patients.models import PerfilPaciente
 from apps.authentication.models import Register
 from apps.core.notifier import notificar_paciente
 from apps.core.whatsapp import DummyProvider, TwilioProvider
+from apps.core.webhooks import WhatsAppWebhook
 from unittest.mock import patch, MagicMock
 
 @pytest.mark.django_db
@@ -37,8 +38,9 @@ def test_notificar_paciente_whatsapp_fallback(mocker):
         canalNotificacion="ambos",
         whatsappConsentimiento=True,
         numeroTelefonico="+573001234567")
-    mock_prov = MagicMock(return_value="SID123")
-    mocker.patch('apps.core.whatsapp.get_whatsapp_provider', return_value=mock_prov)
+    mock_prov = MagicMock()
+    mock_prov.enviar_whatsapp.return_value = "SID123"
+    mocker.patch('apps.core.notifier.get_whatsapp_provider', return_value=mock_prov)
     mocker.patch('django.core.mail.send_mail')
     notificar_paciente(user, "T", "M", "recordatorio_cita")
     mock_prov.enviar_whatsapp.assert_called_once()
@@ -50,10 +52,14 @@ def test_webhook_stop_desactiva_consentimiento(client):
         whatsappConsentimiento=True,
         numeroTelefonico="+573001234567",
         canalNotificacion="ambos")
-    resp = client.post("/api/pacientes/whatsapp/webhook/",
-        {"From":"whatsapp:+573001234567","Body":"STOP"},
-        HTTP_X_TWILIO_SIGNATURE="dummy")
-    assert resp.status_code == 200
+    
+    # Mock the signature verification
+    with patch.object(WhatsAppWebhook, '_verify_signature', return_value=True):
+        resp = client.post("/api/whatsapp/webhook/",
+            {"From":"whatsapp:+573001234567","Body":"STOP"},
+            HTTP_X_TWILIO_SIGNATURE="dummy")
+        assert resp.status_code == 200
+    
     perfil = PerfilPaciente.objects.get(idPaciente=user)
     assert perfil.whatsappConsentimiento is False
     assert perfil.canalNotificacion == "email"

@@ -30,13 +30,16 @@ class PerfilPacienteSerializer(serializers.Serializer):
 
         # Normalizar a E.164
         if tel:
-            tel = re.sub(r"\D", "", tel)
-            if not tel.startswith("+"):
-                if len(tel) == 10:          # asumir Colombia +57
-                    tel = "+57" + tel
-                else:
-                    raise serializers.ValidationError(
-                        {"numeroTelefonico": "Formato internacional requerido (+57…)"})
+            tel_clean = re.sub(r"\D", "", tel)
+            if tel.startswith("+"):
+                tel = "+" + tel_clean
+            elif len(tel_clean) == 10:
+                tel = "+57" + tel_clean
+            elif len(tel_clean) > 10:
+                tel = "+" + tel_clean
+            else:
+                raise serializers.ValidationError(
+                    {"numeroTelefonico": "Formato internacional requerido (+57…)"})
             attrs["numeroTelefonico"] = tel
 
         if canal in ("whatsapp", "ambos"):

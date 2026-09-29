@@ -4,7 +4,7 @@ from django.db.models.functions import Lower, Coalesce
 from django.utils import timezone
 
 from apps.authentication.models import Register
-from apps.professionals.models import PerfilProfesional, PacientesProfesional, Reportes
+from apps.professionals.models import PerfilProfesional, PacientesProfesional, Reportes, Diagnostico
 from apps.patients.models import EvolucionPaciente, PerfilPaciente
 
 
@@ -41,45 +41,42 @@ class ProfessionalRepository:
             perfil.save(update_fields=["especialidad", "licencia", "experiencia"])
 
     def list_professional_patients(self, professional_id):
-        patients_with_diagnosis = (
-            PacientesProfesional.objects.filter(idProfesional_id=professional_id)
-            .exclude(diagnostico__isnull=True)
-            .exclude(diagnostico="")
-            .order_by("-fechaDiagnostico")
-        )
-        latest_diagnosis = {}
-        for pp in patients_with_diagnosis:
-            if pp.idPaciente_id not in latest_diagnosis:
-                latest_diagnosis[pp.idPaciente_id] = pp.diagnostico
+        from django.db.models import OuterRef, Subquery
+
+        latest_diag_subquery = Diagnostico.objects.filter(
+            idAsignacion__idProfesional_id=professional_id,
+            idAsignacion__idPaciente_id=OuterRef('idPaciente_id')
+        ).exclude(diagnostico__isnull=True).exclude(diagnostico="").order_by('-fechaDiagnostico', '-fecha')
+
+        assigned_patients = PacientesProfesional.objects.filter(
+            idProfesional_id=professional_id
+        ).select_related('idPaciente').order_by('idPaciente__nombre')
 
         perfil_data = {
             p.idPaciente_id: p
             for p in PerfilPaciente.objects.filter(
-                idPaciente_id__in=Register.objects.filter(
-                    rol="paciente"
-                ).values_list("idUsuario", flat=True)
+                idPaciente_id__in=assigned_patients.values_list('idPaciente_id', flat=True)
             )
         }
 
-        assigned_ids = (
-            PacientesProfesional.objects.filter(idProfesional_id=professional_id)
-            .values_list("idPaciente_id", flat=True)
-            .distinct()
-        )
-        users = Register.objects.filter(
-            rol="paciente", idUsuario__in=assigned_ids
-        ).order_by("nombre")
         result = []
-        for u in users:
-            p = perfil_data.get(u.idUsuario)
+        for pp in assigned_patients:
+            if not pp.idPaciente:
+                continue
+            p = perfil_data.get(pp.idPaciente_id)
+            latest_diag = Diagnostico.objects.filter(
+                idAsignacion__idProfesional_id=professional_id,
+                idAsignacion__idPaciente_id=pp.idPaciente_id
+            ).exclude(diagnostico__isnull=True).exclude(diagnostico="").order_by('-fechaDiagnostico', '-fecha').first()
+
             result.append({
-                "idUsuario": u.idUsuario,
-                "nombre": u.nombre,
-                "fotoPerfil": u.fotoPerfil,
+                "idUsuario": pp.idPaciente.idUsuario,
+                "nombre": pp.idPaciente.nombre,
+                "fotoPerfil": pp.idPaciente.fotoPerfil,
                 "edad": p.edad if p else None,
                 "genero": p.genero if p else None,
-                "contacto": (p.numeroTelefonico if p and p.numeroTelefonico else u.email),
-                "ultimoDiagnostico": latest_diagnosis.get(u.idUsuario),
+                "contacto": (p.numeroTelefonico if p and p.numeroTelefonico else pp.idPaciente.email),
+                "ultimoDiagnostico": latest_diag.diagnostico if latest_diag else None,
             })
         return result
 
@@ -108,30 +105,44 @@ class ProfessionalRepository:
         ]
 
     def save_diagnosis(self, professional_id, data):
-        existing = PacientesProfesional.objects.filter(
-            idProfesional_id=professional_id,
-            idPaciente_id=data.get("idPaciente"),
-        ).first()
-        if existing:
-            existing.sintomas = data.get("sintomas")
-            existing.diagnostico = data.get("diagnostico")
-            existing.tratamiento = data.get("tratamiento")
-            existing.fechaDiagnostico = data.get("fecha_diagnostico")
-            existing.save(update_fields=["sintomas", "diagnostico", "tratamiento", "fechaDiagnostico"])
+        from django.db import transaction
+        with transaction.atomic():
+            asignacion, _ = PacientesProfesional.objects.get_or_create(
+                idProfesional_id=professional_id,
+                idPaciente_id=data.get("idPaciente"),
+            )
+            fecha_diag = data.get("fecha_diagnostico")
+            if not fecha_diag:
+                import datetime
+                fecha_diag = datetime.date.today()
+            elif isinstance(fecha_diag, str):
+                import datetime
+                try:
+                    fecha_diag = datetime.date.fromisoformat(fecha_diag)
+                except Exception:
+                    fecha_diag = datetime.date.today()
+
+            return Diagnostico.objects.create(
+                idAsignacion=asignacion,
+                sintomas=data.get("sintomas"),
+                diagnostico=data.get("diagnostico"),
+                tratamiento=data.get("tratamiento"),
+                fechaDiagnostico=fecha_diag,
+            )
 
     def get_diagnosis_history(self, professional_id):
         rows = (
-            PacientesProfesional.objects.filter(
-                idProfesional_id=professional_id,
+            Diagnostico.objects.filter(
+                idAsignacion__idProfesional_id=professional_id,
             )
             .exclude(diagnostico__isnull=True)
             .exclude(diagnostico="")
-            .select_related("idPaciente")
-            .order_by("-fechaDiagnostico")
+            .select_related("idAsignacion__idPaciente")
+            .order_by("-fechaDiagnostico", "-fecha")
         )
         return [
             {
-                "paciente": r.idPaciente.nombre if r.idPaciente else None,
+                "paciente": r.idAsignacion.idPaciente.nombre if (r.idAsignacion and r.idAsignacion.idPaciente) else None,
                 "fechaRaw": r.fechaDiagnostico,
                 "sintomas": r.sintomas,
                 "diagnostico": r.diagnostico,

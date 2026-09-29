@@ -135,6 +135,124 @@ Seguimiento diario del estado emocional.
 
 ---
 
+### `Anamnesis` (tabla `Anamnesis`)
+Historia clínica completa (anamnesis) registrada por un profesional para un paciente. **1→1** con `Register` (paciente).
+
+| Campo | Tipo |
+|-------|------|
+| `idAnamnesis` | PK |
+| `idPaciente` | OneToOne → `Register` (related_name=`anamnesis`) |
+| `idProfesional` | FK → `Register` (related_name=`anamnesis_creadas`, null, SET_NULL) |
+| `fechaActualizacion` | DateTimeField(auto_now) |
+
+**Sección A — Personales**
+| Campo | Tipo |
+|-------|------|
+| `tipoDocumento` | CharField(20, choices: CC/CE/TI/Pasaporte) |
+| `numeroDocumento` | CharField(40) |
+| `fechaNacimiento` | DateField |
+| `edad` | IntegerField |
+| `genero` | CharField(30) |
+| `estadoCivil` | CharField(30) |
+| `orientacionSexual` | CharField(30) |
+| `razaEtnica` | CharField(40) |
+| `lugarNacimiento` | CharField(120) |
+
+**Sección B — Contacto**
+| Campo | Tipo |
+|-------|------|
+| `telefonoPrincipal` | CharField(20) |
+| `telefonoAlterno` | CharField(20) |
+| `whatsapp` | CharField(20) |
+| `correoAlterno` | EmailField(120) |
+| `direccionResidencia` | CharField(200) |
+| `ciudad` | CharField(80) |
+| `departamento` | CharField(80) |
+| `barrio` | CharField(80) |
+| `codigoPostal` | CharField(10) |
+| `emergenciaNombre` | CharField(120) |
+| `emergenciaParentesco` | CharField(40) |
+| `emergenciaTelefono` | CharField(20) |
+
+**Sección C — Escolar**
+| Campo | Tipo |
+|-------|------|
+| `nivelEscolar` | CharField(20, choices: ninguno/primaria/secundaria/tecnico/universitario/posgrado) |
+| `institucionEducativa` | CharField(150) |
+| `anoGraduacion` | IntegerField |
+| `carreraEstudiada` | CharField(150) |
+| `estudiaActualmente` | BooleanField |
+
+**Sección D — Ocupación**
+| Campo | Tipo |
+|-------|------|
+| `ocupacion` | CharField(120) |
+| `situacionLaboral` | CharField(60) |
+| `empresa` | CharField(150) |
+| `cargo` | CharField(100) |
+| `rangoIngresosMensuales` | CharField(20, choices: NO_INFORMA/SIN_INGRESOS/MENOS1SMM/1SMM2SMM/2SMM4SMM/4SMM6SMM/6SMM10SMM/MAS10SMM) |
+
+**Sección E — Salud**
+| Campo | Tipo |
+|-------|------|
+| `seguroSalud` | BooleanField |
+| `epsNombre` | CharField(120) |
+| `alergias` | TextField |
+| `cirugiasPrevias` | TextField |
+| `enfermedadesCronicas` | TextField |
+| `medicamentosActuales` | TextField |
+| `discapacidad` | BooleanField |
+| `tipoDiscapacidad` | CharField(120) |
+
+**Sección F — Psicosocial**
+| Campo | Tipo |
+|-------|------|
+| `conviveCon` | CharField(80) |
+| `personasQueVivenCon` | IntegerField |
+| `cantidadHijos` | IntegerField |
+| `consumoAlcohol` | CharField(40) |
+| `consumoTabaco` | CharField(40) |
+| `consumoSustancias` | TextField |
+| `suenoHoras` | DecimalField(4,1) |
+| `calidadSueno` | CharField(40) |
+| `actividadFisica` | CharField(40) |
+
+**Sección G/H — Entrevista**
+| Campo | Tipo |
+|-------|------|
+| `motivoConsulta` | TextField |
+| `antecedentesFamiliares` | TextField |
+| `narrativa` | TextField |
+| `observaciones` | TextField |
+| `entrevistador` | CharField(120) |
+
+**Propiedad:** `edad_calculada` (property) — calcula edad desde `fechaNacimiento`
+
+---
+
+### `Familiar` (tabla `AnamnesisFamiliar`)
+Familiares registrados en la anamnesis. **N→1** con `Anamnesis` (related_name=`familiares`).
+
+| Campo | Tipo |
+|-------|------|
+| `idFamiliar` | PK |
+| `idAnamnesis` | FK → `Anamnesis` (CASCADE) |
+| `tipoParentesco` | CharField(20, choices: PADRE/MADRE/HIJO/HIJA/ABUELO_PATERNO/ABUELA_PATERNA/ABUELO_MATERNO/ABUELA_MATERNA/BISABUELO/TIO/TIA/PRIMO/PRIMA/HERMANO/HERMANA/CONYUGE/OTRO) |
+| `nombreCompleto` | CharField(120) |
+| `fechaNacimiento` | DateField |
+| `edad` | IntegerField |
+| `sexo` | CharField(20) |
+| `vivo` | BooleanField |
+| `causaFallecimiento` | CharField(200) |
+| `estadoSalud` | CharField(20, choices: sano/enfermedad_cronica/discapacidad/fallecido/desconocido) |
+| `diagnosticoOEnfermedad` | TextField |
+| `ocupacion` | CharField(120) |
+| `telefono` | CharField(20) |
+| `notas` | TextField |
+| `orden` | IntegerField(default=0) |
+
+---
+
 ## 3. `apps.professionals` — Portal de profesionales
 
 ### `PerfilProfesional` (tabla `PerfilProfesional`)
@@ -153,20 +271,33 @@ Extensión 1→1 de `Register` para profesionales.
 ---
 
 ### `PacientesProfesional` (tabla `PacientesProfesional`)
-Relación profesional-paciente con datos clínicos.
+Relación profesional-paciente (asignación). Los datos clínicos (diagnósticos) están en la tabla separada `Diagnostico`.
 
 | Campo | Tipo |
 |-------|------|
 | `idRegistro` | PK |
 | `idProfesional` | FK → `Register` (related_name=`pacientes_profesional`) |
 | `idPaciente` | FK → `Register` (related_name=`pacientes_asignados`, null) |
-| `sintomas` | TextField(null) |
-| `diagnostico` | TextField(null) |
-| `tratamiento` | TextField(null) |
-| `fechaDiagnostico` | DateField(null) |
 | `fecha` | DateTimeField(auto_now_add) |
 
 **Constraint:** `UniqueConstraint(idProfesional, idPaciente)` → `uq_profesional_paciente`
+
+---
+
+### `Diagnostico` (tabla `Diagnostico`)
+Historial de diagnósticos por asignación profesional-paciente. **N→1** con `PacientesProfesional` (related_name=`diagnosticos`).
+
+| Campo | Tipo |
+|-------|------|
+| `idDiagnostico` | PK |
+| `idAsignacion` | FK → `PacientesProfesional` (CASCADE, related_name=`diagnosticos`) |
+| `sintomas` | TextField |
+| `diagnostico` | TextField |
+| `tratamiento` | TextField |
+| `fechaDiagnostico` | DateField |
+| `fecha` | DateTimeField(auto_now_add) |
+
+**Ordering:** `[-fechaDiagnostico, -fecha]`
 
 ---
 
@@ -479,6 +610,10 @@ erDiagram
     Register ||--o{ MensajesChat : "receptor"
     Register ||--o{ Notificaciones : "1:N"
     Register ||--o{ AuditoriaAccesos : "1:N"
+    Register ||--|| Anamnesis : "1:1 (paciente)"
+    Register ||--o{ Anamnesis : "1:N (profesional)"
+    Anamnesis ||--o{ Familiar : "1:N"
+    PacientesProfesional ||--o{ Diagnostico : "1:N"
 
     Register }|--|| PerfilPaciente : "1:1"
     Register }|--|| PerfilProfesional : "1:1"

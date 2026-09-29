@@ -23,12 +23,12 @@ class WhatsAppWebhook(View):
 
         if body in ("STOP", "BAJA", "UNSUBSCRIBE"):
             try:
-                user = Register.objects.get(telefono=from_num)   # assumes Register has telefono field
-                perfil = PerfilPaciente.objects.get(idPaciente=user)
+                # Buscar perfil por número telefónico
+                perfil = PerfilPaciente.objects.get(numeroTelefonico=from_num)
                 perfil.whatsappConsentimiento = False
                 perfil.canalNotificacion = "email"
                 perfil.whatsappConsentimientoFecha = None
-                perfil.save(update_fields=["whatsappConsentimiento","canalNotificacion","whatsappConsentimientoFecha"])
+                perfil.save(update_fields=["whatsappConsentimiento", "canalNotificacion", "whatsappConsentimientoFecha"])
                 get_whatsapp_provider().enviar_whatsapp(from_num,
                     texto="Has sido dado de baja de notificaciones por WhatsApp. Seguirás recibiendo correos.")
             except Exception:

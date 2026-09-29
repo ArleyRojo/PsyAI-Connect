@@ -59,10 +59,6 @@ class PacientesProfesional(models.Model):
         null=True,
         blank=True,
     )
-    sintomas = models.TextField(null=True, blank=True)
-    diagnostico = models.TextField(null=True, blank=True)
-    tratamiento = models.TextField(null=True, blank=True)
-    fechaDiagnostico = models.DateField(null=True, blank=True)
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -82,11 +78,42 @@ class PacientesProfesional(models.Model):
             "idRegistro": self.idRegistro,
             "idProfesional": self.idProfesional_id,
             "idPaciente": self.idPaciente_id,
+            "fecha": self.fecha.isoformat() if self.fecha else None,
+        }
+
+
+class Diagnostico(models.Model):
+    idDiagnostico = models.AutoField(primary_key=True)
+    idAsignacion = models.ForeignKey(
+        PacientesProfesional,
+        on_delete=models.CASCADE,
+        db_column="idAsignacion",
+        related_name="diagnosticos",
+    )
+    sintomas = models.TextField(null=True, blank=True)
+    diagnostico = models.TextField(null=True, blank=True)
+    tratamiento = models.TextField(null=True, blank=True)
+    fechaDiagnostico = models.DateField(null=True, blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "Diagnostico"
+        ordering = ["-fechaDiagnostico", "-fecha"]
+
+    def __str__(self):
+        return f"Diagnostico {self.idDiagnostico} - Asignacion {self.idAsignacion_id}"
+
+    def to_dict(self):
+        return {
+            "idDiagnostico": self.idDiagnostico,
+            "idAsignacion": self.idAsignacion_id,
             "sintomas": self.sintomas,
             "diagnostico": self.diagnostico,
             "tratamiento": self.tratamiento,
             "fechaDiagnostico": (
-                self.fechaDiagnostico.isoformat() if self.fechaDiagnostico else None
+                self.fechaDiagnostico.isoformat()
+                if hasattr(self.fechaDiagnostico, "isoformat")
+                else (str(self.fechaDiagnostico) if self.fechaDiagnostico else None)
             ),
             "fecha": self.fecha.isoformat() if self.fecha else None,
         }

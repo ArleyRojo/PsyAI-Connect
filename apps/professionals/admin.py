@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.professionals.models import PacientesProfesional, PerfilProfesional, Reportes
+from apps.professionals.models import PacientesProfesional, PerfilProfesional, Reportes, Diagnostico
 
 
 @admin.register(PerfilProfesional)
@@ -12,7 +12,14 @@ class PerfilProfesionalAdmin(admin.ModelAdmin):
 
 @admin.register(PacientesProfesional)
 class PacientesProfesionalAdmin(admin.ModelAdmin):
-    list_display = ("idRegistro", "idProfesional", "idPaciente", "fechaDiagnostico")
+    list_display = ("idRegistro", "idProfesional", "idPaciente", "fecha")
+    readonly_fields = ("fecha",)
+
+
+@admin.register(Diagnostico)
+class DiagnosticoAdmin(admin.ModelAdmin):
+    list_display = ("idDiagnostico", "idAsignacion", "fechaDiagnostico", "fecha")
+    search_fields = ("diagnostico", "sintomas")
     readonly_fields = ("fecha",)
 
 

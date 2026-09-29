@@ -41,7 +41,7 @@ class PatientRepository:
         }
 
     def update_patient_profile(self, data):
-        user_id = data.get("idPaciente") or data.get("user_id")
+        user_id = data.get("idPaciente") or data.get("user_id") or data.get("idUsuario")
         perfil, _ = PerfilPaciente.objects.get_or_create(
             idPaciente_id=user_id,
             defaults={"consentimiento_chatbot": False},
@@ -146,15 +146,20 @@ class PatientRepository:
 
     def list_patients(self, page=1, limit=20):
         offset = (page - 1) * limit
-        users = Register.objects.filter(
-            rol="paciente"
-        ).order_by("nombre")[offset : offset + limit]
+        users = list(
+            Register.objects.filter(rol="paciente").order_by("nombre")[offset : offset + limit]
+        )
+        user_ids = [u.idUsuario for u in users]
+        anamnesis_paciente_ids = set(
+            Anamnesis.objects.filter(idPaciente_id__in=user_ids).values_list("idPaciente_id", flat=True)
+        )
         return [
             {
                 "idUsuario": u.idUsuario,
                 "nombre": u.nombre,
                 "email": u.email,
                 "fotoPerfil": u.fotoPerfil,
+                "tieneAnamnesis": u.idUsuario in anamnesis_paciente_ids,
             }
             for u in users
         ]

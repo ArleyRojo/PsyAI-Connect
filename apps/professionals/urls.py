@@ -14,6 +14,7 @@ from apps.professionals.views import (
     ChatContactoProfesionalResource,
     ChatMensajeProfesionalResource,
     AllPacientesProfesionalResource,
+    PacienteAsignarResource,
 )
 
 app_name = "professionals"
@@ -26,6 +27,7 @@ urlpatterns = [
     path("profesional/dashboard", DashboardResource.as_view(), name="dashboard"),
     path("profesional/pacientes", ProfesionalPacienteResource.as_view(), name="profesional_pacientes"),
     path("profesional/pacientes/todos", AllPacientesProfesionalResource.as_view(), name="profesional_pacientes_todos"),
+    path("profesional/pacientes/<int:id_paciente>/asignar", PacienteAsignarResource.as_view(), name="profesional_paciente_asignar"),
     path("diagnosticos", DiagnosticoViewSet.as_view({"get": "list", "post": "create"}), name="diagnosticos"),
     path("reportes", ReporteViewSet.as_view({"get": "list", "post": "create"}), name="reportes"),
     path("reportes/<int:pk>", ReporteViewSet.as_view({"put": "update", "delete": "destroy"}), name="reporte"),

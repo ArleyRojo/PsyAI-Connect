@@ -183,15 +183,18 @@ async function elegirPaciente() {
 
   // Assign patient to professional (idempotent) before proceeding
   try {
-    await fetch(`/api/profesional/pacientes/${pacienteSeleccionado}/asignar`, {
+    const assignRes = await fetch(`/api/profesional/pacientes/${pacienteSeleccionado}/asignar`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
         'X-CSRFToken': getCookie('csrftoken')
       }
     });
-  } catch (_) {
-    // If assignment fails, document creation will try again server‑side
+    if (!assignRes.ok) {
+      console.warn('Advertencia al asignar paciente al profesional:', assignRes.status);
+    }
+  } catch (err) {
+    console.warn('Error al asignar paciente:', err);
   }
 
   actualizarBanner({
