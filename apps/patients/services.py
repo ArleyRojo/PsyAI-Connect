@@ -91,3 +91,97 @@ class PatientService:
             "message": "Foto de perfil actualizada",
             "fotoPerfil": safe_name,
         }, 200
+
+    # ── Anamnesis ─────────────────────────────────────────────────────────────
+
+    CAMPOS_OBLIGATORIOS_ANAMNESIS = [
+        "fechaNacimiento",
+        "telefonoPrincipal",
+        "direccionResidencia",
+        "nivelEscolar",
+        "motivoConsulta",
+    ]
+
+    def _validar_obligatorios_anamnesis(self, data):
+        """Retorna lista de campos obligatorios faltantes."""
+        return [c for c in self.CAMPOS_OBLIGATORIOS_ANAMNESIS if not data.get(c)]
+
+    def get_anamnesis(self, paciente_id, profesional_id):
+        anamnesis = self.repo.get_anamnesis_by_paciente(paciente_id)
+        if not anamnesis:
+            return {"success": False, "message": "Anamnesis no encontrada"}, 404
+        if anamnesis.idProfesional_id != profesional_id:
+            return {"success": False, "message": "No autorizado para ver esta anamnesis"}, 403
+        return {"success": True, "anamnesis": anamnesis.to_dict(include_familiares=True)}, 200
+
+    def registrar_anamnesis(self, paciente_id, profesional_id, data):
+        from apps.authentication.models import Register
+
+        # Verificar que el paciente existe y tiene rol correcto
+        try:
+            paciente = Register.objects.get(idUsuario=paciente_id)
+        except Register.DoesNotExist:
+            return {"success": False, "message": "El paciente no existe"}, 400
+        if paciente.rol != "paciente":
+            return {"success": False, "message": "El usuario no tiene rol de paciente"}, 400
+
+        # 409 si ya existe
+        if self.repo.existe_anamnesis(paciente_id):
+            return {"success": False, "message": "Ya existe una anamnesis para este paciente"}, 409
+
+        # Validar obligatorios
+        faltantes = self._validar_obligatorios_anamnesis(data)
+        if faltantes:
+            return {
+                "success": False,
+                "message": f"Campos obligatorios faltantes: {', '.join(faltantes)}",
+            }, 400
+
+        familiares_data = data.pop("familiares", None)
+        anamnesis = self.repo.create_anamnesis(paciente_id, profesional_id, data, familiares_data)
+        return {"success": True, "anamnesis": anamnesis.to_dict(include_familiares=True)}, 201
+
+    def actualizar_anamnesis(self, paciente_id, profesional_id, data):
+        anamnesis = self.repo.get_anamnesis_by_paciente(paciente_id)
+        if not anamnesis:
+            return {"success": False, "message": "Anamnesis no encontrada"}, 404
+        if anamnesis.idProfesional_id != profesional_id:
+            return {"success": False, "message": "No autorizado para editar esta anamnesis"}, 403
+
+        # Si vienen familiares se reemplazan completos
+        familiares_data = data.pop("familiares", None)
+        anamnesis = self.repo.update_anamnesis(anamnesis, data)
+        if familiares_data is not None:
+            self.repo.replace_familiares(anamnesis, familiares_data)
+
+        # Re-fetch con familiares
+        anamnesis = self.repo.get_anamnesis_by_paciente(paciente_id)
+        return {"success": True, "anamnesis": anamnesis.to_dict(include_familiares=True)}, 200
+
+    def eliminar_anamnesis(self, paciente_id, profesional_id):
+        anamnesis = self.repo.get_anamnesis_by_paciente(paciente_id)
+        if not anamnesis:
+            return {"success": False, "message": "Anamnesis no encontrada"}, 404
+        if anamnesis.idProfesional_id != profesional_id:
+            return {"success": False, "message": "No autorizado para eliminar esta anamnesis"}, 403
+        anamnesis.delete()
+        return {"success": True, "message": "Anamnesis eliminada correctamente"}, 200
+
+    @staticmethod
+    def calcular_edad(fecha_nacimiento):
+        """Calcula edad a partir de una fecha (date o string YYYY-MM-DD)."""
+        import datetime
+        if not fecha_nacimiento:
+            return None
+        if isinstance(fecha_nacimiento, str):
+            try:
+                fecha_nacimiento = datetime.date.fromisoformat(fecha_nacimiento)
+            except ValueError:
+                return None
+        hoy = datetime.date.today()
+        cumple = fecha_nacimiento.replace(year=hoy.year)
+        anios = hoy.year - fecha_nacimiento.year
+        if cumple > hoy:
+            anios -= 1
+        return anios
+

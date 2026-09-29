@@ -2,7 +2,7 @@ from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 
 from apps.authentication.models import Register
-from apps.patients.models import PerfilPaciente, EvolucionPaciente
+from apps.patients.models import PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar
 from apps.professionals.models import PerfilProfesional
 
 
@@ -40,7 +40,20 @@ class PatientRepository:
             "recibirMensajePro": perfil.recibirMensajePro if perfil else True,
         }
 
-    # ... keep other methods ...
+    def update_patient_profile(self, data):
+        user_id = data.get("idPaciente") or data.get("user_id")
+        perfil, _ = PerfilPaciente.objects.get_or_create(
+            idPaciente_id=user_id,
+            defaults={"consentimiento_chatbot": False},
+        )
+        campos_editables = ["genero", "edad", "numeroTelefonico"]
+        campos_a_guardar = []
+        for campo in campos_editables:
+            if campo in data:
+                setattr(perfil, campo, data[campo])
+                campos_a_guardar.append(campo)
+        if campos_a_guardar:
+            perfil.save(update_fields=campos_a_guardar)
 
     def get_preferences(self, user_id):
         try:
@@ -173,3 +186,121 @@ class PatientRepository:
             }
             for r in rows
         ]
+
+    # ── Anamnesis ─────────────────────────────────────────────────────────────
+
+    def get_anamnesis_by_paciente(self, paciente_id):
+        """Retorna la Anamnesis (con familiares prefetch) o None."""
+        try:
+            return (
+                Anamnesis.objects
+                .select_related("idProfesional")
+                .prefetch_related("familiares")
+                .get(idPaciente_id=paciente_id)
+            )
+        except Anamnesis.DoesNotExist:
+            return None
+
+    def create_anamnesis(self, paciente_id, profesional_id, data, familiares_data=None):
+        """Crea Anamnesis + Familiares en una transacción atómica."""
+        from django.db import transaction
+        CAMPOS_ANAMNESIS = [
+            "tipoDocumento", "numeroDocumento", "fechaNacimiento", "edad", "genero",
+            "estadoCivil", "orientacionSexual", "razaEtnica", "lugarNacimiento",
+            "telefonoPrincipal", "telefonoAlterno", "whatsapp", "correoAlterno",
+            "direccionResidencia", "ciudad", "departamento", "barrio", "codigoPostal",
+            "emergenciaNombre", "emergenciaParentesco", "emergenciaTelefono",
+            "nivelEscolar", "institucionEducativa", "anoGraduacion", "carreraEstudiada",
+            "estudiaActualmente", "ocupacion", "situacionLaboral", "empresa", "cargo",
+            "rangoIngresosMensuales", "seguroSalud", "epsNombre", "alergias",
+            "cirugiasPrevias", "enfermedadesCronicas", "medicamentosActuales",
+            "discapacidad", "tipoDiscapacidad", "conviveCon", "personasQueVivenCon",
+            "cantidadHijos", "consumoAlcohol", "consumoTabaco", "consumoSustancias",
+            "suenoHoras", "calidadSueno", "actividadFisica", "motivoConsulta",
+            "antecedentesFamiliares", "narrativa", "observaciones", "entrevistador",
+        ]
+        with transaction.atomic():
+            kwargs = {c: data[c] for c in CAMPOS_ANAMNESIS if c in data}
+            anamnesis = Anamnesis.objects.create(
+                idPaciente_id=paciente_id,
+                idProfesional_id=profesional_id,
+                **kwargs,
+            )
+            if familiares_data:
+                Familiar.objects.bulk_create([
+                    Familiar(
+                        idAnamnesis=anamnesis,
+                        tipoParentesco=f.get("tipoParentesco"),
+                        nombreCompleto=f.get("nombreCompleto"),
+                        fechaNacimiento=f.get("fechaNacimiento"),
+                        edad=f.get("edad"),
+                        sexo=f.get("sexo"),
+                        vivo=f.get("vivo"),
+                        causaFallecimiento=f.get("causaFallecimiento"),
+                        estadoSalud=f.get("estadoSalud"),
+                        diagnosticoOEnfermedad=f.get("diagnosticoOEnfermedad"),
+                        ocupacion=f.get("ocupacion"),
+                        telefono=f.get("telefono"),
+                        notas=f.get("notas"),
+                        orden=f.get("orden", idx),
+                    )
+                    for idx, f in enumerate(familiares_data)
+                ])
+        return anamnesis
+
+    def update_anamnesis(self, anamnesis, data):
+        """Actualiza campos presentes en data y retorna la instancia actualizada."""
+        CAMPOS_EDITABLES = [
+            "tipoDocumento", "numeroDocumento", "fechaNacimiento", "edad", "genero",
+            "estadoCivil", "orientacionSexual", "razaEtnica", "lugarNacimiento",
+            "telefonoPrincipal", "telefonoAlterno", "whatsapp", "correoAlterno",
+            "direccionResidencia", "ciudad", "departamento", "barrio", "codigoPostal",
+            "emergenciaNombre", "emergenciaParentesco", "emergenciaTelefono",
+            "nivelEscolar", "institucionEducativa", "anoGraduacion", "carreraEstudiada",
+            "estudiaActualmente", "ocupacion", "situacionLaboral", "empresa", "cargo",
+            "rangoIngresosMensuales", "seguroSalud", "epsNombre", "alergias",
+            "cirugiasPrevias", "enfermedadesCronicas", "medicamentosActuales",
+            "discapacidad", "tipoDiscapacidad", "conviveCon", "personasQueVivenCon",
+            "cantidadHijos", "consumoAlcohol", "consumoTabaco", "consumoSustancias",
+            "suenoHoras", "calidadSueno", "actividadFisica", "motivoConsulta",
+            "antecedentesFamiliares", "narrativa", "observaciones", "entrevistador",
+        ]
+        campos_a_guardar = []
+        for campo in CAMPOS_EDITABLES:
+            if campo in data:
+                setattr(anamnesis, campo, data[campo])
+                campos_a_guardar.append(campo)
+        if campos_a_guardar:
+            # fechaActualizacion se actualiza sola por auto_now=True
+            anamnesis.save(update_fields=campos_a_guardar + ["fechaActualizacion"])
+        return anamnesis
+
+    def replace_familiares(self, anamnesis, familiares_data):
+        """Reemplaza todos los familiares de una anamnesis (delete + bulk_create)."""
+        from django.db import transaction
+        with transaction.atomic():
+            anamnesis.familiares.all().delete()
+            if familiares_data:
+                Familiar.objects.bulk_create([
+                    Familiar(
+                        idAnamnesis=anamnesis,
+                        tipoParentesco=f.get("tipoParentesco"),
+                        nombreCompleto=f.get("nombreCompleto"),
+                        fechaNacimiento=f.get("fechaNacimiento"),
+                        edad=f.get("edad"),
+                        sexo=f.get("sexo"),
+                        vivo=f.get("vivo"),
+                        causaFallecimiento=f.get("causaFallecimiento"),
+                        estadoSalud=f.get("estadoSalud"),
+                        diagnosticoOEnfermedad=f.get("diagnosticoOEnfermedad"),
+                        ocupacion=f.get("ocupacion"),
+                        telefono=f.get("telefono"),
+                        notas=f.get("notas"),
+                        orden=f.get("orden", idx),
+                    )
+                    for idx, f in enumerate(familiares_data)
+                ])
+
+    def existe_anamnesis(self, paciente_id):
+        return Anamnesis.objects.filter(idPaciente_id=paciente_id).exists()
+

@@ -392,3 +392,43 @@ class ChatMensajeViewSet(viewsets.ViewSet):
         user_id = getattr(request, "user_id", None)
         id_msg = svc.enviar_mensaje(user_id, receptor, mensaje)
         return Response({"success": True, "idMensaje": id_msg}, status=status.HTTP_201_CREATED)
+
+
+def _get_patient_service():
+    return PatientService()
+
+
+class AnamnesisViewSet(viewsets.ViewSet):
+    """
+    CRUD de Anamnesis clínica.
+    Permisos: profesional o admin autenticado.
+    URL base: /api/paciente/<paciente_id>/anamnesis
+    """
+    permission_classes = [IsAuthenticatedDRF, IsAdminOrProfesional]
+
+    def retrieve(self, request, paciente_id=None):
+        profesional_id = getattr(request, "user_id", None)
+        payload, status_code = _get_patient_service().get_anamnesis(paciente_id, profesional_id)
+        return Response(payload, status=status_code)
+
+    def create(self, request, paciente_id=None):
+        profesional_id = getattr(request, "user_id", None)
+        data = request.data.copy() if hasattr(request.data, "copy") else dict(request.data)
+        payload, status_code = _get_patient_service().registrar_anamnesis(
+            paciente_id, profesional_id, data
+        )
+        return Response(payload, status=status_code)
+
+    def update(self, request, paciente_id=None):
+        profesional_id = getattr(request, "user_id", None)
+        data = request.data.copy() if hasattr(request.data, "copy") else dict(request.data)
+        payload, status_code = _get_patient_service().actualizar_anamnesis(
+            paciente_id, profesional_id, data
+        )
+        return Response(payload, status=status_code)
+
+    def destroy(self, request, paciente_id=None):
+        profesional_id = getattr(request, "user_id", None)
+        payload, status_code = _get_patient_service().eliminar_anamnesis(paciente_id, profesional_id)
+        return Response(payload, status=status_code)
+

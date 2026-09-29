@@ -16,6 +16,7 @@ from apps.patients.views import (
     DocumentoPacienteViewSet,
     ChatContactoViewSet,
     ChatMensajeViewSet,
+    AnamnesisViewSet,
 )
 from apps.core.webhooks import WhatsAppWebhook
 
@@ -54,6 +55,23 @@ urlpatterns = [
     # Legacy aliases sin barra final (compatibles con API.md y el frontend)
     path("pacientes", PacienteViewSet.as_view({"get": "list"}), name="pacientes"),
     path("profesionales", ProfesionalViewSet.as_view({"get": "list"}), name="profesionales"),
+    # Anamnesis — con y sin barra final (el JS llama sin barra)
+    path(
+        "paciente/<int:paciente_id>/anamnesis",
+        AnamnesisViewSet.as_view({
+            "get": "retrieve", "post": "create",
+            "put": "update", "delete": "destroy",
+        }),
+        name="anamnesis",
+    ),
+    path(
+        "paciente/<int:paciente_id>/anamnesis/",
+        AnamnesisViewSet.as_view({
+            "get": "retrieve", "post": "create",
+            "put": "update", "delete": "destroy",
+        }),
+        name="anamnesis-trailing",
+    ),
     # Webhook WhatsApp
     path("whatsapp/webhook/", WhatsAppWebhook.as_view(), name="whatsapp-webhook"),
 ]
