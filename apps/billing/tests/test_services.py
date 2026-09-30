@@ -285,7 +285,7 @@ class TestConfirmWompiPayment:
 
 class TestGetPatientInvoiceStats:
     def test_returns_stats(self, invoice_service, mock_invoice_repo):
-        mock_invoice_repo.get_invoice_stats_by_professional.return_value = {
+        mock_invoice_repo.get_invoice_stats_by_patient.return_value = {
             "totalPagado": 100000,
             "totalPendiente": 50000,
             "totalGeneral": 150000,
@@ -293,6 +293,8 @@ class TestGetPatientInvoiceStats:
         payload, status = invoice_service.get_patient_invoice_stats(1)
         assert status == 200
         assert payload["stats"]["totalPagado"] == 100000
+        mock_invoice_repo.get_invoice_stats_by_patient.assert_called_once_with(1)
+        assert not mock_invoice_repo.get_invoice_stats_by_professional.called
 
 
 # ── InvoiceService.get_admin_stats ────────────────────────────────────────────

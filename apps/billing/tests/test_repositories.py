@@ -241,6 +241,68 @@ class TestListAllInvoices:
         assert entry["nombreProfesional"] == "Profesional Test"
 
 
+# ── get_invoice_stats_by_patient ─────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestGetInvoiceStatsByPatient:
+    def test_sums_only_that_patient(self, repo, patient, professional):
+        otro = Register.objects.create_user(
+            email="otro2@test.com", nombre="Otro Paciente",
+            password="pass", rol="paciente",
+        )
+        Facturas.objects.create(
+            idPaciente=patient, idProfesional=professional,
+            monto=Decimal("10000.00"), metodoPago="tarjeta", estadoPago="Pagado",
+        )
+        Facturas.objects.create(
+            idPaciente=patient, idProfesional=professional,
+            monto=Decimal("5000.00"), metodoPago="tarjeta", estadoPago="Pendiente",
+        )
+        Facturas.objects.create(
+            idPaciente=otro, idProfesional=professional,
+            monto=Decimal("99999.00"), metodoPago="tarjeta", estadoPago="Pagado",
+        )
+        stats = repo.get_invoice_stats_by_patient(patient.idUsuario)
+        assert stats["totalPagado"] == 10000.0
+        assert stats["totalPendiente"] == 5000.0
+        assert stats["totalGeneral"] == 15000.0
+
+    def test_ignores_annulled_invoices(self, repo, patient, professional):
+        Facturas.objects.create(
+            idPaciente=patient, idProfesional=professional,
+            monto=Decimal("10000.00"), metodoPago="tarjeta",
+            estadoPago="Pagado", anulada=True,
+        )
+        stats = repo.get_invoice_stats_by_patient(patient.idUsuario)
+        assert stats["totalPagado"] == 0.0
+        assert stats["totalGeneral"] == 0.0
+
+    def test_returns_zeros_without_invoices(self, repo, patient):
+        stats = repo.get_invoice_stats_by_patient(patient.idUsuario)
+        assert stats == {
+            "totalPagado": 0.0,
+            "totalPendiente": 0.0,
+            "totalGeneral": 0.0,
+        }
+
+    def test_does_not_mix_professional_revenue(self, repo, patient, professional):
+        Facturas.objects.create(
+            idPaciente=patient, idProfesional=professional,
+            monto=Decimal("7000.00"), metodoPago="tarjeta", estadoPago="Pagado",
+        )
+        otro_profesional = Register.objects.create_user(
+            email="pro2@test.com", nombre="Segundo Profesional",
+            password="pass", rol="profesional",
+        )
+        Facturas.objects.create(
+            idPaciente=patient, idProfesional=otro_profesional,
+            monto=Decimal("300000.00"), metodoPago="tarjeta", estadoPago="Pagado",
+        )
+        stats = repo.get_invoice_stats_by_patient(patient.idUsuario)
+        assert stats["totalGeneral"] == 307000.0
+
+
 # ── update_payment_status ────────────────────────────────────────────────────
 
 

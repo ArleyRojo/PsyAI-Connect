@@ -296,7 +296,7 @@ class InvoiceService:
         }, 200
 
     def get_patient_invoice_stats(self, patient_id):
-        stats = self.repo.get_invoice_stats_by_professional(patient_id)
+        stats = self.repo.get_invoice_stats_by_patient(patient_id)
         return {"success": True, "stats": stats}, 200
 
     def get_admin_stats(self):

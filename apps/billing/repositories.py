@@ -159,6 +159,25 @@ class InvoiceRepository:
             "totalGeneral": float(stats["total_general"] or 0),
         }
 
+    def get_invoice_stats_by_patient(self, patient_id):
+        from django.db.models import Sum, Q
+
+        stats = Facturas.objects.filter(
+            idPaciente_id=patient_id,
+            anulada=False,
+        ).aggregate(
+            total_pagado=Sum("monto", filter=Q(estadoPago="Pagado")),
+            total_pendiente=Sum(
+                "monto", filter=Q(estadoPago__in=("Pendiente", "Parcial"))
+            ),
+            total_general=Sum("monto"),
+        )
+        return {
+            "totalPagado": float(stats["total_pagado"] or 0),
+            "totalPendiente": float(stats["total_pendiente"] or 0),
+            "totalGeneral": float(stats["total_general"] or 0),
+        }
+
     def get_invoice_stats_all(self):
         from django.db.models import Sum, Q
 
