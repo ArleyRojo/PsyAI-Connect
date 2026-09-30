@@ -54,6 +54,7 @@ All endpoints are prefixed with `/api/`. Authentication is session-based (no JWT
 | DELETE | `/api/facturas/<id>/pago` | Yes | paciente | Cancel payment |
 | GET | `/api/facturas/stats` | Yes | All | Invoice statistics |
 | GET | `/api/facturas/pacientes-profesional` | Yes | profesional | List patients for professional |
+| GET | `/api/facturas/estadisticas-admin` | Yes | admin | Global invoice KPIs |
 | POST | `/api/webhooks/wompi` | No | Webhook | Wompi payment notification |
 
 ---

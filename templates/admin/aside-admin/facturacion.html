@@ -260,7 +260,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 async function cargarKPIAdmin() {
     try {
-        var res = await fetch("/api/facturas/estadísticas-admin", { credentials: "include" });
+        var res = await fetch("/api/facturas/estadisticas-admin", { credentials: "include" });
         var data = await res.json();
         if (!data.success) return;
         var s = data.stats;

@@ -1,8 +1,10 @@
 import json
+from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 import pytest
 from django.contrib.sessions.backends.db import SessionStore
+from django.urls import reverse
 from rest_framework.test import APIRequestFactory
 
 from apps.billing.views import (
@@ -12,6 +14,8 @@ from apps.billing.views import (
     FacturaStatsView,
     ProfesionalPacientesView,
 )
+
+BASE_DIR = Path(__file__).resolve().parents[3]
 
 PATCH_TARGET = "apps.core.permissions.IsAuthenticatedDRF.has_permission"
 PATCH_GET_USER = "apps.core.permissions.get_current_user"
@@ -651,3 +655,32 @@ class TestAislamientoDeDatosPorRol:
                     _make_request("get", "/facturas/stats?rol=admin")
                 )
                 assert not mock_svc.get_admin_stats.called
+
+
+# ── Contrato de rutas front ↔ back ───────────────────────────────────────────
+
+
+class TestRutasFacturacion:
+    """El frontend llama endpoints por URL literal; si divergen de urls.py
+    la llamada cae en el catch-all 404 y la vista degrada en silencio."""
+
+    @pytest.mark.parametrize(
+        "path,url_name",
+        [
+            ("/api/facturas", "billing:factura_list"),
+            ("/api/facturas/estadisticas-admin", "billing:factura_estadisticas_admin"),
+            (
+                "/api/facturas/pacientes-profesional",
+                "billing:factura_pacientes",
+            ),
+        ],
+    )
+    def test_ruta_sin_acentos_es_la_registrada(self, path, url_name):
+        assert reverse(url_name) == path
+
+    def test_template_admin_consume_la_url_registrada(self):
+        ruta = reverse("billing:factura_estadisticas_admin")
+        template = Path(
+            BASE_DIR / "templates" / "admin" / "aside-admin" / "facturacion.html"
+        ).read_text(encoding="utf-8")
+        assert f'fetch("{ruta}"' in template
