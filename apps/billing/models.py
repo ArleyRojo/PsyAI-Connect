@@ -51,6 +51,24 @@ class Facturas(models.Model):
 
     class Meta:
         db_table = "Facturas"
+        indexes = [
+            models.Index(
+                fields=["idPaciente", "fecha"],
+                name="idx_facturas_pac_fecha",
+            ),
+            models.Index(
+                fields=["idProfesional", "fecha"],
+                name="idx_facturas_prof_fecha",
+            ),
+            models.Index(
+                fields=["referenciaPago"],
+                name="idx_facturas_referencia",
+            ),
+            models.Index(
+                fields=["idCita"],
+                name="idx_facturas_cita",
+            ),
+        ]
 
     def __str__(self):
         return f"Factura {self.idFactura}"
