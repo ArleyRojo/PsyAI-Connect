@@ -90,15 +90,6 @@ DATABASES = {
     }
 }
 
-# Compatibilidad con MySQL 8.0 en desarrollo local (evita NotSupportedError)
-try:
-    from django.db.backends.mysql.base import DatabaseFeatures
-    DatabaseFeatures.minimum_database_version = property(
-        lambda self: (8, 0) if not self.connection.mysql_is_mariadb else (10, 11)
-    )
-except Exception:
-    pass
-
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
