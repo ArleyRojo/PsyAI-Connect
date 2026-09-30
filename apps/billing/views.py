@@ -31,10 +31,9 @@ class FacturaListView(APIView):
         user_role = getattr(request, "user_role", None)
         user_id = getattr(request, "user_id", None)
 
-        rol = request.query_params.get("rol", user_role)
-        if rol == "paciente":
+        if user_role == "paciente":
             payload, status_code = invoice_service.list_patient_invoices(user_id)
-        elif rol == "profesional":
+        elif user_role == "profesional":
             estado = request.query_params.get("estado")
             fecha_desde = request.query_params.get("fecha_desde")
             fecha_hasta = request.query_params.get("fecha_hasta")
@@ -44,14 +43,19 @@ class FacturaListView(APIView):
                 fecha_desde=fecha_desde,
                 fecha_hasta=fecha_hasta,
             )
-        else:
+        elif user_role == "admin":
             payload, status_code = invoice_service.list_all_invoices(
                 paciente=request.query_params.get("paciente"),
-                profesional=request.query_params.get("profesionales"),
+                profesional=request.query_params.get("profesional"),
                 estado=request.query_params.get("estado"),
                 metodo_pago=request.query_params.get("metodoPago"),
                 fecha_desde=request.query_params.get("fecha_desde"),
                 fecha_hasta=request.query_params.get("fecha_hasta"),
+            )
+        else:
+            return Response(
+                {"success": False, "message": "No autorizado"},
+                status=drf_status.HTTP_403_FORBIDDEN,
             )
         return Response(payload, status=status_code)
 
@@ -166,16 +170,20 @@ class FacturaStatsView(APIView):
         user_role = getattr(request, "user_role", None)
         user_id = getattr(request, "user_id", None)
 
-        rol = request.query_params.get("rol", user_role)
-        if rol == "admin":
+        if user_role == "admin":
             payload, status_code = invoice_service.get_admin_stats()
-        elif rol == "paciente":
+        elif user_role == "paciente":
             payload, status_code = invoice_service.get_patient_invoice_stats(
                 user_id
             )
-        else:
+        elif user_role == "profesional":
             payload, status_code = invoice_service.get_professional_patients(
                 user_id
+            )
+        else:
+            return Response(
+                {"success": False, "message": "No autorizado"},
+                status=drf_status.HTTP_403_FORBIDDEN,
             )
         return Response(payload, status=status_code)
 

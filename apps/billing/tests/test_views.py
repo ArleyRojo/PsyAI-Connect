@@ -101,16 +101,47 @@ class TestFacturaListViewGet:
                 mock_svc.list_all_invoices.assert_called_once()
                 assert resp.status_code == 200
 
-    def test_rol_param_overrides_user_rol(self):
+    def test_rol_param_no_override_user_rol(self):
         with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(4, "admin"))):
             with patch("apps.billing.views.invoice_service") as mock_svc:
-                mock_svc.list_patient_invoices.return_value = (
+                mock_svc.list_all_invoices.return_value = (
                     {"success": True, "facturas": []},
                     200,
                 )
                 req = _make_request("get", "/facturas/?rol=paciente")
                 resp = FacturaListView.as_view()(req)
-                mock_svc.list_patient_invoices.assert_called_once_with(4)
+                mock_svc.list_all_invoices.assert_called_once()
+                assert not mock_svc.list_patient_invoices.called
+
+    def test_rol_desconocido_se_ignora(self):
+        with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(7, "admin"))):
+            with patch("apps.billing.views.invoice_service") as mock_svc:
+                mock_svc.list_all_invoices.return_value = (
+                    {"success": True, "facturas": []},
+                    200,
+                )
+                req = _make_request("get", "/facturas/?rol=inventado")
+                resp = FacturaListView.as_view()(req)
+                mock_svc.list_all_invoices.assert_called_once()
+                assert not mock_svc.list_patient_invoices.called
+                assert resp.status_code == 200
+
+    def test_user_rol_ausente_devuelve_403(self):
+        with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(8, None))):
+            with patch("apps.billing.views.invoice_service") as mock_svc:
+                req = _make_request("get", "/facturas/")
+                resp = FacturaListView.as_view()(req)
+                assert resp.status_code == 403
+                assert not mock_svc.list_all_invoices.called
+                assert not mock_svc.list_patient_invoices.called
+
+    def test_user_rol_ausente_stats_devuelve_403(self):
+        with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(9, None))):
+            with patch("apps.billing.views.invoice_service") as mock_svc:
+                req = _make_request("get", "/facturas/stats")
+                resp = FacturaStatsView.as_view()(req)
+                assert resp.status_code == 403
+                assert not mock_svc.get_admin_stats.called
 
     def test_profesional_passes_filters(self):
         with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(5, "profesional"))):
@@ -141,12 +172,12 @@ class TestFacturaListViewGet:
                 )
                 req = _make_request(
                     "get",
-                    "/facturas/?rol=admin&paciente=Juan&profesionales=10&estado=Pendiente&metodoPago=tarjeta&fecha_desde=2025-01-01&fecha_hasta=2025-12-31",
+                    "/facturas/?rol=admin&paciente=Juan&profesional=Dra%20Maria&estado=Pendiente&metodoPago=tarjeta&fecha_desde=2025-01-01&fecha_hasta=2025-12-31",
                 )
                 resp = FacturaListView.as_view()(req)
                 mock_svc.list_all_invoices.assert_called_once_with(
                     paciente="Juan",
-                    profesional="10",
+                    profesional="Dra Maria",
                     estado="Pendiente",
                     metodo_pago="tarjeta",
                     fecha_desde="2025-01-01",
@@ -550,3 +581,73 @@ class TestProfesionalPacientesViewGet:
                 )
                 resp = ProfesionalPacientesView.as_view()(req)
                 assert resp.data["pacientes"] == []
+
+
+# ── Aislamiento de datos por rol (regresión de seguridad) ───────────────────
+#
+# El rol se toma siempre de request.user_role, que IsAuthenticatedDRF obtiene
+# de la sesión y de la BD. Nunca del query param "rol", que lo controla el
+# cliente: con él, cualquier usuario autenticado pedía las facturas y las
+# estadísticas globales del sistema.
+
+
+class TestAislamientoDeDatosPorRol:
+    def test_paciente_no_alcanza_todas_las_facturas(self):
+        with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(1, "paciente"))):
+            with patch("apps.billing.views.invoice_service") as mock_svc:
+                mock_svc.list_all_invoices.return_value = (
+                    {"success": True, "facturas": []},
+                    200,
+                )
+                resp = FacturaListView.as_view()(
+                    _make_request("get", "/facturas/?rol=admin")
+                )
+                assert not mock_svc.list_all_invoices.called
+
+    def test_paciente_no_escala_con_rol_inventado(self):
+        with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(1, "paciente"))):
+            with patch("apps.billing.views.invoice_service") as mock_svc:
+                mock_svc.list_all_invoices.return_value = (
+                    {"success": True, "facturas": []},
+                    200,
+                )
+                resp = FacturaListView.as_view()(
+                    _make_request("get", "/facturas/?rol=inventado")
+                )
+                assert not mock_svc.list_all_invoices.called
+
+    def test_profesional_no_alcanza_facturas_de_otros(self):
+        with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(2, "profesional"))):
+            with patch("apps.billing.views.invoice_service") as mock_svc:
+                mock_svc.list_all_invoices.return_value = (
+                    {"success": True, "facturas": []},
+                    200,
+                )
+                resp = FacturaListView.as_view()(
+                    _make_request("get", "/facturas/?rol=admin")
+                )
+                assert not mock_svc.list_all_invoices.called
+
+    def test_paciente_no_alcanza_estadisticas_admin(self):
+        with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(1, "paciente"))):
+            with patch("apps.billing.views.invoice_service") as mock_svc:
+                mock_svc.get_admin_stats.return_value = (
+                    {"success": True, "stats": {}},
+                    200,
+                )
+                resp = FacturaStatsView.as_view()(
+                    _make_request("get", "/facturas/stats?rol=admin")
+                )
+                assert not mock_svc.get_admin_stats.called
+
+    def test_profesional_no_alcanza_estadisticas_admin(self):
+        with patch(PATCH_TARGET, _mock_auth_drf(_user_dict(2, "profesional"))):
+            with patch("apps.billing.views.invoice_service") as mock_svc:
+                mock_svc.get_admin_stats.return_value = (
+                    {"success": True, "stats": {}},
+                    200,
+                )
+                resp = FacturaStatsView.as_view()(
+                    _make_request("get", "/facturas/stats?rol=admin")
+                )
+                assert not mock_svc.get_admin_stats.called
