@@ -15,10 +15,10 @@ function getCsrfToken() {
 
 {# Google Fonts (local) #}
 <link href="/vendor/fonts/fonts.css" rel="stylesheet">
-{# Font preloads (WOFF2) #}
-<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/PlusJakartaSans-Regular.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/PlusJakartaSans-SemiBold.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/Lora-Bold.woff2">
+{# Font preloads — deben coincidir exactamente con los src de fonts.css (TTF) #}
+<link rel="preload" as="font" type="font/ttf" crossorigin href="/vendor/fonts/PlusJakartaSans-400.ttf">
+<link rel="preload" as="font" type="font/ttf" crossorigin href="/vendor/fonts/PlusJakartaSans-600.ttf">
+<link rel="preload" as="font" type="font/ttf" crossorigin href="/vendor/fonts/Lora-700.ttf">
 
 {# Bootstrap 5 (local) #}
 <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">

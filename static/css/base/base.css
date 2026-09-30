@@ -3,17 +3,11 @@
     Paleta raÃ­z: #90CAF9 Â· #0D47A1 Â· #E3F2FD
     ======================================================= */
 
-/* Fallback fonts while loading */
-@font-face {
-    font-family: 'Plus Jakarta Sans';
-    font-display: swap;
-    src: local('Plus Jakarta Sans'), local('system-ui');
-}
-@font-face {
-    font-family: 'Lora';
-    font-display: swap;
-    src: local('Lora'), local('Georgia');
-}
+/* NOTA: no declarar aquí @font-face para 'Plus Jakarta Sans' ni 'Lora'.
+   Este archivo se carga después de /vendor/fonts/fonts.css, y una regla
+   @font-face con solo src: local() gana la cascada para el peso normal
+   (400) e invalida los TTF reales, dejando el texto en Segoe UI/Georgia.
+   Los fallbacks van en el font-family de cada regla (ver :root). */
 
 /* View Transitions (Phase 1) */
 @view-transition {
