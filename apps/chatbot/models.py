@@ -154,4 +154,41 @@ class MensajesChat(models.Model):
         }
 
 
+class PrediagnosticoChatbot(models.Model):
+    NIVEL_RIESGO_CHOICES = [
+        ("bajo", "Bajo"),
+        ("moderado", "Moderado"),
+        ("alto", "Alto"),
+        ("critico", "Crítico"),
+    ]
 
+    idPrediagnostico = models.AutoField(primary_key=True)
+    idPaciente = models.ForeignKey(
+        Register,
+        on_delete=models.CASCADE,
+        db_column="idPaciente",
+    )
+    resumenPaciente = models.TextField()
+    resumenProfesional = models.TextField()
+    posiblesAreas = models.JSONField(default=list)
+    recomendaciones = models.JSONField(default=list)
+    nivelRiesgo = models.CharField(max_length=20, choices=NIVEL_RIESGO_CHOICES, default="bajo")
+    requiereAtencionUrgente = models.BooleanField(default=False)
+    profesionalNotificado = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "PrediagnosticoChatbot"
+
+    def to_dict(self):
+        return {
+            "idPrediagnostico": self.idPrediagnostico,
+            "idPaciente": self.idPaciente_id,
+            "resumenPaciente": self.resumenPaciente,
+            "resumenProfesional": self.resumenProfesional,
+            "posiblesAreas": self.posiblesAreas,
+            "recomendaciones": self.recomendaciones,
+            "nivelRiesgo": self.nivelRiesgo,
+            "requiereAtencionUrgente": self.requiereAtencionUrgente,
+            "fecha": self.fecha.isoformat() if self.fecha else None,
+        }

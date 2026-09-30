@@ -26,6 +26,29 @@ GEMINI_RETRY_BASE_DELAY = 0.6
 SYSTEM_PROMPT_FALLBACK = "Actua como un asistente de triaje psicologico para PsyAI Connect."
 CONFIG_CACHE_TTL_SECONDS = 30
 
+PREDIAGNOSTICO_SYSTEM_PROMPT = """
+Eres un asistente que analiza una conversación entre un paciente y un chatbot
+de apoyo emocional, para generar un PRE-diagnóstico orientativo (nunca un
+diagnóstico clínico definitivo, que solo puede dar un profesional humano).
+
+Responde ÚNICAMENTE con un JSON, sin texto adicional ni backticks, con esta
+estructura exacta:
+
+{"resumen_paciente": "resumen breve, cálido y no alarmante, en 2da persona",
+"resumen_profesional": "resumen técnico y objetivo con patrones observados",
+"posibles_areas": ["área 1", "área 2"],
+"recomendaciones_paciente": ["recomendación 1", "recomendación 2", "recomendación 3"],
+"nivel_riesgo": "bajo|moderado|alto|critico",
+"requiere_atencion_urgente": true o false}
+
+Reglas obligatorias:
+- Si detectas ideación suicida, autolesión o riesgo inmediato, "nivel_riesgo"
+  debe ser "critico" y "requiere_atencion_urgente" true, sin excepción.
+- No inventes síntomas que no estén respaldados por la conversación.
+- No uses lenguaje diagnóstico definitivo (evita "tienes depresión"; usa
+  "se observan patrones compatibles con...").
+"""
+
 _PROMPT_SUFFIX = """
 
 ALCANCE TEMÁTICO — LÍMITES ESTRICTOS:
@@ -995,6 +1018,108 @@ class ChatbotService:
         if any(m in model_lower for m in ("2.5-flash", "2.5-pro", "3-flash", "3.1-flash", "3.1-pro", "3.5-flash", "3.5-pro")):
             return True
         return False
+
+    def generar_prediagnostico(self, patient_id):
+        history = self.chat_repo.get_history(patient_id, today_only=True, limit=60)
+        if not history:
+            return {"success": False, "message": "No hay conversación reciente para analizar."}, 400
+
+        conversacion_texto = "\n".join(
+            f"{'Paciente' if h['tipo'] == 'usuario' else 'Bot'}: {h['mensaje']}" for h in history
+        )
+
+        keys = self._get_api_keys()
+        if not keys:
+            return {"success": False, "message": "Servicio de IA no disponible en este momento."}, 503
+
+        model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
+        try:
+            raw = self._call_gemini_json(keys[0], model, PREDIAGNOSTICO_SYSTEM_PROMPT, conversacion_texto)
+            raw = raw.strip().strip("`")
+            if raw.lower().startswith("json"):
+                raw = raw[4:].strip()
+            resultado = json.loads(raw)
+        except Exception as exc:
+            self.logger.exception("Error generando prediagnostico: %s", exc)
+            return {"success": False, "message": "No se pudo generar el prediagnóstico. Intenta más tarde."}, 503
+
+        # Override de seguridad: si el historial ya registró riesgo alto/crítico,
+        # no depender solo del modelo — forzar atención urgente.
+        niveles_altos = {"alto", "critico"}
+        tiene_riesgo_alto_en_historial = any(
+            (h.get("nivel_emocional") or "").lower() in niveles_altos
+            for h in history
+        )
+        if tiene_riesgo_alto_en_historial:
+            resultado["requiere_atencion_urgente"] = True
+            if resultado.get("nivel_riesgo", "bajo") not in niveles_altos:
+                resultado["nivel_riesgo"] = "alto"
+
+        prediagnostico = self.chat_repo.save_prediagnostico(patient_id, resultado)
+        self._notify_prediagnostico(patient_id, prediagnostico)
+
+        return {
+            "success": True,
+            "resumen": prediagnostico.resumenPaciente,
+            "recomendaciones": prediagnostico.recomendaciones,
+            "nivel_riesgo": prediagnostico.nivelRiesgo,
+        }, 201
+
+    def _notify_prediagnostico(self, patient_id, prediagnostico):
+        patient_name = self._get_patient_name(patient_id) or f"Paciente #{patient_id}"
+        profesionales = self._get_assigned_professionals(patient_id)
+        destinos = profesionales if profesionales else self._get_all_professional_ids()
+
+        if prediagnostico.requiereAtencionUrgente:
+            titulo = "Prediagnóstico con riesgo alto"
+            mensaje = f"El chatbot generó un prediagnóstico de riesgo {prediagnostico.nivelRiesgo} para {patient_name}. Requiere revisión urgente."
+            tipo = "Alerta"
+        else:
+            titulo = "Nuevo prediagnóstico disponible"
+            mensaje = f"El chatbot generó un prediagnóstico para {patient_name} (riesgo {prediagnostico.nivelRiesgo})."
+            tipo = "Prediagnostico"
+
+        for profesional_id in destinos:
+            self.appointment_repo.create_notification(profesional_id, "profesional", titulo, mensaje, tipo)
+
+        prediagnostico.profesionalNotificado = True
+        prediagnostico.save(update_fields=["profesionalNotificado"])
+
+        if prediagnostico.requiereAtencionUrgente:
+            # Urgente: reutilizar flujo de alerta de riesgo alto (ya envía email)
+            self._send_risk_email(patient_id, patient_name, destinos, es_alto=True)
+        else:
+            # No urgente: email dedicado con template de prediagnóstico
+            self._send_prediagnostico_email(patient_id, patient_name, destinos, prediagnostico)
+
+    def _send_prediagnostico_email(self, patient_id, patient_name, professional_ids, prediagnostico):
+        site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
+        prof_emails = self.chat_repo.get_professional_emails(professional_ids)
+        if not prof_emails:
+            return
+        asunto = f"PsyAI Connect — Nuevo prediagnóstico disponible: {patient_name}"
+        cta = f"{site_url}/aside-professional/patients.html"
+        areas = ", ".join(prediagnostico.posiblesAreas) if prediagnostico.posiblesAreas else "No especificadas"
+        for email in prof_emails:
+            ctx = {
+                "nombre_profesional": email.split("@")[0].replace(".", " ").title(),
+                "nombre_paciente": patient_name,
+                "nivel_riesgo": prediagnostico.nivelRiesgo,
+                "resumen_profesional": prediagnostico.resumenProfesional,
+                "posibles_areas": areas,
+                "cta_link": cta,
+            }
+            html = render_to_string("emails/prediagnostico.html", ctx)
+            msg = EmailMultiAlternatives(
+                asunto,
+                f"Se generó un prediagnóstico para {patient_name} (riesgo {prediagnostico.nivelRiesgo}). Accede a la plataforma para más detalles.",
+                to=[email],
+            )
+            msg.attach_alternative(html, "text/html")
+            try:
+                msg.send(fail_silently=True)
+            except Exception:
+                self.logger.exception("Error enviando correo de prediagnostico a %s", email)
 
     def get_history(self, patient_id):
         self.logger.info("get_history llamado con patient_id: %s", patient_id)

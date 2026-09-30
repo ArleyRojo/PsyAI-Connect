@@ -10,14 +10,16 @@ from apps.chatbot.views import (
     ChatContactoViewSet,
     ChatMensajeViewSet,
     ChatHistorialDeleteViewSet,
+    PrediagnosticoChatbotViewSet,
 )
 
 app_name = "chatbot"
 
 router = DefaultRouter()
-router.register(r"chatbot", ChatbotViewSet, basename="chatbot")
+router.register(r"chatbot/prediagnostico", PrediagnosticoChatbotViewSet, basename="chatbot-prediagnostico")
 router.register(r"chatbot/encuesta", ChatbotEncuestaViewSet, basename="chatbot-encuesta")
 router.register(r"chatbot/config", ChatbotConfigViewSet, basename="chatbot-config")
+router.register(r"chatbot", ChatbotViewSet, basename="chatbot")
 router.register(r"paciente/consentimiento-chatbot", ConsentimientoChatbotViewSet, basename="consentimiento-chatbot")
 router.register(r"chat/contactos", ChatContactoViewSet, basename="chat-contactos")
 router.register(r"chat/mensajes", ChatMensajeViewSet, basename="chat-mensajes")

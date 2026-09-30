@@ -10,6 +10,7 @@ from apps.chatbot.models import (
     ConversacionesChatbot,
     EncuestaChatbot,
     MensajesChat,
+    PrediagnosticoChatbot,
 )
 from apps.authentication.models import Register
 
@@ -101,6 +102,35 @@ class ChatRepository:
             mensaje__icontains=patient_name,
             fecha__gte=cutoff,
         ).exists()
+
+    def save_prediagnostico(self, patient_id, data):
+        return PrediagnosticoChatbot.objects.create(
+            idPaciente_id=patient_id,
+            resumenPaciente=data.get("resumen_paciente", ""),
+            resumenProfesional=data.get("resumen_profesional", ""),
+            posiblesAreas=data.get("posibles_areas", []),
+            recomendaciones=data.get("recomendaciones_paciente", []),
+            nivelRiesgo=data.get("nivel_riesgo", "bajo"),
+            requiereAtencionUrgente=bool(data.get("requiere_atencion_urgente")),
+        )
+
+    def get_prediagnosticos_for_professional(self, professional_id, days=30):
+        from apps.professionals.models import PacientesProfesional
+        cutoff = timezone.now() - timedelta(days=days)
+        try:
+            patient_ids = PacientesProfesional.objects.filter(
+                idProfesional_id=professional_id
+            ).values_list("idPaciente_id", flat=True)
+            rows = PrediagnosticoChatbot.objects.filter(
+                idPaciente_id__in=patient_ids,
+                fecha__gte=cutoff,
+            ).select_related("idPaciente").order_by("-fecha")
+            return [
+                {**r.to_dict(), "paciente": r.idPaciente.nombre}
+                for r in rows
+            ]
+        except ImportError:
+            return []
 
     def get_low_risk_counts_for_professional(self, professional_id, days=7):
         cutoff = timezone.now() - timedelta(days=days)

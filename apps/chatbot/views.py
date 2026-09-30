@@ -185,6 +185,14 @@ class ChatMensajeViewSet(viewsets.ViewSet):
         return Response({"success": True, "idMensaje": id_msg}, status=status.HTTP_201_CREATED)
 
 
+class PrediagnosticoChatbotViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def create(self, request):
+        payload, status_code = chatbot_service.generar_prediagnostico(request.user_id)
+        return Response(payload, status=status_code)
+
+
 class ChatHistorialDeleteViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticatedDRF, IsPaciente]
 

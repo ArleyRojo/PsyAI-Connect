@@ -87,6 +87,12 @@ class ProfessionalService:
             "riesgo_bajo_chatbot": riesgo_bajo,
         }, 200
 
+    def all_prediagnosticos(self, professional_id):
+        prediagnosticos = []
+        if self.chat_repo:
+            prediagnosticos = self.chat_repo.get_prediagnosticos_for_professional(professional_id)
+        return {"success": True, "prediagnosticos": prediagnosticos}, 200
+
     def get_deleted_reports(self, professional_id):
         return {"success": True, "reportes": self.repo.get_deleted_reports(professional_id)}, 200
 

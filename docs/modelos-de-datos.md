@@ -507,7 +507,30 @@ Chat directo paciente–profesional (SSE).
 
 ---
 
+### `PrediagnosticoChatbot` (tabla `PrediagnosticoChatbot`)
+Prediagnóstico orientativo generado por IA al finalizar una sesión de chatbot. Se persiste para consulta del profesional.
+
+| Campo | Tipo | Detalle |
+|-------|------|---------|
+| `idPrediagnostico` | `AutoField` | PK |
+| `idPaciente` | FK → `Register` | Paciente de la sesión |
+| `resumenPaciente` | `TextField` | Resumen cálido, en 2ª persona, para mostrar al paciente |
+| `resumenProfesional` | `TextField` | Análisis técnico y objetivo con patrones observados |
+| `posiblesAreas` | `JSONField(list)` | Áreas psicológicas detectadas (ej. `["Ansiedad", "Estrés"]`) |
+| `recomendaciones` | `JSONField(list)` | Recomendaciones para el paciente |
+| `nivelRiesgo` | `CharField(20, choices)` | `bajo` / `moderado` / `alto` / `critico` |
+| `requiereAtencionUrgente` | `BooleanField` | `True` si el modelo o el historial detectan riesgo alto/crítico |
+| `profesionalNotificado` | `BooleanField` | `True` tras enviar notificación al profesional |
+| `fecha` | `DateTimeField(auto_now_add)` | Fecha de generación |
+
+**Notas:**
+- Si algún mensaje del historial del día tiene `nivelEmocionalDetectado` en `{alto, critico}`, el servicio fuerza `requiereAtencionUrgente=True` independientemente del modelo (ver `chatbot-ia.md §9.4`).
+- `resumenPaciente` y `recomendaciones` son los únicos campos visibles al paciente (modal del chatbot). El `resumenProfesional` y `nivelRiesgo` solo se muestran en la vista del profesional.
+
+---
+
 ## 8. `apps.core` — Utilidades transversales
+
 
 ### `NewsletterSubscriber` (tabla `NewsletterSubscribers`)
 Suscriptores al boletín.
@@ -643,6 +666,7 @@ erDiagram
     ChatbotConfig }|--o| Register : "actualizado_por"
     MensajesChat }|--|| Register : "emisor"
     MensajesChat }|--|| Register : "receptor"
+    PrediagnosticoChatbot }|--|| Register : "paciente"
     Notificaciones }|--o| Register : "usuario"
     AuditoriaAccesos }|--|| Register : "usuario"
     Logs }|--o| Register : "administrador"

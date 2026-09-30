@@ -131,6 +131,10 @@
             <button type="button" class="chat-header__btn" id="btn-fullscreen" title="Pantalla completa" aria-label="Pantalla completa">
               <i class="fas fa-expand"></i>
             </button>
+            <button type="button" class="chat-header__btn" id="btn-finalizar-sesion" title="Finalizar sesión y ver prediagnóstico" aria-label="Finalizar sesión">
+              <i class="fas fa-clipboard-check"></i>
+              <span class="chat-header__btn-label">Finalizar</span>
+            </button>
           </div>
         </div>
 
@@ -266,6 +270,23 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade psyai-modal" id="prediagnosticoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="psyai-modal__content">
+        <div class="psyai-modal__header">
+          <div class="psyai-modal__header-icon"><i class="fas fa-clipboard-check"></i></div>
+          <div><h5 class="psyai-modal__title">Resumen de tu sesión</h5></div>
+          <button type="button" class="psyai-modal__close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="psyai-modal__body">
+          <p id="prediagnostico-resumen"></p>
+          <ul id="prediagnostico-recomendaciones"></ul>
+          <p class="text-muted small">Esto es un apoyo orientativo generado por IA, no un diagnóstico clínico. Tu profesional también recibió esta información.</p>
+        </div>
       </div>
     </div>
   </div>

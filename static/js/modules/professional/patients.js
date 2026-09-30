@@ -309,15 +309,19 @@ function mostrarPestana(pestana, btnEl) {
 
     var panelDiagnosticos = document.getElementById('pestana-diagnosticos');
     var panelEvolucion = document.getElementById('pestana-evolucion');
+    var panelPrediagnosticos = document.getElementById('pestana-prediagnosticos');
 
     if (panelDiagnosticos) panelDiagnosticos.style.display = pestana === 'diagnosticos' ? '' : 'none';
     if (panelEvolucion) panelEvolucion.style.display = pestana === 'evolucion' ? '' : 'none';
+    if (panelPrediagnosticos) panelPrediagnosticos.style.display = pestana === 'prediagnosticos' ? '' : 'none';
 
     if (pestana === 'diagnosticos') {
         cargarPacientes();
         cargarHistorial();
     } else if (pestana === 'evolucion') {
         cargarEvolucion();
+    } else if (pestana === 'prediagnosticos') {
+        cargarPrediagnosticos();
     }
 }
 

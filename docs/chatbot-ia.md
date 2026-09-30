@@ -261,3 +261,91 @@ Un solo registro (singleton) editable desde panel admin (`/admin/chatbot/config/
 - [`seguridad.md`](seguridad.md) — Rate limiting, validación de entrada
 - [`roles-y-permisos.md`](roles-y-permisos.md) — Chatbot solo para pacientes
 - [`despliegue.md`](despliegue.md) — Variables de entorno `GEMINI_API_KEY*`
+
+---
+
+## 9. Prediagnóstico al finalizar sesión
+
+Al terminar una sesión en el chatbot, el paciente puede solicitar un **prediagnóstico orientativo** que resume la conversación y genera recomendaciones. El resultado se muestra al paciente en un modal y se notifica al profesional asignado.
+
+> ⚠️ Es un apoyo orientativo generado por IA — **no un diagnóstico clínico**.
+
+### 9.1 Flujo completo
+
+```
+Paciente pulsa "Finalizar sesión"
+        │
+        ▼
+configurarFinalizarSesion()  [chatbot.js]
+        │  POST /api/chatbot/prediagnostico/
+        ▼
+PrediagnosticoChatbotViewSet.create()  [chatbot/views.py]
+        │
+        ▼
+ChatbotService.generar_prediagnostico(patient_id)  [chatbot/services.py]
+        │
+        ├─ chat_repo.get_history(today_only=True)  → historial del día
+        │
+        ├─ Override de seguridad: si algún mensaje tiene nivelEmocionalDetectado
+        │  en {alto, critico} → fuerza requiere_atencion_urgente=True y
+        │  escala nivel_riesgo a "alto" (sin depender del modelo)
+        │
+        ├─ _call_gemini_json(PREDIAGNOSTICO_SYSTEM_PROMPT, conversacion_texto)
+        │  → JSON: resumen_paciente, resumen_profesional, posibles_areas,
+        │           recomendaciones_paciente, nivel_riesgo, requiere_atencion_urgente
+        │
+        ├─ chat_repo.save_prediagnostico()  → BD: PrediagnosticoChatbot
+        │
+        └─ _notify_prediagnostico()
+                ├─ appointment_repo.create_notification() (in-app para cada profesional)
+                ├─ Si urgente → _send_risk_email()  [emails/alerta_riesgo.html]
+                └─ Si no urgente → _send_prediagnostico_email()  [emails/prediagnostico.html]
+        │
+        ▼
+Response 201 → {success, resumen, recomendaciones, nivel_riesgo}
+        │
+        ▼
+Modal #prediagnosticoModal  [chatbot.html]
+(muestra resumen_paciente + recomendaciones — nunca nivel_riesgo crudo)
+```
+
+### 9.2 Endpoint
+
+| Método | URL | Permiso | Descripción |
+|--------|-----|---------|-------------|
+| `POST` | `/api/chatbot/prediagnostico/` | `IsAuthenticatedDRF` + `IsPaciente` | Genera y persiste el prediagnóstico de la sesión del día |
+| `GET`  | `/api/prediagnosticos/profesional` | `IsAuthenticatedDRF` + `IsProfesional` | Lista los prediagnósticos de los pacientes asignados (últimos 30 días) |
+
+### 9.3 Prompt de síntesis (`PREDIAGNOSTICO_SYSTEM_PROMPT`)
+
+Definido en `services.py` (constante global). Instruye al modelo a responder **únicamente con JSON** con la estructura:
+
+```json
+{
+  "resumen_paciente": "...",
+  "resumen_profesional": "...",
+  "posibles_areas": ["área 1", "área 2"],
+  "recomendaciones_paciente": ["rec 1", "rec 2"],
+  "nivel_riesgo": "bajo|moderado|alto|critico",
+  "requiere_atencion_urgente": false
+}
+```
+
+### 9.4 Override de seguridad
+
+Antes de persistir el resultado del modelo, el servicio verifica si algún mensaje del historial tiene `nivelEmocionalDetectado` en `{alto, critico}`:
+
+```python
+if tiene_riesgo_alto_en_historial:
+    resultado["requiere_atencion_urgente"] = True
+    if resultado["nivel_riesgo"] not in {"alto", "critico"}:
+        resultado["nivel_riesgo"] = "alto"
+```
+
+Esto garantiza que el sistema no subestime el riesgo aunque el modelo genere una respuesta conservadora.
+
+### 9.5 Vistas
+
+**Paciente:** modal `#prediagnosticoModal` en `chatbot.html`. Solo muestra `resumenPaciente` + `recomendaciones`. Nunca expone `nivel_riesgo` crudo ni el resumen clínico.
+
+**Profesional:** pestaña "Prediagnósticos" en `patients.html`, cargada por `patients.prediagnostico.js`. Muestra `resumenProfesional`, áreas detectadas, nivel de riesgo con badge de color y badge "Urgente" cuando aplica.

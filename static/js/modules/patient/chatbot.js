@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     configurarSelectorEmojis();
     configurarEliminarChat();
     configurarFullscreen();
+    configurarFinalizarSesion();
     configurarWelcomeChips();
     configurarScrollToBottom();
 });
@@ -537,6 +538,43 @@ function configurarEliminarChat() {
             return;
         }
         await limpiarChat();
+    });
+}
+
+function configurarFinalizarSesion() {
+    var btn = document.getElementById('btn-finalizar-sesion');
+    if (!btn) return;
+    btn.addEventListener('click', async function () {
+        if (historialChat.length === 0) {
+            if (typeof showAlert === 'function') showAlert('info', 'Todavía no hay conversación para analizar.', 'Sesión vacía');
+            return;
+        }
+        btn.disabled = true;
+        try {
+            var res = await fetch('/api/chatbot/prediagnostico', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            var data = await res.json();
+            if (!data.success) {
+                if (typeof showAlert === 'function') showAlert('warning', data.message || 'No se pudo generar el resumen.', 'Aviso');
+                return;
+            }
+            document.getElementById('prediagnostico-resumen').textContent = data.resumen;
+            var lista = document.getElementById('prediagnostico-recomendaciones');
+            lista.innerHTML = '';
+            (data.recomendaciones || []).forEach(function (r) {
+                var li = document.createElement('li');
+                li.textContent = r;
+                lista.appendChild(li);
+            });
+            new bootstrap.Modal(document.getElementById('prediagnosticoModal')).show();
+        } catch (err) {
+            console.error('Error generando prediagnostico:', err);
+            if (typeof showAlert === 'function') showAlert('danger', 'No se pudo conectar con el servidor.', 'Error');
+        } finally {
+            btn.disabled = false;
+        }
     });
 }
 

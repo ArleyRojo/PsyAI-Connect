@@ -122,6 +122,10 @@
                         <i class="fas fa-chart-line"></i> Evolución
                         <span class="tab-badge" id="badgeEvol">0</span>
                     </button>
+                    <button class="tab" id="tabPrediag" onclick="mostrarPestana('prediagnosticos', this)">
+                        <i class="fas fa-robot"></i> Prediagnósticos IA
+                        <span class="tab-badge" id="badgePrediag">0</span>
+                    </button>
                 </div>
             </div>
 
@@ -669,6 +673,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ══ PREDIAGNÓSTICOS IA ══ -->
+            <div id="pestana-prediagnosticos" style="display:none;">
+                <div class="card p-4">
+                    <h4 class="fw-bold mb-3"><i class="fas fa-robot me-2 text-info"></i>Prediagnósticos generados por el chatbot</h4>
+                    <p class="text-muted small">Apoyo orientativo generado por IA a partir de las conversaciones del chatbot. No reemplaza tu evaluación clínica.</p>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th><th>Paciente</th><th>Riesgo</th><th>Áreas</th><th>Resumen clínico</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaPrediagnosticos">
+                                <tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div><!-- /p-4 -->
     </main>
 </div>
@@ -682,5 +706,6 @@
 <script src="/js/modules/professional/anamnesis.js?v=20260929-1"></script>
 <script src="/js/modules/professional/patients.js?v=20260803-1"></script>
 <script src="/js/modules/professional/patients.evolution.js?v=20260803-1"></script>
+<script src="/js/modules/professional/patients.prediagnostico.js?v=20260930-1"></script>
 </body>
 </html>

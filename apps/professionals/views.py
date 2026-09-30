@@ -193,6 +193,15 @@ class EvolucionProfesionalResource(APIView):
         return Response(payload, status=status_code)
 
 
+class PrediagnosticosProfesionalResource(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def get(self, request):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_prof_service().all_prediagnosticos(user_id)
+        return Response(payload, status=status_code)
+
+
 class PacienteChatbotHistorialResource(APIView):
     permission_classes = [IsAuthenticatedDRF]
 
@@ -422,4 +431,3 @@ class PacienteAsignarResource(APIView):
             {"success": True, "message": "Paciente asignado correctamente"},
             status=status.HTTP_200_OK,
         )
-
