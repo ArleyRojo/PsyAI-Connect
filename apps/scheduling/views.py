@@ -24,16 +24,9 @@ class CitaViewSet(viewsets.ViewSet):
     def list(self, request):
         user_role = getattr(request, "user_role", None)
         user_id = getattr(request, "user_id", None)
-        rol = request.query_params.get("rol") or user_role
-        filtrar = request.query_params.get("filter", "")
 
-        if user_role not in ("paciente", "profesional", "admin"):
-            return Response(
-                {"success": False, "message": "No autorizado"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        if rol == "profesional":
+        if user_role == "profesional":
+            filtrar = request.query_params.get("filter", "")
             if filtrar == "solicitadas":
                 payload, status_code = appointment_service.list_professional_appointments(
                     user_id, pending_only=True,
@@ -44,8 +37,13 @@ class CitaViewSet(viewsets.ViewSet):
                 payload, status_code = appointment_service.list_professional_appointments(
                     user_id, page=page, limit=limit,
                 )
-        else:
+        elif user_role == "paciente":
             payload, status_code = appointment_service.list_patient_appointments(user_id)
+        else:
+            return Response(
+                {"success": False, "message": "No autorizado"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         return Response(payload, status=status_code)
 
     def create(self, request):

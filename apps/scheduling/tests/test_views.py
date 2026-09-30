@@ -28,6 +28,13 @@ def _auth_profesional(_self, request, view):
     return True
 
 
+def _auth_admin(_self, request, view):
+    request.user_id = 9
+    request.user_role = "admin"
+    request.user_name = "Admin Test"
+    return True
+
+
 def _auth_other(_self, request, view):
     request.user_id = 1
     request.user_role = "otro"
@@ -50,6 +57,12 @@ def mock_role_paciente():
 @pytest.fixture
 def mock_role_profesional():
     with patch.object(IsAuthenticatedDRF, "has_permission", _auth_profesional):
+        yield
+
+
+@pytest.fixture
+def mock_auth_admin():
+    with patch.object(IsAuthenticatedDRF, "has_permission", _auth_admin):
         yield
 
 
@@ -82,7 +95,7 @@ class TestCitaViewSetList:
         assert resp.status_code == 403
 
     def test_paciente_role_returns_200(self, rf, mock_auth_paciente, mock_service):
-        req = rf.get("/api/citas", {"rol": "paciente"})
+        req = rf.get("/api/citas/paciente")
 
         mock_service.list_patient_appointments.return_value = (
             {"success": True, "citas": [{"idCita": 1}]}, 200,
@@ -92,9 +105,10 @@ class TestCitaViewSetList:
 
         assert resp.status_code == 200
         assert resp.data["success"] is True
+        mock_service.list_patient_appointments.assert_called_once_with(1)
 
-    def test_profesional_role_returns_200(self, rf, mock_auth_paciente, mock_service):
-        req = rf.get("/api/citas", {"rol": "profesional"})
+    def test_profesional_role_returns_200(self, rf, mock_role_profesional, mock_service):
+        req = rf.get("/api/citas/profesional")
 
         mock_service.list_professional_appointments.return_value = (
             {"success": True, "citas": [{"idCita": 1}]}, 200,
@@ -103,9 +117,12 @@ class TestCitaViewSetList:
         resp = view(req)
 
         assert resp.status_code == 200
+        mock_service.list_professional_appointments.assert_called_once_with(
+            5, page=1, limit=20,
+        )
 
-    def test_profesional_with_filter_solicitadas(self, rf, mock_auth_paciente, mock_service):
-        req = rf.get("/api/citas", {"rol": "profesional", "filter": "solicitadas"})
+    def test_profesional_with_filter_solicitadas(self, rf, mock_role_profesional, mock_service):
+        req = rf.get("/api/citas/profesional", {"filter": "solicitadas"})
 
         mock_service.list_professional_appointments.return_value = (
             {"success": True, "citas": []}, 200,
@@ -115,11 +132,11 @@ class TestCitaViewSetList:
 
         assert resp.status_code == 200
         mock_service.list_professional_appointments.assert_called_once_with(
-            1, pending_only=True,
+            5, pending_only=True,
         )
 
-    def test_profesional_pagination(self, rf, mock_auth_paciente, mock_service):
-        req = rf.get("/api/citas", {"rol": "profesional", "page": "2", "limit": "10"})
+    def test_profesional_pagination(self, rf, mock_role_profesional, mock_service):
+        req = rf.get("/api/citas/profesional", {"page": "2", "limit": "10"})
 
         mock_service.list_professional_appointments.return_value = (
             {"success": True, "citas": []}, 200,
@@ -129,8 +146,30 @@ class TestCitaViewSetList:
 
         assert resp.status_code == 200
         mock_service.list_professional_appointments.assert_called_once_with(
-            1, page=2, limit=10,
+            5, page=2, limit=10,
         )
+
+    def test_admin_rejected(self, rf, mock_auth_admin, mock_service):
+        req = rf.get("/api/citas")
+
+        view = CitaViewSet.as_view({"get": "list"})
+        resp = view(req)
+
+        assert resp.status_code == 403
+        assert not mock_service.list_patient_appointments.called
+
+    def test_paciente_no_alcanza_rama_profesional(self, rf, mock_auth_paciente, mock_service):
+        req = rf.get("/api/citas", {"rol": "profesional"})
+
+        mock_service.list_patient_appointments.return_value = (
+            {"success": True, "citas": []}, 200,
+        )
+        view = CitaViewSet.as_view({"get": "list"})
+        resp = view(req)
+
+        assert resp.status_code == 200
+        mock_service.list_patient_appointments.assert_called_once_with(1)
+        assert not mock_service.list_professional_appointments.called
 
 
 # ── CitaViewSet create ───────────────────────────────────────────────────

@@ -29,7 +29,7 @@ All endpoints are prefixed with `/api/`. Authentication is session-based (no JWT
 
 | Method | Path | Auth | Roles | Description |
 |--------|------|------|-------|-------------|
-| GET | `/api/citas` | Yes | paciente, profesional, admin | List appointments |
+| GET | `/api/citas` | Yes | paciente, profesional | List own appointments |
 | POST | `/api/citas` | Yes | paciente, profesional | Create appointment |
 | PATCH | `/api/citas/<id>` | Yes | profesional | Update appointment status |
 | DELETE | `/api/citas/<id>` | Yes | paciente, profesional | Cancel appointment |
