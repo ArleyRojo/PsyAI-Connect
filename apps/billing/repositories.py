@@ -73,6 +73,8 @@ class InvoiceRepository:
         qs = self._base_invoice_qs().all()
         if paciente:
             qs = qs.filter(idPaciente__nombre__icontains=paciente)
+        if profesional:
+            qs = qs.filter(idProfesional__nombre__icontains=profesional)
         if estado == "Anulada":
             qs = qs.filter(anulada=True)
         elif estado:

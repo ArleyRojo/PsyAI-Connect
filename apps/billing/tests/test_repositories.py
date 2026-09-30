@@ -173,6 +173,74 @@ class TestListInvoicesByProfessional:
         assert entry["nombrePaciente"] == "Paciente Test"
 
 
+# ── list_all_invoices ─────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestListAllInvoices:
+    def test_returns_all_without_filters(self, repo, sample_invoice):
+        result = repo.list_all_invoices()
+        assert any(r["idFactura"] == sample_invoice.idFactura for r in result)
+
+    def test_filters_by_profesional(self, repo, sample_invoice, professional):
+        otro = Register.objects.create_user(
+            email="otro@test.com", nombre="Otro Profesional",
+            password="pass", rol="profesional",
+        )
+        ajena = Facturas.objects.create(
+            idPaciente=professional, idProfesional=otro,
+            monto=Decimal("9000.00"), metodoPago="tarjeta", estadoPago="Pagado",
+        )
+        result = repo.list_all_invoices(profesional="Profesional Test")
+        ids = [r["idFactura"] for r in result]
+        assert sample_invoice.idFactura in ids
+        assert ajena.idFactura not in ids
+
+    def test_filter_profesional_no_encuentra_devuelve_vacio(
+        self, repo, sample_invoice
+    ):
+        result = repo.list_all_invoices(profesional="Nombre Inexistente")
+        assert result == []
+
+    def test_filters_by_profesional_and_paciente(self, repo, sample_invoice):
+        result = repo.list_all_invoices(
+            profesional="Profesional Test", paciente="Otro",
+        )
+        assert result == []
+
+    def test_filters_by_metodo_pago(self, repo, patient, professional):
+        tarjeta = Facturas.objects.create(
+            idPaciente=patient, idProfesional=professional,
+            monto=Decimal("1000.00"), metodoPago="tarjeta", estadoPago="Pagado",
+        )
+        banco = Facturas.objects.create(
+            idPaciente=patient, idProfesional=professional,
+            monto=Decimal("2000.00"), metodoPago="banco", estadoPago="Pagado",
+        )
+        result = repo.list_all_invoices(metodo_pago="banco")
+        ids = [r["idFactura"] for r in result]
+        assert banco.idFactura in ids
+        assert tarjeta.idFactura not in ids
+
+    def test_filters_by_estado_anulada(self, repo, patient, professional):
+        anulada = Facturas.objects.create(
+            idPaciente=patient, idProfesional=professional,
+            monto=Decimal("1000.00"), metodoPago="tarjeta",
+            estadoPago="Pendiente", anulada=True,
+        )
+        result = repo.list_all_invoices(estado="Anulada")
+        ids = [r["idFactura"] for r in result]
+        assert anulada.idFactura in ids
+
+    def test_includes_both_names(self, repo, sample_invoice):
+        result = repo.list_all_invoices(profesional="Profesional Test")
+        entry = next(
+            r for r in result if r["idFactura"] == sample_invoice.idFactura
+        )
+        assert entry["nombrePaciente"] == "Paciente Test"
+        assert entry["nombreProfesional"] == "Profesional Test"
+
+
 # ── update_payment_status ────────────────────────────────────────────────────
 
 
