@@ -11,7 +11,7 @@
 /* wrapper – flex child inside .input-with-icon */
 .cs-wrapper{
   position:relative;
-  display:flex;
+  display:inline-flex;
   flex-direction:column;
   width:100%;
   flex:1; min-width:0;               /* NEW – plays nice with .input-with-icon */
