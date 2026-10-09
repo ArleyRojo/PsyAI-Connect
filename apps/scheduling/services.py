@@ -247,7 +247,7 @@ class AppointmentService:
                 h_str = hora_actual.strftime("%H:%M")
                 if h_str not in ocupadas:
                     horarios_set.add(h_str)
-                hora_actual = (datetime.combine(date.today(), hora_actual) + timedelta(minutes=30)).time()
+                hora_actual = (datetime.combine(date.today(), hora_actual) + timedelta(minutes=60)).time()
 
         horarios_ordenados = sorted(list(horarios_set))
         return {"success": True, "horarios": horarios_ordenados}, 200
@@ -483,7 +483,7 @@ class AppointmentService:
             hora_actual = inicio
             while hora_actual < fin:
                 slots_por_fecha[fecha_str] += 1
-                hora_actual = (datetime.combine(date.today(), hora_actual) + timedelta(minutes=30)).time()
+                hora_actual = (datetime.combine(date.today(), hora_actual) + timedelta(minutes=60)).time()
 
         ocupadas_por_fecha = self.repo.get_month_taken_counts(professional_id, anio, mes)
         fechas = [
