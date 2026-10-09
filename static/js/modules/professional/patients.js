@@ -7,6 +7,11 @@ var filaSeleccionadaAnterior = null;
 var evolucionData = [];
 var pacientesEvolucionData = [];
 
+// Pagination state
+var allPacientes = [];
+var currentPage = 1;
+var pageSize = 10;
+
 // ── Init ─────────────────────────────────────────────────────
 
 window.onload = function () {
@@ -29,10 +34,10 @@ window.onload = function () {
 
 function escapeHtml(value) {
     return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
         .replace(/'/g, '&#039;');
 }
 
@@ -91,45 +96,98 @@ function cargarPacientes() {
 
             if (pacientes.length === 0) {
                 tbody.innerHTML = "<tr><td colspan='7' class='text-muted text-center py-4'>No hay pacientes registrados</td></tr>";
+                renderPagination(0);
                 return;
             }
 
-            tbody.innerHTML = pacientes.map(function (p) {
-                var inicial = (p.nombre || "P").charAt(0).toUpperCase();
-                var colorLetra = coloresLetras[inicial.toUpperCase()] || "#6c757d";
-                var fotoUrl = p.fotoPerfil
-                    ? "/uploads/" + p.fotoPerfil
-                    : svgAvatar(inicial, 35, colorLetra, 14);
-
-                // Si este paciente ya está seleccionado, marcar el botón
-                var isSelected = pacienteSeleccionado === Number(p.idUsuario);
-                var btnClass   = "btn btn-sm btn-outline-primary btn-seleccionar" + (isSelected ? " active-btn" : "");
-                var btnTxt     = isSelected ? "Seleccionado" : "Seleccionar";
-
-                var emailSafe = (p.email || "").replace(/"/g, '&quot;');
-                var nomSafe   = (p.nombre || "").replace(/"/g, '&quot;');
-                var fotoSafe  = (p.fotoPerfil || "").replace(/"/g, '&quot;');
-                var pacienteId = Number(p.idUsuario);
-
-                var badgeAnamnesis = p.tieneAnamnesis
-                    ? '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="fas fa-check-circle me-1"></i>Registrada</span>'
-                    : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1"><i class="fas fa-clock me-1"></i>Pendiente</span>';
-
-                return '<tr class="patient-row' + (isSelected ? " selected-patient" : "") + '">' +
-                    '<td><img src="' + fotoUrl + '" class="rounded-circle me-2" style="width:35px;height:35px;object-fit:cover;" data-inicial="' + inicial + '" data-color="' + colorLetra + '" data-size="35" data-fz="14" onerror="fallbackAvatar(this)">' + (p.nombre || "—") + '</td>' +
-                    "<td>—</td>" +
-                    "<td>—</td>" +
-                    "<td>" + (p.email || "—") + "</td>" +
-                    "<td>" + badgeAnamnesis + "</td>" +
-                    '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + pacienteId + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this)\'>' + btnTxt + "</button></td>" +
-                    '<td><a href="historia_clinica_pro.html?pacienteId=' + pacienteId + '" class="btn btn-sm btn-outline-info" title="Ver historia clínica"><i class="fas fa-file-medical"></i></a></td>' +
-                    "</tr>";
-            }).join('');
+            allPacientes = pacientes;
+            currentPage = 1;
+            renderPage(currentPage);
+            renderPagination(allPacientes.length);
         })
         .catch(function (err) {
             console.error(err);
             tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error al cargar pacientes</td></tr>";
         });
+}
+
+function renderPage(page) {
+    var tbody = document.getElementById("tbodyPacientes");
+    if (!tbody) return;
+
+    var start = (page - 1) * pageSize;
+    var end = start + pageSize;
+    var pageItems = allPacientes.slice(start, end);
+
+    if (pageItems.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='7' class='text-muted text-center py-4'>No hay pacientes en esta página</td></tr>";
+        return;
+    }
+
+    tbody.innerHTML = pageItems.map(function (p) {
+        var inicial = (p.nombre || "P").charAt(0).toUpperCase();
+        var colorLetra = coloresLetras[inicial.toUpperCase()] || "#6c757d";
+        var fotoUrl = p.fotoPerfil
+            ? "/uploads/" + p.fotoPerfil
+            : svgAvatar(inicial, 35, colorLetra, 14);
+
+        var isSelected = pacienteSeleccionado === Number(p.idUsuario);
+        var btnClass   = "btn btn-sm btn-outline-primary btn-seleccionar" + (isSelected ? " active-btn" : "");
+        var btnTxt     = isSelected ? "Seleccionado" : "Seleccionar";
+
+        var emailSafe = (p.email || "").replace(/"/g, '"');
+        var nomSafe   = (p.nombre || "").replace(/"/g, '"');
+        var fotoSafe  = (p.fotoPerfil || "").replace(/"/g, '"');
+        var pacienteId = Number(p.idUsuario);
+
+        var badgeAnamnesis = p.tieneAnamnesis
+            ? '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="fas fa-check-circle me-1"></i>Registrada</span>'
+            : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1"><i class="fas fa-clock me-1"></i>Pendiente</span>';
+
+        return '<tr class="patient-row' + (isSelected ? " selected-patient" : "") + '">' +
+            '<td><img src="' + fotoUrl + '" class="rounded-circle me-2" style="width:35px;height:35px;object-fit:cover;" data-inicial="' + inicial + '" data-color="' + colorLetra + '" data-size="35" data-fz="14" onerror="fallbackAvatar(this)">' + (p.nombre || "—") + '</td>' +
+            "<td>—</td>" +
+            "<td>—</td>" +
+            "<td>" + (p.email || "—") + "</td>" +
+            "<td>" + badgeAnamnesis + "</td>" +
+            '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + pacienteId + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this)\'>' + btnTxt + "</button></td>" +
+            '<td><a href="historia_clinica_pro.html?pacienteId=' + pacienteId + '" class="btn btn-sm btn-outline-info" title="Ver historia clínica"><i class="fas fa-file-medical"></i></a></td>' +
+            "</tr>";
+    }).join('');
+}
+
+function renderPagination(totalItems) {
+    var nav = document.getElementById("paginationNav");
+    if (!nav) return;
+    var totalPages = Math.ceil(totalItems / pageSize);
+    if (totalPages <= 1) {
+        nav.innerHTML = "";
+        return;
+    }
+    var html = '<ul class="pagination pagination-sm mb-0">';
+    // Previous
+    html += '<li class="page-item' + (currentPage === 1 ? ' disabled' : '') + '"><a class="page-link" href="#" onclick="event.preventDefault(); goToPage(' + (currentPage - 1) + ')">&laquo;</a></li>';
+    // Page numbers (show up to 5)
+    var startPage = Math.max(1, currentPage - 2);
+    var endPage = Math.min(totalPages, startPage + 4);
+    if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+    }
+    for (var i = startPage; i <= endPage; i++) {
+        html += '<li class="page-item' + (i === currentPage ? ' active' : '') + '"><a class="page-link" href="#" onclick="event.preventDefault(); goToPage(' + i + ')">' + i + '</a></li>';
+    }
+    // Next
+    html += '<li class="page-item' + (currentPage === totalPages ? ' disabled' : '') + '"><a class="page-link" href="#" onclick="event.preventDefault(); goToPage(' + (currentPage + 1) + ')">&raquo;</a></li>';
+    html += '</ul>';
+    nav.innerHTML = html;
+}
+
+function goToPage(page) {
+    var totalPages = Math.ceil(allPacientes.length / pageSize);
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderPage(currentPage);
+    renderPagination(allPacientes.length);
 }
 
 // ── Seleccionar paciente ─────────────────────────────────────
@@ -240,7 +298,6 @@ function goToStep(n) {
     }
 }
 
-
 // ── Historial de diagnósticos ─────────────────────────────────
 
 async function cargarHistorial() {
@@ -275,10 +332,46 @@ async function cargarHistorial() {
 // ── Filtro de búsqueda ────────────────────────────────────────
 
 function filtrarPacientes() {
-    var q    = document.getElementById("searchInput").value.toLowerCase();
-    var rows = document.querySelectorAll("#tbodyPacientes tr");
-    rows.forEach(function (row) {
-        row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+    var q = document.getElementById("searchInput").value.toLowerCase();
+    if (!q) {
+        // reset to full list
+        if (allPacientes._original) {
+            allPacientes = allPacientes._original;
+            delete allPacientes._original;
+        }
+        currentPage = 1;
+        renderPage(currentPage);
+        renderPagination(allPacientes.length);
+        return;
+    }
+    var filtered = allPacientes.filter(function(p) {
+        var nombre = (p.nombre || "").toLowerCase();
+        var email = (p.email || "").toLowerCase();
+        return nombre.includes(q) || email.includes(q);
+    });
+    // temporarily replace allPacientes for pagination
+    if (!allPacientes._original) {
+        allPacientes._original = allPacientes;
+    }
+    allPacientes = filtered;
+    currentPage = 1;
+    renderPage(currentPage);
+    renderPagination(filtered.length);
+}
+
+// Reset filter when search cleared
+var searchInput = document.getElementById("searchInput");
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        if (this.value === '') {
+            if (allPacientes._original) {
+                allPacientes = allPacientes._original;
+                delete allPacientes._original;
+            }
+            currentPage = 1;
+            renderPage(currentPage);
+            renderPagination(allPacientes.length);
+        }
     });
 }
 
