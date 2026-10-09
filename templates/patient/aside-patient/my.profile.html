@@ -159,27 +159,66 @@
                 <fieldset class="mb-4">
                     <legend class="form-label fw-semibold mb-3">Canal de recepción</legend>
                     <div class="row g-3">
-                        {% for val,label,icon,desc in [
-                            ("email","Correo","fa-envelope","Recibirás un correo electrónico"),
-                            ("whatsapp","WhatsApp","fa-whatsapp","Mensajes directos a tu WhatsApp"),
-                            ("ambos","Ambos","fa-envelope-open-text","Correo y WhatsApp"),
-                            ("ninguno","Ninguno","fa-bell-slash","No recibirás notificaciones")
-                        ] %}
+                        <!-- Email -->
                         <div class="col-6 col-md-3">
                             <div class="card h-100 border-0 shadow-sm channel-option">
                                 <input class="form-check-input visually-hidden" type="radio"
-                                       name="canalNotificacion" id="canal-{{val}}"
-                                       value="{{val}}"
-                                       {% if perfil.canalNotificacion == val %}checked{% endif %}>
+                                       name="canalNotificacion" id="canal-email"
+                                       value="email"
+                                       {% if perfil.canalNotificacion == "email" %}checked{% endif %}>
                                 <label class="form-check-label d-flex flex-column align-items-center p-3 h-100 w-100"
-                                       for="canal-{{val}}">
-                                    <i class="fas {{icon}} fa-2x text-primary mb-2"></i>
-                                    <strong>{{label}}</strong>
-                                    <small class="text-muted mt-1">{{desc}}</small>
+                                       for="canal-email">
+                                    <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                                    <strong>Correo</strong>
+                                    <small class="text-muted mt-1">Recibirás un correo electrónico</small>
                                 </label>
                             </div>
                         </div>
-                        {% endfor %}
+                        <!-- WhatsApp -->
+                        <div class="col-6 col-md-3">
+                            <div class="card h-100 border-0 shadow-sm channel-option">
+                                <input class="form-check-input visually-hidden" type="radio"
+                                       name="canalNotificacion" id="canal-whatsapp"
+                                       value="whatsapp"
+                                       {% if perfil.canalNotificacion == "whatsapp" %}checked{% endif %}>
+                                <label class="form-check-label d-flex flex-column align-items-center p-3 h-100 w-100"
+                                       for="canal-whatsapp">
+                                    <i class="fas fa-whatsapp fa-2x text-primary mb-2"></i>
+                                    <strong>WhatsApp</strong>
+                                    <small class="text-muted mt-1">Mensajes directos a tu WhatsApp</small>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Ambos -->
+                        <div class="col-6 col-md-3">
+                            <div class="card h-100 border-0 shadow-sm channel-option">
+                                <input class="form-check-input visually-hidden" type="radio"
+                                       name="canalNotificacion" id="canal-ambos"
+                                       value="ambos"
+                                       {% if perfil.canalNotificacion == "ambos" %}checked{% endif %}>
+                                <label class="form-check-label d-flex flex-column align-items-center p-3 h-100 w-100"
+                                       for="canal-ambos">
+                                    <i class="fas fa-envelope-open-text fa-2x text-primary mb-2"></i>
+                                    <strong>Ambos</strong>
+                                    <small class="text-muted mt-1">Correo y WhatsApp</small>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Ninguno -->
+                        <div class="col-6 col-md-3">
+                            <div class="card h-100 border-0 shadow-sm channel-option">
+                                <input class="form-check-input visually-hidden" type="radio"
+                                       name="canalNotificacion" id="canal-ninguno"
+                                       value="ninguno"
+                                       {% if perfil.canalNotificacion == "ninguno" %}checked{% endif %}>
+                                <label class="form-check-label d-flex flex-column align-items-center p-3 h-100 w-100"
+                                       for="canal-ninguno">
+                                    <i class="fas fa-bell-slash fa-2x text-primary mb-2"></i>
+                                    <strong>Ninguno</strong>
+                                    <small class="text-muted mt-1">No recibirás notificaciones</small>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </fieldset>
 
