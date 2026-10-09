@@ -1,0 +1,184 @@
+/* ============================================================
+   PsyAI Connect – Custom Select Component
+   Uses existing design tokens (--brand-*, --surface-*, --dm-*)
+   ============================================================ */
+
+/* ----- hide native select but keep it in the layout ----- */
+.cs-native-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+/* ----- wrapper ----- */
+.cs-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  width: 100%;
+}
+.cs-wrapper.cs-open {
+  z-index: 1000;               /* lifts the whole component above stepper */
+}
+
+/* ----- trigger button ----- */
+.cs-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--sp-4);
+  border: 1.5px solid var(--border-default);
+  border-radius: 12px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font: var(--fs-base) var(--font-body);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+.cs-trigger:hover { border-color: var(--brand-500); }
+.cs-trigger:focus,
+.cs-trigger[aria-expanded="true"] {
+  outline: none;
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px rgba(47,111,228,.12);
+}
+.cs-trigger .cs-arrow {
+  transition: transform var(--dur-fast) var(--ease-out);
+  color: var(--text-muted);
+}
+.cs-trigger[aria-expanded="true"] .cs-arrow { transform: rotate(180deg); }
+
+.cs-placeholder { color: var(--text-muted); }
+
+/* selected icon / avatar inside trigger */
+.cs-sel-icon { font-size: 1.1rem; color: var(--brand-500); }
+.cs-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: .85rem;
+  flex-shrink: 0;
+}
+
+/* ----- listbox panel ----- */
+.cs-listbox {
+  position: absolute;
+  left: 0; right: 0;
+  z-index: 1001;                /* above wrapper */
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--surface-card);   /* opaque */
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.12);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+  pointer-events: none;
+}
+.cs-listbox.cs-show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* scrollbar */
+.cs-listbox::-webkit-scrollbar { width: 6px; }
+.cs-listbox::-webkit-scrollbar-track { background: transparent; }
+.cs-listbox::-webkit-scrollbar-thumb {
+  background: var(--brand-300);
+  border-radius: 3px;
+}
+.cs-listbox::-webkit-scrollbar-thumb:hover { background: var(--brand-500); }
+
+/* ----- option ----- */
+.cs-option {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.cs-option:hover,
+.cs-option.cs-highlight { background: rgba(47,111,228,.08); }
+.cs-option[aria-selected="true"] {
+  background: rgba(47,111,228,.15);
+  font-weight: 600;
+}
+.cs-option[aria-selected="true"]::after {
+  content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+  margin-left: auto; color: var(--brand-500); font-size: .9rem;
+}
+
+/* icons for tipoCita */
+.cs-opt-icon { width: 28px; height: 28px; border-radius: 50%;
+               background: var(--brand-100); color: var(--brand-600);
+               display: flex; align-items: center; justify-content: center;
+               font-size: .95rem; flex-shrink: 0; }
+
+/* professional rows */
+.cs-prof-info { display: flex; flex-direction: column; min-width: 0; }
+.cs-prof-name { font-weight: 600; color: var(--text-primary); }
+.cs-prof-spec { font-size: .8rem; color: var(--text-muted); }
+
+/* empty state */
+.cs-empty {
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* -----------------------------------------------------------
+   Make sure the step‑panel of the first step does not clip
+   the dropdown (only needed on the agenda page)
+   ----------------------------------------------------------- */
+#stepPanel1 { overflow: visible; }
+.patient-agenda-page .section-card:has(.cs-open) { overflow: visible; }
+
+/* ============================================================
+   DARK MODE OVERRIDES (html.dark-mode)
+   ============================================================ */
+html.dark-mode .cs-trigger {
+  background: var(--dm-elevated);
+  border-color: var(--dm-border);
+  color: var(--dm-text1);
+}
+html.dark-mode .cs-trigger:hover { border-color: var(--dm-accent); }
+html.dark-mode .cs-trigger:focus,
+html.dark-mode .cs-trigger[aria-expanded="true"] {
+  border-color: var(--dm-accent);
+  box-shadow: 0 0 0 3px rgba(144,202,249,.15);
+}
+html.dark-mode .cs-placeholder { color: var(--dm-muted); }
+html.dark-mode .cs-trigger .cs-arrow { color: var(--dm-muted); }
+
+/* selected icon in trigger */
+html.dark-mode .cs-sel-icon { color: var(--dm-accent); }
+
+/* listbox */
+html.dark-mode .cs-listbox {
+  background: var(--dm-card);           /* opaque dark background */
+  border-color: var(--dm-border);
+  box-shadow: 0 12px 28px rgba(0,0,0,.4);
+}
+html.dark-mode .cs-option:hover,
+html.dark-mode .cs-option.cs-highlight { background: rgba(144,202,249,.12); }
+html.dark-mode .cs-option[aria-selected="true"] { background: rgba(144,202,249,.2); }
+html.dark-mode .cs-option[aria-selected="true"]::after { color: var(--dm-accent); }
+
+/* option icons */
+html.dark-mode .cs-opt-icon {
+  background: var(--dm-elevated);
+  color: var(--dm-accent);
+}
+
+/* empty state */
+html.dark-mode .cs-empty { color: var(--dm-muted); }

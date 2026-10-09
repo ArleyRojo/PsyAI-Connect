@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/css/pages/patient.css?v=20260723-1">
     <link rel="stylesheet" href="/css/pages/patient-agenda-v2.css?v=20260723-1">
     <link rel="stylesheet" href="/css/components/components.css?v=20260711-1">
+    <link rel="stylesheet" href="/css/components/custom-select.css?v=20261009-1">
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260928-1">
     <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
     <script src="https://checkout.wompi.co/widget.js"></script>
@@ -184,7 +185,7 @@
 
           <div class="mb-3">
             <label for="tipoCita" class="form-label">Tipo de Cita</label>
-            <select id="tipoCita" class="form-select">
+            <select id="tipoCita" class="form-select" data-custom-select data-placeholder="Seleccionar tipo de cita">
               <option value="">Seleccionar tipo de cita</option>
               <option>Ansiedad</option><option>Estrés</option><option>Depresión</option>
               <option>Autoestima</option><option>Duelo</option><option>Trastornos del Sueño</option>
@@ -194,7 +195,7 @@
           </div>
           <div class="mb-3">
             <label for="profesional" class="form-label">Profesional</label>
-            <select id="profesional" class="form-select">
+            <select id="profesional" class="form-select" data-custom-select data-placeholder="Seleccionar profesional">
               <option value="">Seleccionar profesional</option>
               <option value="2">Psicólogo 1</option>
             </select>
@@ -399,6 +400,7 @@
 <script src="/js/modules/patient/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
+<script src="/js/components/custom-select.js?v=20261009-1"></script>
 <script src="/js/modules/patient/agendaquotes.js?v=20260803-1"></script>
 <script>
 // Forzar que todos los acordeones inicien cerrados
