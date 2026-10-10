@@ -5,15 +5,11 @@ function formatearHora(hora) {
   const minutos = parseInt(partes[1]) || 0;
   const periodo = horaNum >= 12 ? 'PM' : 'AM';
   const hora12 = horaNum === 0 ? 12 : horaNum > 12 ? horaNum - 12 : horaNum;
-  const minutosFin = minutos + 30;
-  let horaFin = horaNum;
-  let minFinStr = String(minutosFin).padStart(2, '0');
-  if (minutosFin >= 60) {
-    horaFin = horaNum + 1;
-    minFinStr = '00';
-  }
+  // 1‑hour block
+  const horaFin = horaNum + 1;
   const horaFin12 = horaFin === 0 ? 12 : horaFin > 12 ? horaFin - 12 : horaFin;
-  return `${hora12}:${String(minutos).padStart(2, '0')} - ${horaFin12}:${minFinStr} ${periodo}`;
+  const minFinStr = String(minutos).padStart(2, '0');
+  return `${hora12}:${minFinStr} - ${horaFin12}:${minFinStr} ${periodo}`;
 }
 
 function formatearHoraCorta(hora) {
@@ -173,23 +169,23 @@ async function cargarHorarios() {
     calFechaSinHorarios = '';
     select.disabled = false;
     select.innerHTML = '<option value="">Selecciona una hora</option>';
-    data.horarios.forEach(hora => {
+    // Keep only slots on the hour (minutes == 0) to represent 1‑hour blocks
+    const horasUnicas = data.horarios.filter(h => {
+      const m = parseInt(h.split(':')[1] || '0', 10);
+      return m === 0;
+    });
+    horasUnicas.forEach(hora => {
       const partes = hora.split(':');
       const horaNum = parseInt(partes[0]);
       const minutos = parseInt(partes[1]) || 0;
       const periodo = horaNum >= 12 ? 'PM' : 'AM';
       const hora12 = horaNum === 0 ? 12 : horaNum > 12 ? horaNum - 12 : horaNum;
-      const minutosFin = minutos + 30;
-      let horaFin = horaNum;
-      let minFinStr = String(minutosFin).padStart(2, '0');
-      if (minutosFin >= 60) {
-        horaFin = horaNum + 1;
-        minFinStr = '00';
-      }
+      const horaFin = horaNum + 1;
       const horaFin12 = horaFin === 0 ? 12 : horaFin > 12 ? horaFin - 12 : horaFin;
+      const minStr = String(minutos).padStart(2, '0');
       const opt = document.createElement("option");
       opt.value = hora;
-      opt.textContent = `${hora12}:${String(minutos).padStart(2, '0')} - ${horaFin12}:${minFinStr} ${periodo}`;
+      opt.textContent = `${hora12}:${minStr} - ${horaFin12}:${minStr} ${periodo}`;
       select.appendChild(opt);
     });
   } catch(e) {
@@ -241,23 +237,7 @@ async function cargarCitasPaciente() {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No tienes citas próximas</td></tr>';
       } else {
         tbody.innerHTML = proximas.map(c => {
-          let horaFormateada = '—';
-          if (c.hora) {
-            const partes = c.hora.split(':');
-            const horaNum = parseInt(partes[0]);
-            const minutos = parseInt(partes[1]) || 0;
-            const periodo = horaNum >= 12 ? 'PM' : 'AM';
-            const hora12 = horaNum === 0 ? 12 : horaNum > 12 ? horaNum - 12 : horaNum;
-            const minutosFin = minutos + 30;
-            let horaFin = horaNum;
-            let minFinStr = String(minutosFin).padStart(2, '0');
-            if (minutosFin >= 60) {
-              horaFin = horaNum + 1;
-              minFinStr = '00';
-            }
-            const horaFin12 = horaFin === 0 ? 12 : horaFin > 12 ? horaFin - 12 : horaFin;
-            horaFormateada = `${hora12}:${String(minutos).padStart(2, '0')} - ${horaFin12}:${minFinStr} ${periodo}`;
-          }
+          let horaFormateada = c.hora ? formatearHora(c.hora) : '—';
 
           const accionHtml = c.estado !== 'Cancelada'
             ? `<button class="btn btn-outline-danger btn-sm py-0" onclick="abrirModalCancelar(${c.idCita})" title="Cancelar cita">Cancelar</button>`
