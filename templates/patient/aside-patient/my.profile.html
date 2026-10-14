@@ -432,6 +432,91 @@ window.addEventListener('pageshow', function(event) {
         });
     }
 });
+
+// SweetAlert2 para prueba de WhatsApp
+document.addEventListener('DOMContentLoaded', function () {
+    var btnProbar = document.getElementById('btnProbarNotif');
+    var telInput = document.getElementById('numeroTelefonico');
+    var consentCheckbox = document.getElementById('whatsappConsentimiento');
+
+    if (btnProbar) {
+        btnProbar.addEventListener('click', function (e) {
+            e.preventDefault();
+            // Validar teléfono
+            if (!telInput.value.trim()) {
+                Swal.fire({
+                    title: 'Teléfono requerido',
+                    html: 'Ingresa tu número en formato internacional (E.164).<br>Ejemplo: <code>+573001234567</code>',
+                    input: 'tel',
+                    inputPlaceholder: '+57 3XX XXX XXXX',
+                    inputAttributes: { pattern: '\\+\\d{10,15}' },
+                    showCancelButton: true,
+                    confirmButtonText: 'Guardar',
+                    cancelButtonText: 'Cancelar',
+                    inputValidator: (value) => {
+                        if (!value || !/^\+\d{10,15}$/.test(value.replace(/\s/g,''))) {
+                            return 'Formato inválido. Usa +573001234567';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        telInput.value = result.value.replace(/\s/g,'');
+                        // بعد حفظ الرقم، تحقق من الموافقة
+                        checkConsentAndSend();
+                    }
+                });
+            } else {
+                checkConsentAndSend();
+            }
+
+            function checkConsentAndSend() {
+                if (!consentCheckbox.checked) {
+                    Swal.fire({
+                        title: 'Consentimiento requerido',
+                        text: 'Para recibir notificaciones por WhatsApp debes aceptar el consentimiento.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar y continuar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((r) => {
+                        if (r.isConfirmed) {
+                            consentCheckbox.checked = true;
+                            sendTest();
+                        }
+                    });
+                } else {
+                    sendTest();
+                }
+            }
+
+            function sendTest() {
+                var numero = telInput.value.trim();
+                Swal.fire({
+                    title: 'Enviando prueba…',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+                fetch('/api/notificaciones/probar/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ numero: numero })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok) {
+                        Swal.fire('¡Enviado!', data.mensaje, 'success');
+                    } else {
+                        Swal.fire('Error', data.mensaje || 'No se pudo enviar', 'error');
+                    }
+                })
+                .catch(() => Swal.fire('Error', 'Error de red', 'error'));
+            }
+        });
+    }
+});
 </script>
 </body>
 </html>
