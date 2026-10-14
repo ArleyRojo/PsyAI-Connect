@@ -266,12 +266,17 @@ def config_pago(request):
     if request.method != "GET":
         return JsonResponse({"error": "Method not allowed"}, status=405)
     from django.conf import settings
-    url = getattr(settings, "PAGO_CUENTA_URL", "") or ""
-    nombre = getattr(settings, "PAGO_CUENTA_NOMBRE", "") or ""
+    url = (getattr(settings, "PAGO_CUENTA_URL", "") or "").strip()
+    nombre = (getattr(settings, "PAGO_CUENTA_NOMBRE", "") or "").strip()
+    # Solo considerar configurada si la URL empieza por https://
+    configurada = url.startswith("https://")
+    if not configurada:
+        url = ""
+        nombre = ""
     return JsonResponse({
         "url": url,
         "nombre": nombre,
-        "configurada": bool(url)
+        "configurada": configurada
     })
 
 

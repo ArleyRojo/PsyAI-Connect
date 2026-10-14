@@ -297,7 +297,7 @@ async function cargarFacturasPaciente() {
       } else {
         // Pendiente
         if (pagoConfig.configurada && pagoConfig.url) {
-          accion = '<a href="' + pagoConfig.url + '" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-success"><i class="fas fa-qrcode me-1"></i> Pagar</a>';
+          accion = createPayLink(pagoConfig.url);
         } else {
           accion = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-lock me-1"></i> Pendiente</button>';
         }
@@ -322,6 +322,16 @@ function filtrarFacturas() { cargarFacturasPaciente(); }
 /* Configuración de pago (fetch) */
 let pagoConfig = { url: "", nombre: "", configurada: false };
 
+function createPayLink(url) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.className = 'btn btn-sm btn-success';
+  a.innerHTML = '<i class="fas fa-qrcode me-1"></i> Pagar';
+  return a.outerHTML;
+}
+
 async function cargarConfigPago() {
   try {
     const res = await fetch("/api/config/pago/", { credentials: "include" });
@@ -339,16 +349,30 @@ async function cargarConfigPago() {
 function renderPagoCuentaBtn() {
   var wrap = document.getElementById("pagoCuentaBtnWrap");
   if (!wrap) return;
+  wrap.innerHTML = '';
   if (pagoConfig.configurada && pagoConfig.url) {
-    wrap.innerHTML = '<a href="' + pagoConfig.url + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary"><i class="fas fa-external-link-alt me-2"></i> Pagar con Nequi / Bre-B</a>' +
-      '<span class="ms-2 text-muted small">' + esc(pagoConfig.nombre) + '</span>';
+    const a = document.createElement('a');
+    a.href = pagoConfig.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'btn btn-primary';
+    a.innerHTML = '<i class="fas fa-external-link-alt me-2"></i> Pagar con Nequi / Bre-B';
+    wrap.appendChild(a);
+    const span = document.createElement('span');
+    span.className = 'ms-2 text-muted small';
+    span.textContent = pagoConfig.nombre;
+    wrap.appendChild(span);
   } else {
-    wrap.innerHTML = '<button class="btn btn-secondary" disabled title="No hay cuenta de pago configurada"><i class="fas fa-lock me-2"></i> Cuenta de pago no configurada</button>';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-secondary';
+    btn.disabled = true;
+    btn.title = 'No hay cuenta de pago configurada';
+    btn.innerHTML = '<i class="fas fa-lock me-2"></i> Cuenta de pago no configurada';
+    wrap.appendChild(btn);
   }
 }
 
 function limpiarFiltros() {
-  renderPagoCuentaBtn();
   document.getElementById("filtroEstado").value = "";
   document.getElementById("filtroProfesional").value = "";
   document.getElementById("filtroFechaDesde").value = "";
