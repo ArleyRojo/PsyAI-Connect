@@ -284,3 +284,19 @@ python manage.py runserver
 ---
 
 *Documento generado automáticamente como parte de la iteración de hardening de seguridad. Mantener actualizado ante cualquier cambio en la arquitectura de autenticación/autorización.*
+
+---
+## 8. WhatsApp (Twilio) — Consideraciones de seguridad
+
+| Aspecto | Recomendación |
+|---------|---------------|
+| **Credenciales** | `TWILIO_SID` y `TWILIO_TOKEN` solo en `.env` de producción (nunca en repo). Rotar periódicamente en Twilio Console. |
+| **WHATSAPP_ENABLED** | Activar solo cuando credenciales estén listas; valor parseado case‑insensitive (`true/1/yes`). |
+| **Validación de firma** | Webhook usa `twilio.request_validator.RequestValidator` con `TWILIO_TOKEN` y `TWILIO_WEBHOOK_URL` exacta. Peticiones con firma inválida → 403. |
+| **HTTPS obligatorio** | `TWILIO_WEBHOOK_URL` debe ser `https://` con certificado válido; Twilio rechaza HTTP en producción. |
+| **Plantillas aprobadas** | Solo `ContentSid` de plantillas aprobadas por Meta pueden usarse fuera de la ventana de 24 h. Variables `TWILIO_TPL_*` deben coincidir con las aprobadas. |
+| **Opt‑out (STOP/BAJA/UNSUBSCRIBE)** | Webhook desactiva `whatsappConsentimiento` y fuerza `canalNotificacion=email`. Responde al usuario confirmando baja. |
+| **Rate limits** | Twilio impone límites por número remitente; monitorizar `providerMsgId` y estado (`delivered/failed/undelivered`) vía status callback opcional. |
+| **Datos sensibles** | Nunca loguear `TWILIO_TOKEN` ni cuerpos completos de mensajes. Logs solo SID y estado. |
+| **Pruebas** | Comando `python manage.py probar_whatsapp +57…` usa credenciales reales; en CI usar `WHATSAPP_ENABLED=False` (DummyProvider). |
+| **CSP / Headers** | Endpoints `/api/whatsapp/webhook/` y `/api/whatsapp/status/` están bajo CSP `connect-src 'self'` y no exponen datos de usuario. |

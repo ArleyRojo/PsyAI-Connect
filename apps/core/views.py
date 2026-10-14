@@ -215,6 +215,25 @@ def error_403(request, exception=None):
 
 
 @csrf_exempt
+def notificacion_prueba(request):
+    """POST /api/notificaciones/probar/  body: { \"numero\": \"+57300...\" }"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    try:
+        import json
+        data = json.loads(request.body)
+        numero = (data.get("numero") or "").strip()
+    except Exception:
+        return JsonResponse({"error": "Datos inválidos"}, status=400)
+    if not numero:
+        return JsonResponse({"error": "Número requerido"}, status=400)
+
+    from apps.core.notifier import enviar_prueba
+    ok, msg = enviar_prueba(numero)
+    return JsonResponse({"ok": ok, "mensaje": msg}, status=200 if ok else 500)
+
+
+@csrf_exempt
 def theme_preference(request):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)

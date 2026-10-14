@@ -362,3 +362,46 @@ docker exec -i psyai_db mysql -u root -p"$DB_ROOT_PASSWORD" psyai_connect < back
 - [`SEGURIDAD.md`](seguridad.md) — Checklist de seguridad en producción
 - [`chatbot-ia.md`](chatbot-ia.md) — Variables `GEMINI_API_KEY*`
 - [`pagos-facturacion.md`](pagos-facturacion.md) — Variables `WOMPI_*`
+- [`whatsapp.md`](whatsapp.md) — Configuración de WhatsApp (Twilio)
+
+---
+## 11. Configuración de WhatsApp (Twilio)
+
+| Variable | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `WHATSAPP_ENABLED` | Activa envío real (`true/1/yes` case‑insensitive) | `true` |
+| `TWILIO_SID` | Account SID de Twilio | `ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| `TWILIO_TOKEN` | Auth Token de Twilio | `your_auth_token` |
+| `TWILIO_WHATSAPP_FROM` | Número remitente en formato `whatsapp:+...` | `whatsapp:+14155238886` |
+| `TWILIO_WEBHOOK_URL` | URL pública exacta del webhook (debe coincidir con la configurada en Twilio) | `https://tudominio.com/api/whatsapp/webhook/` |
+| `TWILIO_STATUS_CALLBACK_URL` *(opcional)* | URL para callbacks de estado (`delivered`, `failed`, …) | `https://tudominio.com/api/whatsapp/status/` |
+| `TWILIO_TPL_RECORDATORIO` | Content SID de plantilla “recordatorio_cita” (aprobada en Meta) | `HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| `TWILIO_TPL_CONFIRMACION` | Plantilla “confirmacion_cita” | `HX…` |
+| `TWILIO_TPL_CANCELACION` | Plantilla “cancelacion_cita” | `HX…` |
+| `TWILIO_TPL_MENSAJE_PRO` | Plantilla “mensaje_profesional” | `HX…` |
+
+### Pasos para producción
+1. **Cuenta Twilio** → *Messaging → Try it out → WhatsApp sandbox* para desarrollo. Cada número de prueba debe enviar `join <palabras>` al número del sandbox (`whatsapp:+14155238886`). La unión expira a 72 h.
+2. **Producción** – Registrar un **WhatsApp Business Sender** (número propio, verificación Meta). Crear plantillas en Meta Business Manager → *Message Templates* → enviar a aprobación. Al aprobar, copiar el **Content SID** a las variables `TWILIO_TPL_*`.
+3. **Webhook** – En Twilio Console → *Messaging → Settings → WhatsApp sandbox / Sender* → *When a message comes in* → `POST https://tudominio.com/api/whatsapp/webhook/`. Para exponer localmente usa **ngrok** y pon esa URL en `TWILIO_WEBHOOK_URL`.
+4. **Status callback** (opcional) – En la misma pantalla *Status callback URL* pon `https://tudominio.com/api/whatsapp/status/`.
+5. **Variables en `.env`** (nunca commitear):
+   ```dotenv
+   WHATSAPP_ENABLED=true
+   TWILIO_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   TWILIO_TOKEN=your_auth_token
+   TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+   TWILIO_WEBHOOK_URL=https://tudominio.com/api/whatsapp/webhook/
+   # TWILIO_STATUS_CALLBACK_URL=https://tudominio.com/api/whatsapp/status/
+   TWILIO_TPL_RECORDATORIO=HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   TWILIO_TPL_CONFIRMACION=HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   TWILIO_TPL_CANCELACION=HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   TWILIO_TPL_MENSAJE_PRO=HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+6. **Probar**:  
+   ```bash
+   python manage.py probar_whatsapp +573001234567
+   ```
+   Debe mostrar `OK – Enviado (sid=SM…)` y el paciente recibe el WhatsApp.
+7. **Opt‑out** – El usuario responde `STOP` / `BAJA` / `UNSUBSCRIBE`. El webhook valida la firma HMAC‑SHA1 (base64) y desactiva `whatsappConsentimiento` y pone `canalNotificacion=email`.
+8. **Logs** – Cada envío queda en `Notificaciones` con `estado=enviado|fallido|simulado` y `providerMsgId` (SID real). El status callback actualiza a `delivered / failed / undelivered`.

@@ -27,17 +27,21 @@ class Command(BaseCommand):
         for cita in citas:
             for intento in range(3):
                 try:
-                    notificar_paciente(
+                    ok = notificar_paciente(
                         cita.idPaciente,
                         "Recordatorio de cita",
-                        f"Tu cita es mañana a las {cita.hora.strftime('%H:%M')} "
-                        f"en {cita.lugar or 'la sede habitual'}.",
+                        f"Tu cita es mañana a las {cita.hora.strftime('%H:%M')}"
+                        f" en {cita.lugar or 'la sede habitual'}.",
                         "recordatorio_cita",
                     )
-                    cita.recordatorio_enviado = True
-                    cita.save(update_fields=["recordatorio_enviado"])
-                    logger.info("Recordatorio enviado cita %s", cita.idCita)
-                    break
+                    if ok:
+                        cita.recordatorio_enviado = True
+                        cita.save(update_fields=["recordatorio_enviado"])
+                        logger.info("Recordatorio enviado cita %s", cita.idCita)
+                        break
+                    else:
+                        logger.warning("Recordatorio no enviado (sin canal) cita %s", cita.idCita)
+                        break
                 except Exception as e:
                     logger.warning("Intento %d fallido cita %s: %s", intento+1, cita.idCita, e)
                     if intento == 2:

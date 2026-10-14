@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/", include("apps.documents.urls")),
     path("api/", include("apps.billing.urls")),
     path("api/", include("apps.admin_panel.urls")),
+    path("api/", include("apps.core.urls")),
     path("api/client-errors", client_errors, name="client_errors"),
     path("api/theme", theme_preference, name="theme_preference"),
     path("api/newsletter/subscribe", newsletter_subscribe, name="newsletter_subscribe"),

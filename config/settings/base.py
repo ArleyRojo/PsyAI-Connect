@@ -209,10 +209,20 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 
 # WhatsApp / Twilio
-WHATSAPP_ENABLED = os.getenv("WHATSAPP_ENABLED", "False") == "True"
+def _parse_bool(val: str) -> bool:
+    return val.strip().lower() in ("1", "true", "yes", "on")
+
+WHATSAPP_ENABLED = _parse_bool(os.getenv("WHATSAPP_ENABLED", "False"))
 TWILIO_SID = os.getenv("TWILIO_SID", "")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN", "")
 TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "")   # ej. whatsapp:+14155238886
+TWILIO_WEBHOOK_URL = os.getenv("TWILIO_WEBHOOK_URL", "")
+TWILIO_STATUS_CALLBACK_URL = os.getenv("TWILIO_STATUS_CALLBACK_URL", "")
+# Plantillas (Content SIDs) – configurar en producción
+TWILIO_TPL_RECORDATORIO = os.getenv("TWILIO_TPL_RECORDATORIO", "")
+TWILIO_TPL_CONFIRMACION = os.getenv("TWILIO_TPL_CONFIRMACION", "")
+TWILIO_TPL_CANCELACION = os.getenv("TWILIO_TPL_CANCELACION", "")
+TWILIO_TPL_MENSAJE_PRO = os.getenv("TWILIO_TPL_MENSAJE_PRO", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "PsyAI Connect <noreply@psyaiconnect.com>")
 

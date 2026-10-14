@@ -1,21 +1,33 @@
 # apps/core/webhooks.py
-import hmac, hashlib
+import hmac
+import logging
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
 from apps.patients.models import PerfilPaciente
-from apps.authentication.models import Register
 from apps.core.whatsapp import get_whatsapp_provider
+
+logger = logging.getLogger(__name__)
+
+try:
+    from twilio.request_validator import RequestValidator
+    _validator = RequestValidator(getattr(settings, "TWILIO_TOKEN", "")) if getattr(settings, "TWILIO_TOKEN", "") else None
+except Exception:
+    _validator = None
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class WhatsAppWebhook(View):
     def post(self, request):
+        # Verify signature
         twilio_sig = request.headers.get('X-Twilio-Signature', '')
-        url = request.build_absolute_uri()
+        url = getattr(settings, "TWILIO_WEBHOOK_URL", "") or request.build_absolute_uri()
         post_data = request.POST.dict()
-        if not self._verify_signature(twilio_sig, url, post_data):
+
+        if _validator and not self._verify_signature(twilio_sig, url, post_data):
+            logger.warning("Invalid Twilio signature from %s", request.META.get('REMOTE_ADDR'))
             return HttpResponse(status=403)
 
         body = post_data.get('Body', '').strip().upper()
@@ -23,20 +35,43 @@ class WhatsAppWebhook(View):
 
         if body in ("STOP", "BAJA", "UNSUBSCRIBE"):
             try:
-                # Buscar perfil por número telefónico
                 perfil = PerfilPaciente.objects.get(numeroTelefonico=from_num)
                 perfil.whatsappConsentimiento = False
                 perfil.canalNotificacion = "email"
                 perfil.whatsappConsentimientoFecha = None
                 perfil.save(update_fields=["whatsappConsentimiento", "canalNotificacion", "whatsappConsentimientoFecha"])
-                get_whatsapp_provider().enviar_whatsapp(from_num,
+                provider = get_whatsapp_provider()
+                provider.enviar_whatsapp(from_num,
                     texto="Has sido dado de baja de notificaciones por WhatsApp. Seguirás recibiendo correos.")
-            except Exception:
-                pass
+                logger.info("Opt-out processed for %s", from_num)
+            except PerfilPaciente.DoesNotExist:
+                logger.warning("Opt-out from unknown number %s", from_num)
+            except Exception as exc:
+                logger.error("Error processing opt-out for %s: %s", from_num, exc)
         return HttpResponse(status=200)
 
     def _verify_signature(self, signature, url, params):
+        if not _validator:
+            return False
+        # Twilio expects parameters sorted and concatenated
         data = url + ''.join(f'{k}{v}' for k, v in sorted(params.items()))
-        expected = hmac.new(settings.TWILIO_TOKEN.encode(),
-                            data.encode(), hashlib.sha1).hexdigest()
+        expected = _validator.compute_signature(data)
         return hmac.compare_digest(signature, expected)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class WhatsAppStatusCallback(View):
+    """Optional endpoint to update Notificaciones status via Twilio status callbacks."""
+    def post(self, request):
+        sid = request.POST.get('MessageSid')
+        status = request.POST.get('MessageStatus')  # sent, delivered, failed, undelivered
+        if not sid:
+            return HttpResponse(status=400)
+        from apps.scheduling.models import Notificaciones
+        try:
+            notif = Notificaciones.objects.get(providerMsgId=sid)
+            notif.estado = status
+            notif.save(update_fields=["estado"])
+        except Notificaciones.DoesNotExist:
+            logger.warning("Status callback for unknown SID %s", sid)
+        return HttpResponse(status=200)
