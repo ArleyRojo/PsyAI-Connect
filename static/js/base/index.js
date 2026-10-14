@@ -66,6 +66,50 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('scroll', syncNavbarState, { passive: true });
     setupActiveSectionObserver();
 
+    // Smooth scroll for anchor links, close mobile menu, update hash, and activate Contact at bottom
+    function setupNavLinks() {
+        if (!nav) return;
+        const NAVBAR_OFFSET = 84; // navbar height + extra
+        const navLinks = nav.querySelectorAll('.nav-link[href^="#"]');
+        const navmenu = document.getElementById('navmenu');
+        const bsCollapse = navmenu ? window.bootstrap?.Collapse?.getInstance(navmenu) : null;
+
+        navLinks.forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('href');
+                if (!targetId || targetId.length <= 1) return;
+                const target = document.querySelector(targetId);
+                if (!target) return;
+                e.preventDefault();
+                const targetTop = target.getBoundingClientRect().top + window.scrollY - NAVBAR_OFFSET;
+                window.scrollTo({ top: targetTop, behavior: 'smooth' });
+                history.replaceState(null, '', targetId);
+                // close mobile collapse
+                if (navmenu && navmenu.classList.contains('show')) {
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    } else {
+                        const toggler = nav.querySelector('.navbar-toggler');
+                        if (toggler) toggler.click();
+                    }
+                }
+            });
+        });
+
+        // Activate Contact when near bottom of page
+        function checkContactActive() {
+            const contactSection = document.getElementById('contacto');
+            if (!contactSection) return;
+            const scrollPos = window.scrollY + window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight;
+            if (scrollPos >= docHeight - 20) { // within 20px of bottom
+                navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#contacto'));
+            }
+        }
+        window.addEventListener('scroll', checkContactActive, { passive: true });
+    }
+    setupNavLinks();
+
     // Animate section title underlines on scroll
     var sectionTitles = document.querySelectorAll('.section-title');
     if (sectionTitles.length) {

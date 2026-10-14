@@ -24,6 +24,7 @@
 #mainNav .navbar-brand img { width: 34px; height: 34px; object-fit: contain; vertical-align: middle; }
 #mainNav .nav-link { color: var(--color-text-body); font-size: .78rem; font-weight: 500; }
 #mainNav .nav-link:hover { color: var(--color-secondary); }
+#mainNav .nav-link.active { color: var(--color-primary); }
 #mainNav .btn { border-radius: 10px; padding: .55rem 1rem; font-size: .76rem; }
 #mainNav .btn-primary { background: var(--color-secondary); border-color: var(--color-secondary); }
 #mainNav .btn-outline-primary { border-color: var(--color-primary); color: var(--color-secondary); }
@@ -56,7 +57,11 @@
 .chat-input b { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-secondary); color: #fff; }
 
 #servicios, #funciona, #faq, #impacto { background: var(--color-bg-light); }
-.about-hero { display: none; }
+
+#acerca, #servicios, #funciona, #privacidad, #faq, #contacto {
+    scroll-margin-top: 84px;
+}
+.about-hero { display: block; }
 .services-grid { max-width: 1120px; margin-inline: auto; }
 .service-tile { height: 100%; padding: 1.5rem; border: 1px solid var(--color-border-soft); border-radius: 14px; background: var(--color-bg-light); box-shadow: var(--landing-shadow); transition: transform .2s, border-color .2s; }
 .service-tile:hover { transform: translateY(-4px); border-color: var(--color-primary); }
