@@ -482,18 +482,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ---- Probar canal ---- */
     btnProbar.addEventListener('click', async () => {
-        const canal = form.canalNotificacion.value;
+        const checkedCanal = form.querySelector('input[name="canalNotificacion"]:checked');
+        const canal = checkedCanal ? checkedCanal.value : 'email';
         if (canal === 'ninguno') return showAlert('warning','Canal “Ninguno” no envía pruebas');
         btnProbar.disabled = true;
         btnProbar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Enviando…';
         try {
+            let body = { canal };
+            // For WhatsApp test, send the phone number so backend can send real message
+            if (canal === 'whatsapp') {
+                const telInput = document.getElementById('numeroTelefonico');
+                const numero = telInput ? telInput.value.trim() : '';
+                if (!numero) return showAlert('warning','Ingresa un número de teléfono');
+                body = { numero };
+            }
             const resp = await fetch('/api/notificaciones/probar/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
                 },
-                body: JSON.stringify({ canal }),
+                body: JSON.stringify(body),
                 credentials: 'same-origin',
             });
             const data = await resp.json();
