@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
 <head>
-    <title>PsyAI Connect | Facturaci&oacute;n</title>
+    <title>PsyAI Connect | Facturación</title>
     {% include 'base/partials/head.html' %}
     <link rel="stylesheet" href="/css/pages/admin.css?v=20260711-1">
     <link rel="stylesheet" href="/responsive/responsive-admin.css">
@@ -95,7 +95,7 @@
     <header class="main-header d-flex justify-content-between align-items-center mb-4">
       <div>
         <h1 class="h3 fw-bold mb-0"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Facturación</h1>
-        <small class="text-muted">Control de facturación global del sistema.</small>
+        <small class="text-muted">Control de facturación global del sistema (solo lectura).</small>
       </div>
       <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
     </header>
@@ -116,7 +116,7 @@
       <div class="col-sm-6 col-lg-3">
         <div class="stat-card" style="border-left:3px solid var(--mood-neutral);">
           <div class="stat-icon gold"><i class="fas fa-clock"></i></div>
-          <div><div class="stat-value" id="kpiPendiente">$0</div><div class="stat-label">Pendiente/Parcial</div></div>
+          <div><div class="stat-value" id="kpiPendiente">$0</div><div class="stat-label">Pendiente</div></div>
         </div>
       </div>
       <div class="col-sm-6 col-lg-3">
@@ -133,7 +133,7 @@
           <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--brand-600),var(--brand-700));color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;">
             <i class="fas fa-filter"></i>
           </div>
-          <span class="fw-bold" style="font-size:.9rem;">Filtros de b&uacute;squeda</span>
+          <span class="fw-bold" style="font-size:.9rem;">Filtros de búsqueda</span>
         </div>
         <div class="row g-3 align-items-end">
           <div class="col-md-3">
@@ -149,25 +149,15 @@
             <select id="filtroEstadoAdmin" class="form-select" onchange="filtrarFacturasAdmin()" style="border-radius:8px; font-size:.88rem;">
               <option value="">Todos</option>
               <option value="Pendiente">Pendiente</option>
-              <option value="Parcial">Parcial</option>
               <option value="Pagado">Completado</option>
-              <option value="Cancelado">Cancelado</option>
               <option value="Anulada">Anulada</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label" style="font-size:.78rem; font-weight:600; color:var(--brand-700); text-transform:uppercase; letter-spacing:.03em;"><i class="fas fa-credit-card me-1"></i>M&eacute;todo</label>
-            <select id="filtroMetodoAdmin" class="form-select" onchange="filtrarFacturasAdmin()" style="border-radius:8px; font-size:.88rem;">
-              <option value="">Todos</option>
-              <option value="tarjeta">Tarjeta</option>
-              <option value="banco">Transferencia</option>
-            </select>
-          </div>
-          <div class="col-md-1">
             <label class="form-label" style="font-size:.78rem; font-weight:600; color:var(--brand-700); text-transform:uppercase; letter-spacing:.03em;"><i class="fas fa-calendar me-1"></i>Desde</label>
             <input type="date" id="filtroFechaDesdeAdmin" class="form-control" onchange="filtrarFacturasAdmin()" style="border-radius:8px; font-size:.88rem;">
           </div>
-          <div class="col-md-1">
+          <div class="col-md-2">
             <label class="form-label" style="font-size:.78rem; font-weight:600; color:var(--brand-700); text-transform:uppercase; letter-spacing:.03em;"><i class="fas fa-calendar me-1"></i>Hasta</label>
             <input type="date" id="filtroFechaHastaAdmin" class="form-control" onchange="filtrarFacturasAdmin()" style="border-radius:8px; font-size:.88rem;">
           </div>
@@ -184,12 +174,11 @@
               <th style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--brand-700);">Paciente</th>
               <th style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--brand-700);">Profesional</th>
               <th style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--brand-700);">Monto</th>
-              <th style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--brand-700);">Método</th>
               <th style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--brand-700);">Estado</th>
               <th class="text-end pe-4" style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--brand-700);">Acción</th>
             </tr>
           </thead>
-          <tbody><tr><td colspan="7" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr></tbody>
+          <tbody><tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -212,32 +201,6 @@
 </div>
 </div>
 
-<div class="modal fade" id="modalAnularFacturaAdmin" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered">
-<div class="modal-content border-0 shadow" style="border-radius:12px;">
-<div class="modal-header border-0 pb-0" style="background:linear-gradient(135deg,rgba(183,28,28,0.06),#fff); border-radius:12px 12px 0 0;">
-    <h5 class="modal-title fw-bold text-danger"><i class="fas fa-ban me-2"></i>Anular Factura</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
-<div class="modal-body py-4">
-    <p class="text-muted text-center mb-3">¿Estás seguro que deseas anular esta factura?</p>
-    <div class="form-group text-start">
-        <label for="motivoAnulacionAdmin" class="form-label fw-semibold">Motivo <span class="text-danger">*</span></label>
-        <textarea class="form-control" id="motivoAnulacionAdmin" rows="3" maxlength="255" style="border-radius:8px;"></textarea>
-        <div class="d-flex justify-content-between mt-1">
-            <small class="text-danger d-none" id="errorMotivoAdmin">El motivo es obligatorio</small>
-            <small class="text-muted ms-auto" id="charCountAdmin">0/255</small>
-        </div>
-    </div>
-</div>
-<div class="modal-footer border-0 pt-0 justify-content-center gap-2">
-    <button type="button" class="btn btn-outline-secondary px-4" style="border-radius:8px;" data-bs-dismiss="modal">Volver</button>
-    <button type="button" class="btn btn-danger px-4" id="btnConfirmarAnularAdmin" style="border-radius:8px;">Sí, anular</button>
-</div>
-</div>
-</div>
-</div>
-
 {% include 'base/partials/scripts.html' %}
 <link rel="stylesheet" href="/responsive/responsive-fix.css">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
@@ -246,16 +209,15 @@
 <script src="/js/core/shared/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script>
-var facturaAdminIdAnular = null;
+function esc(str) {
+  return String(str || '').replace(/[&<>"']/g, function(m) {
+    return ({'&':'&','<':'<','>':'>','"':'"',"'":'''})[m];
+  });
+}
 
 document.addEventListener("DOMContentLoaded", function() {
     cargarKPIAdmin();
     cargarFacturasAdmin();
-    document.getElementById("motivoAnulacionAdmin").addEventListener("input", function() {
-        document.getElementById("charCountAdmin").textContent = this.value.length + "/255";
-        if (this.value.length > 0) document.getElementById("errorMotivoAdmin").classList.add("d-none");
-    });
-    document.getElementById("btnConfirmarAnularAdmin").addEventListener("click", confirmarAnularAdmin);
 });
 
 async function cargarKPIAdmin() {
@@ -276,7 +238,6 @@ async function cargarFacturasAdmin() {
     var p = document.getElementById("filtroPacienteAdmin").value; if (p) params.set("paciente", p);
     var pr = document.getElementById("filtroProfesionalAdmin").value; if (pr) params.set("profesional", pr);
     var e = document.getElementById("filtroEstadoAdmin").value; if (e) params.set("estado", e);
-    var m = document.getElementById("filtroMetodoAdmin").value; if (m) params.set("metodoPago", m);
     var fd = document.getElementById("filtroFechaDesdeAdmin").value; if (fd) params.set("fecha_desde", fd);
     var fh = document.getElementById("filtroFechaHastaAdmin").value; if (fh) params.set("fecha_hasta", fh);
 
@@ -285,7 +246,7 @@ async function cargarFacturasAdmin() {
         var res = await fetch("/api/facturas?" + params.toString(), { credentials: "include" });
         var data = await res.json();
         if (!data.success || !data.facturas || data.facturas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No hay facturas</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No hay facturas</td></tr>';
             return;
         }
         tbody.innerHTML = data.facturas.map(function(f) {
@@ -302,28 +263,20 @@ async function cargarFacturasAdmin() {
                 estadoHtml = '<span class="badge-riesgo badge-riesgo-medio"><i class="fas fa-clock"></i> Pendiente</span>';
             }
 
-            var metodoHtml = f.metodoPago === 'banco'
-                ? '<span><i class="fas fa-university me-1 text-primary"></i>Transferencia</span>'
-                : '<span><i class="fas fa-credit-card me-1 text-primary"></i>Tarjeta</span>';
-
             return '<tr class="align-middle">' +
                 '<td data-label="Fecha" class="ps-4"><div class="fw-semibold" style="font-size:.85rem;">' + fechaStr + '</div><small class="text-muted">' + horaStr + '</small></td>' +
-                '<td data-label="Paciente"><div class="d-flex align-items-center gap-2"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,rgba(0,105,92,0.12),rgba(0,150,136,0.08));color:#00695c;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;">' + (f.nombrePaciente || '?').split(' ').map(function(w){return w[0]}).filter(Boolean).join('').substring(0,2).toUpperCase() + '</div><span class="fw-semibold">' + (f.nombrePaciente || '---') + '</span></div></td>' +
-                '<td data-label="Profesional"><div class="d-flex align-items-center gap-2"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,rgba(69,39,160,0.12),rgba(126,87,194,0.08));color:#4527a0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;">' + (f.nombreProfesional || '?').split(' ').map(function(w){return w[0]}).filter(Boolean).join('').substring(0,2).toUpperCase() + '</div><span>' + (f.nombreProfesional || '---') + '</span></div></td>' +
+                '<td data-label="Paciente"><div class="d-flex align-items-center gap-2"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,rgba(0,105,92,0.12),rgba(0,150,136,0.08));color:#00695c;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;">' + (f.nombrePaciente || '?').split(' ').map(function(w){return w[0]}).filter(Boolean).join('').substring(0,2).toUpperCase() + '</div><span class="fw-semibold">' + esc(f.nombrePaciente || '---') + '</span></div></td>' +
+                '<td data-label="Profesional"><div class="d-flex align-items-center gap-2"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,rgba(69,39,160,0.12),rgba(126,87,194,0.08));color:#4527a0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;">' + (f.nombreProfesional || '?').split(' ').map(function(w){return w[0]}).filter(Boolean).join('').substring(0,2).toUpperCase() + '</div><span>' + esc(f.nombreProfesional || '---') + '</span></div></td>' +
                 '<td data-label="Monto" class="fw-bold" style="color:var(--brand-700);">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
-                '<td data-label="M&#xE9;todo">' + metodoHtml + '</td>' +
                 '<td data-label="Estado">' + estadoHtml + '</td>' +
-                '<td data-label="Acci&#xF3;n" class="text-end pe-4">' +
+                '<td data-label="Acción" class="text-end pe-4">' +
                     '<div class="btn-group btn-group-sm">' +
                         '<button class="btn btn-outline-primary" style="border-radius:8px;" onclick="verFacturaAdmin(' + f.idFactura + ')" title="Ver detalle"><i class="fas fa-eye"></i></button>' +
-                        (f.anulada ? '' :
-                            '<button class="btn btn-outline-danger" style="border-radius:8px;" onclick="abrirModalAnularAdmin(' + f.idFactura + ')" title="Anular"><i class="fas fa-ban"></i></button>'
-                        ) +
                     '</div>' +
                 '</td></tr>';
         }).join("");
     } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error al cargar</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar</td></tr>';
     }
 }
 
@@ -340,62 +293,18 @@ async function verFacturaAdmin(id) {
         if (!data.success || !data.factura) { body.innerHTML = '<p class="text-danger text-center">Error</p>'; return; }
         var f = data.factura;
         var itemsHtml = (f.items || []).map(function(i) {
-            return '<tr><td>' + i.descripción + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
+            return '<tr><td>' + esc(i.descripcion) + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
         }).join("");
         body.innerHTML =
             '<p><strong>Factura #' + f.idFactura + '</strong></p>' +
-            '<p class="small text-muted">Fecha: ' + f.fecha + '</p>' +
-            '<p class="small">Paciente: <strong>' + (f.nombrePaciente || "---") + '</strong></p>' +
-            '<p class="small">Profesional: <strong>' + (f.nombreProfesional || "---") + '</strong></p>' +
-            '<p class="small">Método: ' + (f.metodoPago === "banco" ? "Transferencia" : "Tarjeta") + '</p>' +
+            '<p class="small text-muted">Fecha: ' + esc(f.fecha) + '</p>' +
+            '<p class="small">Paciente: <strong>' + esc(f.nombrePaciente || "---") + '</strong></p>' +
+            '<p class="small">Profesional: <strong>' + esc(f.nombreProfesional || "---") + '</strong></p>' +
             '<table class="table table-sm"><thead><tr><th>Servicio</th><th class="text-end">Valor</th></tr></thead><tbody>' + itemsHtml + '</tbody>' +
             '<tfoot><tr class="fw-bold"><td>Total</td><td class="text-end">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr></tfoot></table>' +
             '<p>Estado: <span class="badge ' + (f.anulada ? "bg-secondary" : f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark") + '">' + (f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente")) + '</span></p>' +
-            (f.anulada && f.motivoAnulacion ? '<p class="small text-muted">Motivo: ' + f.motivoAnulacion + '</p>' : '') +
-            (f.idTransaccionPago ? '<p class="small text-muted">Transacción: ' + f.idTransaccionPago + '</p>' : '');
+            (f.anulada && f.motivoAnulacion ? '<p class="small text-muted">Motivo: ' + esc(f.motivoAnulacion) + '</p>' : '');
     } catch(e) { body.innerHTML = '<p class="text-danger text-center">Error de conexión</p>'; }
-}
-
-function abrirModalAnularAdmin(id) {
-    facturaAdminIdAnular = id;
-    document.getElementById("motivoAnulacionAdmin").value = "";
-    document.getElementById("charCountAdmin").textContent = "0/255";
-    document.getElementById("errorMotivoAdmin").classList.add("d-none");
-    new bootstrap.Modal(document.getElementById("modalAnularFacturaAdmin")).show();
-}
-
-async function confirmarAnularAdmin() {
-    var motivo = document.getElementById("motivoAnulacionAdmin").value.trim();
-    if (!motivo) {
-        document.getElementById("errorMotivoAdmin").classList.remove("d-none");
-        return;
-    }
-    var btn = document.getElementById("btnConfirmarAnularAdmin");
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Anulando...';
-    try {
-        var res = await fetch("/api/facturas/" + facturaAdminIdAnular + "/anular", {
-            method: "PATCH",
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-            body: JSON.stringify({motivoAnulacion: motivo}),
-        });
-        var data = await res.json();
-        if (data.success) {
-            PsyAIAlerts.success("Anulada", "Factura anulada correctamente");
-            bootstrap.Modal.getInstance(document.getElementById("modalAnularFacturaAdmin")).hide();
-            cargarKPIAdmin();
-            cargarFacturasAdmin();
-        } else {
-            PsyAIAlerts.error("Error", data.message || "No se pudo anular");
-        }
-    } catch(e) {
-        PsyAIAlerts.error("Error", "Error de conexión");
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = "Sí, anular";
-        facturaAdminIdAnular = null;
-    }
 }
 </script>
 </body>

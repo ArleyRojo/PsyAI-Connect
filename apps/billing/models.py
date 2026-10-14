@@ -4,18 +4,9 @@ from apps.authentication.models import Register
 
 
 class Facturas(models.Model):
-    METODO_PAGO_CHOICES = [
-        ("banco", "Banco"),
-        ("tarjeta", "Tarjeta"),
-        ("efectivo", "Efectivo"),
-        ("transferencia", "Transferencia"),
-        ("pse", "PSE"),
-    ]
     ESTADO_PAGO_CHOICES = [
         ("Pendiente", "Pendiente"),
-        ("Parcial", "Parcial"),
         ("Pagado", "Pagado"),
-        ("Cancelado", "Cancelado"),
     ]
 
     idFactura = models.AutoField(primary_key=True)
@@ -33,21 +24,15 @@ class Facturas(models.Model):
     )
     idCita = models.IntegerField(null=True, blank=True)
     monto = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    metodoPago = models.CharField(
-        max_length=15,
-        choices=METODO_PAGO_CHOICES,
-        default="tarjeta",
-    )
     estadoPago = models.CharField(
         max_length=10,
         choices=ESTADO_PAGO_CHOICES,
         default="Pendiente",
     )
     fecha = models.DateTimeField(auto_now_add=True)
+    fechaPago = models.DateTimeField(null=True, blank=True)
     anulada = models.BooleanField(default=False)
     motivoAnulacion = models.CharField(max_length=255, null=True, blank=True)
-    referenciaPago = models.CharField(max_length=64, null=True, blank=True)
-    idTransaccionPago = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
         db_table = "Facturas"
@@ -59,10 +44,6 @@ class Facturas(models.Model):
             models.Index(
                 fields=["idProfesional", "fecha"],
                 name="idx_facturas_prof_fecha",
-            ),
-            models.Index(
-                fields=["referenciaPago"],
-                name="idx_facturas_referencia",
             ),
             models.Index(
                 fields=["idCita"],
@@ -80,13 +61,11 @@ class Facturas(models.Model):
             "idProfesional": self.idProfesional_id,
             "idCita": self.idCita,
             "monto": float(self.monto) if self.monto else None,
-            "metodoPago": self.metodoPago,
             "estadoPago": self.estadoPago,
             "fecha": self.fecha.isoformat() if self.fecha else None,
+            "fechaPago": self.fechaPago.isoformat() if self.fechaPago else None,
             "anulada": self.anulada,
             "motivoAnulacion": self.motivoAnulacion,
-            "referenciaPago": self.referenciaPago,
-            "idTransaccionPago": self.idTransaccionPago,
             "items": [item.to_dict() for item in self.items.all()],
         }
 

@@ -261,6 +261,21 @@ def notificacion_prueba(request):
 
 
 @csrf_exempt
+def config_pago(request):
+    """Public endpoint returning manual payment config."""
+    if request.method != "GET":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    from django.conf import settings
+    url = getattr(settings, "PAGO_CUENTA_URL", "") or ""
+    nombre = getattr(settings, "PAGO_CUENTA_NOMBRE", "") or ""
+    return JsonResponse({
+        "url": url,
+        "nombre": nombre,
+        "configurada": bool(url)
+    })
+
+
+@csrf_exempt
 def theme_preference(request):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)

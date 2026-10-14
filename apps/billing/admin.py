@@ -11,9 +11,9 @@ class ItemsFacturaInline(admin.TabularInline):
 
 @admin.register(Facturas)
 class FacturasAdmin(admin.ModelAdmin):
-    list_display = ("idFactura", "idPaciente", "idProfesional", "monto", "metodoPago", "estadoPago", "fecha")
-    list_filter = ("estadoPago", "metodoPago", "anulada")
-    search_fields = ("idPaciente__email", "referenciaPago")
+    list_display = ("idFactura", "idPaciente", "idProfesional", "monto", "estadoPago", "anulada", "fecha")
+    list_filter = ("estadoPago", "anulada")
+    search_fields = ("idPaciente__email",)
     readonly_fields = ("fecha",)
     inlines = [ItemsFacturaInline]
 

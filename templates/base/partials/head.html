@@ -118,3 +118,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }]
 }
 </script>
+
+<script>
+window.PAGO_CUENTA_URL = "{{ settings.PAGO_CUENTA_URL|default:'' }}";
+window.PAGO_CUENTA_NOMBRE = "{{ settings.PAGO_CUENTA_NOMBRE|default:'' }}";
+</script>

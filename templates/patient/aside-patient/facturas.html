@@ -235,10 +235,10 @@
 <script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
+  await cargarConfigPago();
   cargarStatsFacturas();
   cargarFacturasPaciente();
-  renderPagoCuentaBtn();
 });
 
 async function cargarStatsFacturas() {
@@ -295,7 +295,12 @@ async function cargarFacturasPaciente() {
       } else if (f.estadoPago === "Pagado") {
         accion = '<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(' + f.idFactura + ')"><i class="fas fa-receipt"></i> Ver</button>';
       } else {
-        accion = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-lock me-1"></i> Pendiente</button>';
+        // Pendiente
+        if (pagoConfig.configurada && pagoConfig.url) {
+          accion = '<a href="' + pagoConfig.url + '" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-success"><i class="fas fa-qrcode me-1"></i> Pagar</a>';
+        } else {
+          accion = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-lock me-1"></i> Pendiente</button>';
+        }
       }
 
       return '<tr class="align-middle">' +
@@ -314,14 +319,29 @@ async function cargarFacturasPaciente() {
 
 function filtrarFacturas() { cargarFacturasPaciente(); }
 
+/* Configuración de pago (fetch) */
+let pagoConfig = { url: "", nombre: "", configurada: false };
+
+async function cargarConfigPago() {
+  try {
+    const res = await fetch("/api/config/pago/", { credentials: "include" });
+    const data = await res.json();
+    pagoConfig = { url: data.url || "", nombre: data.nombre || "Nequi / Bre-B", configurada: !!data.configurada };
+    renderPagoCuentaBtn();
+  } catch (e) {
+    console.error("No se pudo cargar config de pago", e);
+    pagoConfig = { url: "", nombre: "", configurada: false };
+    renderPagoCuentaBtn();
+  }
+}
+
 /* Botón cuenta de pago externa */
 function renderPagoCuentaBtn() {
   var wrap = document.getElementById("pagoCuentaBtnWrap");
   if (!wrap) return;
-  var url = window.PAGO_CUENTA_URL || "";
-  var nombre = window.PAGO_CUENTA_NOMBRE || "cuenta externa";
-  if (url) {
-    wrap.innerHTML = '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary"><i class="fas fa-external-link-alt me-2"></i> Ir a la cuenta de pago (' + nombre + ')</a>';
+  if (pagoConfig.configurada && pagoConfig.url) {
+    wrap.innerHTML = '<a href="' + pagoConfig.url + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary"><i class="fas fa-external-link-alt me-2"></i> Pagar con Nequi / Bre-B</a>' +
+      '<span class="ms-2 text-muted small">' + esc(pagoConfig.nombre) + '</span>';
   } else {
     wrap.innerHTML = '<button class="btn btn-secondary" disabled title="No hay cuenta de pago configurada"><i class="fas fa-lock me-2"></i> Cuenta de pago no configurada</button>';
   }

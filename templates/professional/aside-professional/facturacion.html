@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
 <head>
-    <title>PsyAI Connect | Facturaci&oacute;n</title>
+    <title>PsyAI Connect | Facturación</title>
     {% include 'base/partials/head.html' %}
     <link rel="stylesheet" href="/css/pages/professional.css?v=20260711-1">
     <link rel="stylesheet" href="/responsive/responsive-professional.css?v=20260928-1">
@@ -108,14 +108,9 @@
             </button>
         </div>
 
+        <!-- Filtros -->
         <section class="row g-3 mb-4">
-            <div class="col-md-4">
-                <label class="form-label">Paciente</label>
-                <select id="filtroPaciente" class="form-select" onchange="filtrarFacturas()">
-                    <option value="">Todos los pacientes</option>
-                </select>
-            </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Estado</label>
                 <select id="filtroEstado" class="form-select" onchange="filtrarFacturas()">
                     <option value="">Todos</option>
@@ -125,8 +120,18 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Fecha</label>
-                <input type="date" id="filtroFecha" class="form-control" onchange="filtrarFacturas()">
+                <label class="form-label">Paciente</label>
+                <select id="filtroPaciente" class="form-select" onchange="filtrarFacturas()">
+                    <option value="">Todos los pacientes</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha desde</label>
+                <input type="date" id="filtroFechaDesde" class="form-control" onchange="filtrarFacturas()">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha hasta</label>
+                <input type="date" id="filtroFechaHasta" class="form-control" onchange="filtrarFacturas()">
             </div>
         </section>
 
@@ -137,13 +142,12 @@
                         <th>Fecha</th>
                         <th>Paciente</th>
                         <th>Monto</th>
-                        <th>Método</th>
                         <th>Estado</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody id="tablaFacturasProfesional">
-                    <tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr>
+                    <tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -165,13 +169,6 @@
     <div class="mb-3">
         <label class="form-label fw-semibold">Cita (opcional)</label>
         <select id="selectCita" class="form-select"><option value="">Sin cita asociada</option></select>
-    </div>
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Método de pago</label>
-        <select id="selectMetodoPago" class="form-select">
-            <option value="tarjeta">Tarjeta</option>
-            <option value="banco">Transferencia Bancaria</option>
-        </select>
     </div>
     <div class="mb-3">
         <label class="form-label fw-semibold">Items <span class="text-danger">*</span></label>
@@ -243,6 +240,7 @@
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script>
 var facturaIdAnular = null;
+var facturaIdConfirmar = null;
 
 document.addEventListener("DOMContentLoaded", function() {
     cargarPacientesProfesional();
@@ -278,42 +276,55 @@ async function cargarPacientesProfesional() {
     } catch(e) { console.error(e); }
 }
 
+function esc(str) {
+  return String(str || '').replace(/[&<>"']/g, function(m) {
+    return ({'&':'&','<':'<','>':'>','"':'"',"'":'''})[m];
+  });
+}
+
 async function cargarFacturasProfesional() {
     var filtroEstado = document.getElementById("filtroEstado").value;
-    var filtroFecha = document.getElementById("filtroFecha").value;
+    var filtroPaciente = document.getElementById("filtroPaciente").value;
+    var filtroFechaDesde = document.getElementById("filtroFechaDesde").value;
+    var filtroFechaHasta = document.getElementById("filtroFechaHasta").value;
     var params = new URLSearchParams();
     if (filtroEstado) params.set("estado", filtroEstado);
-    if (filtroFecha) {
-        params.set("fecha_desde", filtroFecha);
-        params.set("fecha_hasta", filtroFecha);
-    }
+    if (filtroPaciente) params.set("paciente", filtroPaciente);
+    if (filtroFechaDesde) params.set("fecha_desde", filtroFechaDesde);
+    if (filtroFechaHasta) params.set("fecha_hasta", filtroFechaHasta);
 
     var tbody = document.getElementById("tablaFacturasProfesional");
     try {
         var res = await fetch("/api/facturas/emitidas?" + params.toString(), { credentials: "include" });
         var data = await res.json();
         if (!data.success || !data.facturas || data.facturas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay facturas</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No hay facturas</td></tr>';
             return;
         }
         tbody.innerHTML = data.facturas.map(function(f) {
             var badgeClass = f.anulada ? "bg-secondary" : f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
             var badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
+
+            // botones
+            var btnVer = '<button class="btn btn-outline-primary btn-sm me-1" onclick="verFacturaProf(' + f.idFactura + ')" title="Ver"><i class="fas fa-eye"></i></button>';
+            var btnAnular = '';
+            if (!f.anulada && f.estadoPago !== "Pagado") {
+                btnAnular = '<button class="btn btn-outline-danger btn-sm me-1" onclick="abrirModalAnular(' + f.idFactura + ')" title="Anular"><i class="fas fa-ban"></i></button>';
+            }
+            var btnConfirmar = '';
+            if (!f.anulada && f.estadoPago === "Pendiente") {
+                btnConfirmar = '<button class="btn btn-success btn-sm me-1" onclick="confirmarPago(' + f.idFactura + ')" title="Confirmar pago"><i class="fas fa-check"></i> Confirmar pago</button>';
+            }
+
             return '<tr class="align-middle">' +
-                '<td data-label="Fecha">' + f.fecha + '</td>' +
-                '<td data-label="Paciente" class="fw-semibold">' + (f.nombrePaciente || "---") + '</td>' +
+                '<td data-label="Fecha">' + esc(f.fecha) + '</td>' +
+                '<td data-label="Paciente" class="fw-semibold">' + esc(f.nombrePaciente || "---") + '</td>' +
                 '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
-                '<td data-label="M&#xE9;todo">' + (f.metodoPago === "banco" ? "Transferencia" : "Tarjeta") + '</td>' +
                 '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
-                '<td data-label="Acci&#xF3;n" class="text-center">' +
-                    '<button class="btn btn-outline-primary btn-sm me-1" onclick="verFacturaProf(' + f.idFactura + ')" title="Ver"><i class="fas fa-eye"></i></button>' +
-                    (f.anulada ? '' :
-                        '<button class="btn btn-outline-danger btn-sm" onclick="abrirModalAnular(' + f.idFactura + ')" title="Anular"><i class="fas fa-ban"></i></button>'
-                    ) +
-                '</td></tr>';
+                '<td data-label="Acción" class="text-center">' + btnVer + btnAnular + btnConfirmar + '</td></tr>';
         }).join("");
     } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar</td></tr>';
     }
 }
 
@@ -361,7 +372,6 @@ function abrirModalNuevaFactura() {
 
 async function guardarFactura() {
     var idPaciente = document.getElementById("selectPaciente").value;
-    var metodoPago = document.getElementById("selectMetodoPago").value;
     if (!idPaciente) { PsyAIAlerts.error("Error", "Selecciona un paciente"); return; }
     var items = [];
     var filas = document.querySelectorAll(".item-row");
@@ -369,7 +379,7 @@ async function guardarFactura() {
         var desc = row.querySelector(".item-desc").value.trim();
         var precio = parseFloat(row.querySelector(".item-precio").value);
         if (desc && !isNaN(precio) && precio > 0) {
-            items.push({descripción: desc, precioUnitario: precio});
+            items.push({descripcion: desc, precioUnitario: precio});
         }
     });
     if (items.length === 0) { PsyAIAlerts.error("Error", "Agrega al menos un item válido"); return; }
@@ -381,7 +391,7 @@ async function guardarFactura() {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             credentials: "include",
-            body: JSON.stringify({idPaciente: parseInt(idPaciente), metodoPago: metodoPago, items: items, idCita: null}),
+            body: JSON.stringify({idPaciente: parseInt(idPaciente), items: items, idCita: null}),
         });
         var data = await res.json();
         if (data.success) {
@@ -410,17 +420,16 @@ async function verFacturaProf(id) {
         if (!data.success || !data.factura) { body.innerHTML = '<p class="text-danger text-center">Error</p>'; return; }
         var f = data.factura;
         var itemsHtml = (f.items || []).map(function(i) {
-            return '<tr><td>' + i.descripción + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
+            return '<tr><td>' + esc(i.descripcion) + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
         }).join("");
         body.innerHTML =
             '<p><strong>Factura #' + f.idFactura + '</strong></p>' +
-            '<p class="small text-muted">Fecha: ' + f.fecha + '</p>' +
-            '<p class="small">Paciente: <strong>' + (f.nombrePaciente || "---") + '</strong></p>' +
-            '<p class="small">Método: ' + (f.metodoPago === "banco" ? "Transferencia" : "Tarjeta") + '</p>' +
+            '<p class="small text-muted">Fecha: ' + esc(f.fecha) + '</p>' +
+            '<p class="small">Paciente: <strong>' + esc(f.nombrePaciente || "---") + '</strong></p>' +
             '<table class="table table-sm"><thead><tr><th>Servicio</th><th class="text-end">Valor</th></tr></thead><tbody>' + itemsHtml + '</tbody>' +
             '<tfoot><tr class="fw-bold"><td>Total</td><td class="text-end">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr></tfoot></table>' +
             '<p>Estado: <span class="badge ' + (f.anulada ? "bg-secondary" : f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark") + '">' + (f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente")) + '</span></p>' +
-            (f.anulada && f.motivoAnulacion ? '<p class="small text-muted">Motivo: ' + f.motivoAnulacion + '</p>' : '');
+            (f.anulada && f.motivoAnulacion ? '<p class="small text-muted">Motivo: ' + esc(f.motivoAnulacion) + '</p>' : '');
     } catch(e) { body.innerHTML = '<p class="text-danger text-center">Error de conexión</p>'; }
 }
 
@@ -444,7 +453,7 @@ async function confirmarAnularFactura() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Anulando...';
     try {
-        var res = await fetch("/api/facturas/" + facturaIdAnular + "/anular", {
+        var res = await fetch("/api/facturas/" + facturaIdAnular, {
             method: "PATCH",
             headers: {"Content-Type": "application/json"},
             credentials: "include",
@@ -464,6 +473,26 @@ async function confirmarAnularFactura() {
         btn.disabled = false;
         btn.innerHTML = "Sí, anular";
         facturaIdAnular = null;
+    }
+}
+
+async function confirmarPago(id) {
+    if (!confirm("¿Confirmar que esta factura ha sido pagada? Se notificará al paciente.")) return;
+    try {
+        var res = await fetch("/api/facturas/" + id + "/confirmar-pago", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+        });
+        var data = await res.json();
+        if (data.success) {
+            PsyAIAlerts.success("Confirmado", "Pago confirmado y paciente notificado");
+            cargarFacturasProfesional();
+        } else {
+            PsyAIAlerts.error("Error", data.message || "No se pudo confirmar");
+        }
+    } catch(e) {
+        PsyAIAlerts.error("Error", "Error de conexión");
     }
 }
 </script>

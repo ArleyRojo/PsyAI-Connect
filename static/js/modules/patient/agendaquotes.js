@@ -32,18 +32,6 @@ function avanzarStep(n) {
 }
 
 let _citasHistorialGlobal = [];
-let _wompiPaymentCompleted = false;
-let _wompiCitaId = null;
-
-function cancelarCitaPagoNoCompletado(idCita) {
-  if (!idCita) return;
-  fetch("/api/citas/" + idCita, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ motivoCancelacion: "Pago no completado en Wompi" })
-  }).catch(function() {});
-}
 
 // ============================================================
 // CALENDARIO
@@ -331,51 +319,52 @@ function inicializarModalHistorial() {
             <div class="hist-empty__title">Todo al día</div>
             <div class="hist-empty__desc">No hay citas pasadas o canceladas en tu historial.</div>
           </div>`;
-      } else {
-        const completadas = historial.filter(c => c.estado === 'Completada').length;
-        const canceladas = historial.filter(c => c.estado === 'Cancelada').length;
+        return;
+      }
 
-        histDiv.innerHTML = `
-          <div class="hist-stats">
-            <div class="hist-stats__item">
-              <span class="hist-stats__value">${historial.length}</span>
-              <span class="hist-stats__label">Total</span>
-            </div>
-            <div class="hist-stats__item">
-              <span class="hist-stats__value hist-stats__value--success">${completadas}</span>
-              <span class="hist-stats__label">Completadas</span>
-            </div>
-            <div class="hist-stats__item">
-              <span class="hist-stats__value hist-stats__value--danger">${canceladas}</span>
-              <span class="hist-stats__label">Canceladas</span>
-            </div>
+      const completadas = historial.filter(c => c.estado === 'Completada').length;
+      const canceladas = historial.filter(c => c.estado === 'Cancelada').length;
+
+      histDiv.innerHTML = `
+        <div class="hist-stats">
+          <div class="hist-stats__item">
+            <span class="hist-stats__value">${historial.length}</span>
+            <span class="hist-stats__label">Total</span>
           </div>
-          <div class="hist-list">
-          ${historial.map((c, i) => `
-            <div class="hist-card" style="animation-delay:${i * 0.04}s">
-              <div class="hist-card__accent hist-card__accent--${c.estado === 'Completada' ? 'success' : 'danger'}"></div>
-              <div class="hist-card__left">
-                <div class="hist-card__icon ${c.estado === 'Completada' ? 'hist-card__icon--success' : 'hist-card__icon--danger'}">
-                  ${c.estado === 'Completada' ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>'}
+          <div class="hist-stats__item">
+            <span class="hist-stats__value hist-stats__value--success">${completadas}</span>
+            <span class="hist-stats__label">Completadas</span>
+          </div>
+          <div class="hist-stats__item">
+            <span class="hist-stats__value hist-stats__value--danger">${canceladas}</span>
+            <span class="hist-stats__label">Canceladas</span>
+          </div>
+        </div>
+        <div class="hist-list">
+        ${historial.map((c, i) => `
+          <div class="hist-card" style="animation-delay:${i * 0.04}s">
+            <div class="hist-card__accent hist-card__accent--${c.estado === 'Completada' ? 'success' : 'danger'}"></div>
+            <div class="hist-card__left">
+              <div class="hist-card__icon ${c.estado === 'Completada' ? 'hist-card__icon--success' : 'hist-card__icon--danger'}">
+                ${c.estado === 'Completada' ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>'}
+              </div>
+              <div class="hist-card__body">
+                <div class="hist-card__top">
+                  <div class="hist-card__title">${c.tipoCita}</div>
+                  <span class="hist-card__badge hist-card__badge--${c.estado === 'Completada' ? 'success' : 'danger'}">${c.estado}</span>
                 </div>
-                <div class="hist-card__body">
-                  <div class="hist-card__top">
-                    <div class="hist-card__title">${c.tipoCita}</div>
-                    <span class="hist-card__badge hist-card__badge--${c.estado === 'Completada' ? 'success' : 'danger'}">${c.estado}</span>
-                  </div>
-                  <div class="hist-card__meta">
-                    <span><i class="fas fa-user-md"></i>${c.profesional || '&mdash;'}</span>
-                    <span><i class="fas fa-calendar-day"></i>${c.fecha}</span>
-                    <span><i class="far fa-clock"></i>${formatearHora(c.hora)}</span>
-                    ${c.estadoPago ? `<span class="badge ${c.estadoPago === 'Pagado' ? 'bg-success' : 'bg-warning text-dark'} ms-1">${c.estadoPago === 'Pagado' ? 'Completado' : 'Pendiente'}</span>` : ''}
-                  </div>
-                  ${c.motivoCancelacion ? `<div class="hist-card__cancel-reason"><i class="fas fa-info-circle"></i><strong>Motivo:</strong> ${c.motivoCancelacion}</div>` : ''}
+                <div class="hist-card__meta">
+                  <span><i class="fas fa-user-md"></i>${c.profesional || '&mdash;'}</span>
+                  <span><i class="fas fa-calendar-day"></i>${c.fecha}</span>
+                  <span><i class="far fa-clock"></i>${formatearHora(c.hora)}</span>
+                  ${c.estadoPago ? `<span class="badge ${c.estadoPago === 'Pagado' ? 'bg-success' : 'bg-warning text-dark'} ms-1">${c.estadoPago === 'Pagado' ? 'Completado' : 'Pendiente'}</span>` : ''}
                 </div>
+                ${c.motivoCancelacion ? `<div class="hist-card__cancel-reason"><i class="fas fa-info-circle"></i><strong>Motivo:</strong> ${c.motivoCancelacion}</div>` : ''}
               </div>
             </div>
-          `).join('')}
-          </div>`;
-      }
+          </div>
+        `).join('')}
+        </div>`;
     } catch(e) {
       histDiv.innerHTML = '<div class="text-center text-muted py-3">Error al cargar historial</div>';
     }
@@ -483,7 +472,7 @@ function cargarModalidadGuardada() {
 }
 
 // ============================================================
-// FORMULARIO Y FLUJO DE PAGO (ePayco)
+// FORMULARIO Y FLUJO DE PAGO (manual)
 // ============================================================
 function validarFormularioCita() {
   const tipoCita = document.getElementById("tipoCita").value.trim();
@@ -495,168 +484,6 @@ function validarFormularioCita() {
     return false;
   }
   return true;
-}
-
-function elegirMetodoPago(el) {
-  const metodo = el.dataset.metodo;
-  const data = window._pendingCitaData;
-  if (!data) return;
-  const idCita = data.idCita;
-  _wompiPaymentCompleted = false;
-  _wompiCitaId = idCita;
-  var idFactura = null;
-  const wompiModal = new bootstrap.Modal(document.getElementById("modalPagoWompi"));
-  bootstrap.Modal.getInstance(document.getElementById("modalElegirPago")).hide();
-
-  fetch("/api/facturas", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({
-      idProfesional: data.idProfesional,
-      idCita: idCita,
-      metodoPago: "tarjeta",
-      items: [{ descripcion: "Consulta psicológica", precioUnitario: 100000 }]
-    })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(dataFact) {
-    window._pendingCitaData = null;
-    if (!dataFact.success) {
-      cancelarCitaPagoNoCompletado(idCita);
-      PsyAIAlerts.warning('Cita agendada', 'La cita se creó pero no se pudo generar la factura. Puedes pagar después desde Mis Facturas.');
-      cargarCitasPaciente();
-      return null;
-    }
-    idFactura = dataFact.idFactura;
-
-    if (metodo === "despues") {
-      PsyAIAlerts.success('Cita agendada', 'Tu cita ha sido agendada. La factura queda pendiente, puedes pagarla desde Mis Facturas.');
-      cargarCitasPaciente();
-      return null;
-    }
-
-    document.getElementById("wompiLoading").style.display = "block";
-    document.getElementById("wompiWidgetContainer").style.display = "none";
-    document.getElementById("wompiSuccess").style.display = "none";
-    document.getElementById("wompiError").style.display = "none";
-    wompiModal.show();
-
-    return fetch(`/api/facturas/${idFactura}/iniciar-pago`, {
-      method: "POST", credentials: "include"
-    }).then(function(r) { return r.json(); });
-  })
-  .then(function(dataWompi) {
-    if (!dataWompi) return;
-
-    if (!dataWompi.success) {
-      document.getElementById("wompiLoading").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = dataWompi.message + " Puedes pagar después desde Mis Facturas.";
-      cancelarCitaPagoNoCompletado(idCita);
-      cargarCitasPaciente();
-      return;
-    }
-
-    document.getElementById("wompiLoading").style.display = "none";
-
-    var sandboxInfo = document.getElementById("wompiSandboxInfo");
-    if (sandboxInfo) {
-      sandboxInfo.style.display = dataWompi.data.sandbox ? "block" : "none";
-    }
-
-    document.getElementById("wompiWidgetContainer").style.display = "block";
-
-    var d = dataWompi.data;
-    console.log("[Wompi] initWidget data:", d);
-
-    if (typeof WidgetCheckout === "undefined") {
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "No se pudo cargar el widget de pago. Verifica tu conexi\u00f3n o desactiva bloqueadores de anuncios.";
-      cancelarCitaPagoNoCompletado(idCita);
-      cargarCitasPaciente();
-      return;
-    }
-
-    var wompiWidget = null;
-    var wompiTimeout = setTimeout(function() {
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "El formulario de pago no carg\u00f3. Puede estar siendo bloqueado por tu navegador o extensiones. Intenta desactivar bloqueadores de anuncios/rastreadores para este sitio, o usa otro navegador.";
-    }, 120000);
-
-    try {
-      wompiWidget = new WidgetCheckout({
-        currency: d.currency,
-        amountInCents: d.amountInCents,
-        reference: d.reference,
-        publicKey: d.publicKey,
-        signature: d.signature,
-      });
-    } catch (e) {
-      clearTimeout(wompiTimeout);
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "Error al crear el widget de pago: " + e.message;
-      console.error("[Wompi] constructor error:", e);
-      cancelarCitaPagoNoCompletado(idCita);
-      cargarCitasPaciente();
-      return;
-    }
-
-    try {
-      wompiWidget.open(function(result) {
-        clearTimeout(wompiTimeout);
-        var transaction = result.transaction || {};
-        if (transaction.status === "APPROVED") {
-          fetch("/api/facturas/" + idFactura + "/confirmar-pago", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ transactionId: transaction.id })
-          })
-          .then(function(r) { return r.json(); })
-          .then(function() {
-            _wompiPaymentCompleted = true;
-            document.getElementById("wompiWidgetContainer").style.display = "none";
-            document.getElementById("wompiError").style.display = "none";
-            document.getElementById("wompiSuccess").style.display = "block";
-            cargarCitasPaciente();
-          })
-          .catch(function() {
-            _wompiPaymentCompleted = true;
-            document.getElementById("wompiWidgetContainer").style.display = "none";
-            document.getElementById("wompiError").style.display = "none";
-            document.getElementById("wompiSuccess").style.display = "block";
-            cargarCitasPaciente();
-          });
-        } else {
-          document.getElementById("wompiWidgetContainer").style.display = "none";
-          document.getElementById("wompiError").style.display = "block";
-          var msg = transaction.status === "DECLINED" ? "La transacci\u00f3n fue rechazada." : "El pago no se complet\u00f3.";
-          document.getElementById("wompiErrorMsg").textContent = msg + " Puedes pagar despu\u00e9s desde Mis Facturas.";
-          cancelarCitaPagoNoCompletado(idCita);
-          cargarCitasPaciente();
-        }
-      });
-    } catch (e) {
-      clearTimeout(wompiTimeout);
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "Error al abrir el widget de pago: " + e.message;
-      console.error("[Wompi] open error:", e);
-      cancelarCitaPagoNoCompletado(idCita);
-      cargarCitasPaciente();
-    }
-  })
-  .catch(function() {
-    document.getElementById("wompiLoading").style.display = "none";
-    document.getElementById("wompiError").style.display = "block";
-    document.getElementById("wompiErrorMsg").textContent = "Error al conectar con la pasarela de pago. Puedes pagar después desde Mis Facturas.";
-    cancelarCitaPagoNoCompletado(idCita);
-    cargarCitasPaciente();
-  });
 }
 
 document.getElementById("btnSolicitarCita").addEventListener("click", async () => {
@@ -695,8 +522,26 @@ document.getElementById("btnSolicitarCita").addEventListener("click", async () =
 
     const idCita = dataCita.idCita;
 
-    window._pendingCitaData = { idCita: idCita, idProfesional: idProfesional };
-    new bootstrap.Modal(document.getElementById("modalElegirPago")).show();
+    // 2. Crear factura pendiente automáticamente
+    const resFactura = await fetch("/api/facturas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        idProfesional: idProfesional,
+        idCita: idCita,
+        items: [{ descripcion: tipoCita, precioUnitario: 100000 }]
+      })
+    });
+    const dataFactura = await resFactura.json();
+
+    if (!dataFactura.success) {
+      PsyAIAlerts.warning('Cita agendada', 'La cita se creó pero no se pudo generar la factura. Puedes generarla después desde Mis Facturas.');
+    } else {
+      PsyAIAlerts.success('¡Listo!', 'Cita agendada. Tu factura está en Mis Facturas (pendiente de pago).');
+    }
+
+    cargarCitasPaciente();
 
   } catch(e) {
     PsyAIAlerts.error('Error', 'Error al conectar con el servidor.');
@@ -704,14 +549,6 @@ document.getElementById("btnSolicitarCita").addEventListener("click", async () =
     btn.innerHTML = textOriginal;
     btn.disabled = false;
   }
-});
-
-document.getElementById("modalPagoWompi")?.addEventListener("hidden.bs.modal", function() {
-  if (!_wompiPaymentCompleted && _wompiCitaId) {
-    cancelarCitaPagoNoCompletado(_wompiCitaId);
-  }
-  _wompiPaymentCompleted = false;
-  _wompiCitaId = null;
 });
 
 // ============================================================

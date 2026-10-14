@@ -57,13 +57,9 @@
                                                 <td style="padding:6px 0;border-bottom:1px solid #F1F5F9;"><span style="color:#94A3B8;font-size:13px;">Profesional</span></td>
                                                 <td style="padding:6px 0;border-bottom:1px solid #F1F5F9;text-align:right;"><span style="color:#1E293B;font-size:14px;font-weight:600;">{{ nombre_profesional }}</span></td>
                                             </tr>
-                                            {% endif %}
-                                            <tr>
-                                                <td style="padding:6px 0;border-bottom:1px solid #F1F5F9;"><span style="color:#94A3B8;font-size:13px;">M&eacute;todo de pago</span></td>
-                                                <td style="padding:6px 0;border-bottom:1px solid #F1F5F9;text-align:right;"><span style="color:#1E293B;font-size:14px;font-weight:600;">{{ metodo_pago }}</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding:6px 0;"><span style="color:#94A3B8;font-size:13px;">Estado</span></td>
+{% endif %}
+                                             <tr>
+                                                 <td style="padding:6px 0;"><span style="color:#94A3B8;font-size:13px;">Estado</span></td>
                                                 <td style="padding:6px 0;text-align:right;">
                                                     {% if estado_pago == 'Pagado' %}
                                                     <span style="display:inline-block;background:#ECFDF5;color:#059669;font-size:12px;font-weight:600;padding:4px 12px;border-radius:8px;">{{ estado_pago }}</span>

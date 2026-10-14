@@ -184,16 +184,9 @@ REGISTER_RATE_LIMIT = os.getenv("REGISTER_RATE_LIMIT", "20 per minute")
 LOGIN_RATE_LIMIT = os.getenv("LOGIN_RATE_LIMIT", "60 per minute")
 PASSWORD_RECOVERY_RATE_LIMIT = os.getenv("PASSWORD_RECOVERY_RATE_LIMIT", "10 per minute")
 
-WOMPI_ENV = os.getenv("WOMPI_ENV", "test").lower()
-WOMPI_PUBLIC_KEY = os.getenv("WOMPI_PUBLIC_KEY", "")
-WOMPI_PRIVATE_KEY = os.getenv("WOMPI_PRIVATE_KEY", "")
-WOMPI_INTEGRITY_SECRET = os.getenv("WOMPI_INTEGRITY_SECRET", "")
-WOMPI_EVENTS_SECRET = os.getenv("WOMPI_EVENTS_SECRET", "")
-WOMPI_API_BASE = (
-    "https://production.wompi.co/v1"
-    if WOMPI_ENV == "prod"
-    else "https://sandbox.wompi.co/v1"
-)
+# Pago manual external account
+PAGO_CUENTA_URL = os.getenv("PAGO_CUENTA_URL", "")
+PAGO_CUENTA_NOMBRE = os.getenv("PAGO_CUENTA_NOMBRE", "")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
