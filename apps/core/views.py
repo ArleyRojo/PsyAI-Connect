@@ -216,21 +216,48 @@ def error_403(request, exception=None):
 
 @csrf_exempt
 def notificacion_prueba(request):
-    """POST /api/notificaciones/probar/  body: { \"numero\": \"+57300...\" }"""
+    """POST /api/notificaciones/probar/
+    body: { "canal": "whatsapp|email", "numero": "+57300..." }.
+    Si canal=email, se usa el email del usuario en sesión.
+    """
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
     try:
         import json
         data = json.loads(request.body)
+        canal = (data.get("canal") or "whatsapp").strip().lower()
         numero = (data.get("numero") or "").strip()
     except Exception:
         return JsonResponse({"error": "Datos inválidos"}, status=400)
-    if not numero:
-        return JsonResponse({"error": "Número requerido"}, status=400)
 
-    from apps.core.notifier import enviar_prueba
-    ok, msg = enviar_prueba(numero)
-    return JsonResponse({"ok": ok, "mensaje": msg}, status=200 if ok else 500)
+    if canal == "whatsapp":
+        if not numero:
+            return JsonResponse({"error": "Número requerido"}, status=400)
+        from apps.core.notifier import enviar_prueba
+        ok, msg = enviar_prueba(numero)
+        return JsonResponse({"ok": ok, "mensaje": msg}, status=200 if ok else 500)
+
+    if canal == "email":
+        # obtener usuario de la sesión
+        uid = request.session.get("idUsuario")
+        if not uid:
+            return JsonResponse({"error": "Sesión no válida"}, status=401)
+        from apps.authentication.models import Register
+        from django.core.mail import send_mail
+        from django.conf import settings
+        try:
+            user = Register.objects.get(pk=uid)
+        except Register.DoesNotExist:
+            return JsonResponse({"error": "Usuario no encontrado"}, status=404)
+        try:
+            subject = "[PsyAI] Prueba de notificación por correo"
+            message = f"Hola {user.nombre},\n\nEste es un correo de prueba desde PsyAI Connect."
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+            return JsonResponse({"ok": True, "mensaje": "Correo de prueba enviado"})
+        except Exception as exc:
+            return JsonResponse({"ok": False, "mensaje": str(exc)}, status=500)
+
+    return JsonResponse({"error": "Canal no soportado"}, status=400)
 
 
 @csrf_exempt
