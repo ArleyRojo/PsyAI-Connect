@@ -29,6 +29,38 @@ function getCsrfToken() {
 {# SweetAlert2 #}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<style>
+/* Make SweetAlert2 popups look like PsyAI custom alerts */
+.swal2-popup {
+  border-radius: 16px !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 1.25rem 1.5rem !important;
+}
+.swal2-title { font-weight:700; font-size:15px; margin-bottom:4px; letter-spacing:-0.01em; }
+.swal2-html-container { font-weight:500; opacity:0.92; font-size:13px; line-height:1.5; }
+.swal2-confirm, .swal2-cancel { border-radius:10px; padding:8px 16px; font-size:13px; border:none; }
+.swal2-confirm { background: rgba(255,255,255,0.18); color:#fff; }
+.swal2-cancel { background: rgba(255,255,255,0.12); color:#fff; }
+.swal2-confirm:hover { background: rgba(255,255,255,0.28); }
+.swal2-cancel:hover { background: rgba(255,255,255,0.22); }
+.swal2-input { border-radius:10px; padding:10px; font-size:13px; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.1); color:#fff; }
+.swal2-input::placeholder { color:rgba(255,255,255,0.6); }
+/* type specific backgrounds */
+.swal2-popup.swal2-success { background: linear-gradient(135deg, #059669 0%, #047857 100%); color:#fff; }
+.swal2-popup.swal2-error { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color:#fff; }
+.swal2-popup.swal2-warning { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color:#fff; }
+.swal2-popup.swal2-info { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color:#fff; }
+.swal2-icon-success { border-color:#34d399; color:#34d399; }
+.swal2-icon-error { border-color:#f87171; color:#f87171; }
+.swal2-icon-warning { border-color:#fbbf24; color:#fbbf24; }
+.swal2-icon-info { border-color:#60a5fa; color:#60a5fa; }
+.swal2-close { color:#fff; opacity:0.7; }
+.swal2-close:hover { opacity:1; }
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   if (typeof Swal !== 'undefined') {
