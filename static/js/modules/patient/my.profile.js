@@ -519,7 +519,3 @@ document.addEventListener('DOMContentLoaded', () => {
 function getCookie(name){
     let v=null; if(document.cookie){ document.cookie.split(';').forEach(c=>{c=c.trim(); if(c.startsWith(name+'=')) v=decodeURIComponent(c.slice(name.length+1));}); } return v;
 }
-function showAlert(type,msg){
-    // usa static/js/core/shared/alerts.js  (asumimos función global showAlert)
-    if(window.showAlert) window.showAlert(type,msg); else alert(msg);
-}
