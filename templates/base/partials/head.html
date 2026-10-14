@@ -29,6 +29,29 @@ function getCsrfToken() {
 {# SweetAlert2 #}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof Swal !== 'undefined') {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const primary = rootStyle.getPropertyValue('--color-primary').trim() || '#0D47A1';
+    const secondary = rootStyle.getPropertyValue('--color-secondary').trim() || '#90CAF9';
+    Swal.mixin({
+      customClass: {
+        container: 'swal2-psyai',
+        popup: 'swal2-psyai-popup',
+        title: 'swal2-psyai-title',
+        htmlContainer: 'swal2-psyai-html',
+        confirmButton: 'btn btn-primary',
+        cancelButton: 'btn btn-outline-secondary',
+        input: 'form-control'
+      },
+      buttonsStyling: false,
+      confirmButtonColor: primary,
+      cancelButtonColor: secondary
+    });
+  }
+});
+</script>
 
 {# Core CSS #}
 <link rel="preload" as="style" href="/css/base/base.css?v=20260718-1">
