@@ -123,6 +123,39 @@
       </div>
     </section>
 
+    <!-- Filtros -->
+    <section class="section-card mb-4">
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <label class="form-label">Estado</label>
+          <select id="filtroEstado" class="form-select" onchange="filtrarFacturas()">
+            <option value="">Todos</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Pagado">Pagado</option>
+            <option value="Anulada">Anulada</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Profesional</label>
+          <input type="text" id="filtroProfesional" class="form-control" placeholder="Nombre del profesional" onchange="filtrarFacturas()">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fecha desde</label>
+          <input type="date" id="filtroFechaDesde" class="form-control" onchange="filtrarFacturas()">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fecha hasta</label>
+          <input type="date" id="filtroFechaHasta" class="form-control" onchange="filtrarFacturas()">
+        </div>
+        <div class="col-md-12 d-flex justify-content-end">
+          <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltros()"><i class="fas fa-eraser me-1"></i> Limpiar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Botón cuenta de pago externa -->
+    <div class="mb-4" id="pagoCuentaBtnWrap"></div>
+
     <section class="section-card">
       <div class="section-title"><i class="fas fa-list"></i> Historial de Facturas</div>
       <table class="citas-table w-100">
@@ -168,57 +201,6 @@
 </div>
 </div>
 
-<div class="modal fade psyai-modal psyai-modal--payment" id="modalPagoWompi" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered">
-<div class="psyai-modal__content">
-<div class="psyai-modal__header psyai-modal__header--payment">
-  <div class="psyai-modal__header-icon">
-    <i class="fas fa-credit-card"></i>
-  </div>
-  <div>
-    <h5 class="psyai-modal__title">Pagar Factura</h5>
-    <p class="psyai-modal__subtitle">Procesa tu pago de forma segura</p>
-  </div>
-  <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
-    <i class="fas fa-times"></i>
-  </button>
-</div>
-<div class="psyai-modal__body text-center py-4">
-  <div id="wompiLoading"><div class="spinner-border text-primary mb-3"></div><p>Preparando pago...</p></div>
-  <div id="wompiSandboxInfo" class="alert alert-info text-start small p-3 mb-3" style="display:none;">
-    <i class="fas fa-info-circle me-1"></i> <strong>Estás en modo de pruebas de Wompi.</strong> Usa estos datos para simular un pago:
-    <hr class="my-2">
-    <div class="mb-1"><strong>Tarjeta — Aprobado:</strong> <code class="user-select-all">4242 4242 4242 4242</code></div>
-    <div class="mb-1"><strong>Tarjeta — Rechazado:</strong> <code class="user-select-all">4111 1111 1111 1111</code></div>
-    <div class="mb-1"><strong>Tarjeta — Cualquier otro número:</strong> genera <em>ERROR</em></div>
-    <div class="mb-1"><strong>Nequi — Aprobado:</strong> <code class="user-select-all">3991111111</code></div>
-    <div class="mb-1"><strong>Nequi — Cualquier otro número:</strong> genera <em>RECHAZADO</em></div>
-    <hr class="my-2">
-    <div><strong>Datos adicionales (tarjeta):</strong> cualquier fecha futura (ej. 12/28), CVC de 3 dígitos (ej. 123), y nombre del titular.</div>
-  </div>
-  <div id="wompiWidgetContainer" style="display:none;">
-    <i class="fas fa-credit-card text-primary" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">Procesando pago...</p>
-    <p class="text-muted small">Se abrirá el formulario de pago seguro de Wompi.</p>
-  </div>
-  <div id="wompiSuccess" style="display:none;">
-    <i class="fas fa-check-circle text-success" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">¡Pago exitoso!</p>
-    <p class="text-muted small" id="wompiSuccessMsg">Tu factura ha sido pagada.</p>
-  </div>
-  <div id="wompiError" style="display:none;">
-    <i class="fas fa-times-circle text-danger" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">Pago no completado</p>
-    <p class="text-muted small" id="wompiErrorMsg">Intenta de nuevo más tarde.</p>
-  </div>
-</div>
-<div class="psyai-modal__footer justify-content-center">
-  <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">Cerrar</button>
-</div>
-</div>
-</div>
-</div>
-
 <div class="modal fade psyai-modal psyai-modal--info" id="modalMotivoAnulacion" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
 <div class="psyai-modal__content">
@@ -252,11 +234,11 @@
 <script src="/js/modules/patient/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
-<script src="https://checkout.wompi.co/widget.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   cargarStatsFacturas();
   cargarFacturasPaciente();
+  renderPagoCuentaBtn();
 });
 
 async function cargarStatsFacturas() {
@@ -276,42 +258,82 @@ async function cargarStatsFacturas() {
   } catch(e) { console.error(e); }
 }
 
+function esc(str) {
+  return String(str || '').replace(/[&<>"']/g, function(m) {
+    return ({'&':'&','<':'<','>':'>','"':'"',"'":"'"})[m];
+  });
+}
+
 async function cargarFacturasPaciente() {
+  var filtroEstado = document.getElementById("filtroEstado").value;
+  var filtroProfesional = document.getElementById("filtroProfesional").value;
+  var filtroFechaDesde = document.getElementById("filtroFechaDesde").value;
+  var filtroFechaHasta = document.getElementById("filtroFechaHasta").value;
+  var params = new URLSearchParams();
+  if (filtroEstado) params.set("estado", filtroEstado);
+  if (filtroProfesional) params.set("profesional", filtroProfesional);
+  if (filtroFechaDesde) params.set("fecha_desde", filtroFechaDesde);
+  if (filtroFechaHasta) params.set("fecha_hasta", filtroFechaHasta);
+
   const tbody = document.getElementById("tablaFacturas");
   try {
-    const res = await fetch("/api/facturas/mias", { credentials: "include" });
+    const res = await fetch("/api/facturas/mias?" + params.toString(), { credentials: "include" });
     const data = await res.json();
     if (!data.success || !data.facturas || data.facturas.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No tienes facturas registradas</td></tr>';
       return;
     }
     tbody.innerHTML = data.facturas.map(function(f) {
-      const servicios = (f.items || []).map(function(i) { return i.descripci\u00f3n; }).join(", ") || "Consulta";
+      const servicios = (f.items || []).map(function(i) { return esc(i.descripcion); }).join(", ") || "Consulta";
       const badgeClass = f.anulada ? "bg-secondary" :
         f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
       const badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
 
       let accion = "";
       if (f.anulada || f.estadoPago === "Cancelado") {
-        accion = '<button class="btn btn-sm btn-outline-secondary" onclick="verMotivoAnulacion(\'' + (f.motivoAnulacion || "Sin motivo registrado") + '\')"><i class="fas fa-info-circle"></i></button>';
+        accion = '<button class="btn btn-sm btn-outline-secondary" onclick="verMotivoAnulacion(\'' + esc(f.motivoAnulacion || "Sin motivo registrado") + '\')"><i class="fas fa-info-circle"></i></button>';
       } else if (f.estadoPago === "Pagado") {
         accion = '<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(' + f.idFactura + ')"><i class="fas fa-receipt"></i> Ver</button>';
       } else {
-        accion = '<button class="btn btn-sm btn-success" onclick="pagarFactura(' + f.idFactura + ')"><i class="fas fa-credit-card"></i> Pagar</button>';
+        accion = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-lock me-1"></i> Pendiente</button>';
       }
 
       return '<tr class="align-middle">' +
-        '<td data-label="Fecha">' + f.fecha + '</td>' +
-        '<td data-label="Profesional" class="fw-semibold">' + (f.nombreProfesional || "---") + '</td>' +
+        '<td data-label="Fecha">' + esc(f.fecha) + '</td>' +
+        '<td data-label="Profesional" class="fw-semibold">' + esc(f.nombreProfesional || "---") + '</td>' +
         '<td data-label="Servicio(s)">' + servicios + '</td>' +
         '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
         '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
-        '<td data-label="Acci\u00f3n" class="text-center">' + accion + '</td>' +
+        '<td data-label="Acción" class="text-center">' + accion + '</td>' +
         '</tr>';
     }).join("");
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar facturas</td></tr>';
   }
+}
+
+function filtrarFacturas() { cargarFacturasPaciente(); }
+
+/* Botón cuenta de pago externa */
+function renderPagoCuentaBtn() {
+  var wrap = document.getElementById("pagoCuentaBtnWrap");
+  if (!wrap) return;
+  var url = window.PAGO_CUENTA_URL || "";
+  var nombre = window.PAGO_CUENTA_NOMBRE || "cuenta externa";
+  if (url) {
+    wrap.innerHTML = '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary"><i class="fas fa-external-link-alt me-2"></i> Ir a la cuenta de pago (' + nombre + ')</a>';
+  } else {
+    wrap.innerHTML = '<button class="btn btn-secondary" disabled title="No hay cuenta de pago configurada"><i class="fas fa-lock me-2"></i> Cuenta de pago no configurada</button>';
+  }
+}
+
+function limpiarFiltros() {
+  renderPagoCuentaBtn();
+  document.getElementById("filtroEstado").value = "";
+  document.getElementById("filtroProfesional").value = "";
+  document.getElementById("filtroFechaDesde").value = "";
+  document.getElementById("filtroFechaHasta").value = "";
+  cargarFacturasPaciente();
 }
 
 function verMotivoAnulacion(motivo) {
@@ -333,157 +355,21 @@ async function verComprobante(idFactura) {
     }
     const f = data.factura;
     const itemsHtml = (f.items || []).map(function(i) {
-      return '<tr><td>' + i.descripci\u00f3n + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
+      return '<tr><td>' + esc(i.descripcion) + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
     }).join("");
     body.innerHTML =
       '<div class="text-center mb-3"><h5 class="fw-bold">PsyAI Connect</h5><small class="text-muted">Comprobante de Pago</small></div>' +
       '<hr>' +
       '<p><strong>Factura #' + f.idFactura + '</strong></p>' +
-      '<p class="small text-muted">Fecha: ' + f.fecha + '</p>' +
+      '<p class="small text-muted">Fecha: ' + esc(f.fecha) + '</p>' +
       '<table class="table table-sm"><thead><tr><th>Servicio</th><th class="text-end">Valor</th></tr></thead><tbody>' + itemsHtml + '</tbody>' +
       '<tfoot><tr class="fw-bold"><td>Total</td><td class="text-end">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr></tfoot></table>' +
       '<hr>' +
       '<p class="small text-muted">Estado: <span class="badge bg-success">Completado</span></p>' +
-      (f.idTransaccionPago ? '<p class="small text-muted">Transacci\u00f3n: ' + f.idTransaccionPago + '</p>' : '');
+      (f.idTransaccionPago ? '<p class="small text-muted">Transacción: ' + esc(f.idTransaccionPago) + '</p>' : '');
   } catch(e) {
     body.innerHTML = '<p class="text-danger text-center">Error de conexión</p>';
   }
-}
-
-function cancelarFacturaPagoNoCompletado(idFactura) {
-  fetch("/api/facturas/" + idFactura + "/cancelar-pago", {
-    method: "POST", credentials: "include",
-  }).catch(function() {});
-}
-
-function pagarFactura(idFactura) {
-  const modal = new bootstrap.Modal(document.getElementById("modalPagoWompi"));
-  document.getElementById("wompiLoading").style.display = "block";
-  document.getElementById("wompiWidgetContainer").style.display = "none";
-  document.getElementById("wompiSuccess").style.display = "none";
-  document.getElementById("wompiError").style.display = "none";
-  modal.show();
-
-  fetch("/api/facturas/" + idFactura + "/iniciar-pago", {
-    method: "POST", credentials: "include",
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (!data.success) {
-      document.getElementById("wompiLoading").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = data.message || "Error al iniciar pago";
-      cancelarFacturaPagoNoCompletado(idFactura);
-      cargarFacturasPaciente();
-      cargarStatsFacturas();
-      return;
-    }
-    document.getElementById("wompiLoading").style.display = "none";
-
-    var sandboxInfo = document.getElementById("wompiSandboxInfo");
-    if (sandboxInfo) {
-      sandboxInfo.style.display = data.data.sandbox ? "block" : "none";
-    }
-
-    document.getElementById("wompiWidgetContainer").style.display = "block";
-
-    var d = data.data;
-    console.log("[Wompi] initWidget data:", d);
-
-    if (typeof WidgetCheckout === "undefined") {
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "No se pudo cargar el widget de pago. Verifica tu conexi\u00f3n o desactiva bloqueadores de anuncios.";
-      cancelarFacturaPagoNoCompletado(idFactura);
-      cargarFacturasPaciente();
-      cargarStatsFacturas();
-      return;
-    }
-
-    var wompiWidget = null;
-    var wompiTimeout = setTimeout(function() {
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "El formulario de pago no carg\u00f3. Puede estar siendo bloqueado por tu navegador o extensiones. Intenta desactivar bloqueadores de anuncios/rastreadores para este sitio, o usa otro navegador.";
-    }, 120000);
-
-    try {
-      wompiWidget = new WidgetCheckout({
-        currency: d.currency,
-        amountInCents: d.amountInCents,
-        reference: d.reference,
-        publicKey: d.publicKey,
-        signature: d.signature,
-      });
-    } catch (e) {
-      clearTimeout(wompiTimeout);
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "Error al crear el widget de pago: " + e.message;
-      console.error("[Wompi] constructor error:", e);
-      cancelarFacturaPagoNoCompletado(idFactura);
-      cargarFacturasPaciente();
-      cargarStatsFacturas();
-      return;
-    }
-
-    try {
-      wompiWidget.open(function(result) {
-        clearTimeout(wompiTimeout);
-        var transaction = result.transaction || {};
-        if (transaction.status === "APPROVED") {
-          fetch("/api/facturas/" + idFactura + "/confirmar-pago", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ transactionId: transaction.id })
-          })
-          .then(function(r) { return r.json(); })
-          .then(function() {
-            document.getElementById("wompiWidgetContainer").style.display = "none";
-            document.getElementById("wompiError").style.display = "none";
-            document.getElementById("wompiSuccess").style.display = "block";
-            document.getElementById("wompiSuccessMsg").textContent = "Tu factura #" + idFactura + " ha sido pagada exitosamente.";
-            cargarFacturasPaciente();
-            cargarStatsFacturas();
-          })
-          .catch(function() {
-            document.getElementById("wompiWidgetContainer").style.display = "none";
-            document.getElementById("wompiError").style.display = "none";
-            document.getElementById("wompiSuccess").style.display = "block";
-            document.getElementById("wompiSuccessMsg").textContent = "Tu factura #" + idFactura + " ha sido pagada exitosamente.";
-            cargarFacturasPaciente();
-            cargarStatsFacturas();
-          });
-        } else {
-          document.getElementById("wompiWidgetContainer").style.display = "none";
-          document.getElementById("wompiError").style.display = "block";
-          var msg = transaction.status === "DECLINED" ? "La transacci\u00f3n fue rechazada." : "El pago no se complet\u00f3.";
-          document.getElementById("wompiErrorMsg").textContent = msg + " La factura ha sido cancelada.";
-          cancelarFacturaPagoNoCompletado(idFactura);
-          cargarFacturasPaciente();
-          cargarStatsFacturas();
-        }
-      });
-    } catch (e) {
-      clearTimeout(wompiTimeout);
-      document.getElementById("wompiWidgetContainer").style.display = "none";
-      document.getElementById("wompiError").style.display = "block";
-      document.getElementById("wompiErrorMsg").textContent = "Error al abrir el widget de pago: " + e.message;
-      console.error("[Wompi] open error:", e);
-      cancelarFacturaPagoNoCompletado(idFactura);
-      cargarFacturasPaciente();
-      cargarStatsFacturas();
-    }
-  })
-  .catch(function() {
-    document.getElementById("wompiLoading").style.display = "none";
-    document.getElementById("wompiError").style.display = "block";
-    document.getElementById("wompiErrorMsg").textContent = "Error de conexi\u00f3n";
-    cancelarFacturaPagoNoCompletado(idFactura);
-    cargarFacturasPaciente();
-    cargarStatsFacturas();
-  });
 }
 </script>
 </body>
