@@ -437,7 +437,6 @@ window.addEventListener('pageshow', function(event) {
 document.addEventListener('DOMContentLoaded', function () {
     var btnProbar = document.getElementById('btnProbarNotif');
     var telInput = document.getElementById('numeroTelefonico');
-    var consentCheckbox = document.getElementById('whatsappConsentimiento');
 
     if (btnProbar) {
         btnProbar.addEventListener('click', function (e) {
@@ -461,32 +460,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         telInput.value = result.value.replace(/\s/g,'');
-                        // بعد حفظ الرقم، تحقق من الموافقة
-                        checkConsentAndSend();
+                        sendTest();
                     }
                 });
             } else {
-                checkConsentAndSend();
-            }
-
-            function checkConsentAndSend() {
-                if (!consentCheckbox.checked) {
-                    Swal.fire({
-                        title: 'Consentimiento requerido',
-                        text: 'Para recibir notificaciones por WhatsApp debes aceptar el consentimiento.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Aceptar y continuar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((r) => {
-                        if (r.isConfirmed) {
-                            consentCheckbox.checked = true;
-                            sendTest();
-                        }
-                    });
-                } else {
-                    sendTest();
-                }
+                sendTest();
             }
 
             function sendTest() {
