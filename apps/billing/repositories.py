@@ -10,7 +10,7 @@ from apps.authentication.models import Register
 class InvoiceRepository:
     def create_invoice(self, patient_id, professional_id, cita_id, items,
                        fechaPago=None, metodoPago=None, referencia=None, notas=None,
-                       evidencia=None, confirmada_por_id=None):
+                       evidencia=None, confirmada_por_id=None, estadoPago="Pendiente"):
         from django.utils import timezone
         monto = sum(Decimal(str(item["precioUnitario"])) for item in items)
         factura = Facturas.objects.create(
@@ -18,14 +18,14 @@ class InvoiceRepository:
             idProfesional_id=professional_id,
             idCita=cita_id,
             monto=monto,
-            estadoPago="Pagado",
+            estadoPago=estadoPago,
             fechaPago=fechaPago,
             metodoPago=metodoPago,
             referencia=referencia,
             notas=notas,
             evidencia=evidencia,
             confirmada_por_id=confirmada_por_id,
-            fecha_confirmacion=timezone.now(),
+            fecha_confirmacion=timezone.now() if estadoPago == "Pagado" else None,
         )
         for item in items:
             ItemsFactura.objects.create(

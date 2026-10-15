@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone as tz
 from apps.core.notifier import notificar_paciente
 from apps.scheduling.repositories import AppointmentRepository
+from apps.billing.repositories import InvoiceRepository
 
 logger = logging.getLogger(__name__)
 
@@ -161,6 +162,8 @@ class AppointmentService:
                 target_patient_id, professional_id, fecha, hora, tipo_cita, motivo,
                 created_by_professional if created_by_professional else False,
             )
+            # Asegurar estado Pendiente para que el profesional pueda confirmar
+            self.repo.update_appointment_status(cita_id, "Pendiente")
         except IntegrityError:
             msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
             return {"success": False, "message": msg}, 409
@@ -295,6 +298,26 @@ class AppointmentService:
             return {"success": False, "message": "No tienes permiso"}, 403
 
         self.repo.update_appointment_status(appointment_id, estado)
+
+        # Si el profesional confirma la cita, crear factura pendiente si no existe
+        if estado == "Confirmada":
+            from apps.billing.models import Facturas
+            if not Facturas.objects.filter(idCita=appointment_id, anulada=False).exists():
+                invoice_repo = InvoiceRepository()
+                # Obtener datos de la cita para crear la factura
+                cita = self.repo.get_appointment_full(appointment_id)
+                if cita:
+                    items = [{
+                        "descripcion": f"Cita {cita.tipoCita}",
+                        "precioUnitario": "0",
+                    }]
+                    invoice_repo.create_invoice(
+                        patient_id=cita.idPaciente_id,
+                        professional_id=cita.idProfesional_id,
+                        cita_id=appointment_id,
+                        items=items,
+                        estadoPago="Pendiente",
+                    )
 
         try:
             cita = self.repo.get_appointment_full(appointment_id)

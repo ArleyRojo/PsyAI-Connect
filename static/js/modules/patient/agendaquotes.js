@@ -522,24 +522,8 @@ document.getElementById("btnSolicitarCita").addEventListener("click", async () =
 
     const idCita = dataCita.idCita;
 
-    // 2. Crear factura pendiente automáticamente
-    const resFactura = await fetch("/api/facturas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        idProfesional: idProfesional,
-        idCita: idCita,
-        items: [{ descripcion: tipoCita, precioUnitario: 100000 }]
-      })
-    });
-    const dataFactura = await resFactura.json();
-
-    if (!dataFactura.success) {
-      PsyAIAlerts.warning('Cita agendada', 'La cita se creó pero no se pudo generar la factura. Puedes generarla después desde Mis Facturas.');
-    } else {
-      PsyAIAlerts.success('¡Listo!', 'Cita agendada. Tu factura está en Mis Facturas (pendiente de pago).');
-    }
+    // Factura se generará automáticamente por el profesional o desde el backend
+    PsyAIAlerts.success('¡Listo!', 'Cita agendada correctamente.');
 
     cargarCitasPaciente();
 
