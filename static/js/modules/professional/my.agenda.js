@@ -247,22 +247,30 @@ async function cargarCitasProfesional() {
                 ? `<span class="badge" style="background:${c.tipoCita === 'Primera sesión' ? '#e3f2fd' : c.tipoCita === 'Evaluación' ? '#fff3e0' : '#e8f5e9'};color:${c.tipoCita === 'Primera sesión' ? '#1565C0' : c.tipoCita === 'Evaluación' ? '#e65100' : '#2e7d32'};font-weight:600;font-size:0.68rem;border-radius:20px;padding:0.25em 0.6em;">${c.tipoCita}</span>`
                 : '';
             
-            const acciones = [];
-            if (!esCancelada) {
-              acciones.push(`<button class="btn btn-outline-danger btn-sm flex-shrink-0" onclick="abrirModalCancelarCita(${c.idCita})" title="Cancelar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
-                <i class="fas fa-ban me-1"></i>Cancelar
-              </button>`);
-              acciones.push(`<a href="facturacion.html?paciente=${c.idPaciente || ''}" class="btn btn-outline-primary btn-sm flex-shrink-0" title="Facturar" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
-                <i class="fas fa-file-invoice-dollar me-1"></i>Facturar
-              </a>`);
+            let estadoBadge = '';
+            let acciones = [];
+            if (c.estado === 'Cancelada') {
+                estadoBadge = `<span class="badge bg-danger">Cancelada</span>`;
+            } else if (c.estado === 'Confirmada') {
+                estadoBadge = `<span class="badge bg-success">Confirmada</span>`;
+                // Facturar solo si confirmada
+                acciones.push(`<a href="facturacion.html?paciente=${c.idPaciente || ''}" class="btn btn-outline-primary btn-sm flex-shrink-0" title="Facturar" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                    <i class="fas fa-file-invoice-dollar me-1"></i>Facturar
+                </a>`);
+            } else if (c.estado === 'Pendiente') {
+                estadoBadge = `<span class="badge bg-warning text-dark">Pendiente de confirmación</span>`;
+                // Botón Confirmar
+                acciones.push(`<button class="btn btn-success btn-sm flex-shrink-0" onclick="confirmarCita(${c.idCita})" title="Confirmar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                    <i class="fas fa-check me-1"></i>Confirmar
+                </button>`);
+                // Cancelar también disponible
+                acciones.push(`<button class="btn btn-outline-danger btn-sm flex-shrink-0" onclick="abrirModalCancelarCita(${c.idCita})" title="Cancelar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                    <i class="fas fa-ban me-1"></i>Cancelar
+                </button>`);
             }
             const canceladaBtn = acciones.length > 0
                 ? `<div class="d-flex gap-1 ms-auto flex-shrink-0">${acciones.join('')}</div>`
                 : '';
-
-            const estadoBadge = esCancelada 
-                ? `<span class="badge bg-danger">Cancelada</span>`
-                : `<span class="badge bg-success">Confirmada</span>`;
 
             const horaFormateada = formatearHora(c.hora);
 
@@ -300,7 +308,8 @@ async function cargarCitasProfesional() {
 // ── Actualizar Stats ────────────────────────────────────────
 function actualizarStats(citas) {
     const total = citas.length;
-    const confirmadas = citas.filter(c => c.estado !== 'Cancelada').length;
+    const confirmadas = citas.filter(c => c.estado === 'Confirmada').length;
+    const pendientes = citas.filter(c => c.estado === 'Pendiente').length;
     const canceladas = citas.filter(c => c.estado === 'Cancelada').length;
 
     const hoy = new Date();
@@ -321,6 +330,7 @@ function actualizarStats(citas) {
 
     animarNumero(document.getElementById('statTotal'), total);
     animarNumero(document.getElementById('statConfirmadas'), confirmadas);
+    animarNumero(document.getElementById('statPendientes'), pendientes);
     animarNumero(document.getElementById('statCanceladas'), canceladas);
     animarNumero(document.getElementById('statProximas'), proximas);
 }
@@ -361,6 +371,37 @@ function abrirModalCancelarCita(idCita) {
     _modalCancelarCitaPro.show();
 }
 
+async function confirmarCita(idCita) {
+    const monto = prompt('Ingrese el monto de la cita (número):');
+    if (monto === null || monto.trim() === '') {
+        return;
+    }
+    const montoNum = parseFloat(monto);
+    if (isNaN(montoNum) || montoNum <= 0) {
+        PsyAIAlerts.warning('Monto inválido', 'Debe ingresar un monto mayor a 0.');
+        return;
+    }
+    const descripcion = prompt('Descripción (opcional):') || '';
+    try {
+        const res = await fetch(`/api/citas/${idCita}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ estado: 'Confirmada', monto: montoNum, descripcion })
+        });
+        const data = await res.json();
+        if (data.success) {
+            PsyAIAlerts.success('Cita Confirmada', 'La cita ha sido confirmada y la factura generada.');
+            cargarCitasProfesional();
+        } else {
+            PsyAIAlerts.error('Error', data.message || 'No se pudo confirmar la cita.');
+        }
+    } catch(err) {
+        console.error(err);
+        PsyAIAlerts.error('Error', 'Error de conexión.');
+    }
+}
+
 async function confirmarCancelacionProfesional() {
     if (!_citaIdACancelar) return;
 
@@ -375,7 +416,7 @@ async function confirmarCancelacionProfesional() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Cancelando...';
 
     try {
-        const res = await fetch(`/api/citas/profesional/${_citaIdACancelar}/cancelar`, {
+        const res = await fetch(`/api/citas/${_citaIdACancelar}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

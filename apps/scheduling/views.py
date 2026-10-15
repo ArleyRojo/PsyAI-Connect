@@ -84,7 +84,7 @@ class CitaDetailViewSet(viewsets.ViewSet):
 
         data = request.data
         payload, status_code = appointment_service.update_status(
-            pk, data.get("estado"), user_id,
+            pk, data.get("estado"), user_id, extra_data=data
         )
         return Response(payload, status=status_code)
 

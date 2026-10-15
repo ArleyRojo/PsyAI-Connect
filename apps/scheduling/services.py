@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal, InvalidOperation
 from datetime import date, datetime, timedelta
 
 from django.conf import settings
@@ -162,8 +163,28 @@ class AppointmentService:
                 target_patient_id, professional_id, fecha, hora, tipo_cita, motivo,
                 created_by_professional if created_by_professional else False,
             )
-            # Asegurar estado Pendiente para que el profesional pueda confirmar
-            self.repo.update_appointment_status(cita_id, "Pendiente")
+            # Estado inicial
+            if created_by_professional:
+                # Profesional agenda directamente -> Confirmada y factura
+                self.repo.update_appointment_status(cita_id, "Confirmada")
+                # Crear factura con monto provisto
+                monto = None
+                descripcion = f"Cita {tipo_cita}"
+                monto_raw = data.get("monto")
+                if monto_raw is not None:
+                    try:
+                        monto = Decimal(str(monto_raw))
+                    except (InvalidOperation, ValueError):
+                        return {"success": False, "message": "Monto inválido"}, 400
+                desc_extra = data.get("descripcion")
+                if desc_extra:
+                    descripcion = desc_extra
+                if monto is None or monto <= 0:
+                    return {"success": False, "message": "Se requiere monto mayor a 0 para agendar como profesional"}, 400
+                self._create_invoice_for_cita(cita_id, target_patient_id, professional_id, monto, descripcion)
+            else:
+                # Paciente solicita -> Pendiente
+                self.repo.update_appointment_status(cita_id, "Pendiente")
         except IntegrityError:
             msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
             return {"success": False, "message": msg}, 409
@@ -175,10 +196,11 @@ class AppointmentService:
                 prof = cita.idProfesional
                 pac = cita.idPaciente
                 if created_by_professional:
+                    # Notificar al paciente que su cita fue agendada y confirmada
                     AppointmentMailService.send_cita_notificacion(
                         recipient_email=pac.email,
-                        titulo="Nueva cita agendada",
-                        mensaje=f"Se ha agendado una cita contigo. {prof.nombre if prof else 'Tu profesional'} te ha asignado una sesión.",
+                        titulo="Cita agendada y confirmada",
+                        mensaje=f"Tu cita con {prof.nombre if prof else 'tu profesional'} ha sido agendada y confirmada.",
                         nombre_contraparte=prof.nombre if prof else None,
                         contraparte_label="Profesional",
                         fecha=cita.fecha, hora=cita.hora,
@@ -193,10 +215,11 @@ class AppointmentService:
                                  hora=cita.hora.strftime("%H:%M"),
                                  lugar=cita.lugar or "Por definir")
                 else:
+                    # Notificar al profesional de nueva solicitud
                     AppointmentMailService.send_cita_notificacion(
                         recipient_email=prof.email if prof else None,
-                        titulo="Nueva cita agendada",
-                        mensaje=f"El paciente {pac.nombre if pac else ''} ha agendado una cita contigo.",
+                        titulo="Nueva solicitud de cita",
+                        mensaje=f"El paciente {pac.nombre if pac else ''} ha solicitado una cita contigo.",
                         nombre_contraparte=pac.nombre if pac else None,
                         contraparte_label="Paciente",
                         fecha=cita.fecha, hora=cita.hora,
@@ -204,10 +227,11 @@ class AppointmentService:
                         estado=cita.estado,
                         cta_link=f"{site_url}/aside-professional/my.agenda.html",
                     )
+                    # Notificar al paciente que la solicitud fue enviada
                     AppointmentMailService.send_cita_notificacion(
                         recipient_email=pac.email if pac else None,
-                        titulo="Cita agendada correctamente",
-                        mensaje=f"Tu cita con {prof.nombre if prof else 'tu profesional'} ha sido agendada exitosamente.",
+                        titulo="Solicitud de cita enviada",
+                        mensaje=f"Tu solicitud de cita con {prof.nombre if prof else 'tu profesional'} ha sido enviada. Queda pendiente de confirmación.",
                         nombre_contraparte=prof.nombre if prof else None,
                         contraparte_label="Profesional",
                         fecha=cita.fecha, hora=cita.hora,
@@ -216,11 +240,7 @@ class AppointmentService:
                         cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                         recipient_user_id=pac.idUsuario if pac else None,
                     )
-                    # notificación centralizada
-                    self._notify(pac, "confirmacion_cita",
-                                 fecha=cita.fecha.strftime("%d/%m/%Y"),
-                                 hora=cita.hora.strftime("%H:%M"),
-                                 lugar=cita.lugar or "Por definir")
+                    # No enviar notificación centralizada de confirmación aquí
         except Exception as e:
             logger.error(f"Error enviando correo de nueva cita: {e}")
 
@@ -284,7 +304,7 @@ class AppointmentService:
         cita["hora"] = str(cita["hora"])
         return {"success": True, "cita": cita}, 200
 
-    def update_status(self, appointment_id, estado, acting_professional_id):
+    def update_status(self, appointment_id, estado, acting_professional_id, extra_data=None):
         if not appointment_id or not estado:
             return {"success": False, "message": "Datos incompletos"}, 400
 
@@ -297,28 +317,61 @@ class AppointmentService:
         if row[0] != acting_professional_id:
             return {"success": False, "message": "No tienes permiso"}, 403
 
-        self.repo.update_appointment_status(appointment_id, estado)
-
-        # Si el profesional confirma la cita, crear factura pendiente si no existe
+        # Validaciones de transición
+        cita_obj = self.repo.get_appointment_full(appointment_id)
+        if not cita_obj:
+            return {"success": False, "message": "Cita no encontrada"}, 404
+        if cita_obj.estado == "Cancelada":
+            return {"success": False, "message": "No se puede cambiar estado de una cita cancelada"}, 400
+        # No permitir confirmar citas pasadas
+        from django.utils import timezone as tz
         if estado == "Confirmada":
-            from apps.billing.models import Facturas
-            if not Facturas.objects.filter(idCita=appointment_id, anulada=False).exists():
-                invoice_repo = InvoiceRepository()
-                # Obtener datos de la cita para crear la factura
-                cita = self.repo.get_appointment_full(appointment_id)
-                if cita:
-                    items = [{
-                        "descripcion": f"Cita {cita.tipoCita}",
-                        "precioUnitario": "0",
-                    }]
+            cita_dt = tz.make_aware(datetime.combine(cita_obj.fecha, cita_obj.hora))
+            if cita_dt < tz.now():
+                return {"success": False, "message": "No se puede confirmar una cita pasada"}, 400
+
+        # Actualizar estado dentro de transacción para crear factura atómicamente
+        from django.db import transaction
+        from apps.billing.models import Facturas
+        from apps.billing.repositories import InvoiceRepository
+        from decimal import Decimal, InvalidOperation
+
+        with transaction.atomic():
+            # Bloquear fila de cita
+            cita_locked = Citas.objects.select_for_update().get(idCita=appointment_id)
+            cita_locked.estado = estado
+            cita_locked.save(update_fields=["estado"])
+
+            # Si se confirma, crear factura si no existe
+            if estado == "Confirmada":
+                if not Facturas.objects.filter(idCita=appointment_id, anulada=False).exists():
+                    # Requiere monto >0
+                    monto = None
+                    descripcion = f"Cita {cita_locked.tipoCita}"
+                    if extra_data:
+                        monto_raw = extra_data.get("monto")
+                        if monto_raw is not None:
+                            try:
+                                monto = Decimal(str(monto_raw))
+                            except (InvalidOperation, ValueError):
+                                return {"success": False, "message": "Monto inválido"}, 400
+                        desc_extra = extra_data.get("descripcion")
+                        if desc_extra:
+                            descripcion = desc_extra
+                    if monto is None or monto <= 0:
+                        return {"success": False, "message": "Se requiere monto mayor a 0 para confirmar"}, 400
+
+                    invoice_repo = InvoiceRepository()
+                    items = [{"descripcion": descripcion, "precioUnitario": str(monto)}]
                     invoice_repo.create_invoice(
-                        patient_id=cita.idPaciente_id,
-                        professional_id=cita.idProfesional_id,
+                        patient_id=cita_locked.idPaciente_id,
+                        professional_id=cita_locked.idProfesional_id,
                         cita_id=appointment_id,
                         items=items,
                         estadoPago="Pendiente",
                     )
 
+        # Notificaciones (fuera de transacción)
         try:
             cita = self.repo.get_appointment_full(appointment_id)
             if cita:
@@ -337,7 +390,6 @@ class AppointmentService:
                     cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                     recipient_user_id=pac.idUsuario if pac else None,
                 )
-                # notificación centralizada
                 if estado == "Confirmada":
                     self._notify(pac, "confirmacion_cita",
                                  fecha=cita.fecha.strftime("%d/%m/%Y"),
@@ -515,6 +567,21 @@ class AppointmentService:
             if ocupadas_por_fecha.get(fecha_key, 0) < total_slots
         ]
         return {"success": True, "fechas": sorted(fechas)}, 200
+
+    def _create_invoice_for_cita(self, cita_id, patient_id, professional_id, monto, descripcion):
+        """Crea una factura pendiente para la cita indicada."""
+        from apps.billing.models import Facturas
+        if Facturas.objects.filter(idCita=cita_id, anulada=False).exists():
+            return
+        invoice_repo = InvoiceRepository()
+        items = [{"descripcion": descripcion, "precioUnitario": str(monto)}]
+        invoice_repo.create_invoice(
+            patient_id=patient_id,
+            professional_id=professional_id,
+            cita_id=cita_id,
+            items=items,
+            estadoPago="Pendiente",
+        )
 
 
 class DisponibilidadService:

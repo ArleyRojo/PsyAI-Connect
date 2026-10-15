@@ -231,9 +231,24 @@ async function cargarCitasPaciente() {
             ? `<button class="btn btn-outline-danger btn-sm py-0" onclick="abrirModalCancelar(${c.idCita})" title="Cancelar cita">Cancelar</button>`
             : `<span class="badge bg-secondary">Cancelada</span>`;
 
+          // Badge de estado de la cita
+          let estadoBadge = '';
+          if (c.estado === 'Pendiente') {
+            estadoBadge = '<span class="badge bg-warning text-dark">Pendiente de confirmación</span>';
+          } else if (c.estado === 'Confirmada') {
+            estadoBadge = '<span class="badge bg-success">Confirmada</span>';
+          } else if (c.estado === 'Cancelada') {
+            estadoBadge = '<span class="badge bg-danger">Cancelada</span>';
+          } else {
+            estadoBadge = `<span class="badge bg-secondary">${c.estado}</span>`;
+          }
+
+          // Badge de pago si existe factura
           const pagoHtml = c.estadoPago
             ? `<span class="badge ${c.estadoPago === 'Pagado' ? 'bg-success' : 'bg-warning text-dark'}">${c.estadoPago === 'Pagado' ? 'Pagado' : 'Pendiente'}</span>`
-            : '<span class="text-muted">—</span>';
+            : '';
+
+          const estadoYpago = `${estadoBadge}${pagoHtml ? ' ' + pagoHtml : ''}`;
 
           return `
             <tr class="align-middle">
@@ -241,7 +256,7 @@ async function cargarCitasPaciente() {
               <td class="text-dark fw-medium">${horaFormateada}</td>
               <td>${c.tipoCita}</td>
               <td>${c.motivo || '<em class="text-muted">Sin detalles</em>'}</td>
-              <td>${pagoHtml}</td>
+              <td>${estadoYpago}</td>
               <td>${accionHtml}</td>
             </tr>
           `;
@@ -522,8 +537,7 @@ document.getElementById("btnSolicitarCita").addEventListener("click", async () =
 
     const idCita = dataCita.idCita;
 
-    // Factura se generará automáticamente por el profesional o desde el backend
-    PsyAIAlerts.success('¡Listo!', 'Cita agendada correctamente.');
+    PsyAIAlerts.success('Solicitud enviada', 'Tu solicitud de cita ha sido enviada. Tu profesional debe confirmarla; recibirás un aviso y tu factura aparecerá en Mis Pagos.');
 
     cargarCitasPaciente();
 

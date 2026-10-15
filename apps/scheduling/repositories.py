@@ -138,6 +138,7 @@ class AppointmentRepository:
                 "motivo": cita.motivo,
                 "estado": cita.estado,
                 "creado_por_profesional": cita.creado_por_profesional,
+                "idPaciente": cita.idPaciente_id,
             }
             result.append(d)
         return result

@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="/css/components/custom-select.css?v=20261009-1">
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260928-1">
     <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
-    <script src="https://checkout.wompi.co/widget.js"></script>
 </head>
 <body class="patient-dashboard patient-agenda-page">
 
@@ -265,83 +264,6 @@
   </main>
 </div>
 
-<!-- MODAL: ELEGIR MÉTODO DE PAGO -->
-<div class="modal fade" id="modalElegirPago" tabindex="-1" data-bs-backdrop="static">
-<div class="modal-dialog modal-dialog-centered">
-<div class="modal-content border-0 shadow">
-<div class="modal-header border-0">
-  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Método de pago</h5>
-  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
-<div class="modal-body py-4">
-  <p class="text-muted text-center mb-4">Elige cómo quieres pagar esta consulta</p>
-  <div class="payment-method-grid">
-    <div class="payment-option" data-metodo="ahora" onclick="elegirMetodoPago(this)">
-      <div class="payment-option-icon"><i class="fas fa-credit-card"></i></div>
-      <div class="payment-option-info">
-        <span class="payment-option-title">Pagar ahora</span>
-        <span class="payment-option-desc">Tarjeta, PSE o efectivo vía Wompi</span>
-      </div>
-      <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
-    </div>
-    <div class="payment-option" data-metodo="despues" onclick="elegirMetodoPago(this)">
-      <div class="payment-option-icon"><i class="fas fa-clock"></i></div>
-      <div class="payment-option-info">
-        <span class="payment-option-title">Pagar después</span>
-        <span class="payment-option-desc">La factura queda Pagada, puedes pagar desde Mis Pagos</span>
-      </div>
-      <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
-    </div>
-  </div>
-</div>
-</div>
-</div>
-</div>
-
-<!-- MODAL: PAGO CON Wompi -->
-<div class="modal fade" id="modalPagoWompi" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered">
-<div class="modal-content border-0 shadow">
-<div class="modal-header border-0">
-  <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Pago de Consulta</h5>
-  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
-<div class="modal-body text-center py-4">
-  <div id="wompiLoading"><div class="spinner-border text-primary mb-3"></div><p class="fw-semibold">Preparando pago...</p></div>
-  <div id="wompiSandboxInfo" class="alert alert-info text-start small p-3 mb-3" style="display:none;">
-    <i class="fas fa-info-circle me-1"></i> <strong>Estás en modo de pruebas de Wompi.</strong> Usa estos datos para simular un pago:
-    <hr class="my-2">
-    <div class="mb-1"><strong>Tarjeta — Aprobado:</strong> <code class="user-select-all">4242 4242 4242 4242</code></div>
-    <div class="mb-1"><strong>Tarjeta — Rechazado:</strong> <code class="user-select-all">4111 1111 1111 1111</code></div>
-    <div class="mb-1"><strong>Tarjeta — Cualquier otro número:</strong> genera <em>ERROR</em></div>
-    <div class="mb-1"><strong>Nequi — Aprobado:</strong> <code class="user-select-all">3991111111</code></div>
-    <div class="mb-1"><strong>Nequi — Cualquier otro número:</strong> genera <em>RECHAZADO</em></div>
-    <hr class="my-2">
-    <div><strong>Datos adicionales (tarjeta):</strong> cualquier fecha futura (ej. 12/28), CVC de 3 dígitos (ej. 123), y nombre del titular.</div>
-  </div>
-  <div id="wompiWidgetContainer" style="display:none;">
-    <i class="fas fa-credit-card text-primary" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">Procesando pago...</p>
-    <p class="text-muted small">Se abrirá el formulario de pago seguro de Wompi.</p>
-  </div>
-  <div id="wompiSuccess" style="display:none;">
-    <i class="fas fa-check-circle text-success" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">Pago exitoso</p>
-    <p class="text-muted small">Tu cita ha sido agendada y el pago confirmado.</p>
-  </div>
-  <div id="wompiError" style="display:none;">
-    <i class="fas fa-times-circle text-danger" style="font-size:3rem;"></i>
-    <p class="fw-bold mt-3">Pago no completado</p>
-    <p class="text-muted small" id="wompiErrorMsg">Puedes pagar después desde Mis Pagos.</p>
-  </div>
-</div>
-<div class="modal-footer border-0 justify-content-center">
-  <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cerrar</button>
-</div>
-</div>
-</div>
-</div>
-
 <!-- Modal Cancelar Cita -->
 <div class="modal fade modal-cancel-custom" id="modalCancelar" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
@@ -401,7 +323,7 @@
 <script src="/js/modules/auth/logout.js?v=20260803-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script src="/js/components/custom-select.js?v=20261009-1"></script>
-<script src="/js/modules/patient/agendaquotes.js?v=20260803-1"></script>
+<script src="/js/modules/patient/agendaquotes.js?v=20261015-1"></script>
 <script>
 // Forzar que todos los acordeones inicien cerrados
 document.querySelectorAll('.accordion-collapse').forEach(function(el) {
