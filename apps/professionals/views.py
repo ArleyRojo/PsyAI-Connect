@@ -17,6 +17,7 @@ from apps.professionals.serializers import (
     ReporteUpdateSerializer,
     VisibilidadSerializer,
     ChatMensajeSerializer,
+    ProfessionalPaymentInfoSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -417,6 +418,38 @@ class AllPacientesProfesionalResource(APIView):
         return Response(payload, status=status_code)
 
 
+
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def post(self, request, id_paciente):
+        from apps.professionals.models import PacientesProfesional
+        user_id = getattr(request, "user_id", None)
+        PacientesProfesional.objects.get_or_create(
+            idProfesional_id=user_id,
+            idPaciente_id=id_paciente,
+        )
+        return Response(
+            {"success": True, "message": "Paciente asignado correctamente"},
+            status=status.HTTP_200_OK,
+        )
+
+
+class ProfessionalPaymentInfoViewSet(viewsets.ViewSet):
+    """Gestión de datos de cobro (QR y mensaje) de la profesional autenticada."""
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def retrieve(self, request):
+        """GET /api/professional/payment-info/ – datos de la profesional autenticada."""
+        from apps.professionals.models import ProfessionalPaymentInfo
+        user_id = getattr(request, "user_id", None)
+        try:
+            info = ProfessionalPaymentInfo.objects.get(idProfesional_id=user_id)
+        except ProfessionalPaymentInfo.DoesNotExist:
+            info = ProfessionalPaymentInfo(idProfesional_id=user_id)
+        serializer = ProfessionalPaymentInfoSerializer(info)
+        return Response({"success": True, "data": serializer.data}, status=status.HTTP_200_OK)
+
+
 class PacienteAsignarResource(APIView):
     permission_classes = [IsAuthenticatedDRF, IsProfesional]
 
@@ -431,3 +464,45 @@ class PacienteAsignarResource(APIView):
             {"success": True, "message": "Paciente asignado correctamente"},
             status=status.HTTP_200_OK,
         )
+
+    def update(self, request):
+        """PUT /api/professional/payment-info/ – guardar/actualizar QR y mensaje."""
+        serializer = ProfessionalPaymentInfoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_id = getattr(request, "user_id", None)
+        from apps.professionals.models import ProfessionalPaymentInfo
+        info, _ = ProfessionalPaymentInfo.objects.get_or_create(idProfesional_id=user_id)
+        info.qr_image = serializer.validated_data.get('qr_image', info.qr_image)
+        info.mensaje_texto = serializer.validated_data.get('mensaje_texto', info.mensaje_texto)
+        info.save()
+        return Response({"success": True, "message": "Datos de cobro actualizados"}, status=status.HTTP_200_OK)
+
+
+class ProfessionalPaymentInfoPublicView(APIView):
+    """GET /api/professional/<id>/payment-info/ – datos de cobro visibles para pacientes con relación o la propia profesional."""
+    permission_classes = [IsAuthenticatedDRF]
+
+    def get(self, request, id_profesional):
+        from apps.professionals.models import ProfessionalPaymentInfo, PacientesProfesional
+        user_id = getattr(request, "user_id", None)
+        user_role = getattr(request, "user_role", None)
+
+        # Permitir a la propia profesional ver sus datos
+        if user_role == "profesional" and str(user_id) == str(id_profesional):
+            pass  # autorizado
+        # Permitir a pacientes con relación
+        elif user_role == "paciente":
+            related = PacientesProfesional.objects.filter(
+                idProfesional_id=id_profesional, idPaciente_id=user_id
+            ).exists()
+            if not related:
+                return Response({"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response({"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            info = ProfessionalPaymentInfo.objects.get(idProfesional_id=id_profesional)
+        except ProfessionalPaymentInfo.DoesNotExist:
+            info = ProfessionalPaymentInfo(idProfesional_id=id_profesional)
+        serializer = ProfessionalPaymentInfoSerializer(info)
+        return Response({"success": True, "data": serializer.data}, status=status.HTTP_200_OK)

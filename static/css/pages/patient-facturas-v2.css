@@ -10,6 +10,13 @@
     max-width: 960px;
 }
 
+/* Full-width variant for professional/admin facturación */
+.facturas-page--full {
+    max-width: none;
+    width: 100%;
+    padding: 0;
+}
+
 .facturas-page .main-header h1 {
     font-family: var(--font-heading);
     font-size: var(--fs-xl);
@@ -164,6 +171,7 @@
 }
 
 .facturas-list-empty {
+    width: 100%;
     text-align: center;
     padding: var(--sp-12) var(--sp-6);
     color: var(--text-muted);

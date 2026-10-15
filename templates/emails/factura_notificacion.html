@@ -61,9 +61,9 @@
                                              <tr>
                                                  <td style="padding:6px 0;"><span style="color:#94A3B8;font-size:13px;">Estado</span></td>
                                                 <td style="padding:6px 0;text-align:right;">
-                                                    {% if estado_pago == 'Pagado' %}
-                                                    <span style="display:inline-block;background:#ECFDF5;color:#059669;font-size:12px;font-weight:600;padding:4px 12px;border-radius:8px;">{{ estado_pago }}</span>
-                                                    {% elif estado_pago == 'Cancelado' %}
+{% if estado_pago == 'Pagado' %}
+                                                     <span style="display:inline-block;background:#ECFDF5;color:#059669;font-size:12px;font-weight:600;padding:4px 12px;border-radius:8px;">Completado</span>
+                                                     {% elif estado_pago == 'Cancelado' %}
                                                     <span style="display:inline-block;background:#FEF2F2;color:#DC2626;font-size:12px;font-weight:600;padding:4px 12px;border-radius:8px;">{{ estado_pago }}</span>
                                                     {% else %}
                                                     <span style="display:inline-block;background:#FFFBEB;color:#D97706;font-size:12px;font-weight:600;padding:4px 12px;border-radius:8px;">{{ estado_pago }}</span>

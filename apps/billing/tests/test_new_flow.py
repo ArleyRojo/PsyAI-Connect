@@ -4,6 +4,9 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from apps.authentication.models import Register
 from apps.billing.models import Facturas, ItemsFactura
+from django.core.files.uploadedfile import SimpleUploadedFile
+from io import BytesIO
+from PIL import Image
 
 
 @pytest.mark.django_db
@@ -11,116 +14,207 @@ class TestBillingNewFlow:
 
     def setup_method(self):
         self.client = APIClient()
-        # create users
         self.paciente = Register.objects.create_user(email="pac@test.com", password="pass1234", nombre="Paciente Test", rol="paciente")
         self.profesional = Register.objects.create_user(email="pro@test.com", password="pass1234", nombre="Profesional Test", rol="profesional")
         self.admin = Register.objects.create_superuser(email="adm@test.com", password="pass1234", nombre="Admin Test")
-        self.client.force_authenticate(user=self.paciente)
+        self.client.force_authenticate(user=self.profesional)
 
     def authenticate(self, user):
         self.client.force_authenticate(user=user)
 
-    def test_create_invoice_patient(self):
-        self.authenticate(self.paciente)
-        payload = {
-            "idProfesional": self.profesional.idUsuario,
-            "items": [{"descripcion": "Consulta", "precioUnitario": "100000"}]
+    def _create_test_image(self):
+        img = Image.new('RGB', (100, 100), color='red')
+        img_bytes = BytesIO()
+        img.save(img_bytes, format='PNG')
+        img_bytes.seek(0)
+        return SimpleUploadedFile("test_evidence.png", img_bytes.read(), content_type="image/png")
+
+    def test_register_payment_success(self):
+        self.authenticate(self.profesional)
+        # ensure relationship
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(idProfesional=self.profesional, idPaciente=self.paciente)
+
+        evidencia = self._create_test_image()
+        items = [{"descripcion": "Consulta", "precioUnitario": "100000"}]
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Transferencia",
+            "referencia": "REF123",
+            "notas": "Prueba",
         }
-        resp = self.client.post("/api/facturas", payload, format="json")
-        assert resp.status_code == 201
-        assert resp.json()["success"]
-        factura_id = resp.json()["idFactura"]
+        # Use multipart
+        response = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        assert response.status_code == 201
+        data = response.json()
+        assert data["success"]
+        factura_id = data["idFactura"]
         factura = Facturas.objects.get(idFactura=factura_id)
-        assert factura.estadoPago == "Pendiente"
-        assert factura.idPaciente == self.paciente
-        assert factura.idProfesional == self.profesional
-        assert factura.anulada is False
-        assert factura.fechaPago is None
-
-    def test_create_invoice_professional(self):
-        self.authenticate(self.profesional)
-        payload = {
-            "idPaciente": self.paciente.idUsuario,
-            "items": [{"descripcion": "Terapia", "precioUnitario": "150000"}]
-        }
-        resp = self.client.post("/api/facturas", payload, format="json")
-        assert resp.status_code == 201
-        assert resp.json()["success"]
-
-    def test_list_patient_invoices(self):
-        self.authenticate(self.paciente)
-        Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("100000"), estadoPago="Pendiente")
-        resp = self.client.get("/api/facturas/mias")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["success"]
-        assert isinstance(data["facturas"], list)
-
-    def test_professional_filter_by_estado(self):
-        self.authenticate(self.profesional)
-        Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("100000"), estadoPago="Pendiente")
-        Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("200000"), estadoPago="Pagado")
-        resp = self.client.get("/api/facturas/emitidas?estado=Pendiente")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["success"]
-        for f in data["facturas"]:
-            assert f["estadoPago"] == "Pendiente"
-
-    def test_confirmar_pago_by_owner(self):
-        self.authenticate(self.profesional)
-        factura = Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("100000"), estadoPago="Pendiente")
-        resp = self.client.post(f"/api/facturas/{factura.idFactura}/confirmar-pago")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["success"]
-        factura.refresh_from_db()
         assert factura.estadoPago == "Pagado"
-        assert factura.fechaPago is not None
+        assert factura.metodoPago == "Transferencia"
+        assert factura.evidencia
+        assert factura.confirmada_por == self.profesional
 
-    def test_confirmar_pago_not_owner_403(self):
-        other_prof = Register.objects.create_user(email="other@test.com", password="pass", nombre="Otro", rol="profesional")
-        self.authenticate(other_prof)
-        factura = Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("100000"), estadoPago="Pendiente")
-        resp = self.client.post(f"/api/facturas/{factura.idFactura}/confirmar-pago")
+    def test_register_payment_missing_evidencia(self):
+        self.authenticate(self.profesional)
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(idProfesional=self.profesional, idPaciente=self.paciente)
+
+        items = [{"descripcion": "Consulta", "precioUnitario": "100000"}]
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Transferencia",
+        }
+        response = self.client.post("/api/facturas", form_data, format="multipart")
+        assert response.status_code == 400
+        data = response.json()
+        assert not data["success"]
+        assert "evidencia" in data["message"].lower() or "adjuntar" in data["message"].lower()
+
+    def test_register_payment_invalid_method(self):
+        self.authenticate(self.profesional)
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(idProfesional=self.profesional, idPaciente=self.paciente)
+
+        evidencia = self._create_test_image()
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Invalido",
+        }
+        response = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        assert response.status_code == 400
+
+    def test_register_payment_future_date(self):
+        self.authenticate(self.profesional)
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(idProfesional=self.profesional, idPaciente=self.paciente)
+
+        evidencia = self._create_test_image()
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2099-12-31",
+            "metodoPago": "Transferencia",
+        }
+        response = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        assert response.status_code == 400
+
+    def test_register_payment_without_relation(self):
+        self.authenticate(self.profesional)
+        # no PacientesProfesional link
+        evidencia = self._create_test_image()
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Transferencia",
+        }
+        response = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        assert response.status_code == 403
+
+    def test_patient_cannot_create(self):
+        self.authenticate(self.paciente)
+        evidencia = self._create_test_image()
+        form_data = {
+            "idProfesional": str(self.profesional.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Transferencia",
+        }
+        response = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        assert response.status_code == 403
+
+    def test_admin_cannot_create(self):
+        self.authenticate(self.admin)
+        evidencia = self._create_test_image()
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Transferencia",
+        }
+        response = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        assert response.status_code == 403
+
+    def test_evidencia_endpoint(self):
+        # create factura with evidencia
+        self.authenticate(self.profesional)
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(idProfesional=self.profesional, idPaciente=self.paciente)
+
+        evidencia = self._create_test_image()
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Transferencia",
+        }
+        resp = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        assert resp.status_code == 201
+        factura_id = resp.json()["idFactura"]
+
+        # owner professional can view
+        self.authenticate(self.profesional)
+        resp = self.client.get(f"/api/facturas/{factura_id}/evidencia")
+        assert resp.status_code == 200
+
+        # patient can view
+        self.authenticate(self.paciente)
+        resp = self.client.get(f"/api/facturas/{factura_id}/evidencia")
+        assert resp.status_code == 200
+
+        # admin can view
+        self.authenticate(self.admin)
+        resp = self.client.get(f"/api/facturas/{factura_id}/evidencia")
+        assert resp.status_code == 200
+
+        # other professional cannot
+        other = Register.objects.create_user(email="other@test.com", password="pass", nombre="Otro", rol="profesional")
+        self.authenticate(other)
+        resp = self.client.get(f"/api/facturas/{factura_id}/evidencia")
         assert resp.status_code == 403
 
-    def test_confirmar_pago_already_paid_400(self):
-        self.authenticate(self.profesional)
-        factura = Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("100000"), estadoPago="Pagado")
-        resp = self.client.post(f"/api/facturas/{factura.idFactura}/confirmar-pago")
-        assert resp.status_code == 400
-
-    def test_annul_invoice_not_paid(self):
-        self.authenticate(self.profesional)
-        factura = Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("100000"), estadoPago="Pendiente")
-        resp = self.client.patch(f"/api/facturas/{factura.idFactura}", {"anular": True, "motivoAnulacion": "Error"})
-        assert resp.status_code == 200
-        factura.refresh_from_db()
-        assert factura.anulada is True
-        assert factura.motivoAnulacion == "Error"
-
-    def test_annul_invoice_already_paid_fails(self):
-        self.authenticate(self.profesional)
-        factura = Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("100000"), estadoPago="Pagado")
-        resp = self.client.patch(f"/api/facturas/{factura.idFactura}", {"anular": True, "motivoAnulacion": "Error"})
-        assert resp.status_code == 400
-
-    def test_admin_stats(self):
-        self.authenticate(self.admin)
-        Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("100000"), estadoPago="Pendiente")
-        Facturas.objects.create(idPaciente=self.paciente, idProfesional=self.profesional, monto=Decimal("200000"), estadoPago="Pagado")
-        resp = self.client.get("/api/facturas/estadisticas-admin")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["success"]
-        stats = data["stats"]
-        assert stats["totalFacturado"] == 300000
-        assert stats["totalPagado"] == 200000
-        assert stats["totalPendiente"] == 100000
-        assert stats["anuladas"] == 0
-
-    def test_unauthenticated_access_denied(self):
+        # unauthenticated
         self.client.logout()
-        resp = self.client.get("/api/facturas/mias")
+        resp = self.client.get(f"/api/facturas/{factura_id}/evidencia")
         assert resp.status_code in (401, 403)
+
+    def test_admin_readonly(self):
+        self.authenticate(self.admin)
+        # list
+        resp = self.client.get("/api/facturas")
+        assert resp.status_code == 200
+        # create attempt
+        evidencia = self._create_test_image()
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Transferencia",
+        }
+        resp = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        assert resp.status_code == 403
+        # anulable? admin cannot annul
+        # create a factura first as profesional
+        self.authenticate(self.profesional)
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(idProfesional=self.profesional, idPaciente=self.paciente)
+        evidencia = self._create_test_image()
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": '[{"descripcion":"Consulta","precioUnitario":"100000"}]',
+            "fechaPago": "2026-10-14",
+            "metodoPago": "Transferencia",
+        }
+        resp = self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+        factura_id = resp.json()["idFactura"]
+        # admin try annul
+        self.authenticate(self.admin)
+        resp = self.client.patch(f"/api/facturas/{factura_id}", {"motivoAnulacion": "test"})
+        assert resp.status_code == 403

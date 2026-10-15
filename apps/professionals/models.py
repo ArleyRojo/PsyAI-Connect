@@ -3,6 +3,24 @@ from django.db import models
 from apps.authentication.models import Register
 
 
+class ProfessionalPaymentInfo(models.Model):
+    idProfesional = models.OneToOneField(
+        Register,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        db_column="idProfesional",
+        related_name="payment_info",
+    )
+    qr_image = models.ImageField(upload_to='qr_codes/', null=True, blank=True)
+    mensaje_texto = models.TextField(null=True, blank=True, help_text="Número de cuenta, Nequi, llaves Bre-B, etc.")
+
+    class Meta:
+        db_table = "ProfessionalPaymentInfo"
+
+    def __str__(self):
+        return f"PaymentInfo Prof {self.idProfesional_id}"
+
+
 class PerfilProfesional(models.Model):
     ESTADO_CHOICES = [
         ("Activo", "Activo"),

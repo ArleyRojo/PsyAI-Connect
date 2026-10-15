@@ -34,6 +34,23 @@ def parse_json_body(request):
 
 class IsAuthenticatedDRF(BasePermission):
     def has_permission(self, request, view):
+        # First try DRF's request.user (for token auth and force_authenticate in tests)
+        user = getattr(request, "user", None)
+        if user and hasattr(user, "is_authenticated") and user.is_authenticated:
+            # Get the Register user from the authenticated user
+            from apps.authentication.models import Register
+            try:
+                db_user = Register.objects.get(idUsuario=user.idUsuario if hasattr(user, "idUsuario") else user.pk)
+            except (Register.DoesNotExist, AttributeError):
+                return False
+            if not db_user.activo or db_user.estadoCuenta != "Activa":
+                return False
+            request.user_id = db_user.idUsuario
+            request.user_role = db_user.rol
+            request.user_name = db_user.nombre
+            return True
+
+        # Fallback to session-based auth
         user = get_current_user(request)
         if not user:
             return False

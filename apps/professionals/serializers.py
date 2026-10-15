@@ -50,3 +50,8 @@ class VisibilidadSerializer(serializers.Serializer):
 class ChatMensajeSerializer(serializers.Serializer):
     receptor = serializers.IntegerField()
     mensaje = serializers.CharField(max_length=2000)
+
+
+class ProfessionalPaymentInfoSerializer(serializers.Serializer):
+    qr_image = serializers.ImageField(required=False, allow_null=True)
+    mensaje_texto = serializers.CharField(required=False, allow_blank=True)

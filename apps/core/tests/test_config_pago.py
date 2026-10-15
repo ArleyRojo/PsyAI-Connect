@@ -1,4 +1,5 @@
 import pytest
+import json
 from django.test import RequestFactory
 from apps.core.views import config_pago
 from django.conf import settings
@@ -12,7 +13,7 @@ def test_config_pago_valid_url(settings):
     request = factory.get("/api/config/pago/")
     response = config_pago(request)
     assert response.status_code == 200
-    data = response.json()
+    data = json.loads(response.content)
     assert data["configurada"] is True
     assert data["url"] == "https://checkout.nequi.wompi.co/l/abc123"
     assert data["nombre"] == "Nequi Test"
@@ -26,7 +27,7 @@ def test_config_pago_empty_url(settings):
     request = factory.get("/api/config/pago/")
     response = config_pago(request)
     assert response.status_code == 200
-    data = response.json()
+    data = json.loads(response.content)
     assert data["configurada"] is False
     assert data["url"] == ""
     assert data["nombre"] == ""
@@ -40,7 +41,7 @@ def test_config_pago_invalid_url_without_https(settings):
     request = factory.get("/api/config/pago/")
     response = config_pago(request)
     assert response.status_code == 200
-    data = response.json()
+    data = json.loads(response.content)
     assert data["configurada"] is False
     assert data["url"] == ""
     assert data["nombre"] == ""

@@ -1196,8 +1196,33 @@ html.dark-mode .psyai-modal--info .psyai-modal__content {
 @keyframes fadePanel { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
 /* ============================================================
-   DARK MODE ADDITIONS
-   ============================================================ */
+    DARK MODE ADDITIONS
+    ============================================================ */
+
+/* QR & Bank info section enhancements */
+.section-card .row .col-6.text-center img {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.section-card .row .col-6.text-center img.d-none {
+    opacity: 0;
+    transform: scale(0.95);
+}
+.section-card .row .col-6.text-center img:not(.d-none) {
+    opacity: 1;
+    transform: scale(1);
+}
+.section-card pre#accountText {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+html.dark-mode .section-card pre#accountText {
+    background-color: var(--dm-elevated);
+    border-color: var(--dm-border);
+    color: var(--dm-text1);
+}
 
 
 

@@ -1,3 +1,5 @@
+from decimal import Decimal
+from django.db import transaction
 from django.db.models import Q, Prefetch
 from django.utils import timezone
 
@@ -6,14 +8,24 @@ from apps.authentication.models import Register
 
 
 class InvoiceRepository:
-    def create_invoice(self, patient_id, professional_id, cita_id, items):
+    def create_invoice(self, patient_id, professional_id, cita_id, items,
+                       fechaPago=None, metodoPago=None, referencia=None, notas=None,
+                       evidencia=None, confirmada_por_id=None):
+        from django.utils import timezone
         monto = sum(Decimal(str(item["precioUnitario"])) for item in items)
         factura = Facturas.objects.create(
             idPaciente_id=patient_id,
             idProfesional_id=professional_id,
             idCita=cita_id,
             monto=monto,
-            estadoPago="Pendiente",
+            estadoPago="Pagado",
+            fechaPago=fechaPago,
+            metodoPago=metodoPago,
+            referencia=referencia,
+            notas=notas,
+            evidencia=evidencia,
+            confirmada_por_id=confirmada_por_id,
+            fecha_confirmacion=timezone.now(),
         )
         for item in items:
             ItemsFactura.objects.create(
@@ -103,12 +115,22 @@ class InvoiceRepository:
             result.append(d)
         return result
 
-    def confirmar_pago(self, invoice_id):
-        updated = Facturas.objects.filter(idFactura=invoice_id).update(
-            estadoPago="Pagado",
-            fechaPago=timezone.now(),
-        )
-        return updated > 0
+    def confirmar_pago(self, invoice_id, evidencia=None, confirmada_por=None):
+        with transaction.atomic():
+            factura = Facturas.objects.select_for_update().filter(idFactura=invoice_id).first()
+            if not factura:
+                return False
+            if factura.anulada or factura.estadoPago == "Pagado":
+                return False
+            factura.estadoPago = "Pagado"
+            factura.fechaPago = timezone.now()
+            factura.fecha_confirmacion = timezone.now()
+            if evidencia:
+                factura.evidencia = evidencia
+            if confirmada_por:
+                factura.confirmada_por = confirmada_por
+            factura.save(update_fields=["estadoPago", "fechaPago", "fecha_confirmacion", "evidencia", "confirmada_por"])
+        return True
 
     def annul_invoice(self, invoice_id, motivo):
         updated = Facturas.objects.filter(idFactura=invoice_id).update(

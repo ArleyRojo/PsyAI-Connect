@@ -16,6 +16,8 @@ from apps.professionals.views import (
     ChatMensajeProfesionalResource,
     AllPacientesProfesionalResource,
     PacienteAsignarResource,
+    ProfessionalPaymentInfoViewSet,
+    ProfessionalPaymentInfoPublicView,
 )
 
 app_name = "professionals"
@@ -49,4 +51,7 @@ urlpatterns = [
     path("profesional/documentos/<int:pk>/visibilidad", DocumentoProfesionalPacienteViewSet.as_view({"patch": "partial_update", "put": "update"}), name="documento_visibilidad_legacy"),
     path("descargar/documento-profesional/<int:id_documento>", DownloadResource.as_view(), name="descargar_profesional_legacy"),
     path("descargar/documento-paciente/<int:id_documento>", DownloadResource.as_view(), name="descargar_paciente_legacy"),
+    # Payment info
+    path("profesional/payment-info", ProfessionalPaymentInfoViewSet.as_view({"get": "retrieve", "put": "update"}), name="professional_payment_info"),
+    path("profesional/<int:id_profesional>/payment-info", ProfessionalPaymentInfoPublicView.as_view(), name="professional_payment_info_public"),
 ]

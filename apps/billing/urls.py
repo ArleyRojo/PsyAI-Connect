@@ -26,11 +26,6 @@ urlpatterns = [
         name="factura_detail",
     ),
     path(
-        "facturas/<int:id_factura>/confirmar-pago",
-        views.FacturaConfirmarPagoView.as_view(),
-        name="factura_confirmar_pago",
-    ),
-    path(
         "facturas/stats",
         views.FacturaStatsView.as_view(),
         name="factura_stats",
@@ -39,6 +34,11 @@ urlpatterns = [
         "facturas/estadisticas-admin",
         views.FacturaStatsView.as_view(),
         name="factura_estadisticas_admin",
+    ),
+    path(
+        "facturas/<int:id_factura>/evidencia",
+        views.FacturaEvidenciaView.as_view(),
+        name="factura_evidencia",
     ),
     path(
         "facturas/pacientes-profesional",
