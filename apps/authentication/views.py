@@ -204,6 +204,13 @@ class TOTPVerifyLoginView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        # Verificar estado de la cuenta antes de completar login
+        if not user_model.activo or user_model.estadoCuenta != "Activa":
+            return Response(
+                {"success": False, "message": "Tu cuenta ha sido suspendida. Contacta al administrador."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         django_login(request, user_model, backend="apps.authentication.backends.EmailBackend")
         request.session.cycle_key()
 

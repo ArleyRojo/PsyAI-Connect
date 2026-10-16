@@ -6,6 +6,9 @@ from apps.authentication.models import Register
 @receiver(user_logged_in)
 def setup_session_on_login(request, user, **kwargs):
     if isinstance(user, Register):
+        if not user.activo or user.estadoCuenta != "Activa":
+            from django.core.exceptions import PermissionDenied
+            raise PermissionDenied("Tu cuenta ha sido suspendida. Contacta al administrador.")
         foto = user.fotoPerfil
 
         if not foto:

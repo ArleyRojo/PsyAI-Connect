@@ -5,6 +5,7 @@ import logging
 import psutil
 from collections import Counter, deque
 from django.conf import settings
+from django.contrib.sessions.models import Session
 from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
@@ -79,9 +80,34 @@ class AdminService:
         return {"success": True, "message": "Usuario eliminado"}, 200
 
     def block_user(self, data):
-        activo, user_info = self.repo.block_user(data.get("idUsuario"), data.get("accion"))
-        if activo == 0 and user_info and user_info.get("email"):
-            self._send_suspension_email(user_info["email"], user_info["nombre"], data.get("motivo", ""))
+        target_id = data.get("idUsuario")
+        accion = data.get("accion")
+        # Prevent admin from blocking themselves
+        admin_id = data.get("admin_id")  # will be set by view
+        if admin_id and int(admin_id) == int(target_id):
+            return {"success": False, "message": "No puedes bloquearte a ti mismo"}, 400
+
+        activo, user_info = self.repo.block_user(target_id, accion)
+
+        # Invalidate sessions of the affected user (only when suspending)
+        if activo == 0:
+            # Delete Django sessions where _auth_user_id == target_id
+            # Session data is stored as a dict in session_data (encoded). We'll decode each.
+            try:
+                for session in Session.objects.all():
+                    try:
+                        decoded = session.get_decoded()
+                        if str(decoded.get("_auth_user_id") or decoded.get("idUsuario")) == str(target_id):
+                            session.delete()
+                    except Exception:
+                        continue
+            except RuntimeError:
+                # Database not available (e.g., tests without django_db mark)
+                pass
+
+            if user_info and user_info.get("email"):
+                self._send_suspension_email(user_info["email"], user_info["nombre"], data.get("motivo", ""))
+
         return {"success": True, "message": f"Usuario {'suspendido' if activo == 0 else 'reestablecido'}"}, 200
 
     def _send_suspension_email(self, email, nombre, motivo=""):

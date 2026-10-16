@@ -56,6 +56,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def _setup_session(self, request, user):
         if isinstance(user, Register):
+            if not user.activo or user.estadoCuenta != "Activa":
+                from django.core.exceptions import PermissionDenied
+                raise PermissionDenied("Tu cuenta ha sido suspendida. Contacta al administrador.")
             request.session["usuario"] = user.to_dict()
             request.session["idUsuario"] = user.idUsuario
             request.session["nombre"] = user.nombre

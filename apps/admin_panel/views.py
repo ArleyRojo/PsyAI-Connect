@@ -41,8 +41,10 @@ class AdminStatsStreamAPIView(APIView):
     renderer_classes = [EventStreamRenderer]
 
     def get(self, request):
+        from apps.authentication.models import Register
         client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
         telemetry_service.sse_connected(client_ip)
+        user_id = request.session.get("idUsuario")
 
         def generate():
             last_version = -1
@@ -50,6 +52,17 @@ class AdminStatsStreamAPIView(APIView):
             poll_count = 0
             try:
                 while True:
+                    # Verify account status each iteration
+                    if user_id:
+                        try:
+                            usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
+                            if not usr.activo or usr.estadoCuenta != "Activa":
+                                yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
+                                return
+                        except Register.DoesNotExist:
+                            yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
+                            return
+
                     telemetry_service.sse_heartbeat(client_ip)
                     current_version = telemetry_service._version
                     now = _time.time()
@@ -83,8 +96,10 @@ class AdminLogsStreamAPIView(APIView):
     renderer_classes = [EventStreamRenderer]
 
     def get(self, request):
+        from apps.authentication.models import Register
         client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
         telemetry_service.sse_connected(client_ip)
+        user_id = request.session.get("idUsuario")
 
         def generate():
             last_version = -1
@@ -92,6 +107,17 @@ class AdminLogsStreamAPIView(APIView):
             poll_count = 0
             try:
                 while True:
+                    # Verify account status each iteration
+                    if user_id:
+                        try:
+                            usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
+                            if not usr.activo or usr.estadoCuenta != "Activa":
+                                yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
+                                return
+                        except Register.DoesNotExist:
+                            yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
+                            return
+
                     telemetry_service.sse_heartbeat(client_ip)
                     current_version = AdminRepository.get_logs_version()
                     now = _time.time()
@@ -156,6 +182,7 @@ class AdminUsuarioViewSet(viewsets.ViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             data["idUsuario"] = int(pk)
+            data["admin_id"] = getattr(request, "user_id", None)
             payload, status_code = admin_service.block_user(data)
         elif data.get("nuevoRol"):
             data["idUsuario"] = int(pk)

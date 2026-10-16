@@ -97,12 +97,27 @@ class ChatbotConfigViewSet(viewsets.ViewSet):
 
 class ChatbotConfigEventsResource(View):
     def get(self, request):
+        from apps.authentication.models import Register
+        import json
+        from queue import Empty
+
         queue = chatbot_config_events.subscribe()
+        user_id = request.session.get("idUsuario")
 
         def stream():
             try:
                 yield ": conectado\n\n"
                 while True:
+                    # Verify account status each iteration
+                    if user_id:
+                        try:
+                            usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
+                            if not usr.activo or usr.estadoCuenta != "Activa":
+                                yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
+                                return
+                        except Register.DoesNotExist:
+                            yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
+                            return
                     try:
                         event = queue.get(timeout=60)
                         yield f"event: chatbot-config\ndata: {event}\n\n"
