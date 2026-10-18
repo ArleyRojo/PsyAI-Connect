@@ -324,7 +324,7 @@ pytest --cov=apps --cov-report=html:htmlcov
 ### Solo tests de integración (requiere MySQL)
 ```bash
 # Levantar MySQL (docker compose up -d db)
-docker compose -f docker/docker-compose.yml up -d db
+docker compose -f install/docker-compose.yml up -d db
 
 # Ejecutar
 pytest tests/test_integration.py -v -m integration
@@ -332,7 +332,7 @@ pytest tests/test_integration.py -v -m integration
 
 ### Dentro de Docker
 ```bash
-docker compose -f docker/docker-compose.yml exec app python -m pytest apps/ -q
+docker compose -f install/docker-compose.yml exec app python -m pytest apps/ -q
 docker compose -f docker-compose.yml exec app python -m pytest apps/authentication/tests/ -v
 ```
 

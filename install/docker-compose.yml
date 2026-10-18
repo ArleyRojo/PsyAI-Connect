@@ -1,13 +1,13 @@
 ## ──────────────────────────────────────────────────────────────────────────────
 # PsyAI Connect — Docker Compose (Development)
 # Usage (from project root):
-#   docker compose -f docker/docker-compose.yml up
-#   docker compose -f docker/docker-compose.yml up -d
-#   docker compose -f docker/docker-compose.yml down
-#   docker compose -f docker/docker-compose.yml logs -f app
-#   docker compose -f docker/docker-compose.yml exec app bash
+#   docker compose -f install/docker-compose.yml up
+#   docker compose -f install/docker-compose.yml up -d
+#   docker compose -f install/docker-compose.yml down
+#   docker compose -f install/docker-compose.yml logs -f app
+#   docker compose -f install/docker-compose.yml exec app bash
 #
-# Usage (from docker/ folder):
+# Usage (from install/ folder):
 #   docker compose up
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -16,7 +16,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: install/Dockerfile
       target: dev
     container_name: psyai_app
     ports:

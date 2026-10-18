@@ -93,7 +93,7 @@ PsyAI-Connect/
 ├── .env.example
 ├── .gitignore
 │
-├── docker/
+├── install/
 │   ├── Dockerfile            # Multi-stage dev/prod
 │   ├── docker-compose.yml
 │   ├── docker-compose.prod.yml
@@ -149,7 +149,7 @@ cp .env.example .env
 # Editar .env con SECRET_KEY y credenciales
 
 # 3. Levantar
-docker compose -f docker/docker-compose.yml up
+docker compose -f install/docker-compose.yml up
 ```
 🎉 **Listo** en `http://localhost:8000`  
 El entrypoint crea BD, migra, crea superuser demo (`admin@psyai.com` / `Admin123`) y arranca el servidor.
@@ -195,7 +195,7 @@ pytest apps/chatbot/tests/ -v
 pytest apps/scheduling/tests/ -v
 
 # En Docker
-docker compose -f docker/docker-compose.yml exec app python -m pytest apps/ -q
+docker compose -f install/docker-compose.yml exec app python -m pytest apps/ -q
 ```
 
 > **259+ tests** cubriendo servicios, repositorios, vistas y endpoints HTTP.  

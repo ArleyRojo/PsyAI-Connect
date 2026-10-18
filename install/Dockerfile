@@ -35,7 +35,7 @@ ENV DJANGO_SETTINGS_MODULE=config.settings.dev \
 
 EXPOSE 8000
 
-COPY docker/entrypoint.sh /entrypoint.sh
+COPY install/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
@@ -61,7 +61,7 @@ RUN rm -rf .git .pytest_cache __pycache__ \
 
 EXPOSE 8000
 
-COPY docker/entrypoint.sh /entrypoint.sh
+COPY install/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

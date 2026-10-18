@@ -17,7 +17,7 @@ Flujo habitual: `@architect` plantea el cambio → `@django-backend` y `@fronten
 ## Comandos
 - Pruebas: `pytest` (usa `config.settings.test`, SQLite en memoria). Por app: `pytest apps/scheduling -q`.
 - Servidor local: `python manage.py runserver` (`config.settings.dev`).
-- Docker (desde la raíz): `docker compose -f docker/docker-compose.yml up`.
+- Docker (desde la raíz): `docker compose -f install/docker-compose.yml up`.
 
 ## Arquitectura (cada app en `apps/<nombre>/`)
 `Views (DRF) → Services → Repositories → MySQL`, más `models.py`, `urls.py`, `serializers.py` y `tests/`.
@@ -41,7 +41,7 @@ Flujo habitual: `@architect` plantea el cambio → `@django-backend` y `@fronten
 - UI, mensajes y documentación en **español**. Nombres de modelos/campos como ya existen (`idCita`, `estadoPago`).
 - No editar migraciones ya aplicadas; crear una nueva. No borrar ni debilitar tests para que pasen.
 - Nunca leer, imprimir ni commitear `.env`. Variables nuevas se documentan en `.env.example`.
-- `docker/entrypoint.sh` debe mantener finales de línea LF.
+- `install/entrypoint.sh` debe mantener finales de línea LF.
 
 ## Definición de terminado
 `pytest` en verde · tests nuevos por capa afectada · `docs/` actualizado (índice en `docs/README.md`) · revisión de `architect` y `security-auditor` hecha.

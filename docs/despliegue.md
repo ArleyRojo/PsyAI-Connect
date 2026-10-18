@@ -19,7 +19,7 @@
 ## 2. Estructura de Docker
 
 ```
-docker/
+install/
 ├── Dockerfile               # Multi-stage: builder → runtime (dev/prod)
 ├── docker-compose.yml       # Desarrollo: app + MySQL + phpMyAdmin (opcional)
 ├── docker-compose.prod.yml  # Override producción: waitress, sin hot-reload, logs JSON
@@ -29,7 +29,7 @@ docker/
 
 ---
 
-## 3. `docker/Dockerfile` — Multi-stage
+## 3. `install/Dockerfile` — Multi-stage
 
 ```dockerfile
 # ---- Builder ----
@@ -47,14 +47,14 @@ COPY . .
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 EXPOSE 8000
-ENTRYPOINT ["/app/docker/entrypoint.sh"]
+ENTRYPOINT ["/app/install/entrypoint.sh"]
 ```
 
 > **Nota:** En `docker-compose.prod.yml` se sobrescribe el `CMD` para usar `waitress` en lugar de `runserver`.
 
 ---
 
-## 4. `docker/entrypoint.sh`
+## 4. `install/entrypoint.sh`
 
 ```bash
 #!/bin/bash
@@ -85,7 +85,7 @@ if not Register.objects.filter(email='admin@psyai.com').exists():
 exec "$@"
 ```
 
-> **Permisos:** `chmod +x docker/entrypoint.sh` en el repo.
+> **Permisos:** `chmod +x install/entrypoint.sh` en el repo.
 
 ---
 
@@ -115,7 +115,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: install/Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ..:/app  # Hot-reload: código montado
@@ -144,7 +144,7 @@ volumes:
 
 **Levantar:**
 ```bash
-cd docker
+cd install
 docker compose up -d --build
 # App: http://localhost:8000
 # MySQL: localhost:3307 (user: psyai, pass: psyai_pass)
@@ -174,7 +174,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: install/Dockerfile
     command: >
       waitress-serve
       --port=8000
@@ -221,7 +221,7 @@ volumes:
 
 **Levantar:**
 ```bash
-cd docker
+cd install
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
@@ -326,7 +326,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 ```bash
 # Desarrollo
-cd docker
+cd install
 docker compose up -d --build          # Levantar
 docker compose logs -f app             # Logs
 docker compose exec app bash           # Shell en contenedor
@@ -337,7 +337,7 @@ docker compose down                    # Detener
 docker compose down -v                 # Detener + borrar volúmenes (BD)
 
 # Producción
-cd docker
+cd install
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f app
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py migrate
@@ -357,8 +357,8 @@ docker exec -i psyai_db mysql -u root -p"$DB_ROOT_PASSWORD" psyai_connect < back
 - [`config/settings/base.py`](../config/settings/base.py) — Settings base
 - [`config/settings/prod.py`](../config/settings/prod.py) — Settings producción
 - [`config/settings/dev.py`](../config/settings/dev.py) — Settings desarrollo
-- [`docker/Dockerfile`](../docker/Dockerfile) — Imagen multi-stage
-- [`docker/entrypoint.sh`](../docker/entrypoint.sh) — Script de arranque
+- [`install/Dockerfile`](../install/Dockerfile) — Imagen multi-stage
+- [`install/entrypoint.sh`](../install/entrypoint.sh) — Script de arranque
 - [`SEGURIDAD.md`](seguridad.md) — Checklist de seguridad en producción
 - [`chatbot-ia.md`](chatbot-ia.md) — Variables `GEMINI_API_KEY*`
 - [`pagos-facturacion.md`](pagos-facturacion.md) — Variables `WOMPI_*`

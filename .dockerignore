@@ -42,9 +42,9 @@ ENV/
 tests.py
 tests/
 
-# Docker files (moved to docker/) - but keep entrypoint.sh
-docker/*
-!docker/entrypoint.sh
+# Docker files (moved to install/) - but keep entrypoint.sh
+install/*
+!install/entrypoint.sh
 .dockerignore
 
 # Documentation

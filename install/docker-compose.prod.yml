@@ -1,9 +1,9 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # PsyAI Connect — Docker Compose (Production Override)
 # Usage (from project root):
-#   docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
+#   docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml up -d
 #
-# Usage (from docker/ folder):
+# Usage (from install/ folder):
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
 # This overrides the 'app' service to:
@@ -18,7 +18,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: install/Dockerfile
       target: prod
       args:
         SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or environment}
