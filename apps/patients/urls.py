@@ -55,6 +55,8 @@ urlpatterns = [
     # Legacy aliases sin barra final (compatibles con API.md y el frontend)
     path("pacientes", PacienteViewSet.as_view({"get": "list"}), name="pacientes"),
     path("profesionales", ProfesionalViewSet.as_view({"get": "list"}), name="profesionales"),
+    # Alias con tilde para compatibilidad con frontend
+    path("evolución", EvolucionViewSet.as_view({"get": "list", "post": "create"}), name="evolucion_tilde"),
     # Anamnesis — con y sin barra final (el JS llama sin barra)
     path(
         "paciente/<int:paciente_id>/anamnesis",

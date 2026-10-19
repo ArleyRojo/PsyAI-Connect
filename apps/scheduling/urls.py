@@ -20,6 +20,8 @@ urlpatterns = [
     path("citas/disponibles", CitaDisponibleResource.as_view(), name="citas_disponibles"),
     path("citas/fechas-disponibles", CitaDisponibleResource.as_view(), name="citas_fechas_disponibles"),
     path("citas/proxima", CitaProximaResource.as_view(), name="cita_proxima"),
+    # Alias con tilde para compatibilidad con frontend
+    path("citas/próxima", CitaProximaResource.as_view(), name="cita_proxima_tilde"),
     path("citas/horarios-ocupados", CitaHorarioOcupadoResource.as_view(), name="citas_horarios_ocupados"),
     path("citas/profesional", CitaViewSet.as_view({"get": "list"}), name="citas_profesional"),
     path("citas/paciente", CitaViewSet.as_view({"get": "list"}), name="citas_paciente"),
