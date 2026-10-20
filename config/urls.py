@@ -20,6 +20,7 @@ urlpatterns = [
     path("api/client-errors", client_errors, name="client_errors"),
     path("api/theme", theme_preference, name="theme_preference"),
     path("api/newsletter/subscribe", newsletter_subscribe, name="newsletter_subscribe"),
+    path("health/", csrf_exempt(health_check), name="health"),
     path("healthz/", csrf_exempt(health_check), name="healthz"),
     path("", serve_pages, {"filename": "index.html"}, name="index"),
     path("<path:filename>", serve_pages, name="page_catch_all"),
