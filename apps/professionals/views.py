@@ -448,6 +448,22 @@ class ProfessionalPaymentInfoViewSet(viewsets.ViewSet):
             info = ProfessionalPaymentInfo(idProfesional_id=user_id)
         serializer = ProfessionalPaymentInfoSerializer(info)
         return Response({"success": True, "data": serializer.data}, status=status.HTTP_200_OK)
+    def update(self, request):
+        """PUT /api/professional/payment-info/ – guardar/actualizar QR y mensaje."""
+        data = request.data.copy() if hasattr(request.data, "copy") else dict(request.data)
+        if "qr_image" in request.FILES:
+            data["qr_image"] = request.FILES["qr_image"]
+        serializer = ProfessionalPaymentInfoSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        user_id = getattr(request, "user_id", None)
+        from apps.professionals.models import ProfessionalPaymentInfo
+        info, _ = ProfessionalPaymentInfo.objects.get_or_create(idProfesional_id=user_id)
+        if "qr_image" in serializer.validated_data:
+            info.qr_image = serializer.validated_data["qr_image"]
+        if "mensaje_texto" in serializer.validated_data:
+            info.mensaje_texto = serializer.validated_data["mensaje_texto"]
+        info.save()
+        return Response({"success": True, "message": "Datos de cobro actualizados"}, status=status.HTTP_200_OK)
 
 
 class PacienteAsignarResource(APIView):
@@ -464,18 +480,6 @@ class PacienteAsignarResource(APIView):
             {"success": True, "message": "Paciente asignado correctamente"},
             status=status.HTTP_200_OK,
         )
-
-    def update(self, request):
-        """PUT /api/professional/payment-info/ – guardar/actualizar QR y mensaje."""
-        serializer = ProfessionalPaymentInfoSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user_id = getattr(request, "user_id", None)
-        from apps.professionals.models import ProfessionalPaymentInfo
-        info, _ = ProfessionalPaymentInfo.objects.get_or_create(idProfesional_id=user_id)
-        info.qr_image = serializer.validated_data.get('qr_image', info.qr_image)
-        info.mensaje_texto = serializer.validated_data.get('mensaje_texto', info.mensaje_texto)
-        info.save()
-        return Response({"success": True, "message": "Datos de cobro actualizados"}, status=status.HTTP_200_OK)
 
 
 class ProfessionalPaymentInfoPublicView(APIView):
