@@ -41,6 +41,11 @@ urlpatterns = [
         name="factura_evidencia",
     ),
     path(
+        "facturas/<int:id_factura>/confirmar-pago",
+        views.FacturaConfirmarPagoView.as_view(),
+        name="factura_confirmar_pago",
+    ),
+    path(
         "facturas/pacientes-profesional",
         views.ProfesionalPacientesView.as_view(),
         name="factura_pacientes",
