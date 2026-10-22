@@ -230,3 +230,24 @@ class FacturaEvidenciaView(APIView):
         response = FileResponse(open(factura.evidencia.path, "rb"), as_attachment=False)
         response["Content-Disposition"] = f'inline; filename="{os.path.basename(factura.evidencia.name)}"'
         return response
+
+
+class FacturaConfirmarPagoView(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def post(self, request, id_factura):
+        user_id = getattr(request, "user_id", None)
+        evidencia = request.FILES.get("evidencia")
+        metodo_pago = request.data.get("metodoPago")
+        referencia = request.data.get("referencia")
+        notas = request.data.get("notas")
+
+        payload, status_code = invoice_service.confirm_payment(
+            id_factura,
+            professional_user_id=user_id,
+            evidencia=evidencia,
+            metodoPago=metodo_pago,
+            referencia=referencia,
+            notas=notas,
+        )
+        return Response(payload, status=status_code)
