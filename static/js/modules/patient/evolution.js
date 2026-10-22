@@ -2,6 +2,17 @@
 // js/aside-patient/evolution.js — Mi Evolución Paciente
 // ============================================================
 
+// Escapa texto que viene del usuario o del servidor antes de meterlo con innerHTML.
+// Sin esto, unas notas como "<img src=x onerror=alert(1)>" se ejecutarían como código (XSS).
+function escaparHtml(valor) {
+    return String(valor ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function getEnergiaColor(nivel) {
     if (nivel <= 3) return 'danger';
     if (nivel <= 5) return 'warning';
@@ -24,9 +35,9 @@ function getEnergiaBarra(nivel) {
     const color = getEnergiaColor(nivel);
     return `<div class="d-flex align-items-center gap-2">
         <div class="progress" style="height: 6px; width: 50px;">
-            <div class="progress-bar bg-${color}" style="width: ${nivel * 10}%"></div>
+            <div class="progress-bar bg-${color}" style="width: ${Math.min(Number(nivel) || 0, 10) * 10}%"></div>
         </div>
-        <small class="text-muted">${nivel}</small>
+        <small class="text-muted">${escaparHtml(nivel)}</small>
     </div>`;
 }
 
@@ -74,10 +85,10 @@ function renderizarHistorial() {
 
     tbody.innerHTML = historial.map(h => `
         <tr>
-            <td>${h.fecha}</td>
-            <td><span class="badge bg-${getEstadoColor(h.estadoEmocional)}">${h.estadoEmocional}</span></td>
+            <td>${escaparHtml(h.fecha)}</td>
+            <td><span class="badge bg-${getEstadoColor(h.estadoEmocional)}">${escaparHtml(h.estadoEmocional)}</span></td>
             <td>${getEnergiaBarra(h.nivelEnergia)}</td>
-            <td>${h.notasPersonales || '—'}</td>
+            <td>${escaparHtml(h.notasPersonales || '—')}</td>
         </tr>
     `).join('');
 }
