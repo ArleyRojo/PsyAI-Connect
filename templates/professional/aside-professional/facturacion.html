@@ -176,11 +176,43 @@
         </div>
         <button class="btn btn-sm btn-outline-primary mt-1" onclick="agregarFilaItem()"><i class="fas fa-plus me-1"></i>Agregar ítem</button>
     </div>
-    <div class="text-end fw-bold fs-5">Total: $<span id="totalFactura">0</span></div>
+    <div class="text-end fw-bold fs-5 mb-3">Total: $<span id="totalFactura">0</span></div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Fecha de pago <span class="text-danger">*</span></label>
+            <input type="date" id="inputFechaPago" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Método de pago <span class="text-danger">*</span></label>
+            <select id="selectMetodoPago" class="form-select" required>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Nequi">Nequi</option>
+                <option value="Bre-B">Bre-B</option>
+                <option value="Daviplata">Daviplata</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Tarjeta">Tarjeta</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Referencia bancaria</label>
+            <input type="text" id="inputReferencia" class="form-control" placeholder="Ej: REF123456" maxlength="60">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Notas</label>
+            <input type="text" id="inputNotas" class="form-control" placeholder="Notas sobre el cobro (opcional)" maxlength="255">
+        </div>
+        <div class="col-12">
+            <label class="form-label fw-semibold">Comprobante / Evidencia <span class="text-danger">*</span></label>
+            <input type="file" id="inputEvidenciaNueva" class="form-control" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required>
+            <small class="text-muted">JPG, PNG, WEBP o PDF. Máximo 5 MB.</small>
+        </div>
+    </div>
 </div>
 <div class="modal-footer border-0">
     <button type="button" class="btn btn-outline-secondary px-4 professional-modal-btn" data-bs-dismiss="modal">Cancelar</button>
-    <button type="button" class="btn btn-primary px-4 professional-modal-btn" id="btnGuardarFactura" onclick="guardarFactura()">Guardar Factura</button>
+    <button type="button" class="btn btn-primary px-4 professional-modal-btn" id="btnGuardarFactura" onclick="guardarFactura()">Registrar Pago</button>
 </div>
 </div>
 </div>
@@ -441,6 +473,16 @@ function abrirModalNuevaFactura() {
             '<div class="col-2"><button class="btn btn-outline-danger btn-sm w-100" onclick="eliminarFilaItem(this)"><i class="fas fa-trash"></i></button></div>' +
         '</div>';
     document.getElementById("totalFactura").textContent = "0";
+    var fechaInp = document.getElementById("inputFechaPago");
+    if (fechaInp) fechaInp.value = new Date().toISOString().split("T")[0];
+    var metodoSel = document.getElementById("selectMetodoPago");
+    if (metodoSel) metodoSel.value = "Transferencia";
+    var refInp = document.getElementById("inputReferencia");
+    if (refInp) refInp.value = "";
+    var notasInp = document.getElementById("inputNotas");
+    if (notasInp) notasInp.value = "";
+    var evidInp = document.getElementById("inputEvidenciaNueva");
+    if (evidInp) evidInp.value = "";
     new bootstrap.Modal(document.getElementById("modalNuevaFactura")).show();
 }
 
@@ -456,29 +498,57 @@ async function guardarFactura() {
         }
     });
     if (items.length === 0) { PsyAIAlerts.error("Error", "Agrega al menos un item válido"); return; }
+
+    var fechaPago = document.getElementById("inputFechaPago").value;
+    if (!fechaPago) { PsyAIAlerts.error("Error", "Indica la fecha del pago"); return; }
+    var metodoPago = document.getElementById("selectMetodoPago").value;
+    if (!metodoPago) { PsyAIAlerts.error("Error", "Selecciona el método de pago"); return; }
+
+    var evidenciaInput = document.getElementById("inputEvidenciaNueva");
+    var evidenciaFile = evidenciaInput && evidenciaInput.files ? evidenciaInput.files[0] : null;
+    if (!evidenciaFile) {
+        PsyAIAlerts.error("Error", "Debes adjuntar el comprobante o evidencia del pago");
+        return;
+    }
+    var msgErr = validarEvidencia(evidenciaFile);
+    if (msgErr) { PsyAIAlerts.error("Error", msgErr); return; }
+
     var btn = document.getElementById("btnGuardarFactura");
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando...';
+
     try {
+        var fd = new FormData();
+        fd.append("idPaciente", parseInt(idPaciente));
+        fd.append("items", JSON.stringify(items));
+        fd.append("fechaPago", fechaPago);
+        fd.append("metodoPago", metodoPago);
+        var ref = (document.getElementById("inputReferencia").value || "").trim();
+        if (ref) fd.append("referencia", ref);
+        var notas = (document.getElementById("inputNotas").value || "").trim();
+        if (notas) fd.append("notas", notas);
+        var citaId = document.getElementById("selectCita").value;
+        if (citaId) fd.append("idCita", parseInt(citaId));
+        fd.append("evidencia", evidenciaFile);
+
         var res = await fetch("/api/facturas", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
             credentials: "include",
-            body: JSON.stringify({idPaciente: parseInt(idPaciente), items: items, idCita: null}),
+            body: fd,
         });
         var data = await res.json();
         if (data.success) {
-            PsyAIAlerts.success("Éxito", "Factura creada correctamente");
+            PsyAIAlerts.success("Éxito", "Pago registrado y factura creada correctamente");
             bootstrap.Modal.getInstance(document.getElementById("modalNuevaFactura")).hide();
             cargarFacturasProfesional();
         } else {
-            PsyAIAlerts.error("Error", data.message || "No se pudo crear");
+            PsyAIAlerts.error("Error", data.message || "No se pudo registrar el pago");
         }
     } catch (e) {
-        PsyAIAlerts.error("Error", "Error de conexión");
+        PsyAIAlerts.error("Error", "Error de conexión al registrar el pago");
     } finally {
         btn.disabled = false;
-        btn.innerHTML = "Guardar Factura";
+        btn.innerHTML = "Registrar Pago";
     }
 }
 
