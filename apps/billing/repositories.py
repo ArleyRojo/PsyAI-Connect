@@ -115,7 +115,8 @@ class InvoiceRepository:
             result.append(d)
         return result
 
-    def confirmar_pago(self, invoice_id, evidencia=None, confirmada_por=None):
+    def confirmar_pago(self, invoice_id, evidencia=None, confirmada_por=None,
+                       metodoPago=None, referencia=None, notas=None):
         with transaction.atomic():
             factura = Facturas.objects.select_for_update().filter(idFactura=invoice_id).first()
             if not factura:
@@ -125,11 +126,23 @@ class InvoiceRepository:
             factura.estadoPago = "Pagado"
             factura.fechaPago = timezone.now()
             factura.fecha_confirmacion = timezone.now()
+            update_fields = ["estadoPago", "fechaPago", "fecha_confirmacion"]
             if evidencia:
                 factura.evidencia = evidencia
+                update_fields.append("evidencia")
             if confirmada_por:
                 factura.confirmada_por = confirmada_por
-            factura.save(update_fields=["estadoPago", "fechaPago", "fecha_confirmacion", "evidencia", "confirmada_por"])
+                update_fields.append("confirmada_por")
+            if metodoPago:
+                factura.metodoPago = metodoPago
+                update_fields.append("metodoPago")
+            if referencia:
+                factura.referencia = referencia
+                update_fields.append("referencia")
+            if notas:
+                factura.notas = notas
+                update_fields.append("notas")
+            factura.save(update_fields=update_fields)
         return True
 
     def annul_invoice(self, invoice_id, motivo):
