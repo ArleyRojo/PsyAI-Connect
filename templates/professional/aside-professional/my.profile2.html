@@ -162,7 +162,75 @@
             <h5><i class="fas fa-brain icon-brain"></i>Especialidades</h5>
             <p class="card-text-block" data-field="especialidad">Cargando...</p>
         </div>
+
+        <!-- Información de Cobro (QR y Cuentas) -->
+        <div class="card profile-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fas fa-qrcode text-primary me-2"></i>Información de Cobro (Pagos de Pacientes)</h5>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarPagoInfo">
+                    <i class="fas fa-edit me-1"></i>Editar datos de cobro
+                </button>
+            </div>
+            <p class="text-muted small">Estos datos (código QR y números de cuenta) son los que verán tus pacientes asignados en su sección <strong>"Mis Pagos"</strong> para transferirte.</p>
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-4 text-center">
+                    <div id="profQrPreviewWrap" class="p-2 border rounded bg-light d-inline-block">
+                        <img id="profQrPreview" src="" alt="Código QR de cobro" class="img-fluid d-none" style="max-width:180px; max-height:180px; border-radius:8px;">
+                        <div id="profQrEmpty" class="text-muted p-4 small"><i class="fas fa-qrcode fa-3x mb-2 d-block"></i>Sin QR configurado</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-8">
+                    <label class="form-label fw-semibold small text-muted text-uppercase">Instrucciones / Cuentas configuradas:</label>
+                    <pre id="profMensajeTextoPreview" class="p-3 bg-light rounded text-muted" style="white-space: pre-wrap; font-size:.9rem; max-height:180px; overflow:auto;">No has registrado instrucciones de cuenta o llaves Bre-B / Nequi.</pre>
+                </div>
+            </div>
+        </div>
     </main>
+</div>
+
+<!-- Modal Editar Información de Pago -->
+<div class="modal fade psyai-modal" id="modalEditarPagoInfo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content psyai-modal__content">
+            <div class="psyai-modal__header">
+                <div class="psyai-modal__header-icon">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <div>
+                    <h5 class="psyai-modal__title">Configurar Datos de Cobro</h5>
+                    <p class="psyai-modal__subtitle">Código QR y cuentas para tus pacientes</p>
+                </div>
+                <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="psyai-modal__body">
+                <div class="psyai-modal__field mb-3">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-qrcode"></i> Imagen del Código QR (Nequi / Daviplata / Bancolombia / Bre-B)
+                    </label>
+                    <input type="file" class="form-control" id="editQrImage" accept=".jpg,.jpeg,.png,.webp,image/*">
+                    <small class="text-muted d-block mt-1">Sube la captura de tu código QR de cobro.</small>
+                </div>
+                <div class="psyai-modal__field">
+                    <label class="psyai-modal__label">
+                        <i class="fas fa-university"></i> Datos de cuenta y llaves de transferencia
+                    </label>
+                    <textarea class="psyai-modal__input" id="editMensajeTexto" rows="4"
+                        placeholder="Ej: Nequi / Daviplata: 3001234567&#10;Bancolombia Ahorros: 123-456789-01&#10;Titular: Dr(a)...&#10;Llave Bre-B: 3001234567"
+                        style="resize:vertical; border-radius:12px;"></textarea>
+                </div>
+            </div>
+            <div class="psyai-modal__footer">
+                <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <button type="button" class="psyai-modal__btn psyai-modal__btn--save" id="btnGuardarPagoInfo" onclick="guardarPagoInfo()">
+                    <i class="fas fa-save me-1"></i> Guardar Datos
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Editar Perfil Profesional -->

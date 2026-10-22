@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     await cargarPerfil(usuario.id);
+    await cargarPagoInfo();
     inicializarUploadFoto();
 
     const modalEditar = document.getElementById('modalEditarPerfil');
@@ -310,4 +311,94 @@ function getNombreUsuario() {
         }
     }
     return 'Usuario';
+}
+
+// ── Datos de Pago y Cobro ──────────────────────────────────────
+async function cargarPagoInfo() {
+    try {
+        const res = await fetch('/api/profesional/payment-info', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success && data.data) {
+            const info = data.data;
+            const img = document.getElementById('profQrPreview');
+            const empty = document.getElementById('profQrEmpty');
+            const pre = document.getElementById('profMensajeTextoPreview');
+            const textarea = document.getElementById('editMensajeTexto');
+
+            if (info.qr_image) {
+                if (img) { img.src = info.qr_image; img.classList.remove('d-none'); }
+                if (empty) empty.classList.add('d-none');
+            } else {
+                if (img) img.classList.add('d-none');
+                if (empty) empty.classList.remove('d-none');
+            }
+
+            if (info.mensaje_texto) {
+                if (pre) pre.textContent = info.mensaje_texto;
+                if (textarea) textarea.value = info.mensaje_texto;
+            } else {
+                if (pre) pre.textContent = 'No has registrado instrucciones de cuenta o llaves Bre-B / Nequi.';
+                if (textarea) textarea.value = '';
+            }
+        }
+    } catch(e) {
+        console.error('Error cargando payment info:', e);
+    }
+}
+
+async function guardarPagoInfo() {
+    const btn = document.getElementById('btnGuardarPagoInfo');
+    const qrInput = document.getElementById('editQrImage');
+    const mensajeTexto = (document.getElementById('editMensajeTexto')?.value || '').trim();
+
+    const fd = new FormData();
+    if (qrInput && qrInput.files && qrInput.files[0]) {
+        fd.append('qr_image', qrInput.files[0]);
+    }
+    fd.append('mensaje_texto', mensajeTexto);
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+    }
+
+    try {
+        const res = await fetch('/api/profesional/payment-info', {
+            method: 'PUT',
+            credentials: 'include',
+            body: fd
+        });
+        const data = await res.json();
+        if (data.success) {
+            if (typeof PsyAIAlerts !== 'undefined' && PsyAIAlerts.success) {
+                PsyAIAlerts.success('Éxito', 'Datos de cobro actualizados correctamente');
+            } else if (typeof mostrarToast === 'function') {
+                mostrarToast('Datos de cobro actualizados correctamente', 'success');
+            }
+            const modalEl = document.getElementById('modalEditarPagoInfo');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            if (qrInput) qrInput.value = '';
+            await cargarPagoInfo();
+        } else {
+            const err = data.message || 'Error al guardar datos de cobro';
+            if (typeof PsyAIAlerts !== 'undefined' && PsyAIAlerts.error) {
+                PsyAIAlerts.error('Error', err);
+            } else if (typeof mostrarToast === 'function') {
+                mostrarToast(err, 'error');
+            }
+        }
+    } catch(e) {
+        console.error(e);
+        if (typeof PsyAIAlerts !== 'undefined' && PsyAIAlerts.error) {
+            PsyAIAlerts.error('Error', 'Error de conexión al guardar datos de cobro');
+        } else if (typeof mostrarToast === 'function') {
+            mostrarToast('Error de conexión al guardar datos de cobro', 'error');
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save me-1"></i> Guardar Datos';
+        }
+    }
 }
