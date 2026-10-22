@@ -93,7 +93,7 @@ function renderizarHistorial() {
     `).join('');
 }
 
-function guardarEvolucion() {
+async function guardarEvolucion() {
     const estadoEmocional = document.getElementById("estado_emocional").value;
     const nivelEnergia    = document.getElementById("nivel_energia").value;
     const notasPersonales = document.getElementById("notas_personales").value;
@@ -106,37 +106,40 @@ function guardarEvolucion() {
         return;
     }
 
-    fetch("/api/evolucion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ estadoEmocional, nivelEnergia, notasPersonales })
-    })
-    .then(res => res.json())
-    .then(data => {
-        const historial = getHistorialLocal();
-        const nuevaEvolucion = {
-            fecha: new Date().toLocaleDateString(),
-            fechaRaw: new Date().toISOString(),
-            estadoEmocional: estadoEmocional,
-            nivelEnergia: parseInt(nivelEnergia),
-            notasPersonales: notasPersonales
-        };
-        historial.unshift(nuevaEvolucion);
-        guardarHistorialLocal(historial);
-        
+    // Deshabilitar el botón evita registros duplicados por doble clic.
+    const btnGuardar = document.getElementById("btnGuardarEvolucion");
+    if (btnGuardar) btnGuardar.disabled = true;
+
+    try {
+        const res = await fetch("/api/evolucion", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ estadoEmocional, nivelEnergia, notasPersonales })
+        });
+        const data = await res.json().catch(() => ({}));
+
+        // Antes se mostraba "Guardado" aunque el servidor respondiera 400/403/500.
+        if (!res.ok || data.success === false) {
+            PsyAIAlerts.error('Error', data.message || data.detail || 'No se pudo guardar tu evolución.');
+            return;
+        }
+
+        // El servidor es la fuente de verdad: recargamos el historial desde la API.
+        await cargarHistorialRemoto();
+        renderizarHistorial();
+
         PsyAIAlerts.success('Guardado', 'Tu evolución se ha registrado correctamente.');
-        
+
         document.getElementById("estado_emocional").value = "";
         document.getElementById("nivel_energia").value = "";
         document.getElementById("notas_personales").value = "";
-        
-        renderizarHistorial();
-    })
-    .catch(err => {
+    } catch (err) {
         console.error(err);
-        PsyAIAlerts.error('Error', 'No se pudo guardar en la base de datos.');
-    });
+        PsyAIAlerts.error('Error', 'No se pudo conectar con el servidor.');
+    } finally {
+        if (btnGuardar) btnGuardar.disabled = false;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
