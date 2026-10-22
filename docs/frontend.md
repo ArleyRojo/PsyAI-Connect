@@ -1,6 +1,6 @@
 # Frontend — PsyAI Connect
 
-> **Resumen:** Organización del frontend (HTML/CSS/JS vanilla), carga de scripts, sistema de notificaciones, tema claro/oscuro y convenciones de命名.  
+> **Resumen:** Organización del frontend (HTML/CSS/JS vanilla), carga de scripts, sistema de notificaciones, tema claro/oscuro y convenciones de nombres.  
 > **Audiencia:** Desarrolladores frontend y full-stack que tocan la UI.
 
 ---
@@ -39,6 +39,7 @@ static/
 │   │   └── navbar-scroll.js
 │   ├── core/
 │   │   └── shared/           # Utilidades globales (cargadas en TODAS las páginas autenticadas)
+│   │       ├── account-status.js   # Manejo global de cuenta suspendida (aviso y redirección)
 │   │       ├── alerts.js           # PsyAIAlerts (toasts)
 │   │       ├── aside.js            # Sidebar colapsable
 │   │       ├── connection-status.js# Offline/servidor caído/chatbot
@@ -59,15 +60,20 @@ static/
 │   │   │   ├── my.profile.js
 │   │   │   └── aside.js
 │   │   ├── professional/       # Módulos del portal profesional
+│   │   │   ├── anamnesis.js            # Anamnesis y antecedentes familiares (historia clínica)
 │   │   │   ├── my.agenda.js
 │   │   │   ├── patients.js
 │   │   │   ├── patients.evolution.js
+│   │   │   ├── patients.prediagnostico.js # Prediagnósticos del chatbot por paciente
 │   │   │   ├── historia_clinica_pro.js
 │   │   │   ├── my.profile2.js
 │   │   │   ├── reports.js
 │   │   │   └── aside.js
 │   │   ├── admin/              # Módulos del panel admin
 │   │   │   ├── admin.dashboard.js
+│   │   │   ├── admin.dashboard.charts.js  # Gráficas (Chart.js)
+│   │   │   ├── admin.dashboard.sse.js     # Métricas en vivo por SSE
+│   │   │   ├── admin.dashboard.utils.js   # escapeHtml, csvCell y utilidades compartidas
 │   │   │   ├── admin.users.js
 │   │   │   ├── admin.roles.js
 │   │   │   ├── admin.logs.js
