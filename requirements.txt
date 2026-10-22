@@ -19,6 +19,7 @@ django-allauth>=65.0.0
 pyjwt>=2.8.0
 cryptography>=42.0.0
 twilio>=8.0
+Pillow>=10.0.0
 
 # Testing (dev)
 pytest>=8.0
