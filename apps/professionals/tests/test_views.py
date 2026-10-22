@@ -10,6 +10,7 @@ from apps.professionals.views import (
     DashboardResource,
     ReporteViewSet,
     EvolucionProfesionalResource,
+    ProfessionalPaymentInfoViewSet,
 )
 from apps.core.permissions import IsAuthenticatedDRF, IsProfesional
 
@@ -391,3 +392,36 @@ class TestEvolucionProfesionalResourceGET:
         resp = EvolucionProfesionalResource.as_view()(req)
 
         assert resp.status_code == 200
+
+
+# ── ProfessionalPaymentInfoViewSet ──────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestProfessionalPaymentInfoViewSet:
+    def test_retrieve_and_update(self, rf, mock_auth_profesional):
+        from apps.authentication.models import Register
+        Register.objects.create_user(idUsuario=5, email="pro5@test.com", password="pass", rol="profesional", nombre="Prof Cinco")
+
+        # GET
+        req_get = rf.get("/api/profesional/payment-info")
+        view_get = ProfessionalPaymentInfoViewSet.as_view({"get": "retrieve"})
+        resp_get = view_get(req_get)
+        assert resp_get.status_code == 200
+        assert resp_get.data["success"]
+
+        # PUT
+        req_put = rf.put(
+            "/api/profesional/payment-info",
+            data=json.dumps({"mensaje_texto": "Nequi: 3001234567"}),
+            content_type="application/json",
+        )
+        view_put = ProfessionalPaymentInfoViewSet.as_view({"put": "update"})
+        resp_put = view_put(req_put)
+        assert resp_put.status_code == 200
+        assert resp_put.data["success"]
+
+        # verify retrieval reflects updated text
+        resp_get2 = view_get(req_get)
+        assert resp_get2.data["data"]["mensaje_texto"] == "Nequi: 3001234567"
+
