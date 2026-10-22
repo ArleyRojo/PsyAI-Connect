@@ -106,6 +106,7 @@ class InvoiceService:
                 notas=notas,
                 evidencia=evidencia,
                 confirmada_por_id=professional_user_id,
+                estadoPago="Pagado",
             )
 
             # enviar correo al paciente
@@ -240,3 +241,72 @@ class InvoiceService:
     def get_professional_patients(self, professional_id):
         patients = self.repo.get_professional_patients(professional_id)
         return {"success": True, "pacientes": patients}, 200
+
+    def confirm_payment(self, invoice_id, professional_user_id, evidencia,
+                        metodoPago=None, referencia=None, notas=None):
+        factura_data = self.repo.get_invoice_by_id(invoice_id)
+        if not factura_data:
+            return {"success": False, "message": "Factura no encontrada"}, 404
+
+        if factura_data.get("anulada"):
+            return {"success": False, "message": "No se puede confirmar una factura anulada"}, 400
+
+        if factura_data.get("estadoPago") == "Pagado":
+            return {"success": False, "message": "La factura ya está pagada"}, 400
+
+        if factura_data.get("idProfesional") != professional_user_id:
+            return {"success": False, "message": "No tienes permiso para confirmar esta factura"}, 403
+
+        if not evidencia:
+            return {"success": False, "message": "Debes adjuntar la evidencia del pago"}, 400
+
+        from apps.core.utils import validate_file_upload
+        allowed_ext = ["jpg", "jpeg", "png", "webp", "pdf"]
+        name, error = validate_file_upload(evidencia, allowed_extensions=allowed_ext)
+        if error:
+            return {"success": False, "message": f"Evidencia inválida: {error}"}, 400
+
+        if metodoPago:
+            allowed_methods = dict(Facturas.METODO_PAGO_CHOICES).keys()
+            if metodoPago not in allowed_methods:
+                return {"success": False, "message": "Método de pago inválido"}, 400
+
+        from apps.authentication.models import Register
+        confirmador = Register.objects.filter(idUsuario=professional_user_id).first()
+
+        ok = self.repo.confirmar_pago(
+            invoice_id,
+            evidencia=evidencia,
+            confirmada_por=confirmador,
+            metodoPago=metodoPago,
+            referencia=referencia,
+            notas=notas,
+        )
+        if not ok:
+            return {"success": False, "message": "No se pudo confirmar el pago"}, 400
+
+        # Enviar correo de notificación al paciente
+        try:
+            paciente = Register.objects.filter(idUsuario=factura_data["idPaciente"]).first()
+            profesional = confirmador
+            site_url = InvoiceMailService._get_site_url()
+            items_fmt = [
+                {"descripcion": i["descripcion"], "precio": f"{float(i['precioUnitario']):,.0f}"}
+                for i in factura_data.get("items", [])
+            ]
+            InvoiceMailService.send_factura_notificacion(
+                recipient_email=paciente.email if paciente else None,
+                titulo="Pago confirmado",
+                mensaje=f"Se ha confirmado el pago de la factura #{invoice_id}.",
+                id_factura=invoice_id,
+                nombre_paciente=paciente.nombre if paciente else None,
+                nombre_profesional=profesional.nombre if profesional else None,
+                monto=factura_data.get("monto", 0),
+                estado_pago="Pagado",
+                items=items_fmt,
+                cta_link=f"{site_url}/aside-patient/facturas.html",
+            )
+        except Exception as e:
+            logger.error(f"Error enviando correo de confirmación de pago: {e}")
+
+        return {"success": True, "message": "Pago confirmado y paciente notificado"}, 200
