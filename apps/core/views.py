@@ -114,9 +114,9 @@ def serve_pages(request, filename):
             return render(request, info["template"], {"title": info["title"], "updated": "18 de junio de 2026"})
         return HttpResponseRedirect("/")
 
-    if settings.DEBUG:
-        # En desarrollo permitimos abrir las pantallas protegidas sin sesión para
-        # facilitar la vista previa del frontend y la depuración local.
+    if settings.DEBUG and getattr(settings, "ALLOW_PAGE_PREVIEW_WITHOUT_SESSION", False):
+        # Vista previa del frontend sin sesión: solo si se activa a propósito en el .env
+        # (ALLOW_PAGE_PREVIEW_WITHOUT_SESSION=True) y nunca en producción (DEBUG=False).
         pass
     elif filename == "admin.dashboard.html" or filename.startswith("aside-admin/"):
         if user_role is None:

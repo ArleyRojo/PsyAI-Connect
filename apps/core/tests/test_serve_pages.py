@@ -158,11 +158,23 @@ class TestUnaffectedPages:
         resp = serve_pages(request, "login.html")
         assert resp.status_code == 200
 
-    @override_settings(DEBUG=True)
-    def test_professional_patient_page_is_available_in_debug_mode(self, rf):
+    @override_settings(DEBUG=True, ALLOW_PAGE_PREVIEW_WITHOUT_SESSION=True)
+    def test_professional_patient_page_is_available_in_preview_mode(self, rf):
         request = _make_request(rf, "/aside-professional/patients.html")
         resp = serve_pages(request, "aside-professional/patients.html")
         assert resp.status_code == 200
+
+    @override_settings(DEBUG=True, ALLOW_PAGE_PREVIEW_WITHOUT_SESSION=False)
+    def test_debug_alone_does_not_skip_role_check(self, rf):
+        request = _make_request(rf, "/aside-professional/patients.html", {"rol": "paciente"})
+        with pytest.raises(PermissionDenied):
+            serve_pages(request, "aside-professional/patients.html")
+
+    @override_settings(DEBUG=False, ALLOW_PAGE_PREVIEW_WITHOUT_SESSION=True)
+    def test_preview_flag_is_ignored_in_production(self, rf):
+        request = _make_request(rf, "/aside-admin/users.html")
+        resp = serve_pages(request, "aside-admin/users.html")
+        assert resp.status_code == 302
 
     def test_nonexistent_page_raises_404(self, rf):
         request = _make_request(rf, "/nonexistent.page.html")

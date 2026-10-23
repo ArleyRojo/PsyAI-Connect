@@ -22,6 +22,9 @@ urlpatterns = [
     path("api/newsletter/subscribe", newsletter_subscribe, name="newsletter_subscribe"),
     path("health/", csrf_exempt(health_check), name="health"),
     path("healthz/", csrf_exempt(health_check), name="healthz"),
+    # Sin barra final: si no, caen en serve_pages (catch-all) y responden 404.
+    path("health", csrf_exempt(health_check), name="health_sin_barra"),
+    path("healthz", csrf_exempt(health_check), name="healthz_sin_barra"),
     path("", serve_pages, {"filename": "index.html"}, name="index"),
     path("<path:filename>", serve_pages, name="page_catch_all"),
 ]

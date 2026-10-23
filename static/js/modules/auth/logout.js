@@ -316,10 +316,13 @@ async function cerrarSesion() {
     if (overlay) overlay.remove();
     const style = document.querySelector('style[data-logout-overlay]');
     if (style) style.remove();
+    const msg = 'No se pudo cerrar sesión. Verifica tu conexión e intenta de nuevo.';
     if (typeof mostrarToast === 'function') {
-      mostrarToast('No se pudo cerrar sesion. Verifica tu conexion e intenta de nuevo.', 'error');
+      mostrarToast(msg, 'error');
+    } else if (window.PsyAIAlerts) {
+      PsyAIAlerts.error('Error', msg);
     } else {
-      alert('No se pudo cerrar sesion. Verifica tu conexion e intenta de nuevo.');
+      console.error(msg);
     }
     return;
   }
