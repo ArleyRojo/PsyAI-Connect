@@ -361,7 +361,13 @@ function toggleShare(btn) {
   const tag = row.querySelector('.tag');
   const info = row.querySelector('.finfo');
 
-  fetch(`/api/profesional/documentos/${id}/visibilidad`, { method: 'PUT' })
+  // El servidor exige el campo "visibilidad": se envía el valor al que cambia el documento.
+  const nuevaVisibilidad = row.dataset.visibilidad === 'compartido' ? 'privado' : 'compartido';
+  fetch(`/api/profesional/documentos/${encodeURIComponent(id)}/visibilidad`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visibilidad: nuevaVisibilidad })
+  })
     .then(r => r.json())
     .then(data => {
       if (!data.success) { showToast(data.message || 'Error', 'warn'); return; }
@@ -394,14 +400,17 @@ function closeDeleteModal() {
 
 function confirmDelete() {
   if (rowToDelete) {
-    const id = rowToDelete.dataset.id;
-    fetch(`/api/profesional/documentos/${id}`, { method: 'DELETE' })
+    // Se guarda la fila en una constante: closeDeleteModal() pone rowToDelete en null
+    // antes de que llegue la respuesta del servidor.
+    const row = rowToDelete;
+    const id = row.dataset.id;
+    fetch(`/api/profesional/documentos/${encodeURIComponent(id)}`, { method: 'DELETE' })
       .then(r => r.json())
       .then(data => {
         if (!data.success) { showToast(data.message || 'Error', 'warn'); return; }
-        rowToDelete.style.transition = 'opacity 0.2s';
-        rowToDelete.style.opacity = '0';
-        setTimeout(() => rowToDelete.remove(), 200);
+        row.style.transition = 'opacity 0.2s';
+        row.style.opacity = '0';
+        setTimeout(() => row.remove(), 200);
         showToast('Documento eliminado');
       })
       .catch(() => showToast('Error de conexión', 'warn'));

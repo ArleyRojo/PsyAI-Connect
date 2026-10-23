@@ -551,12 +551,13 @@ function configurarFinalizarSesion() {
         }
         btn.disabled = true;
         try {
-            var res = await fetch('/api/chatbot/prediagnostico', {
+            // La ruta del router de DRF termina en "/"; sin la barra cae en serve_pages y devuelve HTML.
+            var res = await fetch('/api/chatbot/prediagnostico/', {
                 method: 'POST',
                 credentials: 'include'
             });
-            var data = await res.json();
-            if (!data.success) {
+            var data = await res.json().catch(function () { return {}; });
+            if (!res.ok || !data.success) {
                 if (typeof showAlert === 'function') showAlert('warning', data.message || 'No se pudo generar el resumen.', 'Aviso');
                 return;
             }
