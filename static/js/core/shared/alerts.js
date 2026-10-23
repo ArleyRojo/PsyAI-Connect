@@ -294,7 +294,8 @@ function showAlert(type, message, title) {
 
     window.mostrarToast = function (mensaje, tipo = 'info', duracion = 4000) {
         const dark   = document.documentElement.classList.contains('dark-mode');
-        const config = TIPOS[tipo] || TIPOS.info;
+        // 'error' es un alias de 'danger': varios módulos llaman mostrarToast(msg, 'error').
+        const config = TIPOS[tipo === 'error' ? 'danger' : tipo] || TIPOS.info;
         const col    = dark ? config.dark : config.light;
         const c      = getToastContainer();
 

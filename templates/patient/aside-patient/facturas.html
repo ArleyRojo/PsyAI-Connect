@@ -283,10 +283,10 @@
 
 {% include 'base/partials/scripts.html' %}
 <script src="/js/modules/auth/auth-guard.js?v=20260918-2"></script>
-<script src="/js/core/shared/alerts.js?v=20260803-1"></script>
+<script src="/js/core/shared/alerts.js?v=20261023-1"></script>
 <script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
 <script src="/js/modules/patient/aside.js?v=20260711-1"></script>
-<script src="/js/modules/auth/logout.js?v=20260803-1"></script>
+<script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script>
 document.addEventListener("DOMContentLoaded", async function() {
@@ -317,7 +317,8 @@ async function loadPagoCuentaBtn() {
   try {
     const res = await fetch('/api/config/pago/', { credentials: 'include' });
     const data = await res.json();
-    if (data.success && data.url) {
+    // /api/config/pago/ responde {url, nombre, configurada}; no trae "success".
+    if (data.configurada && data.url) {
       const wrap = document.getElementById('pagoCuentaBtnWrap');
       if (wrap) {
         wrap.innerHTML = '<a href="' + esc(data.url) + '" target="_blank" rel="noopener" class="btn btn-outline-primary w-100"><i class="fas fa-external-link-alt me-2"></i>Pagar por enlace externo</a>';
