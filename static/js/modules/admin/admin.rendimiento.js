@@ -1,5 +1,22 @@
 window.rendimientoCargado = false;
 let _sseSource = null;
+// Se pausa el stream cuando la pestaña está oculta: Chrome permite solo 6 conexiones por sitio.
+let _rendimientoPausado = false;
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (_sseSource) {
+            _sseSource.close();
+            _sseSource = null;
+            _rendimientoPausado = true;
+        }
+    } else if (_rendimientoPausado && window.rendimientoCargado) {
+        _rendimientoPausado = false;
+        iniciarSSEConTimeout();
+    }
+});
+window.addEventListener('pagehide', () => {
+    if (_sseSource) { _sseSource.close(); _sseSource = null; }
+});
 const sparklineHistory = {
     Cpu: [], Ram: [], Requests: [], Online: [], Latency: [], Queue: [],
     Server: [], Capacity: []
@@ -45,6 +62,11 @@ async function cargarStatsIniciales() {
 // Race entre primer mensaje SSE y timeout de seguridad (10s)
 async function iniciarSSEConTimeout(ms = 10000) {
     if (_sseSource) return;
+    // Con la pestaña oculta no se abre: se reanuda en visibilitychange.
+    if (document.hidden) {
+        _rendimientoPausado = true;
+        return;
+    }
 
     let timeoutId = null;
 

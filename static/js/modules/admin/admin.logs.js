@@ -102,9 +102,33 @@ async function cargarTabNotificaciones() {
 }
 
 // ── SSE para logs en tiempo real ──────────────────────────────────────────────
+// Se pausa cuando la pestaña está oculta: Chrome permite solo 6 conexiones por sitio.
+let _logsStreamPausado = false;
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (_logsEventSource) {
+            _logsEventSource.close();
+            _logsEventSource = null;
+            _logsStreamPausado = true;
+        }
+    } else if (_logsStreamPausado) {
+        _logsStreamPausado = false;
+        iniciarLogsStream();
+    }
+});
+window.addEventListener('pagehide', () => {
+    if (_logsEventSource) { _logsEventSource.close(); _logsEventSource = null; }
+});
+
 function iniciarLogsStream() {
     if (_logsEventSource) {
         _logsEventSource.close();
+        _logsEventSource = null;
+    }
+    // Con la pestaña oculta no se abre: se reanuda en visibilitychange.
+    if (document.hidden) {
+        _logsStreamPausado = true;
+        return;
     }
 
     _logsEventSource = new EventSource(`${API}/api/admin/logs/stream`, { withCredentials: true });

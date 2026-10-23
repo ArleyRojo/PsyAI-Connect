@@ -250,7 +250,7 @@
 <script src="/js/modules/patient/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
-<script src="/js/modules/patient/evolution.js?v=20260803-1"></script>
+<script src="/js/modules/patient/evolution.js?v=20261021-2"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -327,6 +327,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset slider
             energySlider.value = 5;
             updateEnergy(5);
+            // Reset contador de notas: cambiar .value desde JS no dispara el evento "input"
+            if (notesCounter && notesTextarea && notesTextarea.value === '') {
+                notesCounter.textContent = '0 / 500';
+                notesCounter.style.color = '';
+            }
         });
         obs.observe(tableObs, { childList: true, subtree: true });
     }
