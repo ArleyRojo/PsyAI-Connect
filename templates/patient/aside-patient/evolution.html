@@ -327,6 +327,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset slider
             energySlider.value = 5;
             updateEnergy(5);
+            // Reset contador de notas: cambiar .value desde JS no dispara el evento "input"
+            if (notesCounter && notesTextarea && notesTextarea.value === '') {
+                notesCounter.textContent = '0 / 500';
+                notesCounter.style.color = '';
+            }
         });
         obs.observe(tableObs, { childList: true, subtree: true });
     }

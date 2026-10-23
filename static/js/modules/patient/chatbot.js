@@ -251,8 +251,27 @@ function configurarActualizacionConfigChatbot() {
     });
 }
 
+// El stream de configuración se cierra con la pestaña oculta y se reabre al volver.
+let chatbotConfigPausado = false;
+document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+        if (chatbotConfigEventSource) {
+            chatbotConfigEventSource.close();
+            chatbotConfigEventSource = null;
+            chatbotConfigPausado = true;
+        }
+    } else if (chatbotConfigPausado) {
+        chatbotConfigPausado = false;
+        configurarEventosConfigChatbot();
+    }
+});
+window.addEventListener('pagehide', function () {
+    if (chatbotConfigEventSource) { chatbotConfigEventSource.close(); chatbotConfigEventSource = null; }
+});
+
 async function configurarEventosConfigChatbot() {
     if (!window.EventSource || chatbotConfigEventSource) return;
+    if (document.hidden) { chatbotConfigPausado = true; return; }
     try {
         const check = await fetch('/api/chatbot/config', { credentials: 'include' });
         if (!check.ok) return;
