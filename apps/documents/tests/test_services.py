@@ -101,7 +101,8 @@ class TestToggleDocVisibility:
             "idDocumento": 1,
             "visibilidad": "privado",
         }
-        result = documento_service.toggle_doc_visibility(1, 1)
+        result, status = documento_service.toggle_doc_visibility(1, 1)
+        assert status == 200
         assert result["success"] is True
         assert result["visibilidad"] == "compartido"
 
@@ -117,7 +118,9 @@ class TestDeleteProfesionalDoc:
 
     def test_successful_delete(self, documento_service, mock_documento_repo):
         mock_documento_repo.soft_delete_profesional_doc.return_value = True
-        result = documento_service.delete_profesional_doc(1, 1)
+        # La vista hace "payload, status_code = ...": el servicio debe devolver una tupla.
+        result, status = documento_service.delete_profesional_doc(1, 1)
+        assert status == 200
         assert result["success"] is True
 
 
@@ -190,7 +193,9 @@ class TestDeletePatientDoc:
 
     def test_successful_delete(self, documento_service, mock_documento_repo):
         mock_documento_repo.soft_delete_patient_doc.return_value = True
-        result = documento_service.delete_patient_doc(1, 5)
+        # La vista hace "payload, status_code = ...": el servicio debe devolver una tupla.
+        result, status = documento_service.delete_patient_doc(1, 5)
+        assert status == 200
         assert result["success"] is True
 
 
@@ -206,14 +211,16 @@ class TestToggleAutorizacion:
     def test_successful_toggle_grant(self, documento_service, mock_documento_repo):
         mock_documento_repo.get_patient_doc_by_id.return_value = {"idDocumento": 1}
         mock_documento_repo.get_autorizacion.return_value = None
-        result = documento_service.toggle_autorizacion(1, 5, 1)
+        result, status = documento_service.toggle_autorizacion(1, 5, 1)
+        assert status == 200
         assert result["success"] is True
         assert result["autorizado"] is True
 
     def test_successful_toggle_revoke(self, documento_service, mock_documento_repo):
         mock_documento_repo.get_patient_doc_by_id.return_value = {"idDocumento": 1}
         mock_documento_repo.get_autorizacion.return_value = {"revocado": False}
-        result = documento_service.toggle_autorizacion(1, 5, 1)
+        result, status = documento_service.toggle_autorizacion(1, 5, 1)
+        assert status == 200
         assert result["success"] is True
         assert result["autorizado"] is False
 

@@ -116,13 +116,13 @@ class DocumentoService:
 
         new_vis = "compartido" if doc.get("visibilidad") != "compartido" else "privado"
         self.repo.update_doc_visibility(doc_id, professional_id, new_vis)
-        return {"success": True, "visibilidad": new_vis, "message": "Visibilidad actualizada"}
+        return {"success": True, "visibilidad": new_vis, "message": "Visibilidad actualizada"}, 200
 
     def delete_profesional_doc(self, doc_id, professional_id):
         ok = self.repo.soft_delete_profesional_doc(doc_id, professional_id)
         if not ok:
             return {"success": False, "message": "Documento no encontrado"}, 404
-        return {"success": True, "message": "Documento eliminado"}
+        return {"success": True, "message": "Documento eliminado"}, 200
 
     def list_patient_dashboard(self, patient_id):
         compartidos = self.repo.list_shared_docs_for_patient(patient_id)
@@ -184,7 +184,7 @@ class DocumentoService:
         ok = self.repo.soft_delete_patient_doc(doc_id, patient_id)
         if not ok:
             return {"success": False, "message": "Documento no encontrado"}, 404
-        return {"success": True, "message": "Documento eliminado"}
+        return {"success": True, "message": "Documento eliminado"}, 200
 
     def toggle_autorizacion(self, documento_id, patient_id, professional_id):
         doc = self.repo.get_patient_doc_by_id(documento_id, patient_id)
@@ -194,10 +194,10 @@ class DocumentoService:
         aut = self.repo.get_autorizacion(documento_id, professional_id)
         if aut and not aut["revocado"]:
             self.repo.set_autorizacion(documento_id, professional_id, revocado=1)
-            return {"success": True, "autorizado": False, "message": "Acceso revocado"}
+            return {"success": True, "autorizado": False, "message": "Acceso revocado"}, 200
         else:
             self.repo.set_autorizacion(documento_id, professional_id, revocado=0)
-            return {"success": True, "autorizado": True, "message": "Acceso concedido"}
+            return {"success": True, "autorizado": True, "message": "Acceso concedido"}, 200
 
     def get_profesional_doc_for_download(self, id_documento, professional_id):
         doc = self.repo.get_profesional_doc_by_id(id_documento, professional_id)

@@ -152,14 +152,17 @@ function closeDeleteModal() {
 
 function confirmDelete() {
   if (rowToDelete) {
-    const id = rowToDelete.dataset.id;
-    fetch(`/api/paciente/documentos/${id}`, { method: 'DELETE' })
+    // Se guarda la fila en una constante: closeDeleteModal() pone rowToDelete en null
+    // antes de que llegue la respuesta del servidor.
+    const row = rowToDelete;
+    const id = row.dataset.id;
+    fetch(`/api/documentos/paciente/doc/${encodeURIComponent(id)}`, { method: 'DELETE' })
       .then(r => r.json())
       .then(data => {
         if (!data.success) { showToast(data.message || 'Error', 'warn'); return; }
-        rowToDelete.style.transition = 'opacity 0.2s';
-        rowToDelete.style.opacity = '0';
-        setTimeout(() => { rowToDelete.remove(); loadDocumentos(); }, 200);
+        row.style.transition = 'opacity 0.2s';
+        row.style.opacity = '0';
+        setTimeout(() => { row.remove(); loadDocumentos(); }, 200);
         showToast('Documento eliminado');
       })
       .catch(() => showToast('Error de conexión', 'warn'));

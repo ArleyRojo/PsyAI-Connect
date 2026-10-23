@@ -123,29 +123,32 @@ async function guardarPerfil() {
         return;
     }
 
-    if (telefonoNuevo !== telefonoActual) {
-        localStorage.setItem('perfil_telefono', telefonoNuevo);
+    if (!usuario?.id) {
+        mostrarToast('Tu sesión expiró. Vuelve a iniciar sesión.', 'error');
+        return;
     }
 
-    if (telefonoNuevo) setField('telefono', telefonoNuevo);
-
-    if (usuario?.id) {
-        try {
-            const res = await fetch('/api/perfil/paciente', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    idUsuario:        usuario.id,
-                    numeroTelefonico: telefonoNuevo
-                })
-            });
-            const data = await res.json();
-            if (!data.success) console.warn('Flask:', data.message);
-        } catch {
-            // Sin Flask — cambios ya guardados en localStorage
+    try {
+        // El servidor toma el id del paciente de la sesión; el de la URL solo identifica el recurso.
+        const res = await fetch(`/api/perfil/paciente/${encodeURIComponent(usuario.id)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ numeroTelefonico: telefonoNuevo })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) {
+            mostrarToast(data.message || 'No se pudo guardar el teléfono. Intenta de nuevo.', 'error');
+            return;
         }
+    } catch {
+        mostrarToast('No se pudo conectar con el servidor.', 'error');
+        return;
     }
+
+    // Solo se actualiza la vista cuando el servidor confirmó el cambio.
+    localStorage.setItem('perfil_telefono', telefonoNuevo);
+    if (telefonoNuevo) setField('telefono', telefonoNuevo);
 
     mostrarToast('Perfil actualizado correctamente.', 'success');
     const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarPerfil'));

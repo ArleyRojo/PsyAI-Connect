@@ -501,6 +501,7 @@ hr.divider {
 .toast i { font-size: 18px; color: #4ade80; }
 
 /* ── MODAL ── */
+/* Se usa .modal-card y no .modal: Bootstrap 5 oculta todo lo que tenga la clase .modal. */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -511,9 +512,11 @@ hr.divider {
   justify-content: center;
   backdrop-filter: blur(2px);
 }
-.modal-overlay.show { display: flex; }
+/* professional.css oculta .modal-overlay (opacity 0, visibility hidden) hasta que tenga .active;
+   esta página usa .show, así que hay que volverla visible aquí. */
+.modal-overlay.show { display: flex; opacity: 1; visibility: visible; }
 
-.modal {
+.modal-card {
   background: var(--color-bg-light, #fff);
   border-radius: var(--radius-lg);
   padding: 28px;
@@ -521,8 +524,8 @@ hr.divider {
   box-shadow: 0 20px 60px rgba(0,0,0,.2);
   border-top: 3px solid var(--red);
 }
-.modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--gray-800); }
-.modal p  { font-size: 13px; color: var(--gray-400); line-height: 1.6; margin-bottom: 20px; }
+.modal-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--gray-800); }
+.modal-card p  { font-size: 13px; color: var(--gray-400); line-height: 1.6; margin-bottom: 20px; }
 
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
@@ -617,12 +620,12 @@ html.dark-mode .notice.amber {
   color: #fbbf24;
 }
 
-html.dark-mode .modal {
+html.dark-mode .modal-card {
   background: var(--dm-elevated);
   border-top-color: var(--dm-accent);
 }
-html.dark-mode .modal h3 { color: var(--dm-text1); }
-html.dark-mode .modal p { color: var(--dm-text2); }
+html.dark-mode .modal-card h3 { color: var(--dm-text1); }
+html.dark-mode .modal-card p { color: var(--dm-text2); }
 html.dark-mode .btn-cancel {
   background: transparent;
   border-color: var(--dm-border);
