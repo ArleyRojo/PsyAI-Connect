@@ -207,6 +207,10 @@ def _parse_bool(val: str) -> bool:
     return val.strip().lower() in ("1", "true", "yes", "on")
 
 WHATSAPP_ENABLED = _parse_bool(os.getenv("WHATSAPP_ENABLED", "False"))
+
+# Permite abrir las pantallas protegidas sin sesión (solo con DEBUG=True).
+# Apagado por defecto para que en desarrollo también se respeten los roles.
+ALLOW_PAGE_PREVIEW_WITHOUT_SESSION = _parse_bool(os.getenv("ALLOW_PAGE_PREVIEW_WITHOUT_SESSION", "False"))
 TWILIO_SID = os.getenv("TWILIO_SID", "")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN", "")
 TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "")   # ej. whatsapp:+14155238886
