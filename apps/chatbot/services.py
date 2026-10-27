@@ -1137,6 +1137,50 @@ class ChatbotService:
             return True
         return False
 
+    def _parse_prediagnostico_json(self, raw_text):
+        """Parse JSON from model response, handling common issues."""
+        # First try direct parse
+        try:
+            return json.loads(raw_text)
+        except json.JSONDecodeError:
+            pass
+        
+        # Try to extract JSON from markdown code blocks
+        import re
+        json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+        if json_match:
+            try:
+                return json.loads(json_match.group())
+            except json.JSONDecodeError:
+                pass
+        
+        # Try to find JSON between ```json and ``` or ``` and ```
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', raw_text, re.DOTALL | re.IGNORECASE)
+        if json_match:
+            try:
+                return json.loads(json_match.group(1))
+            except json.JSONDecodeError:
+                pass
+        
+        raise json.JSONDecodeError("Could not extract valid JSON", raw_text, 0)
+
+    def _validate_prediagnostico_result(self, resultado):
+        """Validate that the prediagnóstico result has all required fields."""
+        required_fields = [
+            "resumen_paciente", "resumen_profesional", "posibles_areas",
+            "recomendaciones_paciente", "nivel_riesgo", "requiere_atencion_urgente"
+        ]
+        for field in required_fields:
+            if field not in resultado:
+                self.logger.error(f"Missing required field in prediagnóstico: {field}")
+                return False
+        # Validate nivel_riesgo is valid
+        valid_niveles = {"bajo", "moderado", "alto", "critico"}
+        if resultado.get("nivel_riesgo") not in valid_niveles:
+            self.logger.error(f"Invalid nivel_riesgo: {resultado.get('nivel_riesgo')}")
+            return False
+        return True
+
     def generar_prediagnostico(self, patient_id):
         history = self.chat_repo.get_history(patient_id, today_only=True, limit=60)
         if not history:
@@ -1160,15 +1204,36 @@ class ChatbotService:
             return {"success": False, "message": "Servicio de IA no disponible en este momento."}, 503
 
         model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
-        try:
-            raw = self._call_gemini_json(keys[0], model, PREDIAGNOSTICO_SYSTEM_PROMPT, conversacion_texto)
-            raw = raw.strip().strip("`")
-            if raw.lower().startswith("json"):
-                raw = raw[4:].strip()
-            resultado = json.loads(raw)
-        except Exception as exc:
-            self.logger.exception("Error generando prediagnostico: %s", exc)
-            return {"success": False, "message": "No se pudo generar el prediagnóstico. Intenta más tarde."}, 503
+        
+        # Try up to 2 times with different prompts if JSON parsing fails
+        for attempt in range(2):
+            try:
+                raw = self._call_gemini_json(keys[0], model, PREDIAGNOSTICO_SYSTEM_PROMPT, conversacion_texto)
+                self.logger.info(f"Prediagnóstico raw response (attempt {attempt+1}): {raw[:500]}")
+                
+                raw = raw.strip().strip("`")
+                if raw.lower().startswith("json"):
+                    raw = raw[4:].strip()
+                
+                # Try to extract JSON from the response (in case model adds extra text)
+                resultado = self._parse_prediagnostico_json(raw)
+                
+                # Validate required fields
+                if not self._validate_prediagnostico_result(resultado):
+                    raise ValueError("Missing required fields in prediagnóstico result")
+                
+                break  # Success
+                
+            except (json.JSONDecodeError, ValueError) as exc:
+                self.logger.warning(f"Prediagnóstico JSON parse failed (attempt {attempt+1}): {exc}. Raw: {raw[:200]}")
+                if attempt == 1:  # Last attempt failed
+                    self.logger.exception("Error generando prediagnostico después de 2 intentos")
+                    return {"success": False, "message": "No se pudo generar el prediagnóstico. Intenta más tarde."}, 503
+                # Retry with a more explicit prompt
+                continue
+            except Exception as exc:
+                self.logger.exception("Error generando prediagnostico: %s", exc)
+                return {"success": False, "message": "No se pudo generar el prediagnóstico. Intenta más tarde."}, 503
 
         # Override de seguridad: si el historial ya registró riesgo alto/crítico,
         # no depender solo del modelo — forzar atención urgente.
