@@ -487,19 +487,18 @@ class ProfessionalPaymentInfoPublicView(APIView):
     permission_classes = [IsAuthenticatedDRF]
 
     def get(self, request, id_profesional):
-        from apps.professionals.models import ProfessionalPaymentInfo, PacientesProfesional
+        from apps.professionals.models import ProfessionalPaymentInfo
+        from apps.professionals.repositories import ProfessionalRepository
         user_id = getattr(request, "user_id", None)
         user_role = getattr(request, "user_role", None)
 
         # Permitir a la propia profesional ver sus datos
         if user_role == "profesional" and str(user_id) == str(id_profesional):
             pass  # autorizado
-        # Permitir a pacientes con relación
+        # Permitir a pacientes con relación (asignación, cita o factura)
         elif user_role == "paciente":
-            related = PacientesProfesional.objects.filter(
-                idProfesional_id=id_profesional, idPaciente_id=user_id
-            ).exists()
-            if not related:
+            repo = ProfessionalRepository()
+            if not repo.patient_can_view_payment_info(int(id_profesional), user_id):
                 return Response({"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
         else:
             return Response({"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)

@@ -11,6 +11,7 @@ from apps.professionals.views import (
     ReporteViewSet,
     EvolucionProfesionalResource,
     ProfessionalPaymentInfoViewSet,
+    ProfessionalPaymentInfoPublicView,
 )
 from apps.core.permissions import IsAuthenticatedDRF, IsProfesional
 
@@ -59,23 +60,25 @@ def mock_role_profesional():
 
 
 class TestPerfilProfesionalGET:
-    def test_unauthenticated_returns_403(self, rf):
+    def test_unauthenticated_returns_401(self, rf):
         req = rf.get("/api/perfil/profesional/1")
         pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PerfilProfesionalViewSet.as_view({"get": "retrieve"})
             resp = view(req, pk="1")
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
-    def test_wrong_role_returns_403(self, rf):
+    def test_wrong_role_returns_401(self, rf):
         req = rf.get("/api/perfil/profesional/1")
         pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PerfilProfesionalViewSet.as_view({"get": "retrieve"})
             resp = view(req, pk="1")
-        assert resp.status_code == 403
+        # Sin autenticación (has_permission=False) debe devolver 401
+        assert resp.status_code == 401
 
     def test_profesional_can_access(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/perfil/profesional/1")
@@ -123,7 +126,7 @@ class TestPerfilProfesionalGET:
 
 
 class TestPerfilProfesionalPUT:
-    def test_wrong_role_returns_403(self, rf):
+    def test_wrong_role_returns_401(self, rf):
         req = rf.put(
             "/api/perfil/profesional",
             data=json.dumps({}),
@@ -134,7 +137,8 @@ class TestPerfilProfesionalPUT:
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = PerfilProfesionalViewSet.as_view({"put": "update"})
             resp = view(req)
-        assert resp.status_code == 403
+        # Sin autenticación (has_permission=False) debe devolver 401
+        assert resp.status_code == 401
 
     def test_ownership_check_rejects_other_user(self, rf, mock_service):
         req = rf.put(
@@ -190,7 +194,7 @@ class TestPerfilProfesionalPUT:
 
 
 class TestDisponibilidadResourcePOST:
-    def test_wrong_role_returns_403(self, rf):
+    def test_wrong_role_returns_401(self, rf):
         req = rf.post(
             "/api/disponibilidad",
             data=json.dumps({"dia": "lunes"}),
@@ -201,7 +205,8 @@ class TestDisponibilidadResourcePOST:
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DisponibilidadViewSet.as_view({"post": "create"})
             resp = view(req)
-        assert resp.status_code == 403
+        # Sin autenticación (has_permission=False) debe devolver 401
+        assert resp.status_code == 401
 
     def test_success(self, rf, mock_auth_profesional):
         req = rf.post(
@@ -228,14 +233,15 @@ class TestDisponibilidadResourcePOST:
 
 
 class TestDisponibilidadResourceGET:
-    def test_unauthenticated_returns_403(self, rf):
+    def test_unauthenticated_returns_401(self, rf):
         req = rf.get("/api/disponibilidad/1")
         pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = DisponibilidadViewSet.as_view({"get": "retrieve"})
             resp = view(req, pk="1")
-        assert resp.status_code == 403
+        # Sin autenticación (has_permission=False) debe devolver 401
+        assert resp.status_code == 401
 
     def test_profesional_can_access(self, rf, mock_auth_profesional):
         req = rf.get("/api/disponibilidad/1")
@@ -275,13 +281,14 @@ class TestDisponibilidadResourceGET:
 
 
 class TestDashboardResourceGET:
-    def test_wrong_role_returns_403(self, rf):
+    def test_wrong_role_returns_401(self, rf):
         req = rf.get("/api/profesional/dashboard")
         pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             resp = DashboardResource.as_view()(req)
-        assert resp.status_code == 403
+        # Sin autenticación (has_permission=False) debe devolver 401
+        assert resp.status_code == 401
 
     def test_success(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/profesional/dashboard")
@@ -300,14 +307,15 @@ class TestDashboardResourceGET:
 
 
 class TestReporteResourceGET:
-    def test_wrong_role_returns_403(self, rf):
+    def test_wrong_role_returns_401(self, rf):
         req = rf.get("/api/reportes")
         pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = ReporteViewSet.as_view({"get": "list"})
             resp = view(req)
-        assert resp.status_code == 403
+        # Sin autenticación (has_permission=False) debe devolver 401
+        assert resp.status_code == 401
 
     def test_success(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/reportes")
@@ -338,7 +346,7 @@ class TestReporteResourceGET:
 
 
 class TestReporteResourcePOST:
-    def test_wrong_role_returns_403(self, rf):
+    def test_wrong_role_returns_401(self, rf):
         req = rf.post(
             "/api/reportes",
             data=json.dumps({"tipoReporte": "general"}),
@@ -349,7 +357,8 @@ class TestReporteResourcePOST:
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = ReporteViewSet.as_view({"post": "create"})
             resp = view(req)
-        assert resp.status_code == 403
+        # Sin autenticación (has_permission=False) debe devolver 401
+        assert resp.status_code == 401
 
     def test_success(self, rf, mock_auth_profesional, mock_service):
         req = rf.post(
@@ -373,13 +382,14 @@ class TestReporteResourcePOST:
 
 
 class TestEvolucionProfesionalResourceGET:
-    def test_wrong_role_returns_403(self, rf):
+    def test_wrong_role_returns_401(self, rf):
         req = rf.get("/api/evolucion/profesional")
         pass  # session provided by shared rf fixture
 
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             resp = EvolucionProfesionalResource.as_view()(req)
-        assert resp.status_code == 403
+        # Sin autenticación (has_permission=False) debe devolver 401
+        assert resp.status_code == 401
 
     def test_success(self, rf, mock_auth_profesional, mock_service):
         req = rf.get("/api/evolucion/profesional")
@@ -424,4 +434,180 @@ class TestProfessionalPaymentInfoViewSet:
         # verify retrieval reflects updated text
         resp_get2 = view_get(req_get)
         assert resp_get2.data["data"]["mensaje_texto"] == "Nequi: 3001234567"
+
+
+# ── ProfessionalPaymentInfoPublicView ─────────────────────────────────────────
+
+
+def _auth_user(rf, user_id, user_role, user_name="Test User"):
+    """Helper to create a request with authenticated user."""
+    def _auth(_self, request, view):
+        request.user_id = user_id
+        request.user_role = user_role
+        request.user_name = user_name
+        return True
+    return _auth
+
+
+@pytest.mark.django_db
+class TestProfessionalPaymentInfoPublicView:
+    """Tests for GET /api/profesional/<id>/payment-info/ authorization logic."""
+
+    def setup_method(self):
+        from apps.authentication.models import Register
+        from apps.professionals.models import ProfessionalPaymentInfo, PacientesProfesional
+        from apps.scheduling.models import Citas
+        from apps.billing.models import Facturas
+        from datetime import date, time
+
+        # Create users
+        self.profesional = Register.objects.create_user(
+            idUsuario=10, email="prof@test.com", password="pass", rol="profesional", nombre="Prof Test"
+        )
+        self.other_profesional = Register.objects.create_user(
+            idUsuario=20, email="prof2@test.com", password="pass", rol="profesional", nombre="Otro Prof"
+        )
+        self.paciente = Register.objects.create_user(
+            idUsuario=1, email="pac@test.com", password="pass", rol="paciente", nombre="Paciente Test"
+        )
+        self.other_paciente = Register.objects.create_user(
+            idUsuario=2, email="pac2@test.com", password="pass", rol="paciente", nombre="Otro Paciente"
+        )
+        self.admin = Register.objects.create_superuser(
+            email="admin@test.com", password="pass", nombre="Admin Test"
+        )
+
+        # Create payment info for the professional
+        self.payment_info = ProfessionalPaymentInfo.objects.create(
+            idProfesional=self.profesional,
+            mensaje_texto="Nequi: 3001234567",
+        )
+
+    def _make_request(self, rf, user_id, user_role, url="/api/profesional/10/payment-info"):
+        """Create a request with mocked authentication."""
+        auth_func = _auth_user(rf, user_id, user_role)
+        with patch.object(IsAuthenticatedDRF, "has_permission", auth_func):
+            req = rf.get(url)
+            view = ProfessionalPaymentInfoPublicView.as_view()
+            resp = view(req, id_profesional=10)
+        return resp
+
+    def test_profesional_owner_can_access(self, rf):
+        """Professional can view their own payment info."""
+        resp = self._make_request(rf, 10, "profesional")
+        assert resp.status_code == 200
+        assert resp.data["success"]
+        assert resp.data["data"]["mensaje_texto"] == "Nequi: 3001234567"
+
+    def test_other_profesional_forbidden(self, rf):
+        """Another professional cannot view payment info."""
+        resp = self._make_request(rf, 20, "profesional")
+        assert resp.status_code == 403
+        assert not resp.data["success"]
+        assert resp.data["message"] == "No autorizado"
+
+    def test_admin_forbidden(self, rf):
+        """Admin cannot view payment info (not owner)."""
+        # Admin user_id is typically different, let's use the admin's actual id
+        admin_id = self.admin.idUsuario
+        resp = self._make_request(rf, admin_id, "admin")
+        assert resp.status_code == 403
+        assert not resp.data["success"]
+
+    def test_unauthenticated_forbidden(self, rf):
+        """Unauthenticated user gets 401."""
+        with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
+            req = rf.get("/api/profesional/10/payment-info")
+            view = ProfessionalPaymentInfoPublicView.as_view()
+            resp = view(req, id_profesional=10)
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
+
+    def test_paciente_with_asignacion_can_access(self, rf):
+        """Patient with PacientesProfesional assignment can access."""
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(
+            idProfesional=self.profesional, idPaciente=self.paciente
+        )
+        resp = self._make_request(rf, 1, "paciente")
+        assert resp.status_code == 200
+        assert resp.data["success"]
+        assert resp.data["data"]["mensaje_texto"] == "Nequi: 3001234567"
+
+    def test_paciente_with_cita_can_access(self, rf):
+        """Patient with Cita (appointment) can access even without assignment."""
+        from apps.scheduling.models import Citas
+        from datetime import date, time
+        Citas.objects.create(
+            idPaciente=self.paciente,
+            idProfesional=self.profesional,
+            fecha=date.today(),
+            hora=time(10, 0),
+            estado="Confirmada",
+        )
+        resp = self._make_request(rf, 1, "paciente")
+        assert resp.status_code == 200
+        assert resp.data["success"]
+        assert resp.data["data"]["mensaje_texto"] == "Nequi: 3001234567"
+
+    def test_paciente_with_factura_can_access(self, rf):
+        """Patient with Factura (invoice) can access even without assignment or cita."""
+        from apps.billing.models import Facturas
+        Facturas.objects.create(
+            idPaciente=self.paciente,
+            idProfesional=self.profesional,
+            monto=50000,
+            estadoPago="Pendiente",
+        )
+        resp = self._make_request(rf, 1, "paciente")
+        assert resp.status_code == 200
+        assert resp.data["success"]
+        assert resp.data["data"]["mensaje_texto"] == "Nequi: 3001234567"
+
+    def test_paciente_without_relation_forbidden(self, rf):
+        """Patient without any relation gets 403."""
+        resp = self._make_request(rf, 1, "paciente")
+        assert resp.status_code == 403
+        assert not resp.data["success"]
+        assert resp.data["message"] == "No autorizado"
+
+    def test_other_paciente_forbidden(self, rf):
+        """Another patient (not related) gets 403 even if first patient has relation."""
+        from apps.professionals.models import PacientesProfesional
+        # First patient has assignment
+        PacientesProfesional.objects.create(
+            idProfesional=self.profesional, idPaciente=self.paciente
+        )
+        # Second patient tries to access
+        resp = self._make_request(rf, 2, "paciente")
+        assert resp.status_code == 403
+        assert not resp.data["success"]
+
+    def test_paciente_with_cita_other_profesional_forbidden(self, rf):
+        """Patient with cita to OTHER professional cannot access this professional's info."""
+        from apps.scheduling.models import Citas
+        from datetime import date, time
+        Citas.objects.create(
+            idPaciente=self.paciente,
+            idProfesional=self.other_profesional,  # Different professional
+            fecha=date.today(),
+            hora=time(10, 0),
+            estado="Confirmada",
+        )
+        resp = self._make_request(rf, 1, "paciente")
+        assert resp.status_code == 403
+        assert not resp.data["success"]
+
+    def test_paciente_with_factura_other_profesional_forbidden(self, rf):
+        """Patient with factura to OTHER professional cannot access this professional's info."""
+        from apps.billing.models import Facturas
+        Facturas.objects.create(
+            idPaciente=self.paciente,
+            idProfesional=self.other_profesional,  # Different professional
+            monto=50000,
+            estadoPago="Pendiente",
+        )
+        resp = self._make_request(rf, 1, "paciente")
+        assert resp.status_code == 403
+        assert not resp.data["success"]
 

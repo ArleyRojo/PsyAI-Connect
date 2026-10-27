@@ -20,7 +20,7 @@ from apps.authentication.views import (
 app_name = "authentication"
 
 urlpatterns = [
-    path("csrf", CsrfTokenView.as_view(), name="csrf_token"),
+    path("csrf/", CsrfTokenView.as_view(), name="csrf_token"),
     path("register", RegisterView.as_view(), name="register"),
     path("login", LoginView.as_view(), name="login"),
     path("logout", LogoutView.as_view(), name="logout"),

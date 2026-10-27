@@ -8,6 +8,10 @@ let chatStorageKey = null;
 let isFullscreen = false;
 let chatbotConfigEventSource = null;
 
+// Timeout para peticiones al chatbot (debe ser mayor al peor caso del backend).
+// Backend: GEMINI_TOTAL_DEADLINE_SECONDS = 25s + margen
+const CHATBOT_TIMEOUT_MS = 30000;
+
 function obtenerFechaChatActual() {
     const now = new Date();
     const year = now.getFullYear();
@@ -43,7 +47,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     configurarActualizacionConfigChatbot();
     configurarSelectorEmojis();
     configurarEliminarChat();
-    configurarFullscreen();
     configurarFinalizarSesion();
     configurarWelcomeChips();
     configurarScrollToBottom();
@@ -406,26 +409,25 @@ async function enviarMensaje(mensaje) {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Guardar mensaje para posible reintento
     window.__lastChatbotMessage = mensaje;
 
     try {
-        // Usar fetchConTimeout del módulo de conexión (timeout 8s para chatbot)
-        var res = await (window.PsyAIConnection?.fetchConTimeout
+        // PsyAIConnection.fetchConTimeout ya devuelve el JSON parseado.
+        // La rama de respaldo (fetch) también debe devolver datos parseados.
+        var data = await (window.PsyAIConnection?.fetchConTimeout
             ? window.PsyAIConnection.fetchConTimeout('/api/chatbot/enviar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ mensaje: mensaje })
-              }, 8000)
+              }, CHATBOT_TIMEOUT_MS)
             : fetch('/api/chatbot/enviar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ mensaje: mensaje })
-              })
+              }).then(function (r) { return r.json(); })
         );
-        var data = await res.json();
 
         var typingMessage = chatContainer && chatContainer.querySelector('.typing-msg');
         if (typingMessage) typingMessage.remove();
@@ -439,23 +441,55 @@ async function enviarMensaje(mensaje) {
         }
 
         var botReply = data.respuesta || data.message || 'Disculpa, no pude procesar tu mensaje. Intentalo de nuevo.';
+        // Si hay riesgo detectado pero la respuesta está vacía, mostrar mensaje local de crisis
+        if (data.risk_detected && (!botReply || botReply.trim() === '')) {
+            var crisisPhone = data.crisis_phone || '106';
+            botReply = 'Te escucho y me preocupa lo que compartes. Tu bienestar es lo más importante ahora. ' +
+                'Por favor, contacta inmediatamente a la línea de crisis: ' + crisisPhone + '. ' +
+                'Si estás en peligro inminente, llama a emergencias (123). ' +
+                'No tienes que enfrentarlo solo/a; hay profesionales disponibles 24/7 para acompañarte. ' +
+                'Tu vida importa.';
+        }
         agregarMensajeBot(botReply);
-        // Limpiar mensaje guardado al éxito
         window.__lastChatbotMessage = null;
     } catch (err) {
         var typingMessage = chatContainer && chatContainer.querySelector('.typing-msg');
         if (typingMessage) typingMessage.remove();
         console.error('Error chatbot:', err);
 
-        // Usar nuevo componente de error de chatbot con botón Reintentar
+        var errStatus = err?.status;
+        var errMsg = err?.message || 'Error desconocido';
+
+        if (errStatus === 408 || err?.name === 'AbortError') {
+            errMsg = 'La respuesta tardó demasiado. Por favor, inténtalo de nuevo.';
+        } else if (errStatus === 401) {
+            window.location.href = '/login.html';
+            return;
+        } else if (errStatus === 403) {
+            if (err?.isCsrf) {
+                errMsg = 'Token de seguridad expirado. Refrescando e intentando de nuevo...';
+            } else {
+                errMsg = 'No tienes permiso para esta acción.';
+            }
+        }
+
+        // Si el error trae fallback y respuesta (caso raro, el backend ya devolvió respuesta válida)
+        if (err?.fallback && err?.respuesta) {
+            agregarMensajeBot(err.respuesta);
+            window.__lastChatbotMessage = null;
+            return;
+        }
+
         if (window.PsyAIConnection?.showChatbotError) {
-          window.PsyAIConnection.showChatbotError(mensaje, function(retryMsg) {
-            // Reintentar con el mismo mensaje
-            enviarMensaje(retryMsg);
+          window.PsyAIConnection.showChatbotError(errMsg, function(retryMsg) {
+            if (window.__lastChatbotMessage === retryMsg) {
+              enviarMensaje(retryMsg);
+            }
           });
         } else {
-          // Fallback al comportamiento original
-          agregarMensajeBot('No hay conexion con el asistente en este momento. Intentalo de nuevo mas tarde. Si es una emergencia o hay riesgo inmediato, llama al 123.');
+          if (confirm('No hay conexión con el asistente. ¿Reintentar?')) {
+            enviarMensaje(mensaje);
+          }
         }
     }
 }
@@ -485,10 +519,10 @@ function bloquearFormularioPorLimiteDiario() {
 
 function escapeHtml(value) {
     return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
         .replace(/'/g, '&#039;');
 }
 
@@ -532,10 +566,9 @@ async function cargarHistorialRemoto() {
 
 async function limpiarChat() {
     try {
-        await fetch('/api/chatbot/historial', {
-            method: 'DELETE',
-            credentials: 'include'
-        });
+        await (window.PsyAIConnection?.del
+            ? window.PsyAIConnection.del('/api/chatbot/historial')
+            : fetch('/api/chatbot/historial', { method: 'DELETE', credentials: 'include' }).then(function (r) { return r.json(); }));
     } catch (err) {
         console.warn('No se pudo eliminar historial remoto:', err);
     }
@@ -570,14 +603,18 @@ function configurarFinalizarSesion() {
         }
         btn.disabled = true;
         try {
-            // La ruta del router de DRF termina en "/"; sin la barra cae en serve_pages y devuelve HTML.
-            var res = await fetch('/api/chatbot/prediagnostico/', {
-                method: 'POST',
-                credentials: 'include'
-            });
-            var data = await res.json().catch(function () { return {}; });
-            if (!res.ok || !data.success) {
-                if (typeof showAlert === 'function') showAlert('warning', data.message || 'No se pudo generar el resumen.', 'Aviso');
+            // PsyAIConnection.post ya devuelve el JSON parseado.
+            // La rama de respaldo (fetch) también debe devolver datos parseados.
+            var data = await (window.PsyAIConnection?.post
+                ? window.PsyAIConnection.post('/api/chatbot/prediagnostico/')
+                : fetch('/api/chatbot/prediagnostico/', {
+                    method: 'POST',
+                    credentials: 'include'
+                }).then(function (r) { return r.json().catch(function () { return {}; }); }));
+
+            // PsyAIConnection ya rechaza en 4xx/5xx, así que aquí solo llegan respuestas 2xx
+            if (!data || !data.success) {
+                if (typeof showAlert === 'function') showAlert('warning', data?.message || 'No se pudo generar el resumen.', 'Aviso');
                 return;
             }
             document.getElementById('prediagnostico-resumen').textContent = data.resumen;

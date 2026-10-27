@@ -335,6 +335,28 @@ function esc(str) {
   return div.innerHTML;
 }
 
+// ─── DEMO MODE (remove or set DEMO_PAGO = false when real data exists) ───
+const DEMO_PAGO = true;
+const DEMO_PAGO_INFO = {
+  qr_image: "/img/qr-demo.png",
+  mensaje_texto: "Banco: Bancolombia\nTipo de cuenta: Ahorros\nNúmero de cuenta: 12345678901\nTitular: Profesional Demo\nDocumento: 1234567890\n\nNequi: 3001234567\n\n* Datos de ejemplo. No realizar pagos reales."
+};
+
+function pagoInfoOk(data) {
+  if (DEMO_PAGO) return true;
+  return data && data.success && data.data;
+}
+
+function resolvePagoInfo(info) {
+  if (!DEMO_PAGO) return info;
+  // Fill only empty fields with demo data
+  return {
+    qr_image: info?.qr_image || DEMO_PAGO_INFO.qr_image,
+    mensaje_texto: info?.mensaje_texto || DEMO_PAGO_INFO.mensaje_texto,
+  };
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 // Formatea fecha ISO o dd/mm/YYYY HH:MM a "dd MMM yyyy" + hora tenue
 function formatFecha(fechaStr) {
   if (!fechaStr) return '';
@@ -455,13 +477,13 @@ async function loadTopPagoInfo(profesionalId) {
   try {
     const res = await fetch('/api/profesional/' + profesionalId + '/payment-info', { credentials: 'include' });
     const data = await res.json();
-    if (!data.success || !data.data) {
+    if (!pagoInfoOk(data)) {
       qrLoading.style.display = 'none';
       accountLoading.style.display = 'none';
       accountTextEl.textContent = 'No hay datos de pago disponibles.';
       return;
     }
-    const info = data.data;
+    const info = resolvePagoInfo(data.data);
     if (info.qr_image) {
       qrImg.src = info.qr_image;
       qrImg.classList.remove('d-none');
@@ -520,12 +542,12 @@ async function loadPagoInfo(facturaId, profesionalId) {
   try {
     const res = await fetch('/api/profesional/' + profesionalId + '/payment-info', { credentials: 'include' });
     const data = await res.json();
-    if (!data.success || !data.data) {
+    if (!pagoInfoOk(data)) {
       document.getElementById('qrLoading-' + facturaId).style.display = 'none';
       document.getElementById('accountLoading-' + facturaId).style.display = 'none';
       return;
     }
-    const info = data.data;
+    const info = resolvePagoInfo(data.data);
     // QR
     const qrImg = document.getElementById('qrImg-' + facturaId);
     const qrLoading = document.getElementById('qrLoading-' + facturaId);
@@ -637,14 +659,14 @@ async function verComprobante(idFactura) {
   try {
     const res = await fetch("/api/profesional/" + profesionalId + "/payment-info", { credentials: "include" });
     const data = await res.json();
-    if (!data.success || !data.data) {
+    if (!pagoInfoOk(data)) {
       // show error in both sections
       document.getElementById("modalQrLoading").style.display = "none";
       document.getElementById("modalAccountLoading").style.display = "none";
       document.getElementById("modalQrContainer").innerHTML = '<p class="text-danger text-center">No se pudo cargar la información de pago</p>';
       return;
     }
-    const info = data.data;
+    const info = resolvePagoInfo(data.data);
     // QR
     if (info.qr_image) {
       qrImg.src = info.qr_image;

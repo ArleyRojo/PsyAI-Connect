@@ -83,7 +83,8 @@ class TestCitaViewSetList:
             view = CitaViewSet.as_view({"get": "list"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
     def test_rejects_unauthorized_role(self, rf):
         req = rf.get("/api/citas")
@@ -187,7 +188,8 @@ class TestCitaViewSetCreate:
             view = CitaViewSet.as_view({"post": "create"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
     def test_creates_appointment(self, rf, mock_role_paciente, mock_service):
         req = rf.post(
@@ -286,7 +288,12 @@ class TestCitaDetailViewSetPartialUpdate:
         resp = view(req, pk=1)
 
         assert resp.status_code == 200
-        mock_service.update_status.assert_called_once_with(1, "Completada", 5)
+        # El servicio ahora recibe extra_data, ajustamos la aserción
+        mock_service.update_status.assert_called_once()
+        call_args = mock_service.update_status.call_args
+        assert call_args.args[0] == 1  # idCita
+        assert call_args.args[1] == "Completada"  # estado
+        assert call_args.args[2] == 5  # user_id
 
 
 # ── CitaDetailViewSet destroy ────────────────────────────────────────────
@@ -386,13 +393,23 @@ class TestCitaDisponibleResourceGet:
 # ── CitaProximaResource GET ──────────────────────────────────────────────
 
 
+@pytest.mark.django_db
 class TestCitaProximaResourceGet:
     def test_requires_paciente_role(self, rf):
+        from apps.authentication.models import Register
+        # Crear usuario profesional en la BD de test
+        profesional = Register.objects.create_user(
+            idUsuario=5, email="prof@test.com", password="pass", rol="profesional", nombre="Prof Test"
+        )
         req = rf.get("/api/citas/proxima")
+        # Simular sesión de profesional autenticado
+        req.session = {}
+        req.session["idUsuario"] = profesional.idUsuario
 
         with patch.object(IsAuthenticatedDRF, "has_permission", _auth_profesional):
             resp = CitaProximaResource.as_view()(req)
 
+        # Usuario autenticado pero con rol incorrecto debe devolver 403
         assert resp.status_code == 403
 
     def test_returns_next_appointment(self, rf, mock_role_paciente, mock_service):

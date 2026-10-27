@@ -295,6 +295,44 @@ class ProfessionalRepository:
             Q(idPaciente__isnull=True)
         ).exists()
 
+    def patient_can_view_payment_info(self, professional_id, patient_id):
+        """
+        Return True if the patient has at least one relationship with the professional:
+        - PacientesProfesional row (assigned patient)
+        - Cita (appointment) in Citas table
+        - Factura (invoice) in Facturas table
+        """
+        # 1. Check PacientesProfesional assignment
+        if PacientesProfesional.objects.filter(
+            idProfesional_id=professional_id,
+            idPaciente_id=patient_id,
+        ).exists():
+            return True
+
+        # 2. Check Citas (appointments)
+        try:
+            from apps.scheduling.models import Citas
+            if Citas.objects.filter(
+                idProfesional_id=professional_id,
+                idPaciente_id=patient_id,
+            ).exists():
+                return True
+        except (ImportError, LookupError):
+            pass
+
+        # 3. Check Facturas (invoices)
+        try:
+            from apps.billing.models import Facturas
+            if Facturas.objects.filter(
+                idProfesional_id=professional_id,
+                idPaciente_id=patient_id,
+            ).exists():
+                return True
+        except (ImportError, LookupError):
+            pass
+
+        return False
+
     def get_dashboard_stats(self, professional_id):
         from django.db.models import Count, Q, F, Value, CharField
         from django.db.models.functions import Coalesce

@@ -23,8 +23,28 @@ GEMINI_URL_TEMPLATE = "https://generativelanguage.googleapis.com/v1beta/models/{
 GEMINI_RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 GEMINI_RETRIES = 2
 GEMINI_RETRY_BASE_DELAY = 0.6
+# Presupuesto total de tiempo para llamadas a Gemini (segundos).
+# Debe ser menor que el timeout del frontend (chatbot.js usa CHATBOT_TIMEOUT_MS = 30000).
+GEMINI_TOTAL_DEADLINE_SECONDS = 25
 SYSTEM_PROMPT_FALLBACK = "Actua como un asistente de triaje psicologico para PsyAI Connect."
 CONFIG_CACHE_TTL_SECONDS = 30
+
+# Constantes por defecto para configuración de crisis
+DEFAULT_CRISIS_PHONE = "106"
+DEFAULT_CRISIS_RESPONSE = (
+    "Te escucho y me preocupa lo que compartes. Tu bienestar es lo más importante ahora. "
+    "Por favor, contacta inmediatamente a la línea de crisis: {crisis_phone}. "
+    "Si estás en peligro inminente, llama a emergencias (123). "
+    "No tienes que enfrentarlo solo/a; hay profesionales disponibles 24/7 para acompañarte. "
+    "Tu vida importa."
+)
+DEFAULT_MEDIUM_RESPONSE = (
+    "Gracias por compartir esto conmigo. Parece que estás pasando por un momento difícil. "
+    "Considera hablar con tu profesional de confianza o contactar a la línea de apoyo: {crisis_phone}. "
+    "Estoy aquí para escucharte."
+)
+DEFAULT_FALLBACK_RESPONSE = "¿Cómo te sientes hoy?"
+DEFAULT_OFF_TOPIC_RESPONSE = "Ese tema se sale un poco de mi alcance, pero si quieres cuéntame cómo te has sentido emocionalmente."
 
 PREDIAGNOSTICO_SYSTEM_PROMPT = """
 Eres un asistente que analiza una conversación entre un paciente y un chatbot
@@ -341,6 +361,15 @@ class ChatbotConfigService:
             allowed = {"low", "medium", "high", "none"}
             if data["thinking_level"] not in allowed:
                 return f"thinking_level debe ser uno de: {', '.join(sorted(allowed))}"
+        # Validar campos críticos de crisis
+        if "crisis_response" in data:
+            crisis_resp = (data["crisis_response"] or "").strip()
+            if not crisis_resp:
+                return "La respuesta de crisis no puede estar vacía."
+        if "crisis_phone" in data:
+            crisis_phone = (data["crisis_phone"] or "").strip()
+            if not crisis_phone:
+                return "El teléfono de crisis no puede estar vacío."
         return None
 
     def get_historial_palabras_riesgo(self):
@@ -486,11 +515,11 @@ class ChatbotService:
             result = {
                 "system_prompt": SYSTEM_PROMPT_FALLBACK,
                 "risk_terms": "[]",
-                "crisis_response": "Si hay riesgo, llama al 123.",
-                "medium_response": "",
-                "fallback_response": "¿Cómo te sientes hoy?",
-                "off_topic_response": "Eso se sale un poco del lugar donde puedo acompañarte hoy. Cuéntame: ¿cómo te has sentido emocionalmente?",
-                "crisis_phone": "106",
+                "crisis_response": DEFAULT_CRISIS_RESPONSE.format(crisis_phone=DEFAULT_CRISIS_PHONE),
+                "medium_response": DEFAULT_MEDIUM_RESPONSE.format(crisis_phone=DEFAULT_CRISIS_PHONE),
+                "fallback_response": DEFAULT_FALLBACK_RESPONSE,
+                "off_topic_response": DEFAULT_OFF_TOPIC_RESPONSE,
+                "crisis_phone": DEFAULT_CRISIS_PHONE,
                 "thinking_level": "low",
                 "tone": None,
                 "interaction_rules": None,
@@ -502,19 +531,38 @@ class ChatbotService:
                 "max_tokens_user": 1000,
                 "daily_message_limit": 20,
             }
-        result.setdefault("risk_terms", result.get("risk_terms") or "[]")
-        result.setdefault("crisis_response", result.get("crisis_response") or "")
-        result.setdefault("medium_response", result.get("medium_response") or "")
-        result.setdefault("fallback_response", result.get("fallback_response") or "")
-        result.setdefault("crisis_phone", result.get("crisis_phone") or "106")
-        result.setdefault("thinking_level", result.get("thinking_level") or "low")
-        result.setdefault("temperature", result.get("temperature", 0.55))
-        result.setdefault("top_p", result.get("top_p", 0.9))
-        result.setdefault("max_tokens", result.get("max_tokens", 600))
-        result.setdefault("max_tokens_user", result.get("max_tokens_user", 1000))
-        result.setdefault("prompt_history_window", result.get("prompt_history_window", 4))
-        result.setdefault("gemini_history_window", result.get("gemini_history_window", 12))
-        result.setdefault("daily_message_limit", result.get("daily_message_limit", 20))
+        # Normalizar campos críticos: reemplazar None o vacíos por valores por defecto
+        crisis_resp = (result.get("crisis_response") or "").strip()
+        if not crisis_resp:
+            result["crisis_response"] = DEFAULT_CRISIS_RESPONSE.format(crisis_phone=DEFAULT_CRISIS_PHONE)
+        medium_resp = (result.get("medium_response") or "").strip()
+        if not medium_resp:
+            result["medium_response"] = DEFAULT_MEDIUM_RESPONSE.format(crisis_phone=DEFAULT_CRISIS_PHONE)
+        fallback_resp = (result.get("fallback_response") or "").strip()
+        if not fallback_resp:
+            result["fallback_response"] = DEFAULT_FALLBACK_RESPONSE
+        off_topic_resp = (result.get("off_topic_response") or "").strip()
+        if not off_topic_resp:
+            result["off_topic_response"] = DEFAULT_OFF_TOPIC_RESPONSE
+        crisis_phone = (result.get("crisis_phone") or "").strip()
+        if not crisis_phone:
+            result["crisis_phone"] = DEFAULT_CRISIS_PHONE
+        # Asegurar que risk_terms sea un JSON válido
+        if not result.get("risk_terms"):
+            result["risk_terms"] = "[]"
+        # Valores por defecto para otros campos
+        result.setdefault("thinking_level", "low")
+        result.setdefault("temperature", 0.55)
+        result.setdefault("top_p", 0.9)
+        result.setdefault("max_tokens", 600)
+        result.setdefault("max_tokens_user", 1000)
+        result.setdefault("prompt_history_window", 4)
+        result.setdefault("gemini_history_window", 12)
+        result.setdefault("daily_message_limit", 20)
+        result.setdefault("system_prompt", SYSTEM_PROMPT_FALLBACK)
+        result.setdefault("off_topic_response", DEFAULT_OFF_TOPIC_RESPONSE)
+        result.setdefault("crisis_phone", DEFAULT_CRISIS_PHONE)
+        result.setdefault("risk_terms", "[]")
         self._cached_config = result
         self._cached_config_version = version
         self._cached_config_ts = now
@@ -564,13 +612,17 @@ class ChatbotService:
             nivel_emocional = "Alto"
             risk_words = ",".join([t for t in alto_terms if re.search(rf"\b{re.escape(t)}\b", normalized)])
             self._notify_high_risk(patient_id)
+            # La respuesta de crisis ya está garantizada no vacía por _get_chatbot_config
+            crisis_respuesta = config.get("crisis_response", DEFAULT_CRISIS_RESPONSE.format(crisis_phone=DEFAULT_CRISIS_PHONE))
+            crisis_phone = config.get("crisis_phone", DEFAULT_CRISIS_PHONE)
             self.chat_repo.save_conversation(
-                patient_id, message, config.get("crisis_response", ""), nivel_emocional, risk_words
+                patient_id, message, crisis_respuesta, nivel_emocional, risk_words
             )
             return {
                 "success": True,
-                "respuesta": config.get("crisis_response", ""),
+                "respuesta": crisis_respuesta,
                 "risk_detected": True,
+                "crisis_phone": crisis_phone,
                 "used": used_today + 1,
                 "limit": daily_limit,
             }, 200
@@ -579,37 +631,62 @@ class ChatbotService:
             nivel_emocional = "Medio"
             risk_words = ",".join([t for t in medio_terms if re.search(rf"\b{re.escape(t)}\b", normalized)])
             self._notify_medium_risk(patient_id, risk_words)
+            # Incluir respuesta de medio riesgo (garantizada no vacía por _get_chatbot_config)
+            crisis_phone = config.get("crisis_phone", DEFAULT_CRISIS_PHONE)
+            medio_respuesta = config.get("medium_response", DEFAULT_MEDIUM_RESPONSE.format(crisis_phone=DEFAULT_CRISIS_PHONE))
+            self.chat_repo.save_conversation(
+                patient_id, message, medio_respuesta, nivel_emocional, risk_words
+            )
+            return {
+                "success": True,
+                "respuesta": medio_respuesta,
+                "risk_detected": True,
+                "crisis_phone": crisis_phone,
+                "used": used_today + 1,
+                "limit": daily_limit,
+            }, 200
         elif es_bajo:
             nivel_emocional = "Bajo"
             risk_words = ",".join([t for t in bajo_terms if re.search(rf"\b{re.escape(t)}\b", normalized)])
         else:
             nivel_emocional = "Sin riesgo"
             risk_words = None
+            crisis_phone = None
 
 
         keys = self._get_api_keys()
         if not keys:
             response_text = self._build_local_fallback(message, history, config, es_medio, es_bajo)
             self.chat_repo.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
-            return {
+            response = {
                 "success": True,
                 "respuesta": response_text,
                 "fallback": True,
                 "message": "GEMINI_API_KEY no configurada",
                 "used": used_today + 1,
                 "limit": daily_limit,
-            }, 200
+            }
+            if crisis_phone:
+                response["crisis_phone"] = crisis_phone
+            return response, 200
 
         model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
         contexto_riesgo = self._build_risk_context(es_medio, es_bajo)
 
+        # Mapear thinking_level a valores válidos de Gemini
+        # gemini-3.5-flash-lite acepta: "minimal", "medium", "high" (no "low")
+        raw_thinking = config.get("thinking_level") or "low"
+        thinking_map = {"low": "minimal", "medium": "medium", "high": "high", "none": None}
+        thinking_level = thinking_map.get(raw_thinking, "minimal")
+
         if es_medio or es_bajo:
             thinking_level = "medium"
-        else:
-            thinking_level = config.get("thinking_level") or "low"
+
+        # Tiempo de inicio para presupuesto de deadline
+        deadline_ts = time.time() + GEMINI_TOTAL_DEADLINE_SECONDS
 
         try:
-            response_text = self._call_gemini_with_rotation(keys, model, message, history, config, contexto_riesgo, thinking_level)
+            response_text = self._call_gemini_with_rotation(keys, model, message, history, config, contexto_riesgo, thinking_level, deadline_ts)
             if not response_text or not response_text.strip():
                 raise RuntimeError("Gemini devolvio texto vacio")
             if "[FUERA_DE_TEMA" in response_text or "[FUERA_DE_ALCANCE" in response_text:
@@ -619,24 +696,30 @@ class ChatbotService:
                     "cuéntame cómo te has sentido últimamente."
                 )
             self.chat_repo.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
-            return {
+            response = {
                 "success": True,
                 "respuesta": response_text,
                 "used": used_today + 1,
                 "limit": daily_limit,
-            }, 200
+            }
+            if crisis_phone and (es_medio or es_bajo or es_alto):
+                response["crisis_phone"] = crisis_phone
+            return response, 200
         except Exception as exc:
             self.logger.exception("Error llamando Gemini: %s", exc)
             response_text = self._build_local_fallback(message, history, config, es_medio, es_bajo)
             self.chat_repo.save_conversation(patient_id, message, response_text, nivel_emocional, risk_words)
-            return {
+            response = {
                 "success": True,
                 "respuesta": response_text,
                 "fallback": True,
                 "message": "No se pudo contactar Gemini",
                 "used": used_today + 1,
                 "limit": daily_limit,
-            }, 200
+            }
+            if crisis_phone:
+                response["crisis_phone"] = crisis_phone
+            return response, 200
 
     def _build_risk_context(self, es_medio=False, es_bajo=False):
         if es_medio:
@@ -654,19 +737,29 @@ class ChatbotService:
             )
         return None
 
-    def _call_gemini_with_rotation(self, keys, model, message, history, config, contexto_riesgo=None, thinking_level=None):
+    def _call_gemini_with_rotation(self, keys, model, message, history, config, contexto_riesgo=None, thinking_level=None, deadline_ts=None):
         total_keys = len(keys)
         start_index = self._key_index
 
         for attempt in range(total_keys):
+            # Verificar deadline antes de cada intento
+            if deadline_ts and time.time() >= deadline_ts:
+                self.logger.warning("Deadline alcanzado, abortando rotación de keys")
+                break
+
             current_key = keys[self._key_index]
             try:
-                response_text = self._call_gemini(current_key, model, message, history, config, contexto_riesgo, thinking_level)
+                response_text = self._call_gemini(current_key, model, message, history, config, contexto_riesgo, thinking_level, deadline_ts)
                 self.logger.info("Chatbot: respuesta generada por el modelo IA principal: %s", model)
                 return response_text
             except RuntimeError as exc:
                 error_str = str(exc)
                 is_quota = "429" in error_str or "RESOURCE_EXHAUSTED" in error_str
+                is_client_error = "400" in error_str or "HTTP 400" in error_str
+                if is_client_error:
+                    # Error 400 = payload inválido, no reintentar
+                    self.logger.error("Gemini 400 Bad Request, no reintentando: %s", exc)
+                    raise
                 if is_quota:
                     if total_keys > 1:
                         self._next_key(keys)
@@ -687,7 +780,7 @@ class ChatbotService:
                     model, fallback_model,
                 )
                 response_text = self._call_gemini(
-                    keys[0], fallback_model, message, history, config, contexto_riesgo, thinking_level
+                    keys[0], fallback_model, message, history, config, contexto_riesgo, thinking_level, deadline_ts
                 )
                 self.logger.info("Chatbot: respuesta generada por el modelo IA de respaldo: %s", fallback_model)
                 return response_text
@@ -852,11 +945,11 @@ class ChatbotService:
         nivel = "alto" if es_alto else "medio"
         asunto = f"PsyAI Connect — Alerta de riesgo {nivel}: {patient_name}"
         cta = f"{site_url}/aside-professional/patients.html"
-        for email in prof_emails:
+        for email, nombre_profesional in prof_emails:
             ctx = {
-                "nombre_profesional": email.split("@")[0].replace(".", " ").title(),
+                "nombre_profesional": nombre_profesional or email.split("@")[0].replace(".", " ").title(),
                 "nombre_paciente": patient_name,
-                "nivel_riesgo": nivel,
+                "nivel_riesgo": "alto" if es_alto else "medio",
                 "cta_link": cta,
             }
             html = render_to_string("emails/alerta_riesgo.html", ctx)
@@ -865,7 +958,7 @@ class ChatbotService:
             try:
                 msg.send(fail_silently=True)
             except Exception:
-                self.logger.exception("Error enviando correo de riesgo %s a %s", nivel, email)
+                self.logger.exception("Error enviando correo de riesgo %s a %s", "alto" if es_alto else "medio", email)
 
     def _get_assigned_professionals(self, patient_id):
         return self.chat_repo.get_assigned_professionals(patient_id)
@@ -922,7 +1015,7 @@ class ChatbotService:
                 )
         return f"{system_prompt}{_PROMPT_SUFFIX}"
 
-    def _call_gemini(self, api_key, model, message, history, config, contexto_riesgo=None, thinking_level=None):
+    def _call_gemini(self, api_key, model, message, history, config, contexto_riesgo=None, thinking_level=None, deadline_ts=None):
         system_prompt = self._build_system_prompt(config, history, contexto_riesgo)
         max_user_chars = int(config.get("max_tokens_user") or 1000)
 
@@ -930,6 +1023,11 @@ class ChatbotService:
             thinking_level = config.get("thinking_level") or "low"
         if thinking_level == "none":
             thinking_level = None
+
+        # Verificar deadline al inicio
+        if deadline_ts and time.time() >= deadline_ts:
+            self.logger.warning("Deadline alcanzado al inicio de _call_gemini")
+            raise RuntimeError("Deadline agotado antes de llamar a Gemini")
 
         generation_config = {
             "temperature": float(config.get("temperature", 0.55)),
@@ -947,12 +1045,26 @@ class ChatbotService:
         base_delay = GEMINI_RETRY_BASE_DELAY
         last_exc = None
         for attempt in range(1, GEMINI_RETRIES + 2):
+            # Verificar deadline antes de cada intento
+            if deadline_ts and time.time() >= deadline_ts:
+                self.logger.warning("Deadline alcanzado en _call_gemini, abortando")
+                break
+
+            # Calcular timeout restante para este intento
+            attempt_timeout = 8
+            if deadline_ts:
+                remaining = deadline_ts - time.time()
+                if remaining <= 0:
+                    self.logger.warning("Deadline agotado antes de intento %s", attempt)
+                    break
+                attempt_timeout = min(attempt_timeout, max(1, int(remaining) - 1))  # dejar 1s de margen
+
             try:
                 resp = requests.post(
                     GEMINI_URL_TEMPLATE.format(model=model),
                     json=payload,
                     headers={"x-goog-api-key": api_key},
-                    timeout=8,
+                    timeout=attempt_timeout,
                 )
                 if resp.status_code in GEMINI_RETRYABLE_STATUS:
                     last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
@@ -960,6 +1072,12 @@ class ChatbotService:
                     if attempt <= GEMINI_RETRIES:
                         time.sleep(base_delay * attempt)
                     continue
+                if resp.status_code == 400:
+                    # Error 400 = payload inválido, no reintentar
+                    body = resp.text[:2000]
+                    self.logger.error("Gemini 400 Bad Request: %s", body)
+                    last_exc = RuntimeError(f"Gemini HTTP 400: {body[:200]}")
+                    raise RuntimeError(f"Gemini HTTP 400: {body[:200]}")
                 if resp.status_code != 200:
                     body = resp.text[:2000]
                     self.logger.error(
@@ -1100,9 +1218,9 @@ class ChatbotService:
         asunto = f"PsyAI Connect — Nuevo prediagnóstico disponible: {patient_name}"
         cta = f"{site_url}/aside-professional/patients.html"
         areas = ", ".join(prediagnostico.posiblesAreas) if prediagnostico.posiblesAreas else "No especificadas"
-        for email in prof_emails:
+        for email, nombre_profesional in prof_emails:
             ctx = {
-                "nombre_profesional": email.split("@")[0].replace(".", " ").title(),
+                "nombre_profesional": nombre_profesional or email.split("@")[0].replace(".", " ").title(),
                 "nombre_paciente": patient_name,
                 "nivel_riesgo": prediagnostico.nivelRiesgo,
                 "resumen_profesional": prediagnostico.resumenProfesional,

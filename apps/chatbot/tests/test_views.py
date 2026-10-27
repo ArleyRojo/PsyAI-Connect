@@ -58,7 +58,8 @@ class TestChatbotViewSetPost:
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = ChatbotViewSet.as_view({"post": "create"})
             resp = view(req)
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401 (no 403)
+        assert resp.status_code == 401
 
 
 class TestChatbotViewSetGet:
@@ -169,7 +170,8 @@ class TestChatMensajeViewSetPost:
         with patch.object(IsAuthenticatedDRF, "has_permission", return_value=False):
             view = ChatMensajeViewSet.as_view({"post": "create"})
             resp = view(req)
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401 (no 403)
+        assert resp.status_code == 401
 
 
 # ── ChatHistorialDeleteViewSet ──────────────────────────────────────────────

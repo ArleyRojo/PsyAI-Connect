@@ -91,7 +91,7 @@ class ChatRepository:
         return list(
             Register.objects.filter(
                 idUsuario__in=professional_ids, rol="profesional"
-            ).values_list("email", flat=True)
+            ).values_list("email", "nombre")
         )
 
     def notificacion_reciente_existe(self, patient_name, tipo, horas=12):

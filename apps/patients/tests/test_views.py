@@ -78,7 +78,8 @@ class TestPerfilPacienteGet:
             view = PerfilPacienteViewSet.as_view({"get": "retrieve"})
             resp = view(req, pk="1")
 
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
     def test_returns_profile(self, rf, mock_auth_paciente, mock_service):
         req = rf.get("/api/patients/perfil/paciente/1")
@@ -149,7 +150,8 @@ class TestPerfilPacientePut:
             view = PerfilPacienteViewSet.as_view({"put": "update"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
     def test_requires_paciente_role(self, rf):
         req = rf.put(
@@ -197,7 +199,8 @@ class TestEvolucionGet:
             view = EvolucionViewSet.as_view({"get": "list"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
     def test_returns_evolution_history(self, rf, mock_role_paciente, mock_service):
         req = rf.get("/api/patients/evolucion")
@@ -231,7 +234,8 @@ class TestEvolucionPost:
             view = EvolucionViewSet.as_view({"post": "create"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
     def test_saves_evolution(self, rf, mock_role_paciente, mock_service):
         req = rf.post(
@@ -269,7 +273,8 @@ class TestPacienteGet:
             view = PacienteViewSet.as_view({"get": "list"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
     def test_profesional_can_list(self, rf, mock_role_profesional, mock_service):
         req = rf.get("/api/patients/pacientes")
@@ -313,7 +318,8 @@ class TestProfesionalGet:
             view = ProfesionalViewSet.as_view({"get": "list"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        # Sin autenticación debe devolver 401
+        assert resp.status_code == 401
 
     def test_returns_professionals(self, rf, mock_auth_paciente, mock_service):
         req = rf.get("/api/patients/profesionales")

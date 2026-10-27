@@ -63,6 +63,18 @@ class Register(AbstractBaseUser):
     def __str__(self):
         return self.email
 
+    def set_password(self, raw_password):
+        """
+        Override set_password to use the 'contrasena' field instead of 'password'.
+        Uses Django's default hasher (PBKDF2) via make_password.
+        """
+        from django.contrib.auth.hashers import make_password
+        self.contrasena = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        from django.contrib.auth.hashers import check_password
+        return check_password(raw_password, self.contrasena)
+
     def to_dict(self):
         return {
             "idUsuario": self.idUsuario,

@@ -322,3 +322,107 @@ class TestGetDeletedReports:
     def test_empty_when_none_deleted(self, repo, professional_user):
         result = repo.get_deleted_reports(professional_user.idUsuario)
         assert result == []
+
+
+# ── patient_can_view_payment_info ───────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestPatientCanViewPaymentInfo:
+    def test_with_asignacion_returns_true(self, repo, professional_user, patient_user):
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(
+            idProfesional=professional_user, idPaciente=patient_user
+        )
+        assert repo.patient_can_view_payment_info(professional_user.idUsuario, patient_user.idUsuario) is True
+
+    def test_without_asignacion_returns_false(self, repo, professional_user, patient_user):
+        assert repo.patient_can_view_payment_info(professional_user.idUsuario, patient_user.idUsuario) is False
+
+    def test_with_cita_returns_true(self, repo, professional_user, patient_user):
+        from apps.scheduling.models import Citas
+        from datetime import date, time
+        Citas.objects.create(
+            idPaciente=patient_user,
+            idProfesional=professional_user,
+            fecha=date.today(),
+            hora=time(10, 0),
+            estado="Confirmada",
+        )
+        assert repo.patient_can_view_payment_info(professional_user.idUsuario, patient_user.idUsuario) is True
+
+    def test_with_factura_returns_true(self, repo, professional_user, patient_user):
+        from apps.billing.models import Facturas
+        Facturas.objects.create(
+            idPaciente=patient_user,
+            idProfesional=professional_user,
+            monto=50000,
+            estadoPago="Pendiente",
+        )
+        assert repo.patient_can_view_payment_info(professional_user.idUsuario, patient_user.idUsuario) is True
+
+    def test_other_patient_returns_false(self, repo, professional_user, patient_user):
+        from apps.authentication.models import Register
+        other_patient = Register.objects.create_user(
+            email="other@test.com", password="pass", nombre="Otro", rol="paciente"
+        )
+        # First patient has factura
+        from apps.billing.models import Facturas
+        Facturas.objects.create(
+            idPaciente=patient_user,
+            idProfesional=professional_user,
+            monto=50000,
+            estadoPago="Pendiente",
+        )
+        # Other patient should not have access
+        assert repo.patient_can_view_payment_info(professional_user.idUsuario, other_patient.idUsuario) is False
+
+    def test_other_profesional_returns_false(self, repo, professional_user, patient_user):
+        from apps.authentication.models import Register
+        other_prof = Register.objects.create_user(
+            email="otherprof@test.com", password="pass", nombre="Otro Prof", rol="profesional"
+        )
+        # Patient has factura with first professional
+        from apps.billing.models import Facturas
+        Facturas.objects.create(
+            idPaciente=patient_user,
+            idProfesional=professional_user,
+            monto=50000,
+            estadoPago="Pendiente",
+        )
+        # Should not have access to other professional's info
+        assert repo.patient_can_view_payment_info(other_prof.idUsuario, patient_user.idUsuario) is False
+
+    def test_cita_with_other_profesional_returns_false(self, repo, professional_user, patient_user):
+        from apps.authentication.models import Register
+        from apps.scheduling.models import Citas
+        from datetime import date, time
+        other_prof = Register.objects.create_user(
+            email="otherprof@test.com", password="pass", nombre="Otro Prof", rol="profesional"
+        )
+        # Patient has cita with OTHER professional
+        Citas.objects.create(
+            idPaciente=patient_user,
+            idProfesional=other_prof,
+            fecha=date.today(),
+            hora=time(10, 0),
+            estado="Confirmada",
+        )
+        # Should not have access to this professional's info
+        assert repo.patient_can_view_payment_info(professional_user.idUsuario, patient_user.idUsuario) is False
+
+    def test_factura_with_other_profesional_returns_false(self, repo, professional_user, patient_user):
+        from apps.authentication.models import Register
+        from apps.billing.models import Facturas
+        other_prof = Register.objects.create_user(
+            email="otherprof@test.com", password="pass", nombre="Otro Prof", rol="profesional"
+        )
+        # Patient has factura with OTHER professional
+        Facturas.objects.create(
+            idPaciente=patient_user,
+            idProfesional=other_prof,
+            monto=50000,
+            estadoPago="Pendiente",
+        )
+        # Should not have access to this professional's info
+        assert repo.patient_can_view_payment_info(professional_user.idUsuario, patient_user.idUsuario) is False

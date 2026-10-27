@@ -19,6 +19,7 @@ from apps.chatbot.services import (
     ChatbotConfigService,
     ChatbotService,
     chatbot_config_events,
+    DEFAULT_CRISIS_PHONE,
 )
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ class ChatbotConfigViewSet(viewsets.ViewSet):
                 "max_tokens": cfg.get("max_tokens", 600),
                 "max_tokens_user": cfg.get("max_tokens_user", 1000),
                 "daily_message_limit": daily_limit,
-                "crisis_phone": cfg.get("crisis_phone", "123"),
+                "crisis_phone": cfg.get("crisis_phone", DEFAULT_CRISIS_PHONE),
                 "thinking_level": cfg.get("thinking_level", "medium"),
                 "tone": cfg.get("tone", "empatico"),
             },
