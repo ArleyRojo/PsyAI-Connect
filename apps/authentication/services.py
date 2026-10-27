@@ -235,12 +235,22 @@ class AuthService:
         if not data.get("genero"):
             return {"success": False, "message": "El género es requerido"}, 400
 
+        # Validar aceptación de términos y política de privacidad
+        if not data.get("acepta_terminos"):
+            return {"success": False, "message": "Debes aceptar los términos y la política de privacidad"}, 400
+
         nombre = validated["nombre"]
         email = validated["email"]
         password = validated["password"]
         rol = validated["rol"]
         genero = data.get("genero", "")
         edad = validated.get("edad")
+
+        # Validar edad mínima
+        from django.conf import settings
+        edad_minima = getattr(settings, "EDAD_MINIMA_REGISTRO", 18)
+        if edad is not None and edad < edad_minima:
+            return {"success": False, "message": f"Debes tener al menos {edad_minima} años para registrarte"}, 400
 
         bloqueado, retry_after = self.security_repo.check_rate_limit(f"register:{email}")
         if bloqueado:
@@ -262,6 +272,22 @@ class AuthService:
         user_id = self.repo.create_user(
             nombre, email, SecurityHelper.hash_password(password), rol, genero, edad,
             email_verificado=email_verificado
+        )
+
+        # Guardar consentimiento de términos y privacidad
+        from apps.authentication.models import ConsentimientoUsuario
+        from django.conf import settings
+        legal_version = getattr(settings, "LEGAL_VERSION", "2026-10-26")
+        client_ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "")) if request else ""
+        user_agent = request.META.get("HTTP_USER_AGENT", "") if request else ""
+
+        ConsentimientoUsuario.objects.create(
+            idUsuario_id=user_id,
+            tipo="terminos_privacidad",
+            version=getattr(settings, "LEGAL_VERSION", "2026-10-26"),
+            aceptado=True,
+            ip=client_ip.split(",")[0].strip() if client_ip else None,
+            userAgent=user_agent,
         )
 
         # Si es profesional o email no verificado, crear token de verificación y enviar email

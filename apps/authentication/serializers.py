@@ -1,6 +1,22 @@
 from rest_framework import serializers
 
 
+import re
+from datetime import date
+from rest_framework import serializers
+
+from django.conf import settings
+
+
+def calcular_edad(fecha_nacimiento):
+    """Calcula la edad a partir de la fecha de nacimiento."""
+    hoy = date.today()
+    edad = hoy.year - fecha_nacimiento.year
+    if (hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day):
+        edad -= 1
+    return edad
+
+
 class RegisterSerializer(serializers.Serializer):
     nombre = serializers.CharField(max_length=120)
     email = serializers.EmailField()
@@ -10,11 +26,23 @@ class RegisterSerializer(serializers.Serializer):
         choices=["paciente", "profesional", "admin"], default="paciente"
     )
     genero = serializers.CharField()
-    edad = serializers.IntegerField(required=False, min_value=1, max_value=120)
+    fecha_nacimiento = serializers.DateField()
+    acepta_terminos = serializers.BooleanField(required=True)
 
     def validate(self, data):
         if data["password"] != data["confirm_password"]:
             raise serializers.ValidationError("Las contraseñas no coinciden")
+        if not data.get("acepta_terminos"):
+            raise serializers.ValidationError("Debes aceptar los términos y la política de privacidad")
+
+        # Validar edad mínima
+        edad = calcular_edad(data["fecha_nacimiento"])
+        edad_minima = getattr(settings, "EDAD_MINIMA_REGISTRO", 18)
+        if edad < edad_minima:
+            raise serializers.ValidationError(
+                f"Debes tener al menos {edad_minima} años para registrarte"
+            )
+
         return data
 
 

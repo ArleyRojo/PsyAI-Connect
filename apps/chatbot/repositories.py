@@ -27,19 +27,32 @@ class ChatRepository:
             palabrasRiesgoDetectadas=palabras_riesgo,
         )
 
+    def _today_range(self):
+        """Return (start, end) of the current day in the project's timezone (America/Bogota).
+        Uses a half-open interval [start, end) to avoid MySQL CONVERT_TZ issues with __date.
+        """
+        start = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
+        end = start + timedelta(days=1)
+        return start, end
+
     def get_history(self, patient_id, limit=40, today_only=False):
         qs = ConversacionesChatbot.objects.filter(
             idPaciente_id=patient_id,
         )
         if today_only:
-            qs = qs.filter(fecha__date=timezone.now().date())
+            start, end = self._today_range()
+            qs = qs.filter(fecha__gte=start, fecha__lt=end)
         qs = qs.order_by("-fecha")[:limit]
         rows = list(reversed(qs))
 
         historial = []
         for row in rows:
             if row.mensajeUsuario:
-                historial.append({"tipo": "usuario", "mensaje": row.mensajeUsuario})
+                historial.append({
+                    "tipo": "usuario",
+                    "mensaje": row.mensajeUsuario,
+                    "nivel_emocional": row.nivelEmocionalDetectado,
+                })
             if row.respuestaChatbot:
                 historial.append({"tipo": "bot", "mensaje": row.respuestaChatbot})
         return historial
@@ -48,9 +61,11 @@ class ChatRepository:
         ConversacionesChatbot.objects.filter(idPaciente_id=patient_id).delete()
 
     def count_today_messages(self, patient_id):
+        start, end = self._today_range()
         return ConversacionesChatbot.objects.filter(
             idPaciente_id=patient_id,
-            fecha__date=timezone.now().date(),
+            fecha__gte=start,
+            fecha__lt=end,
         ).exclude(
             nivelEmocionalDetectado="Alto",
         ).count()
@@ -114,17 +129,28 @@ class ChatRepository:
             requiereAtencionUrgente=bool(data.get("requiere_atencion_urgente")),
         )
 
-    def get_prediagnosticos_for_professional(self, professional_id, days=30):
+    def get_prediagnosticos_for_professional(self, professional_id, days=90):
         from apps.professionals.models import PacientesProfesional
+        from django.db.models import Q
         cutoff = timezone.now() - timedelta(days=days)
         try:
-            patient_ids = PacientesProfesional.objects.filter(
-                idProfesional_id=professional_id
+            # Pacientes asignados a este profesional
+            asignados_a_mi = PacientesProfesional.objects.filter(
+                idProfesional_id=professional_id, idPaciente_id__isnull=False
             ).values_list("idPaciente_id", flat=True)
-            rows = PrediagnosticoChatbot.objects.filter(
-                idPaciente_id__in=patient_ids,
-                fecha__gte=cutoff,
-            ).select_related("idPaciente").order_by("-fecha")
+
+            # Pacientes que tienen ALGÚN profesional asignado
+            con_algun_profesional = PacientesProfesional.objects.filter(
+                idPaciente_id__isnull=False
+            ).values_list("idPaciente_id", flat=True)
+
+            rows = (
+                PrediagnosticoChatbot.objects
+                .filter(fecha__gte=cutoff)
+                .filter(Q(idPaciente_id__in=asignados_a_mi) | ~Q(idPaciente_id__in=con_algun_profesional))
+                .select_related("idPaciente")
+                .order_by("-fecha")
+            )
             return [
                 {**r.to_dict(), "paciente": r.idPaciente.nombre}
                 for r in rows

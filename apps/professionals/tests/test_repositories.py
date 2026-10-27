@@ -37,7 +37,8 @@ def professional_profile(professional_user):
     return PerfilProfesional.objects.create(
         idProfesional=professional_user,
         especialidad="Psicología Clínica",
-        licencia="LIC-12345",
+        tarjetaProfesional="TAR-12345",
+        numeroRethus="RETHUS-12345",
         experiencia="10 años",
     )
 
@@ -70,7 +71,7 @@ class TestGetProfessionalProfile:
         assert isinstance(result, dict)
         assert result["nombre"] == "Dr. García"
         assert result["especialidad"] == "Psicología Clínica"
-        assert result["licencia"] == "LIC-12345"
+        assert result["tarjetaProfesional"] == "TAR-12345"
 
     def test_returns_none_when_not_found(self, repo):
         result = repo.get_professional_profile(9999)
@@ -80,7 +81,7 @@ class TestGetProfessionalProfile:
         result = repo.get_professional_profile(professional_user.idUsuario)
         assert result is not None
         assert result["especialidad"] is None
-        assert result["licencia"] is None
+        assert result["tarjetaProfesional"] is None
 
 
 # ── update_professional_profile ──────────────────────────────────────────────
@@ -94,15 +95,23 @@ class TestUpdateProfessionalProfile:
             "especialidad": "Neuropsicología",
         })
         professional_profile.refresh_from_db()
-        assert professional_profile.especialidad == "Neuropsychología" or professional_profile.especialidad == "Neuropsicología"
+        assert professional_profile.especialidad == "Neuropsicología"
 
-    def test_updates_licencia(self, repo, professional_user, professional_profile):
+    def test_updates_tarjeta_profesional(self, repo, professional_user, professional_profile):
         repo.update_professional_profile({
             "idUsuario": professional_user.idUsuario,
-            "licencia": "LIC-99999",
+            "tarjetaProfesional": "TAR-99999",
         })
         professional_profile.refresh_from_db()
-        assert professional_profile.licencia == "LIC-99999"
+        assert professional_profile.tarjetaProfesional == "TAR-99999"
+
+    def test_updates_numero_rethus(self, repo, professional_user, professional_profile):
+        repo.update_professional_profile({
+            "idUsuario": professional_user.idUsuario,
+            "numeroRethus": "RETHUS-99999",
+        })
+        professional_profile.refresh_from_db()
+        assert professional_profile.numeroRethus == "RETHUS-99999"
 
     def test_updates_experiencia(self, repo, professional_user, professional_profile):
         repo.update_professional_profile({
@@ -276,7 +285,7 @@ class TestReportCRUD:
     def test_delete_report(self, repo, professional_user, patient_user, professional_patient):
         data = {
             "idPaciente": patient_user.idUsuario,
-            "tipoReporte": "general",
+            "tipoRepote": "general",
             "fechaInicio": date.today(),
         }
         repo.create_report(professional_user.idUsuario, data)

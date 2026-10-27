@@ -173,6 +173,24 @@ CSRF_TRUSTED_ORIGINS = [
     ).split(",") if origin.strip()
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com",
+    ).split(",") if origin.strip()
+]
+
+# ── Legal / Compliance (Ley 1581/2012 Colombia) ──────────────────────────────
+# Versión de los textos legales (términos, privacidad, consentimientos).
+# Cambiar esta versión cuando se actualicen los textos para forzar re-aceptación.
+LEGAL_VERSION = os.getenv("LEGAL_VERSION", "2026-10-26")
+
+# Edad mínima para registrarse (para bloquear menores sin autorización legal)
+EDAD_MINIMA_REGISTRO = int(os.getenv("EDAD_MINIMA_REGISTRO", "18"))
+
+# Si True, retiene historia clínica y prediagnósticos al anonimizar cuenta
+RETENER_HISTORIA_CLINICA = os.getenv("RETENER_HISTORIA_CLINICA", "True") == "True"
+
 # Content Security Policy
 CSP_ENABLED = True
 

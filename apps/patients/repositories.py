@@ -1,9 +1,13 @@
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Q
 from django.utils import timezone
 
-from apps.authentication.models import Register
-from apps.patients.models import PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar
+from apps.authentication.models import Register, ConsentimientoUsuario
+from apps.patients.models import (
+    PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar,
+    SolicitudDerechos
+)
 from apps.professionals.models import PerfilProfesional
+from apps.chatbot.models import MensajesChat
 
 
 class PatientRepository:
@@ -308,4 +312,277 @@ class PatientRepository:
 
     def existe_anamnesis(self, paciente_id):
         return Anamnesis.objects.filter(idPaciente_id=paciente_id).exists()
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # Derechos del titular (Ley 1581/2012)
+    # ─────────────────────────────────────────────────────────────────────────────
+
+    def get_consentimientos(self, user_id):
+        """Obtiene todos los consentimientos del usuario."""
+        from apps.authentication.models import ConsentimientoUsuario
+        return list(
+            ConsentimientoUsuario.objects.filter(idUsuario_id=user_id)
+            .order_by("-fecha")
+            .values("tipo", "version", "aceptado", "fecha", "ip")
+        )
+
+    def revocar_consentimiento(self, user_id, tipo):
+        """Revoca un consentimiento específico (datos_sensibles_ia o whatsapp)."""
+        from apps.authentication.models import ConsentimientoUsuario
+        from apps.patients.models import PerfilPaciente
+        updated = ConsentimientoUsuario.objects.filter(
+            idUsuario_id=user_id, tipo=tipo, aceptado=True
+        ).update(aceptado=False)
+        if tipo == "datos_sensibles_ia":
+            # Al revocar datos_sensibles_ia, también desactivamos consentimiento_chatbot
+            PerfilPaciente.objects.filter(idPaciente_id=user_id).update(consentimiento_chatbot=False)
+        elif tipo == "whatsapp":
+            PerfilPaciente.objects.filter(idPaciente_id=user_id).update(whatsappConsentimiento=False)
+        return updated > 0
+
+    def get_solicitudes_derechos(self, user_id):
+        """Obtiene el historial de solicitudes de derechos del usuario."""
+        from apps.patients.models import SolicitudDerechos
+        return list(
+            SolicitudDerechos.objects.filter(idUsuario_id=user_id)
+            .order_by("-fecha")
+            .values("idSolicitud", "tipo", "descripcion", "estado", "fecha", "fechaLimite", "fechaRespuesta", "respuesta", "prorrogada")
+        )
+
+    def crear_solicitud_derechos(self, user_id, tipo, descripcion=""):
+        """Crea una nueva solicitud de derechos con fecha límite calculada."""
+        from apps.patients.models import SolicitudDerechos, calcular_fecha_limite_solicitud
+        from django.utils import timezone
+        fecha_limite = calcular_fecha_limite_solicitud(tipo)
+        return SolicitudDerechos.objects.create(
+            idUsuario_id=user_id,
+            tipo=tipo,
+            descripcion=descripcion,
+            fechaLimite=fecha_limite,
+        )
+
+    def exportar_datos_usuario(self, user_id):
+        """Exporta todos los datos del usuario para derecho de acceso."""
+        from apps.authentication.models import Register
+        from apps.patients.models import (
+            PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar,
+            SolicitudDerechos, ConsentimientoUsuario
+        )
+        from apps.chatbot.models import ConversacionesChatbot, PrediagnosticoChatbot
+        from apps.documents.models import DocumentosPaciente
+        from apps.billing.models import Facturas, ItemsFactura
+        from apps.scheduling.models import Citas
+
+        try:
+            user = Register.objects.get(idUsuario=user_id)
+        except Register.DoesNotExist:
+            return None
+
+        # Datos básicos
+        perfil = None
+        try:
+            perfil = PerfilPaciente.objects.get(idPaciente=user_id)
+        except:
+            pass
+
+        # Conversaciones chatbot
+        conversaciones = list(
+            ConversacionesChatbot.objects.filter(idPaciente_id=user_id)
+            .order_by("-fecha")
+            .values("mensajeUsuario", "respuestaChatbot", "nivelEmocionalDetectado", "palabrasRiesgoDetectadas", "fecha")
+        )
+
+        # Prediagnósticos
+        prediagnosticos = list(
+            PrediagnosticoChatbot.objects.filter(idPaciente_id=user_id)
+            .order_by("-fecha")
+            .values("resumenPaciente", "resumenProfesional", "posiblesAreas", "recomendaciones", "nivelRiesgo", "requiereAtencionUrgente", "fecha")
+        )
+
+        # Anamnesis
+        anamnesis = None
+        try:
+            anam = Anamnesis.objects.prefetch_related("familiares").get(idPaciente_id=user_id)
+            anamnesis = anam.to_dict()
+        except:
+            anamnesis = None
+
+        # Conversaciones chat (mensajes)
+        from apps.chatbot.models import MensajesChat
+        mensajes = list(
+            MensajesChat.objects.filter(idEmisor_id=user_id) | MensajesChat.objects.filter(idReceptor_id=user_id)
+        )
+        mensajes = list(MensajesChat.objects.filter(
+            models.Q(idEmisor_id=user_id) | models.Q(idReceptor_id=user_id)
+        ).order_by("fecha").values("idEmisor_id", "idReceptor_id", "mensaje", "leido", "fecha"))
+
+        # Citas
+        citas = list(
+            Citas.objects.filter(idPaciente_id=user_id)
+            .select_related("idProfesional")
+            .order_by("-fecha", "-hora")
+            .values("idCita", "idProfesional__nombre", "fecha", "hora", "tipoCita", "tipoSesion", "estado", "motivo")
+        )
+
+        # Facturas
+        facturas = list(
+            Facturas.objects.filter(idPaciente_id=user_id)
+            .select_related("idProfesional")
+            .order_by("-fecha")
+            .values("idFactura", "idProfesional__nombre", "monto", "estadoPago", "fecha", "metodoPago", "fechaPago")
+        )
+
+        # Items de factura
+        facturas_ids = [f["idFactura"] for f in facturas]
+        items = list(
+            ItemsFactura.objects.filter(idFactura__in=facturas_ids)
+            .values("idFactura_id", "descripcion", "precioUnitario")
+        ) if facturas_ids else []
+
+        # Documentos
+        documentos = list(
+            DocumentosPaciente.objects.filter(idPaciente_id=user_id)
+            .order_by("-fecha")
+            .values("idDocumento", "nombreArchivo", "rutaArchivo", "tipoMime", "tamanoArchivo", "descripcion", "fecha", "eliminado")
+        )
+
+        # Consentimientos
+        from apps.authentication.models import ConsentimientoUsuario
+        consentimientos = list(
+            ConsentimientoUsuario.objects.filter(idUsuario_id=user_id)
+            .order_by("-fecha")
+            .values("tipo", "version", "aceptado", "fecha", "ip")
+        )
+
+        # Solicitudes de derechos
+        from apps.patients.models import SolicitudDerechos
+        solicitudes = list(
+            SolicitudDerechos.objects.filter(idUsuario_id=user_id)
+            .order_by("-fecha")
+            .values("tipo", "descripcion", "estado", "fecha", "fechaLimite", "fechaRespuesta", "respuesta", "prorrogada")
+        )
+
+        return {
+            "cuenta": {
+                "idUsuario": user.idUsuario,
+                "nombre": user.nombre,
+                "email": user.email,
+                "rol": user.rol,
+                "estadoCuenta": user.estadoCuenta,
+                "activo": user.activo,
+                "email_verificado": user.email_verificado,
+                "fechaRegistro": user.fechaRegistro.isoformat() if user.fechaRegistro else None,
+                "fotoPerfil": user.fotoPerfil,
+            },
+            "perfil": perfil.to_dict() if perfil else None,
+            "conversaciones_chatbot": conversaciones,
+            "prediagnosticos": prediagnosticos,
+            "anamnesis": anamnesis,
+            "mensajes_chat": mensajes,
+            "citas": citas,
+            "facturas": facturas,
+            "items_factura": items,
+            "documentos": documentos,
+            "consentimientos": consentimientos,
+            "solicitudes_derechos": solicitudes,
+        }
+
+    def anonimizar_cuenta(self, user_id, password_confirm):
+        """
+        Anonimiza la cuenta del usuario (derecho de supresión).
+        - Nombre → "Usuario eliminado"
+        - Email → dirección única inválida
+        - Contraseña inutilizada
+        - Foto y teléfono vacíos
+        - activo=False, estadoCuenta="Suspendida"
+        - Borra ConversacionesChatbot y datos de chat
+        - Si RETENER_HISTORIA_CLINICA=True: conserva anamnesis, prediagnosticos, documentos clínicos, facturas
+        Retorna (success, message)
+        """
+        from django.conf import settings
+        from django.contrib.auth.hashers import check_password
+        from django.utils import timezone
+        from django.db import transaction
+        from apps.chatbot.models import ConversacionesChatbot, MensajesChat
+        from apps.authentication.models import Register
+
+        try:
+            user = Register.objects.get(idUsuario=user_id)
+        except Register.DoesNotExist:
+            return False, "Usuario no encontrado"
+
+        # Verificar contraseña
+        if not check_password(password_confirm, user.contrasena):
+            return False, "Contraseña incorrecta"
+
+        # Verificar RETENER_HISTORIA_CLINICA
+        retener = getattr(settings, "RETENER_HISTORIA_CLINICA", True)
+
+        with transaction.atomic():
+            # 1. Borrar conversaciones chatbot y mensajes chat
+            ConversacionesChatbot.objects.filter(idPaciente_id=user_id).delete()
+            from apps.chatbot.models import MensajesChat
+            MensajesChat.objects.filter(
+                models.Q(idEmisor_id=user_id) | models.Q(idReceptor_id=user_id)
+            ).delete()
+
+            # 2. Si no retener historia clínica, borrar datos clínicos
+            if not retener:
+                from apps.patients.models import EvolucionPaciente, Anamnesis, Familiar, PrediagnosticoChatbot
+                from apps.documents.models import DocumentosClinicos, DocumentosPaciente
+                from apps.scheduling.models import Citas
+                from apps.billing.models import Facturas, ItemsFactura
+
+                EvolucionPaciente.objects.filter(idPaciente_id=user_id).delete()
+                PrediagnosticoChatbot.objects.filter(idPaciente_id=user_id).delete()
+                Familiar.objects.filter(idAnamnesis__idPaciente_id=user_id).delete()
+                Anamnesis.objects.filter(idPaciente_id=user_id).delete()
+                DocumentosPaciente.objects.filter(idPaciente_id=user_id).delete()
+                DocumentosClinicos.objects.filter(idPaciente_id=user_id).delete()
+                Citas.objects.filter(idPaciente_id=user_id).delete()
+                ItemsFactura.objects.filter(idFactura__idPaciente_id=user_id).delete()
+                Facturas.objects.filter(idPaciente_id=user_id).delete()
+            else:
+                # Solo anonimizar citas futuras
+                from apps.scheduling.models import Citas
+                Citas.objects.filter(
+                    idPaciente_id=user_id,
+                    fecha__gte=timezone.now().date()
+                ).delete()
+
+            # 3. Anonimizar usuario
+            email_anonimo = f"usuario_eliminado_{user_id}@{timezone.now().timestamp()}.invalid"
+            user.nombre = "Usuario eliminado"
+            user.email = email_anonimo
+            user.contrasena = "!"  # Contraseña inutilizada
+            user.fotoPerfil = None
+            user.activo = False
+            user.estadoCuenta = "Suspendida"
+            user.email_verificado = False
+            user.save(update_fields=[
+                "nombre", "email", "contrasena", "fotoPerfil",
+                "activo", "estadoCuenta", "email_verificado"
+            ])
+
+            # 4. Limpiar perfil
+            from apps.patients.models import PerfilPaciente
+            PerfilPaciente.objects.filter(idPaciente_id=user_id).update(
+                numeroTelefonico=None,
+                consentimientoDatos=False,
+                consentimiento_chatbot=False,
+            )
+
+            # 5. Crear solicitud de derechos de supresión
+            from apps.patients.models import SolicitudDerechos
+            SolicitudDerechos.objects.create(
+                idUsuario_id=user_id,
+                tipo="supresion",
+                descripcion="Solicitud de eliminación de cuenta por parte del titular",
+                estado="respondida",
+                fechaLimite=timezone.now().date(),
+                fechaRespuesta=timezone.now(),
+                respuesta="Cuenta anonimizada y suspendida según derecho de supresión (Ley 1581/2012)"
+            )
+
+            return True, "Cuenta anonimizada y suspendida. Los datos de historia clínica se conservan según configuración RETENER_HISTORIA_CLINICA."
 

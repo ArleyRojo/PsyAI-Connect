@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from django.db import transaction
 from django.db.models import Q, Count, F
 from django.db.models.functions import TruncDate
+from django.utils import timezone
 
 from apps.scheduling.models import Citas, Disponibilidad, Notificaciones
 from apps.authentication.models import Register
@@ -122,7 +123,7 @@ class AppointmentRepository:
         if pending_only:
             qs = qs.filter(estado="Pendiente")
         else:
-            qs = qs.exclude(estado="Cancelada").filter(fecha__gte=date.today())
+            qs = qs.exclude(estado="Cancelada").filter(fecha__gte=timezone.localdate())
 
         qs = qs.order_by("fecha", "hora")[offset : offset + limit]
 
@@ -156,7 +157,7 @@ class AppointmentRepository:
                 Citas.objects.filter(
                     idPaciente_id=patient_id,
                     estado="Pendiente",
-                    fecha__gte=date.today(),
+                    fecha__gte=timezone.localdate(),
                 )
                 .select_related("idProfesional")
                 .order_by("fecha", "hora")

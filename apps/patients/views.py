@@ -25,6 +25,11 @@ from apps.patients.serializers import (
     DocumentoUploadSerializer,
     EvolucionSerializer,
     PreferenciasSerializer,
+    SolicitudDerechosSerializer,
+    ConsentimientoUsuarioSerializer,
+    RevocarConsentimientoSerializer,
+    EliminarCuentaSerializer,
+    MisDatosExportSerializer,
 )
 
 if apps.is_installed("apps.chatbot"):
@@ -444,3 +449,90 @@ class AnamnesisViewSet(viewsets.ViewSet):
         payload, status_code = _get_patient_service().eliminar_anamnesis(paciente_id, profesional_id)
         return Response(payload, status=status_code)
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Derechos del titular (Ley 1581/2012)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class MisDatosViewSet(viewsets.ViewSet):
+    """
+    Derecho de acceso - Exportar todos los datos del usuario.
+    GET /api/paciente/mis-datos
+    """
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def list(self, request):
+        user_id = getattr(request, "user_id", None)
+        if not user_id:
+            return Response({"success": False, "message": "No autenticado"}, status=status.HTTP_401_UNAUTHORIZED)
+        patient_service = PatientService()
+        data = patient_service.repo.exportar_datos_usuario(user_id)
+        if data is None:
+            return Response({"success": False, "message": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"success": True, "data": data}, status=status.HTTP_200_OK)
+
+
+class ConsentimientosPacienteViewSet(viewsets.ViewSet):
+    """
+    Gestión de consentimientos del paciente.
+    GET /api/paciente/consentimientos - Listar consentimientos
+    POST /api/paciente/consentimientos/revocar - Revocar consentimiento
+    """
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def list(self, request):
+        user_id = getattr(request, "user_id", None)
+        patient_service = PatientService()
+        consentimientos = patient_service.repo.get_consentimientos(user_id)
+        return Response({"success": True, "consentimientos": consentimientos}, status=status.HTTP_200_OK)
+
+    def revocar(self, request):
+        """POST /api/paciente/consentimientos/revocar"""
+        user_id = getattr(request, "user_id", None)
+        serializer = RevocarConsentimientoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tipo = serializer.validated_data["tipo"]
+        if not serializer.validated_data.get("confirmar"):
+            return Response({"success": False, "message": "Debe confirmar la revocación"}, status=status.HTTP_400_BAD_REQUEST)
+        patient_service = PatientService()
+        ok = patient_service.repo.revocar_consentimiento(user_id, tipo)
+        if not ok:
+            return Response({"success": False, "message": "No se encontró el consentimiento o ya estaba revocado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"success": True, "message": f"Consentimiento {tipo} revocado correctamente"}, status=status.HTTP_200_OK)
+
+
+class CuentaViewSet(viewsets.ViewSet):
+    """
+    Gestión de cuenta - Eliminación (derecho de supresión).
+    POST /api/cuenta/eliminar
+    """
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def eliminar(self, request):
+        """POST /api/cuenta/eliminar"""
+        user_id = getattr(request, "user_id", None)
+        serializer = EliminarCuentaSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if not serializer.validated_data.get("confirmar"):
+            return Response({"success": False, "message": "Debe confirmar la eliminación"}, status=status.HTTP_400_BAD_REQUEST)
+        password = serializer.validated_data["password"]
+        patient_service = PatientService()
+        ok, msg = patient_service.repo.anonimizar_cuenta(user_id, password)
+        if not ok:
+            return Response({"success": False, "message": msg}, status=status.HTTP_400_BAD_REQUEST)
+        # La sesión se invalidará automáticamente al anonimizar la cuenta
+        return Response({"success": True, "message": msg}, status=status.HTTP_200_OK)
+
+
+class SolicitudesDerechosViewSet(viewsets.ViewSet):
+    """
+    Historial de solicitudes de derechos ARCO.
+    GET /api/paciente/solicitudes-derechos
+    """
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def list(self, request):
+        user_id = getattr(request, "user_id", None)
+        patient_service = PatientService()
+        solicitudes = patient_service.repo.get_solicitudes_derechos(user_id)
+        return Response({"success": True, "solicitudes": solicitudes}, status=status.HTTP_200_OK)

@@ -18,6 +18,7 @@ from apps.professionals.views import (
     PacienteAsignarResource,
     ProfessionalPaymentInfoViewSet,
     ProfessionalPaymentInfoPublicView,
+    ProfessionalVerificacionViewSet,
 )
 
 app_name = "professionals"
@@ -54,4 +55,8 @@ urlpatterns = [
     # Payment info
     path("profesional/payment-info", ProfessionalPaymentInfoViewSet.as_view({"get": "retrieve", "put": "update"}), name="professional_payment_info"),
     path("profesional/<int:id_profesional>/payment-info", ProfessionalPaymentInfoPublicView.as_view(), name="professional_payment_info_public"),
+# Admin: Verificación de profesionales
+    path("admin/profesionales/pendientes", ProfessionalVerificacionViewSet.as_view({"get": "pendientes"}), name="profesionales_pendientes"),
+    path("admin/profesionales/<int:pk>/verificar", ProfessionalVerificacionViewSet.as_view({"post": "verificar"}), name="profesional_verificar"),
+    path("admin/profesionales/<int:pk>/desverificar", ProfessionalVerificacionViewSet.as_view({"post": "desverificar"}), name="profesional_desverificar"),
 ]

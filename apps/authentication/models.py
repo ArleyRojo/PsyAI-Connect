@@ -233,3 +233,52 @@ class TOTPDevice(models.Model):
             "createdAt": self.createdAt.isoformat() if self.createdAt else None,
             "last_used": self.last_used.isoformat() if self.last_used else None,
         }
+
+
+class ConsentimientoUsuario(models.Model):
+    """
+    Registro de consentimientos del usuario según Ley 1581/2012.
+    Cada vez que se actualizan los textos legales (LEGAL_VERSION),
+    el usuario debe volver a aceptarlos.
+    """
+    TIPO_CHOICES = [
+        ("terminos_privacidad", "Términos y Política de Privacidad"),
+        ("datos_sensibles_ia", "Datos Sensibles e IA"),
+        ("whatsapp", "WhatsApp / Notificaciones"),
+    ]
+
+    id = models.AutoField(primary_key=True)
+    idUsuario = models.ForeignKey(
+        Register,
+        on_delete=models.CASCADE,
+        db_column="idUsuario",
+        related_name="consentimientos",
+    )
+    tipo = models.CharField(max_length=30, choices=TIPO_CHOICES)
+    version = models.CharField(max_length=20, help_text="Versión del texto legal (LEGAL_VERSION)")
+    aceptado = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    userAgent = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = "ConsentimientoUsuario"
+        unique_together = [("idUsuario", "tipo", "version")]
+        indexes = [
+            models.Index(fields=["idUsuario", "tipo"]),
+            models.Index(fields=["fecha"]),
+        ]
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "idUsuario": self.idUsuario_id,
+            "tipo": self.tipo,
+            "version": self.version,
+            "aceptado": self.aceptado,
+            "fecha": self.fecha.isoformat() if self.fecha else None,
+            "ip": self.ip,
+        }
+
+    def __str__(self):
+        return f"Consentimiento {self.tipo} v{self.version} - Usuario {self.idUsuario_id}"

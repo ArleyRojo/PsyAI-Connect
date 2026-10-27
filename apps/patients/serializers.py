@@ -1,6 +1,8 @@
 import re
 from rest_framework import serializers
 from .models import PerfilPaciente
+from apps.patients.models import SolicitudDerechos
+from apps.authentication.models import ConsentimientoUsuario
 
 
 class PerfilPacienteSerializer(serializers.Serializer):
@@ -99,3 +101,58 @@ class DocumentoAutorizacionSerializer(serializers.Serializer):
 class ChatMensajeSerializer(serializers.Serializer):
     receptor = serializers.IntegerField()
     mensaje = serializers.CharField(max_length=2000)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Derechos del titular (Ley 1581/2012)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class SolicitudDerechosSerializer(serializers.Serializer):
+    idSolicitud = serializers.IntegerField(read_only=True)
+    tipo = serializers.ChoiceField(choices=SolicitudDerechos.TIPO_CHOICES)
+    descripcion = serializers.CharField(required=False, allow_blank=True)
+    estado = serializers.ChoiceField(choices=SolicitudDerechos.ESTADO_CHOICES, read_only=True)
+    fecha = serializers.DateTimeField(read_only=True)
+    fechaLimite = serializers.DateField(read_only=True)
+    fechaRespuesta = serializers.DateTimeField(read_only=True)
+    respuesta = serializers.CharField(read_only=True)
+    prorrogada = serializers.BooleanField(read_only=True)
+    fechaProrroga = serializers.DateField(read_only=True)
+
+
+class ConsentimientoUsuarioSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    tipo = serializers.CharField(read_only=True)
+    version = serializers.CharField(read_only=True)
+    aceptado = serializers.BooleanField(read_only=True)
+    fecha = serializers.DateTimeField(read_only=True)
+    ip = serializers.CharField(read_only=True)
+
+
+class RevocarConsentimientoSerializer(serializers.Serializer):
+    tipo = serializers.ChoiceField(choices=[
+        ("datos_sensibles_ia", "Datos Sensibles e IA"),
+        ("whatsapp", "WhatsApp / Notificaciones"),
+    ])
+    confirmar = serializers.BooleanField(help_text="Confirmar revocación")
+
+
+class EliminarCuentaSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True)
+    confirmar = serializers.BooleanField(help_text="Confirmar que desea eliminar su cuenta permanentemente")
+
+
+class MisDatosExportSerializer(serializers.Serializer):
+    """Serializer para la exportación completa de datos del usuario (derecho de acceso)."""
+    cuenta = serializers.DictField()
+    perfil = serializers.DictField(allow_null=True)
+    conversaciones_chatbot = serializers.ListField()
+    prediagnosticos = serializers.ListField()
+    anamnesis = serializers.DictField(allow_null=True)
+    mensajes_chat = serializers.ListField()
+    citas = serializers.ListField()
+    facturas = serializers.ListField()
+    items_factura = serializers.ListField()
+    documentos = serializers.ListField()
+    consentimientos = serializers.ListField()
+    solicitudes_derechos = serializers.ListField()

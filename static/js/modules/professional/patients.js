@@ -30,6 +30,13 @@ window.onload = function () {
     cargarProfesionales();
     cargarHistorial();
     cargarEvolucion();
+    cargarPrediagnosticos();
+
+    // Si la URL tiene #prediagnosticos, abrir esa pestaña automáticamente
+    if (location.hash === '#prediagnosticos') {
+        var tabBtn = document.getElementById('tabPrediag');
+        if (tabBtn) mostrarPestana('prediagnosticos', tabBtn);
+    }
 };
 
 function escapeHtml(value) {

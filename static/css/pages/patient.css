@@ -2301,21 +2301,6 @@ body.modal-open #chatbot-section.fullscreen-active {
     -webkit-backdrop-filter: blur(4px);
 }
 
-/* â”€â”€ Chat area empty state â”€â”€ */
-#chatbot-section .chat-area:empty::after {
-    content: 'Env\u00EDa un mensaje para comenzar tu conversaci\u00F3n con el asistente emocional.';
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #94a3b8;
-    font-size: 0.9rem;
-    text-align: center;
-    padding: 40px 20px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%2390CAF9' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E") center 30% no-repeat;
-    background-size: 36px;
-    padding-top: 80px;
-}
 
 
 
@@ -11194,4 +11179,3 @@ html.dark-mode .patient-dashboard .card.history-card:hover {
 .chatbot-greeting {
     font-weight: 700 !important;
 }
-

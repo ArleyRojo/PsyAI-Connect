@@ -17,6 +17,10 @@ from apps.patients.views import (
     ChatContactoViewSet,
     ChatMensajeViewSet,
     AnamnesisViewSet,
+    MisDatosViewSet,
+    ConsentimientosPacienteViewSet,
+    CuentaViewSet,
+    SolicitudesDerechosViewSet,
 )
 from apps.core.webhooks import WhatsAppWebhook
 
@@ -76,4 +80,10 @@ urlpatterns = [
     ),
     # Webhook WhatsApp
     path("whatsapp/webhook/", WhatsAppWebhook.as_view(), name="whatsapp-webhook"),
+    # Derechos del titular (Ley 1581/2012)
+    path("paciente/mis-datos", MisDatosViewSet.as_view({"get": "list"}), name="mis-datos"),
+    path("paciente/consentimientos", ConsentimientosPacienteViewSet.as_view({"get": "list"}), name="consentimientos-list"),
+    path("paciente/consentimientos/revocar", ConsentimientosPacienteViewSet.as_view({"post": "revocar"}), name="consentimientos-revocar"),
+    path("cuenta/eliminar", CuentaViewSet.as_view({"post": "eliminar"}), name="cuenta-eliminar"),
+    path("paciente/solicitudes-derechos", SolicitudesDerechosViewSet.as_view({"get": "list"}), name="solicitudes-derechos"),
 ]

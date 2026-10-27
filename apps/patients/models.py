@@ -425,3 +425,105 @@ class Familiar(models.Model):
             "notas": self.notas,
             "orden": self.orden,
         }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Derechos del titular (Ley 1581/2012)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def sumar_dias_habiles(fecha_inicio, dias_habiles, festivos=None):
+    """
+    Suma días hábiles a una fecha dada (excluye sábados, domingos y festivos colombianos).
+    Retorna la fecha límite (date).
+    """
+    from datetime import timedelta
+    if festivos is None:
+        festivos = set()
+    fecha = fecha_inicio
+    while dias_habiles > 0:
+        fecha += timedelta(days=1)
+        if fecha.weekday() < 5 and fecha not in festivos:  # 0-4 = Lun-Vie
+            dias_habiles -= 1
+    return fecha
+
+
+def calcular_fecha_limite_solicitud(tipo_solicitud):
+    """
+    Calcula la fecha límite para responder una solicitud de derechos.
+    - Consulta/Acceso/Rectificación/Revocatoria: 10 días hábiles (prorrogables 5)
+    - Reclamo: 15 días hábiles (prorrogables 8)
+    """
+    from django.utils import timezone
+    hoy = timezone.now().date()
+    if tipo_solicitud in ("acceso", "rectificacion", "supresion", "revocatoria"):
+        return sumar_dias_habiles(hoy, 10)
+    elif tipo_solicitud == "reclamo":
+        return sumar_dias_habiles(hoy, 15)
+    else:
+        return sumar_dias_habiles(hoy, 10)
+
+
+class SolicitudDerechos(models.Model):
+    """
+    Solicitudes de derechos ARCO + revocatoria + reclamo (Ley 1581/2012).
+    Plazos:
+    - Consulta/Acceso/Rectificación/Supresión/Revocatoria: 10 días hábiles (prorrogables 5)
+    - Reclamo: 15 días hábiles (prorrogables 8)
+    """
+    TIPO_CHOICES = [
+        ("acceso", "Acceso / Consulta"),
+        ("rectificacion", "Rectificación / Actualización"),
+        ("supresion", "Supresión / Eliminación"),
+        ("revocatoria", "Revocatoria del consentimiento"),
+        ("reclamo", "Reclamo"),
+    ]
+    ESTADO_CHOICES = [
+        ("recibida", "Recibida"),
+        ("en_proceso", "En proceso"),
+        ("respondida", "Respondida"),
+        ("prorrogada", "Prorrogada"),
+        ("cerrada", "Cerrada"),
+    ]
+
+    idSolicitud = models.AutoField(primary_key=True)
+    idUsuario = models.ForeignKey(
+        Register,
+        on_delete=models.CASCADE,
+        db_column="idUsuario",
+        related_name="solicitudes_derechos",
+    )
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    descripcion = models.TextField(blank=True, help_text="Detalle de la solicitud")
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="recibida")
+    fecha = models.DateTimeField(auto_now_add=True)
+    fechaLimite = models.DateField(help_text="Fecha límite de respuesta (días hábiles)")
+    fechaRespuesta = models.DateTimeField(null=True, blank=True)
+    respuesta = models.TextField(blank=True, help_text="Respuesta dada al titular")
+    prorrogada = models.BooleanField(default=False)
+    fechaProrroga = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = "SolicitudDerechos"
+        ordering = ["-fecha"]
+        indexes = [
+            models.Index(fields=["idUsuario", "estado"]),
+            models.Index(fields=["fechaLimite"]),
+        ]
+
+    def __str__(self):
+        return f"Solicitud {self.tipo} - Usuario {self.idUsuario_id} ({self.estado})"
+
+    def to_dict(self):
+        return {
+            "idSolicitud": self.idSolicitud,
+            "idUsuario": self.idUsuario_id,
+            "tipo": self.tipo,
+            "descripcion": self.descripcion,
+            "estado": self.estado,
+            "fecha": self.fecha.isoformat() if self.fecha else None,
+            "fechaLimite": self.fechaLimite.isoformat() if self.fechaLimite else None,
+            "fechaRespuesta": self.fechaRespuesta.isoformat() if self.fechaRespuesta else None,
+            "respuesta": self.respuesta,
+            "prorrogada": self.prorrogada,
+            "fechaProrroga": self.fechaProrroga.isoformat() if self.fechaProrroga else None,
+        }

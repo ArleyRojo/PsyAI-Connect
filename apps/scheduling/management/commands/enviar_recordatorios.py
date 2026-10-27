@@ -17,8 +17,13 @@ class Command(BaseCommand):
         ventana_inicio = ahora + timedelta(hours=23, minutes=55)
         ventana_fin = ahora + timedelta(hours=24, minutes=5)
 
+        # Use range-based filter to avoid MySQL CONVERT_TZ issues with __date
+        fecha_start = ventana_inicio.replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_end = fecha_start + timedelta(days=1)
+
         citas = Citas.objects.filter(
-            fecha__date__range=(ventana_inicio.date(), ventana_fin.date()),
+            fecha__gte=fecha_start,
+            fecha__lt=fecha_end,
             hora__range=(ventana_inicio.time(), ventana_fin.time()),
             estado__in=["Pendiente","Confirmada"],
             recordatorio_enviado=False,

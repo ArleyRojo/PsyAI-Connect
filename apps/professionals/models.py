@@ -37,10 +37,22 @@ class PerfilProfesional(models.Model):
     genero = models.CharField(max_length=20, null=True, blank=True)
     edad = models.IntegerField(null=True, blank=True)
     especialidad = models.CharField(max_length=120, null=True, blank=True)
-    licencia = models.CharField(max_length=120, null=True, blank=True)
+    tarjetaProfesional = models.CharField(max_length=50, null=True, blank=True, help_text="Número de tarjeta profesional")
+    numeroRethus = models.CharField(max_length=50, null=True, blank=True, help_text="Número de registro ReTHUS")
     experiencia = models.TextField(null=True, blank=True)
     estado = models.CharField(
         max_length=20, choices=ESTADO_CHOICES, default="Activo"
+    )
+    verificado = models.BooleanField(default=False, help_text="Profesional verificado por administrador")
+    fechaVerificacion = models.DateTimeField(null=True, blank=True, help_text="Fecha de verificación")
+    verificadoPor = models.ForeignKey(
+        Register,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column="verificadoPor",
+        related_name="profesionales_verificados",
+        help_text="Administrador que verificó al profesional"
     )
 
     class Meta:
@@ -55,9 +67,13 @@ class PerfilProfesional(models.Model):
             "genero": self.genero,
             "edad": self.edad,
             "especialidad": self.especialidad,
-            "licencia": self.licencia,
+            "tarjetaProfesional": self.tarjetaProfesional,
+            "numeroRethus": self.numeroRethus,
             "experiencia": self.experiencia,
             "estado": self.estado,
+            "verificado": self.verificado,
+            "fechaVerificacion": self.fechaVerificacion.isoformat() if self.fechaVerificacion else None,
+            "verificadoPor": self.verificadoPor_id,
         }
 
 

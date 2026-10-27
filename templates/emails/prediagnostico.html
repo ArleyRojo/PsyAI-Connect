@@ -31,7 +31,7 @@
                                 Hola <strong>{{ nombre_profesional }}</strong>,
                             </p>
                             <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 24px;">
-                                El chatbot de apoyo emocional genero un <strong>prediagnostico orientativo</strong> para el paciente <strong>{{ nombre_paciente }}</strong> al finalizar su sesion.
+                                El chatbot de apoyo emocional gener&oacute; un <strong>prediagnostico orientativo</strong> al finalizar una sesi&oacute;n.
                             </p>
                             <!-- Nivel de riesgo -->
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
@@ -49,36 +49,6 @@
                                     </td>
                                 </tr>
                             </table>
-                            <!-- Resumen clinico -->
-                            <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
-                                <tr>
-                                    <td style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;">
-                                        <p style="font-size:11px;font-weight:600;color:#6366F1;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 10px;">Resumen clinico</p>
-                                        <p style="color:#334155;font-size:14px;line-height:1.7;margin:0;">{{ resumen_profesional }}</p>
-                                    </td>
-                                </tr>
-                            </table>
-                            <!-- Areas detectadas -->
-                            {% if posibles_areas %}
-                            <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
-                                <tr>
-                                    <td style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:16px 20px;">
-                                        <p style="font-size:11px;font-weight:600;color:#4F46E5;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px;">Areas detectadas</p>
-                                        <p style="color:#4338CA;font-size:14px;line-height:1.5;margin:0;">{{ posibles_areas }}</p>
-                                    </td>
-                                </tr>
-                            </table>
-                            {% endif %}
-                            <!-- Disclaimer -->
-                            <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
-                                <tr>
-                                    <td style="background:#F8FAFC;border-left:3px solid #CBD5E1;padding:12px 16px;border-radius:0 8px 8px 0;">
-                                        <p style="color:#64748B;font-size:12px;line-height:1.5;margin:0;">
-                                            <strong>Nota:</strong> Este prediagnostico es un <em>apoyo orientativo generado por IA</em>, no sustituye la evaluacion clinica profesional. Solo el profesional tratante puede emitir un diagnostico clinico definitivo.
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
                             {% if cta_link %}
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px;">
                                 <tr>
@@ -89,15 +59,19 @@
                             </table>
                             {% endif %}
                             <p style="color:#94A3B8;font-size:12px;line-height:1.5;margin:16px 0 0;text-align:center;">
-                                Este correo se envia automaticamente cuando un paciente finaliza su sesion en el chatbot.
+                                Este correo se envia autom&aacute;ticamente cuando un paciente finaliza su sesi&oacute;n en el chatbot.
                             </p>
                         </td>
                     </tr>
                     <!-- Footer -->
                     <tr>
                         <td style="border-top:1px solid #F1F5F9;padding:24px 48px;text-align:center;">
-                            <p style="color:#CBD5E1;font-size:11px;margin:0 0 4px;font-weight:500;">PsyAI Connect &mdash; Bienestar emocional</p>
-                            <p style="color:#CBD5E1;font-size:11px;margin:0;">Correo automatico &middot; No respondas directamente</p>
+                            <p style="color:#CBD5E1;font-size:11px;margin:0 0 4px;font-weight:500;">
+                                PsyAI Connect &mdash; Bienestar emocional
+                            </p>
+                            <p style="color:#CBD5E1;font-size:11px;margin:0;">
+                                Correo autom&aacute;tico &middot; No respondas directamente
+                            </p>
                         </td>
                     </tr>
                 </table>

@@ -1,12 +1,14 @@
 /* ══════════════════════════════════════════════════════
    register.js — Lógica exclusiva del formulario de registro
    PsyAI Connect
-══════════════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════
+const EDAD_MINIMA_REGISTRO = 18; // Coincide con EDAD_MINIMA_REGISTRO en settings
+
+/* ═══════════════════════════════════════════════════════
    CAMPOS y su peso en el progreso global
    6 campos × ~16.7% = 100%
-═══════════════════════════════════════════ */
+════════════════════════════════════════════════════════ */
 const FIELDS = [
     {
         id: 'nombre',
@@ -24,10 +26,19 @@ const FIELDS = [
         step: 1
     },
     {
-        id: 'edad',
+        id: 'fecha_nacimiento',
         check: () => {
-            const edad = parseInt(document.getElementById('edad').value, 10);
-            return !isNaN(edad) && edad >= 1 && edad <= 120;
+            const valor = document.getElementById('fecha_nacimiento').value;
+            if (!valor) return false;
+            const fecha = new Date(valor);
+            if (isNaN(fecha.getTime())) return false;
+            const hoy = new Date();
+            let edad = hoy.getFullYear() - fecha.getFullYear();
+            const mes = hoy.getMonth() - fecha.getMonth();
+            if (mes < 0 || (mes === 0 && hoy.getDate() < fecha.getDate())) {
+                edad--;
+            }
+            return edad >= EDAD_MINIMA_REGISTRO;
         },
         step: 1
     },
@@ -58,9 +69,10 @@ const STEP_LABELS = {
 
 let currentRegStep = 1;
 
-/* ══════════════════════════════
+/* ═════════════════════════════════════════════════════
    PROGRESO
-══════════════════════════════ */
+══════════════════════════════════════════════════════ */
+
 function recalcProgress() {
     const done = FIELDS.filter(f => f.check()).length;
     const pct  = Math.round((done / FIELDS.length) * 100);
@@ -68,9 +80,10 @@ function recalcProgress() {
     document.getElementById('regProgressPct').textContent  = pct + '%';
 }
 
-/* ══════════════════════════════
+/* ═══════════════════════════════════════════════════════
    STEPPER
-══════════════════════════════ */
+═════════════════════════════════════════════════════════ */
+
 function regGoStep(n) {
     if (n > currentRegStep) {
         if (currentRegStep === 1 && !validateStep1()) return;
@@ -99,14 +112,15 @@ function regGoStep(n) {
     recalcProgress();
 }
 
-/* ══════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    VALIDACIONES
-══════════════════════════════ */
+════════════════════════════════════════════════════════════ */
+
 function validateStep1() {
     const nombre = document.getElementById('nombre').value.trim();
     const email  = document.getElementById('email').value.trim();
     const genero = document.getElementById('genero').value;
-    const edad   = parseInt(document.getElementById('edad').value, 10);
+    const fechaNacimiento = document.getElementById('fecha_nacimiento').value;
 
     if (!nombre || nombre.length < 2) {
         mostrarToast('¿Cómo te llamamos? Ingresa tu nombre completo para continuar.', 'warning');
@@ -120,9 +134,23 @@ function validateStep1() {
         mostrarToast('Selecciona tu género para completar tu perfil.', 'warning');
         return false;
     }
-    if (!edad || edad < 1 || edad > 120) {
-        mostrarToast('Ingresa tu edad para completar tu perfil. Debe ser un número entre 1 y 120.', 'warning');
+    if (!fechaNacimiento) {
+        mostrarToast('Ingresa tu fecha de nacimiento para continuar.', 'warning');
         return false;
+    }
+    // Validar edad mínima en el frontend
+    const fecha = new Date(fechaNacimiento);
+    if (!isNaN(fecha.getTime())) {
+        const hoy = new Date();
+        let edad = hoy.getFullYear() - fecha.getFullYear();
+        const mes = hoy.getMonth() - fecha.getMonth();
+        if (mes < 0 || (mes === 0 && hoy.getDate() < fecha.getDate())) {
+            edad--;
+        }
+        if (edad < 18) {
+            mostrarToast('Debes tener al menos 18 años para registrarte', 'warning');
+            return false;
+        }
     }
     return true;
 }
@@ -150,9 +178,10 @@ function validateStep2() {
     return true;
 }
 
-/* ══════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    FUERZA DE CONTRASEÑA
-══════════════════════════════ */
+═════════════════════════════════════════════════════════════ */
+
 function checkPwd() {
     const val      = document.getElementById('password').value;
     const fill     = document.getElementById('pwdFill');
@@ -188,33 +217,42 @@ function checkPwd() {
     hint.style.color      = colors[score] || 'inherit';
 }
 
-/* ══════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    RESUMEN PASO 3
-══════════════════════════════ */
+═════════════════════════════════════════════════════════════ */
+
 function buildRegResumen() {
     const nombre = document.getElementById('nombre').value.trim() || '—';
     const email  = document.getElementById('email').value.trim()  || '—';
     const genero = document.getElementById('genero').value        || '—';
-    const edad   = document.getElementById('edad').value.trim()   || '—';
+    const fecha   = document.getElementById('fecha_nacimiento').value.trim()   || '—';
     document.getElementById('regResumen').innerHTML = `
         <div style="display:grid;gap:6px;">
             <div><strong>Nombre:</strong> ${nombre}</div>
             <div><strong>Correo:</strong> ${email}</div>
             <div><strong>Género:</strong> ${genero}</div>
-            <div><strong>Edad:</strong> ${edad}</div>
+            <div><strong>Fecha de nacimiento:</strong> ${fecha}</div>
         </div>`;
-}   
+}
 
-/* ══════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    SUBMIT
-══════════════════════════════ */
+═════════════════════════════════════════════════════════════ */
+
 async function submitRegister() {
     const nombre           = document.getElementById('nombre').value.trim();
     const email            = document.getElementById('email').value.trim();
     const genero           = document.getElementById('genero').value;
-    const edad             = parseInt(document.getElementById('edad').value, 10);
+    const fecha_nacimiento = document.getElementById('fecha_nacimiento').value;
     const password         = document.getElementById('password').value.trim();
     const confirm_password = document.getElementById('confirm-password').value.trim();
+    const aceptaTerminos   = document.getElementById('acepta-terminos').checked;
+
+    // Validar que se hayan aceptado los términos
+    if (!aceptaTerminos) {
+        mostrarToast('Debes aceptar los Términos y la Política de Privacidad para continuar.', 'warning');
+        return;
+    }
 
     const btn = document.getElementById('btnRegistrar');
     btn.disabled  = true;
@@ -225,7 +263,7 @@ async function submitRegister() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ nombre, email, genero, edad, password, confirm_password })
+            body: JSON.stringify({ nombre, email, genero, fecha_nacimiento, password, confirm_password, acepta_terminos: aceptaTerminos })
         });
         const data = await res.json();
 
@@ -255,10 +293,10 @@ async function submitRegister() {
     }
 }
 
-
-/* ══════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    MOSTRAR / OCULTAR CONTRASEÑA
-══════════════════════════════ */
+═════════════════════════════════════════════════════════════ */
+
 function togglePwd(inputId, btn) {
     const input = document.getElementById(inputId);
     const icon  = btn.querySelector('i');
@@ -273,9 +311,10 @@ function togglePwd(inputId, btn) {
     }
 }
 
-/* ══════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    PARTÍCULAS FLOTANTES
-══════════════════════════════ */
+═════════════════════════════════════════════════════════════ */
+
 (function () {
     const canvas = document.getElementById('bgCanvas');
     if (!canvas) return;
@@ -338,9 +377,10 @@ function togglePwd(inputId, btn) {
     draw();
 })();
 
-/* ══════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    LÍNEAS ANIMADAS EN LA CARD
-══════════════════════════════ */
+═════════════════════════════════════════════════════════════ */
+
 (function () {
     function isDark() { return document.documentElement.classList.contains('dark-mode'); }
 
@@ -359,7 +399,7 @@ function togglePwd(inputId, btn) {
 
     function buildSVG(W, H) {
         const R = 32, pad = 3;
-        const path = `M ${R+pad},${pad} H ${W-R-pad} A ${R},${R} 0 0 1 ${W-pad},${R+pad} V ${H-R-pad} A ${R},${R} 0 0 1 ${W-R-pad},${H-pad} H ${R+pad} A ${R},${R} 0 0 1 ${pad},${H-R-pad} V ${R+pad} A ${R},${R} 0 0 1 ${R+pad},${pad} Z`;
+        const path = `M ${R+pad},${pad} H ${W-R-pad} A ${R},${R} 0 0 1 ${W-pad},${R+pad} V ${H-R-pad} A ${R},${R} 0 0 1 ${W-pad},${H-pad} H ${R+pad} A ${R},${R} 0 0 1 ${pad},${H-R-pad} V ${R+pad} A ${R},${R} 0 0 1 ${R+pad},${pad} Z`;
         const perim = 2 * (W + H) - (8 - 2 * Math.PI) * R;
         const ns  = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(ns, 'svg');
@@ -401,23 +441,32 @@ function togglePwd(inputId, btn) {
         card.appendChild(svg);
     }
 
+    function attach() {
+        const card = document.querySelector('.login-card');
+        if (!card) return;
+        const old = card.querySelector('.card-lines-svg');
+        if (old) old.remove();
+        const svg = buildSVG(card.offsetWidth, card.offsetHeight);
+        card.appendChild(svg);
+    }
+
     new MutationObserver(attach).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attach);
     else attach();
     window.addEventListener('load', attach);
     window.addEventListener('resize', () => setTimeout(attach, 100));
     const observer = new MutationObserver(() => setTimeout(attach, 50));
-document.addEventListener('DOMContentLoaded', function() {
-    const target = document.querySelector('.reg-panels-wrap');
-    if (target) {
-        observer.observe(target, { 
-            childList: true, 
-            subtree: true, 
-            attributes: true, 
-            attributeFilter: ['class'] 
-        });
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        const target = document.querySelector('.reg-panels-wrap');
+        if (target) {
+            observer.observe(target, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+    });
 })();
 
 /* ── Inicializar progreso al cargar ── */

@@ -80,7 +80,7 @@ class InvoiceService:
             fechaPago_dt = timezone.datetime.fromisoformat(fechaPago) if isinstance(fechaPago, str) else fechaPago
         except Exception:
             return {"success": False, "message": "Formato de fechaPago inválido"}, 400
-        if fechaPago_dt and fechaPago_dt.date() > timezone.now().date():
+        if fechaPago_dt and fechaPago_dt.date() > timezone.localdate():
             return {"success": False, "message": "La fecha del pago no puede ser futura"}, 400
 
         # Validar metodoPago

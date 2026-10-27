@@ -816,8 +816,9 @@ class ChatbotService:
                     continue
                 if resp.status_code != 200:
                     body = resp.text[:2000]
-                    self.logger.error("Gemini JSON respondio %s body: %s", resp.status_code, body)
-                    last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}: {body[:200]}")
+                    # Don't log response body as it may contain clinical data
+                    self.logger.error("Gemini JSON respondio %s (body length: %d)", resp.status_code, len(body))
+                    last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
                     if attempt <= GEMINI_RETRIES:
                         time.sleep(base_delay * attempt)
                     continue
@@ -943,17 +944,17 @@ class ChatbotService:
         if not prof_emails:
             return
         nivel = "alto" if es_alto else "medio"
-        asunto = f"PsyAI Connect — Alerta de riesgo {nivel}: {patient_name}"
-        cta = f"{site_url}/aside-professional/patients.html"
+        # No incluir nombre del paciente en el asunto por privacidad
+        asunto = f"PsyAI Connect — Alerta de riesgo {nivel}"
+        # Solo para alertas de pre-diagnóstico urgente incluir el hash #prediagnosticos
+        cta = f"{site_url}/aside-professional/patients.html{'#prediagnosticos' if es_alto else ''}"
         for email, nombre_profesional in prof_emails:
             ctx = {
                 "nombre_profesional": nombre_profesional or email.split("@")[0].replace(".", " ").title(),
-                "nombre_paciente": patient_name,
-                "nivel_riesgo": "alto" if es_alto else "medio",
                 "cta_link": cta,
             }
             html = render_to_string("emails/alerta_riesgo.html", ctx)
-            msg = EmailMultiAlternatives(asunto, f"Alerta de riesgo {nivel}: el paciente {patient_name} requiere seguimiento.", to=[email])
+            msg = EmailMultiAlternatives(asunto, f"Alerta de riesgo {nivel}: se detectaron indicadores de riesgo. Accede a la plataforma para más detalles.", to=[email])
             msg.attach_alternative(html, "text/html")
             try:
                 msg.send(fail_silently=True)
@@ -1075,16 +1076,18 @@ class ChatbotService:
                 if resp.status_code == 400:
                     # Error 400 = payload inválido, no reintentar
                     body = resp.text[:2000]
-                    self.logger.error("Gemini 400 Bad Request: %s", body)
-                    last_exc = RuntimeError(f"Gemini HTTP 400: {body[:200]}")
-                    raise RuntimeError(f"Gemini HTTP 400: {body[:200]}")
+                    # Don't log response body as it may contain clinical data
+                    self.logger.error("Gemini 400 Bad Request (body length: %d)", len(body))
+                    last_exc = RuntimeError("Gemini HTTP 400")
+                    raise RuntimeError("Gemini HTTP 400")
                 if resp.status_code != 200:
                     body = resp.text[:2000]
+                    # Don't log response body as it may contain clinical data
                     self.logger.error(
-                        "Gemini respondio %s en intento %s/%s body: %s",
-                        resp.status_code, attempt, GEMINI_RETRIES + 1, body,
+                        "Gemini respondio %s en intento %s/%s (body length: %d)",
+                        resp.status_code, attempt, GEMINI_RETRIES + 1, len(body),
                     )
-                    last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}: {body[:200]}")
+                    last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
                     if attempt <= GEMINI_RETRIES:
                         time.sleep(base_delay * attempt)
                     continue
@@ -1109,6 +1112,8 @@ class ChatbotService:
             text = (item.get("mensaje") or "").strip()
             if not text:
                 continue
+            # Sanitize PII from history messages before sending to Gemini
+            text = self._sanitize_text(text)
             role = "model" if item.get("tipo") == "bot" else "user"
             history_limit = max_user_chars // 2
             if contents and contents[-1]["role"] == role:
@@ -1117,7 +1122,9 @@ class ChatbotService:
                 contents.append({"role": role, "parts": [{"text": text[:history_limit]}]})
         while contents and contents[0]["role"] != "user":
             contents.pop(0)
-        contents.append({"role": "user", "parts": [{"text": message[:max_user_chars]}]})
+        # Sanitize the current user message as well
+        sanitized_message = self._sanitize_text(message[:max_user_chars])
+        contents.append({"role": "user", "parts": [{"text": sanitized_message}]})
         return contents
 
     def _extract_text(self, data):
@@ -1127,6 +1134,62 @@ class ChatbotService:
             .get("parts", [])
         )
         return "".join(part.get("text", "") for part in parts)
+
+    def _sanitize_text(self, text: str) -> str:
+        """
+        Sanitize text to remove PII before sending to Gemini.
+        Masks:
+        - Emails
+        - Phone numbers (various formats)
+        - Long digit sequences (possible ID numbers, credit cards, etc.)
+        - Colombian document numbers (CC, CE, TI, Pasaporte patterns)
+        """
+        if not text:
+            return text
+
+        sanitized = text
+
+        # Mask emails
+        sanitized = re.sub(
+            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+            '[EMAIL_REDACTED]',
+            sanitized
+        )
+
+        # Mask phone numbers (various formats)
+        # +57 3XX XXX XXXX, +573XXXXXXXXX, 3XX XXX XXXX, etc.
+        sanitized = re.sub(
+            r'(\+?57\s?)?(3\d{2}\s?\d{3}\s?\d{4}|\d{3}\s?\d{3}\s?\d{4})',
+            '[PHONE_REDACTED]',
+            sanitized
+        )
+
+        # Mask long digit sequences (10+ digits) - possible CC, credit cards, etc.
+        # But be careful not to mask short numbers like years, ages, etc.
+        sanitized = re.sub(
+            r'\b\d{10,}\b',
+            lambda m: '[NUMBER_REDACTED]' if len(m.group()) >= 10 else m.group(),
+            sanitized
+        )
+
+        # Mask Colombian document patterns
+        # CC: 6-10 digits, CE: similar, TI: similar, Pasaporte: alphanumeric
+        # Pattern: CC 1234567890, C.C. 1.234.567.890, etc.
+        sanitized = re.sub(
+            r'\b(?:C\.?C\.?|C\.?E\.?|T\.?I\.?|Pasaporte)\s*[:\-]?\s*[\d\.]{6,20}\b',
+            '[DOCUMENT_REDACTED]',
+            sanitized,
+            flags=re.IGNORECASE
+        )
+
+        # Mask credit card patterns (13-19 digits with optional spaces/dashes)
+        sanitized = re.sub(
+            r'\b\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}\b',
+            '[CARD_REDACTED]',
+            sanitized
+        )
+
+        return sanitized
 
     @staticmethod
     def _model_supports_thinking(model):
@@ -1209,7 +1272,7 @@ class ChatbotService:
         for attempt in range(2):
             try:
                 raw = self._call_gemini_json(keys[0], model, PREDIAGNOSTICO_SYSTEM_PROMPT, conversacion_texto)
-                self.logger.info(f"Prediagnóstico raw response (attempt {attempt+1}): {raw[:500]}")
+                self.logger.info("Prediagnóstico raw response (attempt %d): length=%d chars", attempt+1, len(raw))
                 
                 raw = raw.strip().strip("`")
                 if raw.lower().startswith("json"):
@@ -1225,7 +1288,7 @@ class ChatbotService:
                 break  # Success
                 
             except (json.JSONDecodeError, ValueError) as exc:
-                self.logger.warning(f"Prediagnóstico JSON parse failed (attempt {attempt+1}): {exc}. Raw: {raw[:200]}")
+                self.logger.warning("Prediagnóstico JSON parse failed (attempt %d): %s. Raw length: %d", attempt+1, exc, len(raw))
                 if attempt == 1:  # Last attempt failed
                     self.logger.exception("Error generando prediagnostico después de 2 intentos")
                     return {"success": False, "message": "No se pudo generar el prediagnóstico. Intenta más tarde."}, 503
@@ -1289,22 +1352,19 @@ class ChatbotService:
         prof_emails = self.chat_repo.get_professional_emails(professional_ids)
         if not prof_emails:
             return
-        asunto = f"PsyAI Connect — Nuevo prediagnóstico disponible: {patient_name}"
-        cta = f"{site_url}/aside-professional/patients.html"
-        areas = ", ".join(prediagnostico.posiblesAreas) if prediagnostico.posiblesAreas else "No especificadas"
+        # No incluir nombre del paciente en el asunto por privacidad
+        asunto = f"PsyAI Connect — Nuevo prediagnóstico disponible"
+        cta = f"{site_url}/aside-professional/patients.html#prediagnosticos"
         for email, nombre_profesional in prof_emails:
             ctx = {
                 "nombre_profesional": nombre_profesional or email.split("@")[0].replace(".", " ").title(),
-                "nombre_paciente": patient_name,
                 "nivel_riesgo": prediagnostico.nivelRiesgo,
-                "resumen_profesional": prediagnostico.resumenProfesional,
-                "posibles_areas": areas,
                 "cta_link": cta,
             }
             html = render_to_string("emails/prediagnostico.html", ctx)
             msg = EmailMultiAlternatives(
                 asunto,
-                f"Se generó un prediagnóstico para {patient_name} (riesgo {prediagnostico.nivelRiesgo}). Accede a la plataforma para más detalles.",
+                f"Se generó un prediagnóstico (riesgo {prediagnostico.nivelRiesgo}). Accede a la plataforma para más detalles.",
                 to=[email],
             )
             msg.attach_alternative(html, "text/html")

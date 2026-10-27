@@ -83,18 +83,7 @@ function ocultarWelcome() {
 }
 
 function configurarWelcomeChips() {
-    document.querySelectorAll('.chat-welcome__chip').forEach(function (chip) {
-        chip.addEventListener('click', function () {
-            const greeting = chip.getAttribute('data-greeting');
-            if (!greeting) return;
-            const input = document.querySelector('#chatbot-section input[name="mensaje"]');
-            if (input) {
-                input.value = greeting;
-                input.focus();
-            }
-            ocultarWelcome();
-        });
-    });
+    // Chips are now purely visual, no click handlers needed
 }
 
 // ── Inicialización del chat ────────────────────────────────
@@ -132,11 +121,8 @@ async function inicializarChat() {
 }
 
 function mostrarSaludoInicial() {
-    historialChat = [{
-        tipo: 'bot',
-        mensaje: 'Hola! Soy tu asistente emocional. Estoy aqui para escucharte y acompanarte. Como te sientes hoy?',
-        timestamp: ahoraTimestamp()
-    }];
+    // No mostrar mensaje inicial, solo la pantalla de bienvenida
+    historialChat = [];
     guardarHistorial();
     renderizarMensajes();
 }
@@ -146,8 +132,15 @@ function renderizarMensajes() {
     if (!chatContainer) return;
 
     if (historialChat.length === 0) {
-        chatContainer.innerHTML = '';
-        mostrarWelcome();
+        // No borrar el contenedor si ya tiene el welcome screen
+        const welcome = document.getElementById('chat-welcome');
+        if (welcome) {
+            welcome.classList.remove('hidden');
+        } else {
+            // Fallback: reconstruir si no existe
+            chatContainer.innerHTML = '';
+            mostrarWelcome();
+        }
         return;
     }
 
@@ -617,6 +610,15 @@ function configurarFinalizarSesion() {
                 if (typeof showAlert === 'function') showAlert('warning', data?.message || 'No se pudo generar el resumen.', 'Aviso');
                 return;
             }
+
+            // El backend responde 200 con no_data/resumen vacío cuando no hay conversación que analizar hoy.
+            if (data.no_data || !data.resumen) {
+                if (typeof showAlert === 'function') {
+                    showAlert('info', data.message || 'No hay conversación reciente para analizar. Chatea un poco primero.', 'Sesión vacía');
+                }
+                return;
+            }
+
             document.getElementById('prediagnostico-resumen').textContent = data.resumen;
             var lista = document.getElementById('prediagnostico-recomendaciones');
             lista.innerHTML = '';

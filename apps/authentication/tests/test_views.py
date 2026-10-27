@@ -27,6 +27,8 @@ class TestRegisterView:
                 "confirm_password": "Abc123",
                 "rol": "paciente",
                 "genero": "M",
+                "fecha_nacimiento": "2000-01-01",
+                "acepta_terminos": True,
             }),
             content_type="application/json",
         )

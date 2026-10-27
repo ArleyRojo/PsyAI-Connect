@@ -61,8 +61,10 @@ class TestGenerarPrediagnosticoService:
         svc = self._get_service()
         with patch.object(svc.chat_repo, "get_history", return_value=[]):
             result, status = svc.generar_prediagnostico(patient_id=1)
-        assert status == 400
-        assert result["success"] is False
+        # Backend returns 200 with no_data flag when no history (not 400)
+        assert status == 200
+        assert result["success"] is True
+        assert result["no_data"] is True
         # Check for words that don't have accented chars to avoid encoding issues on Windows
         msg = result["message"].lower()
         assert "no hay" in msg or "reciente" in msg or "analizar" in msg

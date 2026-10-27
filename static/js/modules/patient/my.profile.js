@@ -522,3 +522,220 @@ document.addEventListener('DOMContentLoaded', () => {
 function getCookie(name){
     let v=null; if(document.cookie){ document.cookie.split(';').forEach(c=>{c=c.trim(); if(c.startsWith(name+'=')) v=decodeURIComponent(c.slice(name.length+1));}); } return v;
 }
+
+/* ──────────────────────────────────────────────────────────────
+   Mis datos y privacidad (Derechos ARCO - Ley 1581/2012)
+   ────────────────────────────────────────────────────────────── */
+
+async function cargarMisDatos() {
+    try {
+        const res = await fetch('/api/paciente/mis-datos', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            // Descargar JSON
+            const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mis-datos-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mostrarToast('Datos descargados correctamente', 'success');
+        } else {
+            mostrarToast(data.message || 'Error al descargar datos', 'danger');
+        }
+    } catch (e) {
+        console.error(e);
+        mostrarToast('Error de conexión al descargar datos', 'danger');
+    }
+}
+
+async function cargarConsentimientos() {
+    try {
+        const res = await fetch('/api/paciente/consentimientos', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            renderConsentimientos(data.consentimientos);
+        } else {
+            document.getElementById('listaConsentimientos').innerHTML = '<p class="text-muted text-center">Error al cargar consentimientos</p>';
+        }
+    } catch (e) {
+        console.error(e);
+        document.getElementById('listaConsentimientos').innerHTML = '<p class="text-danger text-center">Error de conexión</p>';
+    }
+}
+
+function renderConsentimientos(consentimientos) {
+    const container = document.getElementById('listaConsentimientos');
+    if (!consentimientos || consentimientos.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No hay consentimientos registrados</p>';
+        return;
+    }
+    container.innerHTML = consentimientos.map(c => `
+        <div class="card mb-3">
+            <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <strong>${c.tipo === 'terminos_privacidad' ? 'Términos y Privacidad' : c.tipo === 'datos_sensibles_ia' ? 'Datos Sensibles e IA' : c.tipo === 'whatsapp' ? 'WhatsApp' : c.tipo}</strong>
+                    <div class="text-muted small">v${c.version} · ${c.aceptado ? '<span class="text-success">Activo</span>' : '<span class="text-danger">Revocado</span>'} · ${c.fecha ? new Date(c.fecha).toLocaleDateString('es-CO') : ''}</div>
+                </div>
+                <div class="d-flex gap-2">
+                    ${c.aceptado && (c.tipo === 'datos_sensibles_ia' || c.tipo === 'whatsapp') ? `
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="revocarConsentimiento('${c.tipo}')">
+                            <i class="fas fa-user-slash me-1"></i> Revocar
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function revocarConsentimiento(tipo) {
+    if (!confirm(`¿Estás seguro de revocar el consentimiento de ${tipo === 'datos_sensibles_ia' ? 'Datos Sensibles e IA' : 'WhatsApp'}?`)) return;
+    try {
+        const res = await fetch('/api/paciente/consentimientos/revocar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            credentials: 'include',
+            body: JSON.stringify({ tipo, confirmar: true })
+        });
+        const data = await res.json();
+        if (data.success) {
+            mostrarToast(data.message, 'success');
+            cargarConsentimientos();
+            // Si se revoca datos_sensibles_ia, actualizar estado del chatbot
+            if (tipo === 'datos_sensibles_ia') {
+                const chatSection = document.getElementById('chatbot-section');
+                if (chatSection) chatSection.classList.add('chatbot-consent-blocked');
+            }
+        } else {
+            mostrarToast(data.message, 'danger');
+        }
+    } catch (e) {
+        console.error(e);
+        mostrarToast('Error de conexión', 'danger');
+    }
+}
+
+async function cargarSolicitudesDerechos() {
+    try {
+        const res = await fetch('/api/paciente/solicitudes-derechos', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+            renderSolicitudesDerechos(data.solicitudes);
+        } else {
+            document.getElementById('tbodySolicitudesDerechos').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar</td></tr>';
+        }
+    } catch (e) {
+        console.error(e);
+        document.getElementById('tbodySolicitudesDerechos').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error de conexión</td></tr>';
+    }
+}
+
+function renderSolicitudesDerechos(solicitudes) {
+    const tbody = document.getElementById('tbodySolicitudesDerechos');
+    if (!solicitudes || solicitudes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No hay solicitudes registradas</td></tr>';
+        return;
+    }
+    const labels = {
+        acceso: 'Acceso / Consulta',
+        rectificacion: 'Rectificación',
+        supresion: 'Supresión',
+        revocatoria: 'Revocatoria',
+        reclamo: 'Reclamo'
+    };
+    const estadoLabels = {
+        recibida: 'badge bg-secondary',
+        en_proceso: 'badge bg-info',
+        respondida: 'badge bg-success',
+        prorrogada: 'badge bg-warning',
+        cerrada: 'badge bg-secondary'
+    };
+    tbody.innerHTML = solicitudes.map(s => `
+        <tr>
+            <td>${s.fecha ? new Date(s.fecha).toLocaleDateString('es-CO', {day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
+            <td>${labels[s.tipo] || s.tipo}</td>
+            <td><span class="${estadoLabels[s.estado] || 'bg-secondary'}">${s.estado}</span></td>
+            <td>${s.fechaLimite ? new Date(s.fechaLimite).toLocaleDateString('es-CO') : '—'}</td>
+            <td>${s.fechaRespuesta ? new Date(s.fechaRespuesta).toLocaleDateString('es-CO') : '—'}</td>
+        </tr>
+    `).join('');
+}
+
+async function eliminarCuenta() {
+    const password = document.getElementById('eliminarCuentaPassword').value;
+    const confirmado = document.getElementById('confirmarEliminacion').checked;
+    if (!password || !confirmado) {
+        mostrarToast('Completa la contraseña y marca la confirmación', 'warning');
+        return;
+    }
+    const btn = document.getElementById('btnConfirmarEliminarCuenta');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Eliminando…';
+    try {
+        const res = await fetch('/api/cuenta/eliminar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            credentials: 'include',
+            body: JSON.stringify({ password, confirmar: true })
+        });
+        const data = await res.json();
+        if (data.success) {
+            mostrarToast(data.message, 'success');
+            // Redirigir al login después de un breve delay
+            setTimeout(() => { window.location.href = '/login.html'; }, 2000);
+        } else {
+            mostrarToast(data.message, 'danger');
+        }
+    } catch (e) {
+        console.error(e);
+        mostrarToast('Error de conexión', 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-trash-alt me-1"></i> Eliminar mi cuenta';
+    }
+}
+
+function initMisDatosPrivacidad() {
+    // Descargar datos
+    const btnDescargar = document.getElementById('btnDescargarDatos');
+    if (btnDescargar) btnDescargar.addEventListener('click', cargarMisDatos);
+
+    // Gestionar consentimientos
+    const btnGestionar = document.getElementById('btnGestionarConsentimientos');
+    if (btnGestionar) {
+        btnGestionar.addEventListener('click', () => {
+            cargarConsentimientos();
+            const modal = new bootstrap.Modal(document.getElementById('modalConsentimientos'));
+            modal.show();
+        });
+    }
+
+    // Eliminar cuenta
+    const btnEliminar = document.getElementById('btnEliminarCuenta');
+    if (btnEliminar) {
+        btnEliminar.addEventListener('click', () => {
+            const modal = new bootstrap.Modal(document.getElementById('modalEliminarCuenta'));
+            modal.show();
+        });
+    }
+    const btnConfirmar = document.getElementById('btnConfirmarEliminarCuenta');
+    if (btnConfirmar) btnConfirmar.addEventListener('click', eliminarCuenta);
+
+    // Actualizar solicitudes
+    const btnActualizar = document.getElementById('btnActualizarSolicitudes');
+    if (btnActualizar) {
+        btnActualizar.addEventListener('click', cargarSolicitudesDerechos);
+    }
+
+    // Cargar solicitudes al cargar la página
+    cargarSolicitudesDerechos();
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    initMisDatosPrivacidad();
+});

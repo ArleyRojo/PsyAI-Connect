@@ -24,11 +24,15 @@ class ProfessionalRepository:
             "fotoPerfil": user.fotoPerfil,
             "fechaRegistro": user.fechaRegistro,
             "especialidad": perfil.especialidad if perfil else None,
-            "licencia": perfil.licencia if perfil else None,
+            "tarjetaProfesional": perfil.tarjetaProfesional if perfil else None,
+            "numeroRethus": perfil.numeroRethus if perfil else None,
             "experiencia": perfil.experiencia if perfil else None,
             "estado": perfil.estado if perfil else None,
             "edad": perfil.edad if perfil else None,
             "genero": perfil.genero if perfil else None,
+            "verificado": perfil.verificado if perfil else False,
+            "fechaVerificacion": perfil.fechaVerificacion if perfil else None,
+            "verificadoPor": perfil.verificadoPor_id if perfil else None,
         }
 
     def update_professional_profile(self, data):
@@ -36,9 +40,10 @@ class ProfessionalRepository:
         perfil = PerfilProfesional.objects.filter(idProfesional=user_id).first()
         if perfil:
             perfil.especialidad = data.get("especialidad", perfil.especialidad)
-            perfil.licencia = data.get("licencia", perfil.licencia)
+            perfil.tarjetaProfesional = data.get("tarjetaProfesional", perfil.tarjetaProfesional)
+            perfil.numeroRethus = data.get("numeroRethus", perfil.numeroRethus)
             perfil.experiencia = data.get("experiencia", perfil.experiencia)
-            perfil.save(update_fields=["especialidad", "licencia", "experiencia"])
+            perfil.save(update_fields=["especialidad", "tarjetaProfesional", "numeroRethus", "experiencia"])
 
     def list_professional_patients(self, professional_id):
         from django.db.models import OuterRef, Subquery
@@ -81,6 +86,7 @@ class ProfessionalRepository:
         return result
 
     def list_patients_for_chat(self):
+        # Solo profesionales verificados
         perfil_data = {
             p.idPaciente_id: p
             for p in PerfilPaciente.objects.all()
@@ -102,6 +108,23 @@ class ProfessionalRepository:
                 ),
             }
             for u in users
+        ]
+
+    def list_verified_professionals(self):
+        """Lista solo profesionales verificados para el chat."""
+        professionals = Register.objects.filter(
+            rol="profesional",
+            perfil_profesional__verificado=True
+        ).order_by("nombre")
+        return [
+            {
+                "idUsuario": u.idUsuario,
+                "nombre": u.nombre,
+                "fotoPerfil": u.fotoPerfil,
+                "especialidad": u.perfil_profesional.especialidad if hasattr(u, 'perfil_profesional') and u.perfil_profesional else None,
+                "fotoPerfil": u.fotoPerfil,
+            }
+            for u in professionals
         ]
 
     def save_diagnosis(self, professional_id, data):

@@ -90,6 +90,7 @@ class TestValidatorPositiveInteger:
 # ── AuthService.register_user tests ──────────────────────────────────────────
 
 
+@pytest.mark.django_db
 class TestRegisterUser:
     def test_missing_nombre(self, auth_service):
         payload, status = auth_service.register_user({
@@ -98,6 +99,7 @@ class TestRegisterUser:
             "confirm_password": "Abc123",
             "rol": "paciente",
             "genero": "M",
+            "acepta_terminos": True,
         })
         assert status == 400
         assert payload["success"] is False
@@ -110,6 +112,7 @@ class TestRegisterUser:
             "confirm_password": "Abc123",
             "rol": "paciente",
             "genero": "M",
+            "acepta_terminos": True,
         })
         assert status == 400
         assert payload["success"] is False
@@ -122,6 +125,7 @@ class TestRegisterUser:
             "confirm_password": "Abc123",
             "rol": "paciente",
             "genero": "M",
+            "acepta_terminos": True,
         })
         assert status == 400
         assert payload["success"] is False
@@ -134,6 +138,7 @@ class TestRegisterUser:
             "confirm_password": "123",
             "rol": "paciente",
             "genero": "M",
+            "acepta_terminos": True,
         })
         assert status == 400
         assert payload["success"] is False
@@ -146,6 +151,7 @@ class TestRegisterUser:
             "confirm_password": "Xyz789",
             "rol": "paciente",
             "genero": "M",
+            "acepta_terminos": True,
         })
         assert status == 400
         assert "coinciden" in payload["message"].lower()
@@ -157,6 +163,7 @@ class TestRegisterUser:
             "password": "Abc123",
             "confirm_password": "Abc123",
             "rol": "paciente",
+            "acepta_terminos": True,
         })
         assert status == 400
         assert "género" in payload["message"].lower()
@@ -169,6 +176,7 @@ class TestRegisterUser:
             "confirm_password": "Abc123",
             "rol": "hacker",
             "genero": "M",
+            "acepta_terminos": True,
         })
         assert status == 400
 
@@ -181,6 +189,7 @@ class TestRegisterUser:
             "confirm_password": "Abc123",
             "rol": "paciente",
             "genero": "M",
+            "acepta_terminos": True,
         })
         assert status == 409
         assert payload["success"] is False
@@ -189,18 +198,21 @@ class TestRegisterUser:
         mock_auth_repo.user_exists_by_email.return_value = False
         mock_auth_repo.create_user.return_value = 1
 
-        payload, status = auth_service.register_user({
-            "nombre": "Test User",
-            "email": "new@test.com",
-            "password": "Abc123",
-            "confirm_password": "Abc123",
-            "rol": "paciente",
-            "genero": "F",
-            "edad": 25,
-        })
+        with patch("apps.authentication.models.ConsentimientoUsuario.objects.create") as mock_consent:
+            payload, status = auth_service.register_user({
+                "nombre": "Test User",
+                "email": "new@test.com",
+                "password": "Abc123",
+                "confirm_password": "Abc123",
+                "rol": "paciente",
+                "genero": "F",
+                "edad": 25,
+                "acepta_terminos": True,
+            })
         assert status == 201
         assert payload["success"] is True
         mock_auth_repo.create_user.assert_called_once()
+        mock_consent.assert_called_once()
 
 
 # ── AuthService.login_user tests ─────────────────────────────────────────────

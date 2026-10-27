@@ -61,8 +61,10 @@ class AdminRepository:
         citas_pendientes = Citas.objects.filter(estado="Pendiente").count()
 
         from django.utils import timezone
-        today = timezone.now().date()
-        logs_hoy = Logs.objects.filter(fecha__date=today).count()
+        today = timezone.localdate()
+        start = today
+        end = start + timezone.timedelta(days=1)
+        logs_hoy = Logs.objects.filter(fecha__gte=start, fecha__lt=end).count()
 
         yesterday = today - timezone.timedelta(days=1)
         fallos_login = Logs.objects.filter(

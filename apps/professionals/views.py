@@ -95,7 +95,7 @@ class DisponibilidadViewSet(viewsets.ViewSet):
             svc = DisponibilidadService()
             payload, status_code = svc.get_availability(id_profesional)
         except Exception:
-            logger.exception("Error in DisponibilidadResource.get")
+            logger.exception("DisponibilidadResource.get")
             return Response(
                 {"success": True, "disponibilidad": []},
                 status=status.HTTP_200_OK,
@@ -418,7 +418,7 @@ class AllPacientesProfesionalResource(APIView):
         return Response(payload, status=status_code)
 
 
-
+class PacienteAsignarResource(APIView):
     permission_classes = [IsAuthenticatedDRF, IsProfesional]
 
     def post(self, request, id_paciente):
@@ -448,6 +448,7 @@ class ProfessionalPaymentInfoViewSet(viewsets.ViewSet):
             info = ProfessionalPaymentInfo(idProfesional_id=user_id)
         serializer = ProfessionalPaymentInfoSerializer(info)
         return Response({"success": True, "data": serializer.data}, status=status.HTTP_200_OK)
+
     def update(self, request):
         """PUT /api/professional/payment-info/ – guardar/actualizar QR y mensaje."""
         data = request.data.copy() if hasattr(request.data, "copy") else dict(request.data)
@@ -464,22 +465,6 @@ class ProfessionalPaymentInfoViewSet(viewsets.ViewSet):
             info.mensaje_texto = serializer.validated_data["mensaje_texto"]
         info.save()
         return Response({"success": True, "message": "Datos de cobro actualizados"}, status=status.HTTP_200_OK)
-
-
-class PacienteAsignarResource(APIView):
-    permission_classes = [IsAuthenticatedDRF, IsProfesional]
-
-    def post(self, request, id_paciente):
-        from apps.professionals.models import PacientesProfesional
-        user_id = getattr(request, "user_id", None)
-        PacientesProfesional.objects.get_or_create(
-            idProfesional_id=user_id,
-            idPaciente_id=id_paciente,
-        )
-        return Response(
-            {"success": True, "message": "Paciente asignado correctamente"},
-            status=status.HTTP_200_OK,
-        )
 
 
 class ProfessionalPaymentInfoPublicView(APIView):
@@ -509,3 +494,61 @@ class ProfessionalPaymentInfoPublicView(APIView):
             info = ProfessionalPaymentInfo(idProfesional_id=id_profesional)
         serializer = ProfessionalPaymentInfoSerializer(info)
         return Response({"success": True, "data": serializer.data}, status=status.HTTP_200_OK)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Admin: Verificación de profesionales
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ProfessionalVerificacionViewSet(viewsets.ViewSet):
+    """
+    Admin: Verificación/desverificación de profesionales.
+    GET /api/admin/profesionales/pendientes - Listar profesionales pendientes
+    POST /api/admin/profesionales/<id>/verificar - Verificar profesional
+    POST /api/admin/profesionales/<id>/desverificar - Desverificar profesional
+    """
+    permission_classes = [IsAuthenticatedDRF]
+
+    def get_permissions(self):
+        if self.action in ("verificar", "desverificar", "pendientes"):
+            from apps.core.permissions import IsAdmin
+            return [IsAuthenticatedDRF(), IsAdmin()]
+        return super().get_permissions()
+
+    def pendientes(self, request):
+        """GET /api/admin/profesionales/pendientes"""
+        from apps.professionals.models import PerfilProfesional
+        from apps.authentication.models import Register
+        profesionales = Register.objects.filter(
+            rol="profesional",
+            perfil_profesional__verificado=False
+        ).select_related("perfil_profesional").order_by("fechaRegistro")
+        data = [
+            {
+                "idUsuario": p.idUsuario,
+                "nombre": p.nombre,
+                "email": p.email,
+                "fechaRegistro": p.fechaRegistro,
+                "especialidad": p.perfil_profesional.especialidad if p.perfil_profesional else None,
+                "tarjetaProfesional": p.perfil_profesional.tarjetaProfesional if p.perfil_profesional else None,
+                "numeroRethus": p.perfil_profesional.numeroRethus if p.perfil_profesional else None,
+            }
+            for p in profesionales
+        ]
+        return Response({"success": True, "profesionales": data}, status=status.HTTP_200_OK)
+
+    def verificar(self, request, pk=None):
+        """POST /api/admin/profesionales/<id>/verificar"""
+        admin_id = getattr(request, "user_id", None)
+        if not pk:
+            return Response({"success": False, "message": "ID de profesional requerido"}, status=status.HTTP_400_BAD_REQUEST)
+        payload, status_code = _get_prof_service().verificar_profesional(admin_id, int(pk))
+        return Response(payload, status=status_code)
+
+    def desverificar(self, request, pk=None):
+        """POST /api/admin/profesionales/<id>/desverificar"""
+        admin_id = getattr(request, "user_id", None)
+        if not pk:
+            return Response({"success": False, "message": "ID de profesional requerido"}, status=status.HTTP_400_BAD_REQUEST)
+        payload, status_code = _get_prof_service().desverificar_profesional(admin_id, int(pk))
+        return Response(payload, status=status_code)

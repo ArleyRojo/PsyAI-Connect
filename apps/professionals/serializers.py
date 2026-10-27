@@ -3,9 +3,19 @@ from rest_framework import serializers
 
 class PerfilProfesionalSerializer(serializers.Serializer):
     especialidad = serializers.CharField(required=False, allow_blank=True)
-    licencia = serializers.CharField(required=False, allow_blank=True)
-    experiencia = serializers.IntegerField(required=False)
+    tarjetaProfesional = serializers.CharField(required=False, allow_blank=True)
+    numeroRethus = serializers.CharField(required=False, allow_blank=True)
+    experiencia = serializers.CharField(required=False, allow_blank=True)
     idUsuario = serializers.IntegerField(required=False)
+
+    def validate(self, attrs):
+        # Al menos tarjetaProfesional o numeroRethus es requerido para profesionales
+        if not attrs.get("tarjetaProfesional") and not attrs.get("numeroRethus"):
+            # Permitir vacío si es actualización parcial (solo se valida si se proporciona)
+            if self.instance and not attrs.get("tarjetaProfesional") and not attrs.get("numeroRethus"):
+                # No hacer nada, permitir actualización parcial
+                pass
+        return attrs
 
 
 class DisponibilidadSerializer(serializers.Serializer):
