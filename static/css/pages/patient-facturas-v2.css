@@ -383,6 +383,174 @@
     color: var(--text-secondary);
 }
 
+/* ── Bank Info Card ──────────────────────────────────────────────── */
+.bank-info-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    font-size: var(--fs-sm);
+}
+
+.bank-info-section {
+    margin-bottom: var(--sp-4);
+}
+
+.bank-info-section:last-of-type {
+    margin-bottom: 0;
+}
+
+.bank-info-section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--sp-3);
+    padding-bottom: var(--sp-2);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.bank-info-section-title i {
+    color: var(--brand-500);
+    font-size: var(--fs-base);
+}
+
+.bank-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--sp-3);
+}
+
+.bank-info-field {
+    background: var(--surface-sunken);
+    border-radius: var(--r-sm);
+    padding: var(--sp-3);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bank-info-field.nequi-field {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(47, 111, 228, 0.08), rgba(47, 111, 228, 0.04));
+    border: 1px solid var(--brand-200);
+}
+
+.bank-info-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.bank-info-label i {
+    color: var(--brand-500);
+    font-size: var(--fs-sm);
+}
+
+.bank-info-value {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2);
+}
+
+.bank-info-value .btn-copy {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    border-radius: var(--r-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--dur-fast) var(--ease-out);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.bank-info-value .btn-copy:hover {
+    background: var(--brand-100);
+    color: var(--brand-600);
+}
+
+.bank-info-value .btn-copy.copied {
+    background: var(--mood-excellent);
+    color: white;
+}
+
+html.dark-mode .bank-info-value .btn-copy:hover {
+    background: var(--brand-900);
+    color: var(--brand-300);
+}
+
+.bank-info-disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-2);
+    padding: var(--sp-3);
+    background: var(--surface-sunken);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-sm);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.bank-info-disclaimer i {
+    color: var(--brand-500);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* Responsive for bank info card */
+@media (max-width: 575px) {
+    .bank-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .bank-info-field.nequi-field {
+        grid-column: auto;
+    }
+}
+
+/* Dark mode for bank info card */
+html.dark-mode .bank-info-card {
+    background: var(--dm-card);
+    border-color: var(--dm-border);
+}
+
+html.dark-mode .bank-info-field {
+    background: var(--dm-elevated);
+}
+
+html.dark-mode .bank-info-field.nequi-field {
+    background: linear-gradient(135deg, rgba(144, 202, 249, 0.12), rgba(144, 202, 249, 0.06));
+    border-color: var(--dm-accent);
+}
+
+html.dark-mode .bank-info-value .btn-copy:hover {
+    background: var(--brand-900);
+    color: var(--brand-300);
+}
+
+html.dark-mode .bank-info-disclaimer {
+    background: var(--dm-elevated);
+    border-color: var(--dm-border);
+}
+
 .facturas-sandbox-info strong {
     color: var(--text-primary);
 }

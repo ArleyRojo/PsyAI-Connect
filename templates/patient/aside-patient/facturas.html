@@ -136,7 +136,10 @@
         <div class="col-12 col-md-6">
           <p class="small text-muted mb-2">Datos de la cuenta bancaria</p>
           <div id="accountLoading" class="spinner-border text-primary mb-2"></div>
-          <pre id="accountText" class="text-start small text-muted p-3 bg-light rounded" style="white-space: pre-wrap; max-height:200px; overflow:auto;"></pre>
+          <div id="accountInfoCard" class="d-none">
+            <!-- Bank account info will be rendered here by JS -->
+          </div>
+          <pre id="accountText" class="text-start small text-muted p-3 bg-light rounded d-none" style="white-space: pre-wrap; max-height:200px; overflow:auto;"></pre>
         </div>
       </div>
     </section>
@@ -270,7 +273,8 @@
           <div class="col-12 col-md-6" id="modalAccountContainer">
             <p class="small text-muted mb-2">Datos de la cuenta</p>
             <div id="modalAccountLoading"><div class="spinner-border text-primary"></div></div>
-            <pre id="modalAccountText" class="text-start small text-muted" style="white-space: pre-wrap;"></pre>
+            <div id="modalAccountInfoCard" class="d-none"></div>
+            <pre id="modalAccountText" class="text-start small text-muted d-none" style="white-space: pre-wrap;"></pre>
           </div>
         </div>
       </div>
@@ -326,6 +330,117 @@ async function loadPagoCuentaBtn() {
     }
   } catch(e) {
     console.error('Error loading pago cuenta url', e);
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+
+// Parse bank info text and render as visual card
+function renderBankInfoCard(containerId, text, isModal = false) {
+  const container = document.getElementById(containerId);
+  if (!container || !text) return;
+  
+  // Parse the text into key-value pairs
+  const lines = text.split('\n').filter(l => l.trim());
+  const bankInfo = {};
+  let nequi = '';
+  let disclaimer = '';
+  
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('*')) {
+      disclaimer = trimmed;
+    } else if (trimmed.toLowerCase().startsWith('nequi:')) {
+      nequi = trimmed.replace(/^nequi:\s*/i, '');
+    } else {
+      const [key, ...valueParts] = trimmed.split(':');
+      if (key && valueParts.length) {
+        bankInfo[key.trim()] = valueParts.join(':').trim();
+      }
+    }
+  });
+  
+  // Build the visual card
+  let html = '<div class="bank-info-card">';
+  
+  // Bank section
+  if (Object.keys(bankInfo).length > 0) {
+    html += '<div class="bank-info-section">';
+    html += '<div class="bank-info-section-title"><i class="fas fa-university"></i> Cuenta Bancaria</div>';
+    html += '<div class="bank-info-grid">';
+    
+    const fieldIcons = {
+      'Banco': 'fa-building-columns',
+      'Tipo de cuenta': 'fa-wallet',
+      'Número de cuenta': 'fa-hashtag',
+      'Titular': 'fa-user',
+      'Documento': 'fa-id-card'
+    };
+    
+    const fieldOrder = ['Banco', 'Tipo de cuenta', 'Número de cuenta', 'Titular', 'Documento'];
+    
+    fieldOrder.forEach(field => {
+      if (bankInfo[field]) {
+        const icon = fieldIcons[field] || 'fa-circle-info';
+        const value = bankInfo[field];
+        const isCopyable = ['Número de cuenta', 'Documento'].includes(field);
+        html += '<div class="bank-info-field">';
+        html += '<div class="bank-info-label"><i class="fas ' + icon + '"></i> ' + field + '</div>';
+        html += '<div class="bank-info-value">' + esc(value) + (isCopyable ? '<button class="btn-copy" data-copy="' + esc(value) + '" title="Copiar"><i class="fas fa-copy"></i></button>' : '') + '</div>';
+        html += '</div>';
+      }
+    });
+    
+    html += '</div>'; // grid
+    html += '</div>'; // section
+  }
+  
+  // Nequi section
+  if (nequi) {
+    html += '<div class="bank-info-section">';
+    html += '<div class="bank-info-section-title"><i class="fas fa-mobile-screen-button"></i> Nequi</div>';
+    html += '<div class="bank-info-grid">';
+    html += '<div class="bank-info-field nequi-field">';
+    html += '<div class="bank-info-label"><i class="fas fa-mobile-screen-button"></i> Número Nequi</div>';
+    html += '<div class="bank-info-value">' + esc(nequi) + '<button class="btn-copy" data-copy="' + esc(nequi) + '" title="Copiar"><i class="fas fa-copy"></i></button></div>';
+    html += '</div>';
+    html += '</div>'; // grid
+    html += '</div>'; // section
+  }
+  
+  // Disclaimer
+  if (disclaimer) {
+    html += '<div class="bank-info-disclaimer"><i class="fas fa-info-circle"></i> ' + esc(disclaimer) + '</div>';
+  }
+  
+  html += '</div>'; // card
+  
+  container.innerHTML = html;
+  container.classList.remove('d-none');
+  
+  // Add copy button handlers
+  container.querySelectorAll('.btn-copy').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const textToCopy = this.getAttribute('data-copy');
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalHtml = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check"></i>';
+        this.classList.add('copied');
+        setTimeout(() => {
+          this.innerHTML = originalHtml;
+          this.classList.remove('copied');
+        }, 1500);
+      });
+    });
+  });
+}
+
+// Fallback for rendering raw text in pre tag
+function renderRawBankInfo(preId, text) {
+  const pre = document.getElementById(preId);
+  if (pre && text) {
+    pre.textContent = text;
+    pre.classList.remove('d-none');
   }
 }
 
@@ -454,7 +569,7 @@ async function cargarFacturasPaciente() {
         '<td colspan="6">' +
         '<div class="row p-3">' +
         '<div class="col-12 col-md-6 text-center" id="qrContainer-' + f.idFactura + '"><p class="small text-muted mb-2">Código QR</p><div class="spinner-border text-primary" id="qrLoading-' + f.idFactura + '"></div><img id="qrImg-' + f.idFactura + '" src="" alt="QR de pago" class="img-fluid d-none" style="max-width:200px;"></div>' +
-        '<div class="col-12 col-md-6"><p class="small text-muted mb-2">Datos de la cuenta</p><div class="spinner-border text-primary" id="accountLoading-' + f.idFactura + '"></div><pre id="accountText-' + f.idFactura + '" class="text-start small text-muted" style="white-space: pre-wrap;"></pre></div>' +
+        '<div class="col-12 col-md-6"><p class="small text-muted mb-2">Datos de la cuenta</p><div class="spinner-border text-primary" id="accountLoading-' + f.idFactura + '"></div><div id="accountInfoCard-' + f.idFactura + '" class="d-none"></div><pre id="accountText-' + f.idFactura + '" class="text-start small text-muted d-none" style="white-space: pre-wrap;"></pre></div>' +
         '</div></td></tr>';
       return mainRow + hiddenRow;
     }).join("");
@@ -467,12 +582,15 @@ async function cargarFacturasPaciente() {
 async function loadTopPagoInfo(profesionalId) {
   const qrImg = document.getElementById('qrImage');
   const qrLoading = document.getElementById('qrLoading');
+  const accountCard = document.getElementById('accountInfoCard');
   const accountTextEl = document.getElementById('accountText');
   const accountLoading = document.getElementById('accountLoading');
   // show loaders
   qrLoading.style.display = 'block';
   qrImg.classList.add('d-none');
   accountLoading.style.display = 'block';
+  accountCard.classList.add('d-none');
+  accountTextEl.classList.add('d-none');
   accountTextEl.textContent = '';
   try {
     const res = await fetch('/api/profesional/' + profesionalId + '/payment-info', { credentials: 'include' });
@@ -481,6 +599,7 @@ async function loadTopPagoInfo(profesionalId) {
       qrLoading.style.display = 'none';
       accountLoading.style.display = 'none';
       accountTextEl.textContent = 'No hay datos de pago disponibles.';
+      accountTextEl.classList.remove('d-none');
       return;
     }
     const info = resolvePagoInfo(data.data);
@@ -490,9 +609,10 @@ async function loadTopPagoInfo(profesionalId) {
     }
     qrLoading.style.display = 'none';
     if (info.mensaje_texto) {
-      accountTextEl.textContent = info.mensaje_texto;
+      renderBankInfoCard('accountInfoCard', info.mensaje_texto);
     } else {
       accountTextEl.textContent = 'No hay datos de cuenta disponibles.';
+      accountTextEl.classList.remove('d-none');
     }
     accountLoading.style.display = 'none';
   } catch(e) {
@@ -500,6 +620,7 @@ async function loadTopPagoInfo(profesionalId) {
     qrLoading.style.display = 'none';
     accountLoading.style.display = 'none';
     accountTextEl.textContent = 'Error al cargar la información de pago.';
+    accountTextEl.classList.remove('d-none');
   }
 }
  
@@ -537,6 +658,7 @@ function togglePagoInfo(facturaId) {
 async function loadPagoInfo(facturaId, profesionalId) {
   const qrImg = document.getElementById('qrImg-' + facturaId);
   const qrLoading = document.getElementById('qrLoading-' + facturaId);
+  const accountCard = document.getElementById('accountInfoCard-' + facturaId);
   const accountTextEl = document.getElementById('accountText-' + facturaId);
   const accountLoading = document.getElementById('accountLoading-' + facturaId);
   try {
@@ -549,20 +671,17 @@ async function loadPagoInfo(facturaId, profesionalId) {
     }
     const info = resolvePagoInfo(data.data);
     // QR
-    const qrImg = document.getElementById('qrImg-' + facturaId);
-    const qrLoading = document.getElementById('qrLoading-' + facturaId);
     if (info.qr_image) {
       qrImg.src = info.qr_image;
       qrImg.classList.remove('d-none');
     }
     qrLoading.style.display = 'none';
     // Account text
-    const accountTextEl = document.getElementById('accountText-' + facturaId);
-    const accountLoading = document.getElementById('accountLoading-' + facturaId);
     if (info.mensaje_texto) {
-      accountTextEl.textContent = info.mensaje_texto;
+      renderBankInfoCard('accountInfoCard-' + facturaId, info.mensaje_texto);
     } else {
       accountTextEl.textContent = 'No hay datos de cuenta disponibles.';
+      accountTextEl.classList.remove('d-none');
     }
     accountLoading.style.display = 'none';
   } catch(e) {
@@ -641,6 +760,7 @@ async function verComprobante(idFactura) {
   const modal = new bootstrap.Modal(document.getElementById("modalPagoFactura"));
   const qrImg = document.getElementById("modalQrImage");
   const qrLoading = document.getElementById("modalQrLoading");
+  const accountCard = document.getElementById("modalAccountInfoCard");
   const accountTextEl = document.getElementById("modalAccountText");
   const accountLoadingEl = document.getElementById("modalAccountLoading");
   const subtitle = document.getElementById("modalPagoSubtitle");
@@ -650,6 +770,8 @@ async function verComprobante(idFactura) {
   qrImg.src = "";
   qrLoading.style.display = "block";
   // reset account
+  accountCard.classList.add("d-none");
+  accountTextEl.classList.add("d-none");
   accountTextEl.textContent = "";
   accountLoadingEl.style.display = "block";
 
@@ -676,9 +798,10 @@ async function verComprobante(idFactura) {
 
     // Account text
     if (info.mensaje_texto) {
-      accountTextEl.textContent = info.mensaje_texto;
+      renderBankInfoCard('modalAccountInfoCard', info.mensaje_texto, true);
     } else {
       accountTextEl.textContent = "No hay datos de cuenta disponibles.";
+      accountTextEl.classList.remove("d-none");
     }
     accountLoadingEl.style.display = "none";
 
