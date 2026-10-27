@@ -15,7 +15,10 @@ from apps.admin_panel.repositories import AdminRepository
 
 logger = logging.getLogger(__name__)
 
-psutil.cpu_percent(interval=None)
+try:
+    psutil.cpu_percent(interval=None)
+except Exception:
+    pass
 
 STATS_CACHE_KEY = "admin_panel:stats"
 STATS_CACHE_TTL = 10
@@ -393,13 +396,21 @@ class TelemetryService:
 
     def get_live_stats(self):
         now = time.time()
+        cpu = 0
+        ram = 0
+        disk = None
+        disk_pct = 0
 
-        if now - self._last_system_check >= self.SYSTEM_CHECK_INTERVAL:
-            self._last_cpu = psutil.cpu_percent(interval=None)
-            mem = psutil.virtual_memory()
-            self._last_ram = mem.percent
-            self._last_disk = psutil.disk_usage('/')
-            self._last_system_check = now
+        try:
+            if now - self._last_system_check >= self.SYSTEM_CHECK_INTERVAL:
+                self._last_cpu = psutil.cpu_percent(interval=None)
+                mem = psutil.virtual_memory()
+                self._last_ram = mem.percent
+                self._last_disk = psutil.disk_usage('/')
+                self._last_system_check = now
+        except Exception:
+            pass
+
         cpu = self._last_cpu
         ram = self._last_ram
         disk = self._last_disk
@@ -412,11 +423,14 @@ class TelemetryService:
         uptime_secs = now - self._start_time
         uptime_str = self._format_uptime(uptime_secs)
 
-        if disk:
-            disk_used_gb = round(disk.used / (1024 ** 3), 1)
-            disk_total_gb = round(disk.total / (1024 ** 3), 1)
-            disk_pct = disk.percent
-        else:
+        try:
+            if disk:
+                disk_used_gb = round(disk.used / (1024 ** 3), 1)
+                disk_total_gb = round(disk.total / (1024 ** 3), 1)
+                disk_pct = disk.percent
+            else:
+                disk_used_gb = disk_total_gb = disk_pct = 0
+        except Exception:
             disk_used_gb = disk_total_gb = disk_pct = 0
 
         stale = [ip for ip, data in self._active_sse.items() if data["ts"] < now - 30]

@@ -537,11 +537,12 @@ class TestProfessionalPaymentInfoPublicView:
     def test_paciente_with_cita_can_access(self, rf):
         """Patient with Cita (appointment) can access even without assignment."""
         from apps.scheduling.models import Citas
-        from datetime import date, time
+        from django.utils import timezone
+        from datetime import time
         Citas.objects.create(
             idPaciente=self.paciente,
             idProfesional=self.profesional,
-            fecha=date.today(),
+            fecha=timezone.localdate(),
             hora=time(10, 0),
             estado="Confirmada",
         )
@@ -586,11 +587,12 @@ class TestProfessionalPaymentInfoPublicView:
     def test_paciente_with_cita_other_profesional_forbidden(self, rf):
         """Patient with cita to OTHER professional cannot access this professional's info."""
         from apps.scheduling.models import Citas
-        from datetime import date, time
+        from django.utils import timezone
+        from datetime import time
         Citas.objects.create(
             idPaciente=self.paciente,
             idProfesional=self.other_profesional,  # Different professional
-            fecha=date.today(),
+            fecha=timezone.localdate(),
             hora=time(10, 0),
             estado="Confirmada",
         )

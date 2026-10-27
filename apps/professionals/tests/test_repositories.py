@@ -1,5 +1,6 @@
 import pytest
 from datetime import date, timedelta
+from django.utils import timezone
 
 from apps.authentication.models import Register
 from apps.professionals.models import PerfilProfesional, PacientesProfesional, Reportes, Diagnostico
@@ -156,7 +157,7 @@ class TestDiagnosisCRUD:
             "sintomas": "Ansiedad generalizada",
             "diagnostico": "Trastorno de Ansiedad",
             "tratamiento": "Terapia cognitivo-conductual",
-            "fecha_diagnostico": date.today(),
+            "fecha_diagnostico": timezone.localdate(),
         }
         repo.save_diagnosis(professional_user.idUsuario, data)
 
@@ -174,7 +175,7 @@ class TestDiagnosisCRUD:
             "sintomas": "Ansiedad",
             "diagnostico": "TAD",
             "tratamiento": "Terapia",
-            "fecha_diagnostico": date.today(),
+            "fecha_diagnostico": timezone.localdate(),
         }
         repo.save_diagnosis(professional_user.idUsuario, data)
 
@@ -193,7 +194,7 @@ class TestDiagnosisCRUD:
             "sintomas": "Ansiedad",
             "diagnostico": "TAD",
             "tratamiento": "Terapia",
-            "fecha_diagnostico": date.today(),
+            "fecha_diagnostico": timezone.localdate(),
         }
         repo.save_diagnosis(professional_user.idUsuario, data)
 
@@ -208,7 +209,7 @@ class TestDiagnosisCRUD:
             "sintomas": "Ninguno",
             "diagnostico": "",
             "tratamiento": "Ninguno",
-            "fecha_diagnostico": date.today(),
+            "fecha_diagnostico": timezone.localdate(),
         }
         repo.save_diagnosis(professional_user.idUsuario, data)
 
@@ -225,8 +226,8 @@ class TestReportCRUD:
         data = {
             "idPaciente": patient_user.idUsuario,
             "tipoReporte": "general",
-            "fechaInicio": date.today(),
-            "fechaFin": date.today() + timedelta(days=7),
+            "fechaInicio": timezone.localdate(),
+            "fechaFin": timezone.localdate() + timedelta(days=7),
             "sintomas": "Insomnio",
             "diagnostico": "Insomnio crónico",
             "tratamiento": "Higiene del sueño",

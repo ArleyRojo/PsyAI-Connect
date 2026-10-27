@@ -1,6 +1,7 @@
 import pytest
 from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
+from django.utils import timezone
 
 from apps.professionals.services import ProfessionalService
 from apps.professionals.repositories import ProfessionalRepository
@@ -32,7 +33,7 @@ def verified_professional(django_user_model):
         numeroRethus="RETHUS-12345",
         experiencia="10 años",
         verificado=True,
-        fechaVerificacion=date.today(),
+        fechaVerificacion=timezone.localdate(),
     )
     return user
 

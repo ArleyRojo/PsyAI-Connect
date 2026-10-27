@@ -136,14 +136,12 @@ class ProfessionalRepository:
             )
             fecha_diag = data.get("fecha_diagnostico")
             if not fecha_diag:
-                import datetime
-                fecha_diag = datetime.date.today()
+                fecha_diag = timezone.localdate()
             elif isinstance(fecha_diag, str):
-                import datetime
                 try:
-                    fecha_diag = datetime.date.fromisoformat(fecha_diag)
+                    fecha_diag = date.fromisoformat(fecha_diag)
                 except Exception:
-                    fecha_diag = datetime.date.today()
+                    fecha_diag = timezone.localdate()
 
             return Diagnostico.objects.create(
                 idAsignacion=asignacion,
