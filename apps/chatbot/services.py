@@ -1140,7 +1140,16 @@ class ChatbotService:
     def generar_prediagnostico(self, patient_id):
         history = self.chat_repo.get_history(patient_id, today_only=True, limit=60)
         if not history:
-            return {"success": False, "message": "No hay conversación reciente para analizar."}, 400
+            # Return 200 with a flag instead of 400 to avoid Django "Bad Request" warning
+            # This is a valid business case, not an error
+            return {
+                "success": True,
+                "no_data": True,
+                "message": "No hay conversación reciente para analizar. Chatea un poco primero.",
+                "resumen": "",
+                "recomendaciones": [],
+                "nivel_riesgo": "bajo"
+            }, 200
 
         conversacion_texto = "\n".join(
             f"{'Paciente' if h['tipo'] == 'usuario' else 'Bot'}: {h['mensaje']}" for h in history
