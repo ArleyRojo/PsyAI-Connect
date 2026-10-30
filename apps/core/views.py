@@ -268,8 +268,7 @@ def config_pago(request):
     from django.conf import settings
     url = (getattr(settings, "PAGO_CUENTA_URL", "") or "").strip()
     nombre = (getattr(settings, "PAGO_CUENTA_NOMBRE", "") or "").strip()
-    # Solo considerar configurada si la URL empieza por https://
-    configurada = url.startswith("https://")
+    configurada = bool(url)
     if not configurada:
         url = ""
         nombre = ""

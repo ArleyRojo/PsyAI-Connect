@@ -211,9 +211,6 @@ class TOTPVerifyLoginView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        django_login(request, user_model, backend="apps.authentication.backends.EmailBackend")
-        request.session.cycle_key()
-
         # Limpiar sesión temporal
         request.session.pop("pending_2fa_user_id", None)
 
@@ -294,8 +291,6 @@ class LoginView(APIView):
                 }, status=status.HTTP_200_OK)
 
             # Sin 2FA - login directo
-            django_login(request, user_model, backend="apps.authentication.backends.EmailBackend")
-            request.session.cycle_key()
 
             request.session["usuario"] = session_user
             request.session["idUsuario"] = session_user["id"]

@@ -8,7 +8,7 @@ class ChatbotMensajeSerializer(serializers.Serializer):
 class ChatbotEncuestaSerializer(serializers.Serializer):
     utilidad = serializers.BooleanField()
     claridad = serializers.BooleanField()
-    recomendaria = serializers.ChoiceField(choices=["si", "no", "tal vez"])
+    recomendaria = serializers.ChoiceField(choices=["si", "no"])
     comentario = serializers.CharField(required=False, allow_blank=True, default="")
 
 

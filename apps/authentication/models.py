@@ -33,7 +33,7 @@ class Register(AbstractBaseUser):
     idUsuario = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=120)
     email = models.EmailField(unique=True, max_length=120)
-    contrasena = models.CharField(max_length=200)
+    contrasena = models.CharField(max_length=255)
     rol = models.CharField(max_length=20, choices=ROL_CHOICES)
     fotoPerfil = models.CharField(max_length=255, null=True, blank=True)
     estadoCuenta = models.CharField(
@@ -66,21 +66,22 @@ class Register(AbstractBaseUser):
     def set_password(self, raw_password):
         """
         Override set_password to use the 'contrasena' field instead of 'password'.
-        Uses Django's default hasher (PBKDF2) via make_password.
+        Uses Argon2id via SecurityHelper.
         """
-        from django.contrib.auth.hashers import make_password
-        self.contrasena = make_password(raw_password)
+        from apps.authentication.security import SecurityHelper
+        self.contrasena = SecurityHelper.hash_password(raw_password)
 
     def check_password(self, raw_password):
-        from django.contrib.auth.hashers import check_password
-        return check_password(raw_password, self.contrasena)
+        from apps.authentication.security import SecurityHelper
+        return SecurityHelper.verify_password(raw_password, self.contrasena)
 
     def to_dict(self):
-        """Return user data safe for session storage (excludes password hash)."""
+        """Return user data safe for session storage (includes password hash for auth)."""
         return {
             "idUsuario": self.idUsuario,
             "nombre": self.nombre,
             "email": self.email,
+            "contrasena": self.contrasena,
             "rol": self.rol,
             "activo": self.activo,
             "estadoCuenta": self.estadoCuenta,

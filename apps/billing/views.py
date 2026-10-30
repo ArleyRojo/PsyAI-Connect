@@ -114,8 +114,6 @@ class FacturaListView(APIView):
 
         cita_id = data.get("idCita") or None
         fechaPago = data.get("fechaPago")
-        if not fechaPago:
-            return Response({"success": False, "message": "Fecha de pago obligatoria"}, status=drf_status.HTTP_400_BAD_REQUEST)
         metodoPago = data.get("metodoPago")
         if not metodoPago:
             return Response({"success": False, "message": "Método de pago obligatorio"}, status=drf_status.HTTP_400_BAD_REQUEST)

@@ -21,7 +21,7 @@ class Disponibilidad(models.Model):
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
     estado = models.CharField(
-        max_length=20, choices=ESTADO_CHOICES, default="Disponible", null=True, blank=True
+        max_length=20, choices=ESTADO_CHOICES, default="Disponible"
     )
 
     class Meta:
@@ -66,7 +66,7 @@ class Citas(models.Model):
     motivo = models.TextField(null=True, blank=True)
     notas = models.TextField(null=True, blank=True)
     estado = models.CharField(
-        max_length=20, choices=ESTADO_CHOICES, default="Pendiente", null=True, blank=True
+        max_length=20, choices=ESTADO_CHOICES, default="Pendiente"
     )
     creado_por_profesional = models.BooleanField(default=False, null=True, blank=True)
     motivoCancelacion = models.TextField(null=True, blank=True)

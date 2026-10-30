@@ -12,6 +12,7 @@ from apps.core.permissions import (
     IsProfesional,
 )
 from apps.scheduling.services import AppointmentService
+from apps.scheduling.models import Citas
 
 logger = logging.getLogger(__name__)
 
@@ -76,15 +77,37 @@ class CitaDetailViewSet(viewsets.ViewSet):
         user_role = getattr(request, "user_role", None)
         user_id = getattr(request, "user_id", None)
 
-        if user_role != "profesional":
+        data = request.data
+        nuevo_estado = data.get("estado")
+
+        # Pacientes solo pueden cancelar sus propias citas
+        if user_role == "paciente":
+            if nuevo_estado != "Cancelada":
+                return Response(
+                    {"success": False, "message": "Solo puedes cancelar tus propias citas"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            # Verificar que la cita pertenece al paciente
+            try:
+                cita = Citas.objects.get(idCita=pk)
+            except Citas.DoesNotExist:
+                return Response(
+                    {"success": False, "message": "Cita no encontrada"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            if cita.idPaciente_id != user_id:
+                return Response(
+                    {"success": False, "message": "No autorizado para esta cita"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        elif user_role != "profesional":
             return Response(
                 {"success": False, "message": "No autorizado"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        data = request.data
         payload, status_code = appointment_service.update_status(
-            pk, data.get("estado"), user_id, extra_data=data
+            pk, nuevo_estado, user_id, extra_data=data
         )
         return Response(payload, status=status_code)
 

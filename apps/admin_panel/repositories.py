@@ -184,7 +184,7 @@ class AdminRepository:
             return None
 
     def create_user(self, data):
-        from django.contrib.auth.hashers import make_password
+        from apps.authentication.security import SecurityHelper
 
         password = data.get("contrasena")
         if not password:
@@ -197,7 +197,7 @@ class AdminRepository:
         user = Register(
             nombre=data.get("nombre"),
             email=email,
-            contrasena=make_password(password),
+            contrasena=SecurityHelper.hash_password(password),
             rol=data.get("rol", "paciente"),
         )
         with transaction.atomic():

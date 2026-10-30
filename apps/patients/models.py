@@ -496,7 +496,7 @@ class SolicitudDerechos(models.Model):
     descripcion = models.TextField(blank=True, help_text="Detalle de la solicitud")
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="recibida")
     fecha = models.DateTimeField(auto_now_add=True)
-    fechaLimite = models.DateField(help_text="Fecha límite de respuesta (días hábiles)")
+    fechaLimite = models.DateField(help_text="Fecha límite de respuesta (días hábiles)", null=True, blank=True)
     fechaRespuesta = models.DateTimeField(null=True, blank=True)
     respuesta = models.TextField(blank=True, help_text="Respuesta dada al titular")
     prorrogada = models.BooleanField(default=False)

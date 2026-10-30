@@ -397,7 +397,7 @@ class AuthService:
                 None,
             )
 
-        if stored_hash and not SecurityHelper.is_sha256_hash(stored_hash):
+        if SecurityHelper.needs_upgrade(stored_hash):
             self.repo.update_password(
                 usuario["idUsuario"], SecurityHelper.hash_password(password)
             )

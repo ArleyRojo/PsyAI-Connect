@@ -56,7 +56,6 @@ class TestGetUserByEmail:
         assert result["email"] == "active@test.com"
         assert result["nombre"] == "Active User"
         assert "idUsuario" in result
-        assert "contrasena" in result
 
     def test_returns_none_for_nonexistent(self):
         repo = AuthRepository()

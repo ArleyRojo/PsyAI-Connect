@@ -2,6 +2,7 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
+from rest_framework.test import force_authenticate
 
 from apps.authentication.views import (
     RegisterView,
@@ -11,6 +12,7 @@ from apps.authentication.views import (
     ForgotPasswordView,
     ResetPasswordView,
 )
+from apps.authentication.models import Register
 
 
 # ── RegisterView ─────────────────────────────────────────────────────────────
@@ -175,8 +177,16 @@ class TestLoginView:
 
 
 class TestLogoutView:
+    @pytest.mark.django_db
     def test_logout_returns_200(self, rf):
+        user = Register.objects.create_user(
+            email="logout@test.com",
+            nombre="Logout User",
+            password="Abc12345",
+            rol="paciente",
+        )
         req = rf.post("/api/auth/logout")
+        force_authenticate(req, user=user)
         mock_session = MagicMock()
         mock_session.get.return_value = None
         req.session = mock_session

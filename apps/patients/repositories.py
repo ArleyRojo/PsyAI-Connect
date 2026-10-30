@@ -500,11 +500,11 @@ class PatientRepository:
         Retorna (success, message)
         """
         from django.conf import settings
-        from django.contrib.auth.hashers import check_password
         from django.utils import timezone
         from django.db import transaction
         from apps.chatbot.models import ConversacionesChatbot, MensajesChat
         from apps.authentication.models import Register
+        from apps.authentication.security import SecurityHelper
 
         try:
             user = Register.objects.get(idUsuario=user_id)
@@ -512,7 +512,7 @@ class PatientRepository:
             return False, "Usuario no encontrado"
 
         # Verificar contraseña
-        if not check_password(password_confirm, user.contrasena):
+        if not SecurityHelper.verify_password(password_confirm, user.contrasena):
             return False, "Contraseña incorrecta"
 
         # Verificar RETENER_HISTORIA_CLINICA

@@ -39,15 +39,15 @@ class TestRepositoryCreateUser:
 
     @pytest.mark.django_db
     @patch("apps.admin_panel.repositories.Register")
-    @patch("django.contrib.auth.hashers.make_password")
+    @patch("apps.authentication.security.SecurityHelper.hash_password")
     @patch("apps.admin_panel.repositories.AdminRepository.registrar_log")
-    def test_creates_user_when_password_provided(self, mock_log, mock_make_password, mock_register):
+    def test_creates_user_when_password_provided(self, mock_log, mock_hash_password, mock_register):
         repo = AdminRepository()
         mock_register.DoesNotExist = type("DoesNotExist", (), {})
         mock_register.objects.filter.return_value.exists.return_value = False
         mock_register.return_value.save = MagicMock()
         mock_register.return_value.idUsuario = 1
-        mock_make_password.return_value = "hashed_pw"
+        mock_hash_password.return_value = "hashed_pw"
 
         repo.create_user({
             "nombre": "Test",
@@ -56,7 +56,7 @@ class TestRepositoryCreateUser:
             "rol": "admin",
         })
 
-        mock_make_password.assert_called_once_with("Secure123!")
+        mock_hash_password.assert_called_once_with("Secure123!")
         mock_register.return_value.save.assert_called_once()
 
     @patch("apps.admin_panel.repositories.Register")

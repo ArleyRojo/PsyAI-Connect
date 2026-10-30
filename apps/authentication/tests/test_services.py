@@ -279,7 +279,7 @@ class TestLoginUser:
 
         with patch("apps.authentication.services.SecurityHelper") as mock_sec:
             mock_sec.verify_password.return_value = False
-            mock_sec.is_sha256_hash.return_value = True
+            mock_sec.is_legacy_sha256.return_value = True
             payload, status, session = auth_service.login_user(
                 {"email": "test@test.com", "password": "WrongPass1"}, "127.0.0.1"
             )
@@ -301,7 +301,7 @@ class TestLoginUser:
 
         with patch("apps.authentication.services.SecurityHelper") as mock_sec:
             mock_sec.verify_password.return_value = True
-            mock_sec.is_sha256_hash.return_value = True
+            mock_sec.is_legacy_sha256.return_value = True
             payload, status, session = auth_service.login_user(
                 {"email": "test@test.com", "password": "Abc123"}, "127.0.0.1"
             )
@@ -326,7 +326,7 @@ class TestLoginUser:
 
         with patch("apps.authentication.services.SecurityHelper") as mock_sec:
             mock_sec.verify_password.return_value = True
-            mock_sec.is_sha256_hash.return_value = True
+            mock_sec.is_legacy_sha256.return_value = True
             payload, status, session = auth_service.login_user(
                 {"email": "suspended@test.com", "password": "Abc123"}, "127.0.0.1"
             )
@@ -350,7 +350,7 @@ class TestLoginUser:
 
         with patch("apps.authentication.services.SecurityHelper") as mock_sec:
             mock_sec.verify_password.return_value = True
-            mock_sec.is_sha256_hash.return_value = True
+            mock_sec.is_legacy_sha256.return_value = True
             payload, status, session = auth_service.login_user(
                 {"email": "inconsistent@test.com", "password": "Abc123"}, "127.0.0.1"
             )

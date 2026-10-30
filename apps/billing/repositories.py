@@ -63,7 +63,7 @@ class InvoiceRepository:
         if fecha_desde:
             qs = qs.filter(fecha__gte=fecha_desde)
         if fecha_hasta:
-            qs = qs.filter(fecha__lte=fecha_hasta + " 23:59:59")
+            qs = qs.filter(fecha__lte=fecha_hasta)
         facturas = qs.order_by("-fecha")
         result = []
         for f in facturas:
@@ -83,7 +83,7 @@ class InvoiceRepository:
         if fecha_desde:
             qs = qs.filter(fecha__gte=fecha_desde)
         if fecha_hasta:
-            qs = qs.filter(fecha__lte=fecha_hasta + " 23:59:59")
+            qs = qs.filter(fecha__lte=fecha_hasta)
         facturas = qs.order_by("-fecha")
         result = []
         for f in facturas:
@@ -105,7 +105,7 @@ class InvoiceRepository:
         if fecha_desde:
             qs = qs.filter(fecha__gte=fecha_desde)
         if fecha_hasta:
-            qs = qs.filter(fecha__lte=fecha_hasta + " 23:59:59")
+            qs = qs.filter(fecha__lte=fecha_hasta)
         facturas = qs.order_by("-fecha")
         result = []
         for f in facturas:
