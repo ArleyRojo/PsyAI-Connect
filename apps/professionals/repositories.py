@@ -235,16 +235,18 @@ class ProfessionalRepository:
         )
 
     def get_latest_patient_diagnosis(self, professional_id, patient_id):
-        pp = (
-            PacientesProfesional.objects.filter(
-                idProfesional_id=professional_id,
-                idPaciente_id=patient_id,
+        latest = (
+            Diagnostico.objects.filter(
+                idAsignacion__idProfesional_id=professional_id,
+                idAsignacion__idPaciente_id=patient_id,
             )
+            .exclude(diagnostico__isnull=True)
+            .exclude(diagnostico="")
             .order_by("-fechaDiagnostico")
             .first()
         )
-        if pp:
-            return {"sintomas": pp.sintomas, "diagnostico": pp.diagnostico, "tratamiento": pp.tratamiento}
+        if latest:
+            return {"sintomas": latest.sintomas, "diagnostico": latest.diagnostico, "tratamiento": latest.tratamiento}
         return None
 
     def update_report(self, professional_id, data):

@@ -26,7 +26,6 @@ class AuthRepository:
             rol=rol,
             email_verificado=email_verificado,
         )
-        user.set_unusable_password()
         user.save()
         return user.idUsuario
 

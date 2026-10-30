@@ -185,7 +185,7 @@ class FacturaStatsView(APIView):
         elif user_role == "paciente":
             payload, status_code = invoice_service.get_patient_invoice_stats(user_id)
         elif user_role == "profesional":
-            payload, status_code = invoice_service.get_professional_patients(user_id)
+            payload, status_code = invoice_service.get_professional_invoice_stats(user_id)
         else:
             return Response(
                 {"success": False, "message": "No autorizado"},

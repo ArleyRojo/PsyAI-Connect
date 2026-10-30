@@ -23,7 +23,7 @@ class RegisterSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=6, write_only=True)
     confirm_password = serializers.CharField(write_only=True)
     rol = serializers.ChoiceField(
-        choices=["paciente", "profesional", "admin"], default="paciente"
+        choices=["paciente", "profesional"], default="paciente"
     )
     genero = serializers.CharField()
     fecha_nacimiento = serializers.DateField()

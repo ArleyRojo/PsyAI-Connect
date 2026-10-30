@@ -548,28 +548,37 @@ class AdminRepository:
         return logs_admin_list + logs_auditoria_list
 
     def get_chatbot_historial_rows(self, limit=200):
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT nombre, idPaciente, mensajeUsuario, respuestaChatbot,
-                       nivelEmocionalDetectado, fecha
-                FROM vistahistorialchatbot
-                ORDER BY nombre ASC, fecha ASC LIMIT %s
-            """, [limit])
-            columns = [col[0] for col in cursor.description]
-            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+        from apps.chatbot.models import ConversacionesChatbot
+        rows = (
+            ConversacionesChatbot.objects.all()
+            .order_by("nombrePaciente", "fecha")
+            [:limit]
+        )
+        return [
+            {
+                "nombre": r.nombrePaciente,
+                "idPaciente": r.idPaciente_id,
+                "mensajeUsuario": r.mensajeUsuario,
+                "respuestaChatbot": r.respuestaChatbot,
+                "nivelEmocionalDetectado": r.nivelEmocionalDetectado,
+                "fecha": r.fecha,
+            }
+            for r in rows
+        ]
 
     def get_chatbot_historial_stats(self):
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT COUNT(*) as total,
-                       SUM(CASE WHEN nivelEmocionalDetectado = 'Alto' THEN 1 ELSE 0 END) as alto,
-                       SUM(CASE WHEN nivelEmocionalDetectado = 'Medio' THEN 1 ELSE 0 END) as medio,
-                       SUM(CASE WHEN nivelEmocionalDetectado = 'Bajo' THEN 1 ELSE 0 END) as bajo
-                FROM vistahistorialchatbot
-            """)
-            columns = [col[0] for col in cursor.description]
-            row = cursor.fetchone()
-            return dict(zip(columns, row)) if row else {"total": 0, "alto": 0, "medio": 0, "bajo": 0}
+        from apps.chatbot.models import ConversacionesChatbot
+        from django.db.models import Count, Q
+        qs = ConversacionesChatbot.objects.all()
+        alto = qs.filter(nivelEmocionalDetectado="Alto").count()
+        medio = qs.filter(nivelEmocionalDetectado="Medio").count()
+        bajo = qs.filter(nivelEmocionalDetectado="Bajo").count()
+        return {
+            "total": qs.count(),
+            "alto": alto,
+            "medio": medio,
+            "bajo": bajo,
+        }
 
     def _get_tipo_style(self, tipo):
         """Retorna estilos visuales según el tipo de notificación"""

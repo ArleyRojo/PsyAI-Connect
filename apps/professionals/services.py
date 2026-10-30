@@ -141,10 +141,18 @@ class ProfessionalService:
         return {"success": True, "reportes": self.repo.get_deleted_reports(professional_id)}, 200
 
     def list_patients_for_chat(self):
-        # Solo profesionales verificados
-        from apps.professionals.repositories import ProfessionalRepository
-        repo = ProfessionalRepository()
-        return repo.list_verified_professionals()
+        from apps.authentication.models import Register
+        return [
+            {
+                "idUsuario": u.idUsuario,
+                "nombre": u.nombre,
+                "fotoPerfil": u.fotoPerfil,
+                "edad": None,
+                "genero": None,
+                "contacto": u.email,
+            }
+            for u in Register.objects.filter(rol="paciente", activo=True, estadoCuenta="Activa").order_by("nombre")
+        ]
 
     def get_patient_chatbot_history(self, professional_id, patient_id):
         check = self._check_verificacion(professional_id)

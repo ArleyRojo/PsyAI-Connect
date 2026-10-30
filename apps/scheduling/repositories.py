@@ -34,8 +34,7 @@ class AppointmentRepository:
             idProfesional_id=professional_id,
             fecha=fecha,
             hora=hora,
-            estado__ne="Cancelada",
-        ).exists()
+        ).exclude(estado="Cancelada").exists()
 
     def get_appointment_in_slot(self, professional_id, fecha, hora):
         try:

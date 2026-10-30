@@ -242,6 +242,10 @@ class InvoiceService:
         patients = self.repo.get_professional_patients(professional_id)
         return {"success": True, "pacientes": patients}, 200
 
+    def get_professional_invoice_stats(self, professional_id):
+        stats = self.repo.get_invoice_stats_by_professional(professional_id)
+        return {"success": True, "stats": stats}, 200
+
     def confirm_payment(self, invoice_id, professional_user_id, evidencia,
                         metodoPago=None, referencia=None, notas=None):
         factura_data = self.repo.get_invoice_by_id(invoice_id)
