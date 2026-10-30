@@ -34,6 +34,7 @@ urlpatterns = [
     path("profesional/pacientes/<int:id_paciente>/asignar", PacienteAsignarResource.as_view(), name="profesional_paciente_asignar"),
     path("diagnosticos", DiagnosticoViewSet.as_view({"get": "list", "post": "create"}), name="diagnosticos"),
     path("reportes", ReporteViewSet.as_view({"get": "list", "post": "create"}), name="reportes"),
+    path("reportes/eliminados", ReporteViewSet.as_view({"get": "list_deleted"}), name="reportes_eliminados"),
     path("reportes/<int:pk>", ReporteViewSet.as_view({"put": "update", "delete": "destroy"}), name="reporte"),
     path("evolucion/profesional", EvolucionProfesionalResource.as_view(), name="evolucion_profesional"),
     path("prediagnosticos/profesional", PrediagnosticosProfesionalResource.as_view(), name="prediagnosticos_profesional"),
@@ -46,7 +47,6 @@ urlpatterns = [
     path("profesional/chat/enviar", ChatMensajeProfesionalResource.as_view(), name="chat_enviar_profesional"),
     # Legacy aliases
     path("reportes/profesional", ReporteViewSet.as_view({"get": "list"}), name="reportes_profesional_legacy"),
-    path("reportes/eliminados", ReporteViewSet.as_view({"get": "list"}), name="reportes_eliminados_legacy"),
     path("profesional/paciente/<int:id_paciente>/chatbot-historial", PacienteChatbotHistorialResource.as_view(), name="paciente_chatbot_historial_legacy"),
     path("profesional/paciente/<int:id_paciente>/documentos", DocumentoProfesionalPacienteViewSet.as_view({"get": "list", "post": "create"}), name="documentos_profesional_paciente_legacy"),
     path("profesional/documentos/<int:pk>/visibilidad", DocumentoProfesionalPacienteViewSet.as_view({"patch": "partial_update", "put": "update"}), name="documento_visibilidad_legacy"),

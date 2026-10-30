@@ -269,14 +269,10 @@ class ProfessionalRepository:
             report.save(update_fields=["eliminado"])
 
     def get_deleted_reports(self, professional_id):
-        rows = (
-            Reportes.objects.filter(
-                idProfesional_id=professional_id,
-                eliminado=True,
-            )
-            .select_related("idPaciente")
-            .order_by("-fechaInicio")
-        )
+        rows = Reportes.objects.filter(eliminado=True).select_related("idPaciente")
+        if professional_id is not None:
+            rows = rows.filter(idProfesional_id=professional_id)
+        rows = rows.order_by("-fechaInicio")
         return [
             {
                 "idReporte": r.idReporte,

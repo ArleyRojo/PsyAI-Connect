@@ -39,6 +39,8 @@ class TestCreateUser:
         assert user.email == "new@test.com"
         assert user.nombre == "New User"
         assert user.rol == "paciente"
+        assert user.contrasena == "hashed_password"
+        assert Register._meta.get_field("password").column == "contrasena"
 
 
 @pytest.mark.django_db

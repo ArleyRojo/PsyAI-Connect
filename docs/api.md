@@ -92,6 +92,7 @@ All endpoints are prefixed with `/api/`. Authentication is session-based (no JWT
 | GET | `/api/diagnosticos` | Yes | profesional | List diagnoses |
 | POST | `/api/diagnosticos` | Yes | profesional | Create diagnosis |
 | GET | `/api/reportes` | Yes | profesional | List reports |
+| GET | `/api/reportes/eliminados` | Yes | profesional, admin | List deleted reports (professional sees own; admin sees all) |
 | POST | `/api/reportes` | Yes | profesional | Create report |
 | PATCH | `/api/reportes/<id>` | Yes | profesional | Update report |
 | DELETE | `/api/reportes/<id>` | Yes | profesional | Delete report |

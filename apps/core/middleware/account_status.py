@@ -35,7 +35,8 @@ def _wants_json(request):
     accept = request.META.get("HTTP_ACCEPT", "")
     xrw = request.META.get("HTTP_X_REQUESTED_WITH", "")
     return (
-        "application/json" in accept
+        request.path.startswith("/api/")
+        or "application/json" in accept
         or xrw == "XMLHttpRequest"
         or request.META.get("CONTENT_TYPE", "").startswith("application/json")
         or request.META.get("HTTP_ACCEPT", "").startswith("text/event-stream")

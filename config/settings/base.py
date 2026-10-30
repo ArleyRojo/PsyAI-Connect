@@ -218,7 +218,7 @@ PAGO_CUENTA_URL = os.getenv("PAGO_CUENTA_URL", "")
 PAGO_CUENTA_NOMBRE = os.getenv("PAGO_CUENTA_NOMBRE", "")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 GEMINI_THINKING_LEVEL = os.getenv("GEMINI_THINKING_LEVEL", "low")
 
 SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")

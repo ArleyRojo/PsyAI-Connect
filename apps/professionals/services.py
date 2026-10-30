@@ -134,11 +134,13 @@ class ProfessionalService:
             prediagnosticos = chat_repo.get_prediagnosticos_for_professional(professional_id)
         return {"success": True, "prediagnosticos": prediagnosticos}, 200
 
-    def get_deleted_reports(self, professional_id):
-        check = self._check_verificacion(professional_id)
-        if check:
-            return check
-        return {"success": True, "reportes": self.repo.get_deleted_reports(professional_id)}, 200
+    def get_deleted_reports(self, professional_id, is_admin=False):
+        if not is_admin:
+            check = self._check_verificacion(professional_id)
+            if check:
+                return check
+        owner_id = None if is_admin else professional_id
+        return {"success": True, "reportes": self.repo.get_deleted_reports(owner_id)}, 200
 
     def list_patients_for_chat(self):
         from apps.authentication.models import Register

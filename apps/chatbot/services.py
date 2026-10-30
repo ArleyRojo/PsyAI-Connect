@@ -519,6 +519,19 @@ class ChatbotService:
     def _get_fallback_model(self):
         return os.getenv("GEMINI_FALLBACK_MODEL", "gemma-4-26b-a4b-it").strip()
 
+    def _get_gemini_model(self):
+        model = os.getenv(
+            "GEMINI_MODEL",
+            getattr(settings, "GEMINI_MODEL", "gemini-3.5-flash-lite"),
+        ).strip()
+        if not model or model == "gemini-2.5-flash-lite":
+            self.logger.warning(
+                "GEMINI_MODEL=%r ya no está disponible; usando gemini-3.5-flash-lite",
+                model,
+            )
+            return "gemini-3.5-flash-lite"
+        return model
+
     def _get_chatbot_config(self):
         now = self._now_ts()
         if self._cached_config is not None and now - self._cached_config_ts < CONFIG_CACHE_TTL_SECONDS:
@@ -696,7 +709,7 @@ class ChatbotService:
                 response["crisis_phone"] = crisis_phone
             return response, 200
 
-        model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip() or "gemini-2.5-flash-lite"
+        model = self._get_gemini_model()
         contexto_riesgo = self._build_risk_context(es_medio, es_bajo)
 
         # Mapear thinking_level a valores válidos de Gemini
@@ -1376,7 +1389,7 @@ class ChatbotService:
         if not keys:
             return {"success": False, "message": "Servicio de IA no disponible en este momento."}, 503
 
-        model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip() or "gemini-2.5-flash-lite"
+        model = self._get_gemini_model()
         
         # Try up to 2 times with different prompts if JSON parsing fails
         for attempt in range(2):

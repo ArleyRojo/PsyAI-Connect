@@ -157,11 +157,21 @@ class TestFallbackModel:
 
 
 class TestModelSupportsThinking:
+    def test_replaces_retired_flash_lite_model(self, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+
+        assert chatbot_service._get_gemini_model() == "gemini-3.5-flash-lite"
+
+    def test_uses_configured_flash_lite_model(self, chatbot_service, monkeypatch):
+        monkeypatch.setenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+
+        assert chatbot_service._get_gemini_model() == "gemini-3.5-flash-lite"
+
     def test_gemma_does_not_support_thinking(self):
         assert ChatbotService._model_supports_thinking("gemma-4-26b-a4b-it") is False
 
-    def test_gemini_flash_lite_supports_thinking(self):
-        assert ChatbotService._model_supports_thinking("gemini-2.5-flash-lite") is True
+    def test_gemini_35_flash_lite_supports_thinking(self):
+        assert ChatbotService._model_supports_thinking("gemini-3.5-flash-lite") is True
 
     def test_unknown_model_does_not_support_thinking(self):
         assert ChatbotService._model_supports_thinking("otro-modelo-3.5") is False

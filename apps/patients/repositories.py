@@ -560,7 +560,7 @@ class PatientRepository:
             user.estadoCuenta = "Suspendida"
             user.email_verificado = False
             user.save(update_fields=[
-                "nombre", "email", "contrasena", "fotoPerfil",
+                "nombre", "email", "password", "fotoPerfil",
                 "activo", "estadoCuenta", "email_verificado"
             ])
 
@@ -585,4 +585,3 @@ class PatientRepository:
             )
 
             return True, "Cuenta anonimizada y suspendida. Los datos de historia clínica se conservan según configuración RETENER_HISTORIA_CLINICA."
-

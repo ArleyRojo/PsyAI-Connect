@@ -103,7 +103,7 @@ class AuthRepository:
 
     def update_password(self, user_id, new_password_hash):
         updated = Register.objects.filter(idUsuario=user_id).update(
-            contrasena=new_password_hash
+            password=new_password_hash
         )
         return updated > 0
 

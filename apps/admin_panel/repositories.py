@@ -550,13 +550,13 @@ class AdminRepository:
     def get_chatbot_historial_rows(self, limit=200):
         from apps.chatbot.models import ConversacionesChatbot
         rows = (
-            ConversacionesChatbot.objects.all()
-            .order_by("nombrePaciente", "fecha")
+            ConversacionesChatbot.objects.select_related("idPaciente")
+            .order_by("idPaciente__nombre", "fecha")
             [:limit]
         )
         return [
             {
-                "nombre": r.nombrePaciente,
+                "nombre": r.idPaciente.nombre,
                 "idPaciente": r.idPaciente_id,
                 "mensajeUsuario": r.mensajeUsuario,
                 "respuestaChatbot": r.respuestaChatbot,

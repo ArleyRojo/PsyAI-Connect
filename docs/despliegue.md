@@ -257,7 +257,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 | `DEFAULT_FROM_EMAIL` | Remitente | — | `PsyAI Connect <noreply@tudominio.com>` |
 | `GEMINI_API_KEY` | Key principal Gemini | — | **Requerida** |
 | `GEMINI_API_KEYS` | Keys extra (rotación) | — | Opcional |
-| `GEMINI_MODEL` | Modelo | `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` |
+| `GEMINI_MODEL` | Modelo | `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` |
 | `GEMINI_THINKING_LEVEL` | Nivel de razonamiento | `low` | `low` |
 | `GEMINI_REQUEST_TIMEOUT_CONNECT` | Timeout de conexión (s) | `3` | `3` |
 | `GEMINI_REQUEST_TIMEOUT_READ` | Timeout de lectura intento 1 (s) | `8` | `8` |

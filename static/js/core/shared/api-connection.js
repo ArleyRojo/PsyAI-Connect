@@ -9,7 +9,7 @@
  * - En 401: limpia sesión local y redirige a /login.html (salvo endpoints de auth).
  * - En 403 por CSRF: refresca token automáticamente y reintenta UNA vez.
  * - En 408 (timeout): rechaza con { status: 408, message: 'Tiempo de espera agotado' }.
- * - El token CSRF se obtiene automáticamente de /api/auth/csrf/ al cargar la página.
+ * - El token CSRF se obtiene automáticamente de /api/csrf/ al cargar la página.
  */
 (function () {
     'use strict';
@@ -48,7 +48,7 @@
         }
         csrfFetching = true;
 
-        return fetch('/api/auth/csrf/', {
+        return fetch('/api/csrf/', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
@@ -110,7 +110,7 @@
             // Limpiar sesión local
             try { localStorage.removeItem('usuario'); localStorage.removeItem('sessionUser'); } catch (_) { }
             // Redirigir a login si no es una petición de auth
-            if (!/\/api\/auth\/(login|register|csrf|forgot-password|reset-password|verify-email)/.test(url)) {
+            if (!/\/api\/(login|register|csrf|forgot-password|reset-password|verify-email)(?:\/|$)/.test(url)) {
                 window.location.href = '/login.html';
             }
             return Promise.reject({ status: 401, message: 'Sesión expirada. Redirigiendo al login...' });

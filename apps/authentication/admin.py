@@ -15,7 +15,7 @@ class RegisterAdmin(admin.ModelAdmin):
     search_fields = ("email", "nombre")
     ordering = ("-fechaRegistro",)
     fieldsets = (
-        (None, {"fields": ("email", "contrasena")}),
+        (None, {"fields": ("email", "password")}),
         ("Info", {"fields": ("nombre", "rol", "fotoPerfil")}),
         ("Estado", {"fields": ("estadoCuenta", "activo")}),
     )

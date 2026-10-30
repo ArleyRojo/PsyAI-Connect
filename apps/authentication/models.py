@@ -33,7 +33,9 @@ class Register(AbstractBaseUser):
     idUsuario = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=120)
     email = models.EmailField(unique=True, max_length=120)
-    contrasena = models.CharField(max_length=255)
+    password = models.CharField(
+        max_length=255, db_column="contrasena", verbose_name="contrasena"
+    )
     rol = models.CharField(max_length=20, choices=ROL_CHOICES)
     fotoPerfil = models.CharField(max_length=255, null=True, blank=True)
     estadoCuenta = models.CharField(
@@ -60,20 +62,24 @@ class Register(AbstractBaseUser):
     class Meta:
         db_table = "Register"
 
+    @property
+    def contrasena(self):
+        return self.password
+
+    @contrasena.setter
+    def contrasena(self, value):
+        self.password = value
+
     def __str__(self):
         return self.email
 
     def set_password(self, raw_password):
-        """
-        Override set_password to use the 'contrasena' field instead of 'password'.
-        Uses Argon2id via SecurityHelper.
-        """
         from apps.authentication.security import SecurityHelper
-        self.contrasena = SecurityHelper.hash_password(raw_password)
+        self.password = SecurityHelper.hash_password(raw_password)
 
     def check_password(self, raw_password):
         from apps.authentication.security import SecurityHelper
-        return SecurityHelper.verify_password(raw_password, self.contrasena)
+        return SecurityHelper.verify_password(raw_password, self.password)
 
     def to_dict(self):
         """Return user data safe for session storage (includes password hash for auth)."""
@@ -81,7 +87,7 @@ class Register(AbstractBaseUser):
             "idUsuario": self.idUsuario,
             "nombre": self.nombre,
             "email": self.email,
-            "contrasena": self.contrasena,
+            "contrasena": self.password,
             "rol": self.rol,
             "activo": self.activo,
             "estadoCuenta": self.estadoCuenta,

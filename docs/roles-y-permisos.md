@@ -107,6 +107,7 @@ class IsAuthenticatedDRF(BasePermission):
 | Autorizaciones de documentos | `POST /api/documentos/autorizacion/<id>` | ✅ | ✅ | ✅ |
 | **Reportes** | | | | |
 | Mis reportes | `GET/POST/PATCH/DELETE /api/reportes` | ❌ | ✅ | ✅ |
+| Reportes eliminados | `GET /api/reportes/eliminados` | ❌ | ✅ (propios) | ✅ (todos) |
 | Evolución de pacientes | `GET /api/evolucion/profesional` | ❌ | ✅ | ✅ |
 | **Facturación** | | | | |
 | Listar/crear facturas | `GET/POST /api/facturas` | ✅ (propias) | ✅ (propias) | ✅ (todas) |

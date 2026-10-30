@@ -15,6 +15,13 @@ from apps.authentication.views import (
 from apps.authentication.models import Register
 
 
+def test_csrf_endpoint_uses_api_prefix(client):
+    response = client.get("/api/csrf/")
+
+    assert response.status_code == 200
+    assert response.json()["csrfToken"]
+
+
 # ── RegisterView ─────────────────────────────────────────────────────────────
 
 

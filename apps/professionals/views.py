@@ -7,7 +7,11 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.core.permissions import IsAuthenticatedDRF, IsProfesional
+from apps.core.permissions import (
+    IsAdminOrProfesional,
+    IsAuthenticatedDRF,
+    IsProfesional,
+)
 from apps.professionals.services import ProfessionalService
 from apps.professionals.serializers import (
     PerfilProfesionalSerializer,
@@ -154,6 +158,16 @@ class DiagnosticoViewSet(viewsets.ViewSet):
 class ReporteViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticatedDRF, IsProfesional]
 
+    def get_permissions(self):
+        if getattr(self, "action", None) == "list_deleted":
+            return [IsAuthenticatedDRF(), IsAdminOrProfesional()]
+        return super().get_permissions()
+
+    def get_authenticators(self):
+        if getattr(self, "action", None) == "list_deleted":
+            return []
+        return super().get_authenticators()
+
     def list(self, request):
         user_id = getattr(request, "user_id", None)
         filter_param = request.query_params.get("filter", "")
@@ -161,6 +175,14 @@ class ReporteViewSet(viewsets.ViewSet):
             payload, status_code = _get_prof_service().get_deleted_reports(user_id)
         else:
             payload, status_code = _get_prof_service().report_overview(user_id)
+        return Response(payload, status=status_code)
+
+    def list_deleted(self, request):
+        user_id = getattr(request, "user_id", None)
+        is_admin = getattr(request, "user_role", None) == "admin"
+        payload, status_code = _get_prof_service().get_deleted_reports(
+            user_id, is_admin=is_admin
+        )
         return Response(payload, status=status_code)
 
     def create(self, request):

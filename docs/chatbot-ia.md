@@ -91,7 +91,7 @@ class ChatbotService:
 ```bash
 GEMINI_API_KEY=key_principal           # Obligatoria
 GEMINI_API_KEYS=key1,key2,key3         # Opcional: lista separada por comas
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-3.5-flash-lite
 GEMINI_THINKING_LEVEL=low
 # Timeouts y reintentos (segundos)
 GEMINI_REQUEST_TIMEOUT_CONNECT=3       # timeout de conexión por intento

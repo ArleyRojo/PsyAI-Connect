@@ -2,6 +2,8 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from apps.admin_panel.repositories import AdminRepository
+from apps.authentication.models import Register
+from apps.chatbot.models import ConversacionesChatbot
 
 
 # ── BUG 5: AdminRepository.create_user — sin contraseña ────────────────────
@@ -70,6 +72,35 @@ class TestRepositoryCreateUser:
                 "contrasena": "Secure123!",
                 "rol": "paciente",
             })
+
+
+@pytest.mark.django_db
+def test_chatbot_historial_rows_uses_patient_relation():
+    patient = Register.objects.create_user(
+        email="historial@test.com",
+        nombre="Paciente Historial",
+        password="TestPass123",
+        rol="paciente",
+    )
+    ConversacionesChatbot.objects.create(
+        idPaciente=patient,
+        mensajeUsuario="Necesito apoyo",
+        respuestaChatbot="Estoy aquí para escucharte",
+        nivelEmocionalDetectado="Medio",
+    )
+
+    rows = AdminRepository().get_chatbot_historial_rows()
+
+    assert rows == [
+        {
+            "nombre": "Paciente Historial",
+            "idPaciente": patient.idUsuario,
+            "mensajeUsuario": "Necesito apoyo",
+            "respuestaChatbot": "Estoy aquí para escucharte",
+            "nivelEmocionalDetectado": "Medio",
+            "fecha": rows[0]["fecha"],
+        }
+    ]
 
 
 # ── BUG 4: Cache behavior ─────────────────────────────────────────────────
