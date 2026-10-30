@@ -303,7 +303,71 @@ function clearTopPagoInfo() {
   accountTextEl.textContent = '';
   accountLoading.style.display = 'none';
 }
- 
+
+async function cargarFacturasPaciente() {
+  const tbody = document.getElementById("tablaFacturas");
+  try {
+    const res = await fetch("/api/facturas/mias", { credentials: "include" });
+    const data = await res.json();
+    if (!data.success || !data.facturas || data.facturas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No tienes facturas registradas</td></tr>';
+      clearTopPagoInfo();
+      return;
+    }
+    let firstProfId = null;
+    for (const f of data.facturas) {
+      if (f.idProfesional) { firstProfId = f.idProfesional; break; }
+    }
+    if (firstProfId) {
+      loadTopPagoInfo(firstProfId);
+    } else {
+      clearTopPagoInfo();
+    }
+    tbody.innerHTML = data.facturas.map(function(f) {
+      const servicios = (f.items || []).map(function(i) { return esc(i.descripcion); }).join(", ") || "Consulta";
+      const badgeClass = f.anulada ? "bg-secondary" :
+        f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
+      const badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
+
+      let accion = "";
+      if (f.anulada || f.estadoPago === "Cancelado") {
+        accion = '<button class="btn btn-sm btn-outline-secondary" onclick="verMotivoAnulacion(\'' + esc(f.motivoAnulacion || "Sin motivo registrado") + '\')"><i class="fas fa-info-circle"></i></button>';
+      } else if (f.estadoPago === "Pagado") {
+        var btnEvidencia = f.tieneEvidencia ? '<button class="btn btn-sm btn-outline-info ms-1" onclick="verEvidencia(' + f.idFactura + ')" title="Ver evidencia"><i class="fas fa-file-image"></i></button>' : '';
+        accion = '<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(' + f.idFactura + ')"><i class="fas fa-receipt"></i> Ver</button>' + btnEvidencia;
+      } else {
+        if (f.idProfesional) {
+          accion = '<button class="btn btn-sm btn-success" onclick="abrirModalPago(' + f.idProfesional + ', ' + f.idFactura + ')"><i class="fas fa-qrcode me-1"></i> Pagar</button>';
+        } else {
+          accion = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-lock me-1"></i> Pendiente</button>';
+        }
+      }
+
+      let toggleBtn = '';
+      if (f.estadoPago === "Pendiente" && f.idProfesional) {
+        toggleBtn = '<button class="btn btn-sm btn-outline-info ms-1" onclick="togglePagoInfo(' + f.idFactura + ')"><i class="fas fa-info-circle"></i></button>';
+      }
+      const mainRow = '<tr class="align-middle" id="rowFactura-' + f.idFactura + '">' +
+        '<td data-label="Fecha">' + formatFecha(f.fecha) + '</td>' +
+        '<td data-label="Profesional" class="fw-semibold">' + esc(f.nombreProfesional || "---") + '</td>' +
+        '<td data-label="Servicio(s)">' + servicios + '</td>' +
+        '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
+        '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
+        '<td data-label="Acción" class="text-center">' + accion + ' ' + toggleBtn + '</td>' +
+        '</tr>';
+      const hiddenRow = '<tr id="pagoInfo-' + f.idFactura + '" style="display:none;" data-profesional-id="' + (f.idProfesional || '') + '">' +
+        '<td colspan="6">' +
+        '<div class="row p-3">' +
+        '<div class="col-12 col-md-6 text-center" id="qrContainer-' + f.idFactura + '"><p class="small text-muted mb-2">Código QR</p><div class="spinner-border text-primary" id="qrLoading-' + f.idFactura + '"></div><img id="qrImg-' + f.idFactura + '" src="" alt="QR de pago" class="img-fluid d-none" style="max-width:200px;"></div>' +
+        '<div class="col-12 col-md-6"><p class="small text-muted mb-2">Datos de la cuenta</p><div class="spinner-border text-primary" id="accountLoading-' + f.idFactura + '"></div><div id="accountInfoCard-' + f.idFactura + '" class="d-none"></div><pre id="accountText-' + f.idFactura + '" class="text-start small text-muted d-none" style="white-space: pre-wrap;"></pre></div>' +
+        '</div></td></tr>';
+      return mainRow + hiddenRow;
+    }).join("");
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar facturas</td></tr>';
+  }
+}
+
 function togglePagoInfo(facturaId) {
   const row = document.getElementById('pagoInfo-' + facturaId);
   if (!row) return;
