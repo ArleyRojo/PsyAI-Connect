@@ -291,7 +291,168 @@ async function loadTopPagoInfo(profesionalId) {
     accountTextEl.classList.remove('d-none');
   }
 }
- 
+
+async function loadPagoCuentaBtn() {
+  try {
+    const res = await fetch('/api/config/pago/', { credentials: 'include' });
+    const data = await res.json();
+    if (data.configurada && data.url) {
+      const wrap = document.getElementById('pagoCuentaBtnWrap');
+      if (wrap) {
+        wrap.innerHTML = '<a href="' + esc(data.url) + '" target="_blank" rel="noopener" class="btn btn-outline-primary w-100"><i class="fas fa-external-link-alt me-2"></i>Pagar por enlace externo</a>';
+      }
+    }
+  } catch(e) {
+    console.error('Error loading pago cuenta url', e);
+  }
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : str;
+  return div.innerHTML;
+}
+
+// Formatea fecha ISO o dd/mm/YYYY HH:MM a "dd MMM yyyy" + hora tenue
+function formatFecha(fechaStr) {
+  if (!fechaStr) return '';
+  let d;
+  d = new Date(fechaStr);
+  if (isNaN(d.getTime())) {
+    const parts = fechaStr.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/);
+    if (parts) {
+      d = new Date(parts[3], parts[2]-1, parts[1], parts[4], parts[5]);
+    }
+  }
+  if (isNaN(d.getTime())) return esc(fechaStr);
+  const dia = d.toLocaleDateString('es-CO', {day:'2-digit', month:'short', year:'numeric'});
+  const hora = d.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit', hour12:false});
+  return `${dia}<br><small class="text-muted">${hora}</small>`;
+}
+
+// ─── DEMO MODE ───
+const DEMO_PAGO = true;
+const DEMO_PAGO_INFO = {
+  qr_image: "/img/qr-demo.png",
+  mensaje_texto: "Banco: Bancolombia\nTipo de cuenta: Ahorros\nNúmero de cuenta: 12345678901\nTitular: Profesional Demo\nDocumento: 1234567890\n\nNequi: 3001234567\n\n* Datos de ejemplo. No realizar pagos reales."
+};
+
+function pagoInfoOk(data) {
+  if (DEMO_PAGO) return true;
+  return data && data.success && data.data;
+}
+
+function resolvePagoInfo(info) {
+  if (!DEMO_PAGO) return info;
+  return {
+    qr_image: info?.qr_image || DEMO_PAGO_INFO.qr_image,
+    mensaje_texto: info?.mensaje_texto || DEMO_PAGO_INFO.mensaje_texto,
+  };
+}
+
+// Parse bank info text and render as visual card
+function renderBankInfoCard(containerId, text, isModal = false) {
+  const container = document.getElementById(containerId);
+  if (!container || !text) return;
+
+  const lines = text.split('\n').filter(l => l.trim());
+  const bankInfo = {};
+  let nequi = '';
+  let disclaimer = '';
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('*')) {
+      disclaimer = trimmed;
+    } else if (trimmed.toLowerCase().startsWith('nequi:')) {
+      nequi = trimmed.replace(/^nequi:\s*/i, '');
+    } else {
+      const [key, ...valueParts] = trimmed.split(':');
+      if (key && valueParts.length) {
+        bankInfo[key.trim()] = valueParts.join(':').trim();
+      }
+    }
+  });
+
+  let html = '<div class="bank-info-card">';
+
+  if (Object.keys(bankInfo).length > 0) {
+    html += '<div class="bank-info-section">';
+    html += '<div class="bank-info-section-title"><i class="fas fa-university"></i> Cuenta Bancaria</div>';
+    html += '<div class="bank-info-grid">';
+
+    const fieldIcons = {
+      'Banco': 'fa-building-columns',
+      'Tipo de cuenta': 'fa-wallet',
+      'Número de cuenta': 'fa-hashtag',
+      'Titular': 'fa-user',
+      'Documento': 'fa-id-card'
+    };
+
+    const fieldOrder = ['Banco', 'Tipo de cuenta', 'Número de cuenta', 'Titular', 'Documento'];
+
+    fieldOrder.forEach(field => {
+      if (bankInfo[field]) {
+        const icon = fieldIcons[field] || 'fa-circle-info';
+        const value = bankInfo[field];
+        const isCopyable = ['Número de cuenta', 'Documento'].includes(field);
+        html += '<div class="bank-info-field">';
+        html += '<div class="bank-info-label"><i class="fas ' + icon + '"></i> ' + field + '</div>';
+        html += '<div class="bank-info-value">' + esc(value) + (isCopyable ? '<button class="btn-copy" data-copy="' + esc(value) + '" title="Copiar"><i class="fas fa-copy"></i></button>' : '') + '</div>';
+        html += '</div>';
+      }
+    });
+
+    html += '</div>';
+    html += '</div>';
+  }
+
+  if (nequi) {
+    html += '<div class="bank-info-section">';
+    html += '<div class="bank-info-section-title"><i class="fas fa-mobile-screen-button"></i> Nequi</div>';
+    html += '<div class="bank-info-grid">';
+    html += '<div class="bank-info-field nequi-field">';
+    html += '<div class="bank-info-label"><i class="fas fa-mobile-screen-button"></i> Número Nequi</div>';
+    html += '<div class="bank-info-value">' + esc(nequi) + '<button class="btn-copy" data-copy="' + esc(nequi) + '" title="Copiar"><i class="fas fa-copy"></i></button></div>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+  }
+
+  if (disclaimer) {
+    html += '<div class="bank-info-disclaimer"><i class="fas fa-info-circle"></i> ' + esc(disclaimer) + '</div>';
+  }
+
+  html += '</div>';
+
+  container.innerHTML = html;
+  container.classList.remove('d-none');
+
+  container.querySelectorAll('.btn-copy').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const textToCopy = this.getAttribute('data-copy');
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalHtml = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check"></i>';
+        this.classList.add('copied');
+        setTimeout(() => {
+          this.innerHTML = originalHtml;
+          this.classList.remove('copied');
+        }, 1500);
+      });
+    });
+  });
+}
+
+// Fallback for rendering raw text in pre tag
+function renderRawBankInfo(preId, text) {
+  const pre = document.getElementById(preId);
+  if (pre && text) {
+    pre.textContent = text;
+    pre.classList.remove('d-none');
+  }
+}
+
 function clearTopPagoInfo() {
   const qrImg = document.getElementById('qrImage');
   const qrLoading = document.getElementById('qrLoading');
