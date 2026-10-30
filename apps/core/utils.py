@@ -1,11 +1,101 @@
 import logging
 import zipfile
+from datetime import timezone as dt_tz
 from io import BytesIO
 
 from django.conf import settings
 from django.http import JsonResponse
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
+# Zona horaria de Colombia
+try:
+    from zoneinfo import ZoneInfo
+    BOGOTA_TZ = ZoneInfo("America/Bogota")
+except ImportError:
+    # Fallback para Python < 3.9
+    BOGOTA_TZ = timezone.get_fixed_timezone(-300)  # UTC-5
+
+
+def fmt_bogota(dt):
+    """
+    Convierte un datetime a zona horaria de Bogotá y lo formatea como dd/mm/YYYY HH:MM.
+    
+    Args:
+        dt: datetime (aware o naive). Si es naive, se asume UTC.
+    
+    Returns:
+        str: Fecha formateada en zona horaria de Bogotá, o "" si dt es None.
+    """
+    if not dt:
+        return ""
+    
+    # Si es naive, asumir UTC
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, dt_tz.utc)
+    
+    # Convertir a Bogotá
+    dt = dt.astimezone(BOGOTA_TZ)
+    return dt.strftime("%d/%m/%Y %H:%M")
+
+
+def fmt_bogota_short(dt):
+    """
+    Formato corto: dd/mm/YYYY.
+    """
+    if not dt:
+        return ""
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, dt_tz.utc)
+    dt = dt.astimezone(BOGOTA_TZ)
+    return dt.strftime("%d/%m/%Y")
+
+
+def fmt_bogota_time(dt):
+    """
+    Solo hora: HH:MM.
+    """
+    if not dt:
+        return ""
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, dt_tz.utc)
+    dt = dt.astimezone(BOGOTA_TZ)
+    return dt.strftime("%H:%M")
+
+
+def to_bogota(dt):
+    """
+    Convierte un datetime a zona horaria de Bogotá (retorna datetime aware).
+    """
+    if not dt:
+        return None
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, dt_tz.utc)
+    return dt.astimezone(BOGOTA_TZ)
+
+
+def parse_bogota_datetime(value):
+    """
+    Parsea un string 'YYYY-MM-DDTHH:MM' (de input datetime-local) 
+    como hora de Bogotá y lo convierte a UTC para guardar en BD.
+    
+    Args:
+        value: string en formato 'YYYY-MM-DDTHH:MM'
+    
+    Returns:
+        datetime aware en UTC, o None si value es falsy.
+    """
+    if not value:
+        return None
+    
+    # Parsear como naive y luego asignar zona de Bogotá
+    naive = timezone.datetime.fromisoformat(value)
+    aware = timezone.make_aware(naive, BOGOTA_TZ)
+    
+    # Convertir a UTC para almacenar
+    return aware.astimezone(dt_tz.utc)
+
 
 DOC_MAGIC_BYTES = {
     "jpg": (b"\xff\xd8\xff",),

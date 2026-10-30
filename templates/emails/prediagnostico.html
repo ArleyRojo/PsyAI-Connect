@@ -28,7 +28,7 @@
                     <tr>
                         <td style="padding:32px 48px 40px;">
                             <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 24px;">
-                                Hola <strong>{{ nombre_profesional }}</strong>,
+                                Hola <strong>{{ nombre_profesional|default:"Profesional" }}</strong>,
                             </p>
                             <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 24px;">
                                 El chatbot de apoyo emocional gener&oacute; un <strong>prediagnostico orientativo</strong> al finalizar una sesi&oacute;n.

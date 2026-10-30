@@ -6,6 +6,7 @@ from django.db import connection, transaction
 
 from apps.admin_panel.models import AuditoriaAccesos, Logs
 from apps.authentication.models import Register
+from apps.core.utils import fmt_bogota
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +106,7 @@ class AdminRepository:
                 "titulo": log.accion,
                 "detalle": log.detalle,
                 "tipo": tipo,
-                "tiempo": log.fecha.strftime("%d/%m/%Y %H:%M") if log.fecha else "",
+                "tiempo": fmt_bogota(log.fecha) if log.fecha else "",
             })
 
         actividad_rows = Logs.objects.order_by("-fecha")[:5]
@@ -113,7 +114,7 @@ class AdminRepository:
             {
                 "accion": log.accion,
                 "detalle": log.detalle,
-                "fecha": log.fecha.strftime("%d/%m/%Y %H:%M") if log.fecha else "",
+                "fecha": fmt_bogota(log.fecha) if log.fecha else "",
             }
             for log in actividad_rows
         ]
@@ -145,9 +146,8 @@ class AdminRepository:
                 SELECT r.idUsuario, r.nombre, r.email, r.rol,
                        COALESCE(r.activo, 1) as activo,
                        r.estadoCuenta,
-                       DATE_FORMAT(r.fechaRegistro, '%%d/%%m/%%Y') as fechaRegistro,
-                       (SELECT DATE_FORMAT(MAX(a.fecha),'%%d/%%m/%%Y %%H:%%i')
-                        FROM AuditoriaAccesos a WHERE a.idUsuario = r.idUsuario) as ultimoAcceso
+                       r.fechaRegistro,
+                       (SELECT MAX(a.fecha) FROM AuditoriaAccesos a WHERE a.idUsuario = r.idUsuario) as ultimoAcceso
                 FROM Register r
                 ORDER BY
                     CASE r.rol
@@ -159,19 +159,29 @@ class AdminRepository:
             """, [limit, offset])
             columns = [col[0] for col in cursor.description]
             rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-            return rows
+        
+        # Format dates using centralized utility
+        for row in rows:
+            row["fechaRegistro"] = fmt_bogota(row.get("fechaRegistro"))
+            row["ultimoAcceso"] = fmt_bogota(row.get("ultimoAcceso"))
+        
+        return rows
 
     def get_user(self, user_id):
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT idUsuario, nombre, email, rol,
                        COALESCE(activo,1) as activo, estadoCuenta,
-                       DATE_FORMAT(fechaRegistro,'%%d/%%m/%%Y') as fechaRegistro
+                       fechaRegistro
                 FROM Register WHERE idUsuario = %s
             """, [user_id])
             columns = [col[0] for col in cursor.description]
             row = cursor.fetchone()
-            return dict(zip(columns, row)) if row else None
+            if row:
+                row = dict(zip(columns, row))
+                row["fechaRegistro"] = fmt_bogota(row.get("fechaRegistro"))
+                return row
+            return None
 
     def create_user(self, data):
         from django.contrib.auth.hashers import make_password
@@ -289,67 +299,191 @@ class AdminRepository:
     def get_notifications_feed(self):
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT
-                    n.idNotificacion, n.titulo, n.mensaje, n.tipo,
-                    COALESCE(n.destinatario, reg.nombre, reg.email) as destinatario,
-                    n.email_individual, n.enviado_por, n.estado, n.leido,
-                    DATE_FORMAT(n.fecha, '%d/%m/%Y %H:%i') as fecha,
-                    n.fecha_programada, 'notificacion' as tipo_registro,
-                    n.fecha as fecha_orden
-                FROM notificaciones n
-                LEFT JOIN Register reg ON reg.idUsuario = n.idUsuario
+                (
+                    SELECT
+                        n.idNotificacion, n.titulo, n.mensaje, n.tipo,
+                        COALESCE(n.destinatario, reg.nombre, reg.email) as destinatario,
+                        n.email_individual, n.enviado_por, n.estado, n.leido,
+                        n.fecha as fecha_raw,
+                        n.fecha_programada, 'notificacion' as tipo_registro,
+                        n.fecha as fecha_orden
+                    FROM Notificaciones n
+                    LEFT JOIN Register reg ON reg.idUsuario = n.idUsuario
+                    ORDER BY n.fecha DESC LIMIT 100
+                )
                 UNION ALL
-                SELECT NULL as idNotificacion,
-                    CONCAT('Cita: ', c.tipoCita) as titulo,
-                    CONCAT('Paciente: ', pa.nombre) as mensaje,
-                    'profesional' as tipo,
-                    CONCAT('profesional_', pr.idUsuario) as destinatario,
-                    NULL as email_individual, pr.nombre as enviado_por,
-                    'enviado' as estado, NULL as leido,
-                    DATE_FORMAT(c.fecha, '%d/%m/%Y %H:%i') as fecha,
-                    NULL as fecha_programada, 'profesional' as tipo_registro,
-                    c.fecha as fecha_orden
-                FROM Citas c
-                JOIN Register pr ON c.idProfesional = pr.idUsuario
-                JOIN Register pa ON c.idPaciente = pa.idUsuario
+                (
+                    SELECT NULL as idNotificacion,
+                        CONCAT('Cita: ', c.tipoCita) as titulo,
+                        CONCAT('Paciente: ', pa.nombre) as mensaje,
+                        'profesional' as tipo,
+                        CONCAT('profesional_', pr.idUsuario) as destinatario,
+                        NULL as email_individual, pr.nombre as enviado_por,
+                        'enviado' as estado, NULL as leido,
+                        c.fecha as fecha_raw,
+                        NULL as fecha_programada, 'profesional' as tipo_registro,
+                        c.fecha as fecha_orden
+                    FROM Citas c
+                    JOIN Register pr ON c.idProfesional = pr.idUsuario
+                    JOIN Register pa ON c.idPaciente = pa.idUsuario
+                    WHERE c.fecha <= CURDATE()
+                    ORDER BY c.fecha DESC LIMIT 50
+                )
                 UNION ALL
-                SELECT NULL as idNotificacion,
-                    CONCAT('Cita solicitada por: ', pa.nombre) as titulo,
-                    CONCAT('Profesional: ', pr.nombre) as mensaje,
-                    'paciente' as tipo,
-                    CONCAT('paciente_', pa.idUsuario) as destinatario,
-                    NULL as email_individual, pa.nombre as enviado_por,
-                    'enviado' as estado, NULL as leido,
-                    DATE_FORMAT(c.fecha, '%d/%m/%Y %H:%i') as fecha,
-                    NULL as fecha_programada, 'paciente' as tipo_registro,
-                    c.fecha as fecha_orden
-                FROM Citas c
-                JOIN Register pa ON c.idPaciente = pa.idUsuario
-                JOIN Register pr ON c.idProfesional = pr.idUsuario
+                (
+                    SELECT NULL as idNotificacion,
+                        CONCAT('Cita solicitada por: ', pa.nombre) as titulo,
+                        CONCAT('Profesional: ', pr.nombre) as mensaje,
+                        'paciente' as tipo,
+                        CONCAT('paciente_', pa.idUsuario) as destinatario,
+                        NULL as email_individual, pa.nombre as enviado_por,
+                        'enviado' as estado, NULL as leido,
+                        c.fecha as fecha_raw,
+                        NULL as fecha_programada, 'paciente' as tipo_registro,
+                        c.fecha as fecha_orden
+                    FROM Citas c
+                    JOIN Register pa ON c.idPaciente = pa.idUsuario
+                    JOIN Register pr ON c.idProfesional = pr.idUsuario
+                    WHERE c.fecha <= CURDATE()
+                    ORDER BY c.fecha DESC LIMIT 50
+                )
                 ORDER BY fecha_orden DESC LIMIT 200
             """)
             columns = [col[0] for col in cursor.description]
-            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+            rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
+        # Format dates in Python using centralized utility
+        for row in rows:
+            fecha_raw = row.pop("fecha_raw", None)
+            row["fecha"] = fmt_bogota(fecha_raw)
+            
+            # Also format fecha_programada if present
+            fecha_prog = row.get("fecha_programada")
+            if fecha_prog:
+                row["fecha_programada"] = fmt_bogota(fecha_prog)
+        
+        return rows
+
+    def get_notification_stats(self):
+        """Get real notification stats using COUNT queries on Notificaciones table only."""
+        from django.utils import timezone
+        from django.db import models
+        from apps.scheduling.models import Notificaciones
+        
+        today = timezone.localdate()
+        start_today = timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.min.time()))
+        end_today = start_today + timezone.timedelta(days=1)
+        
+        # Total historial (notificaciones enviadas + fallidas, no pendientes)
+        total_historial = Notificaciones.objects.exclude(estado='pendiente').count()
+        
+        # Enviadas hoy
+        enviadas_hoy = Notificaciones.objects.filter(
+            estado='enviado',
+            fecha__gte=start_today,
+            fecha__lt=end_today
+        ).count()
+        
+        # Programadas (pendientes)
+        programadas = Notificaciones.objects.filter(estado='pendiente').count()
+        
+        # Fallidas
+        fallidas = Notificaciones.objects.filter(estado='fallido').count()
+        
+        # Tasa de entrega
+        total_enviadas = Notificaciones.objects.filter(estado__in=['enviado', 'fallido']).count()
+        tasa = f"{round((enviadas_hoy / total_enviadas) * 100)}%" if total_enviadas else "0%"
+        
+        # Alcanzados - notificaciones con destinatario/email_individual definidos
+        alcanzados = Notificaciones.objects.exclude(estado='pendiente').filter(
+            models.Q(destinatario__isnull=False) & ~models.Q(destinatario='') |
+            models.Q(email_individual__isnull=False) & ~models.Q(email_individual='') |
+            models.Q(mensaje__isnull=False) & ~models.Q(mensaje='')
+        ).count()
+        
+        return {
+            "total_historial": total_historial,
+            "enviadas_hoy": enviadas_hoy,
+            "programadas": programadas,
+            "tasa": tasa,
+            "alcanzados": alcanzados,
+        }
 
     def create_notification(self, data):
         from apps.scheduling.models import Notificaciones
+        from django.core.mail import EmailMultiAlternatives
+        from django.conf import settings
+        from django.template.loader import render_to_string
+        from apps.core.utils import parse_bogota_datetime
+        from apps.authentication.models import Register
+        from apps.patients.models import PerfilPaciente
+        import re
 
-        estado = "enviado" if data.get("envio") == "inmediato" else "pendiente"
-        Notificaciones.objects.create(
-            titulo=data.get("titulo"),
-            mensaje=data.get("mensaje"),
-            tipo=data.get("tipo", "info"),
-            destinatario=data.get("destinatario"),
-            email_individual=data.get("email_individual"),
+        # Validar campos obligatorios
+        titulo = data.get("titulo", "").strip()
+        mensaje = data.get("mensaje", "").strip()
+        tipo = data.get("tipo", "info")
+        destinatario = data.get("destinatario")
+        envio = data.get("envio", "inmediato")
+        email_individual = data.get("email_individual", "").strip() if data.get("email_individual") else None
+        fecha_programada = parse_bogota_datetime(data.get("fecha_programada"))
+
+        if not titulo or not mensaje or not destinatario:
+            raise ValueError("Título, mensaje y destinatario son obligatorios")
+
+        if destinatario == "individual":
+            if not email_individual:
+                raise ValueError("Email individual es obligatorio cuando destinatario es 'individual'")
+            if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email_individual):
+                raise ValueError("Email individual inválido")
+
+        estado = "enviado" if envio == "inmediato" else "pendiente"
+        
+        notificacion = Notificaciones.objects.create(
+            titulo=titulo,
+            mensaje=mensaje,
+            tipo=tipo,
+            destinatario=destinatario,
+            email_individual=email_individual,
             enviado_por="Admin",
             estado=estado,
-            fecha_programada=data.get("fecha_programada") or None,
+            canal="email",
+            fecha_programada=fecha_programada,
         )
         self.registrar_log(
             "notificaciones", "Enviar notificacion",
-            f"{data.get('titulo')} -> {data.get('destinatario')}",
+            f"{titulo} -> {destinatario}",
             administrador=self.get_admin_name(),
         )
+
+        # Enviar correo si es inmediato
+        if envio == "inmediato":
+            try:
+                enviados, fallidos, error_detalle = self._send_admin_notification_emails(
+                    notificacion_id=notificacion.idNotificacion,
+                    destinatario=destinatario,
+                    email_individual=email_individual,
+                    titulo=titulo,
+                    mensaje=mensaje,
+                    tipo=tipo,
+                )
+                
+                # Actualizar estado de la notificación
+                if enviados > 0:
+                    notificacion.estado = "enviado"
+                    notificacion.errorDetalle = None
+                else:
+                    notificacion.estado = "fallido"
+                    notificacion.errorDetalle = error_detalle or "No se pudo enviar a ningún destinatario"
+                notificacion.save(update_fields=["estado", "errorDetalle"])
+                
+            except Exception as e:
+                logger.exception("Error enviando emails de notificación")
+                notificacion.estado = "fallido"
+                notificacion.errorDetalle = str(e)
+                notificacion.save(update_fields=["estado", "errorDetalle"])
+        
+        return notificacion
 
     def delete_notification(self, notification_id):
         from apps.scheduling.models import Notificaciones
@@ -391,7 +525,7 @@ class AdminRepository:
                 "modulo": l.modulo,
                 "accion": l.accion,
                 "detalle": l.detalle,
-                "fecha": l.fecha.strftime("%d/%m/%Y %H:%M") if l.fecha else "",
+                "fecha": fmt_bogota(l.fecha) if l.fecha else "",
                 "origen": "admin",
             }
             for l in logs_admin
@@ -405,7 +539,7 @@ class AdminRepository:
                 "modulo": "accesos",
                 "accion": a.accion,
                 "detalle": f"IP: {a.ip}",
-                "fecha": a.fecha.strftime("%d/%m/%Y %H:%M") if a.fecha else "",
+                "fecha": fmt_bogota(a.fecha) if a.fecha else "",
                 "origen": "auditoria",
             }
             for a in logs_auditoria
@@ -436,3 +570,178 @@ class AdminRepository:
             columns = [col[0] for col in cursor.description]
             row = cursor.fetchone()
             return dict(zip(columns, row)) if row else {"total": 0, "alto": 0, "medio": 0, "bajo": 0}
+
+    def _get_tipo_style(self, tipo):
+        """Retorna estilos visuales según el tipo de notificación"""
+        styles = {
+            "sistema": {
+                "accent_gradient": "linear-gradient(135deg,#1565C0 0%,#1E88E5 50%,#42A5F5 100%)",
+                "icon_bg": "linear-gradient(135deg,#E3F2FD 0%,#BBDEFB 100%)",
+                "icon": "&#9881;",
+                "tipo_bg": "#E3F2FD",
+                "tipo_color": "#1565C0",
+                "tipo_border": "#BBDEFB",
+                "tipo_label": "Sistema",
+            },
+            "cita": {
+                "accent_gradient": "linear-gradient(135deg,#2E7D32 0%,#388E3C 50%,#4CAF50 100%)",
+                "icon_bg": "linear-gradient(135deg,#E8F5E9 0%,#C8E6C9 100%)",
+                "icon": "&#128197;",
+                "tipo_bg": "#E8F5E9",
+                "tipo_color": "#2E7D32",
+                "tipo_border": "#C8E6C9",
+                "tipo_label": "Cita",
+            },
+            "recordatorio": {
+                "accent_gradient": "linear-gradient(135deg,#EF6C00 0%,#F57C00 50%,#FF9800 100%)",
+                "icon_bg": "linear-gradient(135deg,#FFF3E0 0%,#FFE0B2 100%)",
+                "icon": "&#128276;",
+                "tipo_bg": "#FFF3E0",
+                "tipo_color": "#EF6C00",
+                "tipo_border": "#FFE0B2",
+                "tipo_label": "Recordatorio",
+            },
+            "alerta": {
+                "accent_gradient": "linear-gradient(135deg,#C62828 0%,#D32F2F 50%,#EF5350 100%)",
+                "icon_bg": "linear-gradient(135deg,#FBE9E7 0%,#FFCCBC 100%)",
+                "icon": "&#9888;",
+                "tipo_bg": "#FBE9E7",
+                "tipo_color": "#C62828",
+                "tipo_border": "#FFCCBC",
+                "tipo_label": "Alerta",
+            },
+            "info": {
+                "accent_gradient": "linear-gradient(135deg,#4F46E5 0%,#6366F1 50%,#818CF8 100%)",
+                "icon_bg": "linear-gradient(135deg,#EEF2FF 0%,#E0E7FF 100%)",
+                "icon": "&#129504;",
+                "tipo_bg": "#EEF2FF",
+                "tipo_color": "#4F46E5",
+                "tipo_border": "#C7D2FE",
+                "tipo_label": "Info",
+            },
+        }
+        return styles.get(tipo, styles["info"])
+
+    def _get_recipient_name(self, user, email):
+        """Obtiene el nombre para el saludo: nombre real, o parte local del email, nunca vacío"""
+        if user and user.nombre:
+            return user.nombre
+        # Fallback: parte local del email
+        local_part = email.split("@")[0] if "@" in email else email
+        # Limpiar y formatear
+        name = local_part.replace(".", " ").replace("_", " ").replace("-", " ").title()
+        return name if name else "Usuario"
+
+    def _resolve_recipients(self, destinatario, email_individual=None):
+        """Resuelve la lista de destinatarios según el tipo, aplicando filtros"""
+        from apps.authentication.models import Register
+        from apps.patients.models import PerfilPaciente
+        
+        if destinatario == "individual" and email_individual:
+            try:
+                user = Register.objects.get(email=email_individual)
+                return [(user, email_individual)]
+            except Register.DoesNotExist:
+                # Usuario no registrado, usar solo el email
+                return [(None, email_individual)]
+        
+        # Base query: usuarios activos con cuenta activa y email
+        base_qs = Register.objects.filter(
+            activo=True, 
+            estadoCuenta="Activa"
+        ).exclude(email__isnull=True).exclude(email="")
+        
+        if destinatario == "pacientes":
+            qs = base_qs.filter(rol="paciente")
+            # Excluir pacientes con notificaciones desactivadas
+            pacientes_sin_notif = PerfilPaciente.objects.filter(
+                prefNotificaciones="Desactivadas"
+            ).values_list("idPaciente_id", flat=True)
+            qs = qs.exclude(idUsuario__in=pacientes_sin_notif)
+        elif destinatario == "profesionales":
+            qs = base_qs.filter(rol="profesional")
+        elif destinatario == "todos":
+            qs = base_qs.exclude(rol="admin")  # Nunca incluir admins en "todos"
+        else:
+            return []
+        
+        return [(u, u.email) for u in qs]
+
+    def _send_admin_notification_emails(self, notificacion_id, destinatario, email_individual, titulo, mensaje, tipo):
+        """Envía emails de notificación admin a destinatarios resueltos.
+        Retorna (enviados, fallidos, error_detalle)"""
+        from django.core.mail import EmailMultiAlternatives
+        from django.conf import settings
+        from django.template.loader import render_to_string
+        from apps.scheduling.models import Notificaciones
+        from apps.core.utils import fmt_bogota
+        from django.utils import timezone
+        
+        style = self._get_tipo_style(tipo)
+        site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
+        cta_link = f"{site_url}/aside-patient/mensajes.html"  # o panel de notificaciones
+        
+        # Convertir saltos de línea a <br> para HTML
+        mensaje_html = mensaje.replace("\n", "<br>")
+        
+        recipients = self._resolve_recipients(destinatario, email_individual)
+        
+        if not recipients:
+            return 0, 0, "No hay destinatarios válidos para esta notificación"
+        
+        enviados = 0
+        fallidos = 0
+        errores = []
+        
+        subject = f"PsyAI Connect \u2014 {titulo}"
+        
+        # Texto plano base
+        text_template = """Hola {nombre},
+
+{titulo}
+
+{mensaje}
+
+---
+Este mensaje fue enviado por un administrador de PsyAI Connect.
+Si no deseas recibir estas notificaciones, contacta con el administrador.
+"""
+        
+        for user, email in recipients:
+            try:
+                nombre_destinatario = self._get_recipient_name(user, email)
+                
+                # Texto plano personalizado
+                text_content = text_template.format(
+                    nombre=nombre_destinatario,
+                    titulo=titulo,
+                    mensaje=mensaje
+                )
+                
+                # HTML con template
+                html_content = render_to_string('emails/notificacion_admin.html', {
+                    'titulo': titulo,
+                    'mensaje_html': mensaje_html,
+                    'tipo': tipo,
+                    'nombre_destinatario': nombre_destinatario,
+                    'cta_link': cta_link,
+                    **style,
+                })
+                
+                msg = EmailMultiAlternatives(
+                    subject=subject,
+                    body=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[email]
+                )
+                msg.attach_alternative(html_content, "text/html")
+                msg.send(fail_silently=False)  # No silencioso para capturar errores
+                enviados += 1
+                
+            except Exception as e:
+                fallidos += 1
+                errores.append(f"{email}: {str(e)}")
+                logger.exception("Error enviando notificación admin a %s", email)
+        
+        error_detalle = "; ".join(errores) if errores else None
+        return enviados, fallidos, error_detalle

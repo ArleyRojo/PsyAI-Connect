@@ -76,11 +76,11 @@ class Register(AbstractBaseUser):
         return check_password(raw_password, self.contrasena)
 
     def to_dict(self):
+        """Return user data safe for session storage (excludes password hash)."""
         return {
             "idUsuario": self.idUsuario,
             "nombre": self.nombre,
             "email": self.email,
-            "contrasena": self.contrasena,
             "rol": self.rol,
             "activo": self.activo,
             "estadoCuenta": self.estadoCuenta,
@@ -88,6 +88,16 @@ class Register(AbstractBaseUser):
             "fechaRegistro": (
                 self.fechaRegistro.isoformat() if self.fechaRegistro else None
             ),
+            "fotoPerfil": self.fotoPerfil,
+        }
+
+    def to_session_dict(self):
+        """Return minimal user data for session storage (consistent across all auth flows)."""
+        return {
+            "id": self.idUsuario,
+            "nombre": self.nombre,
+            "email": self.email,
+            "rol": self.rol,
             "fotoPerfil": self.fotoPerfil,
         }
 

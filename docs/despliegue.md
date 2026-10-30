@@ -257,7 +257,15 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 | `DEFAULT_FROM_EMAIL` | Remitente | — | `PsyAI Connect <noreply@tudominio.com>` |
 | `GEMINI_API_KEY` | Key principal Gemini | — | **Requerida** |
 | `GEMINI_API_KEYS` | Keys extra (rotación) | — | Opcional |
-| `GEMINI_MODEL` | Modelo | `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` |
+| `GEMINI_MODEL` | Modelo | `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` |
+| `GEMINI_THINKING_LEVEL` | Nivel de razonamiento | `low` | `low` |
+| `GEMINI_REQUEST_TIMEOUT_CONNECT` | Timeout de conexión (s) | `3` | `3` |
+| `GEMINI_REQUEST_TIMEOUT_READ` | Timeout de lectura intento 1 (s) | `8` | `8` |
+| `GEMINI_MIN_READ_TIMEOUT_SECONDS` | Read timeout mínimo garantizado (s) | `3` | `3` |
+| `GEMINI_RETRIES` | Reintentos ante timeout/error de red | `2` | `2` |
+| `GEMINI_RETRY_BASE_DELAY` | Retraso base entre reintentos (s) | `0.2` | `0.2` |
+| `GEMINI_TOTAL_DEADLINE_SECONDS` | Presupuesto total Gemini (s) | `10` | `10` |
+| `GEMINI_FALLBACK_MODEL` | Modelo de respaldo | `gemma-4-26b-a4b-it` | `gemma-4-26b-a4b-it` |
 | `WOMPI_ENV` | `test` \| `prod` | `test` | `prod` |
 | `WOMPI_PUBLIC_KEY` | Llave pública Wompi | — | **Requerida** |
 | `WOMPI_PRIVATE_KEY` | Llave privada Wompi | — | **Requerida** |

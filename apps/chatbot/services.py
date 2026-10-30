@@ -21,13 +21,39 @@ from apps.scheduling.repositories import AppointmentRepository
 
 GEMINI_URL_TEMPLATE = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 GEMINI_RETRYABLE_STATUS = {429, 500, 502, 503, 504}
-GEMINI_RETRIES = 2
-GEMINI_RETRY_BASE_DELAY = 0.6
-# Presupuesto total de tiempo para llamadas a Gemini (segundos).
-# Debe ser menor que el timeout del frontend (chatbot.js usa CHATBOT_TIMEOUT_MS = 30000).
-GEMINI_TOTAL_DEADLINE_SECONDS = 25
+# Configuración de timeouts y reintentos para Gemini
+# Objetivo: p50 ≤ 2 s, fallback en ≤ 10 s total.
+# Los valores se leen de settings (variables de entorno) con defaults seguros.
+GEMINI_RETRIES = int(getattr(settings, "GEMINI_RETRIES", 2))
+GEMINI_RETRY_BASE_DELAY = float(getattr(settings, "GEMINI_RETRY_BASE_DELAY", 0.2))
+# Timeout por intento: tupla (connect, read) en segundos.
+# Se usa un enfoque escalonado: intento 1 más corto, intento 2 más largo.
+# El read timeout mínimo garantizado es GEMINI_MIN_READ_TIMEOUT_SECONDS.
+GEMINI_REQUEST_TIMEOUT_CONNECT = float(getattr(settings, "GEMINI_REQUEST_TIMEOUT_CONNECT", 3.0))
+GEMINI_REQUEST_TIMEOUT_READ = float(getattr(settings, "GEMINI_REQUEST_TIMEOUT_READ", 8.0))
+GEMINI_MIN_READ_TIMEOUT_SECONDS = float(getattr(settings, "GEMINI_MIN_READ_TIMEOUT_SECONDS", 3.0))
+# Presupuesto total para la llamada principal (incluye reintentos y modelo de respaldo).
+# Debe ser menor que CHATBOT_TIMEOUT_MS del frontend (30 s).
+GEMINI_TOTAL_DEADLINE_SECONDS = float(getattr(settings, "GEMINI_TOTAL_DEADLINE_SECONDS", 10.0))
 SYSTEM_PROMPT_FALLBACK = "Actua como un asistente de triaje psicologico para PsyAI Connect."
 CONFIG_CACHE_TTL_SECONDS = 30
+
+# Session reutilizada para keep-alive (evita handshake TLS en cada request)
+_GEMINI_SESSION: requests.Session | None = None
+
+def _get_gemini_session() -> requests.Session:
+    global _GEMINI_SESSION
+    if _GEMINI_SESSION is None:
+        _GEMINI_SESSION = requests.Session()
+        # Adapter con pool de conexiones para reutilización
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=2,
+            pool_maxsize=4,
+            max_retries=0,  # manejamos reintentos manualmente
+        )
+        _GEMINI_SESSION.mount("https://", adapter)
+        _GEMINI_SESSION.mount("http://", adapter)
+    return _GEMINI_SESSION
 
 # Constantes por defecto para configuración de crisis
 DEFAULT_CRISIS_PHONE = "106"
@@ -300,11 +326,11 @@ class ChatbotConfigService:
                 "crisis_phone": "106",
                     "thinking_level": "low",
                     "prompt_history_window": 4,
-                    "gemini_history_window": 12,
+                    "gemini_history_window": 6,
                     "temperature": 0.55,
                     "top_p": 0.9,
-                    "max_tokens": 600,
-                    "max_tokens_user": 1000,
+                    "max_tokens": 300,
+                    "max_tokens_user": 800,
                     "daily_message_limit": 20,
                     "fecha_actualizacion": None,
                     "actualizado_por": None,
@@ -670,7 +696,7 @@ class ChatbotService:
                 response["crisis_phone"] = crisis_phone
             return response, 200
 
-        model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
+        model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip() or "gemini-2.5-flash-lite"
         contexto_riesgo = self._build_risk_context(es_medio, es_bajo)
 
         # Mapear thinking_level a valores válidos de Gemini
@@ -679,8 +705,10 @@ class ChatbotService:
         thinking_map = {"low": "minimal", "medium": "medium", "high": "high", "none": None}
         thinking_level = thinking_map.get(raw_thinking, "minimal")
 
-        if es_medio or es_bajo:
-            thinking_level = "medium"
+        # El riesgo medio ya se atiende arriba con respuesta inmediata de seguridad.
+        # Para riesgo bajo, mantener thinking mínimo reduce latencia.
+        if es_bajo:
+            thinking_level = "minimal"
 
         # Tiempo de inicio para presupuesto de deadline
         deadline_ts = time.time() + GEMINI_TOTAL_DEADLINE_SECONDS
@@ -800,13 +828,18 @@ class ChatbotService:
         }
         base_delay = GEMINI_RETRY_BASE_DELAY
         last_exc = None
+        url = GEMINI_URL_TEMPLATE.format(model=model)
+        headers = {"x-goog-api-key": api_key}
+        # Timeout para JSON: connect 5s, read 15s (prediagnóstico puede tardar más)
+        timeout_tuple = (5.0, 15.0)
+
         for attempt in range(1, GEMINI_RETRIES + 2):
             try:
                 resp = requests.post(
-                    GEMINI_URL_TEMPLATE.format(model=model),
+                    url,
                     json=payload,
-                    headers={"x-goog-api-key": api_key},
-                    timeout=20,
+                    headers=headers,
+                    timeout=timeout_tuple,
                 )
                 if resp.status_code in GEMINI_RETRYABLE_STATUS:
                     last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
@@ -814,10 +847,31 @@ class ChatbotService:
                     if attempt <= GEMINI_RETRIES:
                         time.sleep(base_delay * attempt)
                     continue
+                if resp.status_code == 400:
+                    body = resp.text[:2000]
+                    self.logger.error("Gemini JSON 400 Bad Request - Modelo: %s (body length: %d): %s", model, len(body), body[:200])
+                    raise RuntimeError("Gemini HTTP 400")
+                if resp.status_code == 404:
+                    body = resp.text[:2000]
+                    self.logger.error(
+                        "Gemini JSON 404 Not Found - Modelo: %s (body length: %d): %s",
+                        model, len(body), body[:200]
+                    )
+                    raise RuntimeError(f"Gemini HTTP 404: Modelo '{model}' no encontrado")
+                if resp.status_code == 401:
+                    body = resp.text[:2000]
+                    self.logger.error("Gemini JSON 401 Unauthorized - Modelo: %s (body length: %d): %s", model, len(body), body[:200])
+                    raise RuntimeError("Gemini HTTP 401: API key inválida")
+                if resp.status_code == 403:
+                    body = resp.text[:2000]
+                    self.logger.error("Gemini JSON 403 Forbidden - Modelo: %s (body length: %d): %s", model, len(body), body[:200])
+                    raise RuntimeError("Gemini HTTP 403: Sin permisos o facturación deshabilitada")
                 if resp.status_code != 200:
                     body = resp.text[:2000]
-                    # Don't log response body as it may contain clinical data
-                    self.logger.error("Gemini JSON respondio %s (body length: %d)", resp.status_code, len(body))
+                    self.logger.error(
+                        "Gemini JSON respondio %s - Modelo: %s (body length: %d): %s",
+                        resp.status_code, model, len(body), body[:200],
+                    )
                     last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
                     if attempt <= GEMINI_RETRIES:
                         time.sleep(base_delay * attempt)
@@ -827,11 +881,24 @@ class ChatbotService:
                 if not text:
                     raise RuntimeError("Gemini no devolvio texto")
                 return text.strip()
+            except requests.exceptions.Timeout as exc:
+                last_exc = exc
+                self.logger.warning("Gemini JSON timeout intento %s/%s: %s", attempt, GEMINI_RETRIES + 1, exc)
+                if attempt <= GEMINI_RETRIES:
+                    time.sleep(base_delay * attempt)
+                continue
+            except requests.exceptions.ConnectionError as exc:
+                last_exc = exc
+                self.logger.warning("Gemini JSON connection error intento %s/%s: %s", attempt, GEMINI_RETRIES + 1, exc)
+                if attempt <= GEMINI_RETRIES:
+                    time.sleep(base_delay * attempt)
+                continue
             except requests.exceptions.RequestException as exc:
                 last_exc = exc
                 self.logger.warning("Gemini JSON request error intento %s/%s: %s", attempt, GEMINI_RETRIES + 1, exc)
                 if attempt <= GEMINI_RETRIES:
                     time.sleep(base_delay * attempt)
+                continue
         raise RuntimeError(f"Gemini no disponible luego de reintentos: {last_exc}")
 
     def _build_local_fallback(self, message, history, config, es_medio=False, es_bajo=False):
@@ -1033,7 +1100,7 @@ class ChatbotService:
         generation_config = {
             "temperature": float(config.get("temperature", 0.55)),
             "topP": float(config.get("top_p", 0.9)),
-            "maxOutputTokens": int(config.get("max_tokens", 600)),
+            "maxOutputTokens": int(config.get("max_tokens", 300)),  # reducido de 600 a 300 para menor latencia
         }
         if thinking_level and self._model_supports_thinking(model):
             generation_config["thinkingConfig"] = {"thinkingLevel": thinking_level}
@@ -1045,27 +1112,45 @@ class ChatbotService:
         }
         base_delay = GEMINI_RETRY_BASE_DELAY
         last_exc = None
+        url = GEMINI_URL_TEMPLATE.format(model=model)
+        headers = {"x-goog-api-key": api_key}
+
         for attempt in range(1, GEMINI_RETRIES + 2):
             # Verificar deadline antes de cada intento
             if deadline_ts and time.time() >= deadline_ts:
-                self.logger.warning("Deadline alcanzado en _call_gemini, abortando")
+                self.logger.warning("Deadline alcanzado en _call_gemini, abortando (intento %s/%s)", attempt, GEMINI_RETRIES + 1)
                 break
 
-            # Calcular timeout restante para este intento
-            attempt_timeout = 8
+            # Calcular timeout para este intento (escalonado: intento 1 más corto)
+            if attempt == 1:
+                connect_timeout = GEMINI_REQUEST_TIMEOUT_CONNECT
+                read_timeout = GEMINI_REQUEST_TIMEOUT_READ
+            else:
+                # Reintentos: connect más rápido, read más generoso
+                connect_timeout = min(GEMINI_REQUEST_TIMEOUT_CONNECT, 2.0)
+                read_timeout = GEMINI_REQUEST_TIMEOUT_READ + 2.0
+
+            # Ajustar por deadline restante, pero garantizar mínimo de lectura
             if deadline_ts:
                 remaining = deadline_ts - time.time()
-                if remaining <= 0:
-                    self.logger.warning("Deadline agotado antes de intento %s", attempt)
+                if remaining <= GEMINI_MIN_READ_TIMEOUT_SECONDS:
+                    self.logger.warning(
+                        "Deadline insuficiente para intento %s/%s (restante=%.1fs < min_read=%.1fs), abortando",
+                        attempt, GEMINI_RETRIES + 1, remaining, GEMINI_MIN_READ_TIMEOUT_SECONDS
+                    )
                     break
-                attempt_timeout = min(attempt_timeout, max(1, int(remaining) - 1))  # dejar 1s de margen
+                # Dejar 1s de margen para overhead
+                read_timeout = min(read_timeout, max(GEMINI_MIN_READ_TIMEOUT_SECONDS, remaining - 1.0))
+                connect_timeout = min(connect_timeout, max(0.5, remaining - read_timeout - 0.5))
+
+            timeout_tuple = (connect_timeout, read_timeout)
 
             try:
                 resp = requests.post(
-                    GEMINI_URL_TEMPLATE.format(model=model),
+                    url,
                     json=payload,
-                    headers={"x-goog-api-key": api_key},
-                    timeout=attempt_timeout,
+                    headers=headers,
+                    timeout=timeout_tuple,
                 )
                 if resp.status_code in GEMINI_RETRYABLE_STATUS:
                     last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
@@ -1074,18 +1159,29 @@ class ChatbotService:
                         time.sleep(base_delay * attempt)
                     continue
                 if resp.status_code == 400:
-                    # Error 400 = payload inválido, no reintentar
                     body = resp.text[:2000]
-                    # Don't log response body as it may contain clinical data
-                    self.logger.error("Gemini 400 Bad Request (body length: %d)", len(body))
-                    last_exc = RuntimeError("Gemini HTTP 400")
+                    self.logger.error("Gemini 400 Bad Request (body length: %d): %s", len(body), body[:200])
                     raise RuntimeError("Gemini HTTP 400")
+                if resp.status_code == 404:
+                    body = resp.text[:2000]
+                    self.logger.error(
+                        "Gemini 404 Not Found - Modelo: %s (body length: %d): %s",
+                        model, len(body), body[:200]
+                    )
+                    raise RuntimeError(f"Gemini HTTP 404: Modelo '{model}' no encontrado")
+                if resp.status_code == 401:
+                    body = resp.text[:2000]
+                    self.logger.error("Gemini 401 Unauthorized (body length: %d): %s", len(body), body[:200])
+                    raise RuntimeError("Gemini HTTP 401: API key inválida")
+                if resp.status_code == 403:
+                    body = resp.text[:2000]
+                    self.logger.error("Gemini 403 Forbidden (body length: %d): %s", len(body), body[:200])
+                    raise RuntimeError("Gemini HTTP 403: Sin permisos o facturación deshabilitada")
                 if resp.status_code != 200:
                     body = resp.text[:2000]
-                    # Don't log response body as it may contain clinical data
                     self.logger.error(
-                        "Gemini respondio %s en intento %s/%s (body length: %d)",
-                        resp.status_code, attempt, GEMINI_RETRIES + 1, len(body),
+                        "Gemini respondio %s en intento %s/%s (body length: %d): %s",
+                        resp.status_code, attempt, GEMINI_RETRIES + 1, len(body), body[:200],
                     )
                     last_exc = RuntimeError(f"Gemini HTTP {resp.status_code}")
                     if attempt <= GEMINI_RETRIES:
@@ -1096,11 +1192,25 @@ class ChatbotService:
                 if not text:
                     raise RuntimeError("Gemini no devolvio texto")
                 return text.strip()
+            except requests.exceptions.Timeout as exc:
+                last_exc = exc
+                self.logger.warning("Gemini timeout intento %s/%s (connect=%.1fs, read=%.1fs): %s",
+                                    attempt, GEMINI_RETRIES + 1, connect_timeout, read_timeout, exc)
+                if attempt <= GEMINI_RETRIES:
+                    time.sleep(base_delay * attempt)
+                continue
+            except requests.exceptions.ConnectionError as exc:
+                last_exc = exc
+                self.logger.warning("Gemini connection error intento %s/%s: %s", attempt, GEMINI_RETRIES + 1, exc)
+                if attempt <= GEMINI_RETRIES:
+                    time.sleep(base_delay * attempt)
+                continue
             except requests.exceptions.RequestException as exc:
                 last_exc = exc
                 self.logger.warning("Gemini request error intento %s/%s: %s", attempt, GEMINI_RETRIES + 1, exc)
                 if attempt <= GEMINI_RETRIES:
                     time.sleep(base_delay * attempt)
+                continue
         raise RuntimeError(f"Gemini no disponible luego de reintentos: {last_exc}")
 
     def _build_contents(self, history, message, max_user_chars=1000):
@@ -1266,7 +1376,7 @@ class ChatbotService:
         if not keys:
             return {"success": False, "message": "Servicio de IA no disponible en este momento."}, 503
 
-        model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
+        model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip() or "gemini-2.5-flash-lite"
         
         # Try up to 2 times with different prompts if JSON parsing fails
         for attempt in range(2):

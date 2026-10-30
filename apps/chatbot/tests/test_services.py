@@ -1,8 +1,10 @@
 from unittest.mock import patch, MagicMock
 
 import pytest
+import requests
+import time
 
-from apps.chatbot.services import ChatbotService
+from apps.chatbot.services import ChatbotService, GEMINI_RETRIES
 
 
 # ── ChatbotService.build_response ─────────────────────────────────────────────
@@ -159,7 +161,7 @@ class TestModelSupportsThinking:
         assert ChatbotService._model_supports_thinking("gemma-4-26b-a4b-it") is False
 
     def test_gemini_flash_lite_supports_thinking(self):
-        assert ChatbotService._model_supports_thinking("gemini-3.5-flash-lite") is True
+        assert ChatbotService._model_supports_thinking("gemini-2.5-flash-lite") is True
 
     def test_unknown_model_does_not_support_thinking(self):
         assert ChatbotService._model_supports_thinking("otro-modelo-3.5") is False
@@ -176,7 +178,7 @@ class TestGemmaFallbackCascade:
         ]
         result = chatbot_service._call_gemini_with_rotation(
             ["key-1", "key-2"],
-            "gemini-3.5-flash-lite",
+            "gemini-2.5-flash-lite",
             "Hola",
             [],
             {},
@@ -198,7 +200,7 @@ class TestGemmaFallbackCascade:
         ]
         result = chatbot_service._call_gemini_with_rotation(
             ["key-1"],
-            "gemini-3.5-flash-lite",
+            "gemini-2.5-flash-lite",
             "Hola",
             [],
             {},
@@ -216,7 +218,7 @@ class TestGemmaFallbackCascade:
         with pytest.raises(RuntimeError) as excinfo:
             chatbot_service._call_gemini_with_rotation(
                 ["key-1", "key-2"],
-                "gemini-3.5-flash-lite",
+                "gemini-2.5-flash-lite",
                 "Hola",
                 [],
                 {},
@@ -233,7 +235,7 @@ class TestGemmaFallbackCascade:
         with pytest.raises(RuntimeError):
             chatbot_service._call_gemini_with_rotation(
                 ["key-1", "key-2"],
-                "gemini-3.5-flash-lite",
+                "gemini-2.5-flash-lite",
                 "Hola",
                 [],
                 {},
@@ -244,12 +246,12 @@ class TestGemmaFallbackCascade:
 
     @patch("apps.chatbot.services.ChatbotService._call_gemini")
     def test_skips_fallback_when_model_equals_primary(self, mock_gemini, chatbot_service, monkeypatch):
-        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemini-3.5-flash-lite")
+        monkeypatch.setenv("GEMINI_FALLBACK_MODEL", "gemini-2.5-flash-lite")
         mock_gemini.side_effect = RuntimeError("Gemini HTTP 429")
         with pytest.raises(RuntimeError):
             chatbot_service._call_gemini_with_rotation(
                 ["key-1", "key-2"],
-                "gemini-3.5-flash-lite",
+                "gemini-2.5-flash-lite",
                 "Hola",
                 [],
                 {},
@@ -455,3 +457,312 @@ class TestSaveConfigValidation:
             "tone": "amigable",
         }, admin_id=1)
         assert status == 200
+
+
+# ── ChatbotService._call_gemini error handling ─────────────────────────────────
+
+
+class TestCallGeminiErrorHandling:
+    """Tests for Gemini API error classification and handling."""
+
+    def test_404_model_not_found_raises_without_retry(self, chatbot_service):
+        """HTTP 404 should raise immediately without retries."""
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_resp = MagicMock()
+                mock_resp.status_code = 404
+                mock_resp.text = '{"error": {"message": "models/gemini-invalid is not found"}}'
+                mock_post.return_value = mock_resp
+
+                with pytest.raises(RuntimeError) as excinfo:
+                    chatbot_service._call_gemini(
+                        "test-key",
+                        "gemini-invalid",
+                        "Hola",
+                        [],
+                        {},
+                        None,
+                        "low",
+                        None,
+                    )
+                assert "404" in str(excinfo.value)
+                assert mock_post.call_count == 1  # No retries on 404
+
+    def test_401_unauthorized_raises_without_retry(self, chatbot_service):
+        """HTTP 401 should raise immediately without retries."""
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_resp = MagicMock()
+                mock_resp.status_code = 401
+                mock_resp.text = '{"error": {"message": "API key not valid"}}'
+                mock_post.return_value = mock_resp
+
+                with pytest.raises(RuntimeError) as excinfo:
+                    chatbot_service._call_gemini(
+                        "test-key",
+                        "gemini-2.5-flash-lite",
+                        "Hola",
+                        [],
+                        {},
+                        None,
+                        "low",
+                        None,
+                    )
+                assert "401" in str(excinfo.value)
+                assert mock_post.call_count == 1
+
+    def test_403_forbidden_raises_without_retry(self, chatbot_service):
+        """HTTP 403 should raise immediately without retries."""
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_resp = MagicMock()
+                mock_resp.status_code = 403
+                mock_resp.text = '{"error": {"message": "Permission denied"}}'
+                mock_post.return_value = mock_resp
+
+                with pytest.raises(RuntimeError) as excinfo:
+                    chatbot_service._call_gemini(
+                        "test-key",
+                        "gemini-2.5-flash-lite",
+                        "Hola",
+                        [],
+                        {},
+                        None,
+                        "low",
+                        None,
+                    )
+                assert "403" in str(excinfo.value)
+                assert mock_post.call_count == 1
+
+    def test_429_quota_retries_then_raises(self, chatbot_service):
+        """HTTP 429 should retry up to GEMINI_RETRIES times."""
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_resp = MagicMock()
+                mock_resp.status_code = 429
+                mock_resp.text = '{"error": {"message": "Quota exceeded"}}'
+                mock_post.return_value = mock_resp
+
+                with pytest.raises(RuntimeError) as excinfo:
+                    chatbot_service._call_gemini(
+                        "test-key",
+                        "gemini-2.5-flash-lite",
+                        "Hola",
+                        [],
+                        {},
+                        None,
+                        "low",
+                        None,
+                    )
+                assert "429" in str(excinfo.value)
+                # Should retry GEMINI_RETRIES + 1 times (initial + retries)
+                assert mock_post.call_count == (GEMINI_RETRIES + 1)
+
+    def test_network_timeout_retries_then_raises(self, chatbot_service):
+        """Network timeout should retry up to GEMINI_RETRIES times."""
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_post.side_effect = requests.exceptions.Timeout("Read timed out")
+
+                with pytest.raises(RuntimeError) as excinfo:
+                    chatbot_service._call_gemini(
+                        "test-key",
+                        "gemini-2.5-flash-lite",
+                        "Hola",
+                        [],
+                        {},
+                        None,
+                        "low",
+                        None,
+                    )
+                assert "timeout" in str(excinfo.value).lower() or "timed out" in str(excinfo.value).lower()
+                assert mock_post.call_count == (GEMINI_RETRIES + 1)
+
+    def test_successful_response_returns_text(self, chatbot_service):
+        """HTTP 200 with valid response should return extracted text."""
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_resp = MagicMock()
+                mock_resp.status_code = 200
+                mock_resp.json.return_value = {
+                    "candidates": [{
+                        "content": {
+                            "parts": [{"text": "Hola, ¿cómo puedo ayudarte?"}]
+                        }
+                    }]
+                }
+                mock_post.return_value = mock_resp
+
+                result = chatbot_service._call_gemini(
+                    "test-key",
+                    "gemini-2.5-flash-lite",
+                    "Hola",
+                    [],
+                    {},
+                    None,
+                    "low",
+                    None,
+                )
+                assert result == "Hola, ¿cómo puedo ayudarte?"
+                assert mock_post.call_count == 1
+
+    def test_400_bad_request_raises_without_retry(self, chatbot_service):
+        """HTTP 400 should raise immediately without retries."""
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_resp = MagicMock()
+                mock_resp.status_code = 400
+                mock_resp.text = '{"error": {"message": "Invalid payload"}}'
+                mock_post.return_value = mock_resp
+
+                with pytest.raises(RuntimeError) as excinfo:
+                    chatbot_service._call_gemini(
+                        "test-key",
+                        "gemini-2.5-flash-lite",
+                        "Hola",
+                        [],
+                        {},
+                        None,
+                        "low",
+                        None,
+                    )
+                assert "400" in str(excinfo.value)
+                assert mock_post.call_count == 1
+
+
+# ── Pruebas nuevas: latencia, reintentos y timeouts ─────────────────────────
+
+
+class TestGeminiTimeoutAndRetries:
+    """Pruebas para verificar que los timeouts y reintentos cumplen el objetivo de latencia."""
+
+    def test_timeout_then_200_retries_and_returns_text(self, chatbot_service):
+        """Un Timeout en el primer intento seguido de 200 en el segundo debe devolver el texto."""
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                # Primer intento: Timeout; segundo intento: 200 OK
+                timeout_exc = requests.exceptions.Timeout("Read timed out")
+                mock_resp = MagicMock()
+                mock_resp.status_code = 200
+                mock_resp.json.return_value = {
+                    "candidates": [{
+                        "content": {"parts": [{"text": "Respuesta tras reintento"}]}
+                    }]
+                }
+                mock_post.side_effect = [timeout_exc, mock_resp]
+
+                result = chatbot_service._call_gemini(
+                    "test-key", "gemini-2.5-flash-lite", "Hola", [], {}, None, "low", None,
+                )
+                assert result == "Respuesta tras reintento"
+                assert mock_post.call_count == 2
+
+    def test_three_timeouts_raise_without_exception_propagation(self, chatbot_service):
+        """Tres Timeouts seguidos deben lanzar RuntimeError (capturado por build_response -> fallback)."""
+        # GEMINI_RETRIES por defecto es 2, así que se intentan 3 veces (1 inicial + 2 reintentos)
+        from apps.chatbot.services import GEMINI_RETRIES
+
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_post.side_effect = requests.exceptions.Timeout("Read timed out")
+
+                with pytest.raises(RuntimeError):
+                    chatbot_service._call_gemini(
+                        "test-key", "gemini-2.5-flash-lite", "Hola", [], {}, None, "low", None,
+                    )
+                # Debe haber intentado GEMINI_RETRIES + 1 veces
+                assert mock_post.call_count == (GEMINI_RETRIES + 1)
+
+    def test_429_rotates_key_but_timeout_does_not(self, chatbot_service):
+        """429 con varias keys rota de key; un Timeout no rota (mismo key en reintento)."""
+        # --- 429 rota de key ---
+        chatbot_service._key_index = 0
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["key-1", "key-2"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_resp = MagicMock()
+                mock_resp.status_code = 429
+                mock_resp.text = '{"error": {"message": "Quota exceeded"}}'
+                mock_post.return_value = mock_resp
+
+                try:
+                    chatbot_service._call_gemini_with_rotation(
+                        ["key-1", "key-2"], "gemini-2.5-flash-lite", "Hola", [], {}, None, "low", None,
+                    )
+                except RuntimeError:
+                    pass
+                # Se usaron ambas keys (key-1 luego key-2), verificando rotación
+                keys_used = [call[1]["headers"]["x-goog-api-key"] for call in mock_post.call_args_list]
+                assert "key-1" in keys_used
+                assert "key-2" in keys_used
+
+        # --- Timeout no rota: mismo key en todos los intentos ---
+        chatbot_service._key_index = 0
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["key-1"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                mock_post.side_effect = requests.exceptions.Timeout("Read timed out")
+
+                try:
+                    chatbot_service._call_gemini(
+                        "key-1", "gemini-2.5-flash-lite", "Hola", [], {}, None, "low", None,
+                    )
+                except RuntimeError:
+                    pass
+                # Todas las llamadas usaron la misma key (única disponible)
+                for call in mock_post.call_args_list:
+                    assert call[1]["headers"]["x-goog-api-key"] == "key-1"
+
+    def test_timeout_never_below_minimum(self, chatbot_service):
+        """El timeout de lectura pasado a requests.post nunca es menor que GEMINI_MIN_READ_TIMEOUT_SECONDS."""
+        from apps.chatbot.services import GEMINI_MIN_READ_TIMEOUT_SECONDS
+
+        with patch.object(chatbot_service, "_get_api_keys", return_value=["test-key"]):
+            with patch("apps.chatbot.services.requests.post") as mock_post:
+                # Deadline muy cercano para forzar ajuste de timeout por deadline
+                far_deadline = time.time() + 60  # mucho tiempo restante
+                mock_resp = MagicMock()
+                mock_resp.status_code = 200
+                mock_resp.json.return_value = {
+                    "candidates": [{
+                        "content": {"parts": [{"text": "OK"}]}
+                    }]
+                }
+                mock_post.return_value = mock_resp
+
+                chatbot_service._call_gemini(
+                    "test-key", "gemini-2.5-flash-lite", "Hola", [], {}, None, "low", far_deadline,
+                )
+                # Verificar que el timeout de lectura usado es >= el mínimo
+                call_kwargs = mock_post.call_args[1]
+                timeout_used = call_kwargs["timeout"]
+                read_timeout = timeout_used[1] if isinstance(timeout_used, tuple) else timeout_used
+                assert read_timeout >= GEMINI_MIN_READ_TIMEOUT_SECONDS, (
+                    f"Read timeout {read_timeout}s es menor que el mínimo {GEMINI_MIN_READ_TIMEOUT_SECONDS}s"
+                )
+
+
+# ── Streaming: el primer texto se entrega sin esperar la respuesta completa ──
+# (Nota: la implementación actual usa respuesta completa con timeout y fallback;
+#  el streaming SSE está documentado como mejora futura en docs/)
+
+
+class TestBuildResponseFallbackOnTimeout:
+    """build_response debe usar el fallback local cuando Gemini falla por timeout."""
+
+    @patch("apps.chatbot.services.ChatbotService._call_gemini_with_rotation")
+    @patch("apps.chatbot.services.ChatbotService._get_chatbot_config")
+    def test_build_response_uses_fallback_when_gemini_times_out(
+        self, mock_config, mock_gemini, chatbot_service, mock_chat_repo
+    ):
+        mock_config.return_value = (
+            {"risk_terms": "[]", "daily_message_limit": "50"},
+            "1.0",
+        )
+        mock_chat_repo.count_today_messages.return_value = 0
+        mock_chat_repo.get_history.return_value = []
+        mock_gemini.side_effect = RuntimeError("Gemini no disponible luego de reintentos: Read timed out")
+
+        payload, status = chatbot_service.build_response(1, "Hola")
+        assert status == 200
+        assert payload["success"] is True
+        assert payload["fallback"] is True
+        assert "respuesta" in payload

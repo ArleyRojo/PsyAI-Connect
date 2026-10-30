@@ -1,4 +1,6 @@
+from datetime import date as date_cls
 from django.db import models
+from django.utils import timezone
 
 from apps.authentication.models import Register
 
@@ -20,6 +22,18 @@ class AuditoriaAccesos(models.Model):
 
     def __str__(self):
         return f"Auditoría {self.idAuditoria} - Usuario {self.idUsuario_id}"
+
+    def clean(self):
+        # Handle naive date objects passed to DateTimeField
+        if isinstance(self.fecha, date_cls) and not isinstance(self.fecha, timezone.datetime):
+            self.fecha = timezone.make_aware(
+                timezone.datetime(self.fecha.year, self.fecha.month, self.fecha.day),
+                timezone.get_default_timezone()
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def to_dict(self):
         return {
@@ -47,6 +61,19 @@ class Logs(models.Model):
 
     def __str__(self):
         return f"Log {self.idLog} - {self.accion}"
+
+    def clean(self):
+        # Handle naive date objects passed to DateTimeField
+        # This prevents: "DateTimeField Logs.fecha received a naive datetime while time zone support is active"
+        if isinstance(self.fecha, date_cls) and not isinstance(self.fecha, timezone.datetime):
+            self.fecha = timezone.make_aware(
+                timezone.datetime(self.fecha.year, self.fecha.month, self.fecha.day),
+                timezone.get_default_timezone()
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def to_dict(self):
         return {

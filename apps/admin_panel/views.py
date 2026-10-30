@@ -67,7 +67,7 @@ class AdminStatsStreamAPIView(APIView):
                     current_version = telemetry_service._version
                     now = _time.time()
                     force = current_version != last_version
-                    timed = now - last_emit >= 5
+                    timed = now - last_emit >= 2
                     if force or timed:
                         last_version = current_version
                         last_emit = now
@@ -176,7 +176,7 @@ class AdminUsuarioViewSet(viewsets.ViewSet):
 
         accion = data.get("accion")
         if accion:
-            if accion not in ("bloquear", "suspender", "reestablecer", "desbloquear"):
+            if accion not in ("bloquear", "suspender", "reestablecer", "desbloquear", "activar"):
                 return Response(
                     {"success": False, "message": f"Acción inválida: {accion}"},
                     status=status.HTTP_400_BAD_REQUEST,

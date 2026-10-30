@@ -91,8 +91,16 @@ class ChatbotService:
 ```bash
 GEMINI_API_KEY=key_principal           # Obligatoria
 GEMINI_API_KEYS=key1,key2,key3         # Opcional: lista separada por comas
-GEMINI_MODEL=gemini-3.5-flash-lite
+GEMINI_MODEL=gemini-2.5-flash-lite
 GEMINI_THINKING_LEVEL=low
+# Timeouts y reintentos (segundos)
+GEMINI_REQUEST_TIMEOUT_CONNECT=3       # timeout de conexión por intento
+GEMINI_REQUEST_TIMEOUT_READ=8          # timeout de lectura por intento (intento 1)
+GEMINI_MIN_READ_TIMEOUT_SECONDS=3      # read timeout mínimo garantizado aunque quede poco deadline
+GEMINI_RETRIES=2                       # reintentos por error de red/timeout (default 2)
+GEMINI_RETRY_BASE_DELAY=0.2            # retraso base entre reintentos (segundos)
+GEMINI_TOTAL_DEADLINE_SECONDS=10       # presupuesto total (incluye reintentos + modelo de respaldo)
+GEMINI_FALLBACK_MODEL=gemma-4-26b-a4b-it  # modelo de respaldo si el principal falla
 ```
 
 **Implementación** (`apps/chatbot/services.py`):
@@ -125,7 +133,55 @@ class GeminiClient:
 
 ---
 
-## 4. Detección de riesgo emocional
+## 4. Timeouts, reintentos y objetivo de latencia
+
+### Objetivo de latencia
+
+| Métrica | Valor objetivo |
+|---------|---------------|
+| p50 (respuesta completa) | ≤ 2 s |
+| Fallback local garantizado antes de | ~10 s |
+| Timeout del frontend (`CHATBOT_TIMEOUT_MS`) | 30 s |
+
+### Configuración de timeouts
+
+El backend usa un enfoque **escalonado** por intento:
+
+| Intento | Connect timeout | Read timeout | Notas |
+|---------|----------------|--------------|-------|
+| 1 | 3 s | 8 s | Intento principal con Gemini |
+| 2+ (reintentos) | ≤ 2 s | 10 s | Reintento tras fallo de red/timeout |
+
+Además:
+- `GEMINI_TOTAL_DEADLINE_SECONDS` (default **10 s**) limita el presupuesto total. Si el tiempo restante es menor que `GEMINI_MIN_READ_TIMEOUT_SECONDS` (default **3 s**), no se intenta otra llamada y se va directamente al fallback local.
+- `GEMINI_RETRIES` (default **2**) define cuántos reintentos se hacen ante `Timeout` o `ConnectionError` antes de considerar que Gemini no está disponible.
+- `GEMINI_RETRY_BASE_DELAY` (default **0.2 s**) es el retraso entre reintentos.
+
+### Qué se reintenta vs qué no
+
+| Error | ¿Reintenta? | ¿Rota key? | ¿Usa fallback? |
+|-------|-------------|------------|----------------|
+| `Timeout` / `ConnectionError` | Sí (hasta `GEMINI_RETRIES`) | No | Sí, tras agotar reintentos |
+| HTTP 429 (cuota) | Sí | Sí | Sí, tras agotar keys + fallback model |
+| HTTP 500/502/503/504 | Sí | No | Sí |
+| HTTP 400 / 401 / 403 | No | No | Sí (inmediato) |
+| HTTP 404 (modelo no encontrado) | No | No | Sí (inmediato) |
+
+El flujo de fallo es:
+1. Intento 1 con read timeout 8 s → si falla por timeout, reintento 2 inmediato con read timeout 10 s.
+2. Si `GEMINI_RETRIES` se agota → prueba modelo de respaldo (`GEMINI_FALLBACK_MODEL`) si está configurado y difiere del principal.
+3. Si todo falla → `build_response` entrega el **fallback local** (`_build_local_fallback`) con `success: True` y `fallback: True`, sin que el usuario quede esperando.
+
+### Parámetros de configuración reducidos para menor latencia
+
+- `max_tokens`: 600 → **300** (respuestas cortas de orientación, máximo 3-4 oraciones en el system prompt)
+- `max_tokens_user`: 1000 → **800**
+- `gemini_history_window`: 12 → **6** (menos tokens de entrada = menos tiempo de generación)
+- `thinking_level`: se mantiene en `minimal` (mapa de `low` → `minimal`) para riesgo bajo; `medium` solo en riesgo medio/bajo.
+
+---
+
+## 5. Detección de riesgo emocional
 
 ### Configuración (`ChatbotConfig` - tabla `ChatbotConfig`)
 
@@ -224,7 +280,7 @@ Un solo registro (singleton) editable desde panel admin (`/admin/chatbot/config/
 |-------|---------|-------------|
 | `system_prompt` | — | Prompt de sistema completo |
 | `temperature` | 0.55 | Creatividad |
-| `max_tokens` | 600 | Límite respuesta |
+| `max_tokens` | 300 | Límite respuesta |
 | `daily_message_limit` | 20 | Límite diario por usuario |
 | `thinking_level` | `low` | `low/medium/high` (Gemini 2.5) |
 | `prompt_history_window` | 4 | Mensajes previos en contexto |

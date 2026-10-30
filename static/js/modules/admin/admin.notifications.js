@@ -4,6 +4,13 @@ let notifSeleccionada = null;
 const ITEMS_PER_PAGE = 15;
 let paginaActualNotifs = 1;
 let notifsFiltradas = [];
+let _notifTimer = null;
+let _pageVisible = true;
+
+// Pause auto-refresh when tab is hidden
+document.addEventListener('visibilitychange', () => {
+    _pageVisible = !document.hidden;
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarNotificaciones();
@@ -21,26 +28,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function cargarNotificaciones() {
+    // Skip if page is hidden
+    if (!_pageVisible) {
+        _notifTimer = setTimeout(cargarNotificaciones, 30000);
+        return;
+    }
+    
     try {
-        const res  = await fetch(`${API}/api/admin/notificaciones`);
+        // Clear any existing timer before creating a new one
+        if (_notifTimer) {
+            clearTimeout(_notifTimer);
+            _notifTimer = null;
+        }
+
+        const res  = await fetch(`${API}/api/admin/notificaciones`, {
+            credentials: 'include',
+            cache: 'no-store'
+        });
         const data = await res.json();
         if (!data.success) return;
-        notificaciones = data.notificaciones;
+        // Filtrar notificaciones de chatbot (no son notificaciones de sistema)
+        notificaciones = data.notificaciones.filter(n => n.tipo !== 'chatbot');
 
-        // Stats dinámicos
+        // Stats dinámicos - usar stats reales de la BD
         if (data.stats) {
-            set('statEnviadas',    data.stats.enviadas);
+            // "Enviadas hoy" es un contador real de hoy
+            set('statEnviadas',    data.stats.enviadas_hoy);
             set('statProgramadas', data.stats.programadas);
             set('statTasa',        data.stats.tasa);
             set('statAlcanzados',  data.stats.alcanzados);
+            // Total historial para paginación
+            window.__totalHistorial = data.stats.total_historial;
         }
 
         // Contadores en tiempo real
         const historial = notificaciones.filter(n => n.estado !== 'pendiente');
         const programadas = notificaciones.filter(n => n.estado === 'pendiente');
-        set('cntHistorial', historial.length);
+        // Badge de la pestaña usa el total real de la BD
+        set('cntHistorial', window.__totalHistorial || historial.length);
         set('cntProgramadas', programadas.length);
-
+        
         renderHistorial(historial);
         renderProgramadas(programadas);
         
@@ -50,8 +77,18 @@ async function cargarNotificaciones() {
         console.error('Error notificaciones:', e);
     }
     
-    // Actualizar cada 30 segundos
-    setTimeout(cargarNotificaciones, 30000);
+    // Actualizar cada 30 segundos (solo si la página está visible)
+    _notifTimer = setTimeout(cargarNotificaciones, 30000);
+}
+
+function esc(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
+        .replace(/'/g, '&#039;');
 }
 
 function renderHistorial(lista) {
@@ -64,7 +101,15 @@ function renderizarPaginaNotifs() {
     const tbody = document.getElementById('tablaNotificaciones');
     if (!tbody) return;
     
-    const totalNotifs = notifsFiltradas.length;
+    // Detectar si hay filtros activos
+    const hayFiltros = (document.getElementById('filtroTipo')?.value ||
+                       document.getElementById('filtroDestinatario')?.value ||
+                       document.getElementById('filtroEstado')?.value ||
+                       document.getElementById('filtroFecha')?.value);
+    
+    // Si no hay filtros, usar el total real de la BD; si hay filtros, usar la longitud filtrada
+    const totalReal = window.__totalHistorial || 0;
+    const totalNotifs = hayFiltros ? notifsFiltradas.length : totalReal;
     const totalPaginas = Math.ceil(totalNotifs / ITEMS_PER_PAGE) || 1;
     const inicio = (paginaActualNotifs - 1) * ITEMS_PER_PAGE;
     const fin = Math.min(inicio + ITEMS_PER_PAGE, totalNotifs);
@@ -93,17 +138,17 @@ function renderizarPaginaNotifs() {
             const destinatarioTexto = n.tipo_registro === 'notificacion'
                 ? getDestPill(n.destinatario, n.email_individual)
                 : n.tipo_registro === 'profesional'
-                    ? '<span class="recipient-pill paciente"><i class="fas fa-user"></i> ' + extraerDestinatarioDeMensaje(n.mensaje, 'Paciente: ') + '</span>'
+                    ? '<span class="recipient-pill paciente"><i class="fas fa-user"></i> ' + esc(extraerDestinatarioDeMensaje(n.mensaje, 'Paciente: ')) + '</span>'
                     : n.tipo_registro === 'paciente'
-                        ? '<span class="recipient-pill profesional"><i class="fas fa-user-md"></i> ' + extraerDestinatarioDeMensaje(n.mensaje, 'Profesional: ') + '</span>'
-                        : (n.enviado_por || '—');
+                        ? '<span class="recipient-pill profesional"><i class="fas fa-user-md"></i> ' + esc(extraerDestinatarioDeMensaje(n.mensaje, 'Profesional: ')) + '</span>'
+                        : esc(n.enviado_por || '—');
             
             return `
             <tr>
-              <td class="ps-4 notif-cell-date">${n.fecha_envio || n.fecha || '—'}</td>
+              <td class="ps-4 notif-cell-date">${esc(n.fecha_envio || n.fecha || '—')}</td>
               <td>
-                <div class="notif-cell-title">${n.titulo}</div>
-                <div class="notif-cell-desc">${(n.mensaje||'').substring(0,60)}${(n.mensaje||'').length>60?'...':''}</div>
+                <div class="notif-cell-title">${esc(n.titulo)}</div>
+                <div class="notif-cell-desc">${esc((n.mensaje||'').substring(0,60))}${(n.mensaje||'').length>60?'...':''}</div>
               </td>
               <td>${tipoBadge}</td>
               <td>${destinatarioTexto}</td>
@@ -160,10 +205,10 @@ function renderProgramadas(lista) {
     }
     tbody.innerHTML = lista.map(n => `
         <tr>
-          <td class="ps-4 notif-cell-date">${n.fecha_programada || n.fecha_envio || '—'}</td>
+          <td class="ps-4 notif-cell-date">${esc(n.fecha_programada || n.fecha_envio || '—')}</td>
           <td>
-            <div class="notif-cell-title">${n.titulo}</div>
-            <div class="notif-cell-desc">${(n.mensaje||'').substring(0,50)}...</div>
+            <div class="notif-cell-title">${esc(n.titulo)}</div>
+            <div class="notif-cell-desc">${esc((n.mensaje||'').substring(0,50))}...</div>
           </td>
           <td>${getTipoBadge(n.tipo)}</td>
           <td>${getDestPill(n.destinatario, n.email_individual)}</td>
@@ -177,6 +222,9 @@ function renderProgramadas(lista) {
 }
 
 async function enviarNotificacion() {
+    const btn = document.getElementById('btnEnviarNotif');
+    if (btn?.dataset.busy === '1') return; // Prevent double-click
+    
     const titulo           = document.getElementById('notifTitulo')?.value.trim();
     const mensaje          = document.getElementById('notifMensaje')?.value.trim();
     const tipo             = document.getElementById('notifTipo')?.value;
@@ -189,74 +237,115 @@ async function enviarNotificacion() {
         mostrarAlerta('error', 'Completa todos los campos requeridos.');
         return;
     }
+    
+    // UI: loading state
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+    btn.disabled = true;
+    btn.dataset.busy = '1';
+    
     try {
-        const res  = await fetch(`${API}/api/admin/notificaciones`, {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify({ titulo, mensaje, tipo, destinatario, envio, fecha_programada, email_individual })
+        // Use PsyAIConnection for automatic CSRF handling
+        const data = await PsyAIConnection.post('/api/admin/notificaciones', {
+            titulo, mensaje, tipo, destinatario, envio, fecha_programada, email_individual
         });
-        const data = await res.json();
         if (data.success) {
-            mostrarAlerta('success', 'Notificación enviada con éxito.');
+            if (envio === 'inmediato') {
+                mostrarAlerta('success', 'Notificación enviada con éxito.');
+                
+                // Optimistic update: add to historial immediately without waiting for GET
+                const nuevaNotif = {
+                    idNotificacion: Date.now(), // temp ID
+                    titulo,
+                    mensaje,
+                    tipo,
+                    destinatario,
+                    email_individual,
+                    estado: 'enviado',
+                    enviado_por: 'Admin',
+                    tipo_registro: 'notificacion',
+                    fecha: new Date().toLocaleString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                    fecha_orden: new Date().toISOString()
+                };
+                notificaciones.unshift(nuevaNotif);
+                
+                // Update badge immediately
+                set('cntHistorial', parseInt(document.getElementById('cntHistorial')?.textContent || '0') + 1);
+                
+                // Switch to Historial tab
+                const btnHistorial = document.querySelector('[onclick="mostrarTab(\'historial\', this)"]');
+                if (btnHistorial) mostrarTab('historial', btnHistorial);
+                
+                // Refresh in background (non-blocking)
+                cargarNotificaciones();
+            } else {
+                mostrarAlerta('success', 'Notificación programada correctamente.');
+                await cargarNotificaciones();
+                const btnProgramadas = document.querySelector('[onclick="mostrarTab(\'programadas\', this)"]');
+                if (btnProgramadas) mostrarTab('programadas', btnProgramadas);
+            }
             limpiarFormulario();
-            cargarNotificaciones();
         } else {
             mostrarAlerta('error', data.message);
         }
-    } catch(e) { 
-        console.error(e); 
-        mostrarAlerta('error', 'Error de conexión.');
+    } catch(e) {
+        console.error(e);
+        const msg = (e && e.message) ? e.message : 'Error de conexión.';
+        mostrarAlerta('error', msg);
+    } finally {
+        // Restore button
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        btn.dataset.busy = '0';
     }
 }
 
 async function confirmarEliminar(id) {
     if (!confirm('¿Eliminar esta notificación?')) return;
     try {
-        const res  = await fetch(`${API}/api/admin/notificaciones/${id}`, {
-            method: 'DELETE', headers: {'Content-Type': 'application/json'},
-            credentials: 'include'
-        });
-        const data = await res.json();
+        // Use PsyAIConnection for automatic CSRF handling
+        const data = await PsyAIConnection.del(`/api/admin/notificaciones/${id}`);
         if (data.success) {
             mostrarAlerta('success', 'Notificación eliminada.');
             cargarNotificaciones();
         }
     } catch(e) { 
         console.error(e); 
-        mostrarAlerta('error', 'Error de conexión.');
+        const msg = (e && e.message) ? e.message : 'Error de conexión.';
+        mostrarAlerta('error', msg);
     }
 }
 
 function verDetalle(id) {
     const n = notificaciones.find(x => x.idNotificacion === id);
     if (!n) return;
-    set('detalleTitle',       n.titulo);
-    set('detalleBody',        n.mensaje);
+    set('detalleTitle',       esc(n.titulo));
+    set('detalleBody',        esc(n.mensaje));
     set('detalleTipo',        n.tipo_registro === 'profesional' ? 'Actividad Profesional' : n.tipo_registro === 'paciente' ? 'Actividad Paciente' : n.tipo);
     
     // Mostrar nombre real del destinatario
     let destinatario;
     if (n.tipo_registro === 'notificacion') {
         if (n.email_individual && n.destinatario === 'individual') {
-            destinatario = n.email_individual;
+            destinatario = esc(n.email_individual);
         } else if (n.destinatario && ['todos','pacientes','profesionales','individual'].includes(n.destinatario)) {
             const labels = {todos:'Todos los usuarios', pacientes:'Solo pacientes', profesionales:'Solo profesionales', individual:'Individual'};
             destinatario = labels[n.destinatario] || n.destinatario;
         } else {
-            destinatario = n.destinatario || '—';
+            destinatario = esc(n.destinatario || '—');
         }
     } else if (n.tipo_registro === 'profesional') {
-        destinatario = extraerDestinatarioDeMensaje(n.mensaje, 'Paciente: ') || n.enviado_por || '—';
+        destinatario = esc(extraerDestinatarioDeMensaje(n.mensaje, 'Paciente: ') || n.enviado_por || '—');
     } else if (n.tipo_registro === 'paciente') {
-        destinatario = extraerDestinatarioDeMensaje(n.mensaje, 'Profesional: ') || n.enviado_por || '—';
+        destinatario = esc(extraerDestinatarioDeMensaje(n.mensaje, 'Profesional: ') || n.enviado_por || '—');
     } else {
-        destinatario = n.enviado_por || '—';
+        destinatario = esc(n.enviado_por || '—');
     }
     set('detalleDestinatario', destinatario);
     
-    set('detalleEnviadoPor',  n.enviado_por || 'Sistema');
-    set('detalleFecha',       n.fecha_envio || n.fecha);
-    set('detalleEstado',      n.estado);
+    set('detalleEnviadoPor',  esc(n.enviado_por || 'Sistema'));
+    set('detalleFecha',       esc(n.fecha_envio || n.fecha));
+    set('detalleEstado',      esc(n.estado));
     new bootstrap.Modal(document.getElementById('modalDetalle')).show();
 }
 
@@ -283,8 +372,8 @@ function toggleFechaProgramada() {
 function actualizarPreview() {
     const titulo  = document.getElementById('notifTitulo')?.value || 'Título de la notificación';
     const mensaje = document.getElementById('notifMensaje')?.value || 'El mensaje aparecerá aquí mientras escribes.';
-    set('previewTitulo',  titulo);
-    set('previewMensaje', mensaje);
+    set('previewTitulo',  esc(titulo));
+    set('previewMensaje', esc(mensaje));
 }
 
 function limpiarFormulario() {
@@ -332,7 +421,7 @@ function getTipoBadge(tipo) {
         info:         '<span class="tipo-badge info"><i class="fas fa-info-circle"></i> Info</span>',
         seguimiento:  '<span class="tipo-badge seguimiento"><i class="fas fa-eye"></i> Seguimiento</span>'
     };
-    return map[key] || `<span class="tipo-badge info">${tipo||'—'}</span>`;
+    return map[key] || `<span class="tipo-badge info">${esc(tipo||'—')}</span>`;
 }
 
 function getDestPill(dest, email) {
@@ -340,16 +429,16 @@ function getDestPill(dest, email) {
         todos:         '<span class="recipient-pill all"><i class="fas fa-users"></i> Todos</span>',
         pacientes:     '<span class="recipient-pill paciente"><i class="fas fa-user"></i> Pacientes</span>',
         profesionales: '<span class="recipient-pill profesional"><i class="fas fa-user-md"></i> Profesionales</span>',
-        individual:    `<span class="recipient-pill individual"><i class="fas fa-user-circle"></i> ${email || 'Individual'}</span>`
+        individual:    `<span class="recipient-pill individual"><i class="fas fa-user-circle"></i> ${esc(email || 'Individual')}</span>`
     };
-    return map[dest] || `<span class="recipient-pill individual"><i class="fas fa-user-circle"></i> ${dest || '—'}</span>`;
+    return map[dest] || `<span class="recipient-pill individual"><i class="fas fa-user-circle"></i> ${esc(dest || '—')}</span>`;
 }
 
 function getEnviadoPorBadge(usuario) {
     if (!usuario || usuario === 'Sistema') {
         return '<span class="badge-origin badge-origen-sistema"><i class="fas fa-cog"></i> Sistema</span>';
     }
-    return `<span class="badge-origin badge-origen-admin"><i class="fas fa-user-shield"></i> ${usuario}</span>`;
+    return `<span class="badge-origin badge-origen-admin"><i class="fas fa-user-shield"></i> ${esc(usuario)}</span>`;
 }
 
 function mostrarAlerta(tipo, msg) {
@@ -361,13 +450,26 @@ function mostrarAlerta(tipo, msg) {
 }
 
 function set(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+
 function filtrarNotificaciones() {
     const tipo   = document.getElementById('filtroTipo')?.value.toLowerCase() || '';
     const dest   = document.getElementById('filtroDestinatario')?.value.toLowerCase() || '';
     const estado = document.getElementById('filtroEstado')?.value.toLowerCase() || '';
-    const fecha  = document.getElementById('filtroFecha')?.value || '';
+    const fecha  = document.getElementById('filtroFecha')?.value || ''; // YYYY-MM-DD
+
+    // Convertir YYYY-MM-DD a dd/mm/YYYY para comparar con n.fecha
+    let fechaFormateada = '';
+    if (fecha) {
+        const parts = fecha.split('-');
+        if (parts.length === 3) {
+            fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+    }
 
     const filtradas = notificaciones.filter(n => {
+        // Excluir pendientes del historial (van a Programadas)
+        if (n.estado === 'pendiente') return false;
+
         const coincideTipo =
             tipo === '' || (n.tipo && n.tipo.toLowerCase() === tipo);
 
@@ -378,7 +480,7 @@ function filtrarNotificaciones() {
             estado === '' || (n.estado && n.estado.toLowerCase() === estado);
 
         const coincideFecha =
-            fecha === '' || (n.fecha && n.fecha.startsWith(fecha));
+            fechaFormateada === '' || (n.fecha && n.fecha.startsWith(fechaFormateada));
 
         return coincideTipo && coincideDest && coincideEstado && coincideFecha;
     });

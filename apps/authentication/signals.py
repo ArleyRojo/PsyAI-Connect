@@ -24,7 +24,7 @@ def setup_session_on_login(request, user, **kwargs):
             except SocialAccount.DoesNotExist:
                 pass
 
-        request.session["usuario"] = user.to_dict()
+        request.session["usuario"] = user.to_session_dict()
         request.session["idUsuario"] = user.idUsuario
         request.session["nombre"] = user.nombre
         request.session["rol"] = user.rol

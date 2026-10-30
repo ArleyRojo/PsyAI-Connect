@@ -39,16 +39,27 @@ class AdminService:
         return {"success": True, "message": "Columnas creadas correctamente"}, 200
 
     def get_stats(self, force=False):
+        # Cache only DB stats; live stats (CPU, RAM, requests) must be fresh every call
         if not force:
             cached = cache.get(STATS_CACHE_KEY)
             if cached is not None:
-                return cached
-        db_stats = self.repo.get_stats()
+                # Handle both old format (tuple) and new format (dict)
+                if isinstance(cached, tuple) and len(cached) == 2:
+                    db_stats = cached[0].get("stats", {})
+                elif isinstance(cached, dict):
+                    db_stats = cached
+                else:
+                    db_stats = self.repo.get_stats()
+            else:
+                db_stats = self.repo.get_stats()
+                cache.set(STATS_CACHE_KEY, db_stats, STATS_CACHE_TTL)
+        else:
+            db_stats = self.repo.get_stats()
+            cache.set(STATS_CACHE_KEY, db_stats, STATS_CACHE_TTL)
+
         live_stats = telemetry_service.get_live_stats()
         merged = {**live_stats, **db_stats}
-        result = ({"success": True, "stats": merged}, 200)
-        cache.set(STATS_CACHE_KEY, result, STATS_CACHE_TTL)
-        return result
+        return {"success": True, "stats": merged}, 200
 
     def list_users(self, page=1, limit=20):
         return {"success": True, "usuarios": self.repo.list_users(page, limit)}, 200
@@ -143,9 +154,21 @@ class AdminService:
         return {"success": True, "historial": historial}, 200
 
     def notifications_feed(self):
+        from datetime import datetime
         actividades = self.repo.get_notifications_feed()
-        actividades.sort(key=lambda x: x.get("fecha", ""), reverse=True)
-        stats = self._notification_stats(actividades)
+        # Sort by fecha_orden (real datetime) instead of fecha (string dd/mm/YYYY)
+        actividades.sort(key=lambda x: x.get("fecha_orden") or datetime.min, reverse=True)
+        # Remove fecha_orden from returned items
+        for item in actividades:
+            item.pop("fecha_orden", None)
+        
+        # Get real stats from COUNT queries
+        stats = self.repo.get_notification_stats()
+        
+        # For backward compatibility, also include the old keys
+        stats["enviadas"] = stats["enviadas_hoy"]
+        stats["total_historial"] = stats["total_historial"]
+        
         return {
             "success": True,
             "notificaciones": actividades[:100],
@@ -169,8 +192,20 @@ class AdminService:
         }
 
     def create_notification(self, data):
-        self.repo.create_notification(data)
-        return {"success": True, "message": "Notificacion enviada"}, 200
+        try:
+            notificacion = self.repo.create_notification(data)
+            # Determinar respuesta según estado
+            if notificacion.estado == "enviado":
+                return {"success": True, "message": "Notificación enviada correctamente", "idNotificacion": notificacion.idNotificacion}, 200
+            elif notificacion.estado == "fallido":
+                return {"success": False, "message": notificacion.errorDetalle or "Error enviando notificación", "idNotificacion": notificacion.idNotificacion}, 502
+            else:  # pendiente
+                return {"success": True, "message": "Notificación programada correctamente", "idNotificacion": notificacion.idNotificacion}, 200
+        except ValueError as e:
+            return {"success": False, "message": str(e)}, 400
+        except Exception as e:
+            logger.exception("Error creando notificación")
+            return {"success": False, "message": "Error interno del servidor"}, 500
 
     def delete_notification(self, notification_id):
         self.repo.delete_notification(notification_id)
@@ -263,7 +298,7 @@ class TelemetryService:
         self._last_cpu = 0
         self._last_ram = 0
         self._last_disk = None
-        self.SYSTEM_CHECK_INTERVAL = 3
+        self.SYSTEM_CHECK_INTERVAL = 2
         self._security = {
             "fallos_login": 0,
             "actividad_sospechosa": 0,
