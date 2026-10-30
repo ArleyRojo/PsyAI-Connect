@@ -868,44 +868,6 @@ FROM `reportes` r
 JOIN `register` up ON r.`idProfesional` = up.`idUsuario`
 LEFT JOIN `register` ua ON r.`idPaciente` = ua.`idUsuario`;
 
--- --------------------------------------------------------
--- DATOS INICIALES: 3 USUARIOS
--- --------------------------------------------------------
-
--- Contraseñas hasheadas con SHA2('password', 256)
--- admin123    -> e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (placeholder, use SHA2)
--- profesional123 -> (SHA2 hash)
--- paciente123 -> (SHA2 hash)
-
-INSERT INTO `register` (`idUsuario`, `nombre`, `email`, `contrasena`, `rol`, `fotoPerfil`, `estadoCuenta`, `activo`, `fechaRegistro`) VALUES
-(1, 'Administrador', 'admin@psyai.com', SHA2('admin123', 256), 'admin', NULL, 'Activa', 1, '2026-06-05 16:16:19'),
-(2, 'Paciente Demo', 'paciente@psyai.com', SHA2('paciente123', 256), 'paciente', NULL, 'Activa', 1, '2026-06-05 16:16:19'),
-(3, 'Profesional Demo', 'profesional@psyai.com', SHA2('profesional123', 256), 'profesional', NULL, 'Activa', 1, '2026-06-05 16:16:19');
-
---
--- Perfil de paciente (idUsuario=2)
---
-INSERT INTO `perfilpaciente` (`idPaciente`, `edad`, `genero`, `numeroTelefonico`, `consentimientoDatos`) VALUES
-(2, 25, 'Femenino', '3001234567', 1);
-
---
--- Perfil de profesional (idUsuario=3)
---
-INSERT INTO `perfilprofesional` (`idProfesional`, `especialidad`, `licencia`, `experiencia`, `estado`) VALUES
-(3, 'Psicología Clínica', 'PSI-2024-001', '5 años de experiencia en terapia cognitivo-conductual y manejo de ansiedad.', 'Activo');
-
---
--- Disponibilidad inicial para el profesional (idProfesional=3)
---
-INSERT INTO `disponibilidad` (`idProfesional`, `fecha`, `hora_inicio`, `hora_fin`, `estado`) VALUES
-(3, '2026-10-28', '08:00:00', '12:00:00', 'Disponible'),
-(3, '2026-10-28', '14:00:00', '18:00:00', 'Disponible'),
-(3, '2026-10-29', '08:00:00', '12:00:00', 'Disponible'),
-(3, '2026-10-29', '14:00:00', '18:00:00', 'Disponible'),
-(3, '2026-10-30', '08:00:00', '12:00:00', 'Disponible');
-
-COMMIT;
-
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
@@ -917,3 +879,31 @@ COMMIT;
 -- Profesional: profesional@psyai.com / profesional123
 -- Paciente:    paciente@psyai.com   / paciente123
 -- ============================================================
+
+START TRANSACTION;
+
+INSERT INTO register
+    (idUsuario, nombre, email, contrasena, rol,
+     estadoCuenta, activo, email_verificado, fechaRegistro)
+VALUES
+    (1, 'Paciente Demo', 'paciente@psyai.com',
+     'argon2$argon2id$v=19$m=102400,t=2,p=8$a0lwcDJSdTFvaGJDcjd0N3lHWlhuTw$nJAHoFaURwoaGgSB6hI8LnDjUPA6mF45cvlWy/5H3is',
+     'paciente', 'Activa', 1, 1, NOW()),
+    (2, 'Profesional Demo', 'profesional@psyai.com',
+     'argon2$argon2id$v=19$m=102400,t=2,p=8$QVVYemNlNUdYM0U5V0NrOG5ycEpOWA$QJ4Ad6luFU9mfyNpmHga/O9nEqbuPfeQl5+1I651BOg',
+     'profesional', 'Activa', 1, 1, NOW()),
+    (3, 'Administrador', 'admin@psyai.com',
+     'argon2$argon2id$v=19$m=102400,t=2,p=8$aVVqZUR2RE5BSDRLWW9uSXhudnRoZw$yaDAPJb6FDenDGa14N6Dr5xwM2DJKknzkT+KkAhoUlc',
+     'admin', 'Activa', 1, 1, NOW());
+
+INSERT INTO perfilpaciente
+    (idPaciente, edad, genero, numeroTelefonico, consentimientoDatos)
+VALUES
+    (1, 25, 'Femenino', NULL, 0);
+
+INSERT INTO perfilprofesional
+    (idProfesional, especialidad, experiencia, estado)
+VALUES
+    (2, 'Psicología Clínica', 'Profesional demo', 'Activo');
+
+COMMIT;
