@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>PsyAI Connect | Mis Pagos</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/patient.css?v=20260723-1">
+    <link rel="stylesheet" href="/css/pages/patient-facturas-v2.css?v=20260723-1">
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260928-1">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+</head>
+<body class="patient-dashboard patient-agenda-page">
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
+    <div class="sidebar__logo">
+        <div class="sidebar__logo-img-wrap">
+            <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
+            <div class="sidebar__logo-glow"></div>
+        </div>
+        <h5 class="sidebar__brand">PsyAI Connect</h5>
+        <span class="sidebar__role-badge">Paciente</span>
+    </div>
+    <nav class="sidebar__nav flex-column" aria-label="NavegaciÃ³n principal">
+        <div class="sidebar__nav-section-label">MenÃº Principal</div>
+        <a href="../patient.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
+            <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
+            <span>Dashboard</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="chatbot.html" class="sidebar__nav-item" data-tooltip="Chatbot">
+            <div class="sidebar__nav-icon"><i class="fas fa-robot"></i></div>
+            <span>Chatbot Emocional</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="agenda-quotes.html" class="sidebar__nav-item" data-tooltip="Agenda">
+            <div class="sidebar__nav-icon"><i class="fas fa-calendar-alt"></i></div>
+            <span>Agenda de Citas</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="facturas.html" class="sidebar__nav-item active" data-tooltip="Facturas">
+            <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <span>Mis Pagos</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <div class="sidebar__nav-section-label">ComunicaciÃ³n</div>
+        <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
+            <div class="sidebar__nav-icon"><i class="fas fa-comments"></i></div>
+            <span>Mensajes</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <div class="sidebar__nav-section-label">Seguimiento</div>
+        <a href="evolution.html" class="sidebar__nav-item" data-tooltip="EvoluciÃ³n">
+            <div class="sidebar__nav-icon"><i class="fas fa-chart-area"></i></div>
+            <span>Mi EvoluciÃ³n</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="historia_clinica_paciente.html" class="sidebar__nav-item" data-tooltip="Documentos">
+            <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
+            <span>Mis Documentos</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+    </nav>
+    <div class="sidebar__footer">
+        <div class="sidebar__user-card">
+            <div class="sidebar__user-avatar" data-avatar="inicial">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="sidebar__user-info">
+                <span class="sidebar__user-name" id="sidebarUserName">Paciente</span>
+                <span class="sidebar__user-role">Paciente</span>
+            </div>
+            <a href="my.profile.html" class="sidebar__user-settings" title="Mi Perfil">
+                <i class="fas fa-cog"></i>
+            </a>
+        </div>
+        <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+            <i class="fa-solid fa-sun theme-icon sun" id="sun-icon"></i>
+            <button id="theme-toggle" title="Cambiar modo"></button>
+            <i class="fa-solid fa-moon theme-icon moon" id="moon-icon"></i>
+        </div>
+    </div>
+    <div class="sidebar__logout-section">
+        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar SesiÃ³n">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar SesiÃ³n</span>
+        </a>
+    </div>
+  </aside>
+
+  <main class="main-content flex-grow-1">
+    <header class="main-header d-flex justify-content-between align-items-center mb-0">
+      <h1><i class="fas fa-file-invoice-dollar me-2"></i>Mis Pagos</h1>
+      <div class="user-info d-flex align-items-center">
+        <span class="user-greeting" id="nombrePaciente">Hola, </span>
+        <button class="btn-notif" title="Notificaciones">
+          <i class="fas fa-bell"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23E8F1FF'/%3E%3C/svg%3E" alt="Avatar" class="user-avatar" data-avatar="inicial" data-nombre="">
+      </div>
+    </header>
+
+    <!-- SecciÃ³n QR y cuenta bancaria -->
+    <section class="section-card mb-4">
+      <div class="section-title"><i class="fas fa-qrcode"></i> InformaciÃ³n de Pago</div>
+      <div class="row g-3">
+        <div class="col-12 col-md-6 text-center">
+          <p class="small text-muted mb-2">CÃ³digo QR</p>
+          <div id="qrLoading" class="spinner-border text-primary mb-2"></div>
+          <img id="qrImage" src="" alt="QR de pago" class="img-fluid d-none" style="max-width:200px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+        </div>
+        <div class="col-12 col-md-6">
+          <p class="small text-muted mb-2">Datos de la cuenta bancaria</p>
+          <div id="accountLoading" class="spinner-border text-primary mb-2"></div>
+          <div id="accountInfoCard" class="d-none">
+            <!-- Bank account info will be rendered here by JS -->
+          </div>
+          <pre id="accountText" class="text-start small text-muted p-3 bg-light rounded d-none" style="white-space: pre-wrap; max-height:200px; overflow:auto;"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- BotÃ³n cuenta de pago externa -->
+    <div class="mb-4" id="pagoCuentaBtnWrap"></div>
+
+    <section class="section-card">
+      <div class="section-title"><i class="fas fa-list"></i> Historial de Facturas</div>
+      <table class="citas-table w-100">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Profesional</th>
+            <th>Servicio(s)</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th class="text-center">AcciÃ³n</th>
+          </tr>
+        </thead>
+        <tbody id="tablaFacturas"><tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-2"></i>Cargando...</td></tr></tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<div class="modal fade psyai-modal psyai-modal--receipt" id="modalVerComprobante" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="psyai-modal__content">
+<div class="psyai-modal__header psyai-modal__header--receipt">
+  <div class="psyai-modal__header-icon">
+    <i class="fas fa-receipt"></i>
+  </div>
+  <div>
+    <h5 class="psyai-modal__title">Comprobante de Pago</h5>
+    <p class="psyai-modal__subtitle">Detalle de tu transacciÃ³n</p>
+  </div>
+  <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
+    <i class="fas fa-times"></i>
+  </button>
+</div>
+<div class="psyai-modal__body" id="comprobanteBody">
+  <div class="text-center py-4" id="comprobanteLoading"><div class="spinner-border text-primary"></div></div>
+</div>
+<div class="psyai-modal__footer">
+  <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" onclick="window.print()"><i class="fas fa-print me-1"></i>Imprimir</button>
+  <button type="button" class="psyai-modal__btn psyai-modal__btn--save" data-bs-dismiss="modal">Cerrar</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="modal fade psyai-modal psyai-modal--info" id="modalMotivoAnulacion" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="psyai-modal__content">
+<div class="psyai-modal__header psyai-modal__header--info">
+  <div class="psyai-modal__header-icon psyai-modal__header-icon--muted">
+    <i class="fas fa-info-circle"></i>
+  </div>
+  <div>
+    <h5 class="psyai-modal__title">Factura Anulada</h5>
+    <p class="psyai-modal__subtitle">Detalle de la anulaciÃ³n</p>
+  </div>
+  <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
+    <i class="fas fa-times"></i>
+  </button>
+</div>
+<div class="psyai-modal__body text-center py-4">
+  <i class="fas fa-ban text-secondary" style="font-size:2.5rem;"></i>
+  <p class="fw-bold mt-3">Motivo de anulaciÃ³n</p>
+  <p class="text-muted" id="motivoAnulacionTexto">---</p>
+</div>
+<div class="psyai-modal__footer justify-content-center">
+  <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">Cerrar</button>
+</div>
+</div>
+</div>
+</div>
+<div class="modal fade psyai-modal psyai-modal--info" id="modalPagoFactura" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="psyai-modal__content">
+      <div class="psyai-modal__header psyai-modal__header--info">
+        <div class="psyai-modal__header-icon psyai-modal__header-icon--muted">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <div>
+          <h5 class="psyai-modal__title">Pagar factura</h5>
+          <p class="psyai-modal__subtitle" id="modalPagoSubtitle">Escanea el QR para pagar</p>
+        </div>
+        <button type="button" class="psyai-modal__close" data-bs-dismiss="modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="psyai-modal__body py-4" id="modalPagoBody">
+        <div class="row">
+          <div class="col-12 col-md-6 text-center" id="modalQrContainer">
+            <p class="small text-muted mb-2">CÃ³digo QR</p>
+            <div id="modalQrLoading"><div class="spinner-border text-primary"></div></div>
+            <img id="modalQrImage" src="" alt="QR de pago" class="img-fluid d-none" style="max-width:200px;">
+          </div>
+          <div class="col-12 col-md-6" id="modalAccountContainer">
+            <p class="small text-muted mb-2">Datos de la cuenta</p>
+            <div id="modalAccountLoading"><div class="spinner-border text-primary"></div></div>
+            <div id="modalAccountInfoCard" class="d-none"></div>
+            <pre id="modalAccountText" class="text-start small text-muted d-none" style="white-space: pre-wrap;"></pre>
+          </div>
+        </div>
+      </div>
+      <div class="psyai-modal__footer justify-content-center">
+        <button type="button" class="psyai-modal__btn psyai-modal__btn--cancel" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include 'base/partials/scripts.html' %}
+<script src="/js/modules/auth/auth-guard.js?v=20260918-2"></script>
+<script src="/js/core/shared/alerts.js?v=20261023-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
+<script src="/js/modules/patient/aside.js?v=20260711-1"></script>
+<script src="/js/modules/auth/logout.js?v=20261023-1"></script>
+<script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async function() {
+  cargarFacturasPaciente();
+  loadPagoCuentaBtn();
+});
+
+async function loadTopPagoInfo(profesionalId) {
+  const qrImg = document.getElementById('qrImage');
+  const qrLoading = document.getElementById('qrLoading');
+  const accountCard = document.getElementById('accountInfoCard');
+  const accountTextEl = document.getElementById('accountText');
+  const accountLoading = document.getElementById('accountLoading');
+  // show loaders
+  qrLoading.style.display = 'block';
+  qrImg.classList.add('d-none');
+  accountLoading.style.display = 'block';
+  accountCard.classList.add('d-none');
+  accountTextEl.classList.add('d-none');
+  accountTextEl.textContent = '';
+  try {
+    const res = await fetch('/api/profesional/' + profesionalId + '/payment-info', { credentials: 'include' });
+    const data = await res.json();
+    if (!pagoInfoOk(data)) {
+      qrLoading.style.display = 'none';
+      accountLoading.style.display = 'none';
+      accountTextEl.textContent = 'No hay datos de pago disponibles.';
+      accountTextEl.classList.remove('d-none');
+      return;
+    }
+    const info = resolvePagoInfo(data.data);
+    if (info.qr_image) {
+      qrImg.src = info.qr_image;
+      qrImg.classList.remove('d-none');
+    }
+    qrLoading.style.display = 'none';
+    if (info.mensaje_texto) {
+      renderBankInfoCard('accountInfoCard', info.mensaje_texto);
+    } else {
+      accountTextEl.textContent = 'No hay datos de cuenta disponibles.';
+      accountTextEl.classList.remove('d-none');
+    }
+    accountLoading.style.display = 'none';
+  } catch(e) {
+    console.error(e);
+    qrLoading.style.display = 'none';
+    accountLoading.style.display = 'none';
+    accountTextEl.textContent = 'Error al cargar la informaciÃ³n de pago.';
+    accountTextEl.classList.remove('d-none');
+  }
+}
+ 
+function clearTopPagoInfo() {
+  const qrImg = document.getElementById('qrImage');
+  const qrLoading = document.getElementById('qrLoading');
+  const accountTextEl = document.getElementById('accountText');
+  const accountLoading = document.getElementById('accountLoading');
+  qrImg.classList.add('d-none');
+  qrImg.src = '';
+  qrLoading.style.display = 'none';
+  accountTextEl.textContent = '';
+  accountLoading.style.display = 'none';
+}
+ 
+function togglePagoInfo(facturaId) {
+  const row = document.getElementById('pagoInfo-' + facturaId);
+  if (!row) return;
+  const isHidden = row.style.display === 'none' || row.style.display === '';
+  if (isHidden) {
+    row.style.display = '';
+    // load data if not loaded
+    if (!row.dataset.loaded) {
+      const profId = row.dataset.profesionalId;
+      if (profId) {
+        loadPagoInfo(facturaId, profId);
+      }
+      row.dataset.loaded = 'true';
+    }
+  } else {
+    row.style.display = 'none';
+  }
+}
+
+async function loadPagoInfo(facturaId, profesionalId) {
+  const qrImg = document.getElementById('qrImg-' + facturaId);
+  const qrLoading = document.getElementById('qrLoading-' + facturaId);
+  const accountCard = document.getElementById('accountInfoCard-' + facturaId);
+  const accountTextEl = document.getElementById('accountText-' + facturaId);
+  const accountLoading = document.getElementById('accountLoading-' + facturaId);
+  try {
+    const res = await fetch('/api/profesional/' + profesionalId + '/payment-info', { credentials: 'include' });
+    const data = await res.json();
+    if (!pagoInfoOk(data)) {
+      document.getElementById('qrLoading-' + facturaId).style.display = 'none';
+      document.getElementById('accountLoading-' + facturaId).style.display = 'none';
+      return;
+    }
+    const info = resolvePagoInfo(data.data);
+    // QR
+    if (info.qr_image) {
+      qrImg.src = info.qr_image;
+      qrImg.classList.remove('d-none');
+    }
+    qrLoading.style.display = 'none';
+    // Account text
+    if (info.mensaje_texto) {
+      renderBankInfoCard('accountInfoCard-' + facturaId, info.mensaje_texto);
+    } else {
+      accountTextEl.textContent = 'No hay datos de cuenta disponibles.';
+      accountTextEl.classList.remove('d-none');
+    }
+    accountLoading.style.display = 'none';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('qrLoading-' + facturaId).style.display = 'none';
+    document.getElementById('accountLoading-' + facturaId).style.display = 'none';
+  }
+}
+
+function verMotivoAnulacion(motivo) {
+  document.getElementById("motivoAnulacionTexto").textContent = motivo;
+  new bootstrap.Modal(document.getElementById("modalMotivoAnulacion")).show();
+}
+
+async function verComprobante(idFactura) {
+  const modal = new bootstrap.Modal(document.getElementById("modalVerComprobante"));
+  const body = document.getElementById("comprobanteBody");
+  modal.show();
+  body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+  try {
+    const res = await fetch("/api/facturas/" + idFactura, { credentials: "include" });
+    const data = await res.json();
+    if (!data.success || !data.factura) {
+      body.innerHTML = '<p class="text-danger text-center">Error al cargar comprobante</p>';
+      return;
+    }
+    const f = data.factura;
+    const itemsHtml = (f.items || []).map(function(i) {
+      return '<tr><td>' + esc(i.descripcion) + '</td><td class="text-end">$' + Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr>';
+    }).join("");
+    var evidenceHtml = '';
+    if (f.tieneEvidencia) {
+      evidenceHtml = '<div class="mt-3 p-3 bg-light rounded">' +
+        '<h6><i class="fas fa-file-image me-2"></i>Evidencia del pago</h6>' +
+        '<div class="text-center">' +
+        '<img src="/api/facturas/' + f.idFactura + '/evidencia" alt="Evidencia" class="img-fluid" style="max-height:300px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">' +
+        '<div class="mt-2"><a href="/api/facturas/' + f.idFactura + '/evidencia" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-external-link-alt me-1"></i>Abrir en nueva pestaÃ±a</a></div>' +
+        '</div>' +
+        '</div>';
+    }
+    var confirmadorInfo = '';
+    if (f.confirmadaPor) {
+      confirmadorInfo = '<p class="small text-muted">Confirmado por: <strong>' + esc(f.nombreConfirmador || 'â€”') + '</strong> el ' + formatFecha(f.fechaConfirmacion) + '</p>';
+    }
+    body.innerHTML =
+      '<div class="text-center mb-3"><h5 class="fw-bold">PsyAI Connect</h5><small class="text-muted">Comprobante de Pago</small></div>' +
+      '<hr>' +
+      '<p><strong>Factura #' + f.idFactura + '</strong></p>' +
+      '<p class="small text-muted">Fecha: ' + formatFecha(f.fecha) + '</p>' +
+      '<table class="table table-sm"><thead><tr><th>Servicio</th><th class="text-end">Valor</th></tr></thead><tbody>' + itemsHtml + '</tbody>' +
+      '<tfoot><tr class="fw-bold"><td>Total</td><td class="text-end">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td></tr></tfoot></table>' +
+      '<hr>' +
+      '<p class="small text-muted">Estado: <span class="badge bg-success">Completado</span></p>' +
+      confirmadorInfo +
+      evidenceHtml +
+      (f.idTransaccionPago ? '<p class="small text-muted">TransacciÃ³n: ' + esc(f.idTransaccionPago) + '</p>' : '');
+  } catch(e) {
+     body.innerHTML = '<p class="text-danger text-center">Error de conexiÃ³n</p>';
+}
+  }
+ 
+  // Ver evidencia
+  function verEvidencia(id) {
+    window.open("/api/facturas/" + id + "/evidencia", "_blank");
+  }
+ 
+  async function abrirModalPago(profesionalId, facturaId) {
+  const modal = new bootstrap.Modal(document.getElementById("modalPagoFactura"));
+  const qrImg = document.getElementById("modalQrImage");
+  const qrLoading = document.getElementById("modalQrLoading");
+  const accountCard = document.getElementById("modalAccountInfoCard");
+  const accountTextEl = document.getElementById("modalAccountText");
+  const accountLoadingEl = document.getElementById("modalAccountLoading");
+  const subtitle = document.getElementById("modalPagoSubtitle");
+
+  // reset UI
+  qrImg.classList.add("d-none");
+  qrImg.src = "";
+  qrLoading.style.display = "block";
+  // reset account
+  accountCard.classList.add("d-none");
+  accountTextEl.classList.add("d-none");
+  accountTextEl.textContent = "";
+  accountLoadingEl.style.display = "block";
+
+  subtitle.textContent = "Cargando datos de pago...";
+  modal.show();
+
+  try {
+    const res = await fetch("/api/profesional/" + profesionalId + "/payment-info", { credentials: "include" });
+    const data = await res.json();
+    if (!pagoInfoOk(data)) {
+      // show error in both sections
+      document.getElementById("modalQrLoading").style.display = "none";
+      document.getElementById("modalAccountLoading").style.display = "none";
+      document.getElementById("modalQrContainer").innerHTML = '<p class="text-danger text-center">No se pudo cargar la informaciÃ³n de pago</p>';
+      return;
+    }
+    const info = resolvePagoInfo(data.data);
+    // QR
+    if (info.qr_image) {
+      qrImg.src = info.qr_image;
+      qrImg.classList.remove("d-none");
+    }
+    document.getElementById("modalQrLoading").style.display = "none";
+
+    // Account text
+    if (info.mensaje_texto) {
+      renderBankInfoCard('modalAccountInfoCard', info.mensaje_texto, true);
+    } else {
+      accountTextEl.textContent = "No hay datos de cuenta disponibles.";
+      accountTextEl.classList.remove("d-none");
+    }
+    accountLoadingEl.style.display = "none";
+
+    // subtitle
+    const subtitleEl = document.getElementById("modalPagoSubtitle");
+    subtitleEl.textContent = "Datos de pago de la profesional";
+  } catch(e) {
+    console.error(e);
+    document.getElementById("modalQrLoading").style.display = "none";
+    document.getElementById("modalAccountLoading").style.display = "none";
+    document.getElementById("modalQrContainer").innerHTML = '<p class="text-danger text-center">Error de conexiÃ³n</p>';
+  }
+}
+
+</script>
+</body>
+</html>
