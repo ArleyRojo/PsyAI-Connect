@@ -4,6 +4,8 @@ from django.contrib.auth import login as django_login
 from django.middleware.csrf import get_token
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -170,6 +172,7 @@ class TOTPStatusView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+@method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='dispatch')
 class TOTPVerifyLoginView(APIView):
     """
     Verifica el token TOTP durante el login (cuando el usuario ya tiene 2FA activado).
@@ -239,6 +242,7 @@ class TOTPVerifyLoginView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+@method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='dispatch')
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -249,6 +253,7 @@ class RegisterView(APIView):
         return Response(payload, status=status_code)
 
 
+@method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='dispatch')
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -346,6 +351,7 @@ class SessionView(APIView):
         return Response({"success": True, "logged_in": False})
 
 
+@method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='dispatch')
 class ForgotPasswordView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -357,6 +363,7 @@ class ForgotPasswordView(APIView):
         return Response(payload, status=status_code)
 
 
+@method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='dispatch')
 class ResetPasswordView(APIView):
     permission_classes = [permissions.AllowAny]
 
