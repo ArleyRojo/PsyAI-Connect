@@ -32,18 +32,18 @@ Digitalizar y centralizar la operación de consultorios y redes de psicólogos m
 
 ## 📄 Documentación
 
-Descarga los documentos del proyecto desde el último release de GitHub:
+Abre los documentos del proyecto desde el último release de GitHub:
 
-| Documento | Descarga |
-|-----------|----------|
-| Casos de uso | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/Casos_de_Uso_PsyAI_Connect_1.pdf) |
-| Historias de usuario | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/Historias_de_Usuario_PsyAI_Connect.pdf) |
-| Manual de usuario | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/Manual_Usuario_PsyAI_Connect_1.1.pdf) |
-| Matriz de requisitos | [XLSX](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/Matriz_de_requisitos_PsyAi_Connect_actualizada_v2.xlsx) |
-| Mockups | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/mockups.1.pdf) |
-| Diagramas UML | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/PsyAI_Connect_Diagramas_UML.pdf) |
-| Guía de marca | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/PsyAI-Connect-Guia-de-marca.pdf) |
-| Mapa de navegación | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/PsyAI-Connect-Mapa-de-navegacion-oscuro.1.pdf) |
+| Documento | Ver |
+|-----------|-----|
+| Casos de uso | [Ver PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/Casos_de_Uso_PsyAI_Connect_1.pdf) |
+| Historias de usuario | [Ver PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/Historias_de_Usuario_PsyAI_Connect.pdf) |
+| Manual de usuario | [Ver PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/Manual_Usuario_PsyAI_Connect_1.1.pdf) |
+| Matriz de requisitos | [Ver XLSX](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/Matriz_de_requisitos_PsyAi_Connect_actualizada_v2.xlsx) |
+| Mockups | [Ver PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/mockups.1.pdf) |
+| Diagramas UML | [Ver PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/PsyAI_Connect_Diagramas_UML.pdf) |
+| Guía de marca | [Ver PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/PsyAI-Connect-Guia-de-marca.pdf) |
+| Mapa de navegación | [Ver PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/latest/download/PsyAI-Connect-Mapa-de-navegacion-oscuro.1.pdf) |
 
 ---
 
