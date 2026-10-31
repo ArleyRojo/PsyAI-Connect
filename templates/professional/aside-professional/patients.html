@@ -92,21 +92,17 @@
     </aside>
 
     <main class="main-content flex-grow-1 ms-250 patients-page">
-        <header class="main-header mb-4">
-            <div style="display:flex; align-items:flex-start; justify-content:space-between; width:100%; position:relative; z-index:1;">
-                <div>
-                    <h1 class="h3 fw-bold text-dark mb-0"><i class="fas fa-users text-primary me-2"></i> Pacientes y Diagnósticos</h1>
-                    <nav aria-label="breadcrumb" class="mt-1">
-                        <ol class="breadcrumb-custom">
-                            <li><a href="../professional.dashboard.html">Dashboard</a></li>
-                            <li class="active">Pacientes y Diagnósticos</li>
-                        </ol>
-                    </nav>
+        <header class="main-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold text-dark mb-0"><i class="fas fa-users me-2 text-primary"></i>Pacientes y Diagnósticos</h1>
+                <small class="text-muted">Consulta y gestiona tus pacientes</small>
+            </div>
+            <div class="user-info d-flex align-items-center gap-3">
+                <div class="position-relative">
+                    <i class="fas fa-bell text-secondary fs-5"></i>
                 </div>
-                <div class="user-info d-flex align-items-center">
-                    <i class="fas fa-bell text-secondary fs-5 me-3"></i>
-                    <span class="fw-semibold" id="nombreProfesional">Hola, Dr(a).</span>
-                </div>
+                <div data-avatar="inicial" data-nombre="{{ request.user.nombre|default:'' }}" data-foto="{{ request.user.foto_perfil|default:'' }}" style="width:40px;height:40px;"></div>
+                <span class="fw-semibold" id="nombreProfesional" data-user-name>Hola, {% if request.user.rol == 'profesional' or request.user.rol == 'professional' %}Dr(a). {% endif %}{{ request.user.nombre|default:'' }}</span>
             </div>
         </header>
 
@@ -707,7 +703,7 @@
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script src="/js/modules/professional/anamnesis.js?v=20260929-1"></script>
-<script src="/js/modules/professional/patients.js?v=20261027-1"></script>
+<script src="/js/modules/professional/patients.js?v=20261030-assign"></script>
 <script src="/js/modules/professional/patients.evolution.js?v=20260803-1"></script>
 <script src="/js/modules/professional/patients.prediagnostico.js?v=20260930-1"></script>
 </body>
