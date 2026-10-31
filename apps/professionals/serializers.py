@@ -39,11 +39,16 @@ class ReporteCreateSerializer(serializers.Serializer):
     idPaciente = serializers.IntegerField(required=False)
     tipoReporte = serializers.CharField(required=False)
     contenido = serializers.CharField(required=False, allow_blank=True)
+    fechaInicio = serializers.DateField(required=False, allow_null=True)
+    fechaFin = serializers.DateField(required=False, allow_null=True)
+    sintomas = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    diagnostico = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    tratamiento = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
 
 class ReporteUpdateSerializer(serializers.Serializer):
-    idReporte = serializers.IntegerField(required=False)
-    contenido = serializers.CharField(required=False, allow_blank=True)
+    tipoReporte = serializers.CharField(required=False, allow_blank=True)
+    estado = serializers.ChoiceField(choices=("Pendiente", "Completado"), required=False)
 
 
 class DocumentoUploadSerializer(serializers.Serializer):
