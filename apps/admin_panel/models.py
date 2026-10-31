@@ -55,6 +55,7 @@ class Logs(models.Model):
     rol_anterior = models.CharField(max_length=20, null=True, blank=True)
     rol_nuevo = models.CharField(max_length=20, null=True, blank=True)
     usuario_afectado = models.CharField(max_length=100, null=True, blank=True)
+    origen = models.CharField(max_length=20, default="admin", null=True, blank=True)
 
     class Meta:
         db_table = "Logs"
@@ -86,4 +87,5 @@ class Logs(models.Model):
             "rol_anterior": self.rol_anterior,
             "rol_nuevo": self.rol_nuevo,
             "usuario_afectado": self.usuario_afectado,
+            "origen": self.origen or "admin",
         }
