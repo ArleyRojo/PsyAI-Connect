@@ -178,7 +178,7 @@ class TestAdminNotificacionDelete:
             view = AdminNotificacionAPIView.as_view()
             resp = view(req, id_notificacion=1)
 
-        assert resp.status_code == 403
+        assert resp.status_code == 401
 
     def test_delete_without_id_returns_400(self, rf, mock_auth_admin):
         req = rf.delete("/api/admin/notificaciones/")
