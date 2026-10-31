@@ -5,6 +5,7 @@ from django.conf import settings
 
 from apps.core.utils import validate_file_upload
 from apps.documents.repositories import DocumentoRepository
+from apps.professionals.models import PacientesProfesional, PerfilProfesional
 
 UPLOAD_SUBDIR = "uploads/documentos"
 
@@ -65,7 +66,17 @@ class DocumentoService:
             allowed_extensions = settings.ALLOWED_UPLOAD_EXTENSIONS
         return validate_file_upload(file, allowed_extensions=allowed_extensions)
 
+    def _professional_can_access_patient(self, professional_id, patient_id):
+        return (
+            PerfilProfesional.objects.filter(idProfesional_id=professional_id, verificado=True).exists()
+            and PacientesProfesional.objects.filter(
+                idProfesional_id=professional_id, idPaciente_id=patient_id
+            ).exists()
+        )
+
     def list_patient_docs(self, professional_id, patient_id):
+        if not patient_id or not self._professional_can_access_patient(professional_id, patient_id):
+            return {"success": False, "message": "No tienes acceso a los documentos de este paciente"}
         docs = self.repo.list_profesional_docs(professional_id, patient_id)
         result = []
         for d in docs:
@@ -83,6 +94,8 @@ class DocumentoService:
         return {"success": True, "documentos": result}
 
     def upload_profesional_doc(self, professional_id, patient_id, file, categoria, visibilidad, notas):
+        if not patient_id or not self._professional_can_access_patient(professional_id, patient_id):
+            return {"success": False, "message": "No tienes permiso para subir documentos a este paciente"}, 403
         original_name, error = self._validate_upload(file)
         if error:
             return {"success": False, "message": error}, 400
@@ -113,12 +126,19 @@ class DocumentoService:
         doc = self.repo.get_profesional_doc_by_id(doc_id, professional_id)
         if not doc:
             return {"success": False, "message": "Documento no encontrado"}, 404
+        if not self._professional_can_access_patient(professional_id, doc["idPaciente"]):
+            return {"success": False, "message": "No tienes permiso para cambiar este documento"}, 403
 
         new_vis = "compartido" if doc.get("visibilidad") != "compartido" else "privado"
         self.repo.update_doc_visibility(doc_id, professional_id, new_vis)
         return {"success": True, "visibilidad": new_vis, "message": "Visibilidad actualizada"}, 200
 
     def delete_profesional_doc(self, doc_id, professional_id):
+        doc = self.repo.get_profesional_doc_by_id(doc_id, professional_id)
+        if not doc:
+            return {"success": False, "message": "Documento no encontrado"}, 404
+        if not self._professional_can_access_patient(professional_id, doc["idPaciente"]):
+            return {"success": False, "message": "No tienes permiso para borrar este documento"}, 403
         ok = self.repo.soft_delete_profesional_doc(doc_id, professional_id)
         if not ok:
             return {"success": False, "message": "Documento no encontrado"}, 404
@@ -190,6 +210,13 @@ class DocumentoService:
         doc = self.repo.get_patient_doc_by_id(documento_id, patient_id)
         if not doc:
             return {"success": False, "message": "Documento no encontrado"}, 404
+        if not PerfilProfesional.objects.filter(
+            idProfesional_id=professional_id,
+            verificado=True,
+            idProfesional__activo=True,
+            idProfesional__estadoCuenta="Activa",
+        ).exists():
+            return {"success": False, "message": "El profesional no existe o no está verificado"}, 404
 
         aut = self.repo.get_autorizacion(documento_id, professional_id)
         if aut and not aut["revocado"]:
@@ -203,6 +230,8 @@ class DocumentoService:
         doc = self.repo.get_profesional_doc_by_id(id_documento, professional_id)
         if not doc:
             return None, {"success": False, "message": "Documento no encontrado"}, 404
+        if not self._professional_can_access_patient(professional_id, doc["idPaciente"]):
+            return None, {"success": False, "message": "No tienes acceso a este documento"}, 403
         return doc, None, 200
 
     def get_patient_doc_for_download(self, id_documento, user_id, rol):
@@ -212,6 +241,8 @@ class DocumentoService:
         if rol == "paciente" and doc["idPaciente"] != user_id:
             return None, {"success": False, "message": "No autorizado"}, 403
         if rol == "profesional":
+            if not self._professional_can_access_patient(user_id, doc["idPaciente"]):
+                return None, {"success": False, "message": "No tienes acceso a este documento"}, 403
             aut = self.repo.get_autorizacion(id_documento, user_id)
             if not aut or aut.get("revocado"):
                 return None, {"success": False, "message": "No autorizado"}, 403
