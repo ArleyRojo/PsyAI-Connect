@@ -5490,3 +5490,22 @@ body {
 /* =======================================================
    LANDING.CSS - Legacy stylesheet reference (unused)
    ======================================================= */
+
+/* ==================================================================
+   GLOBAL RESPONSIVE TOKENS FOR LAPTOPS & SHORT SCREENS (height < 850px)
+   ================================================================== */
+@media screen and (max-height: 850px), screen and (max-width: 1400px) and (max-height: 900px) {
+    html {
+        font-size: 14px;
+    }
+    :root {
+        --sp-4: 12px;
+        --sp-5: 16px;
+        --sp-6: 18px;
+        --sp-8: 20px;
+        --sp-10: 26px;
+        --sp-12: 32px;
+        --fs-xl: 22px;
+        --fs-2xl: 26px;
+    }
+}
