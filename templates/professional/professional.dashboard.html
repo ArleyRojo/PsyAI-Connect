@@ -480,7 +480,7 @@ function animarRings() {
 // -- Render: Bienestar --
 function renderBienestar(evo) {
     const container = document.getElementById('bienestarContainer');
-    if (!evo || (!evo.estado_emocional_promedio && !evo.nivel_energia_promedio)) {
+    if (!evo) {
         container.innerHTML = `
             <div class="text-center text-muted py-4">
                 <i class="fas fa-heart fa-2x mb-2"></i>
@@ -488,96 +488,30 @@ function renderBienestar(evo) {
             </div>`;
         return;
     }
-
-    const emo = Math.min(evo.estado_emocional_promedio / 5 * 100, 100);
-    const energy = Math.min(evo.nivel_energia_promedio / 5 * 100, 100);
-    const sinEvo = evo.pacientes_sin_evolución || 0;
-
-    const C = 226.2;
-    const emoOff = C * (1 - evo.estado_emocional_promedio / 5);
-    const energyOff = C * (1 - evo.nivel_energia_promedio / 5);
-
+    const registros = evo.registros_recientes || [];
+    const sinEvo = evo.pacientes_sin_evolucion || 0;
+    const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    }[char]));
+    const fecha = value => {
+        if (!value) return '';
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? '' : parsed.toLocaleDateString('es-CO');
+    };
     container.innerHTML = `
-        <div class="row g-3 mb-3">
-            <div class="col-6">
-                <div class="metric-ring-wrap position-relative">
-                    <div class="ring-tooltip">Estado emocional promedio</div>
-                    <svg class="metric-ring-svg" viewBox="0 0 100 100" style="--ring-glow: rgba(100,181,246,0.25)">
-                        <circle class="ring-bg" cx="50" cy="50" r="36"/>
-                        <circle class="ring-fill" cx="50" cy="50" r="36"
-                                stroke="#64B5F6" data-target="${emoOff}" style="stroke-dashoffset: 226.2"/>
-                        <g class="ring-center-text">
-                            <text class="value" x="50" y="46" fill="#64B5F6">${evo.estado_emocional_promedio}</text>
-                            <text class="suffix" x="50" y="62">/5</text>
-                        </g>
-                    </svg>
-                    <span class="ring-label"><i class="fas fa-smile me-1"></i>Estado Emocional</span>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="metric-ring-wrap position-relative">
-                    <div class="ring-tooltip">Nivel de energía promedio</div>
-                    <svg class="metric-ring-svg" viewBox="0 0 100 100" style="--ring-glow: rgba(129,199,132,0.25)">
-                        <circle class="ring-bg" cx="50" cy="50" r="36"/>
-                        <circle class="ring-fill" cx="50" cy="50" r="36"
-                                stroke="#81C784" data-target="${energyOff}" style="stroke-dashoffset: 226.2"/>
-                        <g class="ring-center-text">
-                            <text class="value" x="50" y="46" fill="#81C784">${evo.nivel_energia_promedio}</text>
-                            <text class="suffix" x="50" y="62">/5</text>
-                        </g>
-                    </svg>
-                    <span class="ring-label"><i class="fas fa-bolt me-1"></i>Nivel de Energía</span>
-                </div>
-            </div>
+        <div class="row g-2 mb-3 text-center">
+            <div class="col-4"><div class="stats-mini-card rounded-3 p-2"><strong>${evo.pacientes_asignados || 0}</strong><div class="text-muted small">Pacientes asignados</div></div></div>
+            <div class="col-4"><div class="stats-mini-card rounded-3 p-2"><strong>${evo.pacientes_con_evolucion_reciente || 0}</strong><div class="text-muted small">Con registro reciente</div></div></div>
+            <div class="col-4"><div class="stats-mini-card rounded-3 p-2"><strong>${evo.nivel_energia_promedio ?? '—'}${evo.nivel_energia_promedio != null ? '/5' : ''}</strong><div class="text-muted small">Energía promedio (30 días)</div></div></div>
         </div>
-        <div class="row g-3 mb-3">
-            <div class="col-4">
-                <div class="text-center p-2 rounded-3 stats-mini-card">
-                    <div class="fw-bold fs-5 color-blue">${evo.pacientes_con_citas || 0}</div>
-                    <div class="text-muted" style="font-size:0.68rem;">Activos</div>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="text-center p-2 rounded-3 stats-mini-card">
-                    <div class="fw-bold fs-5 color-green">${evo.pacientes_con_evolución_reciente || 0}</div>
-                    <div class="text-muted" style="font-size:0.68rem;">C/ evolución</div>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="text-center p-2 rounded-3 stats-mini-card">
-                    <div class="fw-bold fs-5 ${sinEvo > 0 ? 'color-orange' : 'color-green'}">${sinEvo}</div>
-                    <div class="text-muted" style="font-size:0.68rem;">Sin evolución</div>
-                </div>
-            </div>
-        </div>
-        <div class="row g-3">
-            <div class="col-6">
-                <div class="bienestar-stat-label mb-1">
-                    <span class="label"><i class="fas fa-smile me-1"></i>Estado Emocional</span>
-                    <span class="value">${evo.estado_emocional_promedio}</span>
-                </div>
-                <div class="bienestar-bar">
-                    <div class="fill fill-emo" style="width:${emo}%"></div>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="bienestar-stat-label mb-1">
-                    <span class="label"><i class="fas fa-bolt me-1"></i>Nivel de Energía</span>
-                    <span class="value">${evo.nivel_energia_promedio}</span>
-                </div>
-                <div class="bienestar-bar">
-                    <div class="fill fill-energy" style="width:${energy}%"></div>
-                </div>
-            </div>
-        </div>
-        ${sinEvo > 0 ? `<div class="text-center mt-3">
-            <a href="./aside-professional/patients.html" class="btn btn-sm btn-outline-warning rounded-pill">
-                <i class="fas fa-exclamation-triangle me-1"></i> Revisar pacientes sin evolución
-            </a>
-        </div>` : ''}
+        ${registros.length ? `<div class="list-group list-group-flush">
+            ${registros.map(row => `<div class="list-group-item px-1 d-flex justify-content-between align-items-center gap-2">
+                <div><strong>${safe(row.paciente)}</strong><div class="small text-muted">${safe(row.estadoEmocional || 'Sin estado emocional')} · ${fecha(row.fecha)}</div></div>
+                <span class="badge bg-success-subtle text-success">Energía ${row.nivelEnergia ?? '—'}/5</span>
+            </div>`).join('')}
+        </div>` : `<div class="text-center text-muted py-3">Aún no hay registros de evolución de pacientes asignados.</div>`}
+        ${sinEvo > 0 ? `<div class="text-center mt-3"><a href="./aside-professional/patients.html" class="btn btn-sm btn-outline-warning rounded-pill"><i class="fas fa-exclamation-triangle me-1"></i>${sinEvo} paciente(s) sin registro en 14 días</a></div>` : ''}
     `;
-
-    setTimeout(animarRings, 200);
 }
 
 // -- Render: Reportes Resumen --
@@ -765,7 +699,7 @@ async function cargarDashboard() {
         // Renderizar secciones
         renderAlertas(data.alertas);
         renderProximasCitas(data.proximas_citas);
-        renderBienestar(data.evolución);
+        renderBienestar(data.evolucion);
         renderReportesResumen(data.reportes);
         renderActividades(data);
 
