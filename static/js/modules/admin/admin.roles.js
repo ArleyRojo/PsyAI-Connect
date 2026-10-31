@@ -1,4 +1,10 @@
 const API = '';
+function escapeHtmlRoles(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+}
+function inlineJsArgRoles(value) {
+    return escapeHtmlRoles(JSON.stringify(String(value ?? '')).replace(/[<>&\u2028\u2029]/g, char => ({ '<': '\\u003c', '>': '\\u003e', '&': '\\u0026', '\u2028': '\\u2028', '\u2029': '\\u2029' })[char]));
+}
 let todosUsuarios = [];
 const ITEMS_PER_PAGE = 15;
 let paginaActualRoles = 1;
@@ -30,7 +36,7 @@ async function cargarUsuarios() {
         if (!res.ok) {
             console.error('Error HTTP:', res.status);
             document.getElementById('tablaUsuarios').innerHTML = 
-                '<tr><td colspan="5" class="text-center text-danger py-4">Error: ' + (data.message || 'No autorizado') + '</td></tr>';
+                '<tr><td colspan="5" class="text-center text-danger py-4">Error: ' + escapeHtmlRoles(data.message || 'No autorizado') + '</td></tr>';
             return;
         }
         
@@ -73,7 +79,7 @@ function populateUserSelect() {
     if (!select) return;
     
     select.innerHTML = '<option value="">-- Seleccionar usuario --</option>' + 
-        todosUsuarios.map(u => `<option value="${u.email}">${u.nombre} (${u.email})</option>`).join('');
+        todosUsuarios.map(u => `<option value="${escapeHtmlRoles(u.email)}">${escapeHtmlRoles(u.nombre)} (${escapeHtmlRoles(u.email)})</option>`).join('');
 }
 
 function renderTablaRoles(lista) {
@@ -99,22 +105,21 @@ function renderizarPaginaRoles() {
         document.getElementById('mostrandoTotalRoles').textContent = 0;
     } else {
         tbody.innerHTML = paginaUsuarios.map(u => {
-            const ini = u.nombre.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
-            const nom = u.nombre.replace(/'/g,"\\'");
+            const ini = escapeHtmlRoles(String(u.nombre || '').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2));
             return `
             <tr>
               <td data-label="Usuario">
                 <div class="user-cell">
                   <div class="user-avatar">${ini}</div>
-                  <div><div class="user-name">${u.nombre}</div><div class="user-email">${u.email}</div></div>
+                  <div><div class="user-name">${escapeHtmlRoles(u.nombre)}</div><div class="user-email">${escapeHtmlRoles(u.email)}</div></div>
                 </div>
               </td>
               <td data-label="Rol">${rolBadge(u.rol)}</td>
               <td data-label="Estado">${estadoBadge(u)}</td>
-              <td data-label="Última actividad" class="text-muted" style="font-size:.82rem;">${u.fechaRegistro||'—'}</td>
+              <td data-label="Última actividad" class="text-muted" style="font-size:.82rem;">${escapeHtmlRoles(u.fechaRegistro||'—')}</td>
               <td class="text-end">
                 <div class="d-flex justify-content-end gap-1">
-                  <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEditar(${u.idUsuario},'${nom}','${u.rol}')" title="Editar"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEditar(${Number(u.idUsuario)},${inlineJsArgRoles(u.nombre)},${inlineJsArgRoles(u.rol)})" title="Editar"><i class="fas fa-edit"></i></button>
                 </div>
               </td>
             </tr>`;
@@ -204,12 +209,12 @@ function renderHistorial() {
     
     tbody.innerHTML = filtrados.map(h => `
         <tr>
-          <td class="mono" style="font-size:.82rem;">${h.fecha||'—'}</td>
-          <td style="font-size:.82rem;"><strong>${h.usuario||'—'}</strong><br><small class="text-muted">${h.email||''}</small></td>
+          <td class="mono" style="font-size:.82rem;">${escapeHtmlRoles(h.fecha||'—')}</td>
+          <td style="font-size:.82rem;"><strong>${escapeHtmlRoles(h.usuario||'—')}</strong><br><small class="text-muted">${escapeHtmlRoles(h.email||'')}</small></td>
           <td>${getAccionBadge(h.accion)}</td>
           <td>${getRolBadge(h.rolAnterior)}</td>
           <td>${getRolBadge(h.rolNuevo)}</td>
-          <td style="font-size:.82rem;">${h.administrador||'Admin'}</td>
+          <td style="font-size:.82rem;">${escapeHtmlRoles(h.administrador||'Admin')}</td>
         </tr>`).join('');
 }
 
@@ -220,13 +225,13 @@ function getAccionBadge(accion) {
     else if (acc.includes('edit')) clase = 'edit';
     else if (acc.includes('elim')) clase = 'delete';
     else if (acc.includes('rol')) clase = 'role';
-    return `<span class="log-badge ${clase}">${accion||'—'}</span>`;
+    return `<span class="log-badge ${clase}">${escapeHtmlRoles(accion||'—')}</span>`;
 }
 
 function getRolBadge(rol) {
     if (!rol) return '<span class="log-badge sistema">—</span>';
     const cls = rol === 'admin' ? 'badge-rol-admin' : rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
-    return `<span class="badge-rol ${cls}">${capitalizar(rol)}</span>`;
+    return `<span class="badge-rol ${cls}">${escapeHtmlRoles(capitalizar(rol))}</span>`;
 }
 
 // ── Modal editar rol ──────────────────────────────────────────────────────────
@@ -330,7 +335,7 @@ function mostrarTab(tab, btn) {
 function rolBadge(rol) {
     if (!rol) return '—';
     const cls = rol === 'admin' ? 'badge-rol-admin' : rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
-    return `<span class="badge-rol ${cls}">${capitalizar(rol)}</span>`;
+    return `<span class="badge-rol ${cls}">${escapeHtmlRoles(capitalizar(rol))}</span>`;
 }
 
 function estadoBadge(u) {
