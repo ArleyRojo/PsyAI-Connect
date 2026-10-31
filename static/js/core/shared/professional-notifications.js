@@ -79,9 +79,19 @@
             const close = wrapper.querySelector('[data-professional-notification-close]');
             if (!toggle || !panel) return;
 
+            // Portal el panel al body para que ningún encabezado o sección lo recorte.
+            document.body.append(panel);
+
             const closePanel = () => {
                 panel.hidden = true;
                 toggle.setAttribute('aria-expanded', 'false');
+            };
+
+            const positionPanel = () => {
+                const rect = toggle.getBoundingClientRect();
+                panel.style.top = `${Math.max(8, rect.bottom + 8)}px`;
+                panel.style.right = `${Math.max(16, window.innerWidth - rect.right)}px`;
+                panel.style.maxHeight = `${Math.max(180, window.innerHeight - rect.bottom - 24)}px`;
             };
 
             toggle.addEventListener('click', async () => {
@@ -89,8 +99,9 @@
                 panel.hidden = !opening;
                 toggle.setAttribute('aria-expanded', String(opening));
                 if (!opening) return;
+                positionPanel();
 
-                const list = wrapper.querySelector('[data-professional-notification-list]');
+                const list = panel.querySelector('[data-professional-notification-list]');
                 list.replaceChildren(createMessage('Cargando avisos…', 'professional-notification-empty'));
                 try {
                     await loadAlerts();
@@ -104,10 +115,13 @@
 
             close?.addEventListener('click', closePanel);
             document.addEventListener('click', (event) => {
-                if (!wrapper.contains(event.target)) closePanel();
+                if (!wrapper.contains(event.target) && !panel.contains(event.target)) closePanel();
             });
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape') closePanel();
+            });
+            window.addEventListener('resize', () => {
+                if (!panel.hidden) positionPanel();
             });
         });
 
