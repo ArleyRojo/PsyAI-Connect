@@ -165,5 +165,6 @@ class DocumentoRepository:
                 "nombreArchivo": doc.nombreArchivo,
                 "rutaArchivo": doc.rutaArchivo,
                 "visibilidad": doc.visibilidad,
+                "idPaciente": doc.idPaciente_id,
             }
         return None
