@@ -1,16 +1,11 @@
 # apps/core/tests/test_whatsapp.py
-import os
-import hmac
-import hashlib
 from unittest.mock import patch, MagicMock
 from django.test import TestCase, override_settings
-from django.conf import settings
 from apps.core.whatsapp import get_whatsapp_provider, TwilioProvider, DummyProvider
 from apps.core.notifier import notificar_paciente, enviar_prueba
 from apps.core.webhooks import WhatsAppWebhook
 from apps.patients.models import PerfilPaciente
 from apps.authentication.models import Register
-from django.utils import timezone
 
 
 class WhatsAppProviderTests(TestCase):
@@ -28,7 +23,7 @@ class WhatsAppProviderTests(TestCase):
             get_whatsapp_provider()
 
     @override_settings(WHATSAPP_ENABLED=True, TWILIO_SID="SID", TWILIO_TOKEN="TOKEN", TWILIO_WHATSAPP_FROM="whatsapp:+14155238886")
-    @patch("apps.core.whatsapp.Client")
+    @patch("twilio.rest.Client")
     def test_twilio_provider_success(self, mock_client_class):
         mock_client = MagicMock()
         mock_msg = MagicMock()
@@ -43,7 +38,7 @@ class WhatsAppProviderTests(TestCase):
         mock_client.messages.create.assert_called_once()
 
     @override_settings(WHATSAPP_ENABLED=True, TWILIO_SID="SID", TWILIO_TOKEN="TOKEN", TWILIO_WHATSAPP_FROM="whatsapp:+14155238886")
-    @patch("apps.core.whatsapp.Client")
+    @patch("twilio.rest.Client")
     def test_twilio_provider_exception(self, mock_client_class):
         from twilio.base.exceptions import TwilioRestException
         mock_client = MagicMock()
@@ -60,10 +55,7 @@ class NotifierTests(TestCase):
     @patch("apps.core.notifier.send_mail")
     @patch("apps.core.notifier.PatientService")
     def test_notificar_paciente_email_only(self, mock_service, mock_send):
-        paciente = MagicMock()
-        paciente.email = "a@b.com"
-        paciente.nombre = "Juan"
-        paciente.idUsuario = 1
+        paciente = Register.objects.create_user(email="a@b.com", password="x", rol="paciente", nombre="Juan")
         mock_service.return_value.get_preferences.return_value = ({"preferencias": {"canalNotificacion": "email"}}, None)
 
         ok = notificar_paciente(paciente, "Titulo", "Mensaje", "recordatorio_cita")
@@ -74,10 +66,7 @@ class NotifierTests(TestCase):
     @patch("apps.core.notifier.PatientService")
     @patch("apps.core.notifier.get_whatsapp_provider")
     def test_notificar_paciente_whatsapp_fail_marks_false(self, mock_get_provider, mock_service):
-        paciente = MagicMock()
-        paciente.email = "a@b.com"
-        paciente.nombre = "Juan"
-        paciente.idUsuario = 1
+        paciente = Register.objects.create_user(email="a@b.com", password="x", rol="paciente", nombre="Juan")
         mock_service.return_value.get_preferences.return_value = ({"preferencias": {
             "canalNotificacion": "whatsapp",
             "whatsappConsentimiento": True,
@@ -96,8 +85,8 @@ class NotifierTests(TestCase):
 
 class WebhookSignatureTests(TestCase):
     def _make_signature(self, token, url, params):
-        data = url + ''.join(f'{k}{v}' for k, v in sorted(params.items()))
-        return hmac.new(token.encode(), data.encode(), hashlib.sha1).hexdigest()
+        from twilio.request_validator import RequestValidator
+        return RequestValidator(token).compute_signature(url, params)
 
     @override_settings(TWILIO_TOKEN="SECRET", TWILIO_WEBHOOK_URL="https://example.com/api/whatsapp/webhook/")
     def test_valid_signature(self):
