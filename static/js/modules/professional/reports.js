@@ -192,11 +192,11 @@ function actualizarTablaEliminados(eliminados) {
 
     tbody.innerHTML = eliminados.map(r => `
         <tr>
-            <td>${r.fechaInicio || '—'}</td>
-            <td>${r.fechaFin || '—'}</td>
-            <td>${r.paciente || '—'}</td>
-            <td>${r.tipoReporte || '—'}</td>
-            <td><span class="badge-estado eliminado">${r.estado || 'Eliminado'}</span></td>
+            <td>${escapeHtml(r.fechaInicio || '—')}</td>
+            <td>${escapeHtml(r.fechaFin || '—')}</td>
+            <td>${escapeHtml(r.paciente || '—')}</td>
+            <td>${escapeHtml(r.tipoReporte || '—')}</td>
+            <td><span class="badge-estado eliminado">${escapeHtml(r.estado || 'Eliminado')}</span></td>
         </tr>
     `).join('');
 }
@@ -208,7 +208,7 @@ function renderizarReportes(reportes) {
     if (!reportes || reportes.length === 0) {
         const filtro = document.getElementById("filtroPaciente")?.value || '';
         const mensaje = filtro ? 'No hay reportes generados para este paciente' : 'No hay reportes';
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-folder-open me-2"></i>${mensaje}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-folder-open me-2"></i>${escapeHtml(mensaje)}</td></tr>`;
         return;
     }
 
@@ -216,19 +216,19 @@ function renderizarReportes(reportes) {
         const estadoClass = getEstadoClass(r.estado);
         return `
             <tr>
-                <td>${r.fechaInicio || '—'}</td>
-                <td>${r.fechaFin || '—'}</td>
-                <td>${r.paciente || '—'}</td>
-                <td>${r.tipoReporte || '—'}</td>
-                <td><span class="badge-estado ${estadoClass}">${r.estado || '—'}</span></td>
+                <td>${escapeHtml(r.fechaInicio || '—')}</td>
+                <td>${escapeHtml(r.fechaFin || '—')}</td>
+                <td>${escapeHtml(r.paciente || '—')}</td>
+                <td>${escapeHtml(r.tipoReporte || '—')}</td>
+                <td><span class="badge-estado ${estadoClass}">${escapeHtml(r.estado || '—')}</span></td>
                 <td>
-                    <button class="btn btn-sm btn-outline-secondary me-1 btn-action btn-view" title="Ver reporte" aria-label="Ver reporte" onclick="verReporte(${r.idReporte})">
+                    <button class="btn btn-sm btn-outline-secondary me-1 btn-action btn-view" title="Ver reporte" aria-label="Ver reporte" onclick="verReporte(${Number(r.idReporte)})">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-primary me-1 btn-action btn-edit" title="Editar reporte" aria-label="Editar reporte" onclick="editarReporte(${r.idReporte})">
+                    <button class="btn btn-sm btn-outline-primary me-1 btn-action btn-edit" title="Editar reporte" aria-label="Editar reporte" onclick="editarReporte(${Number(r.idReporte)})">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger btn-action btn-delete" title="Eliminar reporte" aria-label="Eliminar reporte" onclick="eliminarReporte(${r.idReporte})">
+                    <button class="btn btn-sm btn-outline-danger btn-action btn-delete" title="Eliminar reporte" aria-label="Eliminar reporte" onclick="eliminarReporte(${Number(r.idReporte)})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
