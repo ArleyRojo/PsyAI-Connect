@@ -978,3 +978,127 @@ select.form-control {
     cursor: pointer;
     margin: 0;
 }
+/* ==================================================================
+   AUTH RESPONSIVE FOR LAPTOPS & SHORT SCREENS (height < 850px)
+   ================================================================== */
+@media screen and (max-height: 850px) {
+    .register-shell {
+        padding: clamp(6px, 1.2vh, 14px);
+        gap: clamp(8px, 1.2vw, 16px);
+    }
+    .register-art {
+        padding: clamp(12px, 2vh, 18px);
+        border-radius: 18px;
+    }
+    .brand-mark {
+        padding: 5px 12px;
+        font-size: 0.9rem;
+        border-radius: 12px;
+    }
+    .brand-mark img {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+    }
+    .art-copy h1 {
+        font-size: clamp(1.4rem, 2.5vw, 2rem);
+        margin-bottom: 4px;
+    }
+    .art-copy p {
+        font-size: 0.85rem;
+        line-height: 1.35;
+    }
+    .art-strip {
+        gap: 6px;
+    }
+    .art-chip {
+        min-height: 42px;
+        padding: 5px 8px;
+        border-radius: 8px;
+    }
+    .art-chip strong {
+        font-size: 0.82rem;
+        margin-bottom: 0;
+    }
+    .art-chip span {
+        font-size: 0.72rem;
+        line-height: 1.2;
+    }
+    .login-card,
+    .login-card.login-card--register {
+        padding: clamp(1rem, 2.2vh, 1.6rem) clamp(1rem, 2vw, 1.8rem);
+        border-radius: 20px;
+        max-width: 440px;
+    }
+    .auth-topbar {
+        margin-bottom: 6px;
+    }
+    .login-header {
+        margin-bottom: 8px;
+    }
+    .login-header img {
+        width: 48px !important;
+        height: 48px !important;
+        margin-bottom: 4px;
+    }
+    .login-header h1 {
+        font-size: 1.35rem;
+        margin-bottom: 2px;
+    }
+    .login-header p {
+        font-size: 0.78rem;
+        margin-bottom: 8px;
+    }
+    .reg-field {
+        margin-bottom: 8px;
+    }
+    .reg-field .form-label {
+        font-size: 0.78rem;
+        margin-bottom: 2px;
+    }
+    .field-wrap input {
+        height: 38px;
+        font-size: 0.85rem;
+        padding-left: 36px;
+    }
+    .field-wrap .field-icon {
+        font-size: 0.85rem;
+        left: 12px;
+    }
+    .role-grid {
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+    .role-pill {
+        padding: 6px 8px;
+        font-size: 0.78rem;
+        border-radius: 10px;
+    }
+    .role-pill i {
+        font-size: 0.82rem;
+    }
+    .remember-row {
+        margin-bottom: 10px;
+        gap: 6px;
+    }
+    .remember-row label {
+        font-size: 0.82rem;
+    }
+    .remember-row input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+    .btn-login-submit,
+    .btn-submit-reg {
+        height: 40px;
+        font-size: 0.88rem;
+        border-radius: 12px;
+    }
+    .oauth-divider {
+        margin: 10px 0;
+    }
+    .oauth-btn {
+        height: 38px;
+        font-size: 0.82rem;
+    }
+}
