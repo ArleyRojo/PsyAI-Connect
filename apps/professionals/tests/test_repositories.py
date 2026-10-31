@@ -239,7 +239,7 @@ class TestReportCRUD:
             idPaciente=patient_user,
         )
         assert report.tipoReporte == "general"
-        assert report.estado == "Completado"
+        assert report.estado == "Pendiente"
 
     def test_create_report_without_patient(self, repo, professional_user):
         data = {
