@@ -307,6 +307,7 @@ async function guardarDocumento() {
 function addFileToList(d, prepend) {
   const list = document.getElementById('my-docs-list');
   const ext = d.nombre.split('.').pop().toLowerCase();
+  const safeExt = /^[a-z0-9]{1,8}$/.test(ext) ? ext : 'file';
   let faIcon = 'fa-file-alt';
   if (ext === 'pdf') faIcon = 'fa-file-pdf';
   else if (ext === 'docx' || ext === 'doc') faIcon = 'fa-file-word';
@@ -322,10 +323,10 @@ function addFileToList(d, prepend) {
   row.dataset.id = d.id;
   row.dataset.visibilidad = d.visibilidad;
   row.innerHTML = `
-    <div class="ficon ${ext}"><i class="fas ${faIcon}"></i></div>
+    <div class="ficon ${safeExt}"><i class="fas ${faIcon}"></i></div>
     <div class="fmeta">
-      <div class="fname">${d.nombre}</div>
-      <div class="finfo">${d.fecha} &nbsp;·&nbsp; ${d.tamano} &nbsp;·&nbsp; ${infoText}${pacientePart}</div>
+      <div class="fname">${escapeHtml(d.nombre)}</div>
+      <div class="finfo">${escapeHtml(d.fecha)} &nbsp;·&nbsp; ${escapeHtml(d.tamano)} &nbsp;·&nbsp; ${infoText}${pacientePart}</div>
     </div>
     <span class="tag ${tagClass}">${tagLabel}</span>
     <div class="factions">
