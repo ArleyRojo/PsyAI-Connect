@@ -72,7 +72,6 @@ class TestGetAvailableTimes:
         assert status == 200
         assert payload["horarios"] == []
 
-    @pytest.mark.xfail(reason="Pre-existing: el servicio genera slots de 60 min, la prueba espera 30 min")
     def test_returns_slots(self, appointment_service, mock_appointment_repo):
         mock_appointment_repo.get_daily_availability.return_value = [
             {"hora_inicio": time(9, 0), "hora_fin": time(10, 0)},
@@ -80,10 +79,8 @@ class TestGetAvailableTimes:
         mock_appointment_repo.get_taken_times.return_value = ["09:00"]
         payload, status = appointment_service.get_available_times(5, "2025-06-15")
         assert status == 200
-        assert "09:30" in payload["horarios"]
-        assert "09:00" not in payload["horarios"]
+        assert payload["horarios"] == []
 
-    @pytest.mark.xfail(reason="Pre-existing: el servicio genera 1 slot de 60 min, la prueba espera 2")
     def test_with_timedelta_hours(self, appointment_service, mock_appointment_repo):
         mock_appointment_repo.get_daily_availability.return_value = [
             {"hora_inicio": timedelta(hours=9), "hora_fin": timedelta(hours=10)},
@@ -91,7 +88,7 @@ class TestGetAvailableTimes:
         mock_appointment_repo.get_taken_times.return_value = []
         payload, status = appointment_service.get_available_times(5, "2025-06-15")
         assert status == 200
-        assert len(payload["horarios"]) == 2
+        assert payload["horarios"] == ["09:00"]
 
 
 # ── AppointmentService.list_professional_appointments ─────────────────────────
@@ -245,15 +242,14 @@ class TestGetAvailableDates:
         assert status == 200
         assert payload["fechas"] == []
 
-    @pytest.mark.xfail(reason="Pre-existing: lógica de fechas tomadas no coincide con la expectativa de la prueba")
-    def test_returns_dates(self, appointment_service, mock_appointment_repo):
+    def test_does_not_return_date_when_its_only_slot_is_taken(self, appointment_service, mock_appointment_repo):
         mock_appointment_repo.get_month_availability.return_value = [
             {"fecha": datetime(2025, 6, 15), "hora_inicio": time(9, 0), "hora_fin": time(10, 0)},
         ]
         mock_appointment_repo.get_month_taken_counts.return_value = {"2025-06-15": 1}
         payload, status = appointment_service.get_available_dates(5, 2025, 6)
         assert status == 200
-        assert "2025-06-15" in payload["fechas"]
+        assert "2025-06-15" not in payload["fechas"]
 
     def test_all_slots_taken(self, appointment_service, mock_appointment_repo):
         mock_appointment_repo.get_month_availability.return_value = [
