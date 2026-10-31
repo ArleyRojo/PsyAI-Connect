@@ -6,7 +6,7 @@ from apps.patients.models import (
     PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar,
     SolicitudDerechos
 )
-from apps.professionals.models import PerfilProfesional
+from apps.professionals.models import PacientesProfesional, PerfilProfesional
 from apps.chatbot.models import MensajesChat
 
 
@@ -170,13 +170,23 @@ class PatientRepository:
 
     def list_professionals(self):
         rows = Register.objects.filter(
-            rol="profesional"
+            rol="profesional",
+            activo=True,
+            estadoCuenta="Activa",
+            perfil_profesional__verificado=True,
         ).order_by("nombre").values("idUsuario", "nombre")
         return [{"idUsuario": r["idUsuario"], "nombre": r["nombre"]} for r in rows]
 
     def list_professionals_for_patient(self, patient_id):
+        assigned_ids = PacientesProfesional.objects.filter(
+            idPaciente_id=patient_id,
+        ).values_list("idProfesional_id", flat=True)
         rows = (
-            Register.objects.filter(rol="profesional")
+            Register.objects.filter(
+                rol="profesional", activo=True, estadoCuenta="Activa",
+                idUsuario__in=assigned_ids,
+                perfil_profesional__verificado=True,
+            )
             .order_by("nombre")
             .values("idUsuario", "nombre", "fotoPerfil")
         )
