@@ -473,6 +473,27 @@ class ChatEventsServiceManager:
             for row in rows
         ]
 
+    def puede_chatear(self, id_a, id_b):
+        from apps.authentication.models import Register
+        from apps.professionals.models import PacientesProfesional, PerfilProfesional
+
+        roles = dict(
+            Register.objects.filter(idUsuario__in=(id_a, id_b), activo=True, estadoCuenta="Activa")
+            .values_list("idUsuario", "rol")
+        )
+        if roles.get(id_a) == "profesional" and roles.get(id_b) == "paciente":
+            profesional_id, paciente_id = id_a, id_b
+        elif roles.get(id_b) == "profesional" and roles.get(id_a) == "paciente":
+            profesional_id, paciente_id = id_b, id_a
+        else:
+            return False
+        return (
+            PerfilProfesional.objects.filter(idProfesional_id=profesional_id, verificado=True).exists()
+            and PacientesProfesional.objects.filter(
+                idProfesional_id=profesional_id, idPaciente_id=paciente_id
+            ).exists()
+        )
+
     def enviar_mensaje(self, id_emisor, id_receptor, mensaje):
         return self.repo.enviar_mensaje(id_emisor, id_receptor, mensaje)
 
