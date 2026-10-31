@@ -101,7 +101,19 @@
             </div>
             <div class="user-info d-flex align-items-center gap-3">
                 <div class="position-relative">
-                    <i class="fas fa-bell text-secondary fs-5"></i>
+                    <button type="button" class="professional-notification-toggle" data-professional-notification-toggle aria-label="Ver notificaciones" aria-expanded="false" aria-controls="professionalNotificationPanel">
+    <i class="fas fa-bell" aria-hidden="true"></i>
+    <span class="professional-notification-count" data-professional-notification-count hidden></span>
+</button>
+<div class="professional-notification-panel" id="professionalNotificationPanel" data-professional-notification-panel role="dialog" aria-label="Notificaciones" hidden>
+    <div class="professional-notification-panel__header">
+        <span>Notificaciones</span>
+        <button type="button" class="professional-notification-close" data-professional-notification-close aria-label="Cerrar notificaciones">&times;</button>
+    </div>
+    <div class="professional-notification-list" data-professional-notification-list>
+        <p class="professional-notification-empty">Abre la campana para consultar tus avisos.</p>
+    </div>
+</div>
                 </div>
                 <div data-avatar="inicial" data-nombre="{{ request.user.nombre|default:'' }}" data-foto="{{ request.user.foto_perfil|default:'' }}" style="width:40px;height:40px;"></div>
                 <span class="fw-semibold" id="nombreProfesional" data-user-name>Hola, {% if request.user.rol == 'profesional' or request.user.rol == 'professional' %}Dr(a). {% endif %}{{ request.user.nombre|default:'' }}</span>
