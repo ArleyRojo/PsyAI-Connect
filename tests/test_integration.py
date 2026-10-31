@@ -39,6 +39,8 @@ class TestRegisterEndpoint:
                 "confirm_password": "Abc123",
                 "rol": "paciente",
                 "genero": "M",
+                "fecha_nacimiento": "1990-01-01",
+                "acepta_terminos": True,
             }),
             content_type="application/json",
         )
@@ -54,6 +56,8 @@ class TestRegisterEndpoint:
                 "confirm_password": "Xyz789",
                 "rol": "paciente",
                 "genero": "M",
+                "fecha_nacimiento": "1990-01-01",
+                "acepta_terminos": True,
             }),
             content_type="application/json",
         )
@@ -71,7 +75,8 @@ class TestRegisterEndpoint:
                 "confirm_password": "Abc123",
                 "rol": "paciente",
                 "genero": "M",
-                "edad": 25,
+                "fecha_nacimiento": "2001-01-01",
+                "acepta_terminos": True,
             }),
             content_type="application/json",
         )
