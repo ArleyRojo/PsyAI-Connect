@@ -5,10 +5,19 @@ from django.utils import timezone
 
 from apps.authentication.models import Register
 from apps.professionals.models import PerfilProfesional, PacientesProfesional, Reportes, Diagnostico
-from apps.patients.models import EvolucionPaciente, PerfilPaciente
+from apps.patients.models import Anamnesis, EvolucionPaciente, PerfilPaciente
 
 
 class ProfessionalRepository:
+    def assign_patient(self, professional_id, patient_id):
+        if not Register.objects.filter(idUsuario=patient_id, rol="paciente").exists():
+            return False
+        PacientesProfesional.objects.get_or_create(
+            idProfesional_id=professional_id,
+            idPaciente_id=patient_id,
+        )
+        return True
+
     def get_professional_profile(self, user_id):
         try:
             user = Register.objects.get(idUsuario=user_id)
@@ -63,6 +72,10 @@ class ProfessionalRepository:
                 idPaciente_id__in=assigned_patients.values_list('idPaciente_id', flat=True)
             )
         }
+        patient_ids = assigned_patients.values_list("idPaciente_id", flat=True)
+        anamnesis_ids = set(
+            Anamnesis.objects.filter(idPaciente_id__in=patient_ids).values_list("idPaciente_id", flat=True)
+        )
 
         result = []
         for pp in assigned_patients:
@@ -78,37 +91,14 @@ class ProfessionalRepository:
                 "idUsuario": pp.idPaciente.idUsuario,
                 "nombre": pp.idPaciente.nombre,
                 "fotoPerfil": pp.idPaciente.fotoPerfil,
+                "email": pp.idPaciente.email,
+                "tieneAnamnesis": pp.idPaciente_id in anamnesis_ids,
                 "edad": p.edad if p else None,
                 "genero": p.genero if p else None,
                 "contacto": (p.numeroTelefonico if p and p.numeroTelefonico else pp.idPaciente.email),
                 "ultimoDiagnostico": latest_diag.diagnostico if latest_diag else None,
             })
         return result
-
-    def list_patients_for_chat(self):
-        # Solo profesionales verificados
-        perfil_data = {
-            p.idPaciente_id: p
-            for p in PerfilPaciente.objects.all()
-        }
-        users = Register.objects.filter(rol="paciente").order_by("nombre")
-        return [
-            {
-                "idUsuario": u.idUsuario,
-                "nombre": u.nombre,
-                "fotoPerfil": u.fotoPerfil,
-                "edad": perfil_data.get(u.idUsuario, None)
-                and perfil_data[u.idUsuario].edad,
-                "genero": perfil_data.get(u.idUsuario, None)
-                and perfil_data[u.idUsuario].genero,
-                "contacto": (
-                    perfil_data[u.idUsuario].numeroTelefonico
-                    if perfil_data.get(u.idUsuario) and perfil_data[u.idUsuario].numeroTelefonico
-                    else u.email
-                ),
-            }
-            for u in users
-        ]
 
     def list_verified_professionals(self):
         """Lista solo profesionales verificados para el chat."""
@@ -231,7 +221,7 @@ class ProfessionalRepository:
             sintomas=data.get("sintomas"),
             diagnostico=data.get("diagnostico"),
             tratamiento=data.get("tratamiento"),
-            estado="Completado",
+            estado="Pendiente",
         )
 
     def get_latest_patient_diagnosis(self, professional_id, patient_id):
@@ -258,6 +248,7 @@ class ProfessionalRepository:
             report.tipoReporte = data.get("tipoReporte", report.tipoReporte)
             report.estado = data.get("estado", report.estado)
             report.save(update_fields=["tipoReporte", "estado"])
+        return report
 
     def delete_report(self, professional_id, report_id):
         report = Reportes.objects.filter(
@@ -287,9 +278,14 @@ class ProfessionalRepository:
         ]
 
     def get_all_patient_evolution(self, professional_id):
+        patient_ids = PacientesProfesional.objects.filter(
+            idProfesional_id=professional_id,
+            idPaciente_id__isnull=False,
+        ).values_list("idPaciente_id", flat=True)
         rows = (
             EvolucionPaciente.objects.select_related("idPaciente")
             .filter(idPaciente__rol="paciente")
+            .filter(idPaciente_id__in=patient_ids)
             .order_by("-fecha")
         )
         return [
@@ -438,32 +434,37 @@ class ProfessionalRepository:
             pendientes=Count("idReporte", filter=Q(estado="Pendiente")),
         )
 
-        evolucion_data = None
-        emocion_data = None
-        if citas_no_canceladas is not None:
-            pacientes_con_citas = citas_no_canceladas.values("idPaciente").distinct().count()
-            citas_paciente_ids = citas_no_canceladas.values_list("idPaciente", flat=True).distinct()
-            pacientes_con_evolucion = (
-                EvolucionPaciente.objects.filter(
-                    idPaciente_id__in=citas_paciente_ids,
-                    fecha__gte=two_weeks_ago,
-                ).values("idPaciente").distinct().count()
-            )
-            pacientes_sin_evolucion = pacientes_con_citas - pacientes_con_evolucion
-
-            emocion_data = EvolucionPaciente.objects.filter(
-                idPaciente_id__in=citas_paciente_ids,
-                fecha__gte=month_ago,
-            ).aggregate(
-                nivel_energia_promedio=models.Avg("nivelEnergia"),
-                total_registros=Count("idEvolucion"),
-            )
-
-            evolucion_data = {
-                "pacientes_con_citas": pacientes_con_citas,
-                "pacientes_con_evolucion_reciente": pacientes_con_evolucion,
-                "pacientes_sin_evolucion": pacientes_sin_evolucion,
+        patient_ids = PacientesProfesional.objects.filter(
+            idProfesional_id=professional_id,
+            idPaciente_id__isnull=False,
+        ).values_list("idPaciente_id", flat=True)
+        pacientes_asignados = len(set(patient_ids))
+        evoluciones = EvolucionPaciente.objects.filter(
+            idPaciente_id__in=patient_ids,
+        ).select_related("idPaciente")
+        evolucion_reciente_qs = evoluciones.filter(fecha__gte=two_weeks_ago)
+        pacientes_con_evolucion = evolucion_reciente_qs.values("idPaciente_id").distinct().count()
+        evolucion_stats = evoluciones.filter(fecha__gte=month_ago).aggregate(
+            nivel_energia_promedio=models.Avg("nivelEnergia"),
+            total_registros=Count("idEvolucion"),
+        )
+        registros_recientes = [
+            {
+                "paciente": row.idPaciente.nombre if row.idPaciente else "Paciente",
+                "estadoEmocional": row.estadoEmocional,
+                "nivelEnergia": row.nivelEnergia,
+                "fecha": row.fecha,
             }
+            for row in evoluciones.order_by("-fecha")[:5]
+        ]
+        evolucion_data = {
+            "pacientes_asignados": pacientes_asignados,
+            "pacientes_con_evolucion_reciente": pacientes_con_evolucion,
+            "pacientes_sin_evolucion": max(pacientes_asignados - pacientes_con_evolucion, 0),
+            "nivel_energia_promedio": evolucion_stats.get("nivel_energia_promedio"),
+            "total_registros": evolucion_stats.get("total_registros") or 0,
+            "registros_recientes": registros_recientes,
+        }
 
         alertas = []
         try:
@@ -514,14 +515,10 @@ class ProfessionalRepository:
                 "accion": "ver_pacientes",
             })
 
-        nivel_energia = None
-        total_registros = 0
-        if emocion_data:
-            nivel_energia = (
-                round(emocion_data["nivel_energia_promedio"], 1)
-                if emocion_data.get("nivel_energia_promedio") else None
-            )
-            total_registros = emocion_data.get("total_registros") or 0
+        nivel_energia = (
+            round(evolucion_data["nivel_energia_promedio"], 1)
+            if evolucion_data.get("nivel_energia_promedio") is not None else None
+        )
 
         return {
             "pacientes_activos": stats_citas.get("pacientes_activos") or 0,
@@ -535,11 +532,8 @@ class ProfessionalRepository:
                 "pendientes": reportes_stats.get("pendientes") or 0,
             },
             "evolucion": {
-                "pacientes_con_citas": evolucion_data["pacientes_con_citas"] if evolucion_data else 0,
-                "pacientes_con_evolucion_reciente": evolucion_data["pacientes_con_evolucion_reciente"] if evolucion_data else 0,
-                "pacientes_sin_evolucion": evolucion_data["pacientes_sin_evolucion"] if evolucion_data else 0,
+                **evolucion_data,
                 "nivel_energia_promedio": nivel_energia,
-                "total_registros": total_registros,
-            } if evolucion_data else None,
+            },
             "alertas": alertas,
         }
