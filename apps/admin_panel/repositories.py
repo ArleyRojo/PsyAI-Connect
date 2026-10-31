@@ -25,7 +25,7 @@ class AdminRepository:
     def get_admin_name(self):
         return "Admin"
 
-    def registrar_log(self, modulo, accion, detalle, rol_anterior=None, rol_nuevo=None, usuario_afectado=None, administrador="Admin"):
+    def registrar_log(self, modulo, accion, detalle, rol_anterior=None, rol_nuevo=None, usuario_afectado=None, administrador="Admin", origen="admin"):
         try:
             Logs.objects.create(
                 administrador=administrador,
@@ -35,6 +35,7 @@ class AdminRepository:
                 rol_anterior=rol_anterior,
                 rol_nuevo=rol_nuevo,
                 usuario_afectado=usuario_afectado,
+                origen=origen,
             )
             AdminRepository.increment_logs_version()
         except Exception:
@@ -63,11 +64,14 @@ class AdminRepository:
 
         from django.utils import timezone
         today = timezone.localdate()
-        start = today
+        start = timezone.make_aware(
+            timezone.datetime.combine(today, timezone.datetime.min.time()),
+            timezone.get_default_timezone(),
+        )
         end = start + timezone.timedelta(days=1)
         logs_hoy = Logs.objects.filter(fecha__gte=start, fecha__lt=end).count()
 
-        yesterday = today - timezone.timedelta(days=1)
+        yesterday = start - timezone.timedelta(days=1)
         fallos_login = Logs.objects.filter(
             modulo="seguridad", accion="Login fallido",
             fecha__gte=yesterday,
@@ -297,6 +301,8 @@ class AdminRepository:
         return [l.to_dict() for l in logs]
 
     def get_notifications_feed(self):
+        from django.utils import timezone
+
         with connection.cursor() as cursor:
             cursor.execute("""
                 (
@@ -361,6 +367,55 @@ class AdminRepository:
             fecha_prog = row.get("fecha_programada")
             if fecha_prog:
                 row["fecha_programada"] = fmt_bogota(fecha_prog)
+
+        # El feed del panel también debe mostrar actividad originada por los
+        # usuarios. Las notificaciones almacenadas arriba son avisos salientes;
+        # los logs/accesos son eventos entrantes para que el admin pueda verlos.
+        for log in Logs.objects.order_by("-fecha")[:100]:
+            rows.append({
+                "idNotificacion": None,
+                "titulo": f"{log.accion or 'Actividad'}: {log.modulo or 'sistema'}",
+                "mensaje": log.detalle or "",
+                "tipo": log.origen or "sistema",
+                "destinatario": log.administrador or "Sistema",
+                "email_individual": None,
+                "enviado_por": log.administrador or "Sistema",
+                "estado": "enviado",
+                "leido": None,
+                "fecha": fmt_bogota(log.fecha) if log.fecha else "",
+                "fecha_programada": None,
+                "tipo_registro": "actividad",
+                "fecha_orden": log.fecha,
+            })
+
+        for acceso in AuditoriaAccesos.objects.select_related("idUsuario").order_by("-fecha")[:100]:
+            nombre = acceso.idUsuario.nombre if acceso.idUsuario else f"Usuario #{acceso.idUsuario_id}"
+            rows.append({
+                "idNotificacion": None,
+                "titulo": acceso.accion or "Acceso",
+                "mensaje": f"IP: {acceso.ip or 'desconocida'}",
+                "tipo": "accesos",
+                "destinatario": nombre,
+                "email_individual": None,
+                "enviado_por": nombre,
+                "estado": "enviado",
+                "leido": None,
+                "fecha": fmt_bogota(acceso.fecha) if acceso.fecha else "",
+                "fecha_programada": None,
+                "tipo_registro": "actividad",
+                "fecha_orden": acceso.fecha,
+            })
+
+        def fecha_ordenable(row):
+            fecha = row.get("fecha_orden")
+            if fecha is None:
+                return timezone.make_aware(timezone.datetime.min)
+            if timezone.is_naive(fecha):
+                return timezone.make_aware(fecha, timezone.get_default_timezone())
+            return fecha
+
+        rows.sort(key=fecha_ordenable, reverse=True)
+        rows = rows[:200]
         
         return rows
 
@@ -515,37 +570,42 @@ class AdminRepository:
         ]
 
     def get_logs(self, limit=None):
-        limit_val = limit or 200
+        from django.utils import timezone
 
-        logs_admin = Logs.objects.order_by("-fecha")[:limit_val]
-        logs_admin_list = [
-            {
-                "id": l.idLog,
-                "administrador": l.administrador,
-                "modulo": l.modulo,
-                "accion": l.accion,
-                "detalle": l.detalle,
-                "fecha": fmt_bogota(l.fecha) if l.fecha else "",
-                "origen": "admin",
-            }
-            for l in logs_admin
-        ]
+        limit_val = limit or 200
+        combined = []
+
+        for l in Logs.objects.order_by("-fecha")[:limit_val]:
+            combined.append((
+                l.fecha,
+                {
+                    "id": l.idLog,
+                    "administrador": l.administrador,
+                    "modulo": l.modulo,
+                    "accion": l.accion,
+                    "detalle": l.detalle,
+                    "fecha": fmt_bogota(l.fecha) if l.fecha else "",
+                    "origen": l.origen or "admin",
+                },
+            ))
 
         logs_auditoria = AuditoriaAccesos.objects.select_related("idUsuario").order_by("-fecha")[:limit_val]
-        logs_auditoria_list = [
-            {
-                "id": a.idAuditoria,
-                "administrador": a.idUsuario.nombre if a.idUsuario else f"Usuario #{a.idUsuario_id}",
-                "modulo": "accesos",
-                "accion": a.accion,
-                "detalle": f"IP: {a.ip}",
-                "fecha": fmt_bogota(a.fecha) if a.fecha else "",
-                "origen": "auditoria",
-            }
-            for a in logs_auditoria
-        ]
+        for a in logs_auditoria:
+            combined.append((
+                a.fecha,
+                {
+                    "id": a.idAuditoria,
+                    "administrador": a.idUsuario.nombre if a.idUsuario else f"Usuario #{a.idUsuario_id}",
+                    "modulo": "accesos",
+                    "accion": a.accion,
+                    "detalle": f"IP: {a.ip}",
+                    "fecha": fmt_bogota(a.fecha) if a.fecha else "",
+                    "origen": "auditoria",
+                },
+            ))
 
-        return logs_admin_list + logs_auditoria_list
+        combined.sort(key=lambda entry: entry[0] or timezone.now(), reverse=True)
+        return [entry for _, entry in combined[:limit_val]]
 
     def get_chatbot_historial_rows(self, limit=200):
         from apps.chatbot.models import ConversacionesChatbot
