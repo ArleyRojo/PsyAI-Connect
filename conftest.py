@@ -11,6 +11,12 @@ class SessionRequestFactory(APIRequestFactory):
         return request
 
 
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    """Match the documented test setup; repository/view tests may use SQLite."""
+    pass
+
+
 # ── Reusable fixtures ────────────────────────────────────────────────────────
 
 
