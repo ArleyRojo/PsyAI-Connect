@@ -105,11 +105,15 @@ class TestPerfilPacienteGet:
 
         assert resp.status_code == 403
 
-    def test_allows_profesional_to_view(self, rf, mock_service):
+    def test_allows_profesional_to_view_assigned_patient(self, rf, mock_service):
         req = rf.get("/api/patients/perfil/paciente/1")
         pass  # session provided by shared rf fixture
 
-        with patch.object(IsAuthenticatedDRF, "has_permission", _auth_profesional):
+        with (
+            patch.object(IsAuthenticatedDRF, "has_permission", _auth_profesional),
+            patch("apps.professionals.services.ProfessionalService._check_verificacion", return_value=None),
+            patch("apps.professionals.repositories.ProfessionalRepository.professional_has_patient", return_value=True),
+        ):
             mock_service.get_patient_profile.return_value = (
                 {"success": True, "perfil": {"nombre": "Juan"}},
                 200,
@@ -276,34 +280,32 @@ class TestPacienteGet:
         # Sin autenticación debe devolver 401
         assert resp.status_code == 401
 
-    def test_profesional_can_list(self, rf, mock_role_profesional, mock_service):
+    def test_profesional_can_list(self, rf, mock_role_profesional):
         req = rf.get("/api/patients/pacientes")
         pass  # session provided by shared rf fixture
 
-        mock_service.list_patients.return_value = (
-            {"success": True, "pacientes": []},
-            200,
-        )
-        view = PacienteViewSet.as_view({"get": "list"})
-        resp = view(req)
+        with patch("apps.professionals.services.ProfessionalService.list_patients", return_value=(
+            {"success": True, "pacientes": []}, 200,
+        )) as list_patients:
+            view = PacienteViewSet.as_view({"get": "list"})
+            resp = view(req)
 
         assert resp.status_code == 200
         assert resp.data["success"] is True
-        mock_service.list_patients.assert_called_once()
+        list_patients.assert_called_once_with(5)
 
-    def test_pagination_params(self, rf, mock_role_profesional, mock_service):
+    def test_pagination_params(self, rf, mock_role_profesional):
         req = rf.get("/api/patients/pacientes", {"page": "2", "limit": "10"})
         pass  # session provided by shared rf fixture
 
-        mock_service.list_patients.return_value = (
-            {"success": True, "pacientes": []},
-            200,
-        )
-        view = PacienteViewSet.as_view({"get": "list"})
-        resp = view(req)
+        with patch("apps.professionals.services.ProfessionalService.list_patients", return_value=(
+            {"success": True, "pacientes": []}, 200,
+        )) as list_patients:
+            view = PacienteViewSet.as_view({"get": "list"})
+            resp = view(req)
 
         assert resp.status_code == 200
-        mock_service.list_patients.assert_called_once_with(2, 10)
+        list_patients.assert_called_once_with(5)
 
 
 # ── ProfesionalViewSet list ───────────────────────────────────────────────
