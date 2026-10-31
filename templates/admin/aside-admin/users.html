@@ -133,6 +133,9 @@
       <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabUsuarios('suspendidos', this)">
         <i class="fas fa-ban"></i> Suspendidos <span class="tab-count" id="cntSuspendidos" style="background:#ffebee;color:#c62828;">0</span>
       </button>
+      <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabUsuarios('verificacion', this)">
+        <i class="fas fa-user-check"></i> Verificar profesionales <span class="tab-count" id="cntProfesionalesPendientes">0</span>
+      </button>
       <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabUsuarios('nuevo', this)">
         <i class="fas fa-user-plus"></i> Nuevo Usuario
       </button>
@@ -201,6 +204,22 @@
           <table class="table table-clean mb-0">
             <thead><tr><th class="ps-4">Usuario</th><th>Rol</th><th>Motivo</th><th>Suspendido el</th><th class="text-end pe-4">Acciones</th></tr></thead>
             <tbody><tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Verificación profesional -->
+    <div id="tab-u-verificacion" style="display:none;">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-0 px-4 pt-4">
+          <h2 class="h6 fw-bold mb-1">Profesionales pendientes de verificación</h2>
+          <p class="text-muted small mb-0">Verifica sus credenciales antes de habilitar el acceso a información clínica.</p>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-clean mb-0" id="tablaProfesionalesPendientes">
+            <thead><tr><th class="ps-4">Profesional</th><th>Especialidad</th><th>Tarjeta profesional</th><th>RETHUS</th><th>Registro</th><th class="text-end pe-4">Acción</th></tr></thead>
+            <tbody><tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -415,7 +434,7 @@
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
 <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
 <script src="/js/core/shared/aside.js?v=20260711-1"></script>
-<script src="/js/modules/admin/admin.users.js?v=20260711-1"></script>
+<script src="/js/modules/admin/admin.users.js?v=20261030-verify"></script>
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 </body>
 </html>
