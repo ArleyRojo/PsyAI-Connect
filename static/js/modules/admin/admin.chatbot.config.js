@@ -307,10 +307,17 @@ function getNivelBadge(nivel) {
 }
 
 function escapeHtml(text) {
-    if (!text) return '';
+    if (text === null || text === undefined) return '';
     const div = document.createElement('div');
-    div.textContent = text;
+    div.textContent = String(text);
     return div.innerHTML;
+}
+
+function inlineJsArgChatbot(value) {
+    const json = JSON.stringify(String(value ?? '')).replace(/[<>&\u2028\u2029]/g, char => ({
+        '<': '\\u003c', '>': '\\u003e', '&': '\\u0026', '\u2028': '\\u2028', '\u2029': '\\u2029'
+    })[char]);
+    return escapeHtml(json);
 }
 
 function formatFecha(fecha) {
@@ -367,8 +374,8 @@ function renderizarListaPacientes() {
             ? (p.mensajes[p.mensajes.length - 1].mensajeUsuario || '').substring(0, 50)
             : '';
         return `
-            <div class="patient-card ${active}" onclick="seleccionarPaciente('${escapeHtml(p.nombre).replace(/'/g, "\\'")}')" style="border-left: 3px solid ${color};">
-                <div class="patient-avatar" style="background:${color};">${initials}</div>
+            <div class="patient-card ${active}" onclick="seleccionarPaciente(${inlineJsArgChatbot(p.nombre)})" style="border-left: 3px solid ${color};">
+                <div class="patient-avatar" style="background:${color};">${escapeHtml(initials)}</div>
                 <div class="patient-info">
                     <div class="patient-name">${escapeHtml(p.nombre)}</div>
                     <div class="patient-preview">${escapeHtml(lastMsg)}${lastMsg.length >= 50 ? '...' : ''}</div>
@@ -393,7 +400,7 @@ function seleccionarPaciente(nombre) {
     const messages = document.getElementById('conversationMessages');
     const footer = document.getElementById('conversationFooter');
 
-    const initials = paciente.nombre.split(' ').map(w => w[0]).filter(Boolean).join('').toUpperCase().substring(0, 2) || '?';
+    const initials = escapeHtml(paciente.nombre.split(' ').map(w => w[0]).filter(Boolean).join('').toUpperCase().substring(0, 2) || '?');
     const color = paciente.nivel_max === 'Alto' ? 'var(--mood-critical)' : paciente.nivel_max === 'Medio' ? 'var(--mood-neutral)' : 'var(--mood-excellent)';
 
     header.style.display = '';
@@ -402,7 +409,7 @@ function seleccionarPaciente(nombre) {
             <div class="patient-avatar" style="background:${color};width:38px;height:38px;font-size:.85rem;">${initials}</div>
             <div>
                 <div class="fw-bold" style="color:var(--dm-heading);">${escapeHtml(paciente.nombre)}</div>
-                <small class="text-muted">${paciente.total_mensajes} mensajes · ${getNivelBadge(paciente.nivel_max)}</small>
+                <small class="text-muted">${Number(paciente.total_mensajes) || 0} mensajes · ${getNivelBadge(paciente.nivel_max)}</small>
             </div>
         </div>
     `;
@@ -419,7 +426,7 @@ function seleccionarPaciente(nombre) {
                     <div class="msg-avatar user-avatar">${initials}</div>
                     <div>
                         <div class="msg-bubble user-bubble">${escapeHtml(m.mensajeUsuario || '')}</div>
-                        <span class="msg-timestamp">${formatFechaRelativa(m.fecha)}</span>
+                        <span class="msg-timestamp">${escapeHtml(formatFechaRelativa(m.fecha))}</span>
                         ${nivelBadge}
                     </div>
                 </div>
@@ -427,7 +434,7 @@ function seleccionarPaciente(nombre) {
                     <div class="msg-avatar bot-avatar"><i class="fas fa-robot" style="font-size:0.85rem"></i></div>
                     <div>
                         <div class="msg-bubble bot-bubble">${escapeHtml(m.respuestaChatbot || '')}</div>
-                        <span class="msg-timestamp">${formatFechaRelativa(m.fecha)}</span>
+                        <span class="msg-timestamp">${escapeHtml(formatFechaRelativa(m.fecha))}</span>
                     </div>
                 </div>
             </div>
@@ -561,7 +568,7 @@ function renderizarRiskTerms() {
                 ">
                     <i class="fas ${estilo.icono}" style="font-size: 0.9rem;"></i>
                     <span>${escapeHtml(item.palabra)}</span>
-                    <span class="badge-riesgo ${item.nivel === 'Alto' ? 'badge-riesgo-alto' : item.nivel === 'Medio' ? 'badge-riesgo-medio' : 'badge-riesgo-bajo'}" style="font-size:0.65rem; padding:2px 8px;">${item.nivel}</span>
+                    <span class="badge-riesgo ${item.nivel === 'Alto' ? 'badge-riesgo-alto' : item.nivel === 'Medio' ? 'badge-riesgo-medio' : 'badge-riesgo-bajo'}" style="font-size:0.65rem; padding:2px 8px;">${['Alto', 'Medio', 'Bajo'].includes(item.nivel) ? item.nivel : 'Bajo'}</span>
                     <button type="button" 
                         onclick="eliminarPalabra(${index})" 
                         aria-label="Eliminar"
@@ -607,10 +614,11 @@ function renderizarRiskLevelCards() {
 
     list.innerHTML = filtered.map((w) => {
         const nivel = w.nivel || 'Bajo';
-        return `<span class="risk-word-chip ${nivel.toLowerCase()} detected" title="Pacientes: ${(w.pacientes || []).join(', ')}">
+        const safeNivel = ['Alto', 'Medio', 'Bajo'].includes(nivel) ? nivel : 'Bajo';
+        return `<span class="risk-word-chip ${safeNivel.toLowerCase()} detected" title="Pacientes: ${escapeHtml((w.pacientes || []).join(', '))}">
             ${escapeHtml(w.palabra)}
-            <span class="level-badge">${nivel}</span>
-            <span class="usage-badge">${w.count} vez${w.count !== 1 ? 'es' : ''}</span>
+            <span class="level-badge">${safeNivel}</span>
+            <span class="usage-badge">${Number(w.count) || 0} vez${Number(w.count) !== 1 ? 'es' : ''}</span>
         </span>`;
     }).join('');
 }
