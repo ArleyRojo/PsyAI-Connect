@@ -142,6 +142,11 @@ class TestProfessionalAsideAccess:
 
 
 class TestUnaffectedPages:
+    def test_clinical_uploads_are_not_public(self, rf):
+        request = _make_request(rf, "/uploads/documentos/historia.pdf")
+        with pytest.raises(Http404):
+            serve_pages(request, "uploads/documentos/historia.pdf")
+
     def test_index_still_works(self, rf):
         request = _make_request(rf, "/index.html")
         resp = serve_pages(request, "index.html")
