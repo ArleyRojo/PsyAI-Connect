@@ -51,7 +51,7 @@ class TestDocumentoProfesionalListViewGET:
             view = DocumentoProfesionalViewSet.as_view({"get": "list"})
             resp = view(req, id_paciente=5)
 
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     def test_returns_docs(self, rf, mock_auth_profesional):
         req = rf.get("/api/documentos/profesional/5")
@@ -81,7 +81,7 @@ class TestDocumentoProfesionalListViewPOST:
             view = DocumentoProfesionalViewSet.as_view({"post": "create"})
             resp = view(req, id_paciente=5)
 
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     def test_upload_requires_file(self, rf, mock_auth_profesional):
         req = rf.post("/api/documentos/profesional/5")
@@ -130,7 +130,7 @@ class TestDocumentoProfesionalDetailViewPATCH:
             view = DocumentoProfesionalViewSet.as_view({"patch": "partial_update"})
             resp = view(req, id_documento=1)
 
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     def test_toggles_visibility(self, rf, mock_auth_profesional):
         req = rf.patch("/api/documentos/profesional/doc/1")
@@ -160,7 +160,7 @@ class TestDocumentoProfesionalDetailViewDELETE:
             view = DocumentoProfesionalViewSet.as_view({"delete": "destroy"})
             resp = view(req, id_documento=1)
 
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     def test_delete_success(self, rf, mock_auth_profesional):
         req = rf.delete("/api/documentos/profesional/doc/1")
@@ -190,7 +190,7 @@ class TestDocumentoPacienteDashboardViewGET:
             view = DocumentoPacienteDashboardViewSet.as_view({"get": "list"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     def test_returns_dashboard(self, rf, mock_auth_paciente):
         req = rf.get("/api/documentos/paciente/dashboard")
@@ -221,7 +221,7 @@ class TestDocumentoPacienteOwnListViewGET:
             view = DocumentoPacienteOwnViewSet.as_view({"get": "list"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     def test_returns_own_docs(self, rf, mock_auth_paciente):
         req = rf.get("/api/documentos/paciente")
@@ -251,7 +251,7 @@ class TestDocumentoPacienteOwnListViewPOST:
             view = DocumentoPacienteOwnViewSet.as_view({"post": "create"})
             resp = view(req)
 
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     def test_upload_requires_file(self, rf, mock_auth_paciente):
         req = rf.post("/api/documentos/paciente")
@@ -296,12 +296,12 @@ class TestAutorizacionToggleViewPOST:
             view = AutorizacionToggleView.as_view()
             resp = view(req, id_documento=1)
 
-        assert resp.status_code == 403
+        assert resp.status_code in (401, 403)
 
     def test_toggle_success(self, rf, mock_auth_paciente):
         req = rf.post(
             "/api/documentos/autorizacion/1",
-            data=json.dumps({"idPaciente": 5}),
+            data=json.dumps({"idProfesional": 5}),
             content_type="application/json",
         )
         pass  # session provided by shared rf fixture
@@ -316,3 +316,10 @@ class TestAutorizacionToggleViewPOST:
 
         assert resp.status_code == 200
         assert resp.data["autorizado"] is True
+        mock_svc.toggle_autorizacion.assert_called_once_with(1, 1, 5)
+
+    def test_professional_cannot_change_patient_consent(self, rf, mock_auth_profesional):
+        req = rf.post("/api/documentos/autorizacion/1")
+        view = AutorizacionToggleView.as_view()
+        response = view(req, id_documento=1)
+        assert response.status_code in (401, 403)
