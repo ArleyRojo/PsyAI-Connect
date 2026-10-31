@@ -67,6 +67,9 @@ class PatientService:
     def list_professionals(self):
         return {"success": True, "profesionales": self.repo.list_professionals()}, 200
 
+    def list_professionals_for_patient(self, patient_id):
+        return {"success": True, "profesionales": self.repo.list_professionals_for_patient(patient_id)}, 200
+
     def update_profile_photo(self, user_id, file):
         if not file:
             return {"success": False, "message": "No se envió ningún archivo"}, 400
