@@ -167,9 +167,18 @@ class AdminService:
 
     def notifications_feed(self):
         from datetime import datetime
+        from django.utils import timezone
         actividades = self.repo.get_notifications_feed()
         # Sort by fecha_orden (real datetime) instead of fecha (string dd/mm/YYYY)
-        actividades.sort(key=lambda x: x.get("fecha_orden") or datetime.min, reverse=True)
+        def fecha_ordenable(item):
+            fecha = item.get("fecha_orden")
+            if fecha is None:
+                return timezone.make_aware(datetime.min)
+            if timezone.is_naive(fecha):
+                return timezone.make_aware(fecha, timezone.get_default_timezone())
+            return fecha
+
+        actividades.sort(key=fecha_ordenable, reverse=True)
         # Remove fecha_orden from returned items
         for item in actividades:
             item.pop("fecha_orden", None)
