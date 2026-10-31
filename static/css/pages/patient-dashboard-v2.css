@@ -1584,3 +1584,101 @@ html.dark-mode .stat-card-v2__energy-bar {
 html.dark-mode .sparkline-legend__item {
     color: var(--text-secondary);
 }
+
+/* ==================================================================
+   PATIENT DASHBOARD RESPONSIVE FOR LAPTOPS (<850px height)
+   ================================================================== */
+@media screen and (max-height: 850px), screen and (max-width: 1400px) and (max-height: 900px) {
+    .dash-topbar {
+        padding: 8px 24px;
+    }
+    .dash-topbar__avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 0.78rem;
+    }
+    .dash-body {
+        padding: 12px 24px 28px;
+    }
+    .dash-band {
+        margin-bottom: 14px;
+    }
+    .dash-hero-v2 {
+        padding: 16px 24px;
+        margin-bottom: 14px;
+        border-radius: 18px;
+    }
+    .dash-hero-v2__greeting {
+        font-size: 1.45rem;
+        margin-bottom: 2px;
+    }
+    .dash-hero-v2__motivation {
+        font-size: 0.86rem;
+        margin-bottom: 8px;
+        max-width: 440px;
+    }
+    .dash-hero-v2__cta,
+    .dash-hero-v2__mensajes {
+        padding: 5px 12px;
+        font-size: 0.78rem;
+    }
+    .dash-hero-v2__glass-sphere {
+        height: 130px;
+        width: 130px;
+        right: -10px;
+        bottom: -20px;
+    }
+    .dash-hero-v2__avatar {
+        width: 52px;
+        height: 52px;
+        font-size: 1.15rem;
+    }
+    .dash-stats-v2 {
+        gap: 12px;
+    }
+    .stat-card-v2 {
+        padding: 12px 16px;
+        border-radius: 14px;
+    }
+    .stat-card-v2__top {
+        margin-bottom: 6px;
+    }
+    .stat-card-v2__icon {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+        border-radius: 10px;
+    }
+    .stat-card-v2__value {
+        font-size: 1.25rem;
+    }
+    .stat-card-v2__label {
+        font-size: 0.72rem;
+    }
+    .stat-card-v2__meta {
+        font-size: 0.74rem;
+        margin-top: 3px;
+    }
+    .dash-main-grid {
+        gap: 14px;
+    }
+    .dash-card-v2 {
+        padding: 14px 18px;
+        border-radius: 16px;
+    }
+    .dash-card-v2__header {
+        margin-bottom: 10px;
+    }
+    .dash-card-v2__title {
+        font-size: 0.92rem;
+    }
+    .dash-quick-v2__item {
+        padding: 8px 12px;
+        font-size: 0.84rem;
+    }
+    .dash-quick-v2__icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+}
