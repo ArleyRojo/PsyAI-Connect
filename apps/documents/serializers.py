@@ -14,4 +14,4 @@ class DocumentoPacienteUploadSerializer(serializers.Serializer):
 
 
 class AutorizacionToggleSerializer(serializers.Serializer):
-    idPaciente = serializers.IntegerField(required=False, allow_null=True)
+    idProfesional = serializers.IntegerField()
