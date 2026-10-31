@@ -243,20 +243,13 @@ async function cargarCitasPaciente() {
             estadoBadge = `<span class="badge bg-secondary">${c.estado}</span>`;
           }
 
-          // Badge de pago si existe factura
-          const pagoHtml = c.estadoPago
-            ? `<span class="badge ${c.estadoPago === 'Pagado' ? 'bg-success' : 'bg-warning text-dark'}">${c.estadoPago === 'Pagado' ? 'Pagado' : 'Pendiente'}</span>`
-            : '';
-
-          const estadoYpago = `${estadoBadge}${pagoHtml ? ' ' + pagoHtml : ''}`;
-
           return `
             <tr class="align-middle">
               <td class="fw-semibold">${c.fecha}</td>
               <td class="text-dark fw-medium">${horaFormateada}</td>
               <td>${c.tipoCita}</td>
               <td>${c.motivo || '<em class="text-muted">Sin detalles</em>'}</td>
-              <td>${estadoYpago}</td>
+              <td>${estadoBadge}</td>
               <td>${accionHtml}</td>
             </tr>
           `;

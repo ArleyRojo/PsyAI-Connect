@@ -372,22 +372,12 @@ function abrirModalCancelarCita(idCita) {
 }
 
 async function confirmarCita(idCita) {
-    const monto = prompt('Ingrese el monto de la cita (número):');
-    if (monto === null || monto.trim() === '') {
-        return;
-    }
-    const montoNum = parseFloat(monto);
-    if (isNaN(montoNum) || montoNum <= 0) {
-        PsyAIAlerts.warning('Monto inválido', 'Debe ingresar un monto mayor a 0.');
-        return;
-    }
-    const descripcion = prompt('Descripción (opcional):') || '';
     try {
         const res = await fetch(`/api/citas/${idCita}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ estado: 'Confirmada', monto: montoNum, descripcion })
+            body: JSON.stringify({ estado: 'Confirmada' })
         });
         const data = await res.json();
         if (data.success) {

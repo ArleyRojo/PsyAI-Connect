@@ -179,8 +179,10 @@ class AppointmentService:
                 desc_extra = data.get("descripcion")
                 if desc_extra:
                     descripcion = desc_extra
-                if monto is None or monto <= 0:
-                    return {"success": False, "message": "Se requiere monto mayor a 0 para agendar como profesional"}, 400
+                if monto is None:
+                    monto = Decimal(str(getattr(settings, "CITA_MONTO_DEFAULT", "100000")))
+                if monto <= 0:
+                    return {"success": False, "message": "El monto debe ser mayor a 0"}, 400
                 self._create_invoice_for_cita(cita_id, target_patient_id, professional_id, monto, descripcion)
             else:
                 # Paciente solicita -> Pendiente
@@ -338,6 +340,7 @@ class AppointmentService:
 
         with transaction.atomic():
             # Bloquear fila de cita
+            from apps.scheduling.models import Citas
             cita_locked = Citas.objects.select_for_update().get(idCita=appointment_id)
             cita_locked.estado = estado
             cita_locked.save(update_fields=["estado"])
@@ -345,7 +348,6 @@ class AppointmentService:
             # Si se confirma, crear factura si no existe
             if estado == "Confirmada":
                 if not Facturas.objects.filter(idCita=appointment_id, anulada=False).exists():
-                    # Requiere monto >0
                     monto = None
                     descripcion = f"Cita {cita_locked.tipoCita}"
                     if extra_data:
@@ -358,8 +360,10 @@ class AppointmentService:
                         desc_extra = extra_data.get("descripcion")
                         if desc_extra:
                             descripcion = desc_extra
-                    if monto is None or monto <= 0:
-                        return {"success": False, "message": "Se requiere monto mayor a 0 para confirmar"}, 400
+                    if monto is None:
+                        monto = Decimal(str(getattr(settings, "CITA_MONTO_DEFAULT", "100000")))
+                    if monto <= 0:
+                        return {"success": False, "message": "El monto debe ser mayor a 0"}, 400
 
                     invoice_repo = InvoiceRepository()
                     items = [{"descripcion": descripcion, "precioUnitario": str(monto)}]
