@@ -99,6 +99,7 @@ class TestToggleDocVisibility:
     def test_successful_toggle(self, documento_service, mock_documento_repo):
         mock_documento_repo.get_profesional_doc_by_id.return_value = {
             "idDocumento": 1,
+            "idPaciente": 5,
             "visibilidad": "privado",
         }
         result, status = documento_service.toggle_doc_visibility(1, 1)
@@ -208,7 +209,9 @@ class TestToggleAutorizacion:
         result, status = documento_service.toggle_autorizacion(999, 5, 1)
         assert status == 404
 
-    def test_successful_toggle_grant(self, documento_service, mock_documento_repo):
+    @patch("apps.documents.services.PerfilProfesional.objects.filter")
+    def test_successful_toggle_grant(self, mock_professional, documento_service, mock_documento_repo):
+        mock_professional.return_value.exists.return_value = True
         mock_documento_repo.get_patient_doc_by_id.return_value = {"idDocumento": 1}
         mock_documento_repo.get_autorizacion.return_value = None
         result, status = documento_service.toggle_autorizacion(1, 5, 1)
@@ -216,7 +219,9 @@ class TestToggleAutorizacion:
         assert result["success"] is True
         assert result["autorizado"] is True
 
-    def test_successful_toggle_revoke(self, documento_service, mock_documento_repo):
+    @patch("apps.documents.services.PerfilProfesional.objects.filter")
+    def test_successful_toggle_revoke(self, mock_professional, documento_service, mock_documento_repo):
+        mock_professional.return_value.exists.return_value = True
         mock_documento_repo.get_patient_doc_by_id.return_value = {"idDocumento": 1}
         mock_documento_repo.get_autorizacion.return_value = {"revocado": False}
         result, status = documento_service.toggle_autorizacion(1, 5, 1)
