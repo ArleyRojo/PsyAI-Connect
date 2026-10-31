@@ -63,6 +63,17 @@ class PerfilPacienteViewSet(viewsets.ViewSet):
             return Response(
                 {"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN
             )
+        if user_role == "profesional":
+            from apps.professionals.services import ProfessionalService
+            professional_service = ProfessionalService()
+            check = professional_service._check_verificacion(user_id)
+            if check:
+                return Response(check[0], status=check[1])
+            if not professional_service.repo.professional_has_patient(user_id, id_usuario):
+                return Response(
+                    {"success": False, "message": "No tienes asignado este paciente"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
         payload, status_code = _get_patient_service().get_patient_profile(id_usuario)
         return Response(payload, status=status_code)
 
@@ -130,6 +141,10 @@ class PacienteViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticatedDRF, IsAdminOrProfesional]
 
     def list(self, request):
+        if getattr(request, "user_role", None) == "profesional":
+            from apps.professionals.services import ProfessionalService
+            payload, status_code = ProfessionalService().list_patients(getattr(request, "user_id", None))
+            return Response(payload, status=status_code)
         page = int(request.query_params.get("page", 1))
         limit = int(request.query_params.get("limit", 20))
         payload, status_code = _get_patient_service().list_patients(page, limit)
@@ -358,7 +373,7 @@ class ChatContactoViewSet(viewsets.ViewSet):
             )
         user_id = getattr(request, "user_id", None)
         msg_svc = MensajesService()
-        payload, _ = _get_patient_service().list_professionals()
+        payload, _ = _get_patient_service().list_professionals_for_patient(user_id)
         profesionales = payload.get("profesionales", [])
         upload_dir = os.path.join(settings.STATICFILES_DIRS[0], "uploads")
         for p in profesionales:
@@ -385,6 +400,8 @@ class ChatMensajeViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         svc = MensajesService()
+        if not svc.puede_chatear(user_id, id_receptor):
+            return Response({"success": False, "message": "No tienes acceso a la conversación con este profesional"}, status=status.HTTP_403_FORBIDDEN)
         desde = int(request.query_params.get("desde", 0))
         user_id = getattr(request, "user_id", None)
         msgs = svc.get_mensajes(user_id, id_receptor, desde)
@@ -407,6 +424,8 @@ class ChatMensajeViewSet(viewsets.ViewSet):
             )
         svc = MensajesService()
         user_id = getattr(request, "user_id", None)
+        if not svc.puede_chatear(user_id, receptor):
+            return Response({"success": False, "message": "No tienes acceso a la conversación con este profesional"}, status=status.HTTP_403_FORBIDDEN)
         id_msg = svc.enviar_mensaje(user_id, receptor, mensaje)
         return Response({"success": True, "idMensaje": id_msg}, status=status.HTTP_201_CREATED)
 
@@ -423,12 +442,34 @@ class AnamnesisViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticatedDRF, IsAdminOrProfesional]
 
+    def _authorize_professional_patient(self, request, paciente_id):
+        if getattr(request, "user_role", None) == "admin":
+            return None
+        from apps.professionals.services import ProfessionalService
+        service = ProfessionalService()
+        professional_id = getattr(request, "user_id", None)
+        check = service._check_verificacion(professional_id)
+        if check:
+            return Response(check[0], status=check[1])
+        if not service.repo.professional_has_patient(professional_id, paciente_id):
+            return Response(
+                {"success": False, "message": "Debes tener asignado este paciente para acceder a su anamnesis"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return None
+
     def retrieve(self, request, paciente_id=None):
+        denied = self._authorize_professional_patient(request, paciente_id)
+        if denied:
+            return denied
         profesional_id = getattr(request, "user_id", None)
         payload, status_code = _get_patient_service().get_anamnesis(paciente_id, profesional_id)
         return Response(payload, status=status_code)
 
     def create(self, request, paciente_id=None):
+        denied = self._authorize_professional_patient(request, paciente_id)
+        if denied:
+            return denied
         profesional_id = getattr(request, "user_id", None)
         data = request.data.copy() if hasattr(request.data, "copy") else dict(request.data)
         payload, status_code = _get_patient_service().registrar_anamnesis(
@@ -437,6 +478,9 @@ class AnamnesisViewSet(viewsets.ViewSet):
         return Response(payload, status=status_code)
 
     def update(self, request, paciente_id=None):
+        denied = self._authorize_professional_patient(request, paciente_id)
+        if denied:
+            return denied
         profesional_id = getattr(request, "user_id", None)
         data = request.data.copy() if hasattr(request.data, "copy") else dict(request.data)
         payload, status_code = _get_patient_service().actualizar_anamnesis(
@@ -445,6 +489,9 @@ class AnamnesisViewSet(viewsets.ViewSet):
         return Response(payload, status=status_code)
 
     def destroy(self, request, paciente_id=None):
+        denied = self._authorize_professional_patient(request, paciente_id)
+        if denied:
+            return denied
         profesional_id = getattr(request, "user_id", None)
         payload, status_code = _get_patient_service().eliminar_anamnesis(paciente_id, profesional_id)
         return Response(payload, status=status_code)
