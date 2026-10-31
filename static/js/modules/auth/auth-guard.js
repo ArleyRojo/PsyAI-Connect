@@ -69,11 +69,14 @@ function actualizarInfoUsuario(usuario) {
     document.querySelectorAll('.user-info').forEach(el => {
         const slot = el.querySelector('[data-user-name]');
         if (slot) slot.textContent = usuario.nombre;
-        else el.innerHTML = `
+        else {
+            el.innerHTML = `
             <div class="user-avatar-sm">
                 <i class="fas fa-user"></i>
             </div>
-            <span class="fw-semibold">Hola, <span data-user-name>${usuario.nombre}</span></span>`;
+            <span class="fw-semibold">Hola, <span data-user-name></span></span>`;
+            el.querySelector('[data-user-name]').textContent = usuario.nombre;
+        }
     });
 
     const sidebarUser = document.querySelector('[data-sidebar-user-name]');
@@ -82,7 +85,10 @@ function actualizarInfoUsuario(usuario) {
     const sidebarAvatar = document.querySelector('.sidebar .user-avatar');
     if (sidebarAvatar) {
         const iniciales = construirIniciales(usuario.nombre);
-        sidebarAvatar.innerHTML = `<span style="font-weight:700;font-size:0.85rem;color:#1565C0;">${iniciales}</span>`;
+        const initialLabel = document.createElement('span');
+        initialLabel.style.cssText = 'font-weight:700;font-size:0.85rem;color:#1565C0;';
+        initialLabel.textContent = iniciales;
+        sidebarAvatar.replaceChildren(initialLabel);
     }
 }
 
