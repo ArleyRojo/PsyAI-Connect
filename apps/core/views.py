@@ -123,7 +123,16 @@ class ServePagesView(View):
             raise Http404
 
         if filename.startswith("uploads/"):
-            if filename.startswith("uploads/documentos/"):
+            # Only registered profile images are public. Other uploaded files
+            # can contain sensitive clinical documents and must use protected APIs.
+            relative_name = filename.removeprefix("uploads/")
+            if "/" in relative_name or "\\" in relative_name:
+                raise Http404
+            if os.path.splitext(relative_name)[1].lower() not in {".jpg", ".jpeg", ".png", ".gif", ".webp"}:
+                raise Http404
+            from apps.authentication.models import Register
+
+            if not Register.objects.filter(fotoPerfil=relative_name).exists():
                 raise Http404
             try:
                 safe_path = safe_join(settings.MEDIA_ROOT, filename)
@@ -135,6 +144,7 @@ class ServePagesView(View):
             content_type = MIME_OVERRIDES.get(ext) or mimetypes.guess_type(safe_path)[0] or "application/octet-stream"
             response = FileResponse(open(safe_path, "rb"), content_type=content_type)
             response["Cache-Control"] = "max-age=86400"
+            response["X-Content-Type-Options"] = "nosniff"
             return response
 
         user_role = request.session.get("rol")
