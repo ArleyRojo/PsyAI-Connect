@@ -267,7 +267,8 @@ function actualizarStats(lista) {
 }
 
 function getBadgeOrigen(origen) {
-    const label = origen === 'auditoria' ? 'Acceso' : capitalizar(origen);
+    const safeOrigen = ['profesional', 'paciente', 'sistema', 'admin', 'notificacion', 'auditoria'].includes(origen) ? origen : 'sistema';
+    const label = safeOrigen === 'auditoria' ? 'Acceso' : capitalizar(safeOrigen);
     const icons = {
         profesional: 'fa-user-md',
         paciente: 'fa-user',
@@ -276,7 +277,7 @@ function getBadgeOrigen(origen) {
         notificacion: 'fa-bell',
         auditoria: 'fa-sign-in-alt'
     };
-    return `<span class="badge-origin badge-origen-${origen}"><i class="fas ${icons[origen] || 'fa-circle'}"></i> ${label}</span>`;
+    return `<span class="badge-origin badge-origen-${safeOrigen}"><i class="fas ${icons[safeOrigen] || 'fa-circle'}"></i> ${label}</span>`;
 }
 
 function getBadgeModulo(modulo) {
@@ -304,13 +305,18 @@ function getBadgeModulo(modulo) {
         facturacion: 'fa-file-invoice-dollar',
         seguridad: 'fa-shield-alt',
     };
-    const icono = iconos[modulo] || 'fa-circle';
-    return `<span class="badge-modulo badge-modulo-${modulo}"><i class="fas ${icono}"></i> ${capitalizar(modulo)}</span>`;
+    const safeModulo = Object.prototype.hasOwnProperty.call(iconos, modulo) ? modulo : 'sistema';
+    const icono = iconos[safeModulo] || 'fa-circle';
+    return `<span class="badge-modulo badge-modulo-${safeModulo}"><i class="fas ${icono}"></i> ${capitalizar(safeModulo)}</span>`;
+}
+
+function escapeHtmlLog(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 }
 
 function getBadgeUsuario(usuario) {
     if (!usuario) return '—';
-    return `<span class="badge-usuario">${usuario}</span>`;
+    return `<span class="badge-usuario">${escapeHtmlLog(usuario)}</span>`;
 }
 
 function getBadgeRol(rol) {
@@ -321,7 +327,8 @@ function getBadgeRol(rol) {
         admin: 'fa-user-shield'
     };
     const cls = rol === 'admin' ? 'badge-rol-admin' : rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
-    return `<span class="badge-rol ${cls}"><i class="fas ${icons[rol] || 'fa-user'}"></i> ${capitalizar(rol)}</span>`;
+    const icon = Object.prototype.hasOwnProperty.call(icons, rol) ? icons[rol] : 'fa-user';
+    return `<span class="badge-rol ${cls}"><i class="fas ${icon}"></i> ${escapeHtmlLog(capitalizar(rol))}</span>`;
 }
 
 function getBadgeAccion(accion) {
@@ -338,7 +345,7 @@ function getBadgeAccion(accion) {
     else if (a.includes('notif') || a.includes('envi')) clase += ' info';
     else clase += ' sistema';
     
-    return `<span class="${clase}">${accion}</span>`;
+    return `<span class="${clase}">${escapeHtmlLog(accion)}</span>`;
 }
 
 
@@ -367,19 +374,19 @@ function renderizarPagina() {
     } else {
         tbody.innerHTML = paginaLogs.map(l => {
             return `
-        <tr class="log-row ${severidad(l)}" data-modulo="${l.modulo}">
+        <tr class="log-row ${severidad(l)}">
           <td class="ps-4"><span class="sev-dot ${severidad(l)}"></span></td>
-          <td class="mono">${l.fecha}</td>
+          <td class="mono">${escapeHtmlLog(l.fecha)}</td>
           <td>
             <div class="user-cell">
-              <div class="user-avatar" style="background:#e8faf6;color:#283593;">${iniciales(l.administrador)}</div>
-              <span class="user-name">${l.administrador}</span>
+              <div class="user-avatar" style="background:#e8faf6;color:#283593;">${escapeHtmlLog(iniciales(l.administrador))}</div>
+              <span class="user-name">${escapeHtmlLog(l.administrador)}</span>
             </div>
           </td>
           <td>${getBadgeModulo(l.modulo)}</td>
           <td>${getBadgeAccion(l.accion)}</td>
           <td>${getBadgeOrigen(l.origen)}</td>
-          <td><span class="detalle-badge">${l.detalle || '—'}</span></td>
+          <td><span class="detalle-badge">${escapeHtmlLog(l.detalle || '—')}</span></td>
         </tr>`;
         }).join('');
         set('mostrandoInicio', inicio + 1);
@@ -609,18 +616,18 @@ function renderizarPaginacionTab(tabId, lista, containerId, inicioId, finId, tot
             tbody.innerHTML = paginaLogs.map(l => {
                 return `<tr class="log-row ${severidad(l)}">
                   <td class="ps-4"><span class="sev-dot ${severidad(l)}"></span></td>
-                  <td class="mono">${l.fecha}</td>
+                  <td class="mono">${escapeHtmlLog(l.fecha)}</td>
                   <td>${getBadgeAccion(l.accion)}</td>
                   <td>${getBadgeUsuario(l.usuario_afectado || l.administrador)}</td>
                   <td>${getBadgeOrigen(l.origen)}</td>
-                  <td><span class="detalle-badge">${l.detalle || '—'}</span></td>
+                  <td><span class="detalle-badge">${escapeHtmlLog(l.detalle || '—')}</span></td>
                 </tr>`;
             }).join('');
         } else if (tabId === 'roles') {
             tbody.innerHTML = paginaLogs.map(l => {
                 return `<tr class="log-row ${severidad(l)}">
                   <td class="ps-4"><span class="sev-dot ${severidad(l)}"></span></td>
-                  <td class="mono">${l.fecha}</td>
+                  <td class="mono">${escapeHtmlLog(l.fecha)}</td>
                   <td>${getBadgeAccion(l.accion)}</td>
                   <td>${getBadgeUsuario(l.usuario_afectado || l.administrador)}</td>
                   <td>${getBadgeOrigen(l.origen)}</td>
@@ -632,11 +639,11 @@ function renderizarPaginacionTab(tabId, lista, containerId, inicioId, finId, tot
             tbody.innerHTML = paginaLogs.map(l => {
                 return `<tr class="log-row ${severidad(l)}">
                   <td class="ps-4"><span class="sev-dot ${severidad(l)}"></span></td>
-                  <td class="mono">${l.fecha}</td>
+                  <td class="mono">${escapeHtmlLog(l.fecha)}</td>
                   <td>${getBadgeAccion(l.accion)}</td>
                   <td>${getBadgeOrigen(l.origen)}</td>
                   <td>${getBadgeUsuario(l.usuario_afectado || l.administrador)}</td>
-                  <td><span class="detalle-badge">${l.detalle || '—'}</span></td>
+                  <td><span class="detalle-badge">${escapeHtmlLog(l.detalle || '—')}</span></td>
                 </tr>`;
             }).join('');
         }
