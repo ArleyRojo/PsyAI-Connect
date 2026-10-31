@@ -103,6 +103,17 @@ async function cargarReportes() {
             return;
         }
 
+        if (res.status === 403) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-warning py-4">Tu cuenta profesional debe ser verificada por el administrador para consultar y generar reportes.</td></tr>';
+            const eliminados = document.getElementById("tablaReportesEliminados");
+            if (eliminados) eliminados.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Disponible despues de la verificacion.</td></tr>';
+            document.getElementById("statTotal").textContent = "0";
+            document.getElementById("statPendientes").textContent = "0";
+            document.getElementById("statCompletados").textContent = "0";
+            document.getElementById("statEliminados").textContent = "0";
+            return;
+        }
+
         const data = await res.json();
 
         // Actualizar estadísticas
@@ -118,7 +129,19 @@ async function cargarReportes() {
         document.getElementById("statEliminados").textContent = reportesEliminadosData.length;
 
         reportesData = data.reportes || [];
-        syncPacienteSelects(data.pacientes || pacientesFiltroData, reportesData);
+        const pacientes = [...pacientesFiltroData];
+        (data.pacientes || []).forEach(p => {
+            const id = getPacienteId(p);
+            const exists = pacientes.some(x => {
+                const otherId = getPacienteId(x);
+                if (String(id) !== '' && String(otherId) !== '') {
+                    return String(id) === String(otherId);
+                }
+                return (x.nombre || x.paciente) === (p.nombre || p.paciente);
+            });
+            if (!exists) pacientes.push(p);
+        });
+        syncPacienteSelects(pacientes, reportesData);
 
         // Tabla principal
         if (!data.success || !data.reportes || data.reportes.length === 0) {
