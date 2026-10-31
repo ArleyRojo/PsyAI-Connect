@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone as tz
 from apps.core.notifier import notificar_paciente
 from apps.scheduling.repositories import AppointmentRepository
+from apps.scheduling.models import Citas
 from apps.billing.repositories import InvoiceRepository
 
 logger = logging.getLogger(__name__)
@@ -163,28 +164,8 @@ class AppointmentService:
                 target_patient_id, professional_id, fecha, hora, tipo_cita, motivo,
                 created_by_professional if created_by_professional else False,
             )
-            # Estado inicial
-            if created_by_professional:
-                # Profesional agenda directamente -> Confirmada y factura
-                self.repo.update_appointment_status(cita_id, "Confirmada")
-                # Crear factura con monto provisto
-                monto = None
-                descripcion = f"Cita {tipo_cita}"
-                monto_raw = data.get("monto")
-                if monto_raw is not None:
-                    try:
-                        monto = Decimal(str(monto_raw))
-                    except (InvalidOperation, ValueError):
-                        return {"success": False, "message": "Monto inválido"}, 400
-                desc_extra = data.get("descripcion")
-                if desc_extra:
-                    descripcion = desc_extra
-                if monto is None or monto <= 0:
-                    return {"success": False, "message": "Se requiere monto mayor a 0 para agendar como profesional"}, 400
-                self._create_invoice_for_cita(cita_id, target_patient_id, professional_id, monto, descripcion)
-            else:
-                # Paciente solicita -> Pendiente
-                self.repo.update_appointment_status(cita_id, "Pendiente")
+            # Toda cita empieza pendiente; confirmar es una accion separada.
+            self.repo.update_appointment_status(cita_id, "Pendiente")
         except IntegrityError:
             msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
             return {"success": False, "message": msg}, 409
@@ -196,11 +177,11 @@ class AppointmentService:
                 prof = cita.idProfesional
                 pac = cita.idPaciente
                 if created_by_professional:
-                    # Notificar al paciente que su cita fue agendada y confirmada
+                    # Crear la cita no equivale a confirmarla ni facturarla.
                     AppointmentMailService.send_cita_notificacion(
                         recipient_email=pac.email,
-                        titulo="Cita agendada y confirmada",
-                        mensaje=f"Tu cita con {prof.nombre if prof else 'tu profesional'} ha sido agendada y confirmada.",
+                        titulo="Nueva cita pendiente de confirmacion",
+                        mensaje=f"Tu profesional {prof.nombre if prof else ''} programo una cita. Esta pendiente de confirmacion.",
                         nombre_contraparte=prof.nombre if prof else None,
                         contraparte_label="Profesional",
                         fecha=cita.fecha, hora=cita.hora,
@@ -209,11 +190,6 @@ class AppointmentService:
                         cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                         recipient_user_id=pac.idUsuario if pac else None,
                     )
-                    # notificación centralizada
-                    self._notify(pac, "confirmacion_cita",
-                                 fecha=cita.fecha.strftime("%d/%m/%Y"),
-                                 hora=cita.hora.strftime("%H:%M"),
-                                 lugar=cita.lugar or "Por definir")
                 else:
                     # Notificar al profesional de nueva solicitud
                     AppointmentMailService.send_cita_notificacion(
@@ -304,7 +280,7 @@ class AppointmentService:
         cita["hora"] = str(cita["hora"])
         return {"success": True, "cita": cita}, 200
 
-    def update_status(self, appointment_id, estado, acting_professional_id, extra_data=None):
+    def update_status(self, appointment_id, estado, acting_user_id, acting_role="profesional", extra_data=None):
         if not appointment_id or not estado:
             return {"success": False, "message": "Datos incompletos"}, 400
 
@@ -314,13 +290,21 @@ class AppointmentService:
         row = self.repo.get_appointment_owner(appointment_id)
         if not row:
             return {"success": False, "message": "Cita no encontrada"}, 404
-        if row[0] != acting_professional_id:
-            return {"success": False, "message": "No tienes permiso"}, 403
 
         # Validaciones de transición
         cita_obj = self.repo.get_appointment_full(appointment_id)
         if not cita_obj:
             return {"success": False, "message": "Cita no encontrada"}, 404
+        if acting_role == "profesional":
+            if row[0] != acting_user_id:
+                return {"success": False, "message": "No tienes permiso"}, 403
+            if estado == "Confirmada" and cita_obj.creado_por_profesional:
+                return {"success": False, "message": "Esta cita debe ser confirmada por el paciente"}, 403
+        elif acting_role == "paciente":
+            if row[1] != acting_user_id or (estado == "Confirmada" and not cita_obj.creado_por_profesional):
+                return {"success": False, "message": "No tienes permiso para confirmar esta cita"}, 403
+        else:
+            return {"success": False, "message": "No autorizado"}, 403
         if cita_obj.estado == "Cancelada":
             return {"success": False, "message": "No se puede cambiar estado de una cita cancelada"}, 400
         # No permitir confirmar citas pasadas
@@ -339,12 +323,11 @@ class AppointmentService:
         with transaction.atomic():
             # Bloquear fila de cita
             cita_locked = Citas.objects.select_for_update().get(idCita=appointment_id)
-            cita_locked.estado = estado
-            cita_locked.save(update_fields=["estado"])
 
             # Si se confirma, crear factura si no existe
             if estado == "Confirmada":
-                if not Facturas.objects.filter(idCita=appointment_id, anulada=False).exists():
+                if (acting_role == "profesional"
+                        and not Facturas.objects.filter(idCita=appointment_id, anulada=False).exists()):
                     # Requiere monto >0
                     monto = None
                     descripcion = f"Cita {cita_locked.tipoCita}"
@@ -371,6 +354,9 @@ class AppointmentService:
                         estadoPago="Pendiente",
                     )
 
+            cita_locked.estado = estado
+            cita_locked.save(update_fields=["estado"])
+
         # Notificaciones (fuera de transacción)
         try:
             cita = self.repo.get_appointment_full(appointment_id)
@@ -394,12 +380,24 @@ class AppointmentService:
                     self._notify(pac, "confirmacion_cita",
                                  fecha=cita.fecha.strftime("%d/%m/%Y"),
                                  hora=cita.hora.strftime("%H:%M"),
-                                 lugar=cita.lugar or "Por definir")
+                                 lugar=getattr(cita, "lugar", None) or "Por definir")
+                    if acting_role == "paciente":
+                        AppointmentMailService.send_cita_notificacion(
+                            recipient_email=prof.email if prof else None,
+                            titulo="Cita aceptada por el paciente",
+                            mensaje=f"{pac.nombre if pac else 'El paciente'} confirmó la cita que agendaste.",
+                            nombre_contraparte=pac.nombre if pac else None,
+                            contraparte_label="Paciente",
+                            fecha=cita.fecha, hora=cita.hora,
+                            tipo_cita=cita.tipoCita, motivo=cita.motivo,
+                            estado=estado,
+                            cta_link=f"{site_url}/aside-professional/my.agenda.html",
+                        )
                 elif estado == "Cancelada":
                     self._notify(pac, "cancelacion_cita",
                                  fecha=cita.fecha.strftime("%d/%m/%Y"),
                                  hora=cita.hora.strftime("%H:%M"),
-                                 lugar=cita.lugar or "Por definir")
+                                 lugar=getattr(cita, "lugar", None) or "Por definir")
         except Exception as e:
             logger.error(f"Error enviando correo de actualización de estado: {e}")
 
@@ -470,7 +468,7 @@ class AppointmentService:
                 self._notify(pac, "cancelacion_cita",
                              fecha=cita.fecha.strftime("%d/%m/%Y"),
                              hora=cita.hora.strftime("%H:%M"),
-                             lugar=cita.lugar or "Por definir")
+                             lugar=getattr(cita, "lugar", None) or "Por definir")
         except Exception as e:
             logger.error(f"Error enviando correo de cancelación (paciente): {e}")
 
@@ -524,7 +522,7 @@ class AppointmentService:
                 self._notify(pac, "cancelacion_cita",
                              fecha=cita.fecha.strftime("%d/%m/%Y"),
                              hora=cita.hora.strftime("%H:%M"),
-                             lugar=cita.lugar or "Por definir")
+                             lugar=getattr(cita, "lugar", None) or "Por definir")
         except Exception as e:
             logger.error(f"Error enviando correo de cancelación (profesional): {e}")
 
