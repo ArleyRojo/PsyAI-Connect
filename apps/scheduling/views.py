@@ -80,14 +80,8 @@ class CitaDetailViewSet(viewsets.ViewSet):
         data = request.data
         nuevo_estado = data.get("estado")
 
-        # Pacientes solo pueden cancelar sus propias citas
+        # El paciente confirma únicamente las citas creadas por el profesional.
         if user_role == "paciente":
-            if nuevo_estado != "Cancelada":
-                return Response(
-                    {"success": False, "message": "Solo puedes cancelar tus propias citas"},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            # Verificar que la cita pertenece al paciente
             try:
                 cita = Citas.objects.get(idCita=pk)
             except Citas.DoesNotExist:
@@ -100,6 +94,16 @@ class CitaDetailViewSet(viewsets.ViewSet):
                     {"success": False, "message": "No autorizado para esta cita"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
+            if nuevo_estado == "Confirmada" and not cita.creado_por_profesional:
+                return Response(
+                    {"success": False, "message": "Solo puedes confirmar las citas que agendó tu profesional"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            if nuevo_estado not in ("Confirmada", "Cancelada"):
+                return Response(
+                    {"success": False, "message": "Solo puedes confirmar o cancelar tus propias citas"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
         elif user_role != "profesional":
             return Response(
                 {"success": False, "message": "No autorizado"},
@@ -107,7 +111,7 @@ class CitaDetailViewSet(viewsets.ViewSet):
             )
 
         payload, status_code = appointment_service.update_status(
-            pk, nuevo_estado, user_id, extra_data=data
+            pk, nuevo_estado, user_id, acting_role=user_role, extra_data=data
         )
         return Response(payload, status=status_code)
 
