@@ -227,14 +227,24 @@ async function cargarCitasPaciente() {
         tbody.innerHTML = proximas.map(c => {
           let horaFormateada = c.hora ? formatearHora(c.hora) : '—';
 
-          const accionHtml = c.estado !== 'Cancelada'
-            ? `<button class="btn btn-outline-danger btn-sm py-0" onclick="abrirModalCancelar(${c.idCita})" title="Cancelar cita">Cancelar</button>`
-            : `<span class="badge bg-secondary">Cancelada</span>`;
+          const creadaPorProfesional = c.creado_por_profesional === true || c.creado_por_profesional === 1 || c.creado_por_profesional === '1';
+          const acciones = [];
+          if (c.estado === 'Pendiente' && creadaPorProfesional) {
+            acciones.push(`<button class="btn btn-success btn-sm py-0 me-1" onclick="confirmarCitaPaciente(${c.idCita})" title="Confirmar cita">Confirmar</button>`);
+          }
+          if (c.estado !== 'Cancelada') {
+            acciones.push(`<button class="btn btn-outline-danger btn-sm py-0" onclick="abrirModalCancelar(${c.idCita})" title="Cancelar cita">Cancelar</button>`);
+          } else {
+            acciones.push('<span class="badge bg-secondary">Cancelada</span>');
+          }
+          const accionHtml = acciones.join('');
 
           // Badge de estado de la cita
           let estadoBadge = '';
           if (c.estado === 'Pendiente') {
-            estadoBadge = '<span class="badge bg-warning text-dark">Pendiente de confirmación</span>';
+            estadoBadge = creadaPorProfesional
+              ? '<span class="badge bg-warning text-dark">Pendiente por tu confirmación</span>'
+              : '<span class="badge bg-warning text-dark">Pendiente de confirmación del profesional</span>';
           } else if (c.estado === 'Confirmada') {
             estadoBadge = '<span class="badge bg-success">Confirmada</span>';
           } else if (c.estado === 'Cancelada') {
@@ -268,6 +278,27 @@ async function cargarCitasPaciente() {
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar citas</td></tr>';
   }
 }
+
+window.confirmarCitaPaciente = async function(idCita) {
+  try {
+    const response = await fetch(`/api/citas/${idCita}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ estado: 'Confirmada' })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      PsyAIAlerts.error('No se pudo confirmar', data.message || 'Inténtalo nuevamente.');
+      return;
+    }
+    PsyAIAlerts.success('Cita confirmada', 'Tu profesional recibirá la confirmación.');
+    cargarCitasPaciente();
+  } catch (error) {
+    console.error(error);
+    PsyAIAlerts.error('Error', 'No fue posible conectar con el servidor.');
+  }
+};
 
 async function abrirModalCancelar(idCita) {
   window.citaAcancelar = idCita;
