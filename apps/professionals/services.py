@@ -55,6 +55,14 @@ class ProfessionalService:
             return check
         return {"success": True, "pacientes": self.repo.list_professional_patients(professional_id)}, 200
 
+    def assign_patient(self, professional_id, patient_id):
+        check = self._check_verificacion(professional_id)
+        if check:
+            return check
+        if not self.repo.assign_patient(professional_id, patient_id):
+            return {"success": False, "message": "Paciente no encontrado"}, 404
+        return {"success": True, "message": "Paciente asignado correctamente"}, 200
+
     def save_diagnosis(self, professional_id, data):
         check = self._check_verificacion(professional_id)
         if check:
@@ -97,7 +105,9 @@ class ProfessionalService:
         check = self._check_verificacion(professional_id)
         if check:
             return check
-        self.repo.update_report(professional_id, data)
+        report = self.repo.update_report(professional_id, data)
+        if not report:
+            return {"success": False, "message": "Reporte no encontrado"}, 404
         return {"success": True, "message": "Reporte actualizado correctamente"}, 200
 
     def delete_report(self, professional_id, report_id):
@@ -142,19 +152,18 @@ class ProfessionalService:
         owner_id = None if is_admin else professional_id
         return {"success": True, "reportes": self.repo.get_deleted_reports(owner_id)}, 200
 
-    def list_patients_for_chat(self):
-        from apps.authentication.models import Register
-        return [
-            {
-                "idUsuario": u.idUsuario,
-                "nombre": u.nombre,
-                "fotoPerfil": u.fotoPerfil,
-                "edad": None,
-                "genero": None,
-                "contacto": u.email,
-            }
-            for u in Register.objects.filter(rol="paciente", activo=True, estadoCuenta="Activa").order_by("nombre")
-        ]
+    def list_patients_for_chat(self, professional_id):
+        check = self._check_verificacion(professional_id)
+        if check:
+            return check
+        pacientes = self.repo.list_professional_patients(professional_id)
+        return {
+            "success": True,
+            "pacientes": [
+                {"idUsuario": p["idUsuario"], "nombre": p["nombre"], "fotoPerfil": p["fotoPerfil"]}
+                for p in pacientes
+            ],
+        }, 200
 
     def get_patient_chatbot_history(self, professional_id, patient_id):
         check = self._check_verificacion(professional_id)
@@ -166,7 +175,7 @@ class ProfessionalService:
         chat_repo = ChatRepository()
         if not chat_repo:
             return {"success": False, "message": "Servicio de chatbot no disponible"}, 503
-        return {"success": True, "historial": self.chat_repo.get_history(patient_id)}, 200
+        return {"success": True, "historial": chat_repo.get_history(patient_id)}, 200
 
     # Métodos de verificación
     def verificar_profesional(self, admin_user_id, professional_id):
