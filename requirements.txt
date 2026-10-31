@@ -1,7 +1,7 @@
 # PsyAI Connect - Dependencias Django
 # Instalar: pip install -r requirements.txt
 
-django>=5.0
+django>=5.0,<6.0
 mysqlclient>=2.2.0
 python-dotenv>=1.0.0
 bcrypt>=4.0.0
