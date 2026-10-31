@@ -9,6 +9,7 @@ var pacientesEvolucionData = [];
 
 // Pagination state
 var allPacientes = [];
+var pacientesAsignados = new Set();
 var currentPage = 1;
 var pageSize = 10;
 
@@ -93,13 +94,20 @@ function cargarPacientes() {
 
     fetch("/api/pacientes", { credentials: "include" })
         .then(function (res) { return res.json(); })
-        .then(function (data) {
+        .then(async function (data) {
             if (!data.success) {
                 tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>" + data.message + "</td></tr>";
                 return;
             }
 
             var pacientes = data.pacientes || data.usuarios || [];
+            try {
+                var asignadosRes = await fetch("/api/profesional/pacientes", { credentials: "include" });
+                var asignadosData = await asignadosRes.json();
+                pacientesAsignados = new Set((asignadosData.pacientes || []).map(function (p) { return Number(p.idUsuario); }));
+            } catch (_) {
+                pacientesAsignados = new Set();
+            }
 
             if (pacientes.length === 0) {
                 tbody.innerHTML = "<tr><td colspan='7' class='text-muted text-center py-4'>No hay pacientes registrados</td></tr>";
@@ -140,7 +148,8 @@ function renderPage(page) {
 
         var isSelected = pacienteSeleccionado === Number(p.idUsuario);
         var btnClass   = "btn btn-sm btn-outline-primary btn-seleccionar" + (isSelected ? " active-btn" : "");
-        var btnTxt     = isSelected ? "Seleccionado" : "Seleccionar";
+        var estaAsignado = pacientesAsignados.has(Number(p.idUsuario));
+        var btnTxt     = isSelected ? "Seleccionado" : estaAsignado ? "Seleccionar" : "Asignar y seleccionar";
 
         var emailSafe = (p.email || "").replace(/"/g, '"');
         var nomSafe   = (p.nombre || "").replace(/"/g, '"');
@@ -155,9 +164,9 @@ function renderPage(page) {
             '<td><img src="' + fotoUrl + '" class="rounded-circle me-2" style="width:35px;height:35px;object-fit:cover;" data-inicial="' + inicial + '" data-color="' + colorLetra + '" data-size="35" data-fz="14" onerror="fallbackAvatar(this)">' + (p.nombre || "—") + '</td>' +
             "<td>—</td>" +
             "<td>—</td>" +
-            "<td>" + (p.email || "—") + "</td>" +
+            "<td>" + (p.email || p.contacto || "—") + "</td>" +
             "<td>" + badgeAnamnesis + "</td>" +
-            '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + pacienteId + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this)\'>' + btnTxt + "</button></td>" +
+            '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + pacienteId + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this, ' + estaAsignado + ')\'>' + btnTxt + "</button></td>" +
             '<td><a href="historia_clinica_pro.html?pacienteId=' + pacienteId + '" class="btn btn-sm btn-outline-info" title="Ver historia clínica"><i class="fas fa-file-medical"></i></a></td>' +
             "</tr>";
     }).join('');
@@ -199,8 +208,25 @@ function goToPage(page) {
 
 // ── Seleccionar paciente ─────────────────────────────────────
 
-function seleccionarPaciente(id, nombre, fotoPerfil, email, btn) {
+async function seleccionarPaciente(id, nombre, fotoPerfil, email, btn, yaAsignado) {
     try {
+        if (!yaAsignado && !pacientesAsignados.has(Number(id))) {
+            var asignacionRes = await fetch("/api/profesional/pacientes/" + encodeURIComponent(id) + "/asignar", {
+                method: "POST",
+                credentials: "include"
+            });
+            var asignacion = await asignacionRes.json();
+            if (!asignacionRes.ok || !asignacion.success) {
+                if (window.PsyAIAlerts?.error) {
+                    window.PsyAIAlerts.error("No se pudo asignar", asignacion.message || "Verifica que tu cuenta profesional este aprobada.");
+                } else {
+                    window.alert(asignacion.message || "Verifica que tu cuenta profesional este aprobada.");
+                }
+                return;
+            }
+            pacientesAsignados.add(Number(id));
+        }
+
         // Si ya estaba seleccionado, solo avisar
         if (pacienteSeleccionado === id) {
             PsyAIAlerts
