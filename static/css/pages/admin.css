@@ -2238,3 +2238,7 @@ body.admin-panel .main-header .user-info i {
   color: var(--header-text-on-brand, var(--text-on-brand)) !important;
   -webkit-text-fill-color: var(--header-text-on-brand, var(--text-on-brand)) !important;
 }
+/* Keep the fixed sidebar anchored to the viewport, not to the animated body. */
+body.admin-panel {
+  animation: none;
+}
