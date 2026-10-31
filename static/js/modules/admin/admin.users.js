@@ -70,6 +70,13 @@ function escapeHtmlAdmin(value) {
     })[char]);
 }
 
+function inlineJsArgAdmin(value) {
+    const json = JSON.stringify(String(value ?? '')).replace(/[<>&\u2028\u2029]/g, char => ({
+        '<': '\\u003c', '>': '\\u003e', '&': '\\u0026', '\u2028': '\\u2028', '\u2029': '\\u2029'
+    })[char]);
+    return escapeHtmlAdmin(json);
+}
+
 async function cargarUsuarios() {
     const res  = await fetch(`${API}/api/admin/usuarios`, {
         credentials: "include"
@@ -120,7 +127,7 @@ function renderizarPaginaUsuarios() {
         document.getElementById('mostrandoTotal').textContent = 0;
     } else {
         tbody.innerHTML = paginaUsuarios.map(u => {
-            const iniciales  = u.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            const iniciales  = escapeHtmlAdmin(String(u.nombre || '').split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase());
             const rolLabel   = u.rol === 'profesional' ? 'Profesional' : u.rol === 'admin' ? 'Admin' : 'Paciente';
             const rolClass   = u.rol === 'admin' ? 'badge-rol-admin' : u.rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
             const rolIcon    = u.rol === 'admin' ? 'fa-user-shield' : u.rol === 'profesional' ? 'fa-user-md' : 'fa-user';
@@ -130,13 +137,13 @@ function renderizarPaginaUsuarios() {
             let estadoBadge, btnToggle;
             if (estado === 'Pendiente' || estado === 'Verificacion') {
                 estadoBadge = '<span class="badge-estado badge-estado-pendiente">Pendiente</span>';
-                btnToggle = `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','activar')" title="Activar"><i class="fas fa-check"></i></button>`;
+                btnToggle = `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'activar')" title="Activar"><i class="fas fa-check"></i></button>`;
             } else if (activoNum === 0 || estado === 'Suspendida') {
                 estadoBadge = '<span class="badge-estado badge-estado-suspendido">Suspendido</span>';
-                btnToggle = `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','activar')" title="Activar"><i class="fas fa-check"></i></button>`;
+                btnToggle = `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'activar')" title="Activar"><i class="fas fa-check"></i></button>`;
             } else {
                 estadoBadge = '<span class="badge-estado badge-estado-activo">Activo</span>';
-                btnToggle = `<button class="btn btn-sm btn-outline-warning" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','suspender')" title="Suspender"><i class="fas fa-ban"></i></button>`;
+                btnToggle = `<button class="btn btn-sm btn-outline-warning" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'suspender')" title="Suspender"><i class="fas fa-ban"></i></button>`;
             }
 
             return `
@@ -145,19 +152,19 @@ function renderizarPaginaUsuarios() {
                 <div class="d-flex align-items-center gap-2">
                   <div style="width:36px;height:36px;border-radius:50%;background:#e8f0fe;color:#1565C0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;">${iniciales}</div>
                   <div>
-                    <div class="fw-semibold" style="font-size:.9rem;">${u.nombre}</div>
-                    <div class="text-muted" style="font-size:.78rem;">${u.email}</div>
+                  <div class="fw-semibold" style="font-size:.9rem;">${escapeHtmlAdmin(u.nombre)}</div>
+                    <div class="text-muted" style="font-size:.78rem;">${escapeHtmlAdmin(u.email)}</div>
                   </div>
                 </div>
               </td>
               <td data-label="Rol">${rolBadge}</td>
               <td data-label="Estado">${estadoBadge}</td>
-              <td data-label="Registro" class="text-muted" style="font-size:.82rem;">${u.fechaRegistro || '—'}</td>
-              <td data-label="Último acceso" class="text-muted" style="font-size:.82rem;">${u.ultimoAcceso || '—'}</td>
+              <td data-label="Registro" class="text-muted" style="font-size:.82rem;">${escapeHtmlAdmin(u.fechaRegistro || '—')}</td>
+              <td data-label="Último acceso" class="text-muted" style="font-size:.82rem;">${escapeHtmlAdmin(u.ultimoAcceso || '—')}</td>
               <td class="text-end pe-4">
                 <div class="d-flex justify-content-end gap-1">
-                  <button class="btn btn-sm btn-outline-primary" onclick="abrirEditar(${u.idUsuario},'${u.nombre}','${u.email}','${u.rol}','${u.estadoCuenta || 'Activa'}')" title="Editar"><i class="fas fa-edit"></i></button>
-                  <button class="btn btn-sm btn-outline-danger" onclick="abrirEliminar(${u.idUsuario},'${u.nombre}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+                  <button class="btn btn-sm btn-outline-primary" onclick="abrirEditar(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},${inlineJsArgAdmin(u.email)},${inlineJsArgAdmin(u.rol)},${inlineJsArgAdmin(u.estadoCuenta || 'Activa')})" title="Editar"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="abrirEliminar(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)})" title="Eliminar"><i class="fas fa-trash"></i></button>
                   ${btnToggle}
                 </div>
               </td>
@@ -390,7 +397,7 @@ function renderTablaFiltrada(tabId, lista) {
 
     if (tabId === 'tab-u-suspendidos') {
         tbody.innerHTML = lista.map(u => {
-            const iniciales = u.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            const iniciales = escapeHtmlAdmin(String(u.nombre || '').split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase());
             const rolLabel  = u.rol === 'profesional' ? 'Profesional' : u.rol === 'admin' ? 'Admin' : 'Paciente';
             const rolClass  = u.rol === 'admin' ? 'badge-rol-admin' : u.rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
             const rolIcon   = u.rol === 'admin' ? 'fa-user-shield' : u.rol === 'profesional' ? 'fa-user-md' : 'fa-user';
@@ -402,16 +409,16 @@ function renderTablaFiltrada(tabId, lista) {
                 <div class="d-flex align-items-center gap-2">
                   <div style="width:36px;height:36px;border-radius:50%;background:#ffebee;color:#c62828;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;">${iniciales}</div>
                   <div>
-                    <div class="fw-semibold">${u.nombre}</div>
-                    <div class="text-muted" style="font-size:.78rem;">${u.email}</div>
+                    <div class="fw-semibold">${escapeHtmlAdmin(u.nombre)}</div>
+                    <div class="text-muted" style="font-size:.78rem;">${escapeHtmlAdmin(u.email)}</div>
                   </div>
                 </div>
               </td>
               <td>${rolBadge}</td>
-              <td class="text-muted">${u.motivoSuspension || 'No especificado'}</td>
-              <td class="text-muted">${u.fechaSuspension || u.fechaRegistro || '—'}</td>
+              <td class="text-muted">${escapeHtmlAdmin(u.motivoSuspension || 'No especificado')}</td>
+              <td class="text-muted">${escapeHtmlAdmin(u.fechaSuspension || u.fechaRegistro || '—')}</td>
               <td class="text-end pe-4">
-                <button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','activar')" title="Reestablecer"><i class="fas fa-check"></i> Reestablecer</button>
+                <button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'activar')" title="Reestablecer"><i class="fas fa-check"></i> Reestablecer</button>
               </td>
             </tr>`;
         }).join('');
@@ -419,7 +426,7 @@ function renderTablaFiltrada(tabId, lista) {
     }
 
     tbody.innerHTML = lista.map(u => {
-        const iniciales = u.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+        const iniciales = escapeHtmlAdmin(String(u.nombre || '').split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase());
         const rolLabel  = u.rol === 'profesional' ? 'Profesional' : u.rol === 'admin' ? 'Admin' : 'Paciente';
         const rolClass  = u.rol === 'admin' ? 'badge-rol-admin' : u.rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
         const rolIcon   = u.rol === 'admin' ? 'fa-user-shield' : u.rol === 'profesional' ? 'fa-user-md' : 'fa-user';
@@ -427,8 +434,8 @@ function renderTablaFiltrada(tabId, lista) {
         
         const activoNum = parseInt(u.activo);
         const btnToggle = activoNum === 0
-            ? `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','activar')" title="Activar"><i class="fas fa-check"></i></button>`
-            : `<button class="btn btn-sm btn-outline-warning" onclick="abrirBloqueo(${u.idUsuario},'${u.nombre}','suspender')" title="Suspender"><i class="fas fa-ban"></i></button>`;
+            ? `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'activar')" title="Activar"><i class="fas fa-check"></i></button>`
+            : `<button class="btn btn-sm btn-outline-warning" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'suspender')" title="Suspender"><i class="fas fa-ban"></i></button>`;
 
         return `
         <tr>
@@ -436,18 +443,18 @@ function renderTablaFiltrada(tabId, lista) {
             <div class="d-flex align-items-center gap-2">
               <div style="width:36px;height:36px;border-radius:50%;background:#e8f0fe;color:#1565C0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;">${iniciales}</div>
               <div>
-                <div class="fw-semibold">${u.nombre}</div>
-                <div class="text-muted" style="font-size:.78rem;">${u.email}</div>
+                <div class="fw-semibold">${escapeHtmlAdmin(u.nombre)}</div>
+                <div class="text-muted" style="font-size:.78rem;">${escapeHtmlAdmin(u.email)}</div>
               </div>
             </div>
           </td>
           <td>${rolBadge}</td>
-          <td class="text-muted">${u.fechaRegistro || '—'}</td>
-          <td class="text-muted">${u.ultimoAcceso || '—'}</td>
+          <td class="text-muted">${escapeHtmlAdmin(u.fechaRegistro || '—')}</td>
+          <td class="text-muted">${escapeHtmlAdmin(u.ultimoAcceso || '—')}</td>
           <td class="text-end pe-4">
             <div class="d-flex justify-content-end gap-1">
-              <button class="btn btn-sm btn-outline-primary" onclick="abrirEditar(${u.idUsuario},'${u.nombre}','${u.email}','${u.rol}','${u.estadoCuenta || 'Activa'}')" title="Editar"><i class="fas fa-edit"></i></button>
-              <button class="btn btn-sm btn-outline-danger" onclick="abrirEliminar(${u.idUsuario},'${u.nombre}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+              <button class="btn btn-sm btn-outline-primary" onclick="abrirEditar(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},${inlineJsArgAdmin(u.email)},${inlineJsArgAdmin(u.rol)},${inlineJsArgAdmin(u.estadoCuenta || 'Activa')})" title="Editar"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="abrirEliminar(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)})" title="Eliminar"><i class="fas fa-trash"></i></button>
               ${btnToggle}
             </div>
           </td>
