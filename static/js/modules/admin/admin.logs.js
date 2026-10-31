@@ -280,7 +280,30 @@ function getBadgeOrigen(origen) {
 }
 
 function getBadgeModulo(modulo) {
-    const iconos = { usuarios:'fa-users', roles:'fa-user-shield', notificaciones:'fa-bell', accesos:'fa-sign-in-alt', sistema:'fa-cog' };
+    const iconos = {
+        usuarios: 'fa-users',
+        roles: 'fa-user-shield',
+        notificaciones: 'fa-bell',
+        accesos: 'fa-sign-in-alt',
+        sistema: 'fa-cog',
+        perfil: 'fa-id-card',
+        evolucion: 'fa-chart-line',
+        anamnesis: 'fa-notes-medical',
+        diagnosticos: 'fa-stethoscope',
+        reportes: 'fa-file-medical',
+        pacientes: 'fa-user-injured',
+        profesionales: 'fa-user-md',
+        documentos: 'fa-folder-open',
+        consentimiento: 'fa-file-signature',
+        cuenta: 'fa-user-slash',
+        chatbot: 'fa-robot',
+        chat: 'fa-comments',
+        agenda: 'fa-calendar-plus',
+        citas: 'fa-calendar-check',
+        pagos: 'fa-credit-card',
+        facturacion: 'fa-file-invoice-dollar',
+        seguridad: 'fa-shield-alt',
+    };
     const icono = iconos[modulo] || 'fa-circle';
     return `<span class="badge-modulo badge-modulo-${modulo}"><i class="fas ${icono}"></i> ${capitalizar(modulo)}</span>`;
 }
@@ -486,10 +509,12 @@ function filtrarLogs() {
     
     let accion = '';
     let texto = '';
+    let origen = '';
     let moduloFiltro = [];
     
     if (tab === 'todos') {
         accion = (document.getElementById('filtroAccion')?.value || '').toLowerCase();
+        origen = (document.getElementById('filtroOrigen')?.value || '').toLowerCase();
         texto = (document.getElementById('filtroTexto')?.value || '').toLowerCase();
     } else if (tab === 'usuarios') {
         moduloFiltro = ['usuarios', 'accesos'];
@@ -514,6 +539,9 @@ function filtrarLogs() {
         const coincideAccion =
             !accion || (l.accion && l.accion.toLowerCase().includes(accion));
 
+        const coincideOrigen =
+            !origen || (l.origen && l.origen.toLowerCase() === origen);
+
         const coincideTexto =
             !texto ||
             (l.detalle || '').toLowerCase().includes(texto) ||
@@ -521,7 +549,7 @@ function filtrarLogs() {
             (l.administrador || '').toLowerCase().includes(texto) ||
             (l.usuario_afectado || '').toLowerCase().includes(texto);
 
-        return coincideModulo && coincideAccion && coincideTexto;
+        return coincideModulo && coincideAccion && coincideOrigen && coincideTexto;
     });
 
     logsFiltrados = filtrado;
