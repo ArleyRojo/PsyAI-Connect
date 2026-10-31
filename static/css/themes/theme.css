@@ -3027,7 +3027,7 @@ html.dark-mode .sidebar {
     top: 0 !important;
     left: 0 !important;
     z-index: 100 !important;
-    overflow-y: auto !important;
+    overflow: hidden !important;
     overflow-x: hidden !important;
     border-radius: 0 16px 16px 0 !important;
 }
