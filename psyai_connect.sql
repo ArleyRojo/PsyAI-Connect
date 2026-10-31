@@ -297,7 +297,8 @@ CREATE TABLE `logs` (
   `modulo` varchar(80) DEFAULT NULL,
   `accion` varchar(120) DEFAULT NULL,
   `detalle` text DEFAULT NULL,
-  `fecha` datetime DEFAULT current_timestamp()
+  `fecha` datetime DEFAULT current_timestamp(),
+  `origen` varchar(20) DEFAULT 'admin'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -838,7 +839,7 @@ SELECT
     l.`accion` AS `accion`,
     l.`detalle` AS `detalle`,
     DATE_FORMAT(l.`fecha`, '%d/%m/%Y %H:%i') AS `fecha`,
-    'admin' AS `origen`
+    COALESCE(l.`origen`, 'admin') AS `origen`
 FROM `logs` l
 UNION ALL
 SELECT 
