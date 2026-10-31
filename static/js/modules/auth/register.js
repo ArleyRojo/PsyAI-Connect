@@ -228,11 +228,15 @@ function buildRegResumen() {
     const fecha   = document.getElementById('fecha_nacimiento').value.trim()   || '—';
     document.getElementById('regResumen').innerHTML = `
         <div style="display:grid;gap:6px;">
-            <div><strong>Nombre:</strong> ${nombre}</div>
-            <div><strong>Correo:</strong> ${email}</div>
-            <div><strong>Género:</strong> ${genero}</div>
-            <div><strong>Fecha de nacimiento:</strong> ${fecha}</div>
+            <div><strong>Nombre:</strong> ${escapeHtmlRegister(nombre)}</div>
+            <div><strong>Correo:</strong> ${escapeHtmlRegister(email)}</div>
+            <div><strong>Género:</strong> ${escapeHtmlRegister(genero)}</div>
+            <div><strong>Fecha de nacimiento:</strong> ${escapeHtmlRegister(fecha)}</div>
         </div>`;
+}
+
+function escapeHtmlRegister(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 }
 
 /* ═══════════════════════════════════════════════════════════
