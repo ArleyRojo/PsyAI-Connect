@@ -1,5 +1,11 @@
 loadDocumentos();
 
+function escapeHtmlPatient(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[char]);
+}
+
 function loadDocumentos() {
   fetch('/api/paciente/documentos')
     .then(r => r.json())
@@ -21,8 +27,8 @@ function renderCompartidos(docs) {
     row.innerHTML = `
       <div class="ficon shared"><i class="ti ti-file-description"></i></div>
       <div class="share-row-info">
-        <strong>${d.nombre}</strong><br>
-        ${d.profesional} &nbsp;·&nbsp; ${d.fecha} &nbsp;·&nbsp; ${d.tamano}
+        <strong>${escapeHtmlPatient(d.nombre)}</strong><br>
+        ${escapeHtmlPatient(d.profesional)} &nbsp;·&nbsp; ${escapeHtmlPatient(d.fecha)} &nbsp;·&nbsp; ${escapeHtmlPatient(d.tamano)}
       </div>
       <div class="factions">
         <button class="faction-btn" title="Ver" onclick="viewShared(this)"><i class="ti ti-eye"></i></button>
@@ -43,8 +49,8 @@ function renderPropios(docs) {
     row.innerHTML = `
       <div class="ficon prev"><i class="ti ti-file-upload"></i></div>
       <div class="share-row-info">
-        <strong>${d.nombre}</strong><br>
-        Subido por mí &nbsp;·&nbsp; ${d.fecha} &nbsp;·&nbsp; ${d.tamano}
+        <strong>${escapeHtmlPatient(d.nombre)}</strong><br>
+        Subido por mí &nbsp;·&nbsp; ${escapeHtmlPatient(d.fecha)} &nbsp;·&nbsp; ${escapeHtmlPatient(d.tamano)}
       </div>
       <div class="factions">
         <button class="faction-btn" title="Ver" onclick="viewOwn(this)"><i class="ti ti-eye"></i></button>
