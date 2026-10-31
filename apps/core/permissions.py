@@ -32,6 +32,10 @@ def parse_json_body(request):
         )
 
 
+def _normalize_rol(rol):
+    return (rol or "").strip().lower()
+
+
 class IsAuthenticatedDRF(BasePermission):
     def has_permission(self, request, view):
         # First try DRF's request.user (for token auth and force_authenticate in tests)
@@ -46,7 +50,7 @@ class IsAuthenticatedDRF(BasePermission):
             if not db_user.activo or db_user.estadoCuenta != "Activa":
                 return False
             request.user_id = db_user.idUsuario
-            request.user_role = db_user.rol
+            request.user_role = _normalize_rol(db_user.rol)
             request.user_name = db_user.nombre
             return True
 
@@ -66,22 +70,25 @@ class IsAuthenticatedDRF(BasePermission):
             return False
 
         request.user_id = user["idUsuario"]
-        request.user_role = user["rol"]
+        request.user_role = _normalize_rol(user["rol"] or db_user.rol)
         request.user_name = user["nombre"]
         return True
 
 
 class IsPaciente(BasePermission):
+    message = "No autorizado para este rol"
     def has_permission(self, request, view):
         return getattr(request, "user_role", None) == "paciente"
 
 
 class IsProfesional(BasePermission):
+    message = "No autorizado para este rol"
     def has_permission(self, request, view):
         return getattr(request, "user_role", None) == "profesional"
 
 
 class IsAdmin(BasePermission):
+    message = "No autorizado para este rol"
     def has_permission(self, request, view):
         return getattr(request, "user_role", None) == "admin"
 

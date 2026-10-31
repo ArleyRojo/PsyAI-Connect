@@ -218,6 +218,9 @@ PASSWORD_RECOVERY_RATE_LIMIT = os.getenv("PASSWORD_RECOVERY_RATE_LIMIT", "10 per
 PAGO_CUENTA_URL = os.getenv("PAGO_CUENTA_URL", "")
 PAGO_CUENTA_NOMBRE = os.getenv("PAGO_CUENTA_NOMBRE", "")
 
+# Precio por defecto de una cita al confirmarla (COP).
+CITA_MONTO_DEFAULT = os.getenv("CITA_MONTO_DEFAULT", "100000")
+
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 GEMINI_THINKING_LEVEL = os.getenv("GEMINI_THINKING_LEVEL", "low")

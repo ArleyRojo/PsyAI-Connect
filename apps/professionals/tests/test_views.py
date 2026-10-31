@@ -280,6 +280,7 @@ class TestDisponibilidadResourceGET:
 # ── DashboardResource GET ────────────────────────────────────────────────────
 
 
+@pytest.mark.django_db
 class TestDashboardResourceGET:
     def test_wrong_role_returns_401(self, rf):
         req = rf.get("/api/profesional/dashboard")
@@ -300,6 +301,58 @@ class TestDashboardResourceGET:
         )
         resp = DashboardResource.as_view()(req)
 
+        assert resp.status_code == 200
+
+    def test_paciente_returns_403(self, rf, mock_service):
+        from apps.authentication.models import Register
+        Register.objects.create_user(
+            idUsuario=1, email="pac@test.com", password="Pass123",
+            rol="paciente", nombre="Paciente Test",
+        )
+        req = rf.get("/api/profesional/dashboard")
+        req.session["idUsuario"] = 1
+        req.session["rol"] = "paciente"
+        req.session["nombre"] = "Paciente Test"
+        with patch.object(IsAuthenticatedDRF, "has_permission", _auth_paciente):
+            with patch.object(IsProfesional, "has_permission", return_value=False):
+                resp = DashboardResource.as_view()(req)
+        assert resp.status_code == 403
+
+    def test_admin_returns_403(self, rf, mock_service):
+        from apps.authentication.models import Register
+        Register.objects.create_user(
+            idUsuario=10, email="admin@test.com", password="Pass123",
+            rol="admin", nombre="Admin",
+        )
+        req = rf.get("/api/profesional/dashboard")
+        req.session["idUsuario"] = 10
+        req.session["rol"] = "admin"
+        req.session["nombre"] = "Admin"
+        with patch.object(IsAuthenticatedDRF, "has_permission", _auth_admin):
+            with patch.object(IsProfesional, "has_permission", return_value=False):
+                resp = DashboardResource.as_view()(req)
+        assert resp.status_code == 403
+
+    @pytest.mark.django_db
+    def test_rol_con_espacios_y_mayusculas_devuelve_200(self, rf, mock_service):
+        """Un rol guardado como ' Profesional ' se normaliza y da acceso."""
+        from apps.authentication.models import Register
+
+        user = Register.objects.create_user(
+            email="dirty@test.com", nombre="Prof Sucio", password="Pass123",
+            rol=" Profesional ",
+        )
+        req = rf.get("/api/profesional/dashboard")
+        req.session["idUsuario"] = user.idUsuario
+        req.session["rol"] = " Profesional "
+        req.session["nombre"] = user.nombre
+        req.session.save()
+
+        mock_service.get_dashboard.return_value = (
+            {"success": True, "pacientes_activos": 3},
+            200,
+        )
+        resp = DashboardResource.as_view()(req)
         assert resp.status_code == 200
 
 

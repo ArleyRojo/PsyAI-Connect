@@ -23,7 +23,7 @@ class AuthRepository:
             email=Register.objects.normalize_email(email),
             nombre=nombre,
             contrasena=password_hash,
-            rol=rol,
+            rol=(rol or "").strip().lower(),
             email_verificado=email_verificado,
         )
         user.save()

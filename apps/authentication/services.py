@@ -152,7 +152,7 @@ class AuthService:
                 "La contraseña debe contener al menos un número", "password"
             )
 
-        rol = data.get("rol", "paciente")
+        rol = (data.get("rol", "paciente") or "paciente").strip().lower()
         allowed = ("paciente", "profesional", "admin")
         if rol not in allowed:
             raise ValidationError(
