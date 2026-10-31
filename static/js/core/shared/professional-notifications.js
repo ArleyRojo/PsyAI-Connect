@@ -44,7 +44,7 @@
                 );
                 item.append(title, message);
 
-                const destination = destinations[alert.accion || alert.acción];
+                const destination = destinations[alert.accion];
                 if (destination) {
                     const link = document.createElement('a');
                     link.className = 'professional-notification-action';
