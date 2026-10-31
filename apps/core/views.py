@@ -2,6 +2,7 @@
 import logging
 import mimetypes
 import os
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
@@ -345,7 +346,8 @@ class ConfigPagoView(APIView):
     def get(self, request):
         url = (getattr(settings, "PAGO_CUENTA_URL", "") or "").strip()
         nombre = (getattr(settings, "PAGO_CUENTA_NOMBRE", "") or "").strip()
-        configurada = bool(url)
+        parsed_url = urlparse(url)
+        configurada = parsed_url.scheme.lower() == "https" and bool(parsed_url.netloc)
         if not configurada:
             url = ""
             nombre = ""
