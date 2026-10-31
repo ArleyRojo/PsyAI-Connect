@@ -21,8 +21,8 @@ class SecurityHeadersMiddleware:
         if getattr(settings, "CSP_ENABLED", True):
             csp = (
                 "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com; "
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                "script-src 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
                 "font-src 'self' data: https://fonts.gstatic.com; "
                 "img-src 'self' data: https:; "
                 "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com; "
