@@ -4,15 +4,71 @@ let usuarioSeleccionado = null;
 const ITEMS_PER_PAGE = 15;
 let paginaActualUsuarios = 1;
 let usuariosFiltrados = [];
+let profesionalesPendientes = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarUsuarios();
+    cargarProfesionalesPendientes();
     document.getElementById('buscarUsuarioInput')?.addEventListener('input', filtrarTabla);
     document.getElementById('filtroRol')?.addEventListener('change', filtrarTabla);
     document.getElementById('filtroEstado')?.addEventListener('change', filtrarTabla);
     document.getElementById('btnConfirmarBloqueo')?.addEventListener('click', confirmarBloqueo);
     document.getElementById('btnConfirmarEliminar')?.addEventListener('click', confirmarEliminar);
 });
+
+async function cargarProfesionalesPendientes() {
+    const tbody = document.querySelector('#tablaProfesionalesPendientes tbody');
+    try {
+        const res = await fetch(`${API}/api/admin/profesionales/pendientes`, { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'No se pudo cargar la lista');
+        profesionalesPendientes = data.profesionales || [];
+        const contador = document.getElementById('cntProfesionalesPendientes');
+        if (contador) contador.textContent = profesionalesPendientes.length;
+        if (!tbody) return;
+        if (!profesionalesPendientes.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay profesionales pendientes.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = profesionalesPendientes.map(p => `
+            <tr>
+              <td class="ps-4"><div class="fw-semibold">${escapeHtmlAdmin(p.nombre)}</div><div class="small text-muted">${escapeHtmlAdmin(p.email)}</div></td>
+              <td>${escapeHtmlAdmin(p.especialidad || '—')}</td>
+              <td>${escapeHtmlAdmin(p.tarjetaProfesional || '—')}</td>
+              <td>${escapeHtmlAdmin(p.numeroRethus || '—')}</td>
+              <td>${p.fechaRegistro ? new Date(p.fechaRegistro).toLocaleDateString('es-CO') : '—'}</td>
+              <td class="text-end pe-4"><button class="btn btn-sm btn-success" onclick="verificarProfesional(${Number(p.idUsuario)})"><i class="fas fa-check me-1"></i>Verificar</button></td>
+            </tr>`).join('');
+    } catch (error) {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">No se pudo cargar la lista de verificación.</td></tr>';
+        console.error('Error cargando profesionales pendientes:', error);
+    }
+}
+
+async function verificarProfesional(idUsuario) {
+    try {
+        const res = await fetch(`${API}/api/admin/profesionales/${idUsuario}/verificar`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            PsyAIAlerts.error('No se pudo verificar', data.message || 'Revisa las credenciales e intenta de nuevo.');
+            return;
+        }
+        PsyAIAlerts.success('Profesional verificado', data.message || 'El profesional ya puede acceder a sus funciones clínicas.');
+        await Promise.all([cargarProfesionalesPendientes(), cargarUsuarios()]);
+    } catch (error) {
+        console.error('Error verificando profesional:', error);
+        PsyAIAlerts.error('Error de conexión', 'No se pudo verificar el profesional.');
+    }
+}
+
+function escapeHtmlAdmin(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+}
 
 async function cargarUsuarios() {
     const res  = await fetch(`${API}/api/admin/usuarios`, {
@@ -294,7 +350,7 @@ async function confirmarBloqueo() {
 }
 
 function mostrarTabUsuarios(tab, btn) {
-    ['todos','activos','suspendidos','nuevo'].forEach(t => {
+    ['todos','activos','suspendidos','verificacion','nuevo'].forEach(t => {
         const el = document.getElementById('tab-u-' + t);
         if (el) el.style.display = 'none';
     });
@@ -317,6 +373,8 @@ function mostrarTabUsuarios(tab, btn) {
     } else if (tab === 'suspendidos') {
         const suspendidos = usuarios.filter(u => parseInt(u.activo) === 0 || u.estadoCuenta === 'Suspendida');
         renderTablaFiltrada('tab-u-suspendidos', suspendidos);
+    } else if (tab === 'verificacion') {
+        cargarProfesionalesPendientes();
     }
 }
 
