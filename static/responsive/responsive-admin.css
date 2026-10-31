@@ -3526,3 +3526,21 @@
     min-height: 32px !important;
   }
 }
+/* Desktop sidebar remains fixed; only its navigation scrolls on short screens. */
+@media (min-width: 992px) {
+  body.admin-panel #sidebar {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  body.admin-panel #sidebar .sidebar__nav {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+}
