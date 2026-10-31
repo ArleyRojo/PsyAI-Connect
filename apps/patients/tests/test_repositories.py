@@ -241,6 +241,9 @@ class TestListProfessionals:
         Register.objects.create_user(
             email="pac@test.com", nombre="Paciente", password="Abc123", rol="paciente"
         )
+        from apps.professionals.models import PerfilProfesional
+        for professional in Register.objects.filter(rol="profesional"):
+            PerfilProfesional.objects.create(idProfesional=professional, verificado=True)
         repo = PatientRepository()
         result = repo.list_professionals()
 
