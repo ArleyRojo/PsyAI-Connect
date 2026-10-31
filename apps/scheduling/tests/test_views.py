@@ -261,14 +261,19 @@ class TestCitaViewSetCreate:
 
 
 class TestCitaDetailViewSetPartialUpdate:
-    def test_requires_profesional_role(self, rf):
+    def test_patient_cannot_mark_appointment_completed(self, rf):
+        from types import SimpleNamespace
+
         req = rf.patch(
             "/api/citas/1",
             data=json.dumps({"estado": "Completada"}),
             content_type="application/json",
         )
 
-        with patch.object(IsAuthenticatedDRF, "has_permission", _auth_paciente):
+        with (
+            patch.object(IsAuthenticatedDRF, "has_permission", _auth_paciente),
+            patch("apps.scheduling.views.Citas.objects.get", return_value=SimpleNamespace(idPaciente_id=1, creado_por_profesional=True)),
+        ):
             view = CitaDetailViewSet.as_view({"patch": "partial_update"})
             resp = view(req, pk=1)
 
