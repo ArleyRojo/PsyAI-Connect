@@ -238,8 +238,9 @@ async function cargarCitasProfesional() {
                 : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='38' height='38' viewBox='0 0 38 38'%3E%3Ccircle cx='19' cy='19' r='19' fill='%232196F3'/%3E%3Ctext x='19' y='23' text-anchor='middle' fill='white' font-family='Arial' font-size='14' font-weight='bold'%3E${inicial}%3C/text%3E%3C/svg%3E`;
             
             const esCancelada = c.estado === 'Cancelada';
+            const creadaPorProfesional = c.creado_por_profesional === true || c.creado_por_profesional === 1 || c.creado_por_profesional === '1';
             
-            const origen = (c.creado_por_profesional === true || c.creado_por_profesional === 1 || c.creado_por_profesional === '1')
+            const origen = creadaPorProfesional
                 ? `<span class="badge bg-primary"><i class="fas fa-user-md me-1"></i>Agendado por ti</span>`
                 : `<span class="badge bg-info text-dark"><i class="fas fa-calendar me-1"></i>Sistema</span>`;
 
@@ -258,11 +259,12 @@ async function cargarCitasProfesional() {
                     <i class="fas fa-file-invoice-dollar me-1"></i>Facturar
                 </a>`);
             } else if (c.estado === 'Pendiente') {
-                estadoBadge = `<span class="badge bg-warning text-dark">Pendiente de confirmación</span>`;
-                // Botón Confirmar
-                acciones.push(`<button class="btn btn-success btn-sm flex-shrink-0" onclick="confirmarCita(${c.idCita})" title="Confirmar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
-                    <i class="fas fa-check me-1"></i>Confirmar
-                </button>`);
+                estadoBadge = `<span class="badge bg-warning text-dark">${creadaPorProfesional ? 'Esperando confirmación del paciente' : 'Pendiente de tu confirmación'}</span>`;
+                if (!creadaPorProfesional) {
+                    acciones.push(`<button class="btn btn-success btn-sm flex-shrink-0" onclick="confirmarCita(${c.idCita})" title="Confirmar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                        <i class="fas fa-check me-1"></i>Confirmar
+                    </button>`);
+                }
                 // Cancelar también disponible
                 acciones.push(`<button class="btn btn-outline-danger btn-sm flex-shrink-0" onclick="abrirModalCancelarCita(${c.idCita})" title="Cancelar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
                     <i class="fas fa-ban me-1"></i>Cancelar
