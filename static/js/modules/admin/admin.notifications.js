@@ -122,7 +122,9 @@ function renderizarPaginaNotifs() {
         document.getElementById('mostrandoTotalNotifs').textContent = 0;
     } else {
         tbody.innerHTML = paginaNotifs.map(n => {
-            const estadoTexto = n.estado === 'enviado'
+            const estadoTexto = n.tipo_registro === 'actividad'
+                ? '<span class="estado-dot enviado"></span> <span class="estado-texto-enviado" style="font-size:.82rem;">Registrada</span>'
+                : n.estado === 'enviado'
                 ? '<span class="estado-dot enviado"></span> <span class="estado-texto-enviado" style="font-size:.82rem;">Enviado</span>'
                 : '<span class="estado-dot fallido"></span> <span class="estado-texto-fallido" style="font-size:.82rem;">Fallido</span>';
             
@@ -321,7 +323,7 @@ function verDetalle(id) {
     if (!n) return;
     set('detalleTitle',       esc(n.titulo));
     set('detalleBody',        esc(n.mensaje));
-    set('detalleTipo',        n.tipo_registro === 'profesional' ? 'Actividad Profesional' : n.tipo_registro === 'paciente' ? 'Actividad Paciente' : n.tipo);
+    set('detalleTipo',        n.tipo_registro === 'actividad' ? 'Actividad de usuario' : n.tipo_registro === 'profesional' ? 'Actividad Profesional' : n.tipo_registro === 'paciente' ? 'Actividad Paciente' : n.tipo);
     
     // Mostrar nombre real del destinatario
     let destinatario;
