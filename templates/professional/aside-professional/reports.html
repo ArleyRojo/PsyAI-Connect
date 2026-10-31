@@ -93,12 +93,18 @@
 
     <main class="main-content flex-grow-1 ms-250 p-4 reports-page">
         <header class="main-header d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 fw-bold mb-0">
-                <i class="fas fa-chart-line text-primary me-2"></i> Reportes
-            </h1>
-            <div class="user-info d-flex align-items-center">
-                <i class="fas fa-bell text-secondary fs-5 me-3"></i>
-                <span class="fw-semibold" id="nombreProfesional">Hola, Dr(a).</span>
+            <div>
+                <h1 class="h3 fw-bold mb-0">
+                    <i class="fas fa-chart-line me-2 text-primary"></i>Reportes
+                </h1>
+                <small class="text-muted">Analiza y descarga reportes clínicos</small>
+            </div>
+            <div class="user-info d-flex align-items-center gap-3">
+                <div class="position-relative">
+                    <i class="fas fa-bell text-secondary fs-5"></i>
+                </div>
+                <div data-avatar="inicial" data-nombre="{{ request.user.nombre|default:'' }}" data-foto="{{ request.user.foto_perfil|default:'' }}" style="width:40px;height:40px;"></div>
+                <span class="fw-semibold" id="nombreProfesional" data-user-name>Hola, {% if request.user.rol == 'profesional' or request.user.rol == 'professional' %}Dr(a). {% endif %}{{ request.user.nombre|default:'' }}</span>
             </div>
         </header>
 
@@ -384,6 +390,6 @@
 <script src="/js/modules/professional/aside.js?v=20260711-1"></script>
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
-<script src="/js/modules/professional/reports.js?v=20260803-1"></script>
+<script src="/js/modules/professional/reports.js?v=20261030-3"></script>
 </body>
 </html>
