@@ -2216,3 +2216,25 @@ main:has(#panel-logs) .top-endpoint {
 .empty-state i {
   color: rgba(21,101,192,.2);
 }
+
+/* Encabezados alineados con los paneles de paciente y profesional */
+body.admin-panel .main-header {
+  background: linear-gradient(135deg, var(--header-bg-start, var(--brand-500)) 0%, var(--header-bg-end, var(--brand-700)) 100%);
+  border: 1px solid var(--brand-300);
+  border-radius: 14px;
+  padding: 18px 24px;
+  box-shadow: var(--elev-2);
+}
+
+body.admin-panel .main-header::after {
+  display: none;
+}
+
+body.admin-panel .main-header h1,
+body.admin-panel .main-header h1 i,
+body.admin-panel .main-header small,
+body.admin-panel .main-header .user-info,
+body.admin-panel .main-header .user-info i {
+  color: var(--header-text-on-brand, var(--text-on-brand)) !important;
+  -webkit-text-fill-color: var(--header-text-on-brand, var(--text-on-brand)) !important;
+}
