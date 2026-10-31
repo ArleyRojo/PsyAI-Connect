@@ -247,7 +247,7 @@ class DocumentoProfesionalPacienteViewSet(viewsets.ViewSet):
             )
         svc = DocumentoService()
         payload = svc.list_patient_docs(user_id, id_paciente)
-        return Response(payload, status=200 if payload.get("success") else 500)
+        return Response(payload, status=200 if payload.get("success") else 403)
 
     def create(self, request, id_paciente=None):
         id_paciente = int(id_paciente) if id_paciente else None
@@ -378,13 +378,19 @@ class ChatContactoProfesionalResource(APIView):
             )
         msg_svc = MensajesService()
         prof_svc = _get_prof_service()
-        pacientes = prof_svc.list_patients_for_chat()
+        check = prof_svc._check_verificacion(user_id)
+        if check:
+            return Response(check[0], status=check[1])
+        payload, status_code = prof_svc.list_patients_for_chat(user_id)
+        if status_code != 200:
+            return Response(payload, status=status_code)
+        pacientes = payload.get("pacientes", [])
         resultado = msg_svc.get_contactos_con_mensajes(user_id, pacientes, id_field="idUsuario")
         return Response({"success": True, "pacientes": resultado}, status=status.HTTP_200_OK)
 
 
 class ChatMensajeProfesionalResource(APIView):
-    permission_classes = [IsAuthenticatedDRF]
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
 
     def get(self, request):
         user_id = getattr(request, "user_id", None)
@@ -400,6 +406,8 @@ class ChatMensajeProfesionalResource(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         svc = MensajesService()
+        if not svc.puede_chatear(user_id, id_paciente):
+            return Response({"success": False, "message": "No tienes acceso a la conversación de este paciente"}, status=status.HTTP_403_FORBIDDEN)
         desde = int(request.query_params.get("desde", 0))
         msgs = svc.get_mensajes(user_id, id_paciente, desde)
         return Response({"success": True, "mensajes": msgs}, status=status.HTTP_200_OK)
@@ -421,6 +429,8 @@ class ChatMensajeProfesionalResource(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         svc = MensajesService()
+        if not svc.puede_chatear(user_id, receptor):
+            return Response({"success": False, "message": "No tienes acceso a la conversación de este paciente"}, status=status.HTTP_403_FORBIDDEN)
         id_msg = svc.enviar_mensaje(user_id, receptor, mensaje)
         return Response({"success": True, "idMensaje": id_msg}, status=status.HTTP_201_CREATED)
 
@@ -433,10 +443,19 @@ class AllPacientesProfesionalResource(APIView):
         user_role = getattr(request, "user_role", None)
         if user_role not in ("profesional", "admin"):
             return Response({"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
+        if user_role == "profesional":
+            check = _get_prof_service()._check_verificacion(getattr(request, "user_id", None))
+            if check:
+                return Response(check[0], status=check[1])
         from apps.patients.services import PatientService
         svc = PatientService()
         # Return a large page to get all patients
         payload, status_code = svc.list_patients(page=1, limit=1000)
+        if payload.get("success"):
+            payload["pacientes"] = [
+                {"idUsuario": patient["idUsuario"], "nombre": patient["nombre"], "fotoPerfil": patient.get("fotoPerfil")}
+                for patient in payload.get("pacientes", [])
+            ]
         return Response(payload, status=status_code)
 
 
@@ -444,16 +463,9 @@ class PacienteAsignarResource(APIView):
     permission_classes = [IsAuthenticatedDRF, IsProfesional]
 
     def post(self, request, id_paciente):
-        from apps.professionals.models import PacientesProfesional
         user_id = getattr(request, "user_id", None)
-        PacientesProfesional.objects.get_or_create(
-            idProfesional_id=user_id,
-            idPaciente_id=id_paciente,
-        )
-        return Response(
-            {"success": True, "message": "Paciente asignado correctamente"},
-            status=status.HTTP_200_OK,
-        )
+        payload, status_code = _get_prof_service().assign_patient(user_id, id_paciente)
+        return Response(payload, status=status_code)
 
 
 class ProfessionalPaymentInfoViewSet(viewsets.ViewSet):
