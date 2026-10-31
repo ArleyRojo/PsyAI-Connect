@@ -16,6 +16,7 @@ from django.utils._os import safe_join
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 
 from rest_framework.views import APIView
 
@@ -92,12 +93,24 @@ class HealthCheckView(APIView):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(ratelimit(key="ip", rate="30/m", method="POST", block=True), name="dispatch")
 class ClientErrorsView(APIView):
     authentication_classes = []
     permission_classes = []
 
     def post(self, request):
-        core_service.log_client_error(request.body)
+        max_body_bytes = 2048
+        content_length = request.META.get("CONTENT_LENGTH")
+        try:
+            if content_length and int(content_length) > max_body_bytes:
+                return JsonResponse({"error": "Solicitud demasiado grande"}, status=413)
+        except (TypeError, ValueError):
+            return JsonResponse({"error": "Longitud de solicitud inválida"}, status=400)
+
+        body = request.body
+        if len(body) > max_body_bytes:
+            return JsonResponse({"error": "Solicitud demasiado grande"}, status=413)
+        core_service.log_client_error(body, max_bytes=max_body_bytes)
         return JsonResponse({"status": "ok"})
 
     def get(self, request):
