@@ -6,6 +6,7 @@ from apps.patients.repositories import PatientRepository
 from apps.patients.services import PatientService
 from apps.patients.views import AnamnesisViewSet
 from apps.core.permissions import IsAuthenticatedDRF
+from apps.professionals.models import PerfilProfesional, PacientesProfesional
 
 
 @pytest.fixture
@@ -248,9 +249,33 @@ class TestAnamnesisService:
 
 @pytest.mark.django_db
 class TestAnamnesisViewSet:
+    def test_unverified_or_unassigned_professional_cannot_create(
+        self, rf, profesional_user, paciente_user, valid_anamnesis_payload
+    ):
+        def _mock_auth(self, request, view):
+            request.user_id = profesional_user.idUsuario
+            request.user_role = "profesional"
+            request.user_name = profesional_user.nombre
+            return True
+
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setattr(IsAuthenticatedDRF, "has_permission", _mock_auth)
+            view = AnamnesisViewSet.as_view({"post": "create"})
+            request = rf.post(
+                f"/api/paciente/{paciente_user.idUsuario}/anamnesis",
+                valid_anamnesis_payload,
+                format="json",
+            )
+            response = view(request, paciente_id=paciente_user.idUsuario)
+
+        assert response.status_code == 403
+
     def test_viewset_retrieve_create_update(
         self, rf, profesional_user, paciente_user, valid_anamnesis_payload
     ):
+        PerfilProfesional.objects.create(idProfesional=profesional_user, verificado=True)
+        PacientesProfesional.objects.create(idProfesional=profesional_user, idPaciente=paciente_user)
+
         def _mock_auth(self, request, view):
             request.user_id = profesional_user.idUsuario
             request.user_role = "profesional"
