@@ -71,19 +71,34 @@ class CoreService:
         message = "Te has suscrito correctamente" if created else "Ya estas suscrito"
         return {"success": True, "message": message, "created": created}, 200
 
-    def log_client_error(self, request_body):
+    def log_client_error(self, request_body, max_bytes=2048):
         try:
+            if len(request_body) > max_bytes:
+                return
             data = json.loads(request_body)
-            msg = data.get("message", "")
+            if not isinstance(data, dict):
+                return
+
+            def safe_field(value, limit):
+                if value is None:
+                    return ""
+                text = "".join(
+                    " " if ord(character) < 32 or ord(character) == 127 else character
+                    for character in str(value)
+                )
+                text = " ".join(text.split())
+                return text[:limit]
+
+            msg = safe_field(data.get("message", ""), 500)
             # Ignore benign View Transition opt‑in warnings from browsers that don't support the API yet
             if "ViewTransition opt-in disabled" in msg:
                 return
             logger.warning(
                 "[ClientError] %s: %s | %s | page=%s",
-                data.get("type", "unknown"),
+                safe_field(data.get("type", "unknown"), 50),
                 msg,
-                data.get("details", ""),
-                data.get("page", ""),
+                safe_field(data.get("details", ""), 1000),
+                safe_field(data.get("page", ""), 200),
             )
         except Exception:
             pass
