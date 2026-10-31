@@ -232,7 +232,10 @@ async function cargarCitasProfesional() {
         actualizarStats(citas);
 
         const renderCita = (c) => {
-            const inicial = c.paciente ? c.paciente.charAt(0).toUpperCase() : '?';
+            const inicial = c.paciente ? encodeURIComponent(c.paciente.charAt(0).toUpperCase()) : '?';
+            const pacienteId = Number(c.idPaciente);
+            const citaId = Number(c.idCita);
+            if (!Number.isSafeInteger(citaId) || citaId < 1) return '';
             const fotoUrl = c.foto_perfil 
                 ? `/uploads/${c.foto_perfil}` 
                 : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='38' height='38' viewBox='0 0 38 38'%3E%3Ccircle cx='19' cy='19' r='19' fill='%232196F3'/%3E%3Ctext x='19' y='23' text-anchor='middle' fill='white' font-family='Arial' font-size='14' font-weight='bold'%3E${inicial}%3C/text%3E%3C/svg%3E`;
@@ -245,7 +248,7 @@ async function cargarCitasProfesional() {
                 : `<span class="badge bg-info text-dark"><i class="fas fa-calendar me-1"></i>Sistema</span>`;
 
             const tipoCitaBadge = c.tipoCita 
-                ? `<span class="badge" style="background:${c.tipoCita === 'Primera sesión' ? '#e3f2fd' : c.tipoCita === 'Evaluación' ? '#fff3e0' : '#e8f5e9'};color:${c.tipoCita === 'Primera sesión' ? '#1565C0' : c.tipoCita === 'Evaluación' ? '#e65100' : '#2e7d32'};font-weight:600;font-size:0.68rem;border-radius:20px;padding:0.25em 0.6em;">${c.tipoCita}</span>`
+                ? `<span class="badge" style="background:${c.tipoCita === 'Primera sesión' ? '#e3f2fd' : c.tipoCita === 'Evaluación' ? '#fff3e0' : '#e8f5e9'};color:${c.tipoCita === 'Primera sesión' ? '#1565C0' : c.tipoCita === 'Evaluación' ? '#e65100' : '#2e7d32'};font-weight:600;font-size:0.68rem;border-radius:20px;padding:0.25em 0.6em;">${escapeHtmlAgenda(c.tipoCita)}</span>`
                 : '';
             
             let estadoBadge = '';
@@ -255,18 +258,18 @@ async function cargarCitasProfesional() {
             } else if (c.estado === 'Confirmada') {
                 estadoBadge = `<span class="badge bg-success">Confirmada</span>`;
                 // Facturar solo si confirmada
-                acciones.push(`<a href="facturacion.html?paciente=${c.idPaciente || ''}" class="btn btn-outline-primary btn-sm flex-shrink-0" title="Facturar" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                acciones.push(`<a href="facturacion.html?paciente=${Number.isSafeInteger(pacienteId) ? pacienteId : ''}" class="btn btn-outline-primary btn-sm flex-shrink-0" title="Facturar" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
                     <i class="fas fa-file-invoice-dollar me-1"></i>Facturar
                 </a>`);
             } else if (c.estado === 'Pendiente') {
                 estadoBadge = `<span class="badge bg-warning text-dark">${creadaPorProfesional ? 'Esperando confirmación del paciente' : 'Pendiente de tu confirmación'}</span>`;
                 if (!creadaPorProfesional) {
-                    acciones.push(`<button class="btn btn-success btn-sm flex-shrink-0" onclick="confirmarCita(${c.idCita})" title="Confirmar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                    acciones.push(`<button class="btn btn-success btn-sm flex-shrink-0" onclick="confirmarCita(${citaId})" title="Confirmar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
                         <i class="fas fa-check me-1"></i>Confirmar
                     </button>`);
                 }
                 // Cancelar también disponible
-                acciones.push(`<button class="btn btn-outline-danger btn-sm flex-shrink-0" onclick="abrirModalCancelarCita(${c.idCita})" title="Cancelar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                acciones.push(`<button class="btn btn-outline-danger btn-sm flex-shrink-0" onclick="abrirModalCancelarCita(${citaId})" title="Cancelar cita" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
                     <i class="fas fa-ban me-1"></i>Cancelar
                 </button>`);
             }
@@ -278,19 +281,19 @@ async function cargarCitasProfesional() {
 
             return `
                 <li class="list-group-item d-flex align-items-center gap-2" style="${esCancelada ? 'opacity:0.65;' : ''}">
-                    <img src="${fotoUrl}" alt="${c.paciente}" class="rounded-circle flex-shrink-0" style="width:38px;height:38px;object-fit:cover;">
+                    <img src="${escapeHtmlAgenda(fotoUrl)}" alt="${escapeHtmlAgenda(c.paciente)}" class="rounded-circle flex-shrink-0" style="width:38px;height:38px;object-fit:cover;">
                     <div class="flex-grow-1 min-w-0">
                         <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <strong>${c.paciente}</strong>
+                            <strong>${escapeHtmlAgenda(c.paciente)}</strong>
                             ${tipoCitaBadge}
                             ${estadoBadge}
                             ${origen}
                         </div>
                         <div class="d-flex align-items-center gap-2 mt-1">
-                            <small class="text-muted"><i class="far fa-calendar-alt me-1" style="font-size:0.7rem;"></i>${c.fecha}</small>
+                            <small class="text-muted"><i class="far fa-calendar-alt me-1" style="font-size:0.7rem;"></i>${escapeHtmlAgenda(c.fecha)}</small>
                             <small class="text-muted"><i class="far fa-clock me-1" style="font-size:0.7rem;"></i>${horaFormateada}</small>
                         </div>
-                        ${c.motivoCancelacion ? `<div class="mt-1"><small class="text-danger"><i class="fas fa-info-circle me-1"></i><strong>Motivo:</strong> ${c.motivoCancelacion}</small></div>` : ''}
+                        ${c.motivoCancelacion ? `<div class="mt-1"><small class="text-danger"><i class="fas fa-info-circle me-1"></i><strong>Motivo:</strong> ${escapeHtmlAgenda(c.motivoCancelacion)}</small></div>` : ''}
                     </div>
                     ${canceladaBtn}
                 </li>
@@ -305,6 +308,16 @@ async function cargarCitasProfesional() {
         console.error(err);
         lista.innerHTML = '<li class="list-group-item text-danger">Error al cargar citas</li>';
     }
+}
+
+function escapeHtmlAgenda(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[character]);
 }
 
 // ── Actualizar Stats ────────────────────────────────────────
