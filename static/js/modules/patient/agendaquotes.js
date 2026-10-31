@@ -22,6 +22,16 @@ function formatearHoraCorta(hora) {
   return `${hora12}:${minutos} ${periodo}`;
 }
 
+function escapeHtmlAgenda(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+}
+
 function avanzarStep(n) {
   document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.add('d-none'); });
   document.getElementById('stepPanel' + n).classList.remove('d-none');
@@ -225,15 +235,17 @@ async function cargarCitasPaciente() {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No tienes citas próximas</td></tr>';
       } else {
         tbody.innerHTML = proximas.map(c => {
+          const citaId = Number(c.idCita);
+          if (!Number.isSafeInteger(citaId) || citaId < 1) return '';
           let horaFormateada = c.hora ? formatearHora(c.hora) : '—';
 
           const creadaPorProfesional = c.creado_por_profesional === true || c.creado_por_profesional === 1 || c.creado_por_profesional === '1';
           const acciones = [];
           if (c.estado === 'Pendiente' && creadaPorProfesional) {
-            acciones.push(`<button class="btn btn-success btn-sm py-0 me-1" onclick="confirmarCitaPaciente(${c.idCita})" title="Confirmar cita">Confirmar</button>`);
+            acciones.push(`<button class="btn btn-success btn-sm py-0 me-1" onclick="confirmarCitaPaciente(${citaId})" title="Confirmar cita">Confirmar</button>`);
           }
           if (c.estado !== 'Cancelada') {
-            acciones.push(`<button class="btn btn-outline-danger btn-sm py-0" onclick="abrirModalCancelar(${c.idCita})" title="Cancelar cita">Cancelar</button>`);
+            acciones.push(`<button class="btn btn-outline-danger btn-sm py-0" onclick="abrirModalCancelar(${citaId})" title="Cancelar cita">Cancelar</button>`);
           } else {
             acciones.push('<span class="badge bg-secondary">Cancelada</span>');
           }
@@ -250,15 +262,15 @@ async function cargarCitasPaciente() {
           } else if (c.estado === 'Cancelada') {
             estadoBadge = '<span class="badge bg-danger">Cancelada</span>';
           } else {
-            estadoBadge = `<span class="badge bg-secondary">${c.estado}</span>`;
+            estadoBadge = `<span class="badge bg-secondary">${escapeHtmlAgenda(c.estado)}</span>`;
           }
 
           return `
             <tr class="align-middle">
-              <td class="fw-semibold">${c.fecha}</td>
+              <td class="fw-semibold">${escapeHtmlAgenda(c.fecha)}</td>
               <td class="text-dark fw-medium">${horaFormateada}</td>
-              <td>${c.tipoCita}</td>
-              <td>${c.motivo || '<em class="text-muted">Sin detalles</em>'}</td>
+              <td>${escapeHtmlAgenda(c.tipoCita)}</td>
+              <td>${c.motivo ? escapeHtmlAgenda(c.motivo) : '<em class="text-muted">Sin detalles</em>'}</td>
               <td>${estadoBadge}</td>
               <td>${accionHtml}</td>
             </tr>
@@ -389,16 +401,16 @@ function inicializarModalHistorial() {
               </div>
               <div class="hist-card__body">
                 <div class="hist-card__top">
-                  <div class="hist-card__title">${c.tipoCita}</div>
-                  <span class="hist-card__badge hist-card__badge--${c.estado === 'Completada' ? 'success' : 'danger'}">${c.estado}</span>
+                  <div class="hist-card__title">${escapeHtmlAgenda(c.tipoCita)}</div>
+                  <span class="hist-card__badge hist-card__badge--${c.estado === 'Completada' ? 'success' : 'danger'}">${escapeHtmlAgenda(c.estado)}</span>
                 </div>
                 <div class="hist-card__meta">
-                  <span><i class="fas fa-user-md"></i>${c.profesional || '&mdash;'}</span>
-                  <span><i class="fas fa-calendar-day"></i>${c.fecha}</span>
+                  <span><i class="fas fa-user-md"></i>${escapeHtmlAgenda(c.profesional || '—')}</span>
+                  <span><i class="fas fa-calendar-day"></i>${escapeHtmlAgenda(c.fecha)}</span>
                   <span><i class="far fa-clock"></i>${formatearHora(c.hora)}</span>
                   ${c.estadoPago ? `<span class="badge ${c.estadoPago === 'Pagado' ? 'bg-success' : 'bg-warning text-dark'} ms-1">${c.estadoPago === 'Pagado' ? 'Completado' : 'Pendiente'}</span>` : ''}
                 </div>
-                ${c.motivoCancelacion ? `<div class="hist-card__cancel-reason"><i class="fas fa-info-circle"></i><strong>Motivo:</strong> ${c.motivoCancelacion}</div>` : ''}
+                ${c.motivoCancelacion ? `<div class="hist-card__cancel-reason"><i class="fas fa-info-circle"></i><strong>Motivo:</strong> ${escapeHtmlAgenda(c.motivoCancelacion)}</div>` : ''}
               </div>
             </div>
           </div>
