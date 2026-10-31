@@ -55,6 +55,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "apps.core.middleware.security_headers.SecurityHeadersMiddleware",
     "apps.core.middleware.telemetry.TelemetryMiddleware",
+    "apps.core.middleware.audit.AuditActivityMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
