@@ -96,7 +96,7 @@
     <header class="main-header d-flex justify-content-between align-items-center mb-4">
       <div>
         <h1 class="h3 fw-bold mb-0"><i class="fas fa-clipboard-list me-2 text-primary"></i>Auditoría y Logs</h1>
-        <small class="text-muted">Registro de todas las acciones realizadas en el panel de administración.</small>
+        <small class="text-muted">Registro de actividad de administradores, profesionales y pacientes.</small>
       </div>
       <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
     </header>
@@ -117,7 +117,7 @@
       <div class="col-sm-6 col-lg-3">
         <div class="stat-card">
           <div class="stat-icon blue"><i class="fas fa-stream"></i></div>
-          <div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Eventos hoy</div></div>
+          <div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Eventos registrados</div></div>
         </div>
       </div>
       <div class="col-sm-6 col-lg-3">
@@ -172,6 +172,27 @@
               <option value="reset">Reset contraseña</option>
               <option value="rol">Cambio de rol</option>
               <option value="notif">Notificación</option>
+              <option value="inicio">Inicio de sesión</option>
+              <option value="perfil">Perfil</option>
+              <option value="cita">Citas</option>
+              <option value="reporte">Reportes</option>
+              <option value="documento">Documentos</option>
+              <option value="diagnostico">Diagnósticos</option>
+              <option value="consentimiento">Consentimientos</option>
+              <option value="pago">Pagos</option>
+              <option value="2fa">2FA</option>
+              <option value="registro">Registro</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label"><i class="fas fa-user-tag"></i> Origen</label>
+            <select id="filtroOrigen" class="form-select" onchange="filtrarLogs()">
+              <option value="">Todos los orígenes</option>
+              <option value="admin">Admin</option>
+              <option value="profesional">Profesional</option>
+              <option value="paciente">Paciente</option>
+              <option value="sistema">Sistema</option>
+              <option value="auditoria">Acceso</option>
             </select>
           </div>
           <div class="filter-group">
@@ -715,7 +736,7 @@
 <script src="/js/modules/auth/auth-ui.js?v=20260803-1" defer></script>
 <script src="/js/core/shared/aside.js?v=20260711-1" defer></script>
 <script src="/js/modules/admin/admin.dashboard.utils.js?v=20260711-1" defer></script>
-<script src="/js/modules/admin/admin.logs.js?v=20261023-1" defer></script>
+<script src="/js/modules/admin/admin.logs.js?v=20261030-audit" defer></script>
 <script src="/js/modules/admin/admin.rendimiento.js?v=20261023-1" defer></script>
 <script src="/js/modules/auth/logout.js?v=20261023-1" defer></script>
 
