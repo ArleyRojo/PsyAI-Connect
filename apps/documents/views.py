@@ -1,4 +1,3 @@
-import json
 import os
 
 from django.conf import settings
@@ -7,8 +6,9 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.core.permissions import IsAuthenticatedDRF
+from apps.core.permissions import IsAuthenticatedDRF, IsPaciente
 from apps.documents.services import DocumentoService
+from apps.documents.serializers import AutorizacionToggleSerializer
 
 documento_service = DocumentoService()
 
@@ -18,7 +18,12 @@ class DocumentoProfesionalViewSet(viewsets.ViewSet):
 
     def list(self, request, id_paciente=None):
         user_id = getattr(request, "user_id", None)
-        payload, status_code = documento_service.list_patient_docs(user_id, id_paciente)
+        result = documento_service.list_patient_docs(user_id, id_paciente)
+        if isinstance(result, tuple):
+            payload, status_code = result
+        else:
+            payload = result
+            status_code = 200 if payload.get("success") else 403
         return Response(payload, status=status_code)
 
     def create(self, request, id_paciente=None):
@@ -136,18 +141,13 @@ class DocumentoPacienteDownloadView(APIView):
 
 
 class AutorizacionToggleView(APIView):
-    permission_classes = [IsAuthenticatedDRF]
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
 
     def post(self, request, id_documento):
         user_id = getattr(request, "user_id", None)
-        data = {}
-        if request.body:
-            try:
-                data = json.loads(request.body)
-            except (json.JSONDecodeError, ValueError):
-                pass
-        patient_id = data.get("idPaciente") or user_id
+        serializer = AutorizacionToggleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         payload, status_code = documento_service.toggle_autorizacion(
-            id_documento, patient_id, user_id
+            id_documento, user_id, serializer.validated_data["idProfesional"]
         )
         return Response(payload, status=status_code)
