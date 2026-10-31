@@ -566,22 +566,6 @@ class AppointmentService:
         ]
         return {"success": True, "fechas": sorted(fechas)}, 200
 
-    def _create_invoice_for_cita(self, cita_id, patient_id, professional_id, monto, descripcion):
-        """Crea una factura pendiente para la cita indicada."""
-        from apps.billing.models import Facturas
-        if Facturas.objects.filter(idCita=cita_id, anulada=False).exists():
-            return
-        invoice_repo = InvoiceRepository()
-        items = [{"descripcion": descripcion, "precioUnitario": str(monto)}]
-        invoice_repo.create_invoice(
-            patient_id=patient_id,
-            professional_id=professional_id,
-            cita_id=cita_id,
-            items=items,
-            estadoPago="Pendiente",
-        )
-
-
 class DisponibilidadService:
     def __init__(self):
         self.repo = AppointmentRepository()
