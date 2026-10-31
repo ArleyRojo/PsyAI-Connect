@@ -114,8 +114,19 @@
                     <i class="fas fa-sync-alt"></i>
                 </button>
                 <div class="position-relative">
-                    <i class="fas fa-bell text-secondary fs-5" id="bellIcon" style="cursor:pointer"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notifBadge" style="font-size:0.55rem;display:none">0</span>
+                    <button type="button" class="professional-notification-toggle" data-professional-notification-toggle aria-label="Ver notificaciones" aria-expanded="false" aria-controls="professionalNotificationPanel">
+                        <i class="fas fa-bell" aria-hidden="true"></i>
+                        <span class="professional-notification-count" id="notifBadge" data-professional-notification-count style="display:none">0</span>
+                    </button>
+                    <div class="professional-notification-panel" id="professionalNotificationPanel" data-professional-notification-panel role="dialog" aria-label="Notificaciones" hidden>
+                        <div class="professional-notification-panel__header">
+                            <span>Notificaciones</span>
+                            <button type="button" class="professional-notification-close" data-professional-notification-close aria-label="Cerrar notificaciones">&times;</button>
+                        </div>
+                        <div class="professional-notification-list" data-professional-notification-list>
+                            <p class="professional-notification-empty">Cargando avisos...</p>
+                        </div>
+                    </div>
                 </div>
                 <div data-avatar="inicial" data-nombre="{{ request.user.nombre|default:'' }}" data-foto="{{ request.user.foto_perfil|default:'' }}" style="width:40px;height:40px;"></div>
                 <span class="fw-semibold" id="nombreProfesional" data-user-name>Hola, {% if request.user.rol == 'profesional' or request.user.rol == 'professional' %}Dr(a). {% endif %}{{ request.user.nombre|default:'' }}</span>
@@ -385,6 +396,7 @@ function actualizarBadge() {
 
 // -- Render: Alertas --
 function renderAlertas(alertas) {
+    window.dispatchEvent(new CustomEvent('psyai:professional-alerts', { detail: alertas || [] }));
     const container = document.getElementById('alertasContainer');
     if (!alertas || alertas.length === 0) {
         container.innerHTML = '';
@@ -401,7 +413,7 @@ function renderAlertas(alertas) {
                 <div class="fw-semibold small">${a.titulo}</div>
                 <div class="text-muted" style="font-size:0.82rem">${a.mensaje}</div>
             </div>
-            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:0.72rem;white-space:nowrap;flex-shrink:0" onclick="irASeccion('${a.acción || ''}')">
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:0.72rem;white-space:nowrap;flex-shrink:0" onclick="irASeccion('${a.accion || a.acción || ''}')">
                 <i class="fas fa-arrow-right me-1"></i> Ir
             </button>
             <button class="btn-close-alert" onclick="cerrarAlerta(this)" title="Descartar"><i class="fas fa-times"></i></button>
