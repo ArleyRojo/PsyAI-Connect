@@ -93,6 +93,9 @@ def serve_pages(request, filename):
         raise Http404
 
     if filename.startswith("uploads/"):
+        # Los documentos clÃ­nicos se entregan solo por endpoints autenticados.
+        if filename.startswith("uploads/documentos/"):
+            raise Http404
         try:
             safe_path = safe_join(settings.MEDIA_ROOT, filename)
         except (ValueError, SuspiciousOperation):
@@ -202,6 +205,23 @@ def serve_pages(request, filename):
     return response
 
 
+def serve_public_qr(request, filename):
+    """Serve only professional payment QR images from public media."""
+    try:
+        file_path = safe_join(settings.MEDIA_ROOT, "qr_codes", filename)
+    except (ValueError, SuspiciousOperation):
+        raise Http404
+    if not os.path.isfile(file_path) or os.path.splitext(file_path)[1].lower() not in {
+        ".png", ".jpg", ".jpeg", ".webp"
+    }:
+        raise Http404
+    content_type = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
+    response = FileResponse(open(file_path, "rb"), content_type=content_type)
+    response["Cache-Control"] = "public, max-age=86400"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
 def error_404(request, exception=None):
     return render(request, "404.html", status=404)
 
@@ -214,7 +234,6 @@ def error_403(request, exception=None):
     return render(request, "403.html", status=403)
 
 
-@csrf_exempt
 def notificacion_prueba(request):
     """POST /api/notificaciones/probar/
     body: { "canal": "whatsapp|email", "numero": "+57300..." }.
@@ -222,6 +241,17 @@ def notificacion_prueba(request):
     """
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
+    uid = request.session.get("idUsuario")
+    if not uid:
+        return JsonResponse({"success": False, "message": "Debes iniciar sesi\u00f3n"}, status=401)
+    from apps.authentication.models import Register
+    from apps.patients.models import PerfilPaciente
+    user = Register.objects.filter(
+        idUsuario=uid, rol="paciente", activo=True, estadoCuenta="Activa"
+    ).first()
+    if not user:
+        return JsonResponse({"success": False, "message": "No autorizado"}, status=403)
+
     try:
         import json
         data = json.loads(request.body)
@@ -233,9 +263,19 @@ def notificacion_prueba(request):
     if canal == "whatsapp":
         if not numero:
             return JsonResponse({"error": "Número requerido"}, status=400)
+        perfil = PerfilPaciente.objects.filter(idPaciente_id=uid).first()
+        def normalizar(value):
+            digits = "".join(c for c in value if c.isdigit())
+            if len(digits) == 10 and digits.startswith("3"):
+                return "57" + digits
+            return digits
+        if (not perfil or not perfil.whatsappConsentimiento
+                or perfil.canalNotificacion not in ("whatsapp", "ambos")
+                or normalizar(numero) != normalizar(perfil.numeroTelefonico or "")):
+            return JsonResponse({"success": False, "message": "Solo puedes probar WhatsApp en tu n\u00famero con consentimiento activo"}, status=403)
         from apps.core.notifier import enviar_prueba
-        ok, msg = enviar_prueba(numero)
-        return JsonResponse({"ok": ok, "mensaje": msg}, status=200 if ok else 500)
+        ok, msg = enviar_prueba(perfil.numeroTelefonico)
+        return JsonResponse({"success": ok, "ok": ok, "message": msg, "mensaje": msg}, status=200 if ok else 500)
 
     if canal == "email":
         # obtener usuario de la sesión
@@ -253,9 +293,9 @@ def notificacion_prueba(request):
             subject = "[PsyAI] Prueba de notificación por correo"
             message = f"Hola {user.nombre},\n\nEste es un correo de prueba desde PsyAI Connect."
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
-            return JsonResponse({"ok": True, "mensaje": "Correo de prueba enviado"})
+            return JsonResponse({"success": True, "ok": True, "message": "Correo de prueba enviado", "mensaje": "Correo de prueba enviado"})
         except Exception as exc:
-            return JsonResponse({"ok": False, "mensaje": str(exc)}, status=500)
+            return JsonResponse({"success": False, "ok": False, "message": "No se pudo enviar el correo", "mensaje": "No se pudo enviar el correo"}, status=500)
 
     return JsonResponse({"error": "Canal no soportado"}, status=400)
 
