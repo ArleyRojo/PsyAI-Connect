@@ -87,7 +87,7 @@
     width: 64px;
     height: 64px;
     object-fit: contain;
-    border-radius: 16px;
+    border-radius: 50% !important;
     border: none;
     box-shadow: 0 4px 12px rgba(0,0,0,.25);
     display: block;
@@ -112,7 +112,7 @@
 .sidebar__logo-glow {
     position: absolute;
     inset: -4px;
-    border-radius: 18px;
+    border-radius: 50% !important;
     background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
     z-index: 1;
 }
@@ -732,5 +732,89 @@
     }
     .footer-enhanced .footer-heading {
         margin-top: 20px;
+    }
+}
+/* ==================================================================
+   GLOBAL LAPTOP & SHORT-VIEWPORT OPTIMIZATIONS (height < 850px)
+   ================================================================== */
+@media screen and (max-height: 850px) {
+    .sidebar {
+        width: 240px;
+    }
+    .sidebar__logo {
+        padding: 16px 14px 12px;
+        gap: 8px;
+    }
+    .sidebar__logo-img-wrap {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    .sidebar__logo img,
+    .sidebar__logo-img {
+        width: 54px !important;
+        height: 54px !important;
+        object-fit: contain !important;
+        border-radius: 50% !important;
+        display: block !important;
+    }
+    .sidebar__logo-glow {
+        inset: -2px !important;
+        border-radius: 50% !important;
+    }
+    .sidebar__brand {
+        font-size: 0.95rem;
+        margin-top: 2px;
+    }
+    .sidebar__role-badge {
+        font-size: 0.68rem;
+        padding: 2px 8px;
+    }
+    .sidebar__nav-item {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+    }
+    .sidebar__nav-section-label {
+        padding: 6px 14px 2px;
+        font-size: 0.65rem;
+    }
+    .sidebar__footer {
+        padding: 6px 10px;
+    }
+    .sidebar__user-card {
+        padding: 4px 6px;
+    }
+    .sidebar__logout-section {
+        padding: 4px 10px 8px;
+    }
+    .sidebar__logout-btn {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+    }
+    .main-content {
+        margin-left: 240px;
+        padding: 14px 18px;
+    }
+    .ms-250, .ms-280 {
+        margin-left: 240px !important;
+    }
+    .main-header {
+        margin-bottom: 0.85rem !important;
+    }
+    .main-header h1 {
+        font-size: 1.3rem;
+    }
+    .section-card {
+        margin-bottom: 0.85rem;
+    }
+    .section-card__header {
+        padding: 8px 14px;
+        font-size: 0.88rem;
+    }
+    .section-card__body {
+        padding: 12px 14px;
     }
 }
