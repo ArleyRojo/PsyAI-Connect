@@ -524,7 +524,7 @@ Prediagnóstico orientativo generado por IA al finalizar una sesión de chatbot.
 | `fecha` | `DateTimeField(auto_now_add)` | Fecha de generación |
 
 **Notas:**
-- Si algún mensaje del historial del día tiene `nivelEmocionalDetectado` en `{alto, critico}`, el servicio fuerza `requiereAtencionUrgente=True` independientemente del modelo (ver `chatbot-ia.md §9.4`).
+- Si algún mensaje del historial del día tiene `nivelEmocionalDetectado` en `{alto, critico}`, el servicio fuerza `requiereAtencionUrgente=True` independientemente del modelo (ver `chatbot-ai.md §9.4`).
 - `resumenPaciente` y `recomendaciones` son los únicos campos visibles al paciente (modal del chatbot). El `resumenProfesional` y `nivelRiesgo` solo se muestran en la vista del profesional.
 
 ---
@@ -682,8 +682,8 @@ erDiagram
 
 ## Ver también
 
-- [`roles-y-permisos.md`](roles-y-permisos.md) — Qué modelos ve cada rol
+- [`roles-and-permissions.md`](roles-and-permissions.md) — Qué modelos ve cada rol
 - [`frontend.md`](frontend.md) — Cómo se consumen estos modelos desde el frontend
-- [`chatbot-ia.md`](chatbot-ia.md) — Modelos específicos del chatbot
+- [`chatbot-ai.md`](chatbot-ai.md) — Modelos específicos del chatbot
 - [`pagos-facturacion.md`](pagos-facturacion.md) — Modelos de facturación
-- [`seguridad.md`](seguridad.md) — Modelos de seguridad (`TOTPDevice`, `RecoveryTokens`, etc.)
+- [`security.md`](security.md) — Modelos de seguridad (`TOTPDevice`, `RecoveryTokens`, etc.)

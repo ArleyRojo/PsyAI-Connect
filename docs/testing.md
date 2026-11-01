@@ -414,9 +414,9 @@ jobs:
 
 ## Ver también
 
-- [`modelos-de-datos.md`](modelos-de-datos.md) — Modelos que se testean
-- [`chatbot-ia.md`](chatbot-ia.md) — Tests del servicio de chatbot
+- [`data-models.md`](data-models.md) — Modelos que se testean
+- [`chatbot-ai.md`](chatbot-ai.md) — Tests del servicio de chatbot
 - [`pagos-facturacion.md`](pagos-facturacion.md) — Tests del webhook Wompi (HMAC)
-- [`seguridad.md`](seguridad.md) — Tests de CSRF, rate limiting, 2FA
-- [`despliegue.md`](despliegue.md) — Tests en Docker/CI
+- [`security.md`](security.md) — Tests de CSRF, rate limiting, 2FA
+- [`deployment.md`](deployment.md) — Tests en Docker/CI
 - [`frontend.md`](frontend.md) — Tests de utilidades JS (si aplica)

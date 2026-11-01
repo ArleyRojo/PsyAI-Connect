@@ -268,19 +268,21 @@ Ver `.env.example` para lista completa.
 
 ## 📚 Documentación Técnica
 
-Toda la docs detallada en [`docs/`](docs/):
+Consulta la documentación técnica completa organizada por área. Este `README.md` es la puerta de entrada del proyecto; el resto de los documentos detallados se encuentran en la carpeta [`docs/`](docs/).
 
-| Archivo | Contenido |
-|---------|-----------|
-| [`docs/api.md`](docs/api.md) | Referencia endpoints REST |
-| [`docs/seguridad.md`](docs/seguridad.md) | Hardening y estado seguridad |
-| [`docs/modelos-de-datos.md`](docs/modelos-de-datos.md) | Modelo ER y diccionario datos |
-| [`docs/roles-y-permisos.md`](docs/roles-y-permisos.md) | Roles, pantallas, permisos DRF |
-| [`docs/frontend.md`](docs/frontend.md) | Arquitectura JS/CSS/Tema/Alertas |
-| [`docs/chatbot-ia.md`](docs/chatbot-ia.md) | Integración Gemini profunda |
-| [`docs/pagos-facturacion.md`](docs/pagos-facturacion.md) | Flujo facturación + Wompi |
-| [`docs/despliegue.md`](docs/despliegue.md) | Docker, variables, producción |
-| [`docs/testing.md`](docs/testing.md) | Estrategia tests, capas, CI |
+| Documento | Descripción | Acceso |
+|-----------|-------------|--------|
+| 📘 **README.md** | Documentación principal: visión general, objetivo, stack tecnológico, instalación rápida y características destacadas. | [Ver documento](README.md) |
+| 🏗 **architecture.md** | Arquitectura general del sistema: capas Views → Services → Repositories, módulos por app y diagrama de componentes. | [docs/architecture.md](docs/architecture.md) |
+| 🔌 **api.md** | Referencia de API REST: endpoints por app, métodos HTTP, autenticación requerida y roles permitidos. | [docs/api.md](docs/api.md) |
+| 🔒 **security.md** | Seguridad y protección de datos: capas de hardening, CSRF, rate limiting, cookies seguras, HSTS y buenas prácticas. | [docs/security.md](docs/security.md) |
+| 🚀 **deployment.md** | Instalación y despliegue: Docker multi-stage, compose dev/prod, entrypoint y variables de entorno. | [docs/deployment.md](docs/deployment.md) |
+| 🧪 **testing.md** | Estrategia de pruebas: organización con pytest, cobertura, capas repository/service/view y tests de integración. | [docs/testing.md](docs/testing.md) |
+| 👥 **roles-and-permissions.md** | Roles y permisos: tres roles de usuario, pantallas por rol y clases de permiso de Django REST Framework. | [docs/roles-and-permissions.md](docs/roles-and-permissions.md) |
+| 🗄 **data-models.md** | Modelos y relaciones de datos: modelos por app, campos clave, claves foráneas y diagrama ER en Mermaid. | [docs/data-models.md](docs/data-models.md) |
+| 🎨 **frontend.md** | Arquitectura del frontend: organización de JS y CSS, temas claro/oscuro, sistema de alertas y convenciones. | [docs/frontend.md](docs/frontend.md) |
+| 🤖 **chatbot-ai.md** | Chatbot e integración con Gemini: flujo de mensajería, rotación de API keys y detección de riesgo emocional. | [docs/chatbot-ai.md](docs/chatbot-ai.md) |
+| 🔗 **integrations.md** | Integraciones externas: Gemini IA, Twilio WhatsApp, Google OAuth (allauth), correo SMTP, pagos manuales con evidencia y boletín informativo. | [docs/integrations.md](docs/integrations.md) |
 
 ---
 
