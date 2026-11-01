@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     /* ─────────────────────────────────────────────────────── */
     /* 5. Theme Toggle Functionality                          */
     /* ─────────────────────────────────────────────────────── */
+    /* DESHABILITADO: El manejo del tema ahora está en static/js/core/shared/theme.js
     const themeToggle = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
     
@@ -107,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         initializeTheme();
+    */
         
         // Escuchar cambios de preferencia del sistema
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {

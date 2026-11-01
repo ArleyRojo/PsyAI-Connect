@@ -2964,6 +2964,132 @@ html.dark-mode #theme-toggle:not(.toggle-animating) .theme-emoji-moon {
     transform: scale(0);
 }
 
+/* ==============================
+   TOGGLE THEME - OVERRIDE (alta especificidad para ganar a landing.css, responsive y themes)
+   ============================== */
+html:root:root:root .theme-switch-container,
+html:root:root:root body #mainNav .theme-switch-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    user-select: none !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+html:root:root:root #theme-toggle,
+html:root:root:root body #mainNav #theme-toggle,
+html:root:root:root .theme-toggle-mobile,
+html:root:root:root body #mainNav .theme-toggle-mobile {
+    appearance: none !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    font-size: 1.5rem !important;
+    line-height: 1 !important;
+    padding: 4px 6px !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+    transition: transform 150ms ease !important;
+}
+
+html:root:root:root #theme-toggle:hover,
+html:root:root:root body #mainNav #theme-toggle:hover,
+html:root:root:root .theme-toggle-mobile:hover,
+html:root:root:root body #mainNav .theme-toggle-mobile:hover {
+    transform: scale(1.15) !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+html:root:root:root #theme-toggle::before,
+html:root:root:root body #mainNav #theme-toggle::before,
+html:root:root:root .theme-toggle-mobile::before,
+html:root:root:root body #mainNav .theme-toggle-mobile::before {
+    content: "\2600\FE0F" !important;
+    font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "Apple Color Emoji", "Android Emoji", sans-serif !important;
+    font-size: 1.5rem !important;
+    position: static !important;
+    background: none !important;
+    transform: none !important;
+    display: inline-block !important;
+    margin: 0 !important;
+}
+
+html:root:root:root #theme-toggle[data-theme="dark"]::before,
+html:root:root:root body #mainNav #theme-toggle[data-theme="dark"]::before,
+html:root:root:root .theme-toggle-mobile[data-theme="dark"]::before,
+html:root:root:root body #mainNav .theme-toggle-mobile[data-theme="dark"]::before {
+    content: "\1F319" !important;
+}
+
+/* Respaldo: si no hay data-theme pero hay clase dark-mode en <html> (primer pintado) */
+html.dark-mode #theme-toggle:not([data-theme])::before,
+html.dark-mode body #mainNav #theme-toggle:not([data-theme])::before,
+html.dark-mode .theme-toggle-mobile:not([data-theme])::before,
+html.dark-mode body #mainNav .theme-toggle-mobile:not([data-theme])::before {
+    content: "\1F319" !important;
+}
+
+html:root:root:root #theme-toggle::after,
+html:root:root:root body #mainNav #theme-toggle::after,
+html:root:root:root .theme-toggle-mobile::after,
+html:root:root:root body #mainNav .theme-toggle-mobile::after {
+    content: none !important;
+}
+
+html:root:root:root #theme-toggle .theme-emoji,
+html:root:root:root body #mainNav #theme-toggle .theme-emoji,
+html:root:root:root #theme-toggle .theme-emoji-sun,
+html:root:root:root body #mainNav #theme-toggle .theme-emoji-sun,
+html:root:root:root #theme-toggle .theme-emoji-moon,
+html:root:root:root body #mainNav #theme-toggle .theme-emoji-moon,
+html:root:root:root .theme-toggle-mobile .theme-emoji,
+html:root:root:root body #mainNav .theme-toggle-mobile .theme-emoji,
+html:root:root:root .theme-toggle-mobile .theme-emoji-sun,
+html:root:root:root body #mainNav .theme-toggle-mobile .theme-emoji-sun,
+html:root:root:root .theme-toggle-mobile .theme-emoji-moon,
+html:root:root:root body #mainNav .theme-toggle-mobile .theme-emoji-moon {
+    display: none !important;
+}
+
+@keyframes theme-emoji-pop {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.35) rotate(180deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+html:root:root:root #theme-toggle.toggle-animating::before,
+html:root:root:root body #mainNav #theme-toggle.toggle-animating::before,
+html:root:root:root .theme-toggle-mobile.toggle-animating::before,
+html:root:root:root body #mainNav .theme-toggle-mobile.toggle-animating::before {
+    animation: theme-emoji-pop 400ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:root:root:root #theme-toggle.toggle-animating::before,
+    html:root:root:root body #mainNav #theme-toggle.toggle-animating::before,
+    html:root:root:root .theme-toggle-mobile.toggle-animating::before,
+    html:root:root:root body #mainNav .theme-toggle-mobile.toggle-animating::before {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
 /* MODO OSCURO */
 
 

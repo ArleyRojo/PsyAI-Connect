@@ -3625,14 +3625,6 @@ html.dark-mode .theme-icon.moon.active {
     background: var(--dm-card) !important;
     color: var(--dm-accent) !important;
 }
-html.dark-mode #theme-toggle {
-    background: var(--dm-border) !important;
-    border-color: var(--dm-border2) !important;
-}
-html.dark-mode #theme-toggle::before {
-    transform: translateX(20px) !important;
-    background: var(--dm-accent) !important;
-}
 
 /* ── 20. Componentes Genéricos (Modales, Formularios, etc) ── */
 html.dark-mode .form-control,

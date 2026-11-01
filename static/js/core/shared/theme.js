@@ -1,8 +1,11 @@
 let themeTransitionTimer;
 let themeToggleTimer;
 
-const EMOJI_SUN = '<span class="theme-emoji theme-emoji-sun" aria-hidden="true">☀️</span>';
-const EMOJI_MOON = '<span class="theme-emoji theme-emoji-moon" aria-hidden="true">🌙</span>';
+const TOGGLE_SELECTOR = '#theme-toggle, .theme-toggle-mobile';
+
+function getToggles() {
+    return document.querySelectorAll(TOGGLE_SELECTOR);
+}
 
 function applyThemeState(isDark) {
     const root = document.documentElement;
@@ -13,37 +16,18 @@ function applyThemeState(isDark) {
     }
 }
 
-function injectEmojis(themeToggle) {
+function updateToggleUI(themeToggle, isDark) {
     if (!themeToggle) return;
-    if (themeToggle.querySelector('.theme-emoji')) return;
 
-    themeToggle.innerHTML = EMOJI_SUN + EMOJI_MOON;
-}
+    // Un solo span con el emoji correspondiente
+    themeToggle.innerHTML = isDark
+        ? '<span class="theme-emoji" aria-hidden="true">🌙</span>'
+        : '<span class="theme-emoji" aria-hidden="true">☀️</span>';
 
-function syncThemeToggleUI(isDark) {
-    const themeToggle = document.getElementById('theme-toggle');
-    const emojiSun = themeToggle ? themeToggle.querySelector('.theme-emoji-sun') : null;
-    const emojiMoon = themeToggle ? themeToggle.querySelector('.theme-emoji-moon') : null;
-
-    if (themeToggle) {
-        themeToggle.setAttribute('aria-pressed', String(isDark));
-        themeToggle.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
-        themeToggle.dataset.theme = isDark ? 'dark' : 'light';
-    }
-
-    if (emojiSun && emojiMoon) {
-        if (isDark) {
-            emojiSun.style.opacity = '0';
-            emojiSun.style.transform = 'scale(0)';
-            emojiMoon.style.opacity = '1';
-            emojiMoon.style.transform = 'scale(1)';
-        } else {
-            emojiSun.style.opacity = '1';
-            emojiSun.style.transform = 'scale(1)';
-            emojiMoon.style.opacity = '0';
-            emojiMoon.style.transform = 'scale(0)';
-        }
-    }
+    themeToggle.setAttribute('aria-pressed', String(isDark));
+    themeToggle.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+    themeToggle.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+    themeToggle.dataset.theme = isDark ? 'dark' : 'light';
 }
 
 function saveThemeToStorage(theme) {
@@ -66,33 +50,33 @@ function saveThemeToStorage(theme) {
     }).catch(() => {});
 }
 
-function toggleTheme() {
+function toggleTheme(event) {
+    const currentToggle = event && event.currentTarget ? event.currentTarget : document.querySelector(TOGGLE_SELECTOR);
     const root = document.documentElement;
-    const themeToggle = document.getElementById('theme-toggle');
 
-    // Agregar clase de animación
-    themeToggle.classList.add('toggle-animating');
+    if (currentToggle) {
+        currentToggle.classList.add('toggle-animating');
+    }
     root.classList.add('theme-animating');
 
     window.clearTimeout(themeTransitionTimer);
     window.clearTimeout(themeToggleTimer);
 
-    // Forzar reflow para activar la animación
-    void themeToggle.offsetWidth;
+    void root.offsetWidth;
 
     const isDark = root.classList.contains('dark-mode');
     const newTheme = isDark ? 'light' : 'dark';
 
     applyThemeState(newTheme === 'dark');
     saveThemeToStorage(newTheme);
-    syncThemeToggleUI(newTheme === 'dark');
+    getToggles().forEach((t) => updateToggleUI(t, newTheme === 'dark'));
 
     themeTransitionTimer = window.setTimeout(() => {
         root.classList.remove('theme-animating');
     }, 400);
 
     themeToggleTimer = window.setTimeout(() => {
-        themeToggle.classList.remove('toggle-animating');
+        getToggles().forEach((t) => t.classList.remove('toggle-animating'));
     }, 400);
 
     window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: newTheme === 'dark' } }));
@@ -116,17 +100,12 @@ function getSavedTheme() {
 
 function initTheme() {
     const isDark = getSavedTheme() === 'dark';
-    const themeToggle = document.getElementById('theme-toggle');
-
     applyThemeState(isDark);
 
-    // Inyectar emojis si el botón existe
-    if (themeToggle) {
-        injectEmojis(themeToggle);
-        syncThemeToggleUI(isDark);
-
+    getToggles().forEach((themeToggle) => {
+        updateToggleUI(themeToggle, isDark);
         themeToggle.addEventListener('click', toggleTheme);
-    }
+    });
 }
 
 (function applyThemeEarly() {
@@ -150,12 +129,9 @@ if (!document.readyState || document.readyState === 'loading') {
 window.addEventListener('storage', function (e) {
     if (e.key === 'theme') {
         const isDark = e.newValue === 'dark';
-        const themeToggle = document.getElementById('theme-toggle');
         applyThemeState(isDark);
-
-        if (themeToggle && !themeToggle.querySelector('.theme-emoji')) {
-            injectEmojis(themeToggle);
-        }
-        syncThemeToggleUI(isDark);
+        getToggles().forEach((themeToggle) => {
+            updateToggleUI(themeToggle, isDark);
+        });
     }
 });
