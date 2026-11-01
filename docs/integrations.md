@@ -317,5 +317,331 @@ Archivo: `apps/core/services.py` → `CoreService`
 - [`security.md`](security.md) — HMAC de webhooks, rate limiting, cookies seguras
 - [`chatbot-ai.md`](chatbot-ai.md) — Detalle del chatbot con Gemini
 - [`roles-and-permissions.md`](roles-and-permissions.md) — Permisos por endpoint de integración
+
+---
+
+## English Version
+
+# External Integrations — PsyAI Connect
+
+> **Summary:** Documents integrations with third-party services implemented in the project: Google Gemini (AI), Twilio (WhatsApp), Google OAuth (allauth), transactional email (SMTP) and manual payments with evidence.  
+> **Audience:** developers and DevOps who configure or maintain integrations.  
+> **Status:** reflects real code from `apps/chatbot/`, `apps/core/`, `apps/authentication/`, `apps/billing/` and `config/settings/`.
+
+---
+
+## 1. Integrations summary / Resumen de integraciones
+
+| Integration | Provider | Purpose | Key file | Status |
+|-------------|----------|---------|----------|--------|
+| **Chatbot AI** | Google Gemini API | Chatbot triage and emotional support responses | `apps/chatbot/services.py` | Active |
+| **WhatsApp messaging** | Twilio | Appointment notifications, reminders, opt-in/opt-out | `apps/core/whatsapp.py`, `apps/core/notifier.py` | Active (simulated mode if no credentials) |
+| **Social authentication** | Google (OAuth 2.0 via allauth) | Login with Google account | `apps/authentication/adapters.py` | Active |
+| **Transactional email** | SMTP (configurable, e.g. Brevo) | Welcome, invoices, appointments, risk alerts, password recovery | `apps/core/services.py`, `apps/core/notifier.py`, `apps/authentication/services.py` | Active (SMTP) |
+| **Payments** | Manual (evidence) | Invoice creation and confirmation with attached proof | `apps/billing/services.py`, `apps/billing/views.py` | Active (no automatic gateway) |
+| **Newsletter** | Internal (database) | Subscription and emotional well-being tips delivery | `apps/core/services.py` | Active |
+
+> **Note about Wompi:** The project removed Wompi fields in migration `0004_remove_wompi_fields_add_fechapago`. Currently payments are managed manually: the professional creates the invoice, the patient attaches evidence (image/PDF) and the professional confirms payment. No automatic payment gateway is integrated.
+
+---
+
+## 2. Google Gemini — AI chatbot
+
+Main file: `apps/chatbot/services.py` → `ChatbotService`
+
+### 2.1. Functionality
+
+The psychological triage chatbot sends user messages to Google Gemini and returns an empathetic response, with emotional risk detection and local fallback if the service is unavailable.
+
+### 2.2. Flow
+
+```
+Patient → POST /api/chatbot/enviar → ChatbotViewSet.create
+                                      │
+                                      ▼
+                              ChatbotService.build_response()
+                                      │
+              ┌───────────────────────┼───────────────────────┐
+              ▼                       ▼                       ▼
+    Risk detection              Gemini call           Local fallback
+    (high/medium terms)         (API key rotation)      if Gemini fails
+              │                       │                       │
+              └───────────────────────┴───────────────────────┘
+                                      │
+                                      ▼
+                            Saves in ConversacionesChatbot
+                                      │
+                                      ▼
+                            Returns JSON to frontend
+```
+
+### 2.3. Environment variables
+
+| Variable | Description | Mandatory | Default |
+|----------|-------------|-----------|---------|
+| `GEMINI_API_KEY` | Main Gemini API key | Yes | — |
+| `GEMINI_API_KEYS` | Additional keys separated by comma (rotation) | No | — |
+| `GEMINI_MODEL` | Gemini model | No | `gemini-3.5-flash-lite` |
+| `GEMINI_FALLBACK_MODEL` | Fallback model if main fails | No | `gemma-4-26b-a4b-it` |
+| `GEMINI_THINKING_LEVEL` | Reasoning level (`low/medium/high/none`) | No | `low` |
+| `GEMINI_REQUEST_TIMEOUT_CONNECT` | Connection timeout (s) | No | `3` |
+| `GEMINI_REQUEST_TIMEOUT_READ` | Read timeout attempt 1 (s) | No | `8` |
+| `GEMINI_MIN_READ_TIMEOUT_SECONDS` | Minimum guaranteed read timeout (s) | No | `3` |
+| `GEMINI_RETRIES` | Retries on network error/timeout | No | `2` |
+| `GEMINI_RETRY_BASE_DELAY` | Base delay between retries (s) | No | `0.2` |
+| `GEMINI_TOTAL_DEADLINE_SECONDS` | Total budget for the call (s) | No | `10` |
+
+### 2.4. API key rotation
+
+`ChatbotService._call_gemini_with_rotation()` iterates over available keys. If a key returns `429` (quota exhausted) and more keys exist, rotates to the next one. If all keys exhausted, tries fallback model (`GEMINI_FALLBACK_MODEL`) if different from main. If everything fails, activates `_build_local_fallback()` with `success: true` and `fallback: true`.
+
+### 2.5. PII sanitization
+
+Before sending to Gemini, `ChatbotService._sanitize_text()` masks email addresses, Colombian phone numbers, document numbers (CC, CE, TI, passport) and credit cards. Applied to history and current message.
+
+---
+
+## 3. Twilio — WhatsApp
+
+Main files:
+- `apps/core/whatsapp.py` → `WhatsAppProvider`, `TwilioProvider`, `DummyProvider`, `get_whatsapp_provider()`
+- `apps/core/webhooks.py` → `WhatsAppWebhook`, `WhatsAppStatusCallback`
+- `apps/core/notifier.py` → `NotificationService`
+
+### 3.1. Providers
+
+| Provider | When used | Behavior |
+|----------|-----------|----------|
+| `TwilioProvider` | `WHATSAPP_ENABLED=True` and complete credentials | Real send via Twilio API |
+| `DummyProvider` | `WHATSAPP_ENABLED=False` or incomplete credentials | Simulated mode, logs without sending |
+
+`get_whatsapp_provider()` returns `TwilioProvider` if `WHATSAPP_ENABLED` is True, otherwise `DummyProvider`.
+
+### 3.2. Environment variables
+
+| Variable | Description | Mandatory | Default |
+|----------|-------------|-----------|---------|
+| `WHATSAPP_ENABLED` | Activates real send (`true/1/yes`) | No | `False` |
+| `TWILIO_SID` | Twilio Account SID | If `WHATSAPP_ENABLED=true` | — |
+| `TWILIO_TOKEN` | Twilio Auth Token | If `WHATSAPP_ENABLED=true` | — |
+| `TWILIO_WHATSAPP_FROM` | Sender number (`whatsapp:+...`) | If `WHATSAPP_ENABLED=true` | — |
+| `TWILIO_WEBHOOK_URL` | Public webhook URL | No | — |
+| `TWILIO_STATUS_CALLBACK_URL` | Status callback URL | Optional | — |
+| `TWILIO_TPL_RECORDATORIO` | Content SID for appointment reminder template | No | — |
+| `TWILIO_TPL_CONFIRMACION` | Content SID for appointment confirmation template | No | — |
+| `TWILIO_TPL_CANCELACION` | Content SID for appointment cancellation template | No | — |
+| `TWILIO_TPL_MENSAJE_PRO` | Content SID for professional message template | No | — |
+
+### 3.3. Webhooks
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/paciente/whatsapp/webhook/` | `POST` | Incoming Twilio webhook. Verifies HMAC signature (`X-Twilio-Signature`). Handles opt-out (`STOP`, `BAJA`, `UNSUBSCRIBE`). |
+| WhatsApp Status Callback | `POST` | Updates notification status (`sent`, `delivered`, `failed`, `undelivered`) by `providerMsgId`. |
+
+### 3.4. Patient notifications
+
+`NotificationService.notificar_paciente()` in `apps/core/notifier.py` sends by email and/or WhatsApp according to patient preferences (`canalNotificacion`: `email`, `whatsapp`, `ambos`, `ninguno`). Supported types: `recordatorio_cita`, `confirmacion_cita`, `cancelacion_cita`, `mensaje_profesional`.
+
+Registers each attempt in `Notificaciones` (table of `apps/scheduling/models.py`) with `estado`, `canal`, `errorDetalle` and `providerMsgId`.
+
+---
+
+## 4. Google OAuth — Social authentication
+
+Main file: `apps/authentication/adapters.py` → `SocialAccountAdapter`
+
+### 4.1. Configuration
+
+Configured in `config/settings/base.py` with `django-allauth` and Google provider:
+- `allauth.socialaccount.providers.google` in `INSTALLED_APPS`
+- Custom `SocialAccountAdapter`
+
+### 4.2. Behavior
+
+| Aspect | Detail |
+|--------|--------|
+| Assigned role | Always `paciente` (forces `rol='paciente'` regardless of provider) |
+| Password | `uuid.uuid4().hex` generated (unusable password, login only via OAuth) |
+| Name | From `extra_data["name"]` or `extra_data["first_name"]` |
+| Profile picture | From `extra_data["picture"]` if exists |
+| Patient profile | Automatically creates `PerfilPaciente` with `consentimientoDatos=True` and `consentimiento_chatbot=True` |
+| Session | Configured via `_setup_session()` with `idUsuario`, `nombre`, `rol`, `fotoPerfil` |
+
+### 4.3. Environment variables
+
+| Variable | Description | Mandatory |
+|----------|-------------|-----------|
+| `GOOGLE_CLIENT_ID` | Google OAuth Client ID | No (required to use social login) |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | No (required to use social login) |
+
+---
+
+## 5. Transactional email (SMTP)
+
+Main files:
+- `apps/core/services.py` → `CoreService.send_welcome_email()`, `subscribe_newsletter()`
+- `apps/core/notifier.py` → `NotificationService._build_email()` (sends via `send_mail`)
+- `apps/billing/services.py` → `InvoiceService` (sends invoice notifications)
+- `apps/scheduling/services.py` → `AppointmentService._notify()` (sends appointment notifications)
+- `apps/authentication/services.py` → `AuthService` (verification and recovery emails)
+- `apps/chatbot/services.py` → `_send_risk_email()` (risk alerts)
+- `apps/admin_panel/services.py` → account suspension emails
+
+### 5.1. Backend
+
+Django uses `django.core.mail.backends.smtp.EmailBackend` by default. In development, if no `EMAIL_HOST_USER`, uses `console.EmailBackend` (prints to terminal).
+
+### 5.2. Environment variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EMAIL_BACKEND` | Django email backend | `django.core.mail.backends.smtp.EmailBackend` |
+| `EMAIL_HOST` | SMTP server | `smtp.gmail.com` |
+| `EMAIL_PORT` | SMTP port | `587` |
+| `EMAIL_USE_TLS` | Use TLS | `True` |
+| `EMAIL_HOST_USER` | SMTP user | — |
+| `EMAIL_HOST_PASSWORD` | SMTP password | — |
+| `DEFAULT_FROM_EMAIL` | Sender | `PsyAI Connect <noreply@psyaiconnect.com>` |
+| `SITE_URL` | Base URL for email links | `http://localhost:8000` |
+
+> **Note about Brevo:** The README mentions Brevo as transactional email service, but the code implements email sending via standard Django SMTP. Brevo can be configured as SMTP server by defining `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` with Brevo credentials.
+
+### 5.3. Email templates
+
+| Template | Use |
+|----------|-----|
+| `templates/emails/newsletter_welcome.html` | Newsletter welcome email |
+| `templates/emails/factura_notificacion.html` | Invoice notification |
+| `templates/emails/cita_notificacion.html` | Appointment notification |
+| `templates/emails/alerta_riesgo.html` | Emotional risk alert (chatbot) |
+| `templates/emails/password_recovery.html` | Password recovery |
+| `templates/emails/cuenta_bloqueada.html` | Account suspended |
+| `templates/emails/pago_confirmado_webhook.html` | Payment confirmation |
+
+---
+
+## 6. Payments — Manual confirmation with evidence
+
+Main files:
+- `apps/billing/services.py` → `InvoiceService`
+- `apps/billing/views.py` → `FacturaListView`, `FacturaConfirmarPagoView`, `FacturaEvidenciaView`
+- `apps/billing/models.py` → `Facturas`
+- `apps/professionals/models.py` → `ProfessionalPaymentInfo`
+
+### 6.1. Payment flow
+
+1. **Create invoice:** `POST /api/facturas` (professional only). Requires `items`, `idPaciente`, `metodoPago`, `evidencia` (attached file), `fechaPago`, `referencia`, `notas`.
+2. **Evidence validation:** Validates extension (`jpg`, `jpeg`, `png`, `webp`, `pdf`) and size (max 5 MB) via `validate_file_upload()` in `apps/core/utils.py`.
+3. **Confirm payment:** `POST /api/facturas/<id>/confirmar-pago` (professional owner only). Marks invoice as confirmed.
+4. **View evidence:** `GET /api/facturas/<id>/evidencia` — serves attached file.
+
+### 6.2. Payment methods
+
+Defined in `Facturas.METODO_PAGO_CHOICES` (apps/billing/models.py). Includes transfer, Nequi, Bre-B, cash, etc.
+
+### 6.3. Professional payment information
+
+Model `ProfessionalPaymentInfo`:
+- `qr_image`: QR image for payments
+- `mensaje_texto`: Account number, Nequi, Bre-B keys, etc.
+
+> **Note:** No automatic payment gateway integration (Wompi was removed). Payments are manually confirmed by the professional after verifying attached evidence.
+
+---
+
+## 7. Newsletter
+
+Main file: `apps/core/services.py` → `CoreService`
+
+### 7.1. Functionality
+
+- `subscribe_newsletter(email)`: Subscribes an email to the newsletter. Validates email format. Creates or reactivates a `NewsletterSubscriber`. Sends welcome email if new subscription.
+- `send_welcome_email(to_email)`: Sends welcome email with a breathing tip (4-7-8).
+
+### 7.2. Model
+
+`NewsletterSubscriber` (apps/core/models.py): `email`, `is_active`, `fechaSuscripcion`.
+
+---
+
+## 8. Consolidated environment variables
+
+| Variable | Integration | Mandatory | Default |
+|----------|-------------|-----------|---------|
+| `GEMINI_API_KEY` | Gemini | Yes | — |
+| `GEMINI_API_KEYS` | Gemini | No | — |
+| `GEMINI_MODEL` | Gemini | No | `gemini-3.5-flash-lite` |
+| `GEMINI_FALLBACK_MODEL` | Gemini | No | `gemma-4-26b-a4b-it` |
+| `GEMINI_THINKING_LEVEL` | Gemini | No | `low` |
+| `GEMINI_REQUEST_TIMEOUT_CONNECT` | Gemini | No | `3` |
+| `GEMINI_REQUEST_TIMEOUT_READ` | Gemini | No | `8` |
+| `GEMINI_MIN_READ_TIMEOUT_SECONDS` | Gemini | No | `3` |
+| `GEMINI_RETRIES` | Gemini | No | `2` |
+| `GEMINI_RETRY_BASE_DELAY` | Gemini | No | `0.2` |
+| `GEMINI_TOTAL_DEADLINE_SECONDS` | Gemini | No | `10` |
+| `WHATSAPP_ENABLED` | Twilio | No | `False` |
+| `TWILIO_SID` | Twilio | If `WHATSAPP_ENABLED=true` | — |
+| `TWILIO_TOKEN` | Twilio | If `WHATSAPP_ENABLED=true` | — |
+| `TWILIO_WHATSAPP_FROM` | Twilio | If `WHATSAPP_ENABLED=true` | — |
+| `TWILIO_WEBHOOK_URL` | Twilio | No | — |
+| `TWILIO_STATUS_CALLBACK_URL` | Twilio | No | — |
+| `TWILIO_TPL_RECORDATORIO` | Twilio | No | — |
+| `TWILIO_TPL_CONFIRMACION` | Twilio | No | — |
+| `TWILIO_TPL_CANCELACION` | Twilio | No | — |
+| `TWILIO_TPL_MENSAJE_PRO` | Twilio | No | — |
+| `GOOGLE_CLIENT_ID` | Google OAuth | No | — |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth | No | — |
+| `EMAIL_HOST` | SMTP | No | `smtp.gmail.com` |
+| `EMAIL_PORT` | SMTP | No | `587` |
+| `EMAIL_USE_TLS` | SMTP | No | `True` |
+| `EMAIL_HOST_USER` | SMTP | No | — |
+| `EMAIL_HOST_PASSWORD` | SMTP | No | — |
+| `DEFAULT_FROM_EMAIL` | SMTP | No | `PsyAI Connect <noreply@psyaiconnect.com>` |
+| `SITE_URL` | General | No | `http://localhost:8000` |
+
+---
+
+## 9. Integration endpoints
+
+| Method | Endpoint | Integration | Permission |
+|--------|----------|-------------|------------|
+| `POST` | `/api/chatbot/enviar` | Gemini | Authenticated + Patient |
+| `POST` | `/api/paciente/whatsapp/webhook/` | Twilio (webhook) | Public (HMAC signature) |
+| `GET/POST` | `/api/auth/social/google/` | Google OAuth | Public |
+| `GET/POST` | `/api/facturas` | Payments (manual) | Authenticated |
+| `POST` | `/api/facturas/<id>/confirmar-pago` | Payments (manual) | Professional |
+| `GET` | `/api/facturas/<id>/evidencia` | Payments (manual) | Authenticated |
+| `POST` | `/api/newsletter/suscribir` | Newsletter | Public |
+
+---
+
+## 10. Key files
+
+| Path | Content |
+|------|-----------|
+| `apps/chatbot/services.py` | `ChatbotService`: Gemini call, key rotation, fallback, PII sanitization |
+| `apps/core/whatsapp.py` | `TwilioProvider`, `DummyProvider`, `get_whatsapp_provider()` |
+| `apps/core/webhooks.py` | `WhatsAppWebhook`, `WhatsAppStatusCallback` |
+| `apps/core/notifier.py` | `NotificationService`: patient email/WhatsApp notifications |
+| `apps/core/services.py` | `CoreService`: newsletter, welcome email |
+| `apps/authentication/adapters.py` | `SocialAccountAdapter`: Google OAuth (forces patient role) |
+| `apps/authentication/services.py` | `AuthService`: verification and recovery emails |
+| `apps/billing/services.py` | `InvoiceService`: invoice creation, confirmation and email |
+| `apps/billing/views.py` | Invoice and payment confirmation views |
+| `apps/billing/models.py` | `Facturas`, `ProfessionalPaymentInfo` |
+| `apps/scheduling/services.py` | `AppointmentService`: appointment notifications |
+| `apps/core/utils.py` | `validate_file_upload()`: attached file validation |
+
+---
+
+## See also / Ver también
+
+- [`despliegue.md`](deployment.md) — Environment variables and Docker deployment
+- [`seguridad.md`](security.md) — Webhook HMAC, rate limiting, secure cookies
+- [`chatbot-ai.md`](chatbot-ai.md) — Gemini chatbot details
+- [`roles-y-permisos.md`](roles-and-permissions.md) — Permissions per integration endpoint
+- [`pagos-facturacion.md`](pagos-facturacion.md) — Billing and manual payment flow
+- [`api.md`](api.md) — Complete REST endpoints reference
 - [`pagos-facturacion.md`](pagos-facturacion.md) — Flujo de facturación y pagos manuales
 - [`api.md`](api.md) — Referencia completa de endpoints REST

@@ -313,3 +313,324 @@ Uso educativo/interno. Consulta el repositorio para detalles de licencia.
 ⭐ **¿Te gusta el proyecto? Dale una estrella en GitHub**
 
 </div>
+
+---
+
+## English Version
+
+# 🧠 PsyAI Connect
+
+**Integrated psychology clinic management platform with AI**
+
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Django](https://img.shields.io/badge/Django-5.0-092E20?logo=django&logoColor=white)](https://djangoproject.com)
+[![DRF](https://img.shields.io/badge/DRF-3.14-ff1709?logo=django&logoColor=white)](https://django-rest-framework.org)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://mysql.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://docker.com)
+[![Tests](https://img.shields.io/badge/Tests-259%2B-brightgreen)](#-testing)
+[![License](https://img.shields.io/badge/License-Educational-blue)](#-license)
+
+*Connects patients with professionals, automates triage with AI and centralizes clinical operation in a single platform.*
+
+---
+
+## 🎯 Objective / Objetivo
+
+Digitize and centralize the operation of psychology offices and psychologist networks through three specialized portals:
+
+| Portal | Key functionalities |
+|--------|--------------------|
+| 👤 **Patients** | Schedule appointments · View evolution · Therapist chat · AI support chatbot |
+| 👩‍⚕️ **Professionals** | Schedule management · Patient history · Report generation |
+| ⚙️ **Administration** | Real-time metrics · Users and roles · Logs · AI chatbot configuration |
+
+---
+
+## 📄 Documentation / Documentación
+
+Open project documents from the latest GitHub release:
+
+| Document | View |
+|----------|------|
+| Use cases | [View PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FCasos_de_Uso_PsyAI_Connect_1.pdf&embedded=true) |
+| User stories | [View PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FHistorias_de_Usuario_PsyAI_Connect.pdf&embedded=true) |
+| User manual | [View PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FManual_Usuario_PsyAI_Connect_1.1.pdf&embedded=true) |
+| Requirements matrix | [View XLSX](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FMatriz_de_requisitos_PsyAi_Connect_actualizada_v2.xlsx&embedded=true) |
+| Mockups | [View PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2Fmockups.1.pdf&embedded=true) |
+| UML diagrams | [View PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FPsyAI_Connect_Diagramas_UML.pdf&embedded=true) |
+| Brand guide | [View PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FPsyAI-Connect-Guia-de-marca.pdf&embedded=true) |
+| Navigation map | [View PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FPsyAI-Connect-Mapa-de-navegacion-oscuro.1.pdf&embedded=true) |
+
+---
+
+## 🛠 Technological stack / Stack Tecnológico
+
+### Backend
+
+| Tech | Purpose |
+|------|---------|
+| **Python 3.10+** | Main language |
+| **Django 5** | Robust web framework |
+| **Django REST Framework** | Versioned REST APIs |
+| **MySQL 8** | Relational database |
+| **Waitress** | Production WSGI server |
+| **python-dotenv** | Environment-based configuration |
+| **psutil** | System metrics (CPU/RAM/Disk) |
+| **bcrypt** | Secure password hashing |
+| **Brevo** | Transactional emails |
+
+### Artificial Intelligence
+
+| Tech | Use |
+|------|-----|
+| **Google Gemini API** | Psychological triage chatbot |
+| **Multi-key rotation** | Quota distribution across projects |
+
+### Frontend
+
+| Tech | Use |
+|------|-----|
+| **Bootstrap 5 + Django Templates** | Server-side rendering |
+| **CSS modular** | Themes, responsiveness, components |
+| **Vanilla JS (ES6+)** | UI logic per module |
+| **SSE** | Real-time chat and admin panel |
+
+### Testing & DevOps
+
+`pytest` · `pytest-django` · `pytest-cov` · `Docker` · `Docker Compose`
+
+---
+
+## 🏗 Architecture / Arquitectura
+
+```
+Views → Services → Repositories → MySQL
+```
+
+- **Views** — REST endpoints and pages
+- **Services** — Pure business logic
+- **Repositories** — Encapsulated SQL queries
+- **Utils** — Auth, security, validation, email
+- **Permissions** — Centralized in `core/permissions.py`
+
+---
+
+## 📁 Project structure / Estructura del Proyecto
+
+<details>
+<summary>View full tree / Ver árbol completo</summary>
+
+```
+PsyAI-Connect/
+├── manage.py
+├── requirements.txt
+├── setup_install.py          # Automatic installer
+├── pytest.ini
+├── conftest.py
+├── .env.example
+├── .gitignore
+│
+├── install/
+│   ├── Dockerfile            # Multi-stage dev/prod
+│   ├── docker-compose.yml
+│   ├── docker-compose.prod.yml
+│   └── entrypoint.sh
+│
+├── config/
+│   └── settings/             # base, dev, prod, test
+│
+├── apps/
+│   ├── admin_panel/          # Administration panel
+│   ├── authentication/       # Complete auth
+│   ├── billing/              # Billing + Wompi
+│   ├── chatbot/              # Gemini AI
+│   ├── core/                 # Permissions, middlewares
+│   ├── documents/            # Clinical documents
+│   ├── patients/             # Patient portal
+│   ├── professionals/        # Professional portal
+│   └── scheduling/           # Appointment scheduling
+│
+├── static/                   # CSS, JS, images
+└── templates/                # Django templates
+```
+</details>
+
+---
+
+## 👥 User roles / Roles de Usuario
+
+| Role | Permissions |
+|------|-------------|
+| **Patient** | Appointments, evolution, AI chatbot, therapist chat |
+| **Professional** | Agenda, assigned patients, reports |
+| **Administrator** | Full panel: users, roles, logs, metrics, AI config |
+
+---
+
+## 🚀 Quick installation / Instalación Rápida
+
+### Prerequisites / Prerrequisitos
+- Python 3.10+
+- MySQL 8+ (or Docker)
+- API Key from [Google AI Studio](https://aistudio.google.com/)
+
+### 🐳 With Docker (Recommended)
+
+```bash
+# 1. Clone
+git clone https://github.com/ArleyRojo/PsyAI-Connect.git
+cd PsyAI-Connect
+
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with SECRET_KEY and credentials
+
+# 3. Start
+docker compose -f install/docker-compose.yml up
+```
+
+🎉 **Ready** at `http://localhost:8000`  
+The entrypoint creates DB, migrates, creates demo superuser (`admin@psyai.com` / `Admin123`) and starts the server.
+
+### 💻 Manual installation / Instalación Manual
+
+```bash
+git clone https://github.com/ArleyRojo/PsyAI-Connect.git
+cd PsyAI-Connect
+
+python -m venv venv
+source venv/bin/activate      # Linux/Mac
+# venv\Scripts\activate       # Windows
+
+pip install -r requirements.txt
+cp .env.example .env
+# Configure .env
+
+mysql -u root -p -e "CREATE DATABASE psyai_connect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+python manage.py migrate
+python manage.py createsuperuser  # optional
+python manage.py runserver
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Configure test settings
+export DJANGO_SETTINGS_MODULE=config.settings.test
+
+# Full suite
+pytest --tb=short -q
+
+# With coverage
+pytest --cov=apps --cov-report=term-missing
+pytest --cov=apps --cov-report=html:htmlcov  # Open htmlcov/index.html
+
+# By app
+pytest apps/chatbot/tests/ -v
+pytest apps/scheduling/tests/ -v
+
+# In Docker
+docker compose -f install/docker-compose.yml exec app python -m pytest apps/ -q
+```
+
+> **259+ tests** covering services, repositories, views and HTTP endpoints.  
+> Unit tests use **SQLite in memory** (fast, no MySQL).  
+> Integration tests marked with `@pytest.mark.integration` require MySQL.
+
+---
+
+## ⚙️ Key environment variables / Variables de Entorno Clave
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `SECRET_KEY` | Django secret key | ✅ |
+| `GEMINI_API_KEY` / `GEMINI_API_KEYS` | Gemini API keys (multi-key rotation) | ✅ |
+| `DB_*` | MySQL connection (host, port, user, pass, name) | ✅ |
+| `EMAIL_*` | SMTP for transactional emails | ✅ |
+| `LOGIN_RATE_LIMIT` | Login rate limit (default: `60/m`) | ❌ |
+
+See `.env.example` for complete list.
+
+---
+
+## 🔒 Security
+
+- ✅ CSRF on all forms
+- ✅ Rate limiting on auth endpoints
+- ✅ HSTS + SSL Redirect in production
+- ✅ Secure cookies (Secure, HttpOnly, SameSite)
+- ✅ Strict `SECRET_KEY` validation in prod
+- ✅ `X-Content-Type-Options: nosniff`
+- ✅ `X-Frame-Options: DENY`
+
+---
+
+## ✨ Featured features / Características Destacadas
+
+| Feature | Detail |
+|---------|--------|
+| 🔐 **Complete auth** | Registration, login, recovery, reset with secure tokens |
+| 🤖 **AI chatbot** | Gemini with configurable prompt, cache, risk detection, multi-key rotation |
+| 💬 **Real-time chat** | Bidirectional SSE patient–professional |
+| 📅 **Scheduling** | Appointments with states, reminders, conflicts |
+| 📋 **Clinical history** | Diagnoses + attached documents |
+| 📈 **Patient evolution** | Daily progress tracking |
+| 💳 **Billing** | Invoices + Wompi integration |
+| 📊 **Live telemetry** | CPU, RAM, disk, requests, endpoints, security events |
+| 🌓 **Themes** | Light/dark persisted per user |
+| 📱 **Responsive** | Mobile, tablet, desktop per section |
+| 🐳 **Docker ready** | Dev (hot-reload) + Prod (Waitress) |
+| ✅ **Tests** | 259+ unit + integration |
+
+---
+
+## 📚 Technical documentation / Documentación Técnica
+
+Consult the complete technical documentation organized by area. This `README.md` is the project's entry point; the rest of the detailed documents are in the [`docs/`](docs/) folder.
+
+| Document | Description | Access |
+|----------|-------------|--------|
+| 📘 **README.md** | Documentation index of the `docs/` folder: summarizes all detailed technical documentation (API, security, models, roles, frontend, chatbot AI, deployment, testing, integrations). The root `README.md` remains the general entry point. | [docs/README.md](docs/README.md) |
+| 🏗 **architecture.md** | General system architecture: Views → Services → Repositories layers, per-app modules and component diagram. | [docs/architecture.md](docs/architecture.md) |
+| 🔌 **api.md** | REST API reference: endpoints by app, HTTP methods, required authentication and allowed roles. | [docs/api.md](docs/api.md) |
+| 🔒 **security.md** | Security and data protection: hardening layers, CSRF, rate limiting, secure cookies, HSTS and best practices. | [docs/security.md](docs/security.md) |
+| 🚀 **deployment.md** | Installation and deployment: multi-stage Docker, compose dev/prod, entrypoint and environment variables. | [docs/deployment.md](docs/deployment.md) |
+| 🧪 **testing.md** | Testing strategy: pytest organization, coverage, repository/service/view layers and integration tests. | [docs/testing.md](docs/testing.md) |
+| 👥 **roles-and-permissions.md** | Roles and permissions: three user roles, screens per role and Django REST Framework permission classes. | [docs/roles-and-permissions.md](docs/roles-and-permissions.md) |
+| 🗄 **data-models.md** | Data models and relationships: per-app models, key fields, foreign keys and Mermaid ER diagram. | [docs/data-models.md](docs/data-models.md) |
+| 🎨 **frontend.md** | Frontend architecture: JS and CSS organization, light/dark theme, alert system and conventions. | [docs/frontend.md](docs/frontend.md) |
+| 🤖 **chatbot-ai.md** | Chatbot and Gemini integration: messaging flow, API key rotation and emotional risk detection. | [docs/chatbot-ai.md](docs/chatbot-ai.md) |
+| 🔗 **integrations.md** | External integrations: Gemini AI, Twilio WhatsApp, Google OAuth (allauth), SMTP email, manual payments with evidence and newsletter. | [docs/integrations.md](docs/integrations.md) |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repo
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit: `git commit -m 'Add amazing feature'`
+4. Push: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+Educational/internal use. Consult the repository for license details.
+
+---
+
+## 👨‍💻 Author
+
+**Arley Rojo** — [GitHub](https://github.com/ArleyRojo)
+
+---
+
+<div align="center">
+
+⭐ **If you like the project, give it a star on GitHub**
+
+</div>

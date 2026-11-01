@@ -251,3 +251,256 @@ user_name = getattr(request, "user_name", None)
 - [`security.md`](security.md) — Autenticación, CSRF, 2FA, rate limiting, cookies seguras
 - [`chatbot-ai.md`](chatbot-ai.md) — Chatbot solo para pacientes; configuración accesible por admin
 - [`deployment.md`](deployment.md) — Variables de entorno y despliegue (no afecta al modelo de roles)
+
+---
+
+## English Version
+
+# Roles and Permissions — PsyAI Connect
+
+> **Summary:** Defines the three system roles (`paciente`, `profesional`, `admin`), what screens and functionalities each has, how roles are assigned at registration or login, and how endpoints are protected through DRF classes in `apps/core/permissions.py` and utilities in `apps/core/utils.py`.  
+> **Audience:** developers and QA who need to understand the authorization model.
+
+---
+
+## 1. System roles / Roles del sistema
+
+The user model is `Register` (`apps/authentication/models.py`), extending `AbstractBaseUser` with `USERNAME_FIELD = 'email'`. Each user has a `rol` field and optionally an associated 1:1 profile.
+
+| Role | Description | Base model | Associated profile | `is_staff` / `is_superuser` |
+|------|-------------|------------|-------------------|------------------------------|
+| **paciente** | End user: schedules appointments, uses chatbot, views evolution, chats with therapist, manages invoices | `Register(rol='paciente')` | `PerfilPaciente` (1:1) | `False` / `False` |
+| **profesional** | Psychologist: manages agenda, attends assigned patients, generates reports, uploads clinical documents, optional 2FA | `Register(rol='profesional')` | `PerfilProfesional` (1:1) | `False` / `False` |
+| **admin** | System administrator: manages users/roles, logs, metrics, chatbot configuration and notifications | `Register(rol='admin')` | (no dedicated profile) | `True` / `True` |
+
+### `Register` model details
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `idUsuario` | AutoField (PK) | User identifier |
+| `nombre` | CharField(120) | Full name |
+| `email` | EmailField (unique) | Authentication username (`USERNAME_FIELD`) |
+| `password` | CharField(255) | bcrypt hash (column `contrasena`) |
+| `rol` | CharField(20) | `choices=[('paciente','Paciente'), ('profesional','Profesional'), ('admin','Admin')]` |
+| `fotoPerfil` | CharField(255) | Profile picture URL |
+| `estadoCuenta` | CharField(20) | `choices=[('Activa','Activa'), ('Suspendida','Suspendida')]`, default `Activa` |
+| `activo` | BooleanField | default `True` |
+| `email_verificado` | BooleanField | default `False` |
+| `fechaRegistro` | DateTimeField | auto_now_add |
+
+> **Important:** Authentication is **session-based**, not exclusively using Django's `request.user`. Permissions read `request.session["idUsuario"]`, `request.session["rol"]` and `request.session["nombre"]`, and set `request.user_id`, `request.user_role`, `request.user_name` for use in views.
+
+---
+
+## 2. Screens by role (templates) / Pantallas por rol (templates)
+
+Each role has its own folder under `templates/`:
+
+| Role | Folder | Main pages |
+|------|--------|------------|
+| **paciente** | `templates/patient/` | `patient.dashboard.html`, `aside-patient/chatbot.html`, `aside-patient/agenda-quotes.html`, `aside-patient/evolution.html`, `aside-patient/historia_clinica_paciente.html`, `aside-patient/facturas.html`, `aside-patient/mensajes.html`, `aside-patient/my.profile.html` |
+| **profesional** | `templates/professional/` | `professional.dashboard.html`, `aside-professional/my.agenda.html`, `aside-professional/patients.html`, `aside-professional/patients.evolution.html`, `aside-professional/historia_clinica_pro.html`, `aside-professional/facturacion.html`, `aside-professional/reports.html`, `aside-professional/mensajes.html`, `aside-professional/my.profile2.html` |
+| **admin** | `templates/admin/` | `admin.dashboard.html`, `aside-admin/users.html`, `aside-admin/roles.html`, `aside-admin/logs.html`, `aside-admin/notifications.html`, `aside-admin/rendimiento.html`, `aside-admin/chatbot.config.html`, `aside-admin/facturacion.html` |
+
+> **Shared:** `templates/auth/` (login, registration, recovery), `templates/base/` (base layout, partials), `templates/legal/`, `templates/emails/`.
+
+---
+
+## 3. DRF permissions — `apps/core/permissions.py` / Permisos DRF
+
+All DRF views use permission classes inheriting from `BasePermission`. Access is evaluated with AND logic: all classes in `permission_classes` must return `True`.
+
+### Authentication utilities (`apps/core/utils.py`)
+
+| Function | Description |
+|---------|-------------|
+| `AuthHelper.get_current_user(request)` | Reads `idUsuario`, `rol` and `nombre` from `request.session`. Returns `None` if no session. |
+| `AuthHelper.require_auth(request)` | Validates session exists, user exists in DB, `activo=True` and `estadoCuenta='Activa'`. Returns 401/403 if fails. |
+| `AuthHelper.require_role(request, *roles)` | Same as `require_auth` plus verifies `rol` is in allowed list. Returns 403 if no match. |
+
+### Available permission classes
+
+| Class | Logic | Typical use |
+|-------|-------|-------------|
+| `IsAuthenticatedDRF` | Tries `request.user` (DRF/token); fallback to session. Validates `activo` and `estadoCuenta='Activa'` in DB. Sets `request.user_id`, `request.user_role`, `request.user_name`. | Base for all private endpoints |
+| `IsPaciente` | `request.user_role == 'paciente'` | Patient-only endpoints |
+| `IsProfesional` | `request.user_role == 'profesional'` | Professional-only endpoints |
+| `IsAdmin` | `request.user_role == 'admin'` | Admin panel |
+| `IsPacienteOrProfesional` | `rol IN ('paciente','profesional')` | Shared endpoints |
+| `IsAdminOrProfesional` | `rol IN ('admin','profesional')` | Reports, metrics |
+| `IsOwnerOrStaff` | Owner of resource OR `admin`/`profesional` | Own objects (documents, evolution) |
+
+### Internal flow of `IsAuthenticatedDRF`
+
+1. Tries DRF authentication (`request.user.is_authenticated`).
+2. If exists, searches `Register` by `idUsuario`/`pk`, validates `activo` and `estadoCuenta`, sets attributes on `request`.
+3. If no DRF user, fallback to session: `get_current_user(request)` reads `idUsuario`, `rol`, `nombre` from `request.session`.
+4. Searches `Register` in DB by `idUsuario`.
+5. Rejects if `activo=False` or `estadoCuenta != 'Activa'` (clears session with `request.session.flush()`).
+6. Sets `request.user_id`, `request.user_role` (lowercase), `request.user_name`.
+
+---
+
+## 4. Role × Functionality matrix / Matriz Rol × Funcionalidad
+
+| Functionality | Endpoint(s) | Patient | Professional | Admin |
+|---------------|-------------|:--------:|:-----------:|:-----:|
+| **Authentication** | | | | |
+| Registration | `POST /api/register` | ✅ | ✅ | ✅ |
+| Login / Logout | `POST /api/login`, `/api/logout` | ✅ | ✅ | ✅ |
+| Email verification | `POST /api/verify-email` | ✅ | ✅ | — |
+| Password recovery | `POST /api/forgot-password`, `/api/reset-password` | ✅ | ✅ | ✅ |
+| 2FA (TOTP) | `GET/POST /api/totp/*` | ❌ | ✅ | ✅ |
+| **Profile** | | | | |
+| View/edit own profile | `GET/PUT /api/perfil/paciente`, `/api/perfil/profesional` | ✅ | ✅ | ✅ (own) |
+| Upload photo | `PUT /api/perfil/paciente/foto`, `/api/perfil/profesional/foto` | ✅ | ✅ | ✅ |
+| **Appointments** | | | | |
+| View public availability | `GET /api/citas/disponibles`, `/fechas-disponibles` | ✅ | ✅ | ✅ |
+| Create appointment | `POST /api/citas` | ✅ | ✅ | ❌ |
+| List my appointments | `GET /api/citas` | ✅ | ✅ | ✅ |
+| Update appointment status | `PATCH /api/citas/<id>` | ❌ | ✅ | ✅ |
+| Cancel appointment | `DELETE /api/citas/<id>` | ✅ | ✅ | ✅ |
+| Availability (create/view) | `POST/GET /api/disponibilidad` | ❌ | ✅ | ✅ |
+| Next appointment | `GET /api/citas/proxima` | ✅ | ❌ | ❌ |
+| **AI Chatbot** | | | | |
+| Send message | `POST /api/chatbot/enviar` | ✅ | ❌ | ❌ |
+| Chatbot history | `GET/DELETE /api/chatbot`, `/api/chatbot/historial` | ✅ | ❌ | ❌ |
+| Chatbot config | `GET /api/chatbot/config` | ✅ | ❌ | ❌ (admin panel separate) |
+| **Direct chat (SSE)** | | | | |
+| Contacts / Messages | `GET/POST /api/chat/*` | ✅ | ✅ | ✅ |
+| **Evolution / Clinical history** | | | | |
+| My evolution | `GET/POST /api/evolucion` | ✅ | ❌ | ❌ |
+| Evolution of my patients | `GET /api/evolucion/profesional` | ❌ | ✅ | ✅ |
+| Diagnoses | `GET/POST /api/diagnosticos` | ❌ | ✅ | ✅ |
+| Clinical history (patient) | `GET/POST/DELETE /api/documentos/paciente/*` | ✅ | ❌ | ✅ |
+| Clinical history (professional) | `GET/POST/PATCH/DELETE /api/documentos/profesional/*` | ❌ | ✅ | ✅ |
+| Document authorizations | `POST /api/documentos/autorizacion/<id>` | ✅ | ✅ | ✅ |
+| **Reports** | | | | |
+| My reports | `GET/POST/PATCH/DELETE /api/reportes` | ❌ | ✅ | ✅ |
+| Deleted reports | `GET /api/reportes/eliminados` | ❌ | ✅ (own) | ✅ (all) |
+| Patient evolution | `GET /api/evolucion/profesional` | ❌ | ✅ | ✅ |
+| **Billing** | | | | |
+| List/create invoices | `GET/POST /api/facturas` | ✅ (own) | ✅ (own) | ✅ (all) |
+| Detail/void invoice | `GET/PATCH/DELETE /api/facturas/<id>` | ✅ (own) | ✅ (own) | ✅ |
+| Start Wompi payment | `POST /api/facturas/<id>/iniciar-pago` | ✅ (own) | ❌ | ❌ |
+| Confirm payment (frontend) | `POST /api/facturas/<id>/confirmar-pago` | ✅ | ❌ | ❌ |
+| Wompi webhook | `POST /api/webhooks/wompi` | (public) | — | — |
+| Billing stats | `GET /api/facturas/stats` | ❌ | ✅ (own) | ✅ (all) |
+| **Admin Panel** | | | | |
+| Users (list/create/edit/delete) | `/api/admin/usuarios*` | ❌ | ❌ | ✅ |
+| Roles | `/api/admin/roles*` | ❌ | ❌ | ✅ |
+| Logs / Audit | `/api/admin/logs`, `/actividad` | ❌ | ❌ | ✅ |
+| Server metrics | `/api/admin/stats`, `/usuarios-online` | ❌ | ❌ | ✅ |
+| Chatbot config | `GET/POST /api/admin/chatbot/*` | ❌ | ❌ | ✅ |
+| Notifications | `/api/admin/notificaciones*` | ❌ | ❌ | ✅ |
+
+> **Legend:** ✅ = access allowed, ❌ = denied (403), (own) = only resources where user is a participant, (public) = no authentication required.
+
+---
+
+## 5. Role assignment / Asignación de roles
+
+| Step | Moment | How role is assigned |
+|------|--------|---------------------|
+| Registration | `POST /api/register` | Client sends `rol` in body. Default: `paciente`. Allowed: `paciente`, `profesional`, `admin`. |
+| Login | `POST /api/login` | Client sends desired `rol`; backend verifies user has that role in BD (`usuario["rol"] == rol`). |
+| Superuser | `createsuperuser` / `create_superuser` | Forces `rol='admin'`; if another role attempted raises `ValueError`. |
+| Social login (Google) | `SocialAccountAdapter` | Forces `rol='paciente'` regardless of provider. |
+| Admin change | `PATCH /api/admin/usuarios/<id>` | Only `admin` can modify any user's role (`apps/admin_panel/views.py`). |
+| Mandatory 2FA | `AuthService.require_totp_for_role(rol)` | Returns `True` for `admin` and `profesional`; `False` for `paciente`. |
+
+### Role restrictions in registration
+
+- **Email verified:** mandatory for `profesional`, optional for `paciente` (`EmailVerificationToken`).
+- **2FA (TOTP):** optional but required for `admin` and `profesional` per `require_totp_for_role`.
+- **Profile:** `PerfilPaciente` or `PerfilProfesional` created automatically after registration according to role.
+
+---
+
+## 6. How to protect a new endpoint / Cómo proteger un endpoint nuevo
+
+### Option A: permission classes (recommended)
+
+```python
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from apps.core.permissions import (
+    IsAuthenticatedDRF,
+    IsPaciente,
+    IsProfesional,
+    IsAdmin,
+    IsPacienteOrProfesional,
+    IsAdminOrProfesional,
+    IsOwnerOrStaff,
+)
+
+# Patients only
+class MiVistaPaciente(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+# Professionals or admin
+class MiVistaProAdmin(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsAdminOrProfesional]
+
+# Object owner or staff
+class MiVistaObjeto(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsOwnerOrStaff]
+
+    def get_object(self, pk):
+        obj = get_object_or_404(Modelo, pk=pk)
+        self.check_object_permissions(self.request, obj)
+        return obj
+```
+
+DRF evaluates classes with AND logic: all must return `True`.
+
+### Option B: `require_role` utility (non-DRF / function views)
+
+```python
+from django.http import JsonResponse
+from apps.core.utils import require_role
+
+def mi_vista(request):
+    user, err = require_role(request, "paciente", "profesional")
+    if err:
+        return err  # JsonResponse 401 / 403
+    user_id = user["idUsuario"]
+    user_rol = user["rol"]
+    # business logic
+    return JsonResponse({"success": True})
+```
+
+### Option C: attributes set by `IsAuthenticatedDRF`
+
+Inside any view (DRF or not) after passing the permission:
+
+```python
+user_id   = getattr(request, "user_id", None)
+user_role = getattr(request, "user_role", None)  # 'paciente' | 'profesional' | 'admin'
+user_name = getattr(request, "user_name", None)
+```
+
+---
+
+## 7. Authentication and account status / Autenticación y estado de cuenta
+
+| Concept | Implementation |
+|---------|---------------|
+| Login user | `email` (`USERNAME_FIELD = 'email'`) |
+| Password | bcrypt hash (`SecurityHelper.hash_password`, `SecurityHelper.verify_password`) |
+| Session | `request.session` with `idUsuario`, `rol`, `nombre`, `email`, `fotoPerfil` |
+| Active account | `activo=True` and `estadoCuenta='Activa'` verified on each request |
+| Suspended account | `estadoCuenta='Suspendida'` → 403 on any protected endpoint; session cleared |
+| Failed attempts | `IntentosFallidos` model (email blocking after threshold) |
+| Email verification | `EmailVerificationToken` mandatory for `profesional`, optional for `paciente` |
+| 2FA | `TOTPDevice` model (RFC 6238). Mandatory for `admin` and `profesional`. Endpoints: setup, confirm, disable, status, verify-login. |
+
+---
+
+## See also / Ver también
+
+- [`data-models.md`](data-models.md) — Models `Register`, `PerfilPaciente`, `PerfilProfesional`, `TOTPDevice`, `EmailVerificationToken`, `IntentosFallidos`
+- [`frontend.md`](frontend.md) — How frontend handles role (sidebar, navigation, role menus)
+- [`security.md`](security.md) — Authentication, CSRF, 2FA, rate limiting, secure cookies
+- [`chatbot-ai.md`](chatbot-ai.md) — Chatbot only for patients; config accessible by admin
+- [`despliegue.md`](deployment.md) — Environment variables and deployment (does not affect role model)

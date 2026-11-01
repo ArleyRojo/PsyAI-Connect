@@ -420,3 +420,338 @@ jobs:
 - [`security.md`](security.md) — Tests de CSRF, rate limiting, 2FA
 - [`deployment.md`](deployment.md) — Tests en Docker/CI
 - [`frontend.md`](frontend.md) — Tests de utilidades JS (si aplica)
+
+---
+
+## English Version
+
+# Testing — PsyAI Connect
+
+> **Summary:** Test organization, how to run them, layer convention (repository/service/view) and integration tests.  
+> **Audience:** Developers and QA who write or run tests.
+
+---
+
+## 1. Test structure / Estructura de tests
+
+```
+tests/
+├── test_integration.py              # Integration tests (require MySQL)
+
+apps/
+├── authentication/
+│   └── tests/
+│       ├── conftest.py              # Fixtures: repository and service mocks
+│       ├── test_repositories.py     # AuthRepository, SecurityRepository tests
+│       ├── test_services.py         # AuthService tests
+│       └── test_views.py            # LoginView, RegisterView, etc. tests
+├── billing/
+│   └── tests/
+│       ├── test_repositories.py
+│       ├── test_services.py
+│       └── test_views.py
+├── chatbot/
+│   └── tests/
+│       ├── test_repositories.py
+│       ├── test_services.py
+│       └── test_views.py
+├── core/
+│   └── tests/
+│       ├── test_permissions.py
+│       └── test_utils.py
+├── documents/
+│   └── tests/
+├── patients/
+│   └── tests/
+├── professionals/
+│   └── tests/
+├── scheduling/
+│   └── tests/
+└── admin_panel/
+    └── tests/
+```
+
+## 2. Global configuration / Configuración global
+
+### `pytest.ini`
+
+```ini
+[pytest]
+DJANGO_SETTINGS_MODULE = config.settings.test
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+addopts = -q --tb=short
+filterwarnings =
+    ignore::DeprecationWarning
+```
+
+### `config/settings/test.py`
+
+- **DB:** SQLite in memory (`:memory:`) — fast unit tests, without MySQL.
+- `DEBUG = False`
+- `PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']` — fast hashing for tests
+- `CACHES = LocMemCache`
+- `EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'`
+
+### `conftest.py` (root)
+
+```python
+# Global fixtures
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass  # Makes `db` fixture available in all tests
+```
+
+## 3. Layer convention / Convención de capas
+
+Each app tests its 3 layers separately:
+
+| Layer | File | What is tested | Dependencies |
+|-------|------|---------------|--------------|
+| **Repository** | `test_repositories.py` | SQL queries, `create`, `get`, `update`, `delete`, `filter` | `@pytest.mark.django_db` (real SQLite DB) |
+| **Service** | `test_services.py` | Business logic, validations, orchestration | Repository mocks (`unittest.mock.patch`) |
+| **View** | `test_views.py` | HTTP endpoints (status, response, permissions) | `RequestFactory` + mock auth (`get_current_user`) |
+
+> **Rule:** **Service** tests do NOT touch the real DB; they use mocks. **Repository** tests DO use DB (SQLite). **View** tests use `RequestFactory` + simulated session.
+
+## 4. Common fixtures / Fixtures comunes
+
+### `apps/authentication/tests/conftest.py`
+
+```python
+@pytest.fixture
+def mock_repo():
+    return Mock(spec=AuthRepository)
+
+@pytest.fixture
+def mock_security_repo():
+    return Mock(spec=SecurityRepository)
+
+@pytest.fixture
+def auth_service(mock_repo, mock_security_repo):
+    service = AuthService()
+    service.repo = mock_repo
+    service.security_repo = mock_security_repo
+    return service
+
+@pytest.fixture
+def user_data():
+    return {
+        "idUsuario": 1,
+        "nombre": "Juan Pérez",
+        "email": "juan@test.com",
+        "contrasena": "hashed123",
+        "rol": "paciente",
+        "activo": True,
+        "estadoCuenta": "Activa",
+    }
+
+@pytest.fixture
+def api_client():
+    return APIClient()
+```
+
+## 5. Test examples by layer / Ejemplos de tests por capa
+
+### 5.1 Repository
+
+```python
+# apps/authentication/tests/test_repositories.py
+import pytest
+from apps.authentication.repositories import AuthRepository
+
+@pytest.mark.django_db
+class TestAuthRepository:
+    def test_create_user(self):
+        repo = AuthRepository()
+        user_id = repo.create_user(
+            nombre="Juan",
+            email="juan@test.com",
+            password_hash="hashed123",
+            rol="paciente",
+        )
+        assert user_id is not None
+        user = Register.objects.get(idUsuario=user_id)
+        assert user.email == "juan@test.com"
+        assert user.rol == "paciente"
+```
+
+### 5.2 Service
+
+```python
+# apps/authentication/tests/test_services.py
+import pytest
+from apps.authentication.services import AuthService
+from apps.authentication.security import SecurityHelper
+
+class TestAuthService:
+    def test_register_user_success(self, auth_service, mock_repo):
+        mock_repo.user_exists_by_email.return_value = False
+        mock_repo.create_user.return_value = 1
+
+        payload, status = auth_service.register_user({
+            "nombre": "Juan",
+            "email": "juan@test.com",
+            "password": "Pass123",
+            "confirm_password": "Pass123",
+            "rol": "paciente",
+            "genero": "Masculino",
+        })
+
+        assert status == 201
+        assert payload["success"] is True
+        mock_repo.create_user.assert_called_once()
+```
+
+### 5.3 View
+
+```python
+# apps/authentication/tests/test_views.py
+import pytest
+from rest_framework.test import RequestFactory
+from apps.authentication.views import LoginView
+from apps.core.utils import get_current_user
+
+class TestLoginView:
+    def test_login_success(self, api_client, user_data):
+        with patch("apps.authentication.views.auth_service") as mock_service:
+            mock_service.login_user.return_value = (
+                {"success": True, "message": "Login exitoso", "usuario": user_data},
+                200,
+                user_data,
+            )
+
+            response = api_client.post(
+                "/api/login",
+                {"email": "juan@test.com", "password": "Pass123", "rol": "paciente"},
+                format="json",
+            )
+
+            assert response.status_code == 200
+            assert response.data["success"] is True
+            assert "usuario" in response.data
+```
+
+## 6. Integration tests / Tests de integración
+
+Require real MySQL (not SQLite). Marked with `@pytest.mark.integration`.
+
+Run only integration tests:
+
+```bash
+pytest tests/test_integration.py -v -m integration
+```
+
+## 7. How to run tests / Cómo ejecutar tests
+
+### Full suite (unit + SQLite)
+
+```bash
+# Configure test settings
+export DJANGO_SETTINGS_MODULE=config.settings.test
+
+# All unit tests
+pytest --tb=short -q
+
+# Only one app
+pytest apps/authentication/tests/ -v
+pytest apps/billing/tests/ -v
+pytest apps/chatbot/tests/ -v
+
+# Only one layer
+pytest apps/authentication/tests/test_services.py -v
+pytest apps/authentication/tests/test_repositories.py -v
+pytest apps/authentication/tests/test_views.py -v
+```
+
+### With coverage
+
+```bash
+# Terminal
+pytest --cov=apps --cov-report=term-missing
+
+# HTML (open htmlcov/index.html)
+pytest --cov=apps --cov-report=html:htmlcov
+```
+
+### Integration tests only (requires MySQL)
+
+```bash
+# Start MySQL (docker compose up -d db)
+docker compose -f install/docker-compose.yml up -d db
+
+# Run
+pytest tests/test_integration.py -v -m integration
+```
+
+### Inside Docker
+
+```bash
+docker compose -f install/docker-compose.yml exec app python -m pytest apps/ -q
+docker compose -f docker-compose.yml exec app python -m pytest apps/authentication/tests/ -v
+```
+
+## 8. Coverage targets / Cobertura objetivo
+
+| Layer | Minimum coverage |
+|-------|-----------------|
+| Repositories | 90% |
+| Services | 85% |
+| Views | 80% |
+| Global | 80% |
+
+> **Excluded from coverage:** migrations, `manage.py`, `settings/*`, `wsgi.py`, `asgi.py`, tests.
+
+## 9. Mocking patterns / Mocking patterns usados
+
+| What to mock | How |
+|-------------|-----|
+| Repository in Service | `patch("apps.authentication.services.AuthService.repo", mock_repo)` |
+| External service (Gemini, Wompi, Email) | `patch("apps.chatbot.services.GeminiClient.generate")` |
+| `timezone.now()` | `patch("django.utils.timezone.now", return_value=fixed_datetime)` |
+| `secrets.token_urlsafe` | `patch("secrets.token_urlsafe", return_value="fixed_token")` |
+| `request.session` | `request.session = {"idUsuario": 1, "rol": "paciente"}` |
+
+## 10. CI/CD (GitHub Actions example) / CI/CD (ejemplo GitHub Actions)
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+          MYSQL_DATABASE: psyai_connect
+        ports: ["3306:3306"]
+        options: --health-cmd="mysqladmin ping" --health-interval=10s
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - run: pip install pytest pytest-django pytest-cov
+      - name: Unit tests (SQLite)
+        run: |
+          export DJANGO_SETTINGS_MODULE=config.settings.test
+          pytest --cov=apps --cov-report=xml
+      - name: Integration tests (MySQL)
+        run: |
+          export DJANGO_SETTINGS_MODULE=config.settings.test
+          pytest tests/test_integration.py -v -m integration
+      - uses: codecov/codecov-action@v3
+        with: { files: ./coverage.xml }
+```
+
+## See also / Ver también
+
+- [`data-models.md`](data-models.md) — Models that are tested
+- [`chatbot-ai.md`](chatbot-ai.md) — Chatbot service tests
+- [`security.md`](security.md) — CSRF, rate limiting, 2FA tests
+- [`deployment.md`](deployment.md) — Docker/CI tests
+- [`frontend.md`](frontend.md) — JS utility tests (if applicable)
