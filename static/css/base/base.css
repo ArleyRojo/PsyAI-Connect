@@ -3068,16 +3068,18 @@ html:root:root:root body #mainNav .theme-toggle-mobile .theme-emoji-moon {
 }
 
 @keyframes theme-emoji-pop {
-    0% { transform: scale(1) rotate(0deg); }
-    50% { transform: scale(1.35) rotate(180deg); }
-    100% { transform: scale(1) rotate(0deg); }
+    0%   { transform: scale(1) rotateX(0deg) rotateY(0deg) translateY(0); opacity: 1; }
+    25%  { transform: scale(1.25) rotateX(90deg) rotateY(45deg) translateY(-6px); opacity: 1; }
+    50%  { transform: scale(0.85) rotateX(180deg) rotateY(90deg) translateY(0); opacity: 0.85; }
+    75%  { transform: scale(1.15) rotateX(270deg) rotateY(135deg) translateY(-3px); opacity: 1; }
+    100% { transform: scale(1) rotateX(360deg) rotateY(180deg) translateY(0); opacity: 1; }
 }
 
 html:root:root:root #theme-toggle.toggle-animating::before,
 html:root:root:root body #mainNav #theme-toggle.toggle-animating::before,
 html:root:root:root .theme-toggle-mobile.toggle-animating::before,
 html:root:root:root body #mainNav .theme-toggle-mobile.toggle-animating::before {
-    animation: theme-emoji-pop 400ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    animation: theme-emoji-pop 400ms cubic-bezier(0.68, -0.55, 0.27, 1.55) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
