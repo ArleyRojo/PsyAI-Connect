@@ -3,6 +3,9 @@ let themeToggleTimer;
 
 const TOGGLE_SELECTOR = '#theme-toggle, .theme-toggle-mobile';
 
+const SUN_HTML = '<span class="theme-emoji theme-emoji-sun" aria-hidden="true">☀️</span>';
+const MOON_HTML = '<span class="theme-emoji theme-emoji-moon" aria-hidden="true">🌙</span>';
+
 function getToggles() {
     return document.querySelectorAll(TOGGLE_SELECTOR);
 }
@@ -16,18 +19,37 @@ function applyThemeState(isDark) {
     }
 }
 
+function injectEmojis(themeToggle) {
+    if (!themeToggle) return;
+    if (themeToggle.querySelector('.theme-emoji')) return;
+
+    themeToggle.innerHTML = SUN_HTML + MOON_HTML;
+}
+
 function updateToggleUI(themeToggle, isDark) {
     if (!themeToggle) return;
 
-    // Un solo span con el emoji correspondiente
-    themeToggle.innerHTML = isDark
-        ? '<span class="theme-emoji" aria-hidden="true">🌙</span>'
-        : '<span class="theme-emoji" aria-hidden="true">☀️</span>';
+    const emojiSun = themeToggle.querySelector('.theme-emoji-sun');
+    const emojiMoon = themeToggle.querySelector('.theme-emoji-moon');
 
     themeToggle.setAttribute('aria-pressed', String(isDark));
     themeToggle.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
     themeToggle.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
     themeToggle.dataset.theme = isDark ? 'dark' : 'light';
+
+    if (emojiSun && emojiMoon) {
+        if (isDark) {
+            emojiSun.style.opacity = '0';
+            emojiSun.style.transform = 'scale(0)';
+            emojiMoon.style.opacity = '1';
+            emojiMoon.style.transform = 'scale(1)';
+        } else {
+            emojiSun.style.opacity = '1';
+            emojiSun.style.transform = 'scale(1)';
+            emojiMoon.style.opacity = '0';
+            emojiMoon.style.transform = 'scale(0)';
+        }
+    }
 }
 
 function saveThemeToStorage(theme) {
@@ -103,6 +125,7 @@ function initTheme() {
     applyThemeState(isDark);
 
     getToggles().forEach((themeToggle) => {
+        injectEmojis(themeToggle);
         updateToggleUI(themeToggle, isDark);
         themeToggle.addEventListener('click', toggleTheme);
     });
@@ -131,6 +154,7 @@ window.addEventListener('storage', function (e) {
         const isDark = e.newValue === 'dark';
         applyThemeState(isDark);
         getToggles().forEach((themeToggle) => {
+            injectEmojis(themeToggle);
             updateToggleUI(themeToggle, isDark);
         });
     }
