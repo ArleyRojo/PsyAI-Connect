@@ -1,7 +1,7 @@
 let themeTransitionTimer;
 let themeToggleTimer;
 
-const EMOJI_SUN = '<span class="theme-emoji theme-emoji-sun" aria-hidden="true">🌞</span>';
+const EMOJI_SUN = '<span class="theme-emoji theme-emoji-sun" aria-hidden="true">☀️</span>';
 const EMOJI_MOON = '<span class="theme-emoji theme-emoji-moon" aria-hidden="true">🌙</span>';
 
 function applyThemeState(isDark) {
