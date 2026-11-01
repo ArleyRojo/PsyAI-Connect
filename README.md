@@ -272,7 +272,7 @@ Consulta la documentación técnica completa organizada por área. Este `README.
 
 | Documento | Descripción | Acceso |
 |-----------|-------------|--------|
-| 📘 **README.md** | Documentación principal: visión general, objetivo, stack tecnológico, instalación rápida y características destacadas. | [Ver documento](README.md) |
+| 📘 **README.md** | Índice de la carpeta `docs/`: resume toda la documentación técnica detallada (API, seguridad, modelos, roles, frontend, chatbot IA, despliegue, testing, integraciones). El README de la raíz sigue siendo la puerta de entrada general. | [Ver documento](docs/README.md) |
 | 🏗 **architecture.md** | Arquitectura general del sistema: capas Views → Services → Repositories, módulos por app y diagrama de componentes. | [docs/architecture.md](docs/architecture.md) |
 | 🔌 **api.md** | Referencia de API REST: endpoints por app, métodos HTTP, autenticación requerida y roles permitidos. | [docs/api.md](docs/api.md) |
 | 🔒 **security.md** | Seguridad y protección de datos: capas de hardening, CSRF, rate limiting, cookies seguras, HSTS y buenas prácticas. | [docs/security.md](docs/security.md) |
