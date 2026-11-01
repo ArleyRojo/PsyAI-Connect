@@ -2863,35 +2863,18 @@ body {
 }
 
 .theme-icon {
-    font-size: 1.1rem;
-    opacity: 0.6;
+    font-size: 1.15rem;
+    opacity: 1;
     transition: all 0.25s ease;
     cursor: pointer;
-    padding: 4px 6px;
+    padding: 6px 8px;
     border-radius: 8px;
-    background: #fff;
-}
-
-.theme-icon.sun {
+    background: transparent;
     color: #d97706;
-}
-
-.theme-icon.sun.active {
-    opacity: 1;
-    transform: scale(1.1);
-    color: #b45309;
-    background: #fef3c7;
 }
 
 .theme-icon.moon {
     color: #4f46e5;
-}
-
-.theme-icon.moon.active {
-    opacity: 1;
-    transform: scale(1.1);
-    color: #3730a3;
-    background: #e0e7ff;
 }
 
 .theme-icon:hover {
@@ -2899,43 +2882,52 @@ body {
     opacity: 1 !important;
 }
 
-/* Toggle button - MODO CLARO */
+html.dark-mode .theme-icon.sun {
+    color: #9ca3af;
+}
+
+html.dark-mode .theme-icon.moon {
+    color: #fbbf24;
+}
+
+/* Toggle button - botón simple con ícono */
 #theme-toggle {
     appearance: none;
-    width: 44px;
-    height: 24px;
-    border-radius: 999px;
-    background: #3b82f6;
-    border: 2px solid #2563eb;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #c7d2fe;
     cursor: pointer;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 8px rgba(59, 130, 246, 0.3);
-    transition: all 0.25s ease-out;
-    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
     overflow: visible;
     flex-shrink: 0;
 }
 
-#theme-toggle::before {
-    content: '';
-    position: absolute;
-    top: 1px;
-    left: 1px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
 #theme-toggle:hover {
-    background: #2563eb;
-    border-color: #1d4ed8;
+    background: #f3f4f6;
+    border-color: #9ca3af;
+    transform: scale(1.05);
 }
 
 #theme-toggle:active {
     transform: scale(0.95);
+}
+
+html.dark-mode #theme-toggle {
+    background: #1f2937;
+    border-color: #4b5563;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+html.dark-mode #theme-toggle:hover {
+    background: #374151;
+    border-color: #6b7280;
 }
 
 /* MODO OSCURO */

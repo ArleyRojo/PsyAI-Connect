@@ -11,8 +11,7 @@ function applyThemeState(isDark) {
 
 function syncThemeToggleUI(isDark) {
     const themeToggle = document.getElementById('theme-toggle');
-    const sunIcon = document.getElementById('sun-icon');
-    const moonIcon = document.getElementById('moon-icon');
+    const themeIcon = themeToggle ? themeToggle.querySelector('.theme-icon') : null;
 
     if (themeToggle) {
         themeToggle.setAttribute('aria-pressed', String(isDark));
@@ -20,8 +19,11 @@ function syncThemeToggleUI(isDark) {
         themeToggle.dataset.theme = isDark ? 'dark' : 'light';
     }
 
-    if (sunIcon) sunIcon.classList.toggle('active', !isDark);
-    if (moonIcon) moonIcon.classList.toggle('active', isDark);
+    if (themeIcon) {
+        themeIcon.className = isDark
+            ? 'fa-solid fa-moon theme-icon moon'
+            : 'fa-solid fa-sun theme-icon sun';
+    }
 }
 
 function saveThemeToStorage(theme) {
