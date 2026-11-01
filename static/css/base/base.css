@@ -2894,74 +2894,89 @@ body {
     transform: scale(0.9);
 }
 
-/* Emojis del sol y la luna */
-.theme-emoji {
-    font-size: 1.5rem;
-    display: block;
-    transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
-    line-height: 1;
+/* Emoji del sol - siempre presente en el DOM */
+html:root:root:root #theme-toggle::before,
+html:root:root:root body #mainNav #theme-toggle::before,
+html:root:root:root .theme-toggle-mobile::before,
+html:root:root:root body #mainNav .theme-toggle-mobile::before {
+    content: "\2600\FE0F" !important;
+    font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "Apple Color Emoji", "Android Emoji", sans-serif !important;
+    font-size: 1.5rem !important;
+    position: static !important;
+    background: none !important;
+    transform: none !important;
+    display: inline-block !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    transition: opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-.theme-emoji-sun {
-    color: #f59e0b;
+/* Emoji de la luna - siempre presente en el DOM */
+html:root:root:root #theme-toggle::after,
+html:root:root:root body #mainNav #theme-toggle::after,
+html:root:root:root .theme-toggle-mobile::after,
+html:root:root:root body #mainNav .theme-toggle-mobile::after {
+    content: "\1F319" !important;
+    font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "Apple Color Emoji", "Android Emoji", sans-serif !important;
+    font-size: 1.5rem !important;
+    position: static !important;
+    background: none !important;
+    transform: none !important;
+    display: inline-block !important;
+    margin: 0 !important;
+    opacity: 0 !important;
+    transform: scale(0) !important;
+    transition: opacity 400ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-.theme-emoji-moon {
-    color: #fbbf24;
+/* En modo claro: sol visible, luna oculta */
+html:root:root:root #theme-toggle:not([data-theme="dark"])::before {
+    opacity: 1 !important;
+    transform: scale(1) !important;
 }
 
-html.dark-mode .theme-emoji-sun {
-    color: #9ca3af;
+html:root:root:root #theme-toggle:not([data-theme="dark"])::after {
+    opacity: 0 !important;
+    transform: scale(0) !important;
 }
 
-html.dark-mode .theme-emoji-moon {
-    color: #fbbf24;
+/* En modo oscuro: sol se va, luna aparece */
+html:root:root:root #theme-toggle[data-theme="dark"]::before {
+    opacity: 0 !important;
+    transform: scale(0) !important;
 }
 
-/* Animación de transformación al hacer clic */
-#theme-toggle.toggle-animating .theme-emoji {
-    transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+html:root:root:root #theme-toggle[data-theme="dark"]::after {
+    opacity: 1 !important;
+    transform: scale(1) !important;
 }
 
-#theme-toggle.toggle-animating .theme-emoji-sun {
-    transform: scale(0) rotate(180deg);
-    opacity: 0;
+/* Respaldo: si no hay data-theme pero hay clase dark-mode en <html> (primer pintado) */
+html.dark-mode #theme-toggle:not([data-theme])::before {
+    opacity: 0 !important;
+    transform: scale(0) !important;
 }
 
-#theme-toggle.toggle-animating .theme-emoji-moon {
-    transform: scale(1.4) rotate(-180deg);
-    opacity: 0;
+html.dark-mode #theme-toggle:not([data-theme])::after {
+    opacity: 1 !important;
+    transform: scale(1) !important;
 }
 
-html.dark-mode #theme-toggle.toggle-animating .theme-emoji-sun {
-    transform: scale(0) rotate(-180deg);
-    opacity: 0;
-}
-
-html.dark-mode #theme-toggle.toggle-animating .theme-emoji-moon {
-    transform: scale(1.4) rotate(180deg);
-    opacity: 0;
-}
-
-/* Estado normal (sin animación) */
-#theme-toggle:not(.toggle-animating) .theme-emoji {
-    transform: scale(1) rotate(0);
-    opacity: 1;
-}
-
-html.dark-mode #theme-toggle:not(.toggle-animating) .theme-emoji-sun {
-    opacity: 0;
-    transform: scale(0);
-}
-
-html.dark-mode #theme-toggle:not(.toggle-animating) .theme-emoji-moon {
-    opacity: 1;
-    transform: scale(1);
-}
-
-#theme-toggle:not(.toggle-animating) .theme-emoji-moon {
-    opacity: 0;
-    transform: scale(0);
+/* Ocultar spans inyectados por JS (ya no se usan, ::before y ::after lo hacen) */
+#theme-toggle .theme-emoji,
+body #mainNav #theme-toggle .theme-emoji,
+.theme-toggle-mobile .theme-emoji,
+body #mainNav .theme-toggle-mobile .theme-emoji,
+#theme-toggle .theme-emoji-sun,
+body #mainNav #theme-toggle .theme-emoji-sun,
+#theme-toggle .theme-emoji-moon,
+body #mainNav #theme-toggle .theme-emoji-moon,
+.theme-toggle-mobile .theme-emoji-sun,
+body #mainNav .theme-toggle-mobile .theme-emoji-sun,
+.theme-toggle-mobile .theme-emoji-moon,
+body #mainNav .theme-toggle-mobile .theme-emoji-moon {
+    display: none !important;
 }
 
 /* ==============================
