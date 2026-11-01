@@ -2846,40 +2846,42 @@ body {
 
 
 /* ==============================
-   TOGGLE THEME (sol/luna)
+   TOGGLE THEME (sol/luna) - solo símbolo
    ============================== */
 .theme-switch-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0;
     user-select: none;
-    padding: 5px 10px;
-    border-radius: 50px;
-    background: #e0e7ff;
-    border: 2px solid #c7d2fe;
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .theme-icon {
-    font-size: 1.15rem;
-    opacity: 1;
-    transition: all 0.25s ease;
+    font-size: 1.25rem;
+    opacity: 0.9;
+    transition: all 0.3s ease;
     cursor: pointer;
-    padding: 6px 8px;
-    border-radius: 8px;
+    padding: 8px;
+    border-radius: 50%;
     background: transparent;
     color: #d97706;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .theme-icon.moon {
-    color: #4f46e5;
+    color: #fbbf24;
 }
 
 .theme-icon:hover {
-    transform: scale(1.1);
-    opacity: 1 !important;
+    transform: scale(1.15);
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
 }
 
 html.dark-mode .theme-icon.sun {
@@ -2890,44 +2892,41 @@ html.dark-mode .theme-icon.moon {
     color: #fbbf24;
 }
 
-/* Toggle button - botón simple con ícono */
+html.dark-mode .theme-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Toggle button - solo símbolo, sin fondo */
 #theme-toggle {
     appearance: none;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: #fff;
-    border: 2px solid #c7d2fe;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.25s ease;
+    transition: transform 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
+    margin: 0;
     overflow: visible;
     flex-shrink: 0;
 }
 
 #theme-toggle:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
-    transform: scale(1.05);
-}
-
-#theme-toggle:active {
-    transform: scale(0.95);
-}
-
-html.dark-mode #theme-toggle {
-    background: #1f2937;
-    border-color: #4b5563;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(1.1);
 }
 
 html.dark-mode #theme-toggle:hover {
-    background: #374151;
-    border-color: #6b7280;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#theme-toggle:active {
+    transform: scale(0.9);
 }
 
 /* MODO OSCURO */
