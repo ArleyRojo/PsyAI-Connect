@@ -2846,13 +2846,12 @@ body {
 
 
 /* ==============================
-   TOGGLE THEME (sol/luna) - premium minimalista
+   TOGGLE THEME (sol/luna) - solo emoji
    ============================== */
 .theme-switch-container {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0;
     user-select: none;
     padding: 0;
     background: transparent;
@@ -2862,119 +2861,98 @@ body {
 
 #theme-toggle {
     appearance: none;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     cursor: pointer;
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
+    transition: transform 150ms ease;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     margin: 0;
     position: relative;
-    overflow: visible;
     flex-shrink: 0;
+    line-height: 1;
 }
 
 #theme-toggle:hover {
-    background: #fafafa;
-    border-color: #d1d5db;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
-    transform: translateY(-1px);
+    transform: scale(1.15);
 }
 
 #theme-toggle:active {
-    transform: translateY(-1px) scale(0.96);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transform: scale(0.9);
 }
 
-html.dark-mode #theme-toggle {
-    background: #111827;
-    border: 1px solid #374151;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-html.dark-mode #theme-toggle:hover {
-    background: #1f2937;
-    border-color: #4b5563;
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.35), 0 3px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* SVGs del sol y la luna */
-.theme-svg {
-    width: 20px;
-    height: 20px;
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+/* Emojis del sol y la luna */
+.theme-emoji {
+    font-size: 24px;
     display: block;
+    transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    line-height: 1;
 }
 
-.theme-svg-sun {
+.theme-emoji-sun {
     color: #f59e0b;
 }
 
-.theme-svg-moon {
+.theme-emoji-moon {
     color: #fbbf24;
 }
 
-html.dark-mode .theme-svg-sun {
+html.dark-mode .theme-emoji-sun {
     color: #9ca3af;
 }
 
-html.dark-mode .theme-svg-moon {
+html.dark-mode .theme-emoji-moon {
     color: #fbbf24;
 }
 
-/* Ocultar ícono no activo */
-.theme-toggle-hidden {
-    display: none !important;
-}
-
 /* Animación de transformación al hacer clic */
-#theme-toggle.toggle-animating .theme-svg {
-    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1), opacity 150ms ease;
+#theme-toggle.toggle-animating .theme-emoji {
+    transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-#theme-toggle.toggle-animating .theme-svg-sun {
-    transform: scale(0) rotate(15deg);
+#theme-toggle.toggle-animating .theme-emoji-sun {
+    transform: scale(0) rotate(180deg);
     opacity: 0;
 }
 
-#theme-toggle.toggle-animating .theme-svg-moon {
-    transform: scale(1.2) rotate(-15deg);
+#theme-toggle.toggle-animating .theme-emoji-moon {
+    transform: scale(1.4) rotate(-180deg);
     opacity: 0;
 }
 
-html.dark-mode #theme-toggle.toggle-animating .theme-svg-sun {
-    transform: scale(0) rotate(-15deg);
+html.dark-mode #theme-toggle.toggle-animating .theme-emoji-sun {
+    transform: scale(0) rotate(-180deg);
     opacity: 0;
 }
 
-html.dark-mode #theme-toggle.toggle-animating .theme-svg-moon {
-    transform: scale(1.2) rotate(15deg);
+html.dark-mode #theme-toggle.toggle-animating .theme-emoji-moon {
+    transform: scale(1.4) rotate(180deg);
     opacity: 0;
 }
 
 /* Estado normal (sin animación) */
-#theme-toggle:not(.toggle-animating) .theme-svg {
+#theme-toggle:not(.toggle-animating) .theme-emoji {
     transform: scale(1) rotate(0);
     opacity: 1;
 }
 
-html.dark-mode #theme-toggle:not(.toggle-animating) .theme-svg-sun {
+html.dark-mode #theme-toggle:not(.toggle-animating) .theme-emoji-sun {
     opacity: 0;
     transform: scale(0);
 }
 
-html.dark-mode #theme-toggle:not(.toggle-animating) .theme-svg-moon {
+html.dark-mode #theme-toggle:not(.toggle-animating) .theme-emoji-moon {
     opacity: 1;
     transform: scale(1);
 }
 
-#theme-toggle:not(.toggle-animating) .theme-svg-moon {
+#theme-toggle:not(.toggle-animating) .theme-emoji-moon {
     opacity: 0;
     transform: scale(0);
 }

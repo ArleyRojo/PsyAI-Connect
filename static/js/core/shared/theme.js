@@ -1,18 +1,8 @@
 let themeTransitionTimer;
 let themeToggleTimer;
 
-const SVG_SUN = `
-  <svg class="theme-svg theme-svg-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="5"/>
-    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-  </svg>
-`;
-
-const SVG_MOON = `
-  <svg class="theme-svg theme-svg-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79"/>
-  </svg>
-`;
+const EMOJI_SUN = '<span class="theme-emoji theme-emoji-sun" aria-hidden="true">🌞</span>';
+const EMOJI_MOON = '<span class="theme-emoji theme-emoji-moon" aria-hidden="true">🌙</span>';
 
 function applyThemeState(isDark) {
     const root = document.documentElement;
@@ -23,17 +13,17 @@ function applyThemeState(isDark) {
     }
 }
 
-function injectSvgs(themeToggle) {
+function injectEmojis(themeToggle) {
     if (!themeToggle) return;
-    if (themeToggle.querySelector('.theme-svg')) return;
+    if (themeToggle.querySelector('.theme-emoji')) return;
 
-    themeToggle.innerHTML = SVG_SUN + SVG_MOON;
+    themeToggle.innerHTML = EMOJI_SUN + EMOJI_MOON;
 }
 
 function syncThemeToggleUI(isDark) {
     const themeToggle = document.getElementById('theme-toggle');
-    const svgSun = themeToggle ? themeToggle.querySelector('.theme-svg-sun') : null;
-    const svgMoon = themeToggle ? themeToggle.querySelector('.theme-svg-moon') : null;
+    const emojiSun = themeToggle ? themeToggle.querySelector('.theme-emoji-sun') : null;
+    const emojiMoon = themeToggle ? themeToggle.querySelector('.theme-emoji-moon') : null;
 
     if (themeToggle) {
         themeToggle.setAttribute('aria-pressed', String(isDark));
@@ -41,17 +31,17 @@ function syncThemeToggleUI(isDark) {
         themeToggle.dataset.theme = isDark ? 'dark' : 'light';
     }
 
-    if (svgSun && svgMoon) {
+    if (emojiSun && emojiMoon) {
         if (isDark) {
-            svgSun.style.opacity = '0';
-            svgSun.style.transform = 'scale(0)';
-            svgMoon.style.opacity = '1';
-            svgMoon.style.transform = 'scale(1)';
+            emojiSun.style.opacity = '0';
+            emojiSun.style.transform = 'scale(0)';
+            emojiMoon.style.opacity = '1';
+            emojiMoon.style.transform = 'scale(1)';
         } else {
-            svgSun.style.opacity = '1';
-            svgSun.style.transform = 'scale(1)';
-            svgMoon.style.opacity = '0';
-            svgMoon.style.transform = 'scale(0)';
+            emojiSun.style.opacity = '1';
+            emojiSun.style.transform = 'scale(1)';
+            emojiMoon.style.opacity = '0';
+            emojiMoon.style.transform = 'scale(0)';
         }
     }
 }
@@ -99,11 +89,11 @@ function toggleTheme() {
 
     themeTransitionTimer = window.setTimeout(() => {
         root.classList.remove('theme-animating');
-    }, 300);
+    }, 400);
 
     themeToggleTimer = window.setTimeout(() => {
         themeToggle.classList.remove('toggle-animating');
-    }, 300);
+    }, 400);
 
     window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: newTheme === 'dark' } }));
 }
@@ -130,9 +120,9 @@ function initTheme() {
 
     applyThemeState(isDark);
 
-    // Inyectar SVGs si el botón existe
+    // Inyectar emojis si el botón existe
     if (themeToggle) {
-        injectSvgs(themeToggle);
+        injectEmojis(themeToggle);
         syncThemeToggleUI(isDark);
 
         themeToggle.addEventListener('click', toggleTheme);
@@ -163,8 +153,8 @@ window.addEventListener('storage', function (e) {
         const themeToggle = document.getElementById('theme-toggle');
         applyThemeState(isDark);
 
-        if (themeToggle && !themeToggle.querySelector('.theme-svg')) {
-            injectSvgs(themeToggle);
+        if (themeToggle && !themeToggle.querySelector('.theme-emoji')) {
+            injectEmojis(themeToggle);
         }
         syncThemeToggleUI(isDark);
     }
