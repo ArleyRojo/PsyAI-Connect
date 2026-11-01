@@ -44,3 +44,11 @@
 
 > **Nota:** El archivo `README.md` en la **raíz del repositorio** es la única documentación que queda en la raíz. Cualquier otro `.md` (incluyendo `API.md` y `SEGURIDAD.md`) vive en `docs/`.  
 > **Note:** The `README.md` at the **repository root** is the only documentation remaining at the root. Any other `.md` (including `API.md` and `SECURITY.md`) lives in `docs/`.
+
+---
+
+## English Version / Versión en inglés
+
+This document is fully bilingual: every table row and section is written in **Spanish** and **English** side by side. No separate English file is needed — both languages coexist in the same `.md` document.
+
+Este documento es completamente bilingüe: cada fila de tabla y cada sección está escrita en **español** e **inglés** lado a lado. No se necesita un archivo en inglés separado — ambos idiomas conviven en el mismo documento `.md`.
