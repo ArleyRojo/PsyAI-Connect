@@ -1,13 +1,13 @@
 # Despliegue — PsyAI Connect
 
-> **Resumen:** Cómo levantar el proyecto en desarrollo y producción con Docker, las variables de entorno necesarias, las diferencias entre `dev.py` y `prod.py`, y los cuidados para un despliegue seguro.  
-> **Audiencia:** desarrolladores, DevOps y leads técnicos.
+> **Resumen:** Cómo levantar el proyecto en desarrollo y producción usando Docker, variables de entorno, migraciones y diferencias clave entre `dev.py` y `prod.py`.  
+> **Audiencia:** DevOps, desarrolladores que despliegan, leads técnicos.
 
 ---
 
 ## 1. Qué despliega este proyecto
 
-PsyAI Connect se entrega como una aplicación Django 5 contenedorizada. El despliegue estándar consta de dos servicios:
+PsyAI Connect se entrega como una aplicación Django contenedorizada. El despliegue estándar consta de dos servicios:
 
 | Servicio | Imagen | Responsabilidad |
 |----------|--------|-----------------|
@@ -23,10 +23,11 @@ Ambos servicios comparten una red interna Docker (`psyai_net`) para que la app s
 | Herramienta | Versión mínima | Uso |
 |-------------|----------------|-----|
 | Docker | 24+ | Containerización |
-| Docker Compose | 2.20+ | Orquestación de servicios |
-| Git | 2.30+ | Clonar el repositorio |
+| Docker Compose | 2.20+ | Orquestación multi-contenedor |
+| Git | 2.30+ | Control de versiones |
+| Make / bash | — | Scripts de automatización (opcional) |
 
-> **Recomendado:** tener una `SECRET_KEY` fuerte generada (ver sección 7) y, para producción, un dominio con certificados TLS válidos detrás de un reverse proxy (nginx, Traefik, AWS ALB, etc.).
+> **Recomendado:** tener una `SECRET_KEY` fuerte generada (ver sección 8) y, para producción, un dominio con certificados TLS válidos detrás de un reverse proxy (nginx, Traefik, AWS ALB, etc.).
 
 ---
 
@@ -34,16 +35,16 @@ Ambos servicios comparten una red interna Docker (`psyai_net`) para que la app s
 
 ```
 install/
-├── Dockerfile             # Imagen multi-stage: base → dev → prod
+├── Dockerfile             # Multi-stage: base → dev → prod
 ├── docker-compose.yml     # Desarrollo: app + MySQL con hot-reload
-├── docker-compose.prod.yml# Override producción: target prod, waitress, sin volumen de código
-├── entrypoint.sh          # Espera MySQL → migraciones → superuser (dev) → arranca servidor
+├── docker-compose.prod.yml# Override producción: prod target, waitress, no code volume
+├── entrypoint.sh          # Espera a MySQL → migraciones → superuser (dev) → arranca servidor
 └── .dockerignore          # Archivos excluidos de la imagen (.git, __pycache__, etc.)
 ```
 
 ---
 
-## 4. `install/Dockerfile` — Imagen multi-stage
+## 4. `install/Dockerfile` — Multi-stage
 
 El `Dockerfile` define tres etapas. Esto permite usar capas intermedias para cachear dependencias y entregar una imagen de producción sin herramientas de compilación.
 
@@ -63,7 +64,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Dependencias Python primero (cache de capas)
+# Dependencias Python primero (caché de capas)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -87,7 +88,7 @@ FROM base AS prod
 ENV DJANGO_SETTINGS_MODULE=config.settings.prod \
     DEBUG=0
 
-# Copia todo el código dentro de la imagen (inmutable en prod)
+# Copia todo el código dentro de la imagen
 COPY . .
 
 # SECRET_KEY es obligatoria en tiempo de build para collectstatic
@@ -127,7 +128,7 @@ set -e
 
 echo "==> PsyAI Connect — Entrypoint starting..."
 
-# 1. Esperar a que MySQL acepte conexiones (solo si DB_HOST no es localhost)
+# ── 1. Esperar a MySQL ────────────────────────────────────────────────────────
 if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ]; then
     echo "==> Waiting for MySQL at $DB_HOST:${DB_PORT:-3306}..."
     until python - <<'PY'
@@ -147,11 +148,11 @@ PY
     echo "==> MySQL is ready!"
 fi
 
-# 2. Ejecutar migraciones
+# ── 2. Ejecutar migraciones ───────────────────────────────────────────────────
 echo "==> Running migrations..."
 python manage.py migrate --noinput 2>&1 || echo "WARNING: Migrations failed..."
 
-# 3. Crear superuser de prueba (solo en desarrollo)
+# ── 3. Crear superuser si no existe (solo dev) ───────────────────────────────
 if [ "$DJANGO_SETTINGS_MODULE" = "config.settings.dev" ]; then
     python manage.py shell -c "
 from apps.authentication.models import Register
@@ -167,7 +168,7 @@ else:
 " 2>/dev/null || true
 fi
 
-# 4. Arrancar el servidor definido en CMD
+# ── 4. Arrancar el servidor ───────────────────────────────────────────────────
 echo "==> Starting server..."
 exec "$@"
 ```
@@ -379,58 +380,62 @@ Copia `.env.example` a `.env` en la raíz del proyecto y ajusta los valores. Nun
 | Variable | Descripción | Ejemplo / Dev | Producción (requerida) |
 |----------|-------------|---------------|------------------------|
 | `SECRET_KEY` | Clave secreta Django | `dev-insecure-key-change-me` | **Obligatoria** (>50 chars, aleatoria) |
-| `DEBUG` | Modo depuración | `1` | `0` |
+| `DEBUG` | Modo debug | `1` | `0` |
 | `DJANGO_SETTINGS_MODULE` | Módulo de settings | `config.settings.dev` | `config.settings.prod` |
-| `PORT` | Puerto de la app | `8000` | `8000` |
-| `DB_HOST` | Host de MySQL | `db` | `db` (red interna) |
-| `DB_PORT` | Puerto de MySQL | `3306` | `3306` |
-| `DB_NAME` | Nombre de la BD | `psyai_connect` | `psyai_connect` |
-| `DB_USER` | Usuario de la BD | `psyai` | `psyai` |
-| `DB_PASSWORD` | Contraseña de la BD | `psyai_pass` | **Segura** |
-| `DB_ROOT_PASSWORD` | Contraseña root MySQL (Docker) | `rootpass` | **Segura** |
+| `PORT` | Puerto app | `8000` | `8000` |
+| `DB_HOST` | Host MySQL | `db` (Docker) | `db` (red interna) |
+| `DB_PORT` | Puerto MySQL | `3306` | `3306` |
+| `DB_NAME` | Nombre BD | `psyai_connect` | `psyai_connect` |
+| `DB_USER` | Usuario BD | `psyai` | `psyai` |
+| `DB_PASSWORD` | Password BD | `psyai_pass` | **Segura** |
+| `DB_ROOT_PASSWORD` | Root MySQL (Docker) | `rootpass` | **Segura** |
 | `ALLOWED_HOSTS` | Hosts permitidos | `*` | `tudominio.com,www.tudominio.com` |
-| `CORS_ORIGINS` | Orígenes CORS permitidos | `http://localhost:5000` | `https://tudominio.com` |
-| `CSRF_TRUSTED_ORIGINS` | Orígenes CSRF de confianza | `http://localhost:5000` | `https://tudominio.com` |
-| `SESSION_COOKIE_SECURE` | Cookie de sesión solo HTTPS | `False` | `True` |
-| `CSRF_COOKIE_SECURE` | Cookie CSRF solo HTTPS | `False` | `True` |
-| `CSRF_COOKIE_HTTPONLY` | CSRF cookie HttpOnly | `False` | `True` |
+| `CORS_ORIGINS` | Orígenes CORS | `http://localhost:5000` | `https://tudominio.com` |
+| `CSRF_TRUSTED_ORIGINS` | CSRF trusted | `http://localhost:5000` | `https://tudominio.com` |
+| `SESSION_COOKIE_SECURE` | Cookie segura | `False` | `True` |
+| `CSRF_COOKIE_SECURE` | CSRF cookie segura | `False` | `True` |
+| `CSRF_COOKIE_HTTPONLY` | CSRF HttpOnly | `False` | `True` |
 | `SECURE_SSL_REDIRECT` | Forzar HTTPS | `False` | `True` |
-| `SECURE_HSTS_SECONDS` | Tiempo HSTS | `0` | `31536000` |
-| `SECURE_HSTS_INCLUDE_SUBDOMAINS` | HSTS subdominios | `False` | `True` |
-| `SECURE_HSTS_PRELOAD` | HSTS preload | `False` | `True` |
-| `EMAIL_HOST` | Servidor SMTP | `smtp.gmail.com` | `smtp.tuproveedor.com` |
+| `SECURE_HSTS_SECONDS` | HSTS | `0` | `31536000` |
+| `EMAIL_HOST` | SMTP host | `smtp.gmail.com` | `smtp.gmail.com` |
 | `EMAIL_PORT` | Puerto SMTP | `587` | `587` |
-| `EMAIL_USE_TLS` | Usar TLS en SMTP | `True` | `True` |
+| `EMAIL_USE_TLS` | TLS | `True` | `True` |
 | `EMAIL_HOST_USER` | Usuario SMTP | — | **Requerido** |
-| `EMAIL_HOST_PASSWORD` | Contraseña SMTP | — | **Requerida** |
-| `DEFAULT_FROM_EMAIL` | Remitente por defecto | — | `PsyAI Connect <noreply@tudominio.com>` |
-| `GEMINI_API_KEY` | API key principal de Gemini | — | **Requerida** |
-| `GEMINI_API_KEYS` | Keys extra para rotación | — | Opcional |
-| `GEMINI_MODEL` | Modelo Gemini | `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` |
+| `EMAIL_HOST_PASSWORD` | Pass SMTP | — | **Requerida** |
+| `DEFAULT_FROM_EMAIL` | Remitente | — | `PsyAI Connect <noreply@tudominio.com>` |
+| `GEMINI_API_KEY` | Key principal Gemini | — | **Requerida** |
+| `GEMINI_API_KEYS` | Keys extra (rotación) | — | Opcional |
+| `GEMINI_MODEL` | Modelo | `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` |
+| `GEMINI_THINKING_LEVEL` | Nivel de razonamiento | `low` | `low` |
+| `GEMINI_REQUEST_TIMEOUT_CONNECT` | Timeout de conexión (s) | `3` | `3` |
+| `GEMINI_REQUEST_TIMEOUT_READ` | Timeout de lectura intento 1 (s) | `8` | `8` |
+| `GEMINI_MIN_READ_TIMEOUT_SECONDS` | Read timeout mínimo garantizado (s) | `3` | `3` |
+| `GEMINI_RETRIES` | Reintentos ante timeout/error de red | `2` | `2` |
+| `GEMINI_RETRY_BASE_DELAY` | Retraso base entre reintentos (s) | `0.2` | `0.2` |
+| `GEMINI_TOTAL_DEADLINE_SECONDS` | Presupuesto total Gemini (s) | `10` | `10` |
 | `GEMINI_FALLBACK_MODEL` | Modelo de respaldo | `gemma-4-26b-a4b-it` | `gemma-4-26b-a4b-it` |
-| `WOMPI_ENV` | Entorno Wompi (`test` \| `prod`) | `test` | `prod` |
+| `WOMPI_ENV` | `test` \| `prod` | `test` | `prod` |
 | `WOMPI_PUBLIC_KEY` | Llave pública Wompi | — | **Requerida** |
 | `WOMPI_PRIVATE_KEY` | Llave privada Wompi | — | **Requerida** |
-| `WOMPI_INTEGRITY_SECRET` | Secreto de integridad Wompi | — | **Requerida** |
-| `WOMPI_EVENTS_SECRET` | Secreto de eventos Wompi (webhook) | — | **Requerida** |
+| `WOMPI_INTEGRITY_SECRET` | Secreto integridad | — | **Requerida** |
+| `WOMPI_EVENTS_SECRET` | Secreto eventos (webhook) | — | **Requerida** |
 | `GOOGLE_CLIENT_ID` | OAuth Google | — | Opcional |
-| `GOOGLE_CLIENT_SECRET` | Secreto OAuth Google | — | Opcional |
+| `GOOGLE_CLIENT_SECRET` | Secret Google | — | Opcional |
 | `SITE_URL` | URL base del sitio | `http://localhost:8000` | `https://tudominio.com` |
 
-### Generar una `SECRET_KEY` segura
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(64))"
-```
+> **Generar `SECRET_KEY` segura:**
+> ```bash
+> python -c "import secrets; print(secrets.token_urlsafe(64))"
+> ```
 
 ---
 
-## 9. Diferencias clave: `dev.py` vs `prod.py`
+## 9. Diferencias clave `dev.py` vs `prod.py`
 
-| Aspecto | `config/settings/dev.py` | `config/settings/prod.py` |
-|---------|--------------------------|---------------------------|
+| Aspecto | `dev.py` | `prod.py` |
+|---------|----------|-----------|
 | `DEBUG` | `True` | `False` |
-| `ALLOWED_HOSTS` | `["*"]` | Desde variable `ALLOWED_HOSTS` |
+| `ALLOWED_HOSTS` | `["*"]` | De `ALLOWED_HOSTS` env |
 | `CORS_ALLOW_ALL_ORIGINS` | `True` | `False` (usa `CORS_ORIGINS`) |
 | `SESSION_COOKIE_SECURE` | `False` | `True` |
 | `CSRF_COOKIE_SECURE` | `False` | `True` |
@@ -439,31 +444,36 @@ python -c "import secrets; print(secrets.token_urlsafe(64))"
 | `SECURE_HSTS_SECONDS` | `0` | `31536000` (1 año) |
 | `SECURE_HSTS_INCLUDE_SUBDOMAINS` | `False` | `True` |
 | `SECURE_HSTS_PRELOAD` | `False` | `True` |
-| `EMAIL_BACKEND` | Consola (si no hay credenciales) | SMTP real |
+| `EMAIL_BACKEND` | Console (si no credenciales) | SMTP real |
 | Servidor | `runserver` (hot-reload) | `waitress` (producción) |
 
 ---
 
-## 10. Checklist antes de desplegar a producción
+## 10. Checklist de despliegue a producción
 
-- [ ] `SECRET_KEY` generada y definida en `.env` o entorno de producción
-- [ ] `DEBUG=0` y `DJANGO_SETTINGS_MODULE=config.settings.prod`
-- [ ] `ALLOWED_HOSTS` y `CORS_ORIGINS` con dominios reales (no `*`)
-- [ ] `CSRF_TRUSTED_ORIGINS` igual a `CORS_ORIGINS`
-- [ ] Certificados TLS válidos montados en el reverse proxy
-- [ ] Reverse proxy configurado con `proxy_pass http://app:8000` y headers `X-Forwarded-Proto`
-- [ ] `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")` si hay proxy/load balancer
-- [ ] `SESSION_COOKIE_SECURE=True`, `CSRF_COOKIE_SECURE=True`, `CSRF_COOKIE_HTTPONLY=True`
+- [ ] `SECRET_KEY` generada y en `.env` (`python -c "import secrets; print(secrets.token_urlsafe(64))"`)
+- [ ] `DEBUG=False` en `.env` / `prod.py`
+- [ ] `ALLOWED_HOSTS` y `CORS_ORIGINS` configurados con dominios reales
+- [ ] `CSRF_TRUSTED_ORIGINS` = `CORS_ORIGINS`
+- [ ] Certificados TLS válidos (Let's Encrypt o proveedor) → montar en `nginx/certs/`
+- [ ] `nginx/prod.conf` configurado con `proxy_pass http://app:8000` y headers `X-Forwarded-Proto`
+- [ ] `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")` en `prod.py`
+- [ ] `SECURE_PROXY_SSL_HEADER` configurado si hay proxy/load balancer
+- [ ] `SESSION_COOKIE_SECURE=True`, `CSRF_COOKIE_SECURE=True`
+- [ ] `CSRF_COOKIE_HTTPONLY=True`
 - [ ] `SECURE_HSTS_SECONDS=31536000`, `INCLUDE_SUBDOMAINS=True`, `PRELOAD=True`
+- [ ] `SECURE_CONTENT_TYPE_NOSNIFF=True`, `X_FRAME_OPTIONS="DENY"`
+- [ ] `CSP_ENABLED=True` (enforce, no Report-Only)
 - [ ] Variables `WOMPI_*` y `GEMINI_API_KEY` configuradas
-- [ ] Variables `EMAIL_*` configuradas con SMTP real
+- [ ] `EMAIL_*` configuradas (SMTP real)
 - [ ] `SITE_URL=https://tudominio.com`
-- [ ] Migraciones aplicadas (`entrypoint.sh` las ejecuta automáticamente al iniciar)
-- [ ] `collectstatic` ejecutado en el build de la imagen de producción
-- [ ] Superuser creado (solo en dev; en prod crear manualmente si se necesita)
-- [ ] Backups de MySQL programados (volumen `mysql_data` o snapshots de RDS)
-- [ ] Logs centralizados (stdout de Docker → Loki/ELK/Datadog u otro)
-- [ ] Healthcheck de MySQL funcionando (`mysqladmin ping`)
+- [ ] Migraciones aplicadas: `docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py migrate`
+- [ ] `collectstatic` ejecutado (entrypoint lo hace)
+- [ ] Superuser creado (entrypoint lo hace si no existe)
+- [ ] Backups de BD programados (cron / RDS snapshots)
+- [ ] Logs centralizados (stdout → Docker → Loki/ELK/Datadog)
+- [ ] Healthchecks: `/api/session` o endpoint dedicado
+- [ ] Monitoreo: CPU, RAM, disco, latencia p95, error rate
 
 ---
 
@@ -472,52 +482,28 @@ python -c "import secrets; print(secrets.token_urlsafe(64))"
 ### Desarrollo
 
 ```bash
-# Levantar
-docker compose -f install/docker-compose.yml up -d --build
+# Desarrollo
+cd install
+docker compose up -d --build          # Levantar
+docker compose logs -f app             # Logs
+docker compose exec app bash           # Shell en contenedor
+docker compose exec app python manage.py shell
+docker compose exec app python manage.py migrate
+docker compose exec app python manage.py createsuperuser
+docker compose down                    # Detener
+docker compose down -v                 # Detener + borrar volúmenes (BD)
 
-# Logs en tiempo real
-docker compose -f install/docker-compose.yml logs -f app
+# Producción
+cd install
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f app
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py migrate
+docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 
-# Shell dentro del contenedor app
-docker compose -f install/docker-compose.yml exec app bash
-
-# Shell de Django
-docker compose -f install/docker-compose.yml exec app python manage.py shell
-
-# Migraciones y superuser
-docker compose -f install/docker-compose.yml exec app python manage.py migrate
-docker compose -f install/docker-compose.yml exec app python manage.py createsuperuser
-
-# Detener
-docker compose -f install/docker-compose.yml down
-
-# Detener y borrar volúmenes (borra la BD local)
-docker compose -f install/docker-compose.yml down -v
-```
-
-### Producción
-
-```bash
-# Levantar con override de producción
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml up -d --build
-
-# Logs de la app en producción
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml logs -f app
-
-# Ejecutar migraciones manualmente (si es necesario)
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml exec app python manage.py migrate
-
-# Detener
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml down
-```
-
-### Base de datos
-
-```bash
-# Backup desde el host (ajusta el nombre del contenedor si es distinto)
+# Backup BD (desde host)
 docker exec psyai_db mysqldump -u root -p"$DB_ROOT_PASSWORD" psyai_connect > backup_$(date +%F).sql
 
-# Restaurar backup
+# Restore BD
 docker exec -i psyai_db mysql -u root -p"$DB_ROOT_PASSWORD" psyai_connect < backup_2026-01-15.sql
 ```
 
@@ -536,576 +522,18 @@ docker exec -i psyai_db mysql -u root -p"$DB_ROOT_PASSWORD" psyai_connect < back
 
 ---
 
-## 13. Ver también
+## Ver también
 
-- [`config/settings/base.py`](../config/settings/base.py) — Settings base compartidos
-- [`config/settings/dev.py`](../config/settings/dev.py) — Settings de desarrollo
-- [`config/settings/prod.py`](../config/settings/prod.py) — Settings de producción
+- [`config/settings/base.py`](../config/settings/base.py) — Settings base
+- [`config/settings/dev.py`](../config/settings/dev.py) — Settings desarrollo
+- [`config/settings/prod.py`](../config/settings/prod.py) — Settings producción
 - [`install/Dockerfile`](../install/Dockerfile) — Imagen multi-stage
-- [`install/docker-compose.yml`](../install/docker-compose.yml) — Compose de desarrollo
-- [`install/docker-compose.prod.yml`](../install/docker-compose.prod.yml) — Override de producción
+- [`install/docker-compose.yml`](../install/docker-compose.yml) — Compose desarrollo
+- [`install/docker-compose.prod.yml`](../install/docker-compose.prod.yml) — Override producción
 - [`install/entrypoint.sh`](../install/entrypoint.sh) — Script de arranque del contenedor
 - [`security.md`](security.md) — Checklist de seguridad en producción
-- [`api.md`](api.md) — Referencia de endpoints REST
+- [`api.md`](api.md) — Referencia completa de endpoints REST
 - [`architecture.md`](architecture.md) — Arquitectura general del sistema
 - [`chatbot-ai.md`](chatbot-ai.md) — Variables `GEMINI_API_KEY*`
 - [`data-models.md`](data-models.md) — Modelos y relaciones de datos
-
----
-
-## English Version
-
-# Deployment — PsyAI Connect
-
-> **Summary:** How to deploy the project in development and production using Docker, environment variables, migrations, and key differences between `dev.py` and `prod.py`.  
-> **Audience:** DevOps, developers who deploy, technical leads.
-
----
-
-## 1. What this project deploys / Qué despliega este proyecto
-
-PsyAI Connect is delivered as a containerized Django 5 application. The standard deployment consists of two services:
-
-| Service | Image | Responsibility |
-|---|---|---|
-| **app** | `python:3.12-slim` (own build) | Django server (`runserver` in dev / Waitress in prod) |
-| **db** | `mysql:8.4` | Relational MySQL 8 database |
-
-Both services share an internal Docker network (`psyai_net`) so the app connects to the DB using hostname `db`.
-
----
-
-## 2. Prerequisites / Requisitos previos
-
-| Tool | Minimum version | Use |
-|---|---|---|
-| Docker | 24+ | Containerization |
-| Docker Compose | 2.20+ | Multi-container orchestration |
-| Git | 2.30+ | Version control |
-| Make / bash | — | Automation scripts (optional) |
-
-> **Recommended:** have a strong `SECRET_KEY` generated (see section 8) and, for production, a domain with valid TLS certificates behind a reverse proxy (nginx, Traefik, AWS ALB, Cloudflare Tunnel, etc.).
-
----
-
-## 3. `install/` folder structure / Estructura de la carpeta `install/`
-
-```
-install/
-├── Dockerfile             # Multi-stage: base → dev → prod
-├── docker-compose.yml     # Development: app + MySQL with hot-reload
-├── docker-compose.prod.yml# Production override: prod target, waitress, no code volume
-├── entrypoint.sh          # Waits for MySQL → migrations → superuser (dev) → starts server
-└── .dockerignore          # Files excluded from image (.git, __pycache__, etc.)
-```
-
----
-
-## 4. `install/Dockerfile` — Multi-stage image / `install/Dockerfile` — Imagen multi-stage
-
-The `Dockerfile` defines three stages. This allows using intermediate layers to cache dependencies and deliver a production image without build tools.
-
-```dockerfile
-# ── Stage 1: base ─────────────────────────────────────────────────────────────
-FROM python:3.12-slim AS base
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    default-libmysqlclient-dev \
-    pkg-config \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Python dependencies first (layer caching)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# ── Stage 2: dev ──────────────────────────────────────────────────────────────
-FROM base AS dev
-
-ENV DJANGO_SETTINGS_MODULE=config.settings.dev \
-    DEBUG=1
-
-# Code is mounted as a volume in docker-compose, not copied here.
-COPY install/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-EXPOSE 8000
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
-# ── Stage 3: prod ─────────────────────────────────────────────────────────────
-FROM base AS prod
-
-ENV DJANGO_SETTINGS_MODULE=config.settings.prod \
-    DEBUG=0
-
-# Copy full application code into the image
-COPY . .
-
-# SECRET_KEY is required at build time for collectstatic
-ARG SECRET_KEY=build-time-placeholder-replaced-at-runtime
-ENV SECRET_KEY=${SECRET_KEY}
-RUN python manage.py collectstatic --noinput
-
-# Remove unnecessary files from final image
-RUN rm -rf .git .pytest_cache __pycache__ \
-    && find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-
-EXPOSE 8000
-COPY install/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["waitress-serve", "--host=0.0.0.0", "--port=8000", "--threads=4", "config.wsgi:application"]
-```
-
-### What each stage does / Qué hace cada etapa
-
-| Stage | Purpose | Key feature |
-|-------|---------|-------------|
-| `base` | Installs system and Python dependencies | Reused by `dev` and `prod` |
-| `dev` | Development image | `DEBUG=1`, `runserver`, code mounted by volume (hot-reload) |
-| `prod` | Production image | Code embedded in image, `collectstatic` at build, `waitress` WSGI server |
-
----
-
-## 5. `install/entrypoint.sh` — Startup script / `install/entrypoint.sh` — Script de arranque
-
-The entrypoint runs when the `app` container starts and ensures the database is ready before starting the server:
-
-```bash
-#!/bin/bash
-set -e
-
-echo "==> PsyAI Connect — Entrypoint starting..."
-
-# ── 1. Wait for MySQL ────────────────────────────────────────────────────────
-if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ]; then
-    echo "==> Waiting for MySQL at $DB_HOST:${DB_PORT:-3306}..."
-    until python - <<'PY'
-import os, socket, sys
-host = os.environ["DB_HOST"].strip()
-port = int(os.environ.get("DB_PORT", "3306").strip())
-try:
-    socket.create_connection((host, port), timeout=2).close()
-except Exception as e:
-    print(f"    connect to {host}:{port} failed: {e}", file=sys.stderr)
-    sys.exit(1)
-PY
-    do
-        echo "    MySQL not ready yet, retrying in 2s..."
-        sleep 2
-    done
-    echo "==> MySQL is ready!"
-fi
-
-# ── 2. Run migrations ────────────────────────────────────────────────────────
-echo "==> Running migrations..."
-python manage.py migrate --noinput 2>&1 || echo "WARNING: Migrations failed..."
-
-# ── 3. Create superuser if it doesn't exist (dev only) ───────────────────────
-if [ "$DJANGO_SETTINGS_MODULE" = "config.settings.dev" ]; then
-    python manage.py shell -c "
-from apps.authentication.models import Register
-from apps.authentication.security import SecurityHelper
-if not Register.objects.filter(email='admin@psyai.com').exists():
-    u = Register(email='admin@psyai.com', nombre='Admin', rol='admin')
-    u.contrasena = SecurityHelper.hash_password('Admin123')
-    u.set_unusable_password()
-    u.save()
-    print('    Superuser created: admin@psyai.com / Admin123')
-else:
-    print('    Superuser already exists.')
-" 2>/dev/null || true
-fi
-
-# ── 4. Start the server ──────────────────────────────────────────────────────
-echo "==> Starting server..."
-exec "$@"
-```
-
-### Entrypoint flow / Flujo del entrypoint
-
-1. **Waits for MySQL:** tries to open a TCP socket against `DB_HOST:DB_PORT`. Retries every 2 s until successful.
-2. **Migrations:** runs `python manage.py migrate --noinput` to update the schema.
-3. **Superuser (dev only):** creates `admin@psyai.com` / `Admin123` if it does not exist. In production this step is skipped.
-4. **Server:** executes the command defined in `CMD` (`runserver` in dev, `waitress-serve` in prod).
-
-> **Execution permission:** the file already has the execution bit in the repository. If you edit it on Windows, make sure it keeps LF line endings and the `chmod +x` permission.
-
----
-
-## 6. Development — `docker-compose.yml` / Desarrollo — `docker-compose.yml`
-
-This file brings up the complete stack for local development.
-
-```yaml
-services:
-  # ── Django App ────────────────────────────────────────────────────────────
-  app:
-    build:
-      context: ..
-      dockerfile: install/Dockerfile
-      target: dev
-    container_name: psyai_app
-    ports:
-      - "${PORT:-8000}:8000"
-    env_file:
-      - ../.env
-    environment:
-      - DJANGO_SETTINGS_MODULE=config.settings.dev
-      - DEBUG=1
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_NAME=${DB_NAME:-psyai_connect}
-      - DB_USER=${DB_USER:-psyai}
-      - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
-    volumes:
-      # Hot-reload: host code is reflected instantly in the container
-      - ..:/app
-      # Persist uploaded documents between container restarts
-      - uploads_data:/app/static/uploads
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - psyai_net
-
-  # ── MySQL 8 ───────────────────────────────────────────────────────────────
-  db:
-    image: mysql:8.4
-    container_name: psyai_db
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
-      MYSQL_DATABASE: ${DB_NAME:-psyai_connect}
-      MYSQL_USER: ${DB_USER:-psyai}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-psyai_pass}
-    ports:
-      - "3307:3306"   # Host:3307 → Container:3306
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    restart: unless-stopped
-    networks:
-      - psyai_net
-
-volumes:
-  mysql_data:
-    driver: local
-  uploads_data:
-    driver: local
-
-networks:
-  psyai_net:
-    driver: bridge
-```
-
-### Start development environment / Levantar el entorno de desarrollo
-
-From the project root:
-
-```bash
-# Build and start in background
-docker compose -f install/docker-compose.yml up -d --build
-
-# View app logs
-docker compose -f install/docker-compose.yml logs -f app
-
-# Open shell inside app container
-docker compose -f install/docker-compose.yml exec app bash
-
-# Run Django commands
-docker compose -f install/docker-compose.yml exec app python manage.py migrate
-docker compose -f install/docker-compose.yml exec app python manage.py createsuperuser
-
-# Stop
-docker compose -f install/docker-compose.yml down
-
-# Stop and delete volumes (deletes local DB!)
-docker compose -f install/docker-compose.yml down -v
-```
-
-### Development access / Acceso en desarrollo
-
-| Service | URL / Port | Notes |
-|---|---|---|
-| Django App | `http://localhost:8000` | `runserver` with hot-reload |
-| MySQL | `localhost:3307` | User `psyai`, DB `psyai_connect` |
-
----
-
-## 7. Production — `docker-compose.prod.yml` / Producción — `docker-compose.prod.yml`
-
-This file **overrides** the `app` service to use the `prod` stage of the `Dockerfile`, `Waitress` instead of `runserver`, and does not mount code as a volume (immutable image).
-
-```yaml
-services:
-  # ── Django App (Production) ──────────────────────────────────────────────
-  app:
-    build:
-      context: ..
-      dockerfile: install/Dockerfile
-      target: prod
-      args:
-        SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or environment}
-    container_name: psyai_app_prod
-    env_file:
-      - ../.env
-    environment:
-      - DJANGO_SETTINGS_MODULE=config.settings.prod
-      - DEBUG=0
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_NAME=${DB_NAME:-psyai_connect}
-      - DB_USER=${DB_USER:-psyai}
-      - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
-    # Code embedded in image: no code volume mount
-    volumes:
-      - uploads_data:/app/static/uploads
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - psyai_net
-
-  # ── MySQL 8 (Production) ─────────────────────────────────────────────────
-  db:
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME:-psyai_connect}
-      MYSQL_USER: ${DB_USER:-psyai}
-      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
-    # In production consider removing port mapping (internal only)
-    ports: []
-    volumes:
-      - mysql_data:/var/lib/mysql
-    restart: unless-stopped
-    networks:
-      - psyai_net
-
-volumes:
-  mysql_data:
-    driver: local
-  uploads_data:
-    driver: local
-
-networks:
-  psyai_net:
-    driver: bridge
-```
-
-### Start production stack / Levantar la pila de producción
-
-From the project root:
-
-```bash
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml up -d --build
-```
-
-### Key production points / Puntos clave de producción
-
-| Aspect | Configuration |
-|---|---|
-| WSGI server | `waitress-serve` with 4 threads |
-| Code | Embedded in image (no hot-reload) |
-| MySQL DB | Port **not exposed** to host (`ports: []`), accessible only via internal network `psyai_net` |
-| `SECRET_KEY` | Mandatory, passed as `ARG` in build |
-| Static files | `collectstatic` executed during image build |
-| Uploaded files | Persist in volume `uploads_data` |
-
-> **Reverse proxy (recommended):** `docker-compose.prod.yml` does not include nginx by default. In production expose the app behind a reverse proxy (nginx, Traefik, AWS ALB, Cloudflare Tunnel, etc.) that terminates TLS, forwards `X-Forwarded-Proto` and `X-Forwarded-For`, and routes traffic to port `8000` of container `app`.
-
----
-
-## 8. Environment variables (`.env`) / Variables de entorno (`.env`)
-
-Copy `.env.example` to `.env` in the project root and adjust values. Never commit `.env` with real secrets to version control.
-
-| Variable | Description | Dev example | Production (required) |
-|---|---|---|---|
-| `SECRET_KEY` | Django secret key | `dev-insecure-key-change-me` | **Mandatory** (>50 chars, random) |
-| `DEBUG` | Debug mode | `1` | `0` |
-| `DJANGO_SETTINGS_MODULE` | Settings module | `config.settings.dev` | `config.settings.prod` |
-| `PORT` | App port | `8000` | `8000` |
-| `DB_HOST` | MySQL host | `db` (Docker) | `db` (internal network) |
-| `DB_PORT` | MySQL port | `3306` | `3306` |
-| `DB_NAME` | DB name | `psyai_connect` | `psyai_connect` |
-| `DB_USER` | DB user | `psyai` | `psyai` |
-| `DB_PASSWORD` | DB password | `psyai_pass` | **Secure** |
-| `DB_ROOT_PASSWORD` | MySQL root password (Docker) | `rootpass` | **Secure** |
-| `ALLOWED_HOSTS` | Allowed hosts | `*` | `tudominio.com,www.tudominio.com` |
-| `CORS_ORIGINS` | Allowed CORS origins | `http://localhost:5000` | `https://tudominio.com` |
-| `CSRF_TRUSTED_ORIGINS` | CSRF trusted origins | `http://localhost:5000` | `https://tudominio.com` |
-| `SESSION_COOKIE_SECURE` | Session cookie HTTPS only | `False` | `True` |
-| `CSRF_COOKIE_SECURE` | CSRF cookie HTTPS only | `False` | `True` |
-| `CSRF_COOKIE_HTTPONLY` | CSRF cookie HttpOnly | `False` | `True` |
-| `SECURE_SSL_REDIRECT` | Force HTTPS | `False` | `True` |
-| `SECURE_HSTS_SECONDS` | HSTS time | `0` | `31536000` |
-| `SECURE_HSTS_INCLUDE_SUBDOMAINS` | HSTS subdomains | `False` | `True` |
-| `SECURE_HSTS_PRELOAD` | HSTS preload | `False` | `True` |
-| `EMAIL_HOST` | SMTP host | `smtp.gmail.com` | `smtp.tuproveedor.com` |
-| `EMAIL_PORT` | SMTP port | `587` | `587` |
-| `EMAIL_USE_TLS` | Use TLS in SMTP | `True` | `True` |
-| `EMAIL_HOST_USER` | SMTP user | — | **Required** |
-| `EMAIL_HOST_PASSWORD` | SMTP password | — | **Required** |
-| `DEFAULT_FROM_EMAIL` | Default sender | — | `PsyAI Connect <noreply@tudominio.com>` |
-| `GEMINI_API_KEY` | Main Gemini API key | — | **Required** |
-| `GEMINI_API_KEYS` | Extra keys for rotation | — | Optional |
-| `GEMINI_MODEL` | Gemini model | `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` |
-| `GEMINI_FALLBACK_MODEL` | Fallback model | `gemma-4-26b-a4b-it` | `gemma-4-26b-a4b-it` |
-| `WOMPI_ENV` | Wompi environment (`test` \| `prod`) | `test` | `prod` |
-| `WOMPI_PUBLIC_KEY` | Wompi public key | — | **Required** |
-| `WOMPI_PRIVATE_KEY` | Wompi private key | — | **Required** |
-| `WOMPI_INTEGRITY_SECRET` | Wompi integrity secret | — | **Required** |
-| `WOMPI_EVENTS_SECRET` | Wompi events secret (webhook) | — | **Required** |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID | — | Optional |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | — | Optional |
-| `SITE_URL` | Site base URL | `http://localhost:8000` | `https://tudominio.com` |
-
-### Generate a secure `SECRET_KEY` / Generar una `SECRET_KEY` segura
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(64))"
-```
-
----
-
-## 9. Key differences `dev.py` vs `prod.py` / Diferencias clave `dev.py` vs `prod.py`
-
-| Aspect | `config/settings/dev.py` | `config/settings/prod.py` |
-|---|---|---|
-| `DEBUG` | `True` | `False` |
-| `ALLOWED_HOSTS` | `["*"]` | From `ALLOWED_HOSTS` env |
-| `CORS_ALLOW_ALL_ORIGINS` | `True` | `False` (uses `CORS_ORIGINS`) |
-| `SESSION_COOKIE_SECURE` | `False` | `True` |
-| `CSRF_COOKIE_SECURE` | `False` | `True` |
-| `CSRF_COOKIE_HTTPONLY` | `False` | `True` |
-| `SECURE_SSL_REDIRECT` | `False` | `True` |
-| `SECURE_HSTS_SECONDS` | `0` | `31536000` (1 year) |
-| `SECURE_HSTS_INCLUDE_SUBDOMAINS` | `False` | `True` |
-| `SECURE_HSTS_PRELOAD` | `False` | `True` |
-| `EMAIL_BACKEND` | Console (if no credentials) | Real SMTP |
-| Server | `runserver` (hot-reload) | `waitress` (production) |
-
----
-
-## 10. Production deployment checklist / Checklist de despliegue a producción
-
-- [ ] `SECRET_KEY` generated and defined in `.env` or production environment
-- [ ] `DEBUG=0` and `DJANGO_SETTINGS_MODULE=config.settings.prod`
-- [ ] `ALLOWED_HOSTS` and `CORS_ORIGINS` with real domains (not `*`)
-- [ ] `CSRF_TRUSTED_ORIGINS` equal to `CORS_ORIGINS`
-- [ ] Valid TLS certificates mounted in reverse proxy
-- [ ] Reverse proxy configured with `proxy_pass http://app:8000` and headers `X-Forwarded-Proto`
-- [ ] `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")` if behind proxy/load balancer
-- [ ] `SESSION_COOKIE_SECURE=True`, `CSRF_COOKIE_SECURE=True`, `CSRF_COOKIE_HTTPONLY=True`
-- [ ] `SECURE_HSTS_SECONDS=31536000`, `INCLUDE_SUBDOMAINS=True`, `PRELOAD=True`
-- [ ] Variables `WOMPI_*` and `GEMINI_API_KEY` configured
-- [ ] Variables `EMAIL_*` configured with real SMTP
-- [ ] `SITE_URL=https://tudominio.com`
-- [ ] Migrations applied (`entrypoint.sh` runs them automatically on container start)
-- [ ] `collectstatic` executed in production image build
-- [ ] Superuser created (only in dev; in prod create manually if needed)
-- [ ] MySQL backups scheduled (volume `mysql_data` or RDS snapshots)
-- [ ] Centralized logs (Docker stdout → Loki/ELK/Datadog or other)
-- [ ] Healthchecks working (`mysqladmin ping`)
-
----
-
-## 11. Useful commands / Comandos útiles
-
-### Development / Desarrollo
-
-```bash
-# Start
-docker compose -f install/docker-compose.yml up -d --build
-
-# Real-time logs
-docker compose -f install/docker-compose.yml logs -f app
-
-# Shell inside app container
-docker compose -f install/docker-compose.yml exec app bash
-
-# Django shell
-docker compose -f install/docker-compose.yml exec app python manage.py shell
-
-# Migrations and superuser
-docker compose -f install/docker-compose.yml exec app python manage.py migrate
-docker compose -f install/docker-compose.yml exec app python manage.py createsuperuser
-
-# Stop
-docker compose -f install/docker-compose.yml down
-
-# Stop and delete volumes (deletes local DB!)
-docker compose -f install/docker-compose.yml down -v
-```
-
-### Production / Producción
-
-```bash
-# Start with production override
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml up -d --build
-
-# App logs in production
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml logs -f app
-
-# Run migrations manually (if needed)
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml exec app python manage.py migrate
-
-# Stop
-docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml down
-```
-
-### Database / Base de datos
-
-```bash
-# Backup from host (adjust container name if different)
-docker exec psyai_db mysqldump -u root -p"$DB_ROOT_PASSWORD" psyai_connect > backup_$(date +%F).sql
-
-# Restore backup
-docker exec -i psyai_db mysql -u root -p"$DB_ROOT_PASSWORD" psyai_connect < backup_2026-01-15.sql
-```
-
----
-
-## 12. Common issues / Solución de problemas comunes
-
-| Symptom | Likely cause | Solution |
-|---|---|---|
-| `app` restarts in loop | MySQL not ready yet or wrong credentials | Check `docker compose logs app` and verify `DB_HOST`, `DB_PASSWORD`, `DB_ROOT_PASSWORD` |
-| `collectstatic` fails in prod build | `SECRET_KEY` not defined at build time | Export `SECRET_KEY` before `docker compose build` or define it in `.env` |
-| App cannot connect to MySQL | `DB_HOST` points to `localhost` instead of `db` | In Docker, `DB_HOST` must be `db` (service name) |
-| 500 error in production | `DEBUG=0` hides details | Check logs: `docker compose ... logs app`; verify `ALLOWED_HOSTS` |
-| Static files not loading | `collectstatic` not executed | Rebuild production image (`up -d --build`) |
-| MySQL port not accessible from host | In production `ports: []` | Intentional; access MySQL from another container in network `psyai_net` or from inside `app` container |
-
----
-
-## See also / Ver también
-
-- [`config/settings/base.py`](../config/settings/base.py) — Base settings
-- [`config/settings/dev.py`](../config/settings/dev.py) — Development settings
-- [`config/settings/prod.py`](../config/settings/prod.py) — Production settings
-- [`install/Dockerfile`](../install/Dockerfile) — Multi-stage image
-- [`install/docker-compose.yml`](../install/docker-compose.yml) — Development compose
-- [`install/docker-compose.prod.yml`](../install/docker-compose.prod.yml) — Production override
-- [`install/entrypoint.sh`](../install/entrypoint.sh) — Container startup script
-- [`security.md`](security.md) — Production security checklist
-- [`api.md`](api.md) — Complete REST endpoints reference
-- [`architecture.md`](architecture.md) — General system architecture
-- [`chatbot-ai.md`](chatbot-ai.md) — `GEMINI_API_KEY*` variables
-- [`data-models.md`](data-models.md) — Models and data relationships
-- [`integrations.md`](integrations.md) — External integrations
+- [`integrations.md`](integrations.md) — Integraciones externas
