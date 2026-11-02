@@ -664,6 +664,8 @@ html {
     }
 
     #mainNav .navbar-collapse {
+        flex-direction: column;
+        align-items: stretch;
         flex-basis: 100%;
         width: 100%;
         margin-top: 1rem;
@@ -684,7 +686,10 @@ html {
     }
 
     #mainNav .navbar-collapse.show {
-        max-height: 600px;
+        max-height: calc(100vh - 100px);
+        max-height: calc(100dvh - 100px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
         opacity: 1;
         pointer-events: auto;
         animation: navbarCollapseIn 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
