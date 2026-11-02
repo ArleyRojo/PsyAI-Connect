@@ -160,17 +160,17 @@ class TestAdminNotificationAPI:
         assert "admin2@test.com" not in emails
         assert "admin_notif@test.com" not in emails  # el admin que envía tampoco
 
-    def test_immediate_pacientes_excludes_prefNotificaciones_desactivadas(self, client, django_user_model):
-        """Pacientes con prefNotificaciones='Desactivadas' no reciben correo."""
+    def test_immediate_pacientes_excludes_canal_ninguno(self, client, django_user_model):
+        """Pacientes con canalNotificacion='ninguno' no reciben correo (omitidos, no fallidos)."""
         self._login_admin(client, django_user_model)
         
         p1 = self._make_patient(django_user_model, "paciente_on@test.com", "Paciente On")
         p2 = self._make_patient(django_user_model, "paciente_off@test.com", "Paciente Off")
         
-        # Desactivar notificaciones para p2
+        # p2: canal ninguno → no recibe nada
         from apps.patients.models import PerfilPaciente
         perfil = PerfilPaciente.objects.get(idPaciente=p2)
-        perfil.prefNotificaciones = "Desactivadas"
+        perfil.canalNotificacion = "ninguno"
         perfil.save()
         
         payload = {
@@ -188,6 +188,7 @@ class TestAdminNotificationAPI:
         )
         
         assert response.status_code == 200
+        # p1 recibe (canal email por defecto), p2 es omitido (canal ninguno)
         assert len(mail.outbox) == 1
         assert mail.outbox[0].to[0] == "paciente_on@test.com"
 
@@ -405,7 +406,7 @@ class TestScheduledNotificationsCommand:
         notif.refresh_from_db()
         assert notif.estado == "enviado"
         assert len(mail.outbox) == 1
-        assert mail.outbox[0].subject == "PsyAI Connect \u2014 Programada antigua"
+        assert mail.outbox[0].subject == "[PsyAI] Programada antigua"
 
     def test_command_ignores_future_notifications(self, client, django_user_model):
         """Comando ignora notificaciones con fecha_programada > now."""
@@ -471,7 +472,7 @@ class TestScheduledNotificationsCommand:
         call_command("enviar_notificaciones_programadas")
         
         assert len(mail.outbox) == 1
-        assert mail.outbox[0].subject == "PsyAI Connect \u2014 De Admin"
+        assert mail.outbox[0].subject == "[PsyAI] De Admin"
 
 
 @pytest.mark.django_db

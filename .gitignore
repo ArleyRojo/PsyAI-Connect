@@ -1,9 +1,3 @@
-# Entorno virtual
-venv/
-.venv/
-env/
-ENV/
-
 # Python
 __pycache__/
 *.py[cod]
@@ -16,6 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+parts/
 lib/
 lib64/
 parts/
@@ -26,28 +21,36 @@ wheels/
 .installed.cfg
 *.egg
 
-# IDEs
-.vscode/
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
-
-# Entorno y configuración local
-.env
-.env.local
-*.log
-*.sqlite
-*.db
-
-# Uploads
-static/uploads/
-media/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Ignorar carpeta js suelta
-js/
-!static/js/
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Media
+media/
+
+# Static files collected
+staticfiles/
+
+# Python cache
+.pyrevision

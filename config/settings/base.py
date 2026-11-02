@@ -158,7 +158,7 @@ AUTH_USER_MODEL = "authentication.Register"
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS",
-    "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com",
+    "http://localhost:5000,http://127.0.0.1:5000,http://localhost:8000,http://127.0.0.1:8000,https://psyai-connect.com",
 ).split(",")
 
 CSRF_TRUSTED_ORIGINS = [
@@ -177,19 +177,6 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 CSRF_COOKIE_HTTPONLY = True  # En producción True; en dev se puede poner False en dev.py
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = False
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip() for origin in os.getenv(
-        "CORS_ORIGINS",
-        "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com",
-    ).split(",") if origin.strip()
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip() for origin in os.getenv(
-        "CORS_ORIGINS",
-        "http://localhost:5000,http://127.0.0.1:5000,https://psyai-connect.com",
-    ).split(",") if origin.strip()
-]
 
 # ── Legal / Compliance (Ley 1581/2012 Colombia) ──────────────────────────────
 # Versión de los textos legales (términos, privacidad, consentimientos).
@@ -253,6 +240,9 @@ TWILIO_TPL_RECORDATORIO = os.getenv("TWILIO_TPL_RECORDATORIO", "")
 TWILIO_TPL_CONFIRMACION = os.getenv("TWILIO_TPL_CONFIRMACION", "")
 TWILIO_TPL_CANCELACION = os.getenv("TWILIO_TPL_CANCELACION", "")
 TWILIO_TPL_MENSAJE_PRO = os.getenv("TWILIO_TPL_MENSAJE_PRO", "")
+TWILIO_TPL_FACTURA = os.getenv("TWILIO_TPL_FACTURA", "")
+TWILIO_TPL_CITA_GENERAL = os.getenv("TWILIO_TPL_CITA_GENERAL", "")
+TWILIO_TPL_NOTIFICACION_ADMIN = os.getenv("TWILIO_TPL_NOTIFICACION_ADMIN", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "PsyAI Connect <noreply@psyaiconnect.com>")
 
@@ -374,7 +364,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 }
 
-SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_BASE_URL = "http://localhost:8000"
 SOCIALACCOUNT_LOGIN_REDIRECT_URL = "/"

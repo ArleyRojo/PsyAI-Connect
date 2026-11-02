@@ -43,7 +43,7 @@ class CoreService:
                 to=[to_email],
             )
             msg.attach_alternative(html_message, "text/html")
-            msg.send(fail_silently=True)
+            msg.send(fail_silently=False)
         except Exception:
             logger.exception("Error enviando email de bienvenida a %s", to_email)
 

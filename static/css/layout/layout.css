@@ -914,6 +914,7 @@
         padding: 6px 14px 2px;
         font-size: 0.65rem;
     }
+
     .sidebar__footer {
         padding: 6px 10px;
     }
@@ -923,6 +924,7 @@
     .sidebar__logout-section {
         padding: 4px 10px 8px;
     }
+
     .sidebar__logout-btn {
         padding: 6px 10px;
         font-size: 0.78rem;

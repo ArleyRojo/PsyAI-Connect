@@ -21,6 +21,8 @@ class PerfilPacienteSerializer(serializers.Serializer):
     recibirRecordatorioCita = serializers.BooleanField(required=False)
     recibirConfirmacion = serializers.BooleanField(required=False)
     recibirMensajePro = serializers.BooleanField(required=False)
+    recibirFacturas = serializers.BooleanField(required=False)
+    recibirNotificacionesAdmin = serializers.BooleanField(required=False)
 
     def validate(self, attrs):
         canal = attrs.get("canalNotificacion",

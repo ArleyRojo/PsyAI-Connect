@@ -55,14 +55,45 @@ class AppointmentMailService:
             return
 
         if recipient_user_id:
-            try:
-                from apps.patients.models import PerfilPaciente
-                perfil = PerfilPaciente.objects.filter(idPaciente=recipient_user_id).first()
-                if perfil and perfil.prefNotificaciones == "Desactivadas":
-                    logger.info(f"Correo omitido (notificaciones desactivadas): {recipient_email}")
-                    return
-            except Exception:
-                pass
+            from apps.authentication.models import Register
+            paciente = Register.objects.filter(idUsuario=recipient_user_id).first()
+            if paciente:
+                est = (estado or "").lower()
+                titu = (titulo or "").lower()
+                if "cancel" in est or "cancel" in titu:
+                    tipo_notif = "cancelacion_cita"
+                elif "confirm" in est or "confirm" in titu or "aceptada" in titu:
+                    tipo_notif = "confirmacion_cita"
+                else:
+                    # Notificación general de cita: no hay interruptor propio;
+                    # se rige solo por el canal elegido.
+                    tipo_notif = "cita_general"
+                site_url = cls._get_site_url()
+                ctx = {
+                    "titulo": titulo,
+                    "mensaje": mensaje,
+                    "nombre_contraparte": nombre_contraparte,
+                    "contraparte_label": contraparte_label,
+                    "fecha": cls._formatear_fecha(fecha) if fecha else "",
+                    "hora": cls._formatear_hora(hora) if hora else "",
+                    "tipo_cita": tipo_cita,
+                    "motivo": motivo,
+                    "estado": estado,
+                    "motivo_cancelacion": motivo_cancelacion,
+                    "cta_link": cta_link,
+                    "cta_texto": cta_texto or "Ver cita",
+                    "site_url": site_url,
+                }
+                notificar_paciente(
+                    paciente,
+                    titulo,
+                    mensaje,
+                    tipo_notif,
+                    plantilla_email="emails/cita_notificacion.html",
+                    params_email=ctx,
+                )
+                logger.info(f"Notificación de cita enrutada al paciente {recipient_user_id}: {titulo}")
+                return
         if not recipient_email:
             logger.warning("No se enviÃ³ correo de cita: destinatario vacÃ­o")
             return
@@ -92,7 +123,7 @@ class AppointmentMailService:
             from django.core.mail import EmailMultiAlternatives
             msg = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [recipient_email])
             msg.attach_alternative(html_body, "text/html")
-            msg.send(fail_silently=True)
+            msg.send(fail_silently=False)
             logger.info(f"Correo enviado a {recipient_email}: {titulo}")
         except Exception as e:
             logger.error(f"Error enviando correo a {recipient_email}: {e}")

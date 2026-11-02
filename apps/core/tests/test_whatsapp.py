@@ -79,8 +79,9 @@ class NotifierTests(TestCase):
         mock_provider.enviar_whatsapp.side_effect = Exception("Twilio error")
         mock_get_provider.return_value = mock_provider
 
+        # Con fallback habilitado (default True), el correo de respaldo se envía
         ok = notificar_paciente(paciente, "Titulo", "Mensaje", "recordatorio_cita")
-        self.assertFalse(ok)
+        self.assertTrue(ok)  # fallback por correo rescató el envío
 
 
 class WebhookSignatureTests(TestCase):

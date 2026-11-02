@@ -107,6 +107,9 @@ Archivos principales:
 | `TWILIO_TPL_CONFIRMACION` | Content SID plantilla confirmación cita | No | — |
 | `TWILIO_TPL_CANCELACION` | Content SID plantilla cancelación cita | No | — |
 | `TWILIO_TPL_MENSAJE_PRO` | Content SID plantilla mensaje profesional | No | — |
+| `TWILIO_TPL_FACTURA` | Content SID plantilla factura | No | — |
+| `TWILIO_TPL_CITA_GENERAL` | Content SID plantilla cita general | No | — |
+| `TWILIO_TPL_NOTIFICACION_ADMIN` | Content SID plantilla notificación de administrador | No | — |
 
 ### 3.3. Webhooks
 
@@ -117,9 +120,25 @@ Archivos principales:
 
 ### 3.4. Notificaciones al paciente
 
-`NotificationService.notificar_paciente()` en `apps/core/notifier.py` envía por email y/o WhatsApp según las preferencias del paciente (`canalNotificacion`: `email`, `whatsapp`, `ambos`, `ninguno`). Tipos soportados: `recordatorio_cita`, `confirmacion_cita`, `cancelacion_cita`, `mensaje_profesional`.
+`NotificationService.notificar_paciente()` en `apps/core/notifier.py` envía por email y/o WhatsApp según las preferencias del paciente (`canalNotificacion`: `email`, `whatsapp`, `ambos`, `ninguno`). Tipos soportados: `recordatorio_cita`, `confirmacion_cita`, `cancelacion_cita`, `mensaje_profesional`, `factura`, `cita_general`, `notificacion_admin`.
 
 Registra cada intento en `Notificaciones` (tabla de `apps/scheduling/models.py`) con `estado`, `canal`, `errorDetalle` y `providerMsgId`.
+
+### 3.5. Plantillas de Twilio (Content SIDs)
+
+Para usar WhatsApp con plantillas aprobadas fuera de la ventana de 24 h, crear y aprobar en Twilio Console las siguientes plantillas y configurar sus `Content SID` como variables de entorno:
+
+| Tipo de notificación | Variable de entorno | Variables esperadas por la plantilla |
+|----------------------|---------------------|--------------------------------------|
+| Recordatorio de cita | `TWILIO_TPL_RECORDATORIO` | fecha, hora, lugar |
+| Confirmación de cita | `TWILIO_TPL_CONFIRMACION` | fecha, hora, lugar |
+| Cancelación de cita | `TWILIO_TPL_CANCELACION` | fecha, hora, motivo_cancelacion |
+| Mensaje del profesional | `TWILIO_TPL_MENSAJE_PRO` | — (texto libre) |
+| Factura | `TWILIO_TPL_FACTURA` | id_factura, monto_total, estado_pago |
+| Cita general | `TWILIO_TPL_CITA_GENERAL` | — (texto libre) |
+| Notificación de administrador | `TWILIO_TPL_NOTIFICACION_ADMIN` | titulo, mensaje, nombre_destinatario |
+
+Si no se configura un Content SID para un tipo, `notificar_paciente` envía el mensaje como texto libre (`body`) y registra un `logger.warning` advirtiendo que Twilio puede rechazarlo fuera de la ventana de 24 h.
 
 ---
 

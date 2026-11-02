@@ -79,29 +79,55 @@ function toggleTheme(event) {
     if (currentToggle) {
         currentToggle.classList.add('toggle-animating');
     }
-    root.classList.add('theme-animating');
-
-    window.clearTimeout(themeTransitionTimer);
-    window.clearTimeout(themeToggleTimer);
-
-    void root.offsetWidth;
 
     const isDark = root.classList.contains('dark-mode');
     const newTheme = isDark ? 'light' : 'dark';
 
-    applyThemeState(newTheme === 'dark');
-    saveThemeToStorage(newTheme);
-    getToggles().forEach((t) => updateToggleUI(t, newTheme === 'dark'));
+    // En móvil/tablet: cambio instantáneo en la página (sin transición parcial tosca),
+    // solo el toggle button anima suavemente.
+    const isMobileViewport = window.matchMedia('(max-width: 991px)').matches;
+
+    if (isMobileViewport) {
+        // Cambio visual inmediato
+        applyThemeState(newTheme === 'dark');
+        getToggles().forEach((t) => updateToggleUI(t, newTheme === 'dark'));
+
+        // Diferir guardado y evento al siguiente cuadro
+        window.requestAnimationFrame(() => {
+            window.queueMicrotask(() => {
+                saveThemeToStorage(newTheme);
+                window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: newTheme === 'dark' } }));
+            });
+        });
+
+        themeToggleTimer = window.setTimeout(() => {
+            getToggles().forEach((t) => t.classList.remove('toggle-animating'));
+        }, 150);
+        return;
+    }
+
+    // Escritorio: transición suave con theme-animating
+    root.classList.add('theme-animating');
+    root.classList.add('theme-switching');
+
+    window.requestAnimationFrame(() => {
+        applyThemeState(newTheme === 'dark');
+        getToggles().forEach((t) => updateToggleUI(t, newTheme === 'dark'));
+
+        window.queueMicrotask(() => {
+            saveThemeToStorage(newTheme);
+            window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: newTheme === 'dark' } }));
+        });
+    });
 
     themeTransitionTimer = window.setTimeout(() => {
         root.classList.remove('theme-animating');
-    }, 400);
+        root.classList.remove('theme-switching');
+    }, 260);
 
     themeToggleTimer = window.setTimeout(() => {
         getToggles().forEach((t) => t.classList.remove('toggle-animating'));
-    }, 400);
-
-    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: newTheme === 'dark' } }));
+    }, 260);
 }
 
 function getSavedTheme() {

@@ -37,6 +37,7 @@ class Command(BaseCommand):
         repo = AdminRepository()
         total_enviados = 0
         total_fallidos = 0
+        total_omitidos = 0
         
         for notif in notificaciones:
             self.stdout.write(f"  Procesando #{notif.idNotificacion}: {notif.titulo} -> {notif.destinatario}")
@@ -46,7 +47,7 @@ class Command(BaseCommand):
                 continue
             
             try:
-                enviados, fallidos, error_detalle = repo._send_admin_notification_emails(
+                enviados, fallidos, omitidos, error_detalle = repo._send_admin_notification_emails(
                     notificacion_id=notif.idNotificacion,
                     destinatario=notif.destinatario,
                     email_individual=notif.email_individual,
@@ -60,13 +61,19 @@ class Command(BaseCommand):
                     notif.errorDetalle = None
                     total_enviados += 1
                     self.stdout.write(self.style.SUCCESS(f"    Enviada a {enviados} destinatario(s)"))
+                elif omitidos > 0 and enviados == 0 and fallidos == 0:
+                    notif.estado = "enviado"
+                    notif.errorDetalle = None
+                    total_omitidos += omitidos
+                    self.stdout.write(self.style.WARNING(f"    Omitidos: {omitidos} destinatario(s) (canal ninguno o preferencia desactivada)"))
                 else:
                     notif.estado = "fallido"
                     notif.errorDetalle = error_detalle or "No se pudo enviar a ningún destinatario"
                     total_fallidos += 1
                     self.stdout.write(self.style.ERROR(f"    Fallida: {notif.errorDetalle}"))
                 
-                notif.save(update_fields=["estado", "errorDetalle"])
+                notif.omitidos = omitidos
+                notif.save(update_fields=["estado", "errorDetalle", "omitidos"])
                 
             except Exception as e:
                 notif.estado = "fallido"
@@ -77,5 +84,5 @@ class Command(BaseCommand):
                 logger.exception("Error enviando notificación programada #%d", notif.idNotificacion)
         
         self.stdout.write(self.style.SUCCESS(
-            f"\nResumen: {total_enviados} enviada(s), {total_fallidos} fallida(s)"
+            f"\nResumen: {total_enviados} enviada(s), {total_fallidos} fallida(s), {total_omitidos} omitida(s)"
         ))

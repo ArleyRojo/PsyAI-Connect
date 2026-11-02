@@ -1058,7 +1058,7 @@ class ChatbotService:
             msg = EmailMultiAlternatives(asunto, f"Alerta de riesgo {nivel}: se detectaron indicadores de riesgo. Accede a la plataforma para más detalles.", to=[email])
             msg.attach_alternative(html, "text/html")
             try:
-                msg.send(fail_silently=True)
+                msg.send(fail_silently=False)
             except Exception:
                 self.logger.exception("Error enviando correo de riesgo %s a %s", "alto" if es_alto else "medio", email)
 
@@ -1513,7 +1513,7 @@ class ChatbotService:
             )
             msg.attach_alternative(html, "text/html")
             try:
-                msg.send(fail_silently=True)
+                msg.send(fail_silently=False)
             except Exception:
                 self.logger.exception("Error enviando correo de prediagnostico a %s", email)
 

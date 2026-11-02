@@ -42,6 +42,8 @@ class PatientRepository:
             "recibirRecordatorioCita": perfil.recibirRecordatorioCita if perfil else True,
             "recibirConfirmacion": perfil.recibirConfirmacion if perfil else True,
             "recibirMensajePro": perfil.recibirMensajePro if perfil else True,
+            "recibirFacturas": perfil.recibirFacturas if perfil else True,
+            "recibirNotificacionesAdmin": perfil.recibirNotificacionesAdmin if perfil else True,
         }
 
     def update_patient_profile(self, data):
@@ -70,6 +72,8 @@ class PatientRepository:
                 "recibirRecordatorioCita": perfil.recibirRecordatorioCita,
                 "recibirConfirmacion": perfil.recibirConfirmacion,
                 "recibirMensajePro": perfil.recibirMensajePro,
+                "recibirFacturas": perfil.recibirFacturas,
+                "recibirNotificacionesAdmin": perfil.recibirNotificacionesAdmin,
             }
         except PerfilPaciente.DoesNotExist:
             return {
@@ -80,6 +84,8 @@ class PatientRepository:
                 "recibirRecordatorioCita": True,
                 "recibirConfirmacion": True,
                 "recibirMensajePro": True,
+                "recibirFacturas": True,
+                "recibirNotificacionesAdmin": True,
             }
 
     def save_preferences(self, user_id, data):
@@ -91,6 +97,7 @@ class PatientRepository:
             "canalNotificacion", "whatsappConsentimiento",
             "numeroTelefonico", "recibirRecordatorioCita",
             "recibirConfirmacion", "recibirMensajePro",
+            "recibirFacturas", "recibirNotificacionesAdmin",
         ]
         for k in allowed:
             if k in data:
@@ -108,7 +115,8 @@ class PatientRepository:
             "canalNotificacion", "whatsappConsentimiento",
             "whatsappConsentimientoFecha", "numeroTelefonico",
             "recibirRecordatorioCita", "recibirConfirmacion",
-            "recibirMensajePro",
+            "recibirMensajePro", "recibirFacturas",
+            "recibirNotificacionesAdmin",
         ])
 
     def get_chatbot_consent(self, user_id):

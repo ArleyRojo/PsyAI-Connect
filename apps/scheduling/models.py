@@ -141,6 +141,7 @@ class Notificaciones(models.Model):
     leido = models.BooleanField(default=False, null=True, blank=True)
     fecha = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     fecha_programada = models.DateTimeField(null=True, blank=True)
+    omitidos = models.IntegerField(default=0, null=True, blank=True)
 
     class Meta:
         db_table = "Notificaciones"
@@ -163,4 +164,5 @@ class Notificaciones(models.Model):
             "leido": self.leido,
             "fecha": self.fecha.isoformat() if self.fecha else None,
             "fecha_programada": self.fecha_programada.isoformat() if self.fecha_programada else None,
+            "omitidos": self.omitidos,
         }

@@ -144,7 +144,7 @@ class AdminService:
         msg = EmailMultiAlternatives(asunto, f"Hola {nombre}, tu cuenta en PsyAI Connect ha sido suspendida.", to=[email])
         msg.attach_alternative(html, "text/html")
         try:
-            msg.send(fail_silently=True)
+            msg.send(fail_silently=False)
         except Exception:
             logger.exception("Error enviando correo de suspensión a %s", email)
 
@@ -217,11 +217,26 @@ class AdminService:
             notificacion = self.repo.create_notification(data)
             # Determinar respuesta según estado
             if notificacion.estado == "enviado":
-                return {"success": True, "message": "Notificación enviada correctamente", "idNotificacion": notificacion.idNotificacion}, 200
+                return {
+                    "success": True,
+                    "message": "Notificación enviada correctamente",
+                    "idNotificacion": notificacion.idNotificacion,
+                    "omitidos": notificacion.omitidos or 0,
+                }, 200
             elif notificacion.estado == "fallido":
-                return {"success": False, "message": notificacion.errorDetalle or "Error enviando notificación", "idNotificacion": notificacion.idNotificacion}, 502
+                return {
+                    "success": False,
+                    "message": notificacion.errorDetalle or "Error enviando notificación",
+                    "idNotificacion": notificacion.idNotificacion,
+                    "omitidos": notificacion.omitidos or 0,
+                }, 502
             else:  # pendiente
-                return {"success": True, "message": "Notificación programada correctamente", "idNotificacion": notificacion.idNotificacion}, 200
+                return {
+                    "success": True,
+                    "message": "Notificación programada correctamente",
+                    "idNotificacion": notificacion.idNotificacion,
+                    "omitidos": notificacion.omitidos or 0,
+                }, 200
         except ValueError as e:
             return {"success": False, "message": str(e)}, 400
         except Exception as e:

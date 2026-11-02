@@ -188,6 +188,9 @@ cp .env.example .env
 mysql -u root -p -e "CREATE DATABASE psyai_connect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 python manage.py migrate
+# ⚠️ IMPORTANTE: Ejecutar TODAS las migraciones sin --fake, especialmente en apps/authentication.
+# No usar --fake en 0005_map_password_to_contrasena: la columna física `password` debe eliminarse
+# para evitar IntegrityError en registros vía Google (campo password sin default en MySQL).
 python manage.py createsuperuser  # opcional
 python manage.py runserver
 ```

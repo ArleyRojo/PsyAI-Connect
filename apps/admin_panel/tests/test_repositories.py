@@ -142,3 +142,178 @@ class TestStatsCache:
 
         mock_admin_repo.get_stats.assert_called_once()
         mock_cache.get.assert_not_called()
+
+
+# ── Notificaciones admin por canal (paciente) ──────────────────────────────
+
+
+@pytest.mark.django_db
+class TestAdminNotificationPerCanal:
+    """_send_admin_notification_emails respeta canalNotificacion de pacientes."""
+
+    def _make_user(self, email, rol, nombre):
+        return Register.objects.create_user(
+            email=email, password="x", rol=rol, nombre=nombre,
+        )
+
+    def _make_patient(self, email, nombre, **perfil_kwargs):
+        user = self._make_user(email, "paciente", nombre)
+        defaults = dict(
+            canalNotificacion="email",
+            whatsappConsentimiento=False,
+            numeroTelefonico=None,
+            recibirNotificacionesAdmin=True,
+        )
+        defaults.update(perfil_kwargs)
+        from apps.patients.models import PerfilPaciente
+        PerfilPaciente.objects.create(idPaciente=user, **defaults)
+        return user
+
+    @patch("apps.core.notifier.notificar_paciente")
+    def test_paciente_canal_email_envia_por_notificar_paciente(self, mock_notify):
+        """Canal email: notificar_paciente se llama con plantilla_email."""
+        mock_notify.return_value = True
+        repo = AdminRepository()
+        user = self._make_patient("pac_email@test.com", "Pac Email")
+        enviados, fallidos, omitidos, error = repo._send_admin_notification_emails(
+            notificacion_id=1, destinatario="pacientes", email_individual=None,
+            titulo="Aviso admin", mensaje="Mensaje de prueba", tipo="info",
+        )
+        mock_notify.assert_called_once()
+        _, args, kwargs = mock_notify.mock_calls[0]
+        assert args[0] == user
+        assert args[3] == "notificacion_admin"
+        assert kwargs["plantilla_email"] == "emails/notificacion_admin.html"
+        assert "params_email" in kwargs
+        assert enviados == 1
+        assert fallidos == 0
+        assert omitidos == 0
+
+    @patch("apps.core.notifier.notificar_paciente")
+    def test_paciente_canal_whatsapp_no_correo_directo(self, mock_notify):
+        """Canal whatsapp: notificar_paciente se llama, no correo directo."""
+        mock_notify.return_value = True
+        repo = AdminRepository()
+        user = self._make_patient(
+            "pac_wa@test.com", "Pac WA",
+            canalNotificacion="whatsapp",
+            whatsappConsentimiento=True,
+            numeroTelefonico="+573001234567",
+        )
+        enviados, fallidos, omitidos, error = repo._send_admin_notification_emails(
+            notificacion_id=1, destinatario="pacientes", email_individual=None,
+            titulo="Aviso admin", mensaje="Mensaje de prueba", tipo="info",
+        )
+        mock_notify.assert_called_once()
+        assert enviados == 1
+        assert omitidos == 0
+
+    @patch("apps.core.notifier.notificar_paciente")
+    def test_paciente_canal_ambos_notificar_paciente(self, mock_notify):
+        """Canal ambos: notificar_paciente se llama (cubre email + whatsapp)."""
+        mock_notify.return_value = True
+        repo = AdminRepository()
+        user = self._make_patient(
+            "pac_both@test.com", "Pac Ambos",
+            canalNotificacion="ambos",
+            whatsappConsentimiento=True,
+            numeroTelefonico="+573001234567",
+        )
+        enviados, fallidos, omitidos, error = repo._send_admin_notification_emails(
+            notificacion_id=1, destinatario="pacientes", email_individual=None,
+            titulo="Aviso admin", mensaje="Mensaje de prueba", tipo="info",
+        )
+        mock_notify.assert_called_once()
+        assert enviados == 1
+        assert omitidos == 0
+
+    @patch("apps.core.notifier.notificar_paciente")
+    def test_paciente_canal_ninguno_omitido_no_fallido(self, mock_notify):
+        """Canal ninguno: notificar_paciente se llama pero retorna False → omitido."""
+        mock_notify.return_value = False
+        repo = AdminRepository()
+        user = self._make_patient(
+            "pac_none@test.com", "Pac Ninguno",
+            canalNotificacion="ninguno",
+        )
+        enviados, fallidos, omitidos, error = repo._send_admin_notification_emails(
+            notificacion_id=1, destinatario="pacientes", email_individual=None,
+            titulo="Aviso admin", mensaje="Mensaje de prueba", tipo="info",
+        )
+        mock_notify.assert_called_once()
+        assert enviados == 0
+        assert fallidos == 0  # ninguno no es fallido
+        assert omitidos == 1  # contador de omitidos
+
+    @patch("apps.core.notifier.notificar_paciente")
+    def test_profesional_envia_correo_directo_no_notificar_paciente(self, mock_notify):
+        """Profesional: correo directo, no notificar_paciente."""
+        repo = AdminRepository()
+        user = self._make_user("prof@test.com", "profesional", "Prof Test")
+        enviados, fallidos, omitidos, error = repo._send_admin_notification_emails(
+            notificacion_id=1, destinatario="profesionales", email_individual=None,
+            titulo="Aviso admin", mensaje="Mensaje de prueba", tipo="alerta",
+        )
+        mock_notify.assert_not_called()
+        assert enviados == 1
+        assert fallidos == 0
+        assert omitidos == 0
+        assert error is None
+
+
+@pytest.mark.django_db
+class TestAdminNotificationMixedChannels:
+    """Notificación masiva con pacientes de canales mezclados."""
+
+    def _make_patient(self, email, nombre, **perfil_kwargs):
+        user = Register.objects.create_user(
+            email=email, password="x", rol="paciente", nombre=nombre,
+        )
+        defaults = dict(
+            canalNotificacion="email",
+            whatsappConsentimiento=False,
+            numeroTelefonico=None,
+            recibirNotificacionesAdmin=True,
+        )
+        defaults.update(perfil_kwargs)
+        from apps.patients.models import PerfilPaciente
+        PerfilPaciente.objects.create(idPaciente=user, **defaults)
+        return user
+
+    @patch("apps.core.notifier.notificar_paciente")
+    def test_mezcla_canales_cada_paciente_recibe_lo_que_eligio(self, mock_notify):
+        """Pacientes con distintos canales: cada uno se enruta por notificar_paciente."""
+        mock_notify.return_value = True
+        repo = AdminRepository()
+
+        p_email = self._make_patient("a@test.com", "A", canalNotificacion="email")
+        p_wa = self._make_patient(
+            "b@test.com", "B",
+            canalNotificacion="whatsapp",
+            whatsappConsentimiento=True,
+            numeroTelefonico="+573001234567",
+        )
+        p_ambos = self._make_patient(
+            "c@test.com", "C",
+            canalNotificacion="ambos",
+            whatsappConsentimiento=True,
+            numeroTelefonico="+573001234567",
+        )
+        p_none = self._make_patient(
+            "d@test.com", "D",
+            canalNotificacion="ninguno",
+        )
+        # Profesional (correo directo)
+        prof = Register.objects.create_user(
+            email="prof@test.com", password="x", rol="profesional", nombre="Prof",
+        )
+
+        enviados, fallidos, omitidos, error = repo._send_admin_notification_emails(
+            notificacion_id=1, destinatario="todos", email_individual=None,
+            titulo="Mezcla", mensaje="Mensaje", tipo="info",
+        )
+
+        # notificar_paciente llamado para los 4 pacientes (incluido ninguno)
+        assert mock_notify.call_count == 4
+        # El profesional recibe correo directo → 1 enviado adicional
+        assert enviados >= 1

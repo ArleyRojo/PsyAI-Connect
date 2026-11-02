@@ -20,7 +20,7 @@
             <div class="sidebar__logo-glow"></div>
         </div>
         <h5 class="sidebar__brand">PsyAI Connect</h5>
-        <span class="sidebar__role-badge">Admin</span>
+        <span class="sidebar__role-badge"></span>
     </div>
     <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
         <div class="sidebar__nav-section-label">Menú Principal</div>
@@ -69,12 +69,10 @@
                 <i class="fas fa-user-shield"></i>
             </div>
             <div class="sidebar__user-info">
-                <span class="sidebar__user-name" id="sidebarUserName">Admin</span>
-                <span class="sidebar__user-role">Administrador</span>
+                <span class="sidebar__user-name" id="sidebarUserName"></span>
+                <span class="sidebar__user-role"></span>
             </div>
-            <a href="#" class="sidebar__user-settings" title="Configuración">
-                <i class="fas fa-cog"></i>
-            </a>
+
         </div>
         <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
             <button id="theme-toggle" title="Cambiar modo"></button>
@@ -95,7 +93,7 @@
         <h1 class="h3 fw-bold mb-0"><i class="fas fa-users me-2 text-primary"></i>Gestión de Usuarios</h1>
         <small class="text-muted">Administra cuentas, estados y credenciales de todos los usuarios.</small>
       </div>
-      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i>Hola, Administrador</div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i></div>
     </header>
 
     <!-- Stats -->
@@ -130,9 +128,6 @@
       </button>
       <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabUsuarios('suspendidos', this)">
         <i class="fas fa-ban"></i> Suspendidos <span class="tab-count" id="cntSuspendidos" style="background:#ffebee;color:#c62828;">0</span>
-      </button>
-      <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabUsuarios('verificacion', this)">
-        <i class="fas fa-user-check"></i> Verificar profesionales <span class="tab-count" id="cntProfesionalesPendientes">0</span>
       </button>
       <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" onclick="mostrarTabUsuarios('nuevo', this)">
         <i class="fas fa-user-plus"></i> Nuevo Usuario
@@ -202,22 +197,6 @@
           <table class="table table-clean mb-0">
             <thead><tr><th class="ps-4">Usuario</th><th>Rol</th><th>Motivo</th><th>Suspendido el</th><th class="text-end pe-4">Acciones</th></tr></thead>
             <tbody><tr><td colspan="5" class="text-center text-muted py-3">Cargando...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: Verificación profesional -->
-    <div id="tab-u-verificacion" style="display:none;">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white border-0 px-4 pt-4">
-          <h2 class="h6 fw-bold mb-1">Profesionales pendientes de verificación</h2>
-          <p class="text-muted small mb-0">Verifica sus credenciales antes de habilitar el acceso a información clínica.</p>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-clean mb-0" id="tablaProfesionalesPendientes">
-            <thead><tr><th class="ps-4">Profesional</th><th>Especialidad</th><th>Tarjeta profesional</th><th>RETHUS</th><th>Registro</th><th class="text-end pe-4">Acción</th></tr></thead>
-            <tbody><tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>

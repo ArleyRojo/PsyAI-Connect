@@ -1,27 +1,79 @@
-{% load i18n %}
+{% load socialaccount %}
 <!DOCTYPE html>
-<html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
 <head>
-    <title>{% trans "Signup" %}</title>
+    <title>PsyAI Connect | Crear cuenta con Google</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/auth.css?v=20260711-1">
+    <link rel="stylesheet" href="/responsive/auth.css?v=20260731">
 </head>
 <body>
-    <form method="post" id="signupForm">
-        {% csrf_token %}
-        {{ form.as_p }}
-    </form>
-    <script>
-        (function() {
-            var form = document.getElementById('signupForm');
-            var cookie = document.cookie.match(/csrftoken=([^;]+)/);
-            if (cookie) {
-                var input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'csrfmiddlewaretoken';
-                input.value = cookie[1];
-                form.appendChild(input);
-            }
-            form.submit();
-        })();
-    </script>
+    <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+    <main class="register-shell">
+        <section class="register-art" aria-label="PsyAI Connect">
+            <a class="brand-mark" href="/">
+                <img src="/img/Logo.webp" alt="Logo PsyAI Connect">
+                <span>PsyAI Connect</span>
+            </a>
+
+            <div class="art-copy">
+                <h1>Empieza con calma.</h1>
+                <p>Crea tu perfil y conecta con herramientas de apoyo emocional, seguimiento y acompañamiento profesional.</p>
+            </div>
+
+            <div class="art-strip" aria-hidden="true">
+                <div class="art-chip"><strong>01</strong><span>Datos claros para identificar tu cuenta.</span></div>
+                <div class="art-chip"><strong>02</strong><span>Seguridad antes de guardar tu acceso.</span></div>
+                <div class="art-chip"><strong>03</strong><span>Confirmaci&oacute;n final y bienvenida.</span></div>
+            </div>
+        </section>
+
+        <section class="register-stage">
+            <div class="login-card login-card--register">
+                <div class="auth-topbar">
+                    <div class="back-index">
+                        <a href="/"><i class="fas fa-arrow-left"></i> Inicio</a>
+                    </div>
+                </div>
+
+                <div class="login-header">
+                    <img src="/img/Logo.webp" alt="Logo">
+                    <span class="eyebrow">Nuevo usuario</span>
+                    <h1>Crear cuenta con Google</h1>
+                    <p>Completa tu registro para vincular tu cuenta de Google a PsyAI Connect.</p>
+                </div>
+
+                <form method="post" class="d-grid mb-3">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="reg-field">
+                        <label for="id_email" class="form-label">Correo electr&oacute;nico</label>
+                        <div class="field-wrap">
+                            <i class="fas fa-envelope field-icon reg-icon" id="icon-email"></i>
+                            <input type="email" class="form-control" id="id_email" name="email" placeholder="usuario@example.com" autocomplete="email" required value="{{ form.email.value|default:'' }}">
+                        </div>
+                        {{ form.email.errors }}
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary" aria-describedby="submitHelp">
+                            <span class="btn-text">Crear cuenta con Google</span>
+                        </button>
+                    </div>
+
+                    <div class="auth-links">
+                        <a href="{% url 'account_login' %}" class="link-action">Ya tengo cuenta</a>
+                        <a href="/" class="link-action">Volver al inicio</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    {% include 'base/partials/scripts.html' %}
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+    <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
 </body>
 </html>

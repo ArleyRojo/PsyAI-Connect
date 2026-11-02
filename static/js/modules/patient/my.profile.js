@@ -50,9 +50,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const modalPrefs = document.getElementById('modalEditarPreferencias');
     if (modalPrefs) {
         modalPrefs.addEventListener('show.bs.modal', () => {
-            document.getElementById('prefNotificaciones').value = localStorage.getItem('pref_notificaciones') || 'Activadas';
-            document.getElementById('prefRecordatorios').value  = localStorage.getItem('pref_recordatorios')  || 'Activados';
-            document.getElementById('prefContacto').value       = localStorage.getItem('pref_contacto')       || 'Correo';
+            // Los selectores legacy (prefNotificaciones, prefRecordatorios, prefContacto)
+            // se eliminaron de la UI. Las preferencias reales se editan en el formulario
+            // de Notificaciones de esta misma página.
         });
     }
 
@@ -157,48 +157,16 @@ async function guardarPerfil() {
 
 // ── Guardar preferencias ──────────────────────────────────────
 function guardarPreferencias() {
-    const notifNueva    = document.getElementById('prefNotificaciones').value;
-    const recordatNuevo = document.getElementById('prefRecordatorios').value;
-    const contactoNuevo = document.getElementById('prefContacto').value;
-
-    // ── Valores actuales ──────────────────────────────────────
-    const notifActual    = localStorage.getItem('pref_notificaciones') || 'Activadas';
-    const recordatActual = localStorage.getItem('pref_recordatorios')  || 'Activados';
-    const contactoActual = localStorage.getItem('pref_contacto')       || 'Correo';
-
-    // ── Detectar si algo cambió ───────────────────────────────
-    const sinCambios =
-        notifNueva    === notifActual &&
-        recordatNuevo === recordatActual &&
-        contactoNuevo === contactoActual;
-
-    if (sinCambios) {
-        mostrarToast('No se detectaron cambios. Las preferencias ya se encuentran configuradas de esa manera.', 'warning');
-        return;
-    }
-
-    // ── Guardar y actualizar vista ────────────────────────────
-    localStorage.setItem('pref_notificaciones', notifNueva);
-    localStorage.setItem('pref_recordatorios',  recordatNuevo);
-    localStorage.setItem('pref_contacto',       contactoNuevo);
-
-    setField('pref_notificaciones', notifNueva);
-    setField('pref_recordatorios',  recordatNuevo);
-    setField('pref_contacto',       contactoNuevo);
-
-    mostrarToast('Preferencias actualizadas correctamente.', 'success');
+    // Los selectores legacy (prefNotificaciones, prefRecordatorios, prefContacto)
+    // se eliminaron de la UI. Las preferencias reales se guardan desde el formulario
+    // de Notificaciones de esta misma página.
+    mostrarToast('Preferencias actualizadas desde el formulario de Notificaciones.', 'info');
     const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarPreferencias'));
     if (modal) modal.hide();
 }
 
 function cargarPreferencias() {
-    const notif    = localStorage.getItem('pref_notificaciones') || 'Activadas';
-    const recordat = localStorage.getItem('pref_recordatorios')  || 'Activados';
-    const contacto = localStorage.getItem('pref_contacto')       || 'Correo';
-
-    setField('pref_notificaciones', notif);
-    setField('pref_recordatorios',  recordat);
-    setField('pref_contacto',       contacto);
+    // Los selectores legacy se eliminaron; no hay nada que cargar en este modal.
 }
 
 // ── Foto de perfil ────────────────────────────────────────────
@@ -448,6 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
             recibirRecordatorioCita: form.recibirRecordatorioCita.checked,
             recibirConfirmacion: form.recibirConfirmacion.checked,
             recibirMensajePro: form.recibirMensajePro.checked,
+            recibirFacturas: form.recibirFacturas.checked,
+            recibirNotificacionesAdmin: form.recibirNotificacionesAdmin.checked,
         };
 
         try {

@@ -1,0 +1,65 @@
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>PsyAI Connect | Inicio cancelado</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/auth.css?v=20260731-1">
+    <link rel="stylesheet" href="/responsive/auth.css?v=20260731">
+</head>
+<body>
+    <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+    <main class="register-shell">
+        <section class="register-art" aria-label="PsyAI Connect">
+            <a class="brand-mark" href="/">
+                <img src="/img/Logo.webp" alt="Logo PsyAI Connect">
+                <span>PsyAI Connect</span>
+            </a>
+
+            <div class="art-copy">
+                <h1>Inicio cancelado.</h1>
+                <p>Has cancelado el inicio de sesión con tu cuenta externa. Puedes intentar nuevamente o usar otro método.</p>
+            </div>
+
+            <div class="art-strip" aria-hidden="true">
+                <div class="art-chip"><strong>01</strong><span>Inicio de sesión cancelado.</span></div>
+                <div class="art-chip"><strong>02</strong><span>Intenta nuevamente o usa correo.</span></div>
+                <div class="art-chip"><strong>03</strong><span>Tu cuenta está segura.</span></div>
+            </div>
+        </section>
+
+        <section class="register-stage">
+            <div class="login-card login-card--register">
+                <div class="auth-topbar">
+                    <div class="back-index">
+                        <a href="/"><i class="fas fa-arrow-left"></i> Inicio</a>
+                    </div>
+                </div>
+
+                <div class="login-header">
+                    <img src="/img/Logo.webp" alt="Logo">
+                    <span class="eyebrow">Inicio cancelado</span>
+                    <h1>Operación cancelada</h1>
+                    <p>Has cancelado el inicio de sesión con tu cuenta externa. No se ha creado ni modificado ninguna cuenta.</p>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <a href="{% url 'account_login' %}" class="btn btn-primary">
+                        <span class="btn-text">Iniciar sesión con correo</span>
+                    </a>
+                </div>
+
+                <div class="auth-links">
+                    <a href="/" class="link-action">Volver al inicio</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    {% include 'base/partials/scripts.html' %}
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+    <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from apps.billing.repositories import InvoiceRepository
 from apps.billing.models import Facturas
+from apps.core.notifier import notificar_paciente
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,39 @@ class InvoiceMailService:
                                    nombre_paciente=None, nombre_profesional=None,
                                    monto=0, estado_pago="Pendiente",
                                    fecha=None, items=None, motivo_anulacion=None,
-                                   cta_link=None, cta_texto=None):
+                                   cta_link=None, cta_texto=None, paciente_user=None):
+        # Cuando el destinatario es el paciente, enrutar a través de
+        # NotificationService para respetar canalNotificacion, consentimiento de
+        # WhatsApp y los interruptores por tipo de aviso (tipo "factura"). Se
+        # conserva la plantilla HTML emails/factura_notificacion.html para el canal email.
+        if paciente_user is not None:
+            site_url = cls._get_site_url()
+            ctx = {
+                "titulo": titulo,
+                "mensaje": mensaje,
+                "id_factura": id_factura,
+                "fecha": cls._formatear_fecha(fecha) if fecha else "",
+                "nombre_paciente": nombre_paciente,
+                "nombre_profesional": nombre_profesional,
+                "estado_pago": estado_pago,
+                "monto_total": f"{float(monto):,.0f}" if monto else "0",
+                "items": items or [],
+                "motivo_anulacion": motivo_anulacion,
+                "cta_link": cta_link,
+                "cta_texto": cta_texto or "Ver factura",
+                "site_url": site_url,
+            }
+            notificar_paciente(
+                paciente_user,
+                titulo,
+                mensaje,
+                "factura",
+                plantilla_email="emails/factura_notificacion.html",
+                params_email=ctx,
+            )
+            logger.info(f"Notificación de factura enrutada al paciente {getattr(paciente_user, 'idUsuario', None)}: {titulo}")
+            return
+
         if not recipient_email:
             logger.warning("No se envió correo de factura: destinatario vacío")
             return
@@ -56,7 +89,7 @@ class InvoiceMailService:
             from django.core.mail import EmailMultiAlternatives
             msg = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [recipient_email])
             msg.attach_alternative(html_body, "text/html")
-            msg.send(fail_silently=True)
+            msg.send(fail_silently=False)
             logger.info(f"Correo de factura enviado a {recipient_email}: {titulo}")
         except Exception as e:
             logger.error(f"Error enviando correo de factura a {recipient_email}: {e}")
@@ -126,6 +159,7 @@ class InvoiceService:
                     estado_pago="Pagado",
                     items=[{"descripcion": i["descripcion"], "precio": f"{Decimal(str(i['precioUnitario'])):,.0f}"} for i in items],
                     cta_link=f"{site_url}/aside-patient/facturas.html",
+                    paciente_user=paciente,
                 )
             except Exception as e:
                 logger.error(f"Error enviando correo de pago registrado: {e}")
@@ -211,20 +245,35 @@ class InvoiceService:
                 paciente = Register.objects.filter(idUsuario=factura_data["idPaciente"]).first()
                 profesional = Register.objects.filter(idUsuario=factura_data["idProfesional"]).first()
                 site_url = InvoiceMailService._get_site_url()
-                for recipient in [paciente, profesional]:
-                    if recipient:
-                        InvoiceMailService.send_factura_notificacion(
-                            recipient_email=recipient.email,
-                            titulo="Factura anulada",
-                            mensaje=f"La factura #{invoice_id} ha sido anulada.",
-                            id_factura=invoice_id,
-                            nombre_paciente=paciente.nombre if paciente else None,
-                            nombre_profesional=profesional.nombre if profesional else None,
-                            monto=factura_data.get("monto", 0),
-                            estado_pago="Anulada",
-                            motivo_anulacion=motivo.strip(),
-                            cta_link=f"{site_url}/aside-patient/facturas.html",
-                        )
+                # El paciente respeta sus preferencias de notificación; el profesional
+                # recibe el correo directo (no es una notificación al paciente).
+                if paciente:
+                    InvoiceMailService.send_factura_notificacion(
+                        recipient_email=paciente.email,
+                        titulo="Factura anulada",
+                        mensaje=f"La factura #{invoice_id} ha sido anulada.",
+                        id_factura=invoice_id,
+                        nombre_paciente=paciente.nombre if paciente else None,
+                        nombre_profesional=profesional.nombre if profesional else None,
+                        monto=factura_data.get("monto", 0),
+                        estado_pago="Anulada",
+                        motivo_anulacion=motivo.strip(),
+                        cta_link=f"{site_url}/aside-patient/facturas.html",
+                        paciente_user=paciente,
+                    )
+                if profesional:
+                    InvoiceMailService.send_factura_notificacion(
+                        recipient_email=profesional.email,
+                        titulo="Factura anulada",
+                        mensaje=f"La factura #{invoice_id} ha sido anulada.",
+                        id_factura=invoice_id,
+                        nombre_paciente=paciente.nombre if paciente else None,
+                        nombre_profesional=profesional.nombre if profesional else None,
+                        monto=factura_data.get("monto", 0),
+                        estado_pago="Anulada",
+                        motivo_anulacion=motivo.strip(),
+                        cta_link=f"{site_url}/aside-patient/facturas.html",
+                    )
         except Exception as e:
             logger.error(f"Error enviando correo de anulación: {e}")
 
@@ -309,6 +358,7 @@ class InvoiceService:
                 estado_pago="Pagado",
                 items=items_fmt,
                 cta_link=f"{site_url}/aside-patient/facturas.html",
+                paciente_user=paciente,
             )
         except Exception as e:
             logger.error(f"Error enviando correo de confirmación de pago: {e}")

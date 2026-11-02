@@ -41,7 +41,14 @@
                     <img src="/img/Logo.webp" alt="Logo">
                     <span class="eyebrow">Nuevo usuario</span>
                     <h1>Crear cuenta</h1>
+                    {% if request.GET.google == "1" %}
+                    <p style="background: rgba(255,193,7,.1); border: 1px solid rgba(255,193,7,.3); color: #8a6d00; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-info-circle"></i>
+                        Viene de iniciar sesión con Google. Primero regístrate con este correo para poder usar Google posteriormente.
+                    </p>
+                    {% else %}
                     <p>Completa tres pasos r&aacute;pidos para activar tu acceso a PsyAI Connect.</p>
+                    {% endif %}
                 </div>
 
                 <div class="reg-progress">

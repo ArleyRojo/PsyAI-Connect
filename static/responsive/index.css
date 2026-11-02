@@ -38,15 +38,18 @@ body #mainNav.scrolled {
 body #mainNav > .container {
     max-width: 1180px !important;
     min-height: 54px !important;
-    gap: .8rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: var(--nav-gap, .9rem) !important;
 }
 
 body #mainNav .navbar-brand {
     display: inline-flex !important;
     align-items: center !important;
-    gap: .62rem !important;
+    gap: var(--nav-brand-gap, .62rem) !important;
     min-width: 0 !important;
-    margin-right: .9rem !important;
+    margin-right: var(--nav-gap, .9rem) !important;
     color: #0d47a1 !important;
     font-size: 1.03rem !important;
     font-weight: 800 !important;
@@ -55,12 +58,12 @@ body #mainNav .navbar-brand {
 }
 
 body #mainNav .navbar-brand img {
-    width: 42px !important;
-    height: 42px !important;
-    flex: 0 0 42px !important;
-    padding: 4px !important;
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+    padding: 3px !important;
     border: 1px solid rgba(13, 71, 161, .12) !important;
-    border-radius: 14px !important;
+    border-radius: 12px !important;
     background: #ffffff !important;
     box-shadow: 0 10px 22px rgba(13, 71, 161, .12) !important;
     object-fit: contain !important;
@@ -76,6 +79,9 @@ body #mainNav .navbar-collapse {
 }
 
 body #mainNav .navbar-nav-links {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     gap: .18rem !important;
     padding: .26rem !important;
     border: 1px solid rgba(13, 71, 161, .08) !important;
@@ -110,7 +116,7 @@ body #mainNav .navbar-nav-links .nav-link.active {
 }
 
 body #mainNav .navbar-nav-actions {
-    gap: .46rem !important;
+    gap: .8rem !important;
     align-items: center !important;
     margin-left: .8rem !important;
 }
@@ -152,12 +158,52 @@ body #mainNav .navbar-nav-actions .btn:hover {
 }
 
 body #mainNav .theme-switch-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     min-height: 40px !important;
-    padding: .24rem .44rem !important;
-    border: 1px solid rgba(13, 71, 161, .10) !important;
-    border-radius: 999px !important;
-    background: rgba(255, 255, 255, .78) !important;
-    box-shadow: 0 8px 18px rgba(13, 71, 161, .08) !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body #mainNav #theme-toggle,
+body #mainNav .theme-toggle-mobile {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(13, 71, 161, .14) !important;
+    background: rgba(255, 255, 255, .82) !important;
+    padding: 0 !important;
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 10px rgba(13, 71, 161, .08) !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.18s ease;
+    transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.18s ease !important;
+}
+
+body #mainNav #theme-toggle .theme-emoji,
+body #mainNav .theme-toggle-mobile .theme-emoji {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+    -webkit-transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 body #mainNav .navbar-progress {
@@ -178,10 +224,14 @@ html.dark-mode body #mainNav .navbar-brand {
 }
 
 html.dark-mode body #mainNav .navbar-brand img,
-html.dark-mode body #mainNav .theme-switch-container,
 html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
     border-color: rgba(125, 211, 252, .20) !important;
     background: rgba(15, 44, 78, .88) !important;
+}
+
+html.dark-mode body #mainNav #theme-toggle {
+    border-color: rgba(125, 211, 252, .30) !important;
+    background: rgba(15, 44, 78, .70) !important;
 }
 
 html.dark-mode body #mainNav .navbar-nav-links {
@@ -226,12 +276,22 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
     body #mainNav.scrolled {
         min-height: 68px !important;
         padding: .48rem 0 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+    }
+
+    html.dark-mode body #mainNav.navbar,
+    html.dark-mode body #mainNav.scrolled {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(7, 26, 50, 0.96) !important;
     }
 
     body #mainNav > .container {
         min-height: 52px !important;
         padding-left: 1rem !important;
-        padding-right: 4.85rem !important;
+        padding-right: 1.5rem !important;
     }
 
     body #mainNav .navbar-brand {
@@ -274,7 +334,9 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
         padding: .78rem !important;
         border: 1px solid rgba(13, 71, 161, .12) !important;
         border-radius: 20px !important;
-        background: rgba(255, 255, 255, .98) !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
         box-shadow: 0 24px 52px rgba(13, 71, 161, .20) !important;
     }
 
@@ -328,7 +390,9 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
     html.dark-mode body #mainNav .navbar-toggler,
     html.dark-mode body #mainNav .navbar-collapse {
         border-color: rgba(125, 211, 252, .18) !important;
-        background: rgba(7, 26, 50, .98) !important;
+        background: rgba(7, 26, 50, 0.96) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
         box-shadow: 0 24px 52px rgba(0, 0, 0, .34) !important;
     }
 
@@ -339,6 +403,32 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
 
     html.dark-mode body #mainNav .navbar-nav-actions {
         border-top-color: rgba(125, 211, 252, .16) !important;
+    }
+
+    /* ── Móvil: desactivar animaciones decorativas infinitas y blur pesado ── */
+    [class*="float"], [class*="glow"], [class*="pulse"], [class*="shimmer"],
+    [class*="Orb"], [class*="heroOrb"], [class*="particle"], [class*="textShimmer"],
+    [class*="skeletonPulse"] {
+        animation: none !important;
+        filter: none !important;
+        -webkit-filter: none !important;
+    }
+
+    /* ── Móvil: cambio de tema suave (≤250 ms) en elementos clave ── */
+    html.theme-animating,
+    html.theme-animating body,
+    html.theme-animating #mainNav,
+    html.theme-animating .hero-section,
+    html.theme-animating .content-section,
+    html.theme-animating section,
+    html.theme-animating .card,
+    html.theme-animating .footer-enhanced,
+    html.theme-animating .btn,
+    html.theme-animating .nav-link,
+    html.theme-animating *::before,
+    html.theme-animating *::after {
+        -webkit-transition-duration: 0.25s;
+        transition-duration: 0.25s !important;
     }
 }
 
@@ -4130,27 +4220,31 @@ body #mainNav.scrolled {
 body #mainNav > .container {
     max-width: 1180px !important;
     min-height: 54px !important;
-    gap: .8rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: var(--nav-gap, .9rem) !important;
 }
 
 body #mainNav .navbar-brand {
     display: inline-flex !important;
     align-items: center !important;
-    gap: .62rem !important;
-    margin-right: .9rem !important;
+    gap: var(--nav-brand-gap, .62rem) !important;
+    margin-right: var(--nav-gap, .9rem) !important;
     color: #0d47a1 !important;
     font-size: 1.03rem !important;
     font-weight: 800 !important;
     letter-spacing: 0 !important;
+    line-height: 1 !important;
 }
 
 body #mainNav .navbar-brand img {
-    width: 42px !important;
-    height: 42px !important;
-    flex: 0 0 42px !important;
-    padding: 4px !important;
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+    padding: 3px !important;
     border: 1px solid rgba(13, 71, 161, .12) !important;
-    border-radius: 14px !important;
+    border-radius: 12px !important;
     background: #ffffff !important;
     box-shadow: 0 10px 22px rgba(13, 71, 161, .12) !important;
     object-fit: contain !important;
@@ -4166,6 +4260,9 @@ body #mainNav .navbar-collapse {
 }
 
 body #mainNav .navbar-nav-links {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     gap: .18rem !important;
     padding: .26rem !important;
     border: 1px solid rgba(13, 71, 161, .08) !important;
@@ -4196,7 +4293,7 @@ body #mainNav .navbar-nav-links .nav-link.active {
 }
 
 body #mainNav .navbar-nav-actions {
-    gap: .46rem !important;
+    gap: .8rem !important;
     align-items: center !important;
     margin-left: .8rem !important;
 }
@@ -4228,12 +4325,52 @@ body #mainNav .navbar-nav-actions .btn-outline-primary {
 }
 
 body #mainNav .theme-switch-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     min-height: 40px !important;
-    padding: .24rem .44rem !important;
-    border: 1px solid rgba(13, 71, 161, .10) !important;
-    border-radius: 999px !important;
-    background: rgba(255, 255, 255, .78) !important;
-    box-shadow: 0 8px 18px rgba(13, 71, 161, .08) !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body #mainNav #theme-toggle,
+body #mainNav .theme-toggle-mobile {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(13, 71, 161, .14) !important;
+    background: rgba(255, 255, 255, .82) !important;
+    padding: 0 !important;
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 10px rgba(13, 71, 161, .08) !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.18s ease;
+    transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.18s ease !important;
+}
+
+body #mainNav #theme-toggle .theme-emoji,
+body #mainNav .theme-toggle-mobile .theme-emoji {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+    -webkit-transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 html.dark-mode body #mainNav.navbar,
@@ -4248,10 +4385,14 @@ html.dark-mode body #mainNav .navbar-brand {
 }
 
 html.dark-mode body #mainNav .navbar-brand img,
-html.dark-mode body #mainNav .theme-switch-container,
 html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
     border-color: rgba(125, 211, 252, .20) !important;
     background: rgba(15, 44, 78, .88) !important;
+}
+
+html.dark-mode body #mainNav #theme-toggle {
+    border-color: rgba(125, 211, 252, .30) !important;
+    background: rgba(15, 44, 78, .70) !important;
 }
 
 html.dark-mode body #mainNav .navbar-nav-links {
@@ -4295,12 +4436,22 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
     body #mainNav.scrolled {
         min-height: 68px !important;
         padding: .48rem 0 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+    }
+
+    html.dark-mode body #mainNav.navbar,
+    html.dark-mode body #mainNav.scrolled {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(7, 26, 50, 0.96) !important;
     }
 
     body #mainNav > .container {
         min-height: 52px !important;
         padding-left: 1rem !important;
-        padding-right: 4.85rem !important;
+        padding-right: 1.5rem !important;
     }
 
     body #mainNav .navbar-brand {
@@ -4343,7 +4494,9 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
         padding: .78rem !important;
         border: 1px solid rgba(13, 71, 161, .12) !important;
         border-radius: 20px !important;
-        background: rgba(255, 255, 255, .98) !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
         box-shadow: 0 24px 52px rgba(13, 71, 161, .20) !important;
     }
 
@@ -4396,7 +4549,9 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
     html.dark-mode body #mainNav .navbar-toggler,
     html.dark-mode body #mainNav .navbar-collapse {
         border-color: rgba(125, 211, 252, .18) !important;
-        background: rgba(7, 26, 50, .98) !important;
+        background: rgba(7, 26, 50, 0.96) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
         box-shadow: 0 24px 52px rgba(0, 0, 0, .34) !important;
     }
 
@@ -4407,5 +4562,31 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
 
     html.dark-mode body #mainNav .navbar-nav-actions {
         border-top-color: rgba(125, 211, 252, .16) !important;
+    }
+
+    /* ── Móvil: desactivar animaciones decorativas infinitas y blur pesado ── */
+    [class*="float"], [class*="glow"], [class*="pulse"], [class*="shimmer"],
+    [class*="Orb"], [class*="heroOrb"], [class*="particle"], [class*="textShimmer"],
+    [class*="skeletonPulse"] {
+        animation: none !important;
+        filter: none !important;
+        -webkit-filter: none !important;
+    }
+
+    /* ── Móvil: cambio de tema suave (≤250 ms) en elementos clave ── */
+    html.theme-animating,
+    html.theme-animating body,
+    html.theme-animating #mainNav,
+    html.theme-animating .hero-section,
+    html.theme-animating .content-section,
+    html.theme-animating section,
+    html.theme-animating .card,
+    html.theme-animating .footer-enhanced,
+    html.theme-animating .btn,
+    html.theme-animating .nav-link,
+    html.theme-animating *::before,
+    html.theme-animating *::after {
+        -webkit-transition-duration: 0.25s;
+        transition-duration: 0.25s !important;
     }
 }

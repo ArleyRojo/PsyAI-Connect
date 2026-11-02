@@ -39,6 +39,10 @@ class PerfilPaciente(models.Model):
     prefContacto = models.CharField(
         max_length=15, choices=CONTACTO_CHOICES, default="Correo"
     )
+    # CAMPOS DEPRECADOS: ya no deciden ningún envío de notificación.
+    # Se conservan solo por compatibilidad con datos/clientes antiguos.
+    # Usar canalNotificacion, whatsappConsentimiento, numeroTelefonico y los
+    # interruptores recibirRecordatorioCita / recibirConfirmacion / recibirMensajePro.
     # Nuevas preferencias de notificación
     canalNotificacion = models.CharField(
         max_length=10,
@@ -57,6 +61,8 @@ class PerfilPaciente(models.Model):
     recibirRecordatorioCita = models.BooleanField(default=True)
     recibirConfirmacion = models.BooleanField(default=True)
     recibirMensajePro = models.BooleanField(default=True)
+    recibirFacturas = models.BooleanField(default=True)
+    recibirNotificacionesAdmin = models.BooleanField(default=True)
 
     class Meta:
         db_table = "PerfilPaciente"
@@ -81,6 +87,8 @@ class PerfilPaciente(models.Model):
             "recibirRecordatorioCita": self.recibirRecordatorioCita,
             "recibirConfirmacion": self.recibirConfirmacion,
             "recibirMensajePro": self.recibirMensajePro,
+            "recibirFacturas": self.recibirFacturas,
+            "recibirNotificacionesAdmin": self.recibirNotificacionesAdmin,
         }
 
 

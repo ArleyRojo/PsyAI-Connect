@@ -1,5 +1,7 @@
 import logging
+import threading
 
+from django.db import close_old_connections
 from django.db.models import Count, Q
 from django.db.models.functions import Coalesce
 from django.db import connection, transaction
@@ -492,7 +494,7 @@ class AdminRepository:
             if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email_individual):
                 raise ValueError("Email individual inválido")
 
-        estado = "enviado" if envio == "inmediato" else "pendiente"
+        estado = "pendiente" if envio == "programado" else "enviado"
         
         notificacion = Notificaciones.objects.create(
             titulo=titulo,
@@ -511,34 +513,62 @@ class AdminRepository:
             administrador=self.get_admin_name(),
         )
 
-        # Enviar correo si es inmediato
+        # Enviar correo si es inmediato (en background para no bloquear la respuesta >2s)
         if envio == "inmediato":
+            thread = threading.Thread(
+                target=self._send_notification_emails_background,
+                args=(
+                    notificacion.idNotificacion,
+                    destinatario,
+                    email_individual,
+                    titulo,
+                    mensaje,
+                    tipo,
+                ),
+                daemon=True,
+            )
+            thread.start()
+        
+        return notificacion
+
+    def _send_notification_emails_background(self, notificacion_id, destinatario, email_individual, titulo, mensaje, tipo):
+        """Envía emails de notificación en un hilo de fondo y actualiza el estado."""
+        close_old_connections()
+        from apps.scheduling.models import Notificaciones
+        try:
+            notificacion = Notificaciones.objects.get(idNotificacion=notificacion_id)
+            enviados, fallidos, omitidos, error_detalle = self._send_admin_notification_emails(
+                notificacion_id=notificacion_id,
+                destinatario=destinatario,
+                email_individual=email_individual,
+                titulo=titulo,
+                mensaje=mensaje,
+                tipo=tipo,
+            )
+            
+            if enviados > 0:
+                notificacion.estado = "enviado"
+                notificacion.errorDetalle = None
+            elif omitidos > 0 and enviados == 0 and fallidos == 0:
+                notificacion.estado = "enviado"
+                notificacion.errorDetalle = None
+            else:
+                notificacion.estado = "fallido"
+                notificacion.errorDetalle = error_detalle or "No se pudo entregar a ningún destinatario"
+            notificacion.omitidos = omitidos
+            notificacion.save(update_fields=["estado", "errorDetalle", "omitidos"])
+            
+        except Exception as e:
+            logger.exception("Error enviando emails de notificación (background)")
             try:
-                enviados, fallidos, error_detalle = self._send_admin_notification_emails(
-                    notificacion_id=notificacion.idNotificacion,
-                    destinatario=destinatario,
-                    email_individual=email_individual,
-                    titulo=titulo,
-                    mensaje=mensaje,
-                    tipo=tipo,
-                )
-                
-                # Actualizar estado de la notificación
-                if enviados > 0:
-                    notificacion.estado = "enviado"
-                    notificacion.errorDetalle = None
-                else:
-                    notificacion.estado = "fallido"
-                    notificacion.errorDetalle = error_detalle or "No se pudo enviar a ningún destinatario"
-                notificacion.save(update_fields=["estado", "errorDetalle"])
-                
-            except Exception as e:
-                logger.exception("Error enviando emails de notificación")
+                notificacion = Notificaciones.objects.get(idNotificacion=notificacion_id)
                 notificacion.estado = "fallido"
                 notificacion.errorDetalle = str(e)
                 notificacion.save(update_fields=["estado", "errorDetalle"])
-        
-        return notificacion
+            except Exception:
+                pass
+        finally:
+            close_old_connections()
 
     def delete_notification(self, notification_id):
         from apps.scheduling.models import Notificaciones
@@ -722,11 +752,6 @@ class AdminRepository:
         
         if destinatario == "pacientes":
             qs = base_qs.filter(rol="paciente")
-            # Excluir pacientes con notificaciones desactivadas
-            pacientes_sin_notif = PerfilPaciente.objects.filter(
-                prefNotificaciones="Desactivadas"
-            ).values_list("idPaciente_id", flat=True)
-            qs = qs.exclude(idUsuario__in=pacientes_sin_notif)
         elif destinatario == "profesionales":
             qs = base_qs.filter(rol="profesional")
         elif destinatario == "todos":
@@ -737,34 +762,42 @@ class AdminRepository:
         return [(u, u.email) for u in qs]
 
     def _send_admin_notification_emails(self, notificacion_id, destinatario, email_individual, titulo, mensaje, tipo):
-        """Envía emails de notificación admin a destinatarios resueltos.
-        Retorna (enviados, fallidos, error_detalle)"""
+        """Envía notificaciones admin a destinatarios resueltos.
+
+        Para pacientes, enruta por NotificationService.notificar_paciente con
+        tipo "notificacion_admin", respetando canalNotificacion, consentimiento
+        de WhatsApp y el interruptor recibirNotificacionesAdmin. Para
+        profesionales y admins se mantiene el envío directo por correo.
+
+        Retorna (enviados, fallidos, omitidos, error_detalle).
+        """
         from django.core.mail import EmailMultiAlternatives
         from django.conf import settings
         from django.template.loader import render_to_string
         from apps.scheduling.models import Notificaciones
-        from apps.core.utils import fmt_bogota
+        from apps.core.notifier import notificar_paciente
         from django.utils import timezone
-        
+
         style = self._get_tipo_style(tipo)
         site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
-        cta_link = f"{site_url}/aside-patient/mensajes.html"  # o panel de notificaciones
-        
-        # Convertir saltos de línea a <br> para HTML
+        cta_link = f"{site_url}/aside-patient/mensajes.html"
+
+        # Contexto para plantilla HTML de email
         mensaje_html = mensaje.replace("\n", "<br>")
-        
+
         recipients = self._resolve_recipients(destinatario, email_individual)
-        
+
         if not recipients:
-            return 0, 0, "No hay destinatarios válidos para esta notificación"
-        
+            return 0, 0, 0, "No hay destinatarios válidos para esta notificación"
+
         enviados = 0
         fallidos = 0
+        omitidos = 0
         errores = []
-        
+
         subject = f"PsyAI Connect \u2014 {titulo}"
-        
-        # Texto plano base
+
+        # Texto plano base (fallback si no hay plantilla)
         text_template = """Hola {nombre},
 
 {titulo}
@@ -775,19 +808,60 @@ class AdminRepository:
 Este mensaje fue enviado por un administrador de PsyAI Connect.
 Si no deseas recibir estas notificaciones, contacta con el administrador.
 """
-        
+
         for user, email in recipients:
             try:
                 nombre_destinatario = self._get_recipient_name(user, email)
-                
-                # Texto plano personalizado
+
+                # ── Pacientes: enrutar por notificar_paciente ───────────────
+                if user is not None and user.rol == "paciente":
+                    ctx = {
+                        "titulo": titulo,
+                        "mensaje_html": mensaje_html,
+                        "tipo": tipo,
+                        "nombre_destinatario": nombre_destinatario,
+                        "cta_link": cta_link,
+                        **style,
+                    }
+                    ok = notificar_paciente(
+                        user,
+                        titulo,  # notificar_paciente ya agrega el prefijo [PsyAI]
+                        mensaje,
+                        "notificacion_admin",
+                        plantilla_email="emails/notificacion_admin.html",
+                        params_email=ctx,
+                    )
+                    if ok:
+                        enviados += 1
+                    # canal == "ninguno" o interruptor desactivado → omitido,
+                    # no contado como fallido (notificar_paciente retorna False)
+                    elif not ok:
+                        # Distinguir omitido vs fallido: si el canal es "ninguno"
+                        # o el interruptor está desactivado, no hubo intento de
+                        # envío real, así que es omitido.
+                        prefs_resp, _ = None, None
+                        try:
+                            from apps.patients.services import PatientService
+                            prefs_resp, _ = PatientService().get_preferences(user.idUsuario)
+                        except Exception:
+                            pass
+                        prefs = (prefs_resp or {}).get("preferencias", {}) if prefs_resp else {}
+                        canal = prefs.get("canalNotificacion", "email")
+                        interruptor = prefs.get("recibirNotificacionesAdmin", True)
+                        if canal == "ninguno" or not interruptor:
+                            omitidos += 1
+                        else:
+                            fallidos += 1
+                            errores.append(f"{email}: no se entregó por ningún canal")
+                    continue
+
+                # ── Profesionales / admins / sin usuario: correo directo ───
                 text_content = text_template.format(
                     nombre=nombre_destinatario,
                     titulo=titulo,
-                    mensaje=mensaje
+                    mensaje=mensaje,
                 )
-                
-                # HTML con template
+
                 html_content = render_to_string('emails/notificacion_admin.html', {
                     'titulo': titulo,
                     'mensaje_html': mensaje_html,
@@ -796,7 +870,7 @@ Si no deseas recibir estas notificaciones, contacta con el administrador.
                     'cta_link': cta_link,
                     **style,
                 })
-                
+
                 msg = EmailMultiAlternatives(
                     subject=subject,
                     body=text_content,
@@ -804,13 +878,13 @@ Si no deseas recibir estas notificaciones, contacta con el administrador.
                     to=[email]
                 )
                 msg.attach_alternative(html_content, "text/html")
-                msg.send(fail_silently=False)  # No silencioso para capturar errores
+                msg.send(fail_silently=False)
                 enviados += 1
-                
+
             except Exception as e:
                 fallidos += 1
                 errores.append(f"{email}: {str(e)}")
                 logger.exception("Error enviando notificación admin a %s", email)
-        
+
         error_detalle = "; ".join(errores) if errores else None
-        return enviados, fallidos, error_detalle
+        return enviados, fallidos, omitidos, error_detalle

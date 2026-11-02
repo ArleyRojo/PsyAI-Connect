@@ -6412,24 +6412,50 @@ html.dark-mode.dark-mode .footer-social-new a:hover {
    carga inicial, evitando flash de claro a oscuro.
    ════════════════════════════════════════════════════════════════════ */
 html.theme-animating,
-html.theme-animating *,
+html.theme-animating body,
+html.theme-animating #mainNav,
+html.theme-animating .hero-section,
+html.theme-animating .content-section,
+html.theme-animating section,
+html.theme-animating .card,
+html.theme-animating .footer-enhanced,
+html.theme-animating .btn,
+html.theme-animating .nav-link,
 html.theme-animating *::before,
 html.theme-animating *::after {
-    transition: background-color 0.3s ease,
-                color 0.3s ease,
-                border-color 0.3s ease,
-                fill 0.3s ease,
-                stroke 0.3s ease,
-                box-shadow 0.3s ease !important;
+    transition: background-color 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
     html.theme-animating,
-    html.theme-animating *,
+    html.theme-animating body,
+    html.theme-animating #mainNav,
+    html.theme-animating .hero-section,
+    html.theme-animating .content-section,
+    html.theme-animating section,
+    html.theme-animating .card,
+    html.theme-animating .footer-enhanced,
+    html.theme-animating .btn,
+    html.theme-animating .nav-link,
     html.theme-animating *::before,
     html.theme-animating *::after {
         transition: none !important;
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
     }
+}
+
+/* Pausar animaciones decorativas mientras se cambia de tema */
+html.theme-switching [style*="animation"],
+html.theme-switching [class*="float"],
+html.theme-switching [class*="glow"],
+html.theme-switching [class*="pulse"],
+html.theme-switching [class*="shimmer"],
+html.theme-switching [class*="Orb"],
+html.theme-switching [class*="heroOrb"],
+html.theme-switching [style*="animation-iteration-count: infinite"],
+html.theme-switching [style*="animation-iteration-count:infinite"] {
+    animation-play-state: paused !important;
 }

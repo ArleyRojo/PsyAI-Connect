@@ -45,14 +45,18 @@ document.addEventListener('DOMContentLoaded', function() {
     /* ─────────────────────────────────────────────────────── */
     const navbar = document.getElementById('mainNav');
     if (navbar) {
-        window.addEventListener('scroll', function() {
+        let scrolled = false;
+        window.addEventListener('scroll', function () {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            if (scrollTop > 10) {
+            const should = scrollTop > 10;
+            if (should === scrolled) return;
+            scrolled = should;
+            if (should) {
                 navbar.classList.add('scrolled');
             } else {
                 navbar.classList.remove('scrolled');
             }
-        });
+        }, { passive: true });
     }
     
     /* ─────────────────────────────────────────────────────── */
@@ -181,15 +185,28 @@ document.addEventListener('DOMContentLoaded', function() {
     /* ─────────────────────────────────────────────────────── */
     /* 9. Parallax Effect on Scroll (Light Version)          */
     /* ─────────────────────────────────────────────────────── */
-    window.addEventListener('scroll', function() {
-        const scrolled = window.pageYOffset;
-        const parallaxElements = document.querySelectorAll('[data-parallax]');
-        
-        parallaxElements.forEach(element => {
-            const yPos = scrolled * 0.5;
-            element.style.transform = `translateY(${yPos}px)`;
-        });
-    });
+    const isMobileOrReduced = window.matchMedia('(max-width: 991px)').matches
+        || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let parallaxTicking = false;
+    const parallaxElements = isMobileOrReduced ? [] : Array.from(document.querySelectorAll('[data-parallax]'));
+
+    if (parallaxElements.length) {
+        function updateParallax() {
+            const scrolled = window.pageYOffset;
+            parallaxElements.forEach(element => {
+                const yPos = scrolled * 0.5;
+                element.style.transform = `translateY(${yPos}px)`;
+            });
+            parallaxTicking = false;
+        }
+
+        window.addEventListener('scroll', function () {
+            if (!parallaxTicking) {
+                window.requestAnimationFrame(updateParallax);
+                parallaxTicking = true;
+            }
+        }, { passive: true });
+    }
     
     /* ─────────────────────────────────────────────────────── */
     /* 10. Performance Optimization - Lazy Loading Images    */

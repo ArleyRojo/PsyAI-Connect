@@ -1,0 +1,100 @@
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>PsyAI Connect | Correos electrónicos</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/auth.css?v=20260731-1">
+    <link rel="stylesheet" href="/responsive/auth.css?v=20260731">
+</head>
+<body>
+    <canvas id="bgCanvas" class="canvas-bg"></canvas>
+
+    <main class="register-shell">
+        <section class="register-art" aria-label="PsyAI Connect">
+            <a class="brand-mark" href="/">
+                <img src="/img/Logo.webp" alt="Logo PsyAI Connect">
+                <span>PsyAI Connect</span>
+            </a>
+
+            <div class="art-copy">
+                <h1>Tus correos electrónicos.</h1>
+                <p>Gestiona las direcciones de correo asociadas a tu cuenta de PsyAI Connect.</p>
+            </div>
+
+            <div class="art-strip" aria-hidden="true">
+                <div class="art-chip"><strong>01</strong><span>Correo principal de tu cuenta.</span></div>
+                <div class="art-chip"><strong>02</strong><span>Correos secundarios verificados.</span></div>
+                <div class="art-chip"><strong>03</strong><span>Agrega o elimina direcciones.</span></div>
+            </div>
+        </section>
+
+        <section class="register-stage">
+            <div class="login-card login-card--register">
+                <div class="auth-topbar">
+                    <div class="back-index">
+                        <a href="/"><i class="fas fa-arrow-left"></i> Inicio</a>
+                    </div>
+                </div>
+
+                <div class="login-header">
+                    <img src="/img/Logo.webp" alt="Logo">
+                    <span class="eyebrow">Correos electrónicos</span>
+                    <h1>Gestionar correos</span>
+                    <p>Agrega, verifica o elimina direcciones de correo asociadas a tu cuenta.</p>
+                </div>
+
+                <form method="post" class="d-grid mb-3">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="reg-field">
+                        <label for="id_email" class="form-label">Agregar nuevo correo</label>
+                        <div class="field-wrap">
+                            <i class="fas fa-envelope field-icon reg-icon" id="icon-email"></i>
+                            <input type="email" class="form-control" id="id_email" name="email" placeholder="nuevo@correo.com" autocomplete="email" required>
+                        </div>
+                        {{ form.email.errors }}
+                    </div>
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Agregar correo</span>
+                        </button>
+                    </div>
+                </form>
+
+                {% if emailaddresses %}
+                <div class="auth-links">
+                    <span class="link-action" style="font-weight:700; color: var(--text-muted);">Correos registrados:</span>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    {% for emailaddress in emailaddresses %}
+                    <div class="reg-field" style="margin-bottom: 0.5rem;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-weight: 600; color: var(--text-primary);">{{ emailaddress.email }}</span>
+                            {% if emailaddress.primary %}
+                                <span style="font-size: 0.75rem; background: rgba(13,71,161,.1); color: var(--brand-600); padding: 2px 8px; border-radius: 12px;">Principal</span>
+                            {% endif %}
+                            {% if emailaddress.verified %}
+                                <span style="font-size: 0.75rem; background: rgba(53,166,107,.1); color: var(--mood-good); padding: 2px 8px; border-radius: 12px;">Verificado</span>
+                            {% else %}
+                                <span style="font-size: 0.75rem; background: rgba(220,38,38,.1); color: #b91c1c; padding: 2px 8px; border-radius: 12px;">Pendiente</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="auth-links">
+                    <a href="/" class="link-action">Volver al inicio</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    {% include 'base/partials/scripts.html' %}
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+    <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
+</body>
+</html>
