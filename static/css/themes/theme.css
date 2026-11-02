@@ -6404,3 +6404,32 @@ html.dark-mode.dark-mode .footer-social-new a:hover {
     background: rgba(144, 202, 249, .12) !important;
     color: var(--dm-accent) !important;
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   TEMA — transición suave al cambiar claro/oscuro
+   Se activa solo cuando el usuario toca el botón (clase theme-animating
+   agregada por static/js/core/shared/theme.js). Nunca se aplica en la
+   carga inicial, evitando flash de claro a oscuro.
+   ════════════════════════════════════════════════════════════════════ */
+html.theme-animating,
+html.theme-animating *,
+html.theme-animating *::before,
+html.theme-animating *::after {
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                border-color 0.3s ease,
+                fill 0.3s ease,
+                stroke 0.3s ease,
+                box-shadow 0.3s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.theme-animating,
+    html.theme-animating *,
+    html.theme-animating *::before,
+    html.theme-animating *::after {
+        transition: none !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
