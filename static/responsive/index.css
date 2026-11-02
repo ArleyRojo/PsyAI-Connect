@@ -663,6 +663,10 @@ html {
         order: 3;
     }
 
+    #mainNav.scrolled {
+        overflow: visible;
+    }
+
     #mainNav .navbar-collapse {
         flex-direction: column;
         align-items: stretch;
