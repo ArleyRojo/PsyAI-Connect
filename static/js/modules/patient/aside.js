@@ -183,7 +183,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 (function () {
     function isPatientPage() {
-        return window.location.pathname.includes('/patient') || window.location.pathname.includes('patient.dashboard');
+        // Detectar por clase de <body> para cubrir /aside-patient/... además del dashboard.
+        return document.body.classList.contains('patient-dashboard');
     }
 
     function createBottomNav() {

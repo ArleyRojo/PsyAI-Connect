@@ -302,22 +302,54 @@ strong { color: var(--color-text-main); }
     margin-right: 0;
     flex-shrink: 0;
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    text-decoration: none !important;
 }
 
-/* Logo glow effect on hover */
-.navbar-brand::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 12px;
-    background: radial-gradient(circle, rgba(13,71,161,.06) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity .4s ease;
-    pointer-events: none;
+.navbar-brand img {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(13,71,161,.15);
+    transition: transform .3s ease;
 }
 
-.navbar-brand:hover::before {
-    opacity: 1;
+.navbar-brand:hover img {
+    transform: scale(1.05);
+}
+
+.navbar-brand-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-primary-dark) !important;
+    letter-spacing: -.02em;
+    white-space: nowrap;
+}
+
+.navbar-brand-text strong {
+    color: var(--color-primary) !important;
+}
+
+html.dark-mode .navbar-brand-text {
+    color: #d8ecff !important;
+}
+
+html.dark-mode #mainNav .nav-link {
+    color: #b8d0e7 !important;
+}
+
+html.dark-mode #mainNav .nav-link:hover {
+    color: #d8ecff !important;
+    background: rgba(255,255,255,.05) !important;
+    border-radius: 8px !important;
+}
+
+html.dark-mode #mainNav .nav-link.active {
+    color: #9ecbff !important;
+    background: rgba(144,202,249,.15) !important;
 }
 
 .navbar-collapse {
@@ -343,41 +375,44 @@ strong { color: var(--color-text-main); }
 }
 
 .navbar .nav-link {
-    padding: 0.5rem 1rem !important;
+    padding: .55rem .9rem !important;
     position: relative;
+    color: var(--color-text-body) !important;
+    font-size: .85rem !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+    transition: all .2s ease !important;
 }
 
-/* Nav link with animated underline - enhanced */
 .navbar-nav-links .nav-link::after {
     content: '';
     position: absolute;
     bottom: 2px;
-    left: 1rem;
-    right: 1rem;
+    left: 50%;
+    right: 50%;
     height: 2px;
     background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
     border-radius: 2px;
-    transform: scaleX(0);
+    transform: translateX(-50%) scaleX(0);
     transform-origin: center;
     transition: transform .35s cubic-bezier(.16,1,.3,1);
     opacity: .8;
 }
 
-.navbar-nav-links .nav-link:hover {
-    background: rgba(13,71,161,.04);
-    transform: translateY(-1px);
+#mainNav .nav-link:hover {
+    background: rgba(13,71,161,.06) !important;
+    color: var(--color-primary-dark) !important;
 }
 
-.navbar-nav-links .nav-link:hover::after {
-    transform: scaleX(1);
+#mainNav .nav-link:hover::after {
+    transform: translateX(-50%) scaleX(1) !important;
 }
 
-.navbar-nav-links .nav-link.active {
-    color: var(--color-secondary) !important;
-    font-weight: 600;
+#mainNav .nav-link.active {
+    color: var(--color-primary) !important;
+    font-weight: 600 !important;
+    background: rgba(13,71,161,.1) !important;
 }
-
-.navbar-nav-links .nav-link.active::after {
     transform: scaleX(1);
 }
 

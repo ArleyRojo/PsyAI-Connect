@@ -351,6 +351,7 @@ table {
   .main-header {
     padding: 12px 14px !important;
     margin-bottom: 14px !important;
+    padding-left: 56px !important;
   }
 
   .main-header h1 {
@@ -685,6 +686,94 @@ body.has-mobile-bottom-nav {
     width: 44px !important;
     height: 44px !important;
     font-size: 1rem !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN USUARIOS: 3 tarjetas de resumen en fila compacta en móvil
+   ════════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  body.admin-panel .row.g-3.mb-4:has(.stat-card) {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  body.admin-panel .row.g-3.mb-4:has(.stat-card) > [class*="col-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+  }
+
+  body.admin-panel .stat-card {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 10px 6px !important;
+    gap: 6px !important;
+  }
+
+  body.admin-panel .stat-card .stat-icon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
+  }
+
+  body.admin-panel .stat-card .stat-value {
+    font-size: 1.3rem !important;
+    text-align: center !important;
+  }
+
+  body.admin-panel .stat-card .stat-label {
+    font-size: 0.7rem !important;
+    margin-top: 2px !important;
+    text-align: center !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   TOUCH TARGETS – área táctil mínima 44 × 44 px en móvil
+   ════════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  button,
+  .btn,
+  .button,
+  a[role="button"],
+  [role="button"],
+  .navbar-toggler,
+  .toggle-btn,
+  .menu-toggle,
+  .nav-link,
+  .footer-social-new a,
+  .footer-social-inline a,
+  .theme-toggle-mobile,
+  #theme-toggle,
+  .badge,
+  .pagination .page-link {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  /* Iconos de redes sociales y botones solo-icono: más padding, no agrandar el icono */
+  .footer-social-new a i,
+  .footer-social-inline a i,
+  .navbar-toggler i,
+  .theme-toggle-mobile,
+  #theme-toggle {
+    padding: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
   }
 }
 
@@ -2311,3 +2400,60 @@ body:has(.sidebar) .main-content .accordion,
   }
   body #chatbot-section .message.bot .avatar i { font-size: 13px; }
 }
+
+
+
+/* ----------------------------------------------------
+   RESCUE � evitar recortes / sobresalidos de ancho en m�vil
+   ---------------------------------------------------- */
+@media (max-width: 767.98px) {
+  /* Landing: .about-visual y su columna no deben salir del ancho */
+  .about-visual,
+  .about-visual .col-lg-6,
+  .about-card-float {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+  .about-visual {
+    overflow: hidden !important;
+    position: relative !important;
+  }
+  .about-card-float {
+    width: min(250px, 100%) !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    position: static !important;
+    transform: none !important;
+  }
+
+  /* Mensajes (paciente y profesional): .chat-panel y estado vac�o */
+  .chat-panel,
+  .chat-panel-placeholder {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+  .chat-panel {
+    overflow-x: auto !important;
+  }
+
+  /* Facturas (paciente): cabecera de tabla */
+  table th.text-center,
+  .citas-table th {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* Reportes (profesional): h5.section-heading y .panel-kicker */
+  h5.section-heading,
+  .panel-kicker {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+}
+

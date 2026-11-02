@@ -1350,23 +1350,19 @@ html.dark-mode .stat-card-v2--mood__3d {
         font-size: 1.3rem;
     }
 
-    /* Stats: horizontal scroll snap */
+    /* Stats: dos tarjetas por fila en móvil, ninguna queda oculta */
     .dash-stats-v2 {
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
         gap: var(--sp-3, 12px);
-        padding-bottom: var(--sp-2, 8px);
-        margin: 0 calc(-1 * var(--sp-4, 16px));
-        padding-left: var(--sp-4, 16px);
-        padding-right: var(--sp-4, 16px);
+        margin: 0;
+        padding: 0;
+        overflow: visible;
     }
 
     .stat-card-v2 {
-        min-width: 240px;
-        flex-shrink: 0;
-        scroll-snap-align: start;
+        min-width: 0;
+        scroll-snap-align: none;
     }
 
     /* Quick actions: grid 2 cols */
@@ -1413,7 +1409,7 @@ html.dark-mode .stat-card-v2--mood__3d {
     }
 
     .stat-card-v2 {
-        min-width: 200px;
+        min-width: 0;
         padding: var(--sp-4, 16px);
     }
 

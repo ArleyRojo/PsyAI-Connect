@@ -178,7 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 (function () {
     function isProfessionalPage() {
-        return window.location.pathname.includes('/professional') || window.location.pathname.includes('professional.dashboard');
+        // Detectar por clase de <body> para cubrir /aside-professional/... además del dashboard.
+        return document.body.classList.contains('professional-dashboard') ||
+               document.body.classList.contains('aside-professional');
     }
 
     function createBottomNav() {
