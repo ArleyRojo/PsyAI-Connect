@@ -90,7 +90,10 @@
                 <div class="hero-image-wrapper">
                     <div class="hero-image-card">
                         <div class="hero-scene">
-                            <img class="hero-person hero-reference-image" src="/img/hero-psyai-connect.webp?v=2" alt="Mujer conversando con el asistente de bienestar PsyAI Connect" width="1400" height="752" fetchpriority="high" decoding="async">
+                            <picture>
+                              <source media="(max-width: 767.98px)" srcset="/img/hero-psyai-connect-800.webp?v=3">
+                              <img class="hero-person hero-reference-image" src="/img/hero-psyai-connect.webp?v=2" alt="Mujer conversando con el asistente de bienestar PsyAI Connect" width="1400" height="752" fetchpriority="high" decoding="async" loading="eager">
+                            </picture>
                             <div class="hero-robot" role="img" aria-label="Robot asistente de bienestar con inteligencia artificial">
                                 <div class="hero-robot-antenna"></div>
                                 <div class="hero-robot-head">
@@ -456,7 +459,7 @@
     <div class="container">
         <div class="footer-top">
             <div class="footer-brand-new">
-                <img src="/img/Logo.webp" alt="PsyAI Connect" id="footerLogo" width="48" height="48" decoding="async" data-bs-toggle="modal" data-bs-target="#logoModal">
+                <img src="/img/Logo.webp" alt="PsyAI Connect" id="footerLogo" width="48" height="48" decoding="async" loading="lazy" data-bs-toggle="modal" data-bs-target="#logoModal">
                 <span class="footer-logo-text">PsyAI Connect</span>
             </div>
             <nav class="footer-nav" aria-label="Navegación del pie de página">
@@ -522,7 +525,7 @@
             </div>
             <div class="modal-body modal-logo-body text-center py-4">
                 <div class="logo-modal-wrapper mb-4">
-                    <img src="/img/Logo.webp" alt="Logo de PsyAI Connect" class="logo-modal-img" width="180" height="180" decoding="async">
+                    <img src="/img/Logo.webp" alt="Logo de PsyAI Connect" class="logo-modal-img" width="180" height="180" decoding="async" loading="lazy">
                 </div>
                 <h2 class="logo-modal-title">Bienestar Emocional Accesible</h2>
                 <p class="logo-modal-subtitle">Plataforma de acompañamiento psicológico con inteligencia artificial</p>
@@ -610,7 +613,7 @@
 
 <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js" defer></script>
 <script src="/vendor/aos/aos.js" defer></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20260618">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-rescue">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
     <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
     <script src="/js/core/shared/mobile-navbar-toggle.js?v=20260727-mobile-polish-1"></script>

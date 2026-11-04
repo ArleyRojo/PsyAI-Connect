@@ -1252,6 +1252,7 @@
 .sidebar {
     width: 260px !important;
     height: 100vh;
+    height: 100dvh;
     transition: transform 0.3s ease;
     z-index: 1040;
     border-radius: 0 16px 16px 0;
@@ -3422,6 +3423,7 @@ html.dark-mode .tab.active {
     transition: all 0.3s ease;
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
     height: calc(100vh - 140px);
+    height: calc(100dvh - 140px);
     display: flex;
     flex-direction: column;
 }
@@ -3771,6 +3773,7 @@ html.dark-mode .tab.active {
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    height: 100dvh !important;
     border-radius: 0 !important;
     z-index: 9999 !important;
     padding: 20px !important;
@@ -3778,6 +3781,7 @@ html.dark-mode .tab.active {
 
 #chatbot-section.fullscreen-active .chat-area {
     height: calc(100vh - 180px) !important;
+    height: calc(100dvh - 180px) !important;
 }
 
 .typing-indicator {
@@ -4946,6 +4950,7 @@ html {
 .chat-wrapper {
   display: flex;
   height: calc(100vh - 140px);
+  height: calc(100dvh - 140px);
   min-height: 480px;
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -4957,7 +4962,7 @@ html {
 /* â”€â”€ Panel izquierdo â”€â”€ */
 .chat-sidebar {
   width: 320px;
-  min-width: 260px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--color-border);
@@ -10882,6 +10887,7 @@ body.aside-professional .main-content {
     background-attachment: fixed;
     font-family: var(--font-body);
     min-height: 100vh;
+    min-height: 100dvh;
 }
 
 body.aside-professional .agenda-page :where(h1, h2, h3, h4, h5, h6, p, a, span, small, label, button, input, select, textarea, table, th, td, li, option, .stat-number, .stat-label, .section-heading),
@@ -11094,12 +11100,12 @@ body.aside-professional .reports-page .professional-table-panel {
 }
 
 body.aside-professional .reports-page .professional-table-panel .table {
-    min-width: 720px;
+    min-width: 0;
     margin-bottom: 0;
 }
 
 body.aside-professional .reports-page .professional-table-panel .section-heading {
-    min-width: 720px;
+    min-width: 0;
 }
 
 body.aside-professional .reports-page .professional-table-panel thead th {
@@ -11583,7 +11589,7 @@ body.aside-professional .reports-page .reports-table-panel--deleted {
 }
 
 body.aside-professional .reports-page .deleted-table-heading {
-    min-width: 720px;
+    min-width: 0;
     margin: 0;
     padding: 1rem;
     background: #FFFDFB;

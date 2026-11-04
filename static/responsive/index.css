@@ -782,6 +782,7 @@ html {
     #mainNav .navbar-collapse.show {
         max-height: calc(100vh - 100px);
         max-height: calc(100dvh - 100px);
+        max-height: calc(100dvh - 100px);
         overflow-y: auto;
         overscroll-behavior: contain;
         opacity: 1;
@@ -3643,6 +3644,7 @@ html {
         right: 0.9rem;
         width: auto;
         max-height: calc(100vh - 92px);
+        max-height: calc(100dvh - 92px);
         overflow-y: auto;
         overscroll-behavior: contain;
     }
@@ -3658,6 +3660,7 @@ html {
 
     #mainNav .navbar-collapse.show {
         max-height: calc(100vh - 92px);
+        max-height: calc(100dvh - 92px);
     }
 
     #mainNav .navbar-nav {

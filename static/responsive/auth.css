@@ -690,6 +690,7 @@
     align-items: flex-start !important;
     padding: 1rem;
     min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .login-card,

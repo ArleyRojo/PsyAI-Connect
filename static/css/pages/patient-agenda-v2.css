@@ -11,6 +11,7 @@ body.patient-agenda-page {
             var(--surface-sunken) 0%, var(--surface-canvas) 40%,
             var(--surface-card) 100%);
     min-height: 100vh;
+    min-height: 100dvh;
 }
 
 /* ── Page header — fondo azul gradiente como page canvas ───── */

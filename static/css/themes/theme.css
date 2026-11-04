@@ -3023,6 +3023,7 @@ html.dark-mode .sidebar {
     min-width: 255px !important;
     max-width: 255px !important;
     height: 100vh !important;
+    height: 100dvh !important;
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -3036,6 +3037,7 @@ html.dark-mode .main-content {
     margin-left: 255px !important;
     padding: 28px 30px !important;
     min-height: 100vh !important;
+    min-height: 100dvh !important;
 
     /* Fondo profundo con textura (overrides de layout.css) */
     background: var(--dm-deep) !important;

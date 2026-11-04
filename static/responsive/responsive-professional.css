@@ -292,7 +292,7 @@
   }
 
   .table {
-    min-width: 720px;
+    min-width: 0;
   }
 
   .table th,
@@ -371,7 +371,7 @@
 
   body,
   .main-content {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   .main-content {
@@ -1100,7 +1100,7 @@
   }
 
   body:has(#tablaReportes) .table {
-    min-width: 720px;
+    min-width: 0;
     margin-bottom: 0;
   }
 
@@ -1703,70 +1703,6 @@ body:has(#tbodyPacientes) .main-header,
   }
 }
 
-/* Accordion responsive styles (compartido con responsive-patient.css y responsive-fix.css) */
-.accordion-responsive .accordion-item {
-  border: 1px solid rgba(13, 71, 161, 0.15);
-  border-left: 3px solid #0D47A1;
-  border-radius: 16px !important;
-  margin-bottom: 12px;
-  overflow: visible;
-  
-  box-shadow: 0 2px 8px rgba(13, 71, 161, 0.06);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
-}
-.accordion-responsive .accordion-item:first-child,
-.accordion-responsive .accordion-item:last-child {
-  border-radius: 16px !important;
-}
-.accordion-responsive .accordion-item:hover {
-  box-shadow: 0 6px 20px rgba(13, 71, 161, 0.12);
-  border-color: rgba(13, 71, 161, 0.28);
-}
-.accordion-responsive .accordion-button {
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 1.25rem 1.5rem;
-  
-  color: #0D1F3C;
-  border-radius: 16px !important;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.accordion-responsive .accordion-button:hover {
-  
-  color: #0D47A1;
-}
-.accordion-responsive .accordion-button:not(.collapsed) {
-  color: #0D47A1 !important;
-  
-  box-shadow: none;
-  border-bottom: 1px solid rgba(13, 71, 161, 0.15);
-}
-.accordion-responsive .accordion-button::after {
-  width: 28px;
-  height: 28px;
-  background-image: none !important;
-  background-size: 20px;
-  content: '\f107';
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 900;
-  display: inline-block;
-  color: #0D47A1 !important;
-  filter: none !important;
-  transition: transform 0.3s ease, color 0.2s ease;
-}
-.accordion-responsive .accordion-button:not(.collapsed)::after {
-  content: '\f00d' !important;
-  color: #0D47A1 !important;
-  transform: rotate(0deg);
-}
-.accordion-responsive .accordion-body {
-  padding: 0.75rem 1.5rem 1.5rem;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: #3A526B;
-  
-}
 
 @media (max-width: 767.98px) {
   .accordion-responsive .accordion-button {
