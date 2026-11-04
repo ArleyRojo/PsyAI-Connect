@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Django](https://img.shields.io/badge/Django-5.0-092E20?logo=django&logoColor=white)](https://djangoproject.com)
 [![DRF](https://img.shields.io/badge/DRF-3.14-ff1709?logo=django&logoColor=white)](https://django-rest-framework.org)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://mysql.com)
+[![MySQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://docker.com)
 [![Tests](https://img.shields.io/badge/Tests-259%2B-brightgreen)](#-testing)
 [![License](https://img.shields.io/badge/License-Educational-blue)](#-licencia)
@@ -55,7 +55,7 @@ Abre los documentos del proyecto desde el último release de GitHub:
 | **Python 3.10+** | Lenguaje principal |
 | **Django 5** | Framework web robusto |
 | **Django REST Framework** | APIs REST versionadas |
-| **MySQL 8** | Base de datos relacional |
+| **PostgreSQL 16** | Base de datos relacional |
 | **Waitress** | Servidor WSGI producción |
 | **python-dotenv** | Configuración por entorno |
 | **psutil** | Métricas sistema (CPU/RAM/Disco) |
@@ -84,7 +84,7 @@ Abre los documentos del proyecto desde el último release de GitHub:
 ## 🏗 Arquitectura
 
 ```
-Views → Services → Repositories → MySQL
+Views → Services → Repositories → PostgreSQL
 ```
 
 - **Views** — Endpoints REST y páginas
@@ -151,7 +151,7 @@ PsyAI-Connect/
 
 ### Prerrequisitos
 - Python 3.10+
-- MySQL 8+ (o Docker)
+- PostgreSQL 16+ (o Docker, que lo provee automáticamente)
 - API Key de [Google AI Studio](https://aistudio.google.com/)
 
 ### 🐳 Con Docker (Recomendado)
@@ -183,15 +183,13 @@ source venv/bin/activate      # Linux/Mac
 
 pip install -r requirements.txt
 cp .env.example .env
-# Configurar .env
+# Configurar .env (DB_* ahora apunta a PostgreSQL 16, puerto 5432)
 
-mysql -u root -p -e "CREATE DATABASE psyai_connect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# Crear la base de datos (PostgreSQL)
+createdb -U "$DB_USER" "$DB_NAME" 2>/dev/null || psql -U postgres -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;"
 
 python manage.py migrate
-# ⚠️ IMPORTANTE: Ejecutar TODAS las migraciones sin --fake, especialmente en apps/authentication.
-# No usar --fake en 0005_map_password_to_contrasena: la columna física `password` debe eliminarse
-# para evitar IntegrityError en registros vía Google (campo password sin default en MySQL).
-python manage.py createsuperuser  # opcional
+python manage.py createsuperuser  # opcional (el entrypoint de Docker ya crea el demo admin@psyai.com / Admin123 en dev)
 python manage.py runserver
 ```
 
@@ -214,13 +212,13 @@ pytest --cov=apps --cov-report=html:htmlcov  # Abrir htmlcov/index.html
 pytest apps/chatbot/tests/ -v
 pytest apps/scheduling/tests/ -v
 
-# En Docker
+# En Docker (PostgreSQL)
 docker compose -f install/docker-compose.yml exec app python -m pytest apps/ -q
 ```
 
 > **259+ tests** cubriendo servicios, repositorios, vistas y endpoints HTTP.  
-> Unit tests usan **SQLite en memoria** (rápidos, sin MySQL).  
-> Integration tests marcados con `@pytest.mark.integration` requieren MySQL.
+> Unit tests usan **SQLite en memoria** (rápidos, sin servidor).  
+> Integration tests marcados con `@pytest.mark.integration` requieren **PostgreSQL** (levantable con `docker compose -f install/docker-compose.yml up`).
 
 ---
 
@@ -230,7 +228,7 @@ docker compose -f install/docker-compose.yml exec app python -m pytest apps/ -q
 |----------|-------------|-----------|
 | `SECRET_KEY` | Clave secreta Django | ✅ |
 | `GEMINI_API_KEY` / `GEMINI_API_KEYS` | API keys Gemini (rotación multi-key) | ✅ |
-| `DB_*` | Conexión MySQL (host, port, user, pass, name) | ✅ |
+| `DB_*` | Conexión PostgreSQL (host, port, user, pass, name) — puerto 5432 | ✅ |
 | `EMAIL_*` | SMTP para correos transaccionales | ✅ |
 | `LOGIN_RATE_LIMIT` | Rate limit login (default: `60/m`) | ❌ |
 

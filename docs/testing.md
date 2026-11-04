@@ -9,7 +9,7 @@
 
 ```
 tests/
-├── test_integration.py              # Tests de integración (requieren MySQL)
+├── test_integration.py              # Tests de integración (requieren PostgreSQL)
 
 apps/
 ├── authentication/
@@ -63,7 +63,7 @@ filterwarnings =
 
 ### `config/settings/test.py`
 
-- **BD:** SQLite en memoria (`:memory:`) — tests unitarios rápidos, sin MySQL.
+- **BD:** SQLite en memoria (`:memory:`) — tests unitarios rápidos, sin servidor PostgreSQL.
 - `DEBUG = False`
 - `PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']` — hashing rápido para tests
 - `CACHES = LocMemCache`
@@ -86,11 +86,11 @@ Cada app testa sus 3 capas por separado:
 
 | Capa | Archivo | Qué se testea | Dependencias |
 |------|---------|---------------|--------------|
-| **Repository** | `test_repositories.py` | Consultas SQL, `create`, `get`, `update`, `delete`, `filter` | `@pytest.mark.django_db` (BD real SQLite) |
+| **Repository** | `test_repositories.py` | Consultas SQL, `create`, `get`, `update`, `delete`, `filter` | `@pytest.mark.django_db` (BD real PostgreSQL) |
 | **Service** | `test_services.py` | Lógica de negocio, validaciones, orquestación | Mocks de repositorios (`unittest.mock.patch`) |
 | **View** | `test_views.py` | Endpoints HTTP (status, response, permisos) | `RequestFactory` + mock de auth (`get_current_user`) |
 
-> **Regla:** Los tests de **service** NO tocan la BD real; usan mocks. Los tests de **repository** SÍ usan BD (SQLite). Los tests de **view** usan `RequestFactory` + sesión simulada.
+> **Regla:** Los tests de **service** NO tocan la BD real; usan mocks. Los tests de **repository** SÍ usan BD (PostgreSQL). Los tests de **view** usan `RequestFactory` + sesión simulada.
 
 ---
 
@@ -244,7 +244,7 @@ class TestLoginView:
 
 ## 6. Tests de integración (`tests/test_integration.py`)
 
-Requieren MySQL real (no SQLite). Marcados con `@pytest.mark.integration`.
+Requieren PostgreSQL real (no SQLite). Marcados con `@pytest.mark.integration`.
 
 ```python
 # tests/test_integration.py
@@ -297,7 +297,7 @@ pytest tests/test_integration.py -v -m integration
 
 ## 6. Cómo ejecutar tests
 
-### Suite completa (unitarios + SQLite)
+### Suite completa (unitarios)
 
 ```bash
 # Configurar settings de test
@@ -327,10 +327,10 @@ pytest --cov=apps --cov-report=term-missing
 pytest --cov=apps --cov-report=html:htmlcov
 ```
 
-### Solo tests de integración (requiere MySQL)
+### Solo tests de integración (requiere PostgreSQL)
 
 ```bash
-# Levantar MySQL (docker compose up -d db)
+# Levantar PostgreSQL (docker compose up -d db)
 docker compose -f install/docker-compose.yml up -d db
 
 # Ejecutar
@@ -393,13 +393,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:16
         env:
-          MYSQL_ROOT_PASSWORD: rootpass
-          MYSQL_DATABASE: psyai_connect
-        ports: ["3306:3306"]
-        options: --health-cmd="mysqladmin ping" --health-interval=10s
+          POSTGRES_USER: psyai
+          POSTGRES_PASSWORD: psyai_pass
+          POSTGRES_DB: psyai_connect
+        ports: ["5432:5432"]
+        options: --health-cmd="pg_isready -U psyai -d psyai_connect" --health-interval=10s
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -410,7 +411,7 @@ jobs:
         run: |
           export DJANGO_SETTINGS_MODULE=config.settings.test
           pytest --cov=apps --cov-report=xml
-      - name: Integration tests (MySQL)
+      - name: Integration tests (PostgreSQL)
         run: |
           export DJANGO_SETTINGS_MODULE=config.settings.test
           pytest tests/test_integration.py -v -m integration

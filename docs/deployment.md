@@ -12,7 +12,7 @@ PsyAI Connect se entrega como una aplicación Django contenedorizada. El desplie
 | Servicio | Imagen | Responsabilidad |
 |----------|--------|-----------------|
 | **app** | `python:3.12-slim` (build propio) | Servidor Django (runserver en dev / Waitress en prod) |
-| **db** | `mysql:8.4` | Base de datos relacional MySQL 8 |
+| **db** | `postgres:16` | Base de datos relacional PostgreSQL 16 |
 
 Ambos servicios comparten una red interna Docker (`psyai_net`) para que la app se conecte a la BD por el nombre de host `db`.
 
@@ -36,9 +36,11 @@ Ambos servicios comparten una red interna Docker (`psyai_net`) para que la app s
 ```
 install/
 ├── Dockerfile             # Multi-stage: base → dev → prod
-├── docker-compose.yml     # Desarrollo: app + MySQL con hot-reload
+├── docker-compose.yml     # Desarrollo: app + PostgreSQL con hot-reload
 ├── docker-compose.prod.yml# Override producción: prod target, waitress, no code volume
-├── entrypoint.sh          # Espera a MySQL → migraciones → superuser (dev) → arranca servidor
+├── entrypoint.sh          # Espera a PostgreSQL (pg_isready) → crea BD si falta → migraciones → superuser (dev) → arranca servidor
+├── legacy/                # Dump MySQL original (psyai_connect.sql) como legado, no usado en PostgreSQL
+├── pgloader/              # Config de pgloader para migrar datos MySQL → PostgreSQL
 └── .dockerignore          # Archivos excluidos de la imagen (.git, __pycache__, etc.)
 ```
 
@@ -57,9 +59,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    default-libmysqlclient-dev \
+    libpq-dev \
     pkg-config \
     curl \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -126,33 +129,40 @@ El entrypoint se ejecuta al iniciar el contenedor `app` y se encarga de dejar la
 #!/bin/bash
 set -e
 
-echo "==> PsyAI Connect — Entrypoint starting..."
+echo "==> PsyAI Connect — Entrypoint starting (PostgreSQL)..."
 
-# ── 1. Esperar a MySQL ────────────────────────────────────────────────────────
+DB_HOST="${DB_HOST:-localhost}"
+DB_PORT="${DB_PORT:-5432}"
+DB_USER="${DB_USER:-postgres}"
+DB_PASSWORD="${DB_PASSWORD:-postgres}"
+DB_NAME="${DB_NAME:-psyai_connect}"
+
+# ── 1. Esperar a PostgreSQL ────────────────────────────────────────────────────
 if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ]; then
-    echo "==> Waiting for MySQL at $DB_HOST:${DB_PORT:-3306}..."
-    until python - <<'PY'
-import os, socket, sys
-host = os.environ["DB_HOST"].strip()
-port = int(os.environ.get("DB_PORT", "3306").strip())
-try:
-    socket.create_connection((host, port), timeout=2).close()
-except Exception as e:
-    print(f"    connect to {host}:{port} failed: {e}", file=sys.stderr)
-    sys.exit(1)
-PY
-    do
-        echo "    MySQL not ready yet, retrying in 2s..."
+    echo "==> Waiting for PostgreSQL at $DB_HOST:$DB_PORT..."
+    until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" >/dev/null 2>&1; do
+        echo "    PostgreSQL not ready yet, retrying in 2s..."
         sleep 2
     done
-    echo "==> MySQL is ready!"
+    echo "==> PostgreSQL is ready!"
 fi
 
-# ── 2. Ejecutar migraciones ───────────────────────────────────────────────────
-echo "==> Running migrations..."
-python manage.py migrate --noinput 2>&1 || echo "WARNING: Migrations failed..."
+# ── 2. Crear la base de datos si no existe ─────────────────────────────────────
+if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ]; then
+    echo "==> Ensuring database $DB_NAME exists..."
+    if ! PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'" | grep -q 1; then
+        PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres -c "CREATE DATABASE $DB_NAME"
+        echo "    Database $DB_NAME created."
+    else
+        echo "    Database $DB_NAME already exists."
+    fi
+fi
 
-# ── 3. Crear superuser si no existe (solo dev) ───────────────────────────────
+# ── 3. Ejecutar migraciones ───────────────────────────────────────────────────
+echo "==> Running migrations..."
+python manage.py migrate --noinput
+
+# ── 4. Crear superuser si no existe (solo dev) ───────────────────────────────
 if [ "$DJANGO_SETTINGS_MODULE" = "config.settings.dev" ]; then
     python manage.py shell -c "
 from apps.authentication.models import Register
@@ -168,17 +178,18 @@ else:
 " 2>/dev/null || true
 fi
 
-# ── 4. Arrancar el servidor ───────────────────────────────────────────────────
+# ── 5. Arrancar el servidor ───────────────────────────────────────────────────
 echo "==> Starting server..."
 exec "$@"
 ```
 
 ### Flujo del entrypoint
 
-1. **Espera a MySQL:** intenta abrir un socket TCP contra `DB_HOST:DB_PORT`. Reintenta cada 2 s hasta que tenga éxito.
-2. **Migraciones:** ejecuta `python manage.py migrate --noinput` para poner al día el esquema.
-3. **Superuser (dev únicamente):** crea `admin@psyai.com` / `Admin123` si no existe. En producción este paso se omite.
-4. **Servidor:** ejecuta el comando definido en `CMD` (`runserver` en dev, `waitress-serve` en prod).
+1. **Espera a PostgreSQL:** usa `pg_isready` contra `DB_HOST:DB_PORT`. Reintenta cada 2 s hasta que esté listo.
+2. **Base de datos:** si la BD `DB_NAME` no existe, la crea (conectando a la BD `postgres`). El usuario `DB_USER` es superusuario en PostgreSQL, por lo que puede crear bases de datos.
+3. **Migraciones:** ejecuta `python manage.py migrate --noinput` para poner al día el esquema.
+4. **Superuser (dev únicamente):** crea `admin@psyai.com` / `Admin123` si no existe. En producción este paso se omite.
+5. **Servidor:** ejecuta el comando definido en `CMD` (`runserver` en dev, `waitress-serve` en prod).
 
 > **Permiso de ejecución:** el archivo ya tiene bit de ejecución en el repositorio. Si lo editas en Windows, asegúrate de que conserve los saltos de línea LF y el permiso `chmod +x`.
 
@@ -205,7 +216,7 @@ services:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
       - DEBUG=1
       - DB_HOST=db
-      - DB_PORT=3306
+      - DB_PORT=5432
       - DB_NAME=${DB_NAME:-psyai_connect}
       - DB_USER=${DB_USER:-psyai}
       - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
@@ -221,21 +232,20 @@ services:
     networks:
       - psyai_net
 
-  # ── MySQL 8 ───────────────────────────────────────────────────────────────
+  # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
   db:
-    image: mysql:8.4
+    image: postgres:16
     container_name: psyai_db
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
-      MYSQL_DATABASE: ${DB_NAME:-psyai_connect}
-      MYSQL_USER: ${DB_USER:-psyai}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-psyai_pass}
+      POSTGRES_USER: ${DB_USER:-psyai}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-psyai_pass}
+      POSTGRES_DB: ${DB_NAME:-psyai_connect}
     ports:
-      - "3307:3306"   # Host:3307 → Contenedor:3306
+      - "5437:5432"   # Host:5437 → Contenedor:5432
     volumes:
-      - mysql_data:/var/lib/mysql
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-psyai} -d ${DB_NAME:-psyai_connect}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -245,7 +255,7 @@ services:
       - psyai_net
 
 volumes:
-  mysql_data:
+  pgdata:
     driver: local
   uploads_data:
     driver: local
@@ -285,7 +295,7 @@ docker compose -f install/docker-compose.yml down -v
 | Servicio | URL / Puerto | Notas |
 |----------|--------------|-------|
 | App Django | `http://localhost:8000` | `runserver` con hot-reload |
-| MySQL | `localhost:3307` | Usuario `psyai`, BD `psyai_connect` |
+| PostgreSQL | `localhost:5437` | Usuario `psyai`, BD `psyai_connect` |
 
 ---
 
@@ -310,7 +320,7 @@ services:
       - DJANGO_SETTINGS_MODULE=config.settings.prod
       - DEBUG=0
       - DB_HOST=db
-      - DB_PORT=3306
+      - DB_PORT=5432
       - DB_NAME=${DB_NAME:-psyai_connect}
       - DB_USER=${DB_USER:-psyai}
       - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
@@ -324,23 +334,23 @@ services:
     networks:
       - psyai_net
 
-  # ── MySQL 8 (Producción) ─────────────────────────────────────────────────
+  # ── PostgreSQL 16 (Producción) ────────────────────────────────────────────
   db:
+    image: postgres:16
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME:-psyai_connect}
-      MYSQL_USER: ${DB_USER:-psyai}
-      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER:?Set DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME}
     # En producción se recomienda quitar el mapeo de puerto (solo red interna)
     ports: []
     volumes:
-      - mysql_data:/var/lib/mysql
+      - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
       - psyai_net
 
 volumes:
-  mysql_data:
+  pgdata:
     driver: local
   uploads_data:
     driver: local
@@ -364,7 +374,7 @@ docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml 
 |---------|---------------|
 | Servidor WSGI | `waitress-serve` con 4 hilos |
 | Código | Horneado en la imagen (no hay hot-reload) |
-| BD MySQL | Puerto **no expuesto** al host (`ports: []`), accesible solo por la red interna `psyai_net` |
+| BD PostgreSQL | Puerto **no expuesto** al host (`ports: []`), accesible solo por la red interna `psyai_net` |
 | `SECRET_KEY` | Obligatoria, pasada como `ARG` en el build |
 | Archivos estáticos | `collectstatic` ejecutado durante el build de la imagen |
 | Archivos subidos | Persisten en el volumen `uploads_data` |
@@ -383,12 +393,11 @@ Copia `.env.example` a `.env` en la raíz del proyecto y ajusta los valores. Nun
 | `DEBUG` | Modo debug | `1` | `0` |
 | `DJANGO_SETTINGS_MODULE` | Módulo de settings | `config.settings.dev` | `config.settings.prod` |
 | `PORT` | Puerto app | `8000` | `8000` |
-| `DB_HOST` | Host MySQL | `db` (Docker) | `db` (red interna) |
-| `DB_PORT` | Puerto MySQL | `3306` | `3306` |
+| `DB_HOST` | Host PostgreSQL | `db` (Docker) | `db` (red interna) |
+| `DB_PORT` | Puerto PostgreSQL | `5432` | `5432` |
 | `DB_NAME` | Nombre BD | `psyai_connect` | `psyai_connect` |
 | `DB_USER` | Usuario BD | `psyai` | `psyai` |
 | `DB_PASSWORD` | Password BD | `psyai_pass` | **Segura** |
-| `DB_ROOT_PASSWORD` | Root MySQL (Docker) | `rootpass` | **Segura** |
 | `ALLOWED_HOSTS` | Hosts permitidos | `*` | `tudominio.com,www.tudominio.com` |
 | `CORS_ORIGINS` | Orígenes CORS | `http://localhost:5000` | `https://tudominio.com` |
 | `CSRF_TRUSTED_ORIGINS` | CSRF trusted | `http://localhost:5000` | `https://tudominio.com` |
@@ -501,10 +510,10 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app python 
 docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 
 # Backup BD (desde host)
-docker exec psyai_db mysqldump -u root -p"$DB_ROOT_PASSWORD" psyai_connect > backup_$(date +%F).sql
+docker exec psyai_db pg_dump -U "$DB_USER" "$DB_NAME" > backup_$(date +%F).sql
 
 # Restore BD
-docker exec -i psyai_db mysql -u root -p"$DB_ROOT_PASSWORD" psyai_connect < backup_2026-01-15.sql
+docker exec -i psyai_db psql -U "$DB_USER" -d "$DB_NAME" < backup_2026-01-15.sql
 ```
 
 ---
@@ -513,12 +522,12 @@ docker exec -i psyai_db mysql -u root -p"$DB_ROOT_PASSWORD" psyai_connect < back
 
 | Síntoma | Causa probable | Solución |
 |---------|----------------|----------|
-| `app` reinicia en bucle | MySQL aún no está lista o credenciales incorrectas | Revisar `docker compose logs app` y verificar `DB_HOST`, `DB_PASSWORD`, `DB_ROOT_PASSWORD` |
+| `app` reinicia en bucle | PostgreSQL aún no está lista o credenciales incorrectas | Revisar `docker compose logs app` y verificar `DB_HOST`, `DB_PASSWORD` |
 | `collectstatic` falla en build de prod | `SECRET_KEY` no definida al construir | Exportar `SECRET_KEY` antes de `docker compose build` o definirla en `.env` |
-| App no conecta a MySQL | `DB_HOST` apunta a `localhost` en lugar de `db` | En Docker, `DB_HOST` debe ser `db` (nombre del servicio) |
+| App no conecta a PostgreSQL | `DB_HOST` apunta a `localhost` en lugar de `db` | En Docker, `DB_HOST` debe ser `db` (nombre del servicio) |
 | Error 500 en producción | `DEBUG=0` oculta el detalle | Revisar logs: `docker compose ... logs app`; revisar `ALLOWED_HOSTS` |
 | Archivos estáticos no cargan | `collectstatic` no se ejecutó | Rebuild de la imagen de producción (`up -d --build`) |
-| Puerto MySQL no accesible desde host | En producción `ports: []` | Esto es intencional; accede a MySQL desde otro contenedor en la red `psyai_net` o usa un cliente dentro del contenedor `app` |
+| Puerto PostgreSQL no accesible desde host | En producción `ports: []` | Esto es intencional; accede a PostgreSQL desde otro contenedor en la red `psyai_net` o usa `psql` dentro del contenedor `app` |
 
 ---
 

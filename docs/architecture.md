@@ -7,7 +7,7 @@ Plataforma web de bienestar emocional que combina un chatbot con IA y la conexi�
 | Capa | Tecnología |
 |---|---|
 | Backend | Django 5.2, Django REST Framework, django-allauth (login con Google) |
-| Base de datos | MySQL 8 (SQLite en memoria para las pruebas) |
+| Base de datos | PostgreSQL 16 (SQLite en memoria para pruebas unitarias) |
 | Frontend | Plantillas Django, Bootstrap 5, JavaScript modular (`static/js/{base,components,core,modules}`), CSS por rol |
 | IA | Google Gemini (respuestas del chatbot y prediagnóstico), con modelo de respaldo configurable |
 | Mensajería | SMTP (correos), WhatsApp vía Twilio (con proveedor `Dummy` para desarrollo) |
@@ -20,7 +20,7 @@ Plataforma web de bienestar emocional que combina un chatbot con IA y la conexi�
 flowchart LR
     U[Navegador<br/>paciente / profesional / admin] -->|HTTPS| W[Waitress]
     W --> D[Django<br/>middleware → views → services → repositories]
-    D --> DB[(MySQL 8)]
+    D --> DB[(PostgreSQL 16)]
     D --> G[Gemini API]
     D --> M[SMTP]
     D --> T[Twilio WhatsApp]
@@ -33,7 +33,7 @@ El cobro de las citas es **manual** (link de cobro configurado por variables de 
 
 ## 3. Capas
 
-El diseño objetivo es **Views → Services → Repositories → MySQL**:
+El diseño objetivo es **Views → Services → Repositories → PostgreSQL 16**:
 
 | Capa | Responsabilidad | Ubicación |
 |---|---|---|
@@ -102,7 +102,7 @@ sequenceDiagram
     participant V as Vista (authentication)
     participant S as AuthService
     participant R as SecurityRepository
-    participant DB as MySQL
+    participant DB as PostgreSQL 16
     N->>V: POST /api/login
     V->>S: login_user(datos)
     S->>R: check_brute_force()
@@ -164,14 +164,14 @@ El panel de administración y parte del paciente usan **Server-Sent Events** (`S
 ```mermaid
 flowchart LR
     subgraph Docker
-        APP[psyai_app_prod<br/>Waitress + Django] --> DB[(MySQL 8<br/>sin puerto expuesto)]
+        APP[psyai_app_prod<br/>Waitress + Django] --> DB[(PostgreSQL 16<br/>sin puerto expuesto)]
     end
     APP --- V[(volumen uploads_data)]
     PX[Proxy HTTPS<br/>X-Forwarded-Proto] --> APP
 ```
 
-- Imagen multi-stage con destinos `dev` y `prod` (`install/Dockerfile`); `entrypoint.sh` espera a MySQL, aplica migraciones y arranca.
-- Producción: `config.settings.prod`, `DEBUG=0`, MySQL con healthcheck, reinicio automático.
+- Imagen multi-stage con destinos `dev` y `prod` (`install/Dockerfile`); `entrypoint.sh` espera a PostgreSQL (pg_isready), aplica migraciones y arranca.
+- Producción: `config.settings.prod`, `DEBUG=0`, PostgreSQL con healthcheck, reinicio automático.
 - Salud: `/health/` y `/healthz/`.
 - Detalles en `deployment.md`.
 
