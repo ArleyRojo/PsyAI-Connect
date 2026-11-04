@@ -17,7 +17,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         email = sociallogin.account.extra_data.get("email")
         if email:
             try:
-                Register.objects.get(email=email)
+                Register.objects.get(email__iexact=email)
                 # El usuario existe, permitir login normal
                 return None
             except Register.DoesNotExist:

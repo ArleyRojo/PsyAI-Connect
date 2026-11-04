@@ -85,9 +85,12 @@ class AdminRepository:
 
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT COUNT(DISTINCT SUBSTRING_INDEX(detalle, 'IP: ', -1))
-                FROM Logs WHERE modulo='seguridad' AND accion LIKE 'Rate limit%%'
-                AND detalle LIKE '%%IP: %%' AND fecha >= NOW() - INTERVAL 1 DAY
+                SELECT COUNT(DISTINCT split_part(detalle, 'IP: ', 2))
+                FROM "Logs"
+                WHERE modulo = 'seguridad'
+                  AND accion LIKE 'Rate limit%'
+                  AND detalle LIKE '%IP: %'
+                  AND fecha >= now() - INTERVAL '1 day'
             """)
             ips_bloqueadas = cursor.fetchone()[0] or 0
 
@@ -149,18 +152,18 @@ class AdminRepository:
         offset = (page - 1) * limit
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT r.idUsuario, r.nombre, r.email, r.rol,
-                       COALESCE(r.activo, 1) as activo,
-                       r.estadoCuenta,
-                       r.fechaRegistro,
-                       (SELECT MAX(a.fecha) FROM AuditoriaAccesos a WHERE a.idUsuario = r.idUsuario) as ultimoAcceso
-                FROM Register r
+                SELECT r."idUsuario", r.nombre, r.email, r.rol,
+                       COALESCE(r.activo, TRUE) as activo,
+                       r."estadoCuenta",
+                       r."fechaRegistro",
+                       (SELECT MAX(a.fecha) FROM "AuditoriaAccesos" a WHERE a."idUsuario" = r."idUsuario") as ultimoAcceso
+                FROM "Register" r
                 ORDER BY
                     CASE r.rol
                         WHEN 'admin' THEN 1
                         WHEN 'profesional' THEN 2
                         WHEN 'paciente' THEN 3
-                    END, r.fechaRegistro DESC
+                    END, r."fechaRegistro" DESC
                 LIMIT %s OFFSET %s
             """, [limit, offset])
             columns = [col[0] for col in cursor.description]
@@ -176,10 +179,10 @@ class AdminRepository:
     def get_user(self, user_id):
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT idUsuario, nombre, email, rol,
-                       COALESCE(activo,1) as activo, estadoCuenta,
-                       fechaRegistro
-                FROM Register WHERE idUsuario = %s
+                SELECT "idUsuario", nombre, email, rol,
+                       COALESCE(activo, TRUE) as activo, "estadoCuenta",
+                       "fechaRegistro"
+                FROM "Register" WHERE "idUsuario" = %s
             """, [user_id])
             columns = [col[0] for col in cursor.description]
             row = cursor.fetchone()
@@ -198,7 +201,7 @@ class AdminRepository:
         email = data.get("email")
         if not email:
             raise ValueError("El email es requerido para crear un usuario")
-        if Register.objects.filter(email=email).exists():
+        if Register.objects.filter(email__iexact=email).exists():
             raise ValueError(f"El email '{email}' ya está registrado")
         user = Register(
             nombre=data.get("nombre"),
@@ -309,32 +312,32 @@ class AdminRepository:
             cursor.execute("""
                 (
                     SELECT
-                        n.idNotificacion, n.titulo, n.mensaje, n.tipo,
+                        n."idNotificacion", n.titulo, n.mensaje, n.tipo,
                         COALESCE(n.destinatario, reg.nombre, reg.email) as destinatario,
                         n.email_individual, n.enviado_por, n.estado, n.leido,
                         n.fecha as fecha_raw,
                         n.fecha_programada, 'notificacion' as tipo_registro,
                         n.fecha as fecha_orden
-                    FROM Notificaciones n
-                    LEFT JOIN Register reg ON reg.idUsuario = n.idUsuario
+                    FROM "Notificaciones" n
+                    LEFT JOIN "Register" reg ON reg."idUsuario" = n."idUsuario"
                     ORDER BY n.fecha DESC LIMIT 100
                 )
                 UNION ALL
                 (
                     SELECT NULL as idNotificacion,
-                        CONCAT('Cita: ', c.tipoCita) as titulo,
+                        CONCAT('Cita: ', c."tipoCita") as titulo,
                         CONCAT('Paciente: ', pa.nombre) as mensaje,
                         'profesional' as tipo,
-                        CONCAT('profesional_', pr.idUsuario) as destinatario,
+                        CONCAT('profesional_', pr."idUsuario") as destinatario,
                         NULL as email_individual, pr.nombre as enviado_por,
                         'enviado' as estado, NULL as leido,
                         c.fecha as fecha_raw,
                         NULL as fecha_programada, 'profesional' as tipo_registro,
                         c.fecha as fecha_orden
-                    FROM Citas c
-                    JOIN Register pr ON c.idProfesional = pr.idUsuario
-                    JOIN Register pa ON c.idPaciente = pa.idUsuario
-                    WHERE c.fecha <= CURDATE()
+                    FROM "Citas" c
+                    JOIN "Register" pr ON c."idProfesional" = pr."idUsuario"
+                    JOIN "Register" pa ON c."idPaciente" = pa."idUsuario"
+                    WHERE c.fecha <= CURRENT_DATE
                     ORDER BY c.fecha DESC LIMIT 50
                 )
                 UNION ALL
@@ -343,16 +346,16 @@ class AdminRepository:
                         CONCAT('Cita solicitada por: ', pa.nombre) as titulo,
                         CONCAT('Profesional: ', pr.nombre) as mensaje,
                         'paciente' as tipo,
-                        CONCAT('paciente_', pa.idUsuario) as destinatario,
+                        CONCAT('paciente_', pa."idUsuario") as destinatario,
                         NULL as email_individual, pa.nombre as enviado_por,
                         'enviado' as estado, NULL as leido,
                         c.fecha as fecha_raw,
                         NULL as fecha_programada, 'paciente' as tipo_registro,
                         c.fecha as fecha_orden
-                    FROM Citas c
-                    JOIN Register pa ON c.idPaciente = pa.idUsuario
-                    JOIN Register pr ON c.idProfesional = pr.idUsuario
-                    WHERE c.fecha <= CURDATE()
+                    FROM "Citas" c
+                    JOIN "Register" pa ON c."idPaciente" = pa."idUsuario"
+                    JOIN "Register" pr ON c."idProfesional" = pr."idUsuario"
+                    WHERE c.fecha <= CURRENT_DATE
                     ORDER BY c.fecha DESC LIMIT 50
                 )
                 ORDER BY fecha_orden DESC LIMIT 200
@@ -738,7 +741,7 @@ class AdminRepository:
         
         if destinatario == "individual" and email_individual:
             try:
-                user = Register.objects.get(email=email_individual)
+                user = Register.objects.get(email__iexact=email_individual)
                 return [(user, email_individual)]
             except Register.DoesNotExist:
                 # Usuario no registrado, usar solo el email

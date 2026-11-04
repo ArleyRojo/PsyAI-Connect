@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class AuthRepository:
     def user_exists_by_email(self, email):
-        return Register.objects.filter(email=email).exists()
+        return Register.objects.filter(email__iexact=email).exists()
 
     def create_user(self, nombre, email, password_hash, rol, genero=None, edad=None, email_verificado=True):
         user = Register(
@@ -30,7 +30,7 @@ class AuthRepository:
         return user.idUsuario
 
     def get_user_by_email(self, email, *, admin_only=False):
-        qs = Register.objects.filter(email=email, estadoCuenta="Activa")
+        qs = Register.objects.filter(email__iexact=email, estadoCuenta="Activa")
         if admin_only:
             qs = qs.filter(rol="admin")
         user = qs.first()
@@ -44,7 +44,7 @@ class AuthRepository:
         ).exists()
 
     def create_password_recovery_token(self, email, token, expires):
-        user = Register.objects.filter(email=email).first()
+        user = Register.objects.filter(email__iexact=email).first()
         if user:
             RecoveryTokens.objects.filter(
                 idUsuario=user, used=False
@@ -121,7 +121,7 @@ class AuthRepository:
 class SecurityRepository:
     def check_brute_force(self, email):
         try:
-            row = IntentosFallidos.objects.filter(email=email).first()
+            row = IntentosFallidos.objects.filter(email__iexact=email).first()
             if not row:
                 return False, 0
             if row.intentos < 5:
@@ -139,7 +139,7 @@ class SecurityRepository:
     def register_failed_attempt(self, email):
         now = timezone.now()
         try:
-            row = IntentosFallidos.objects.filter(email=email).first()
+            row = IntentosFallidos.objects.filter(email__iexact=email).first()
             if row:
                 row.intentos += 1
                 row.ultimo_intento = now
@@ -155,7 +155,7 @@ class SecurityRepository:
 
     def reset_failed_attempts(self, email):
         try:
-            row = IntentosFallidos.objects.filter(email=email).first()
+            row = IntentosFallidos.objects.filter(email__iexact=email).first()
             if row:
                 row.intentos = 0
                 row.bloqueado_hasta = None
@@ -165,7 +165,7 @@ class SecurityRepository:
 
     def check_rate_limit(self, key, max_attempts=10, window_minutes=60, lockout_minutes=30):
         try:
-            row = IntentosFallidos.objects.filter(email=key).first()
+            row = IntentosFallidos.objects.filter(email__iexact=key).first()
             if not row:
                 return False, 0
             if row.bloqueado_hasta:
@@ -192,7 +192,7 @@ class SecurityRepository:
     def register_rate_limit_hit(self, key):
         now = timezone.now()
         try:
-            row = IntentosFallidos.objects.filter(email=key).first()
+            row = IntentosFallidos.objects.filter(email__iexact=key).first()
             if row:
                 row.intentos += 1
                 row.ultimo_intento = now
@@ -206,7 +206,7 @@ class SecurityRepository:
 
     def reset_rate_limit(self, key):
         try:
-            row = IntentosFallidos.objects.filter(email=key).first()
+            row = IntentosFallidos.objects.filter(email__iexact=key).first()
             if row:
                 row.intentos = 0
                 row.bloqueado_hasta = None

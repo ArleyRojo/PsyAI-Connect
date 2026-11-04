@@ -7,7 +7,7 @@ class EmailBackend:
         if not email:
             return None
         try:
-            user = Register.objects.get(email=email)
+            user = Register.objects.get(email__iexact=email)
         except Register.DoesNotExist:
             return None
 
