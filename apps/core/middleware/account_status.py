@@ -58,23 +58,33 @@ class AccountStatusMiddleware(MiddlewareMixin):
         if not user_id:
             return None
 
-        # Consulta ligera a BD
-        try:
-            user = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
-        except Register.DoesNotExist:
-            request.session.flush()
-            if _wants_json(request):
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "code": "account_suspended",
-                        "message": "Tu cuenta ha sido suspendida. Contacta al administrador.",
-                    },
-                    status=403,
-                )
-            return redirect("/login.html?suspendida=1")
+        # Lee estado de cuenta de la sesión para evitar una consulta a BD en
+        # cada request. Si no está en sesión (p. ej. sesión antigua), consulta
+        # BD una vez y lo guarda en sesión para los requests siguientes.
+        activo = request.session.get("activo")
+        estado_cuenta = request.session.get("estadoCuenta")
+        if activo is None or estado_cuenta is None:
+            try:
+                user = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
+            except Register.DoesNotExist:
+                request.session.flush()
+                if _wants_json(request):
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "code": "account_suspended",
+                            "message": "Tu cuenta ha sido suspendida. Contacta al administrador.",
+                        },
+                        status=403,
+                    )
+                return redirect("/login.html?suspendida=1")
+            activo = user.activo
+            estado_cuenta = user.estadoCuenta
+            request.session["activo"] = activo
+            request.session["estadoCuenta"] = estado_cuenta
+            request.session.modified = True
 
-        if not user.activo or user.estadoCuenta != "Activa":
+        if not activo or estado_cuenta != "Activa":
             request.session.flush()
             if _wants_json(request):
                 return JsonResponse(

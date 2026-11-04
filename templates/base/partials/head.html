@@ -26,9 +26,7 @@ function getCsrfToken() {
 {# Icons - Font Awesome 6.4.0 (local) #}
 <link rel="stylesheet" href="/vendor/font-awesome/css/all.min.css">
 
-{# SweetAlert2 #}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+{# SweetAlert2 (movido al final del body con defer para no bloquear el render) #}
 <style>
 /* Make SweetAlert2 popups look like PsyAI custom alerts */
 .swal2-popup {
@@ -85,23 +83,18 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-{# Core CSS #}
-<link rel="preload" as="style" href="/css/base/base.css?v=20261101-3">
-<link rel="preload" as="style" href="/css/layout/layout.css?v=20261030-4">
-<link rel="preload" as="style" href="/css/themes/theme.css?v=20261101-theme-transition-1">
-<link rel="preload" as="style" href="/css/components/components.css?v=20260921-1">
-<link rel="preload" as="style" href="/css/themes/dark-polish.css?v=20260924-1">
-<link rel="stylesheet" href="/css/base/base.css?v=20261101-3" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="/css/layout/layout.css?v=20261030-4" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="/css/themes/theme.css?v=20261101-theme-transition-1" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="/css/components/components.css?v=20260921-1" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="/css/themes/dark-polish.css?v=20260924-1" media="print" onload="this.media='all'">
+{# Core CSS (críticos: se cargan de forma bloqueante para evitar FOUC) #}
+<link rel="stylesheet" href="/css/base/base.css?v=20261101-3">
+<link rel="stylesheet" href="/css/layout/layout.css?v=20261030-4">
+<link rel="stylesheet" href="/css/themes/theme.css?v=20261101-theme-transition-1">
+<link rel="stylesheet" href="/css/components/components.css?v=20260921-1">
+<link rel="stylesheet" href="/css/themes/dark-polish.css?v=20260924-1">
 
 
 {# Core JS (debe ir en head para evitar flash de tema incorrecto) #}
 <script src="/js/core/shared/theme-inline.js?v=20260718-1"></script>
 <script src="/js/core/shared/theme.js?v=20261101-3"></script>
-<script src="/js/core/shared/localStorage-detector.js?v=20260718-1"></script>
+<script src="/js/core/shared/localStorage-detector.js?v=20260718-1" defer></script>
 <script src="/js/core/shared/csrf.js?v=20260921-1"></script>
 <script src="/js/core/shared/professional-notifications.js?v=20261030-3" defer></script>
 

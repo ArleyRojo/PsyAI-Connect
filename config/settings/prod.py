@@ -12,6 +12,40 @@ ALLOWED_HOSTS = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# ── WhiteNoise: servir estáticos en producción (gzip/brotli + caché inmutable) ──
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+] + [m for m in MIDDLEWARE if m not in (
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+)]
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+# Caché inmutable (1 año) y compresión automática gzip/brotli en WhiteNoise
+WHITENOISE_MAX_AGE = 31536000
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = False
+
+# ── Caché en producción (LocMemCache, un solo worker en Render plan gratis) ──
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "psyai-connect-cache",
+        "TIMEOUT": 120,
+        "OPTIONS": {
+            "MAX_ENTRIES": 2000,
+        },
+    }
+}
+
 # Validate SECRET_KEY in production
 _secret = os.getenv("SECRET_KEY", "")
 if not _secret or len(_secret) < 50 or _secret.startswith("dev-insecure"):

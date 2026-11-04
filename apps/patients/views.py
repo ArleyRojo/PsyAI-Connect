@@ -263,8 +263,16 @@ class ChatbotConfigEventsResource(View):
                     # Verify account status each iteration
                     if user_id:
                         try:
-                            usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
-                            if not usr.activo or usr.estadoCuenta != "Activa":
+                            usr_activo = request.session.get("activo")
+                            usr_estado = request.session.get("estadoCuenta")
+                            if usr_activo is None or usr_estado is None:
+                                usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
+                                usr_activo = usr.activo
+                                usr_estado = usr.estadoCuenta
+                                request.session["activo"] = usr_activo
+                                request.session["estadoCuenta"] = usr_estado
+                                request.session.modified = True
+                            if not usr_activo or usr_estado != "Activa":
                                 yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
                                 return
                         except Register.DoesNotExist:

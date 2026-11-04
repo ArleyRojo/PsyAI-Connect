@@ -10026,7 +10026,7 @@ html.dark-mode .step-item p { color: #aac5df !important; }
     width: 100%;
     overflow: visible;
     border-radius: 22px;
-    background: #eaf5ff url('/img/hero-woman-robot.png?v=20260919-transparent') left center / 72% 100% no-repeat !important;
+    background: #eaf5ff url('/img/hero-woman-robot.webp?v=2') left center / 72% 100% no-repeat !important;
 }
 .hero-image-wrapper, .hero-image-card { width: 100%; }
 .hero-image-card { overflow: visible !important; transform: none !important; background: transparent !important; border: 0 !important; box-shadow: none !important; }
@@ -10409,7 +10409,7 @@ body {
 .hero-scene {
     min-height: 475px !important;
     border-radius: 0 !important;
-    background: transparent url('/img/hero-psyai-connect.png?v=20260919-hero-psyai') left bottom / cover no-repeat !important;
+    background: transparent url('/img/hero-psyai-connect.webp?v=2') left bottom / cover no-repeat !important;
 }
 
 .hero-person {
