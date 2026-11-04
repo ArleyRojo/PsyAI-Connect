@@ -145,9 +145,8 @@ class Installer:
         if result.returncode != 0:
             self.error(
                 "Falló la instalación de dependencias.\n"
-                "  • En Windows: mysqlclient puede requerir wheels o "
-                "Microsoft Visual C++ Build Tools.\n"
-                "  • En Linux: instale pkg-config y default-libmysqlclient-dev."
+                "  • En Windows: psycopg puede requerir wheels o Microsoft Visual C++ Build Tools.\n"
+                "  • En Linux: instale pkg-config y libpq-dev (postgresql-client para pg_isready)."
             )
             return False
         self.ok("Dependencias instaladas")

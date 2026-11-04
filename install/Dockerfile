@@ -10,12 +10,13 @@ FROM python:3.12-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Install system dependencies required by mysqlclient and general utilities
+# Install system dependencies required by psycopg (libpq) and PostgreSQL client tools (pg_isready)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    default-libmysqlclient-dev \
+    libpq-dev \
     pkg-config \
     curl \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

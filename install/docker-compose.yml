@@ -27,7 +27,7 @@ services:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
       - DEBUG=1
       - DB_HOST=db
-      - DB_PORT=3306
+      - DB_PORT=5432
       - DB_NAME=${DB_NAME:-psyai_connect}
       - DB_USER=${DB_USER:-psyai}
       - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
@@ -43,21 +43,20 @@ services:
     networks:
       - psyai_net
 
-  # ── MySQL 8 ───────────────────────────────────────────────────────────────
+  # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
   db:
-    image: mysql:8.4
+    image: postgres:16
     container_name: psyai_db
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
-      MYSQL_DATABASE: ${DB_NAME:-psyai_connect}
-      MYSQL_USER: ${DB_USER:-psyai}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-psyai_pass}
+      POSTGRES_USER: ${DB_USER:-psyai}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-psyai_pass}
+      POSTGRES_DB: ${DB_NAME:-psyai_connect}
     ports:
-      - "3307:3306"
+      - "5437:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-psyai} -d ${DB_NAME:-psyai_connect}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -68,7 +67,7 @@ services:
 
 # ── Volumes ────────────────────────────────────────────────────────────────
 volumes:
-  mysql_data:
+  pgdata:
     driver: local
   uploads_data:
     driver: local
