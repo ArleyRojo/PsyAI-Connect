@@ -2299,7 +2299,7 @@ button:focus-visible,
     border-left: 3px solid var(--color-primary);
     padding-left: 1rem;
 }
-@media (max-width: 900px) {
+@media (max-width: 991.98px) {
     .hero-section { flex-direction: column; text-align: center; }
 }
 
@@ -2530,7 +2530,7 @@ button:focus-visible,
 /* ms-250 / ms-280 utility */
 .ms-250, .ms-280 { margin-left: 255px !important; }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .ms-250, .ms-280 { margin-left: 0 !important; }
 }
 
@@ -2745,7 +2745,7 @@ button:focus-visible,
     color: #64b5f6;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .footer-enhanced .footer-content {
         padding: 40px 0 15px;
     }

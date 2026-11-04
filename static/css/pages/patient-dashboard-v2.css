@@ -287,7 +287,7 @@
     color: rgba(255,255,255,0.88);
     margin: 0 0 var(--sp-3, 12px);
     line-height: var(--lh-normal, 1.5);
-    max-width: 480px;
+    max-width: 575.98px;
 }
 
 .dash-hero-v2__meta {
@@ -1308,7 +1308,7 @@ html.dark-mode .stat-card-v2--mood__3d {
    14. RESPONSIVE
    ============================================================ */
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
     .dash-main-grid {
         grid-template-columns: 1fr;
     }
@@ -1317,7 +1317,7 @@ html.dark-mode .stat-card-v2--mood__3d {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .dash-topbar {
         padding: var(--sp-3, 12px) var(--sp-4, 16px);
     }
@@ -1399,7 +1399,7 @@ html.dark-mode .stat-card-v2--mood__3d {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .dash-hero-v2 {
         padding: var(--sp-5, 20px);
     }

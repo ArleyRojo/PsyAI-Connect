@@ -593,7 +593,7 @@ html.dark-mode .bank-info-disclaimer {
 }
 
 /* ── Responsive ──────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .facturas-page {
         padding: var(--sp-4);
     }

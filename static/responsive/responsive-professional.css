@@ -10,7 +10,7 @@
      <= 375px    Very small mobile
    ============================================================ */
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 :root {
     --pro-sidebar-width: 300px;
     --pro-toggle-size: 48px;
@@ -320,7 +320,7 @@
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   .main-content {
     padding-left: 1.25rem !important;
     padding-right: 1.25rem !important;
@@ -361,7 +361,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   :root {
     --pro-sidebar-width: 300px;
     --pro-content-pt: 4.5rem;
@@ -631,7 +631,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   :root {
     --pro-sidebar-width: 85vw;
     --pro-content-pt: 4.25rem;
@@ -740,7 +740,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   :root {
     --pro-content-pt: 4rem;
     --pro-toggle-size: 40px;
@@ -884,7 +884,7 @@
 }
 
 /* Refuerzo de visibilidad para acordeones y contenedores en responsive */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   .main-content .card,
   .main-content section,
   .accordion, 
@@ -899,7 +899,7 @@
 }
 
 /* Accordion base visibility for mobile */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   .main-content .accordion,
   .main-content .accordion-responsive,
   .main-content .faq-accordion {
@@ -947,7 +947,7 @@
    Mantiene tablas y contenido; mejora encuadre, scroll y densidad.
    ============================================================ */
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 .aside-professional .main-content,
   body:has(#tablaReportes) .main-content,
   body:has(#tbodyPacientes) .main-content {
@@ -1158,7 +1158,7 @@
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   body:has(#tbodyPacientes) .tabs {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1173,7 +1173,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
 body:has(#tbodyPacientes) .main-header,
   body:has(#tablaReportes) .main-header {
     gap: 0.55rem;
@@ -1527,7 +1527,7 @@ body:has(#tbodyPacientes) .main-header,
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   body:has(#tbodyPacientes) .tabs {
     grid-template-columns: 1fr;
   }
@@ -1619,20 +1619,20 @@ body:has(#tbodyPacientes) .main-header,
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   body:has(#tbodyPacientes) .progress-step {
     grid-template-columns: 30px minmax(0, 1fr);
     gap: 0.15rem 0.3rem;
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   section.row:has(#filtroPaciente) {
     row-gap: 12px;
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   .row.g-3.mb-4:has(#filtroEstado) > [class*="col-"] {
     flex: 0 0 100%;
     max-width: 100%;
@@ -1684,7 +1684,7 @@ body:has(#tbodyPacientes) .main-header,
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   .item-row {
     flex-wrap: wrap;
   }
@@ -1768,7 +1768,7 @@ body:has(#tbodyPacientes) .main-header,
   
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   .accordion-responsive .accordion-button {
     font-size: 0.9rem !important;
     padding: 0.9rem 1rem !important;
@@ -1802,7 +1802,7 @@ body:has(#tbodyPacientes) .main-header,
 }
 
 /* Refuerzo de visibilidad para acordeones en vistas con sidebar (mobile) */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 body:has(.sidebar) .accordion,
   body:has(.sidebar) .accordion-responsive,
   body:has(.sidebar) .faq-accordion {
@@ -1837,7 +1837,7 @@ body:has(.sidebar) .accordion,
 /* ============================================================
    ULTIMATE ACCORDION VISIBILITY FIX - Highest priority
    ============================================================ */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 body:has(.sidebar) .accordion,
   body:has(.sidebar) .accordion-responsive {
     display: block !important;

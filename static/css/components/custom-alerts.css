@@ -227,7 +227,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .psyai-alert-container {
         left: 12px;
         right: 12px;
@@ -270,7 +270,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .psyai-alert-container {
         left: 8px;
         right: 8px;

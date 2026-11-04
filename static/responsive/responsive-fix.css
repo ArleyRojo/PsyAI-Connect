@@ -5,15 +5,6 @@
    NO modifica colores, branding ni estructura.
    =================================================== */
 
-/* ═══════════════════════════════════════════════════
-   BREAKPOINTS UNIFICADOS
-   ═══════════════════════════════════════════════════ */
-:root {
-  --bp-sm: 576px;
-  --bp-md: 768px;
-  --bp-lg: 992px;
-  --bp-xl: 1200px;
-}
 
 /* ═══════════════════════════════════════════════════
    GLOBAL: BOX-SIZING y overflow
@@ -37,7 +28,7 @@ table {
 /* ═══════════════════════════════════════════════════
    SIDEBAR – toggle global override
    ═══════════════════════════════════════════════════ */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
@@ -2045,7 +2036,7 @@ section.chat-wrapper,
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   body.aside-professional .reports-page .reports-stats {
     grid-template-columns: 1fr !important;
   }
@@ -2159,7 +2150,7 @@ section.chat-wrapper,
     Ensure accordion is visible on mobile when inside main-content
     ═══════════════════════════════════════════════════ */
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 body:has(.sidebar) .main-content .accordion,
   body:has(.sidebar) .main-content .accordion-responsive,
   body:has(.sidebar) .main-content .faq-accordion {
@@ -2226,7 +2217,7 @@ body:has(.sidebar) .main-content .accordion,
 /* ═══════════════════════════════════════════════════
    FINAL ACCORDION OVERRIDE - Ensure visibility
    ═══════════════════════════════════════════════════ */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   body:has(.sidebar) .accordion,
   body:has(.sidebar) .accordion-responsive,
   body:has(.sidebar) .faq-accordion {

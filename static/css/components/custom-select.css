@@ -158,7 +158,7 @@
   gap: var(--sp-2);
   padding: var(--sp-2);
 }
-@media (max-width: 480px) { .cs-grid { grid-template-columns: 1fr; } }
+@media (max-width: 575.98px) { .cs-grid { grid-template-columns: 1fr; } }
 
 /* option */
 .cs-option {

@@ -753,7 +753,7 @@ html.dark-mode .btn-back:hover {
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .grid-2 { grid-template-columns: 1fr; }
   .patient-banner { flex-wrap: wrap; }
   .file-row { flex-wrap: wrap; gap: 8px; }

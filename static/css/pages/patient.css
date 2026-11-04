@@ -659,12 +659,12 @@ html.dark-mode .evolution-empty {
 
 
 /* -- Dashboard Responsive -- */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .dash-stats { grid-template-columns: repeat(2, 1fr); }
     .dash-grid { grid-template-columns: 1fr; }
     .dash-hero__text h1 { font-size: 1.3rem; }
 }
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .dash-stats { grid-template-columns: 1fr; }
     .quick-grid { grid-template-columns: repeat(2, 1fr); }
     .dash-hero { padding: 20px; }
@@ -2345,7 +2345,7 @@ body.modal-open #chatbot-section.fullscreen-active {
 /* Responsive styles moved to patient-responsive.css */
 
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -2940,7 +2940,7 @@ body.modal-open #chatbot-section.fullscreen-active {
     border-radius: 10px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .button,
     .btn {
         min-height: 40px;
@@ -3368,7 +3368,7 @@ body.modal-open #chatbot-section.fullscreen-active {
 }
 
 /* ========== TABLETS (768px - 991px) ========== */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -3432,7 +3432,7 @@ body.modal-open #chatbot-section.fullscreen-active {
 }
 
 /* ========== MÃ¯Â¿Â½VILES GRANDES (576px - 767px) ========== */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -4032,7 +4032,7 @@ body.modal-open #chatbot-section.fullscreen-active {
 /* ========== MEJORAS GENERALES ========== */
 
 /* Botones mÃ¯Â¿Â½s tÃ¯Â¿Â½ctiles en mÃ¯Â¿Â½vil */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .button,
     .btn {
         min-height: 40px;
@@ -6814,7 +6814,7 @@ body.modal-open #chatbot-section.fullscreen-active {
 }
 
 /* ========== TABLETS (768px - 991px) ========== */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -6878,7 +6878,7 @@ body.modal-open #chatbot-section.fullscreen-active {
 }
 
 /* ========== MÃ¯Â¿Â½VILES GRANDES (576px - 767px) ========== */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -7506,7 +7506,7 @@ body.modal-open #chatbot-section.fullscreen-active {
 /* ========== MEJORAS GENERALES ========== */
 
 /* Botones mÃ¯Â¿Â½s tÃ¯Â¿Â½ctiles en mÃ¯Â¿Â½vil */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .button,
     .btn {
         min-height: 40px;
@@ -7717,7 +7717,7 @@ html {
 
 /* ===== Source: app\static\responsive\evolution.css ===== */
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .main-content {
         padding: 1rem !important;
         margin-left: 0 !important;
@@ -7756,7 +7756,7 @@ html {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .main-content {
         padding: 0.75rem !important;
     }
@@ -8479,7 +8479,7 @@ html.dark-mode .badge-emotion {
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 @media (
-max-width: 576px) {
+max-width: 575.98px) {
   .emotional-state-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -8503,7 +8503,7 @@ max-width: 576px) {
   }
 }
 
-@media (min-width: 577px) and (max-width: 768px) {
+@media (min-width: 577px) and (max-width: 767.98px) {
   .emotional-state-grid {
     grid-template-columns: repeat(5, 1fr);
   }
@@ -8515,7 +8515,7 @@ max-width: 576px) {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .main-content {
     padding: 1rem !important;
     margin-left: 0 !important;
@@ -8778,7 +8778,7 @@ textarea#notas_personales.form-control::placeholder {
    extracted from patients.css
    ============================================================ */
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -8837,7 +8837,7 @@ textarea#notas_personales.form-control::placeholder {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -9405,7 +9405,7 @@ textarea#notas_personales.form-control::placeholder {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .button,
     .btn {
         min-height: 40px;
@@ -9465,7 +9465,7 @@ html {
    extracted from evolution.css
    ============================================================ */
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .main-content {
         padding: 1rem !important;
         margin-left: 0 !important;
@@ -9504,7 +9504,7 @@ html {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .main-content {
         padding: 0.75rem !important;
     }
@@ -10241,7 +10241,7 @@ html {
 
 
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   .chat-wrapper { height: calc(100vh - 100px); }
   .chat-bubble { max-width: 90%; }
   .chat-input-bar textarea { font-size: 0.85rem; }

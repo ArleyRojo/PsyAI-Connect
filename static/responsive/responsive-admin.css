@@ -18,7 +18,7 @@
    VARIABLES RESPONSIVE
    Sobreescriben las globales sólo en móvil/tablet
    ────────────────────────────────────────────────────────────── */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   :root {
     --admin-sidebar-width:    300px;
     --admin-toggle-size:      48px;
@@ -35,7 +35,7 @@
    1. SIDEBAR ADMIN — MOBILE PREMIUM
    ══════════════════════════════════════════════════════════════ */
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 /* Base */
   .sidebar {
     position: fixed;
@@ -1436,7 +1436,7 @@
    TABLET (769px – 1024px): refinamientos de grid
    ══════════════════════════════════════════════════════════════ */
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 
   :root {
     --admin-sidebar-width: 300px;
@@ -1474,7 +1474,7 @@
    MOBILE (≤ 480px)
    ══════════════════════════════════════════════════════════════ */
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
 
   :root {
     --admin-sidebar-width: 85vw;
@@ -1546,7 +1546,7 @@
    VERY SMALL MOBILE (≤ 375px)
    ══════════════════════════════════════════════════════════════ */
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
 
   :root {
     --admin-content-pt: 4rem;
@@ -1660,7 +1660,7 @@
    LOGS — FIX CONSOLIDADO
    Resuelve conflictos de media queries duplicadas en logs.html
    ════════════════════════════════════════════════════════════════ */
-@media screen and (max-width: 991px) {
+@media screen and (max-width: 991.98px) {
   #panel-logs .logs-tabs {
     display: flex !important;
     flex-wrap: nowrap;
@@ -1727,7 +1727,7 @@
   }
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 767.98px) {
 #panel-logs .row.g-3.mb-4 {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
@@ -1911,7 +1911,7 @@
   }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 575.98px) {
   #panel-logs .row.g-3.mb-4 {
     grid-template-columns: 1fr !important;
   }
@@ -1932,7 +1932,7 @@
 }
 
 /* Ensure accordions are visible and take full width on smaller screens */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   .accordion, /* Added this line to target all Bootstrap accordions */
   .accordion-responsive, /* Existing line */
   .faq-accordion { /* Existing line */
@@ -1946,7 +1946,7 @@
    Mantiene tablas y contenido en columnas alineadas con scroll suave
    ════════════════════════════════════════════════════════════════ */
 
-@media screen and (max-width: 991px) {
+@media screen and (max-width: 991.98px) {
 
   .main-content { overflow-x: hidden; }
 
@@ -2123,7 +2123,7 @@
   }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 575.98px) {
   .toolbar { align-items: stretch; }
 
   .toolbar-left,
@@ -2142,7 +2142,7 @@
   }
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 767.98px) {
 .main-content,
   .main-content > *,
   .card,
@@ -2358,7 +2358,7 @@
   }
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 767.98px) {
 .table-clean,
   #tablaUsuarios,
   #tablaRoles,
@@ -2492,7 +2492,7 @@
 }
 
 /* Logs: responsive compacto y legible */
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 767.98px) {
 #panel-logs .row.g-3.mb-4 {
     margin-bottom: 0.75rem !important;
   }
@@ -2784,7 +2784,7 @@
 }
 
 /* Logs: refinamiento final mobile/tablet */
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 767.98px) {
 .main-content:has(#panel-logs) {
     padding-left: 0.65rem !important;
     padding-right: 0.65rem !important;
@@ -3008,7 +3008,7 @@
   
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 575.98px) {
   #panel-logs .row.g-3.mb-4,
   #panel-logs .logs-tabs {
     grid-template-columns: 1fr;
@@ -3031,7 +3031,7 @@
   }
 }
 
-@media screen and (max-width: 991px) {
+@media screen and (max-width: 991.98px) {
   .main-content:has(#panel-logs) {
     padding-left: 1.25rem !important;
     padding-right: 1.25rem !important;
@@ -3059,7 +3059,7 @@
    USUARIOS / ROLES — FIX CONSOLIDADO
    Resuelve conflictos en users.html y roles.html
    ════════════════════════════════════════════════════════════════ */
-@media screen and (max-width: 991px) {
+@media screen and (max-width: 991.98px) {
   #tab-u-todos .toolbar,
   #tab-usuarios .toolbar,
   #tab-historial .toolbar {
@@ -3154,7 +3154,7 @@
   }
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 767.98px) {
 /* Header compact */
   .main-header {
     padding: 12px 14px !important;
@@ -3408,7 +3408,7 @@
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   #kpiFacturas .stat-card { padding: 12px; }
 
   section:has(#filtroPacienteAdmin) {
@@ -3428,7 +3428,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   #filtroPacienteAdmin, #filtroProfesionalAdmin,
   #filtroEstadoAdmin, #filtroMetodoAdmin,
   #filtroFechaDesdeAdmin, #filtroFechaHastaAdmin {
@@ -3482,7 +3482,7 @@
   }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 575.98px) {
   .row.g-3.mb-4:has(.stat-card),
   #tab-u-todos ~ .row.g-3.mb-4 {
     grid-template-columns: 1fr !important;

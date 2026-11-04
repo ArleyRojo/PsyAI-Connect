@@ -572,7 +572,7 @@ html {
 
 
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
     .hero-section {
         padding: 88px 0 72px;
     }
@@ -594,7 +594,7 @@ html {
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 html {
         scroll-padding-top: 92px;
     }
@@ -1055,7 +1055,7 @@ html {
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     #mainNav .navbar-toggler {
         padding: 0.5rem 0.8rem;
     }
@@ -1065,7 +1065,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     html {
         scroll-padding-top: 88px;
     }
@@ -1288,7 +1288,7 @@ html {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .container {
         padding-left: 1rem;
         padding-right: 1rem;
@@ -1493,7 +1493,7 @@ html {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     #mainNav .navbar-toggler {
         min-width: 44px;
         padding: 0.42rem;
@@ -1552,7 +1552,7 @@ html {
     }
 }
 
-@media (max-height: 620px) and (orientation: landscape) and (max-width: 991px) {
+@media (max-height: 620px) and (orientation: landscape) and (max-width: 991.98px) {
     .hero-section {
         padding-top: 96px;
     }
@@ -1665,7 +1665,7 @@ html {
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     #mainNav .navbar-toggler {
         padding: 0.5rem 0.8rem;
     }
@@ -1675,7 +1675,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     html {
         scroll-padding-top: 88px;
     }
@@ -1898,7 +1898,7 @@ html {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .container {
         padding-left: 1rem;
         padding-right: 1rem;
@@ -2103,7 +2103,7 @@ html {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     #mainNav .navbar-toggler {
         min-width: 44px;
         padding: 0.42rem;
@@ -2162,7 +2162,7 @@ html {
     }
 }
 
-@media (max-height: 620px) and (orientation: landscape) and (max-width: 991px) {
+@media (max-height: 620px) and (orientation: landscape) and (max-width: 991.98px) {
     .hero-section {
         padding-top: 96px;
     }
@@ -2172,7 +2172,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     body {
         padding-left: env(safe-area-inset-left, 0);
         padding-right: env(safe-area-inset-right, 0);
@@ -2239,7 +2239,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .hero-btn-wrapper {
         flex-direction: row;
         flex-wrap: wrap;
@@ -2255,7 +2255,7 @@ html {
     }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
 html {
         scroll-padding-top: 96px;
     }
@@ -2382,7 +2382,7 @@ html {
     }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
     .professional-card {
         max-width: 680px;
         margin-left: auto;
@@ -2390,7 +2390,7 @@ html {
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 #beneficios .row > .col-md-4,
     #servicios .row > .col-md-4 {
         flex: 0 0 50%;
@@ -2428,7 +2428,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
 #logoModal .modal-dialog,
     #chatbotModal .modal-dialog {
         max-width: calc(100vw - 1.25rem);
@@ -2548,7 +2548,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .chatbot-modal-footer {
         flex-direction: row;
         flex-wrap: wrap;
@@ -2572,7 +2572,7 @@ html {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .logo-modal-features {
         grid-template-columns: 1fr;
     }
@@ -2622,7 +2622,7 @@ html {
 }
 
 /* --- Premium Navbar Mobile --- */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .navbar {
         padding: 0.8rem 0 !important;
     }
@@ -2725,7 +2725,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     body {
         padding-left: env(safe-area-inset-left, 0);
         padding-right: env(safe-area-inset-right, 0);
@@ -2792,7 +2792,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .hero-btn-wrapper {
         flex-direction: row;
         flex-wrap: wrap;
@@ -2808,7 +2808,7 @@ html {
     }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
 html {
         scroll-padding-top: 96px;
     }
@@ -2935,7 +2935,7 @@ html {
     }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
     .professional-card {
         max-width: 680px;
         margin-left: auto;
@@ -2943,7 +2943,7 @@ html {
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .hero-section {
         text-align: center;
         padding: 118px 0 80px;
@@ -2976,7 +2976,7 @@ html {
     }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
 html {
         scroll-padding-top: 108px;
     }
@@ -3152,7 +3152,7 @@ html {
     }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
     html {
         scroll-padding-top: 100px;
     }
@@ -3182,7 +3182,7 @@ html {
 
     .hero-subtitle {
         font-size: 1.1rem;
-        max-width: 540px;
+        max-width: 575.98px;
     }
 
     .hero-image-card img {
@@ -3203,11 +3203,11 @@ html {
     }
 
     .modal-dialog.modal-lg {
-        max-width: 900px;
+        max-width: 991.98px;
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
 #beneficios .row > .col-md-4,
     #servicios .row > .col-md-4 {
         flex: 0 0 50%;
@@ -3245,7 +3245,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
 #logoModal .modal-dialog,
     #chatbotModal .modal-dialog {
         max-width: calc(100vw - 1.25rem);
@@ -3365,7 +3365,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .chatbot-modal-footer {
         flex-direction: row;
         flex-wrap: wrap;
@@ -3389,7 +3389,7 @@ html {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .logo-modal-features {
         grid-template-columns: 1fr;
     }
@@ -3435,7 +3435,7 @@ html {
    ======================================================= */
 
 /* -- Hero Badges -- */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .hero-badges {
         justify-content: center;
     }
@@ -3446,14 +3446,14 @@ html {
 }
 
 /* -- Unified Cards Grid -- */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .unified-card-grid .col-md-4 {
         flex: 0 0 50%;
         max-width: 50%;
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .unified-card-grid .col-md-4 {
         flex: 0 0 100%;
         max-width: 100%;
@@ -3470,7 +3470,7 @@ html {
 }
 
 /* -- 3D Objects scale on mobile -- */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .obj-brain { width: 65px; height: 65px; }
     .obj-sphere { width: 58px; height: 58px; }
     .obj-cube { width: 50px; height: 50px; }
@@ -3492,13 +3492,13 @@ html {
 }
 
 /* -- Privacy Grid -- */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .privacy-grid-card {
         margin-bottom: 0;
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .privacy-grid-card {
         padding: 1rem 0.75rem;
     }
@@ -3508,7 +3508,7 @@ html {
 }
 
 /* -- FAQ -- */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .faq-toggle {
         padding: 0.9rem 1rem;
         font-size: 0.88rem;
@@ -3520,7 +3520,7 @@ html {
 }
 
 /* -- CTA Band -- */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .cta-band {
         padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem);
     }
@@ -3541,20 +3541,20 @@ html {
 }
 
 /* -- Footer Newsletter -- */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .footer-newsletter-form {
         margin-top: 0.5rem;
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .footer-newsletter-form .input-group {
         max-width: 100%;
     }
 }
 
 /* -- Section mesh background performance -- */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .hero-section,
     .about-hero,
     .section-white,
@@ -3570,7 +3570,7 @@ html {
 }
 
 /* Final mobile polish: landing readability and tap behavior */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     html {
         scroll-padding-top: 82px;
     }
@@ -3923,7 +3923,7 @@ html {
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     html.dark-mode #mainNav .navbar-toggler,
     .dark-mode #mainNav .navbar-toggler {
         background: rgba(15, 23, 42, 0.96);
@@ -3979,7 +3979,7 @@ html {
 }
 
 /* Mobile visual refinement: stronger hierarchy without adding extra UI weight. */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .hero-section {
         padding: 96px 0 48px !important;
         background:

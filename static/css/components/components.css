@@ -2028,7 +2028,7 @@ button:focus-visible,
 }
 
 /* ── Responsive ── */
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   .psyai-connection-card {
     bottom: 16px;
     left: 16px;

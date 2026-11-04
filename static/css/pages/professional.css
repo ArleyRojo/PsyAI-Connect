@@ -223,7 +223,7 @@
     gap: 20px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .patients-grid {
         grid-template-columns: 1fr;
     }
@@ -240,13 +240,13 @@
     background: #f8f9fa;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .toolbar {
         padding: 12px 15px;
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .toolbar {
         flex-direction: column;
     }
@@ -263,7 +263,7 @@
     min-width: 200px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .search-input {
         width: 100%;
     }
@@ -274,7 +274,7 @@
     min-width: 150px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .filter-select {
         width: 100%;
     }
@@ -285,7 +285,7 @@
     min-width: 140px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .filter-date {
         width: 100%;
     }
@@ -305,7 +305,7 @@
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .patient-card {
         padding: 15px;
     }
@@ -341,7 +341,7 @@
     margin-top: 12px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .patient-actions {
         flex-direction: column;
     }
@@ -358,27 +358,27 @@
     gap: 15px;
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
     .agenda-grid {
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .agenda-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .agenda-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .agenda-grid {
         grid-template-columns: 1fr;
     }
@@ -404,7 +404,7 @@
     background: #1565C0;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .agenda-day-header {
         padding: 10px 12px;
         font-size: 0.9rem;
@@ -458,7 +458,7 @@
     border: 1px solid #e0e0e0;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .report-card {
         padding: 15px;
     }
@@ -471,13 +471,13 @@
     margin-bottom: 25px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .report-stats {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .report-stats {
         grid-template-columns: 1fr;
     }
@@ -524,7 +524,7 @@
     color: var(--brand-700);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .profile-avatar {
         width: 90px;
         height: 90px;
@@ -550,7 +550,7 @@
     border-bottom: 2px solid #0D47A1;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .form-section {
         padding: 20px 15px;
     }
@@ -563,7 +563,7 @@
     margin-bottom: 15px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .form-row {
         flex-direction: column;
         gap: 15px;
@@ -819,7 +819,7 @@
 }
 
 /* ========== TABLETS (768px - 991px) ========== */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -869,7 +869,7 @@
 }
 
 /* ========== MÃ“VILES GRANDES (576px - 767px) ========== */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .menu-toggle,
     .toggle-btn {
         top: 15px;
@@ -1166,7 +1166,7 @@
 /* ========== MEJORAS GENERALES ========== */
 
 /* Botones mÃ¡s tÃ¡ctiles en mÃ³vil */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .button,
     .btn {
         min-height: 40px;
@@ -1218,7 +1218,7 @@
     display: none;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .toggle-btn {
         display: flex !important;
         position: fixed;
@@ -1257,7 +1257,7 @@
     border-radius: 0 16px 16px 0;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .sidebar {
         position: fixed !important;
         transform: translateX(-100%);
@@ -1300,7 +1300,7 @@
     z-index: 1035;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .sidebar-overlay.active {
         display: block;
     }
@@ -1318,7 +1318,7 @@
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .main-content {
         margin-left: 0 !important;
         padding-top: 70px !important;
@@ -1326,7 +1326,7 @@
 }
 
 /* ========== TABLETS (â‰¤991px) ========== */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .main-header h1 {
         font-size: 1.4rem;
     }
@@ -1337,7 +1337,7 @@
 }
 
 /* ========== MÃ“VILES GRANDES (â‰¤767px) ========== */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .main-content {
         padding: 15px !important;
         padding-top: 65px !important;
@@ -1529,7 +1529,7 @@
 }
 
 /* ========== MÃ“VILES PEQUEÃ‘OS (â‰¤480px) ========== */
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .main-content {
         padding: 12px !important;
         padding-top: 60px !important;
@@ -1724,7 +1724,7 @@
     gap: 20px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .patients-grid {
         grid-template-columns: 1fr;
     }
@@ -1741,13 +1741,13 @@
     background: #f8f9fa;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .toolbar {
         padding: 12px 15px;
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .toolbar {
         flex-direction: column;
     }
@@ -1764,7 +1764,7 @@
     min-width: 200px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .search-input {
         width: 100%;
     }
@@ -1775,7 +1775,7 @@
     min-width: 150px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .filter-select {
         width: 100%;
     }
@@ -1786,7 +1786,7 @@
     min-width: 140px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .filter-date {
         width: 100%;
     }
@@ -1806,7 +1806,7 @@
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .patient-card {
         padding: 15px;
     }
@@ -1842,7 +1842,7 @@
     margin-top: 12px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .patient-actions {
         flex-direction: column;
     }
@@ -1859,27 +1859,27 @@
     gap: 15px;
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
     .agenda-grid {
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .agenda-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .agenda-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .agenda-grid {
         grid-template-columns: 1fr;
     }
@@ -1905,7 +1905,7 @@
     background: #1565C0;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .agenda-day-header {
         padding: 10px 12px;
         font-size: 0.9rem;
@@ -1959,7 +1959,7 @@
     border: 1px solid #e0e0e0;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .report-card {
         padding: 15px;
     }
@@ -1972,13 +1972,13 @@
     margin-bottom: 25px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .report-stats {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .report-stats {
         grid-template-columns: 1fr;
     }
@@ -2025,7 +2025,7 @@
     color: var(--brand-700);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .profile-avatar {
         width: 90px;
         height: 90px;
@@ -2051,7 +2051,7 @@
     border-bottom: 2px solid #0D47A1;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .form-section {
         padding: 20px 15px;
     }
@@ -2064,7 +2064,7 @@
     margin-bottom: 15px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .form-row {
         flex-direction: column;
         gap: 15px;
@@ -2209,7 +2209,7 @@
    ============================================================ */
 
 /* ========== TABLETS (768px - 991px) ========== */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -2259,7 +2259,7 @@
 }
 
 /* ========== MÃ“VILES GRANDES (576px - 767px) ========== */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .menu-toggle,
     .toggle-btn {
         top: 15px;
@@ -2534,7 +2534,7 @@
 }
 
 /* Botones mÃ¡s tÃ¡ctiles en mÃ³vil */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .button,
     .btn {
         min-height: 40px;
@@ -2562,7 +2562,7 @@
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .sidebar {
         position: fixed !important;
         transform: translateX(-100%);
@@ -2593,14 +2593,14 @@
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .main-content {
         margin-left: 0 !important;
         padding-top: 70px !important;
     }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
     .main-header h1 {
         font-size: 1.4rem;
     }
@@ -2610,7 +2610,7 @@
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .main-content {
         padding: 15px !important;
         padding-top: 65px !important;
@@ -2779,7 +2779,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
     .main-content {
         padding: 12px !important;
         padding-top: 60px !important;
@@ -3122,7 +3122,7 @@
 /* -----------------------------------------------------------
    Responsive – stack on very small screens
    ----------------------------------------------------------- */
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   .tabs-container {
     flex-direction: column;
     width: 100%;
@@ -3942,7 +3942,7 @@ html.dark-mode .tab.active {
 /* Responsive styles moved to patient-responsive.css */
 
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .menu-toggle,
     .toggle-btn {
         display: flex;
@@ -4537,7 +4537,7 @@ html.dark-mode .tab.active {
     border-radius: 10px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .button,
     .btn {
         min-height: 40px;
@@ -5693,7 +5693,7 @@ html {
 
 
 
-@media (max-width: 480px) {
+@media (max-width: 575.98px) {
   .chat-wrapper { height: calc(100vh - 100px); }
   .chat-bubble { max-width: 90%; }
   .chat-input-bar textarea { font-size: 0.85rem; }
@@ -7457,7 +7457,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     grid-template-columns: 1fr 1fr;
     gap: 0.7rem;
 }
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .resumen-grid { grid-template-columns: 1fr; }
 }
 .resumen-grid .resumen-item {
@@ -7556,7 +7556,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
 
 
 /* ========== ACORDEÃ“N RESPONSIVE MOBILE - FINAL OVERRIDE ========== */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
 .accordion-responsive .accordion-button {
         font-size: 0.9rem !important;
         padding: 0.9rem 1rem !important;
@@ -8872,7 +8872,7 @@ section.card:nth-of-type(3) { animation-delay: 0.25s; }
     grid-template-columns: 1fr 1fr;
     gap: 0.7rem;
 }
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .resumen-grid { grid-template-columns: 1fr; }
 }
 .resumen-grid .resumen-item {
@@ -11220,13 +11220,13 @@ html.dark-mode body.aside-professional .agenda-page .stat-icon-amber {
     color: #FFB74D;
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
     body.aside-professional .agenda-page .agenda-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     body.aside-professional .agenda-page .main-header,
     body.aside-professional .reports-page .main-header {
         align-items: flex-start !important;
@@ -11652,7 +11652,7 @@ html.dark-mode body.aside-professional .reports-page .reports-table-panel tbody 
     color: var(--dm-text2);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     body.aside-professional .reports-page .reports-generator,
     body.aside-professional .reports-page .main-header {
         padding: 1rem !important;
@@ -11948,7 +11948,7 @@ html.dark-mode .main-header .user-greeting {
 }
 
 /* ── Small screens: stack gracefully, keep the banner look ── */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .main-header {
         flex-wrap: wrap !important;
         padding: .9rem 1.1rem !important;
@@ -12021,7 +12021,7 @@ html.dark-mode .main-header .user-greeting {
     grid-template-columns: repeat(4, 1fr);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .anam-form-grid.grid-2,
     .anam-form-grid.grid-3,
     .anam-form-grid.grid-4 {
@@ -12182,7 +12182,7 @@ html.dark-mode #paginationNav .page-item.disabled .page-link {
 }
 
 /* Responsive tweaks */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     #paginationNav .page-link {
         padding: 0.3rem 0.6rem;
         font-size: 0.8rem;
@@ -12196,4 +12196,4 @@ body.aside-professional .main-content {
     width: auto;
     min-width: 0;
     max-width: none;
-}
+}

@@ -633,7 +633,7 @@ hr.divider {
 }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .welcome-banner { flex-wrap: wrap; padding: 18px 20px; }
   .share-row { flex-wrap: wrap; gap: 10px; }
   .file-row  { flex-wrap: wrap; gap: 10px; }
