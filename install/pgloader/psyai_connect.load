@@ -1,0 +1,36 @@
+# pgloader — Migración de datos MySQL → PostgreSQL (PsyAI Connect)
+
+Uso (desde un host con pgloader instalado y acceso a ambos motores):
+
+```bash
+pgloader install/pgloader/psyai_connect.load
+```
+
+Después de cargar los datos, resincronizar las secuencias de PostgreSQL con Django:
+
+```bash
+python manage.py sqlsequencereset authentication patients professionals scheduling chatbot documents billing admin_panel core \
+  | psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME"
+```
+
+LOAD DATABASE
+FROM      mysql://psyai:psyai_pass@localhost:3306/psyai_connect
+INTO      postgresql://psyai:psyai_pass@localhost:5432/psyai_connect
+
+WITH      include no drop, create tables, create indexes, reset sequences
+          , foreign keys = ON
+
+SET       work_mem = '16MB'
+          , maintenance_work_mem = '64MB'
+
+CAST      type enumer to enum drop default
+          , type datetime to timestamptz
+          , type timestamp to timestamptz
+          , type tinyint(1) to boolean
+          , type int to integer
+          , type bigint to bigint
+
+ALTER TABLE 'register' RENAME TO 'register';
+
+-- Las tablas de allauth (socialaccount_*) las gestiona Django; no incluirlas
+-- a menos que se quiera migrar el estado de login social.
