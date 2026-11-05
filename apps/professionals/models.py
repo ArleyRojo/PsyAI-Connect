@@ -12,11 +12,6 @@ class ProfessionalPaymentInfo(models.Model):
         related_name="payment_info",
     )
     qr_image = models.ImageField(upload_to='qr_codes/', null=True, blank=True)
-    qr_payload = models.TextField(
-        null=True,
-        blank=True,
-        help_text="Datos codificados dentro del código QR (ej. cuenta bancaria + URL de facturas).",
-    )
     mensaje_texto = models.TextField(null=True, blank=True, help_text="Número de cuenta, Nequi, llaves Bre-B, etc.")
 
     class Meta:

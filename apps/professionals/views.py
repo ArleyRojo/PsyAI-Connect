@@ -4,7 +4,6 @@ import logging
 from django.apps import apps
 from django.conf import settings
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -496,37 +495,10 @@ class ProfessionalPaymentInfoViewSet(viewsets.ViewSet):
         info, _ = ProfessionalPaymentInfo.objects.get_or_create(idProfesional_id=user_id)
         if "qr_image" in serializer.validated_data:
             info.qr_image = serializer.validated_data["qr_image"]
-        if "qr_payload" in serializer.validated_data:
-            info.qr_payload = serializer.validated_data["qr_payload"]
         if "mensaje_texto" in serializer.validated_data:
             info.mensaje_texto = serializer.validated_data["mensaje_texto"]
         info.save()
         return Response({"success": True, "message": "Datos de cobro actualizados"}, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=["post"])
-    def generate_qr(self, request):
-        """POST /api/professional/payment-info/generate_qr/ – genera el QR automáticamente.
-
-        Codifica dentro del QR los datos bancarios (mensaje_texto) y el enlace a
-        facturas http://127.0.0.1:8000/aside-patient/facturas.html.
-        """
-        from apps.professionals.models import ProfessionalPaymentInfo
-        from apps.professionals.qr_utils import build_qr_payload, generate_qr_png
-
-        user_id = getattr(request, "user_id", None)
-        info, _ = ProfessionalPaymentInfo.objects.get_or_create(idProfesional_id=user_id)
-
-        payload = build_qr_payload(info.mensaje_texto)
-        qr_file = generate_qr_png(payload)
-
-        info.qr_payload = payload
-        info.qr_image.save("payment_qr.png", qr_file, save=True)
-
-        serializer = ProfessionalPaymentInfoSerializer(info)
-        return Response(
-            {"success": True, "message": "Código QR generado", "data": serializer.data},
-            status=status.HTTP_200_OK,
-        )
 
 
 class ProfessionalPaymentInfoPublicView(APIView):

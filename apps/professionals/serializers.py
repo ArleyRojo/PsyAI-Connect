@@ -69,5 +69,4 @@ class ChatMensajeSerializer(serializers.Serializer):
 
 class ProfessionalPaymentInfoSerializer(serializers.Serializer):
     qr_image = serializers.ImageField(required=False, allow_null=True)
-    qr_payload = serializers.CharField(required=False, allow_blank=True)
     mensaje_texto = serializers.CharField(required=False, allow_blank=True)
