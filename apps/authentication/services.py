@@ -576,6 +576,7 @@ class AuthService:
 
     def create_totp_device(self, user_id, name=""):
         """Crea un nuevo secreto TOTP para el usuario (aún no confirmado)."""
+        from apps.authentication.models import TOTPDevice
         self._check_totp_available()
 
         device = self.get_totp_device(user_id)

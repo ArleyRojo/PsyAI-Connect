@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from apps.authentication.models import (
+    EmailVerificationToken,
     IntentosFallidos,
     Login,
     RecoveryTokens,

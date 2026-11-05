@@ -207,3 +207,26 @@ class TestUpdatePassword:
     def test_update_nonexistent_user_returns_false(self):
         repo = AuthRepository()
         assert repo.update_password(99999, "hash") is False
+
+
+@pytest.mark.django_db
+class TestEmailVerificationTokenFlow:
+    def test_create_validate_and_invalidate(self):
+        user = Register.objects.create_user(
+            email="verif@test.com",
+            nombre="Verif",
+            password="Abc123",
+            rol="profesional",
+        )
+        repo = AuthRepository()
+        expires = timezone.now() + timedelta(hours=24)
+
+        repo.create_email_verification_token(user.idUsuario, "verif_token", expires)
+
+        assert repo.validate_email_verification_token("verif_token") == user.idUsuario
+        assert repo.invalidate_email_verification_token("verif_token") is True
+        assert repo.validate_email_verification_token("verif_token") is None
+
+    def test_validate_nonexistent_token(self):
+        repo = AuthRepository()
+        assert repo.validate_email_verification_token("bogus_token") is None
