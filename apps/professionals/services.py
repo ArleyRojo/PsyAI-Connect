@@ -1,4 +1,8 @@
+import logging
+
 from apps.professionals.repositories import ProfessionalRepository
+
+logger = logging.getLogger(__name__)
 
 try:
     from apps.chatbot.repositories import ChatRepository
