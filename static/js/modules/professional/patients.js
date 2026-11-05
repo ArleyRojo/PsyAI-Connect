@@ -42,11 +42,42 @@ window.onload = function () {
 
 function escapeHtml(value) {
     return String(value ?? '')
-        .replace(/&/g, '&')
-        .replace(/</g, '<')
-        .replace(/>/g, '>')
-        .replace(/"/g, '"')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+// ── Helper: manejo de errores de API (auth/autorización) ─────────────────
+// Retorna true si se consumió un error (salir del flujo), false si la respuesta es válida.
+// res: objeto Response de fetch. container: elemento DOM donde pintar el aviso (opcional).
+async function manejarErrorApi(res, container) {
+    if (res.status === 401) {
+        window.location.href = "/login.html";
+        return true;
+    }
+    if (res.status === 403) {
+        var data = {};
+        try { data = await res.json(); } catch (_) {}
+        var msg = escapeHtml(data.message || "Acceso denegado");
+        var esNoVerificado = /no verificado|verificaci/i.test(msg);
+        if (container) {
+            if (esNoVerificado) {
+                // Profesional no verificado → aviso informativo (amarillo, no rojo)
+                container.innerHTML = "<tr><td colspan='7' class='text-warning text-center py-4'><i class='fas fa-info-circle me-2'></i>" + msg + "</td></tr>";
+            } else {
+                // Sin contenedor: usar PsyAIAlerts si existe, sino console
+                if (window.PsyAIAlerts?.info) {
+                    window.PsyAIAlerts.info("Verificación pendiente", msg);
+                } else {
+                    console.warn(msg);
+                }
+            }
+        }
+        return true;
+    }
+    return false;
 }
 
 function normalizarTexto(valor) {
@@ -86,44 +117,49 @@ async function cargarSaludoProfesional() {
 
 // ── Cargar pacientes ─────────────────────────────────────────
 
-function cargarPacientes() {
+async function cargarPacientes() {
     var tbody = document.getElementById("tbodyPacientes");
     if (!tbody) return;
 
     tbody.innerHTML = "<tr><td colspan='7' class='text-center py-3'><i class='fas fa-spinner fa-spin me-2'></i>Cargando...</td></tr>";
 
-    fetch("/api/pacientes", { credentials: "include" })
-        .then(function (res) { return res.json(); })
-        .then(async function (data) {
-            if (!data.success) {
-                tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>" + data.message + "</td></tr>";
-                return;
-            }
+    try {
+        var res = await fetch("/api/pacientes", { credentials: "include" });
+        if (await manejarErrorApi(res, tbody)) return;
 
-            var pacientes = data.pacientes || data.usuarios || [];
-            try {
-                var asignadosRes = await fetch("/api/profesional/pacientes", { credentials: "include" });
+        var data = await res.json();
+        if (!data.success) {
+            tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>" + escapeHtml(data.message || "Error al cargar pacientes") + "</td></tr>";
+            return;
+        }
+
+        var pacientes = data.pacientes || data.usuarios || [];
+        try {
+            var asignadosRes = await fetch("/api/profesional/pacientes", { credentials: "include" });
+            if (await manejarErrorApi(asignadosRes)) {
+                pacientesAsignados = new Set();
+            } else {
                 var asignadosData = await asignadosRes.json();
                 pacientesAsignados = new Set((asignadosData.pacientes || []).map(function (p) { return Number(p.idUsuario); }));
-            } catch (_) {
-                pacientesAsignados = new Set();
             }
+        } catch (_) {
+            pacientesAsignados = new Set();
+        }
 
-            if (pacientes.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='7' class='text-muted text-center py-4'>No hay pacientes registrados</td></tr>";
-                renderPagination(0);
-                return;
-            }
+        if (pacientes.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='7' class='text-muted text-center py-4'>No hay pacientes registrados</td></tr>";
+            renderPagination(0);
+            return;
+        }
 
-            allPacientes = pacientes;
-            currentPage = 1;
-            renderPage(currentPage);
-            renderPagination(allPacientes.length);
-        })
-        .catch(function (err) {
-            console.error(err);
-            tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error al cargar pacientes</td></tr>";
-        });
+        allPacientes = pacientes;
+        currentPage = 1;
+        renderPage(currentPage);
+        renderPagination(allPacientes.length);
+    } catch (err) {
+        console.error(err);
+        tbody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error al cargar pacientes</td></tr>";
+    }
 }
 
 function renderPage(page) {
@@ -336,9 +372,12 @@ function goToStep(n) {
 async function cargarHistorial() {
     try {
         var res  = await fetch("/api/diagnosticos", { credentials: "include" });
-        var data = await res.json();
         var tbody = document.getElementById("tbodyHistorial");
+        if (!tbody) return;
 
+        if (await manejarErrorApi(res, tbody)) return;
+
+        var data = await res.json();
         var badge = document.getElementById("badgeDiag");
         if (badge) badge.textContent = (data.success && data.historial) ? data.historial.length : 0;
 

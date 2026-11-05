@@ -228,6 +228,15 @@ user_role = getattr(request, "user_role", None)  # 'paciente' | 'profesional' | 
 user_name = getattr(request, "user_name", None)
 ```
 
+### Modo preview (`ALLOW_PAGE_PREVIEW_WITHOUT_SESSION`)
+
+Cuando `DEBUG=True` y `ALLOW_PAGE_PREVIEW_WITHOUT_SESSION=True`, `ServePagesView` permite abrir páginas protegidas **sin sesión** (útil para capturas de Playwright y revisión visual). Sin embargo:
+
+- **Sin sesión:** la página se sirve sin validar el rol (comportamiento previo).
+- **Con sesión:** si el usuario tiene `rol` en la sesión, siempre se valida que coincida con el rol esperado de la página, incluso en modo preview. Un usuario con rol `paciente` que abra `/aside-professional/patients.html` recibirá 403, aunque esté en preview. Esto evita que el frontend cargue una página a la que las APIs luego le responderán 403 por rol incorrecto.
+
+Este comportamiento se implementa en `apps/core/views.py` (`ServePagesView.get`).
+
 ---
 
 ## 7. Autenticación y estado de cuenta

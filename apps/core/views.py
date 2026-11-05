@@ -157,22 +157,29 @@ class ServePagesView(View):
             return HttpResponseRedirect("/")
 
         preview = settings.DEBUG and getattr(settings, "ALLOW_PAGE_PREVIEW_WITHOUT_SESSION", False)
-        if not preview:
+
+        def _require_role(expected_role):
+            if user_role is None:
+                return HttpResponseRedirect("/login.html")
+            if user_role != expected_role:
+                raise PermissionDenied
+            return None
+
+        # Modo preview: solo se salta la validación cuando NO hay sesión.
+        # Si existe sesión (cualquier rol), siempre se valida que coincida con el rol esperado.
+        if user_role is not None or not preview:
             if filename == "admin.dashboard.html" or filename.startswith("aside-admin/"):
-                if user_role is None:
-                    return HttpResponseRedirect("/login.html")
-                if user_role != "admin":
-                    raise PermissionDenied
+                resp = _require_role("admin")
+                if resp:
+                    return resp
             elif filename == "patient.dashboard.html" or filename.startswith("aside-patient/"):
-                if user_role is None:
-                    return HttpResponseRedirect("/login.html")
-                if user_role != "paciente":
-                    raise PermissionDenied
+                resp = _require_role("paciente")
+                if resp:
+                    return resp
             elif filename == "professional.dashboard.html" or filename.startswith("aside-professional/"):
-                if user_role is None:
-                    return HttpResponseRedirect("/login.html")
-                if user_role != "profesional":
-                    raise PermissionDenied
+                resp = _require_role("profesional")
+                if resp:
+                    return resp
 
         root = _template_root()
         if filename in DIRECT_MAP:

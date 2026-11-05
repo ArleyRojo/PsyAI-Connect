@@ -94,16 +94,19 @@ class IsAdmin(BasePermission):
 
 
 class IsPacienteOrProfesional(BasePermission):
+    message = "No autorizado para este rol"
     def has_permission(self, request, view):
         return getattr(request, "user_role", None) in ("paciente", "profesional")
 
 
 class IsAdminOrProfesional(BasePermission):
+    message = "No autorizado para este rol"
     def has_permission(self, request, view):
         return getattr(request, "user_role", None) in ("admin", "profesional")
 
 
 class IsOwnerOrStaff(BasePermission):
+    message = "No autorizado para este rol"
     def has_permission(self, request, view):
         return getattr(request, "user_role", None) is not None
 

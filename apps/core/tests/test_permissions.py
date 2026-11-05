@@ -210,3 +210,71 @@ class TestRequireRole:
         user, err = require_role(request, "admin")
         assert user is None
         assert err.status_code == 401
+
+
+# ── DRF permission classes ───────────────────────────────────────────────
+
+
+class TestPermissionClasses:
+    """Verifica que las clases de permiso DRF definen `message` consistente."""
+
+    def test_is_paciente_has_message(self):
+        from apps.core.permissions import IsPaciente
+        assert IsPaciente.message == "No autorizado para este rol"
+
+    def test_is_profesional_has_message(self):
+        from apps.core.permissions import IsProfesional
+        assert IsProfesional.message == "No autorizado para este rol"
+
+    def test_is_admin_has_message(self):
+        from apps.core.permissions import IsAdmin
+        assert IsAdmin.message == "No autorizado para este rol"
+
+    def test_is_paciente_or_profesional_has_message(self):
+        from apps.core.permissions import IsPacienteOrProfesional
+        assert IsPacienteOrProfesional.message == "No autorizado para este rol"
+
+    def test_is_admin_or_profesional_has_message(self):
+        from apps.core.permissions import IsAdminOrProfesional
+        assert IsAdminOrProfesional.message == "No autorizado para este rol"
+
+    def test_is_owner_or_staff_has_message(self):
+        from apps.core.permissions import IsOwnerOrStaff
+        assert IsOwnerOrStaff.message == "No autorizado para este rol"
+
+    def test_is_admin_or_profesional_denies_paciente_with_message(self):
+        from apps.core.permissions import IsAdminOrProfesional
+        from rest_framework.test import APIRequestFactory
+
+        factory = APIRequestFactory()
+        request = factory.get("/api/test")
+        request.session = {"idUsuario": 1, "rol": "paciente", "nombre": "Test"}
+
+        perm = IsAdminOrProfesional()
+        # IsAuthenticatedDRF runs first in views; here we only test the role check
+        # by simulating request.user_role being set
+        request.user_role = "paciente"
+        assert perm.has_permission(request, None) is False
+        assert perm.message == "No autorizado para este rol"
+
+    def test_is_admin_or_profesional_allows_admin(self):
+        from apps.core.permissions import IsAdminOrProfesional
+        from rest_framework.test import APIRequestFactory
+
+        factory = APIRequestFactory()
+        request = factory.get("/api/test")
+        request.user_role = "admin"
+
+        perm = IsAdminOrProfesional()
+        assert perm.has_permission(request, None) is True
+
+    def test_is_admin_or_profesional_allows_profesional(self):
+        from apps.core.permissions import IsAdminOrProfesional
+        from rest_framework.test import APIRequestFactory
+
+        factory = APIRequestFactory()
+        request = factory.get("/api/test")
+        request.user_role = "profesional"
+
+        perm = IsAdminOrProfesional()
+        assert perm.has_permission(request, None) is True

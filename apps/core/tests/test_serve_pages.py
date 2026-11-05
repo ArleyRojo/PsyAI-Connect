@@ -181,6 +181,29 @@ class TestUnaffectedPages:
         resp = serve_pages(request, "aside-admin/users.html")
         assert resp.status_code == 302
 
+    # ── preview con sesión de otro rol ───────────────────────────────────
+
+    @override_settings(DEBUG=True, ALLOW_PAGE_PREVIEW_WITHOUT_SESSION=True)
+    def test_preview_with_session_wrong_role_raises_403(self, rf):
+        """En preview, si hay sesión con rol distinto, se aplica validación de rol."""
+        request = _make_request(rf, "/aside-professional/patients.html", {"rol": "paciente"})
+        with pytest.raises(PermissionDenied):
+            serve_pages(request, "aside-professional/patients.html")
+
+    @override_settings(DEBUG=True, ALLOW_PAGE_PREVIEW_WITHOUT_SESSION=True)
+    def test_preview_with_session_correct_role_returns_200(self, rf):
+        """En preview, si hay sesión con rol correcto, se sirve la página."""
+        request = _make_request(rf, "/aside-professional/patients.html", {"rol": "profesional"})
+        resp = serve_pages(request, "aside-professional/patients.html")
+        assert resp.status_code == 200
+
+    @override_settings(DEBUG=True, ALLOW_PAGE_PREVIEW_WITHOUT_SESSION=True)
+    def test_preview_without_session_still_works(self, rf):
+        """Preview sin sesión sigue funcionando como antes."""
+        request = _make_request(rf, "/aside-professional/patients.html")
+        resp = serve_pages(request, "aside-professional/patients.html")
+        assert resp.status_code == 200
+
     def test_nonexistent_page_raises_404(self, rf):
         request = _make_request(rf, "/nonexistent.page.html")
         with pytest.raises(Http404):

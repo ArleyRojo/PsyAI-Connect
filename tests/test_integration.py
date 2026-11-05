@@ -295,3 +295,69 @@ class TestFacturasEndpoint:
     def test_list_invoices_empty(self, client):
         response = client.get("/api/facturas")
         assert response.status_code in (200, 401, 403)
+
+
+# ── Patients: /api/pacientes por rol ──────────────────────
+
+
+@pytest.mark.django_db
+class TestPacientesEndpointByRole:
+    """GET /api/pacientes debe respetar permisos por rol."""
+
+    def _make_user(self, rol, email, password="Abc123"):
+        from apps.authentication.models import Register
+        from apps.authentication.security import SecurityHelper
+        hashed = SecurityHelper.hash_password(password)
+        user = Register.objects.create_user(
+            email=email,
+            nombre="Test User",
+            password=password,
+            rol=rol,
+        )
+        # Profesionales necesitan perfil verificado para acceder a /api/pacientes
+        if rol == "profesional":
+            from apps.professionals.models import PerfilProfesional
+            PerfilProfesional.objects.create(
+                idProfesional=user,
+                verificado=True,
+                estado="Activo",
+            )
+        return user
+
+    def _login(self, client, email, rol, password="Abc123"):
+        response = client.post(
+            "/api/login",
+            data=json.dumps({"email": email, "password": password, "rol": rol}),
+            content_type="application/json",
+        )
+        assert response.status_code == 200, f"Login falló: {response.content.decode()}"
+        return response
+
+    def test_paciente_rol_recibe_403(self, client):
+        """Usuario con rol paciente no puede listar pacientes (403)."""
+        self._make_user("paciente", "paciente-api@test.com")
+        self._login(client, "paciente-api@test.com", "paciente")
+        response = client.get("/api/pacientes")
+        assert response.status_code == 403
+        data = response.json()
+        assert data["success"] is False
+        assert data["message"] == "No autorizado para este rol"
+
+    def test_admin_rol_recibe_200(self, client):
+        """Usuario con rol admin puede listar pacientes (200)."""
+        self._make_user("admin", "admin-api@test.com")
+        self._login(client, "admin-api@test.com", "admin")
+        response = client.get("/api/pacientes")
+        assert response.status_code == 200
+
+    def test_profesional_verificado_recibe_200(self, client):
+        """Profesional verificado puede listar pacientes (200)."""
+        self._make_user("profesional", "pro-api@test.com")
+        self._login(client, "pro-api@test.com", "profesional")
+        response = client.get("/api/pacientes")
+        assert response.status_code == 200
+
+    def test_sin_sesion_recibe_401(self, client):
+        """Sin sesión, /api/pacientes retorna 401."""
+        response = client.get("/api/pacientes")
+        assert response.status_code == 401
