@@ -6,6 +6,26 @@ from django.utils import timezone
 from datetime import timedelta
 
 
+class _HiloSincrono:
+    """Reemplaza threading.Thread: ejecuta el envío en el mismo hilo para poder revisar mail.outbox."""
+
+    def __init__(self, target=None, args=(), kwargs=None, daemon=None):
+        self._target, self._args, self._kwargs = target, args, kwargs or {}
+
+    def start(self):
+        self._target(*self._args, **self._kwargs)
+
+
+@pytest.fixture(autouse=True)
+def envio_sincrono():
+    # El envío inmediato corre en segundo plano (threading.Thread); en las pruebas se hace síncrono.
+    # Se reemplaza solo el "threading" que usa ese módulo, no el threading global.
+    # close_old_connections también se anula: en el mismo hilo cerraría la conexión de la prueba.
+    with patch("apps.admin_panel.repositories.threading", MagicMock(Thread=_HiloSincrono)), \
+            patch("apps.admin_panel.repositories.close_old_connections"):
+        yield
+
+
 @pytest.mark.django_db
 class TestAdminNotificationAPI:
     """Tests for POST /api/admin/notificaciones"""
@@ -275,12 +295,11 @@ class TestAdminNotificationAPI:
             content_type="application/json",
         )
         
-        # Debe fallar (502) porque no hay destinatarios
-        assert response.status_code == 502
+        # El envío inmediato corre en segundo plano: la respuesta llega antes del resultado
+        # y el fallo queda registrado en la notificación.
+        assert response.status_code == 200
         data = response.json()
-        assert data["success"] is False
-        assert "destinatario" in data["message"].lower() or "destinatarios" in data["message"].lower()
-        
+
         # Verificar en BD que quedó fallido
         from apps.scheduling.models import Notificaciones
         notif = Notificaciones.objects.get(idNotificacion=data["idNotificacion"])
