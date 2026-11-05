@@ -376,7 +376,7 @@ omit =
 | Qué mockear | Cómo |
 |-------------|------|
 | Repositorio en Service | `patch("apps.authentication.services.AuthService.repo", mock_repo)` |
-| Servicio externo (Gemini, Wompi, Email) | `patch("apps.chatbot.services.GeminiClient.generate")` |
+| Servicio externo (Gemini, Email) | `patch("apps.chatbot.services.GeminiClient.generate")` |
 | `timezone.now()` | `patch("django.utils.timezone.now", return_value=fixed_datetime)` |
 | `secrets.token_urlsafe` | `patch("secrets.token_urlsafe", return_value="fixed_token")` |
 | `request.session` | `request.session = {"idUsuario": 1, "rol": "paciente"}` |
@@ -425,7 +425,6 @@ jobs:
 
 - [`data-models.md`](data-models.md) — Modelos que se testean
 - [`chatbot-ai.md`](chatbot-ai.md) — Tests del servicio de chatbot
-- [`pagos-facturacion.md`](pagos-facturacion.md) — Tests del webhook Wompi (HMAC)
 - [`security.md`](security.md) — Tests de CSRF, rate limiting, 2FA
 - [`deployment.md`](deployment.md) — Tests en Docker/CI
 - [`frontend.md`](frontend.md) — Tests de utilidades JS (si aplica)

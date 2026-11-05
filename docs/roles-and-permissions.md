@@ -130,9 +130,9 @@ Todas las vistas de Django REST Framework usan clases de permiso que heredan de 
 | **Facturación** | | | | |
 | Listar/crear facturas | `GET/POST /api/facturas` | ✅ (propias) | ✅ (propias) | ✅ (todas) |
 | Detalle/Anular factura | `GET/PATCH/DELETE /api/facturas/<id>` | ✅ (propias) | ✅ (propias) | ✅ |
-| Iniciar pago Wompi | `POST /api/facturas/<id>/iniciar-pago` | ✅ (propias) | ❌ | ❌ |
-| Confirmar pago (frontend) | `POST /api/facturas/<id>/confirmar-pago` | ✅ | ❌ | ❌ |
-| Webhook Wompi | `POST /api/webhooks/wompi` | (público) | — | — |
+| Adjuntar evidencia de pago | `POST /api/facturas/<id>/evidencia` | ✅ (propias) | ✅ (propias) | ✅ |
+| Confirmar pago manual | `POST /api/facturas/<id>/confirmar-pago` | ✅ | ❌ | ❌ |
+| Ver evidencia | `GET /api/facturas/<id>/evidencia` | ✅ | ✅ | ✅ |
 | Stats facturación | `GET /api/facturas/stats` | ❌ | ✅ (propias) | ✅ (todas) |
 | **Panel Admin** | | | | |
 | Usuarios (listar/crear/editar/borrar) | `/api/admin/usuarios*` | ❌ | ❌ | ✅ |

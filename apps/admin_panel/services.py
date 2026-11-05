@@ -101,7 +101,17 @@ class AdminService:
         if admin_id and int(admin_id) == int(target_id):
             return {"success": False, "message": "No puedes bloquearte a ti mismo"}, 400
 
-        activo, user_info = self.repo.block_user(target_id, accion)
+        # Exigir motivo para acciones de desbloqueo (RF-17)
+        if accion in ("desbloquear", "reestablecer", "activar"):
+            motivo = (data.get("motivo") or "").strip()
+            if not motivo:
+                return {
+                    "success": False,
+                    "message": "El motivo es obligatorio para desbloquear/reestablecer/activar una cuenta",
+                }, 400
+            data["motivo"] = motivo
+
+        activo, user_info = self.repo.block_user(target_id, accion, data.get("motivo"))
 
         # Invalidate sessions of the affected user (only when suspending)
         if activo == 0:
@@ -247,9 +257,14 @@ class AdminService:
         self.repo.delete_notification(notification_id)
         return {"success": True, "message": "Notificacion eliminada"}, 200
 
-    def get_logs(self, limit=None):
-        logs = self.repo.get_logs(limit=limit)
-        logs.sort(key=lambda x: x.get("fecha", ""), reverse=True)
+    def get_logs(self, limit=None, usuario=None, accion=None, fecha_desde=None, fecha_hasta=None):
+        logs = self.repo.get_logs(
+            limit=limit,
+            usuario=usuario,
+            accion=accion,
+            fecha_desde=fecha_desde,
+            fecha_hasta=fecha_hasta,
+        )
         return {"success": True, "logs": logs}, 200
 
     def get_chatbot_historial(self, nivel="", search=""):

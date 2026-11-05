@@ -116,6 +116,35 @@ class MailService:
             logger.error(f"Error enviando correo de recuperación: {e}")
             return False
 
+    @staticmethod
+    def send_password_changed_email(recipient_email, nombre, fecha_hora, ip=None):
+        subject = "Tu contraseña ha sido cambiada — PsyAI Connect"
+        fecha_str = fecha_hora.strftime("%d/%m/%Y %H:%M") if fecha_hora else ""
+        ip_str = ip if ip else "no disponible"
+
+        body_html = render_to_string("emails/password_changed.html", {
+            "nombre": nombre,
+            "fecha_hora": fecha_str,
+            "ip": ip_str,
+            "site_url": getattr(dj_settings, "SITE_URL", "http://localhost:8000"),
+        })
+
+        try:
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=f"Hola {nombre}, tu contraseña en PsyAI Connect fue cambiada el {fecha_str}. IP: {ip_str}",
+                from_email=dj_settings.DEFAULT_FROM_EMAIL,
+                to=[recipient_email],
+            )
+            msg.attach_alternative(body_html, "text/html")
+            msg.send(fail_silently=False)
+            logger.info(f"Correo de cambio de contraseña enviado a {recipient_email}")
+            return True
+        except Exception as e:
+            logger.error(f"Error enviando correo de cambio de contraseña: {e}")
+            return False
+
+
 class AuthService:
     def __init__(self):
         self.repo = AuthRepository()
@@ -491,7 +520,7 @@ class AuthService:
 
         return payload, 200
 
-    def reset_password(self, data):
+    def reset_password(self, data, request=None):
         try:
             validated = self._validate_reset_password_data(data)
         except ValidationError as e:
@@ -510,6 +539,24 @@ class AuthService:
 
         self.repo.invalidate_recovery_token(token)
         self.repo.update_password(user_id, SecurityHelper.hash_password(new_password))
+
+        # Enviar correo de aviso (no incluye contraseña ni token)
+        try:
+            from apps.authentication.models import Register
+            user = Register.objects.filter(idUsuario=user_id).first()
+            if user:
+                client_ip = None
+                if request:
+                    xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+                    client_ip = xff.split(",")[0].strip() if xff else request.META.get("REMOTE_ADDR", "")
+                MailService.send_password_changed_email(
+                    recipient_email=user.email,
+                    nombre=user.nombre,
+                    fecha_hora=timezone.now(),
+                    ip=client_ip,
+                )
+        except Exception as e:
+            logger.warning(f"Error enviando correo de cambio de contraseña: {e}")
 
         return {"success": True, "message": "Contraseña actualizada exitosamente"}, 200
 

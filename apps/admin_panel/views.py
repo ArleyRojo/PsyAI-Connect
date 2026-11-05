@@ -199,6 +199,9 @@ class AdminUsuarioViewSet(viewsets.ViewSet):
                 )
             data["idUsuario"] = int(pk)
             data["admin_id"] = getattr(request, "user_id", None)
+            # Pasar motivo si viene en el request
+            if data.get("motivo"):
+                data["motivo"] = data.get("motivo").strip()
             payload, status_code = admin_service.block_user(data)
         elif data.get("nuevoRol"):
             data["idUsuario"] = int(pk)
@@ -253,7 +256,33 @@ class AdminLogAPIView(APIView):
     permission_classes = [IsAuthenticatedDRF, IsAdmin]
 
     def get(self, request):
-        payload, status_code = admin_service.get_logs()
+        from datetime import datetime
+
+        usuario = request.query_params.get("usuario")
+        accion = request.query_params.get("accion")
+        fecha_desde = request.query_params.get("fecha_desde")
+        fecha_hasta = request.query_params.get("fecha_hasta")
+
+        # Validar formato de fechas
+        for fecha_param, valor in (("fecha_desde", fecha_desde), ("fecha_hasta", fecha_hasta)):
+            if valor:
+                try:
+                    datetime.strptime(valor, "%Y-%m-%d")
+                except ValueError:
+                    return Response(
+                        {
+                            "success": False,
+                            "message": f"Formato de {fecha_param} inválido. Usa YYYY-MM-DD",
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+        payload, status_code = admin_service.get_logs(
+            usuario=usuario,
+            accion=accion,
+            fecha_desde=fecha_desde,
+            fecha_hasta=fecha_hasta,
+        )
         return Response(payload, status=status_code)
 
 

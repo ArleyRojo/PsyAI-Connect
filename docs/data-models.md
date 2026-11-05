@@ -397,20 +397,26 @@ Sistema de notificaciones multi-rol.
 
 ### `Facturas` (tabla `Facturas`)
 
-Facturas con integración Wompi.
+Facturas con pago manual y evidencia (sin pasarela automática).
 
-| Campo | Tipo |
-|-------|------|
-| `idFactura` | PK |
-| `idPaciente` | FK → `Register` (related_name=`facturas_paciente`) |
-| `idProfesional` | FK → `Register` (related_name=`facturas_profesional`) |
-| `idCita` | IntegerField(null) |
-| `monto` | DecimalField(10,2) |
-| `metodoPago` | CharField(choices: banco/tarjeta/efectivo/transferencia/pse) |
-| `estadoPago` | CharField(choices: Pendiente/Parcial/Pagado/Cancelado) |
-| `anulada` | BooleanField |
-| `referenciaPago` | CharField(64, null) — hash Wompi |
-| `idTransaccionPago` | CharField(64, null) |
+| Campo | Tipo | Detalle |
+|-------|------|---------|
+| `idFactura` | `AutoField` | PK |
+| `idPaciente` | FK → `Register` | related_name=`facturas_paciente` |
+| `idProfesional` | FK → `Register` | related_name=`facturas_profesional` |
+| `idCita` | `IntegerField(null)` | — |
+| `monto` | `DecimalField(10,2)` | — |
+| `estadoPago` | `CharField(choices)` | `Pendiente`, `Pagado` |
+| `fecha` | `DateTimeField(auto_now_add)` | — |
+| `fechaPago` | `DateTimeField(null)` | — |
+| `anulada` | `BooleanField(default=False)` | — |
+| `motivoAnulacion` | `CharField(255, null)` | — |
+| `metodoPago` | `CharField(20, choices)` | Efectivo, Transferencia, Nequi, Bre-B, Daviplata, Tarjeta, Otro |
+| `referencia` | `CharField(60, null)` | Referencia del pago |
+| `notas` | `CharField(255, null)` | Notas del profesional |
+| `evidencia` | `FileField(null)` | Comprobante adjunto (imagen/PDF) |
+| `confirmada_por` | FK → `Register(null)` | Profesional que confirmó el pago |
+| `fecha_confirmacion` | `DateTimeField(null)` | Fecha de confirmación |
 
 **Relación:** 1→N `ItemsFactura` (related_name=`items`)
 

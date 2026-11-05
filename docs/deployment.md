@@ -423,11 +423,6 @@ Copia `.env.example` a `.env` en la raíz del proyecto y ajusta los valores. Nun
 | `GEMINI_RETRY_BASE_DELAY` | Retraso base entre reintentos (s) | `0.2` | `0.2` |
 | `GEMINI_TOTAL_DEADLINE_SECONDS` | Presupuesto total Gemini (s) | `10` | `10` |
 | `GEMINI_FALLBACK_MODEL` | Modelo de respaldo | `gemma-4-26b-a4b-it` | `gemma-4-26b-a4b-it` |
-| `WOMPI_ENV` | `test` \| `prod` | `test` | `prod` |
-| `WOMPI_PUBLIC_KEY` | Llave pública Wompi | — | **Requerida** |
-| `WOMPI_PRIVATE_KEY` | Llave privada Wompi | — | **Requerida** |
-| `WOMPI_INTEGRITY_SECRET` | Secreto integridad | — | **Requerida** |
-| `WOMPI_EVENTS_SECRET` | Secreto eventos (webhook) | — | **Requerida** |
 | `GOOGLE_CLIENT_ID` | OAuth Google | — | Opcional |
 | `GOOGLE_CLIENT_SECRET` | Secret Google | — | Opcional |
 | `SITE_URL` | URL base del sitio | `http://localhost:8000` | `https://tudominio.com` |
@@ -473,7 +468,7 @@ Copia `.env.example` a `.env` en la raíz del proyecto y ajusta los valores. Nun
 - [ ] `SECURE_HSTS_SECONDS=31536000`, `INCLUDE_SUBDOMAINS=True`, `PRELOAD=True`
 - [ ] `SECURE_CONTENT_TYPE_NOSNIFF=True`, `X_FRAME_OPTIONS="DENY"`
 - [ ] `CSP_ENABLED=True` (enforce, no Report-Only)
-- [ ] Variables `WOMPI_*` y `GEMINI_API_KEY` configuradas
+- [ ] Variable `GEMINI_API_KEY` configurada
 - [ ] `EMAIL_*` configuradas (SMTP real)
 - [ ] `SITE_URL=https://tudominio.com`
 - [ ] Migraciones aplicadas: `docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app python manage.py migrate`

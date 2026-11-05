@@ -42,10 +42,16 @@ services:
     restart: unless-stopped
     networks:
       - psyai_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/ > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: psyai_db
     environment:
       POSTGRES_USER: ${DB_USER:-psyai}

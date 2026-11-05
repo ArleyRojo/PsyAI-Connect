@@ -59,8 +59,26 @@ class ProfessionalService:
         check = self._check_verificacion(professional_id)
         if check:
             return check
-        if not self.repo.assign_patient(professional_id, patient_id):
+        patient_exists, created = self.repo.assign_patient(professional_id, patient_id)
+        if not patient_exists:
             return {"success": False, "message": "Paciente no encontrado"}, 404
+
+        # RF-49: notificar al profesional solo si la asignación es nueva (idempotente)
+        if created:
+            try:
+                from apps.scheduling.repositories import AppointmentRepository
+                from apps.authentication.models import Register
+                appointment_repo = AppointmentRepository()
+                paciente = Register.objects.filter(idUsuario=patient_id).first()
+                nombre_paciente = paciente.nombre if paciente else f"Paciente #{patient_id}"
+                titulo = "Nuevo paciente asignado"
+                mensaje = f"Se te ha asignado un nuevo paciente: {nombre_paciente}."
+                appointment_repo.create_notification(
+                    professional_id, "profesional", titulo, mensaje, "Asignacion"
+                )
+            except Exception as e:
+                logger.warning(f"Error creando notificación de asignación: {e}")
+
         return {"success": True, "message": "Paciente asignado correctamente"}, 200
 
     def save_diagnosis(self, professional_id, data):

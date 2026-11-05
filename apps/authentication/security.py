@@ -45,7 +45,7 @@ class SecurityHelper:
             except Exception:
                 return False
 
-        # Texto plano: solo para bootstrap directo en MySQL, apagado por defecto
+        # Texto plano: solo para bootstrap directo en PostgreSQL, apagado por defecto
         if getattr(settings, "ALLOW_PLAINTEXT_BOOTSTRAP", False):
             return hmac.compare_digest(password, hashed)
 

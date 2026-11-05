@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 
 
 class Command(BaseCommand):
-    help = "Genera un hash Argon2id para una contraseña, listo para insertar en MySQL."
+    help = "Genera un hash Argon2id para una contraseña, listo para insertar en PostgreSQL."
 
     def add_arguments(self, parser):
         parser.add_argument("contrasena", type=str, help="Contraseña en texto plano a hashear")
@@ -14,8 +14,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Hash Argon2id generado: {hash_argon2}"))
         self.stdout.write(
             self.style.WARNING(
-                "Ejemplo de uso en MySQL:\n"
+                "Ejemplo de uso en PostgreSQL:\n"
                 f"INSERT INTO Register (nombre, email, contrasena, rol, estadoCuenta, activo, email_verificado)\n"
-                f"VALUES ('Nombre', 'email@correo.com', '{hash_argon2}', 'paciente', 'Activa', 1, 1);"
+                f"VALUES ('Nombre', 'email@correo.com', '{hash_argon2}', 'paciente', 'Activa', true, true);"
             )
         )

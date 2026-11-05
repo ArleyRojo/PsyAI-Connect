@@ -18,6 +18,12 @@ DB_USER="${DB_USER:-postgres}"
 DB_PASSWORD="${DB_PASSWORD:-postgres}"
 DB_NAME="${DB_NAME:-psyai_connect}"
 
+# En producción, SECRET_KEY es obligatorio
+if [ "${DJANGO_SETTINGS_MODULE}" = "config.settings.prod" ] && [ -z "${SECRET_KEY:-}" ]; then
+    echo "ERROR: SECRET_KEY is required in production" >&2
+    exit 1
+fi
+
 # ── 1. Wait for PostgreSQL ────────────────────────────────────────────────────
 # Solo se espera si DB_HOST está definido y no es localhost (tests pueden usar SQLite).
 if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ]; then
@@ -47,6 +53,7 @@ python manage.py migrate --noinput
 
 # ── 4. Create superuser if it doesn't exist (dev only) ────────────────────────
 if [ "$DJANGO_SETTINGS_MODULE" = "config.settings.dev" ]; then
+    echo "==> Ensuring demo superuser exists..."
     python manage.py shell -c "
 from apps.authentication.models import Register
 from apps.authentication.security import SecurityHelper

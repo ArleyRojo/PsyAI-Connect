@@ -274,3 +274,165 @@ class TestBillingNewFlow:
         evidencia2 = self._create_test_image()
         resp2 = self.client.post(f"/api/facturas/{factura.idFactura}/confirmar-pago", {"evidencia": evidencia2}, format="multipart")
         assert resp2.status_code == 400
+
+
+# ── RF-72: Evitar facturas duplicadas ────────────────────────────────────────
+
+
+class TestDuplicateInvoice:
+    def setup_method(self):
+        self.client = APIClient()
+        self.paciente = Register.objects.create_user(email="pac2@test.com", password="pass1234", nombre="Paciente Dup", rol="paciente")
+        self.profesional = Register.objects.create_user(email="pro2@test.com", password="pass1234", nombre="Profesional Dup", rol="profesional")
+        self.client.force_authenticate(user=self.profesional)
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(idProfesional=self.profesional, idPaciente=self.paciente)
+
+    def _create_test_image(self):
+        png_bytes = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"
+            b"\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        return SimpleUploadedFile("test_evidence.png", png_bytes, content_type="image/png")
+
+    def _post_invoice(self, cita_id=None, monto="100000", fecha="2026-10-14"):
+        evidencia = self._create_test_image()
+        items = [{"descripcion": "Consulta", "precioUnitario": monto}]
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": f'[{{"descripcion":"Consulta","precioUnitario":"{monto}"}}]',
+            "fechaPago": fecha,
+            "metodoPago": "Transferencia",
+            "referencia": "REF",
+        }
+        if cita_id is not None:
+            form_data["idCita"] = str(cita_id)
+        return self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+
+    def test_duplicada_por_cita_retorna_409(self):
+        # Primera factura con cita
+        resp1 = self._post_invoice(cita_id=101)
+        assert resp1.status_code == 201, f"Primera falló: {resp1.content.decode()}"
+
+        # Segunda factura con misma cita → 409
+        resp2 = self._post_invoice(cita_id=101)
+        assert resp2.status_code == 409
+        data = resp2.json()
+        assert data["success"] is False
+        assert "duplicada" in data["message"].lower() or "ya existe" in data["message"].lower()
+
+    def test_duplicada_sin_cita_retorna_409(self):
+        # Primera factura sin cita
+        resp1 = self._post_invoice(cita_id=None)
+        assert resp1.status_code == 201, f"Primera falló: {resp1.content.decode()}"
+
+        # Segunda factura sin cita, mismo paciente/profesional/monto/fecha → 409
+        resp2 = self._post_invoice(cita_id=None)
+        assert resp2.status_code == 409
+        data = resp2.json()
+        assert data["success"] is False
+
+    def test_factura_anulada_previo_no_bloquea(self):
+        # Primera factura sin cita, luego anularla
+        resp1 = self._post_invoice(cita_id=None)
+        assert resp1.status_code == 201
+        factura_id = resp1.json()["idFactura"]
+
+        # Anular la factura
+        from apps.billing.models import Facturas
+        Facturas.objects.filter(idFactura=factura_id).update(anulada=True)
+
+        # Nueva factura misma cita/profesional/monto/fecha debe funcionar (201)
+        resp2 = self._post_invoice(cita_id=None)
+        assert resp2.status_code == 201, f"Reintento tras anulación falló: {resp2.content.decode()}"
+
+    def test_factura_distinta_funciona(self):
+        # Primera factura
+        resp1 = self._post_invoice(cita_id=None, monto="100000")
+        assert resp1.status_code == 201
+
+        # Segunda factura con monto diferente → 201
+        resp2 = self._post_invoice(cita_id=None, monto="200000")
+        assert resp2.status_code == 201, f"Factura distinta falló: {resp2.content.decode()}"
+
+
+# ── RF-80: Filtro por tipo de servicio en facturas ────────────────────────────
+
+
+class TestTipoServicioFilter:
+    def setup_method(self):
+        self.client = APIClient()
+        self.paciente = Register.objects.create_user(email="pacts@test.com", password="pass1234", nombre="Paciente TS", rol="paciente")
+        self.profesional = Register.objects.create_user(email="prots@test.com", password="pass1234", nombre="Profesional TS", rol="profesional")
+        self.client.force_authenticate(user=self.profesional)
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.create(idProfesional=self.profesional, idPaciente=self.paciente)
+
+    def _create_test_image(self):
+        png_bytes = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"
+            b"\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        return SimpleUploadedFile("test_evidence.png", png_bytes, content_type="image/png")
+
+    def _post_invoice(self, descripcion="Consulta Psicologica", monto="100000", fecha="2026-10-14", cita_id=None):
+        evidencia = self._create_test_image()
+        items = [{"descripcion": descripcion, "precioUnitario": monto}]
+        form_data = {
+            "idPaciente": str(self.paciente.idUsuario),
+            "items": f'[{{"descripcion":"{descripcion}","precioUnitario":"{monto}"}}]',
+            "fechaPago": fecha,
+            "metodoPago": "Transferencia",
+            "referencia": "REF",
+        }
+        if cita_id is not None:
+            form_data["idCita"] = str(cita_id)
+        return self.client.post("/api/facturas", {**form_data, "evidencia": evidencia}, format="multipart")
+
+    def _get_invoices(self, **params):
+        return self.client.get("/api/facturas", params)
+
+    def test_filtro_tipo_servicio_por_descripcion(self):
+        self._post_invoice(descripcion="Terapia Cognitivo Conductual", monto="100000")
+        self._post_invoice(descripcion="Terapia de Pareja", monto="150000")
+
+        resp = self._get_invoices(tipo_servicio="Cognitivo")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["success"] is True
+        facturas = data["facturas"]
+        assert len(facturas) == 1
+        assert "Cognitivo" in facturas[0]["items"][0]["descripcion"]
+
+    def test_filtro_tipo_servicio_por_descripcion_con_cita(self):
+        # Crear cita (no es necesaria para el filtro, solo contexto)
+        from apps.scheduling.models import Citas
+        cita = Citas.objects.create(
+            idPaciente=self.paciente,
+            idProfesional=self.profesional,
+            fecha="2026-10-14",
+            hora="10:00",
+            tipoCita="Primera Consulta",
+            estado="Confirmada",
+        )
+
+        self._post_invoice(descripcion="Terapia de Primera Consulta", monto="100000", cita_id=cita.idCita)
+
+        resp = self._get_invoices(tipo_servicio="Primera Consulta")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["success"] is True
+        facturas = data["facturas"]
+        assert len(facturas) == 1
+
+    def test_filtro_tipo_servicio_combinado_con_estado(self):
+        self._post_invoice(descripcion="Terapia Individual", monto="100000")
+        self._post_invoice(descripcion="Terapia de Pareja", monto="150000")
+
+        resp = self._get_invoices(tipo_servicio="Individual", estado="Pagado")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["success"] is True
+        facturas = data["facturas"]
+        assert len(facturas) == 1
+        assert "Individual" in facturas[0]["items"][0]["descripcion"]

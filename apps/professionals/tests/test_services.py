@@ -549,3 +549,61 @@ class TestGetPatientChatbotHistory:
         payload, status = svc.get_patient_chatbot_history(user.idUsuario, patient.idUsuario)
         assert status == 200
         assert payload["success"] is True
+
+
+# ── RF-49: Notificar al profesional al asignar paciente ───────────────────────
+
+
+@pytest.mark.django_db
+class TestAssignPatientNotification:
+    def test_asignacion_nueva_crea_notificacion(self, verified_professional_with_patient):
+        pro_user, patient = verified_professional_with_patient
+        # Borrar asignación existente para probar desde cero
+        from apps.professionals.models import PacientesProfesional
+        PacientesProfesional.objects.filter(
+            idProfesional=pro_user, idPaciente=patient
+        ).delete()
+
+        svc = ProfessionalService()
+        payload, status = svc.assign_patient(pro_user.idUsuario, patient.idUsuario)
+
+        assert status == 200
+        assert payload["success"] is True
+
+        # Verificar que se creó la notificación
+        from apps.scheduling.models import Notificaciones
+        notif = Notificaciones.objects.filter(
+            idUsuario=pro_user,
+            rol="profesional",
+            titulo="Nuevo paciente asignado",
+        ).first()
+        assert notif is not None
+        assert patient.nombre in notif.mensaje
+        assert notif.tipo == "Asignacion"
+
+    def test_asignacion_repetida_no_crea_notificacion(self, verified_professional_with_patient):
+        pro_user, patient = verified_professional_with_patient
+
+        svc = ProfessionalService()
+        payload, status = svc.assign_patient(pro_user.idUsuario, patient.idUsuario)
+
+        assert status == 200
+        assert payload["success"] is True
+
+        # No debe haber notificación duplicada
+        from apps.scheduling.models import Notificaciones
+        count = Notificaciones.objects.filter(
+            idUsuario=pro_user,
+            rol="profesional",
+            titulo="Nuevo paciente asignado",
+        ).count()
+        assert count == 0
+
+    def test_asignacion_paciente_no_existente_retorna_404(self, verified_professional):
+        pro_user = verified_professional
+        svc = ProfessionalService()
+        payload, status = svc.assign_patient(pro_user.idUsuario, 99999)
+
+        assert status == 404
+        assert payload["success"] is False
+        assert "no encontrado" in payload["message"].lower()

@@ -340,10 +340,23 @@ function abrirBloqueo(id, nombre, accion) {
 }
 
 async function confirmarBloqueo() {
+    // RF-17: exigir motivo para desbloquear/reestablecer/activar
+    const accion = usuarioSeleccionado.accion;
+    const necesitaMotivo = ["desbloquear", "reestablecer", "activar"].includes(accion);
+    let motivo = null;
+    if (necesitaMotivo) {
+        motivo = prompt(`Indica el motivo para ${accion}:`);
+        if (!motivo || !motivo.trim()) {
+            PsyAIAlerts.error('Motivo requerido', 'Debes indicar un motivo para esta acción.');
+            return;
+        }
+        motivo = motivo.trim();
+    }
+
     const res = await fetch(`${API}/api/admin/usuarios/${usuarioSeleccionado.idUsuario}`, {
         method: 'PATCH', headers: {'Content-Type': 'application/json'},
         credentials: 'include',
-        body: JSON.stringify({ accion: usuarioSeleccionado.accion })
+        body: JSON.stringify({ accion: usuarioSeleccionado.accion, ...(motivo ? { motivo } : {}) })
     });
     const data = await res.json();
     if (data.success) {

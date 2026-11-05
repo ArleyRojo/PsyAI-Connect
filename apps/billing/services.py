@@ -130,44 +130,73 @@ class InvoiceService:
         if error:
             return {"success": False, "message": f"Evidencia inválida: {error}"}, 400
 
-        try:
-            invoice_id = self.repo.create_invoice(
-                patient_id, professional_user_id, cita_id, items,
-                fechaPago=fechaPago_dt,
-                metodoPago=metodoPago,
-                referencia=referencia,
-                notas=notas,
-                evidencia=evidencia,
-                confirmada_por_id=professional_user_id,
-                estadoPago="Pagado",
-            )
+        # Calcular monto total
+        from decimal import Decimal
+        monto_total = sum(Decimal(str(i['precioUnitario'])) for i in items)
 
-            # enviar correo al paciente
+        # RF-72: verificar factura duplicada dentro de transacción atómica
+        from django.db import transaction
+        with transaction.atomic():
+            # Duplicada por cita: misma cita no anulada
+            if cita_id:
+                if Facturas.objects.filter(idCita=cita_id, anulada=False).exists():
+                    return {
+                        "success": False,
+                        "message": "Ya existe una factura no anulada para esta cita",
+                    }, 409
+            # Duplicada sin cita: mismo paciente + profesional + monto + misma día de fechaPago
+            else:
+                if Facturas.objects.filter(
+                    idPaciente_id=patient_id,
+                    idProfesional_id=professional_user_id,
+                    monto=monto_total,
+                    fechaPago__date=fechaPago_dt.date(),
+                    anulada=False,
+                ).exists():
+                    return {
+                        "success": False,
+                        "message": "Ya existe una factura no anulada para este paciente, profesional, monto y fecha",
+                    }, 409
+
+            # Crear la factura
             try:
-                from apps.authentication.models import Register
-                paciente = Register.objects.filter(idUsuario=patient_id).first()
-                profesional = Register.objects.filter(idUsuario=professional_user_id).first()
-                site_url = InvoiceMailService._get_site_url()
-                InvoiceMailService.send_factura_notificacion(
-                    recipient_email=paciente.email if paciente else None,
-                    titulo="Pago registrado",
-                    mensaje=f"Se ha registrado un pago por ${sum(Decimal(str(i['precioUnitario'])) for i in items):,.0f} correspondiente a la factura #{invoice_id}.",
-                    id_factura=invoice_id,
-                    nombre_paciente=paciente.nombre if paciente else None,
-                    nombre_profesional=profesional.nombre if profesional else None,
-                    monto=sum(Decimal(str(i['precioUnitario'])) for i in items),
-                    estado_pago="Pagado",
-                    items=[{"descripcion": i["descripcion"], "precio": f"{Decimal(str(i['precioUnitario'])):,.0f}"} for i in items],
-                    cta_link=f"{site_url}/aside-patient/facturas.html",
-                    paciente_user=paciente,
+                invoice_id = self.repo.create_invoice(
+                    patient_id, professional_user_id, cita_id, items,
+                    fechaPago=fechaPago_dt,
+                    metodoPago=metodoPago,
+                    referencia=referencia,
+                    notas=notas,
+                    evidencia=evidencia,
+                    confirmada_por_id=professional_user_id,
+                    estadoPago="Pagado",
                 )
             except Exception as e:
-                logger.error(f"Error enviando correo de pago registrado: {e}")
+                logger.error("Error registrando pago: %s", e, exc_info=True)
+                return {"success": False, "message": "Error al registrar el pago"}, 500
 
-            return {"success": True, "message": "Pago registrado correctamente", "idFactura": invoice_id}, 201
+        # enviar correo al paciente (fuera de la transacción)
+        try:
+            from apps.authentication.models import Register
+            paciente = Register.objects.filter(idUsuario=patient_id).first()
+            profesional = Register.objects.filter(idUsuario=professional_user_id).first()
+            site_url = InvoiceMailService._get_site_url()
+            InvoiceMailService.send_factura_notificacion(
+                recipient_email=paciente.email if paciente else None,
+                titulo="Pago registrado",
+                mensaje=f"Se ha registrado un pago por ${monto_total:,.0f} correspondiente a la factura #{invoice_id}.",
+                id_factura=invoice_id,
+                nombre_paciente=paciente.nombre if paciente else None,
+                nombre_profesional=profesional.nombre if profesional else None,
+                monto=monto_total,
+                estado_pago="Pagado",
+                items=[{"descripcion": i["descripcion"], "precio": f"{Decimal(str(i['precioUnitario'])):,.0f}"} for i in items],
+                cta_link=f"{site_url}/aside-patient/facturas.html",
+                paciente_user=paciente,
+            )
         except Exception as e:
-            logger.error("Error registrando pago: %s", e, exc_info=True)
-            return {"success": False, "message": "Error al registrar el pago"}, 500
+            logger.error(f"Error enviando correo de pago registrado: {e}")
+
+        return {"success": True, "message": "Pago registrado correctamente", "idFactura": invoice_id}, 201
 
     def get_invoice(self, invoice_id, user_id, user_role):
         factura = self.repo.get_invoice_by_id(invoice_id)
@@ -185,9 +214,9 @@ class InvoiceService:
 
         return {"success": True, "factura": factura}, 200
 
-    def list_patient_invoices(self, patient_id, estado=None, profesional=None, fecha_desde=None, fecha_hasta=None):
+    def list_patient_invoices(self, patient_id, estado=None, profesional=None, fecha_desde=None, fecha_hasta=None, tipo_servicio=None):
         facturas = self.repo.list_invoices_by_patient(
-            patient_id, estado=estado, profesional=profesional, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
+            patient_id, estado=estado, profesional=profesional, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, tipo_servicio=tipo_servicio,
         )
         for f in facturas:
             if f.get("monto"):
@@ -197,19 +226,19 @@ class InvoiceService:
                     item["precioUnitario"] = float(item["precioUnitario"])
         return {"success": True, "facturas": facturas}, 200
 
-    def list_professional_invoices(self, professional_id, estado=None, paciente=None, fecha_desde=None, fecha_hasta=None):
+    def list_professional_invoices(self, professional_id, estado=None, paciente=None, fecha_desde=None, fecha_hasta=None, tipo_servicio=None):
         facturas = self.repo.list_invoices_by_professional(
-            professional_id, estado=estado, paciente=paciente, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
+            professional_id, estado=estado, paciente=paciente, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, tipo_servicio=tipo_servicio,
         )
         for f in facturas:
             if f.get("monto"):
                 f["monto"] = float(f["monto"])
         return {"success": True, "facturas": facturas}, 200
 
-    def list_all_invoices(self, paciente=None, profesional=None, estado=None, fecha_desde=None, fecha_hasta=None):
+    def list_all_invoices(self, paciente=None, profesional=None, estado=None, fecha_desde=None, fecha_hasta=None, tipo_servicio=None):
         facturas = self.repo.list_all_invoices(
             paciente=paciente, profesional=profesional, estado=estado,
-            fecha_desde=fecha_desde, fecha_hasta=fecha_hasta,
+            fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, tipo_servicio=tipo_servicio,
         )
         for f in facturas:
             if f.get("monto"):

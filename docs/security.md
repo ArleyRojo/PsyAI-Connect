@@ -336,19 +336,7 @@ Archivo: `apps/authentication/models.py` → `ConsentimientoUsuario`
 
 ---
 
-### Capa 8 — Webhooks con firma HMAC (pagos Wompi)
-
-Archivo: `apps/billing/views.py` → `WebhookWompiView`
-
-| Componente | Descripción |
-|------------|-------------|
-| Firma | `x-hw-signature` validada con `HMAC-SHA256` usando `WOMPI_INTEGRITY_SECRET` |
-| Propósito | Garantiza que el webhook proviene realmente de Wompi y no ha sido alterado |
-| Fuente de verdad | El webhook es la fuente autoritativa de estado de pago (no la confirmación frontend) |
-
----
-
-### Capa 9 — Auditoría de actividad
+### Capa 8 — Auditoría de actividad
 
 Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
 
@@ -372,7 +360,7 @@ Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
 | Entrada | Validación archivos (ext, tamaño, magic bytes), DRF serializers | `apps/core/utils.py`, `serializers.py` |
 | PII / IA | Sanitización antes de Gemini (emails, teléfonos, documentos, tarjetas) | `apps/chatbot/services.py` |
 | Cabeceras HTTP | CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy | `security_headers.py`, `base.py`, `prod.py` |
-| Webhooks | HMAC-SHA256 con `WOMPI_INTEGRITY_SECRET` | `apps/billing/views.py` |
+| — | — | — |
 | 2FA | TOTP RFC 6238, obligatorio para admin/profesional | `TOTPDevice`, `AuthService`, vistas REST |
 | Email verificado | Token un uso, 24h, bloqueo profesional si no verificado | `EmailVerificationToken`, `VerifyEmailView` |
 | Estado de cuenta | Middleware verifica activo/estadoCuenta en cada request | `account_status.py` |
@@ -421,7 +409,7 @@ Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
 - [ ] `CSP_ENABLED = True` → cabecera CSP enforced en producción.
 - [ ] Certificados TLS válidos (Let's Encrypt o proveedor).
 - [ ] `ALLOW_PLAINTEXT_BOOTSTRAP = False` (default, nunca habilitar en producción).
-- [ ] Variables de entorno: `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `WOMPI_INTEGRITY_SECRET`, `GEMINI_API_KEY*`, `SITE_URL`, `TWILIO_*`.
+- [ ] Variables de entorno: `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `GEMINI_API_KEY*`, `SITE_URL`, `TWILIO_*`.
 - [ ] `pip install -r requirements.txt` (incluye `argon2-cffi` para Argon2id).
 - [ ] `python manage.py migrate` (aplica todas las migraciones de seguridad).
 - [ ] Probar flujo completo: registro → verificación email → login → 2FA (si aplica) → acceso restringido por rol.
@@ -447,7 +435,6 @@ Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
 | `apps/core/middleware/account_status.py` | `AccountStatusMiddleware`: verifica activo/estadoCuenta en cada request |
 | `apps/core/middleware/audit.py` | `AuditActivityMiddleware`: registro de acciones con máscara de PII |
 | `apps/chatbot/services.py` | `_sanitize_text()`: enmascara PII antes de enviar a Gemini |
-| `apps/billing/views.py` | `WebhookWompiView`: verificación HMAC-SHA256 |
 | `config/settings/base.py` | `PASSWORD_HASHERS`, `AUTH_PASSWORD_VALIDATORS`, `REST_FRAMEWORK` throttling, cookies, CSP, upload limits |
 | `config/settings/prod.py` | `SECRET_KEY` validación, cookies seguras, HSTS, SSL redirect, proxy SSL header |
 | `config/settings/dev.py` | `DEBUG=True`, `ALLOWED_HOSTS=["*"]`, `CORS_ALLOW_ALL_ORIGINS=True`, email por consola |

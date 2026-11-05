@@ -438,3 +438,77 @@ class TestResetPassword:
         assert payload["success"] is True
         mock_auth_repo.invalidate_recovery_token.assert_called_once()
         mock_auth_repo.update_password.assert_called_once()
+
+
+# ── AuthService.reset_password — correo de aviso (RF-08) ─────────────────────
+
+
+class TestResetPasswordEmail:
+    def test_sends_password_changed_email(self, auth_service, mock_auth_repo):
+        """El envío de correo se intenta con el destinatario correcto."""
+        mock_auth_repo.validate_recovery_token.return_value = 1
+
+        class FakeUser:
+            email = "test@test.com"
+            nombre = "Usuario Test"
+
+        class FakeRequest:
+            META = {}
+
+        with patch(
+            "apps.authentication.services.MailService.send_password_changed_email"
+        ) as mock_mail, patch(
+            "apps.authentication.models.Register.objects.filter"
+        ) as mock_filter:
+            mock_mail.return_value = True
+            mock_qs = MagicMock()
+            mock_qs.first.return_value = FakeUser()
+            mock_filter.return_value = mock_qs
+
+            payload, status = auth_service.reset_password(
+                {
+                    "token": "valid_token",
+                    "new_password": "NewPass1",
+                    "confirm_password": "NewPass1",
+                },
+                request=FakeRequest(),
+            )
+        assert status == 200
+        assert payload["success"] is True
+        mock_mail.assert_called_once()
+        _, kwargs = mock_mail.call_args
+        assert kwargs["recipient_email"] == "test@test.com"
+
+    def test_email_failure_does_not_break_response(self, auth_service, mock_auth_repo):
+        """Un fallo al enviar el correo no rompe la operación de restablecimiento."""
+        mock_auth_repo.validate_recovery_token.return_value = 1
+
+        class FakeUser:
+            email = "test@test.com"
+            nombre = "Usuario Test"
+
+        class FakeRequest:
+            META = {}
+
+        with patch(
+            "apps.authentication.services.MailService.send_password_changed_email",
+            side_effect=Exception("SMTP down"),
+        ), patch(
+            "apps.authentication.models.Register.objects.filter"
+        ) as mock_filter:
+            mock_qs = MagicMock()
+            mock_qs.first.return_value = FakeUser()
+            mock_filter.return_value = mock_qs
+
+            payload, status = auth_service.reset_password(
+                {
+                    "token": "valid_token",
+                    "new_password": "NewPass1",
+                    "confirm_password": "NewPass1",
+                },
+                request=FakeRequest(),
+            )
+        assert status == 200
+        assert payload["success"] is True
+        mock_auth_repo.invalidate_recovery_token.assert_called_once()
+        mock_auth_repo.update_password.assert_called_once()

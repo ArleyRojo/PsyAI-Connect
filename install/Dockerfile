@@ -4,7 +4,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 
 # ── Stage 1: base ────────────────────────────────────────────────────────────
-FROM python:3.12-slim AS base
+FROM python:3.13-slim AS base
 
 # Prevent Python from writing .pyc files and enable unbuffered stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -23,7 +23,8 @@ WORKDIR /app
 
 # Install Python dependencies first (layer caching)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
 # ── Stage 2: dev ─────────────────────────────────────────────────────────────
 FROM base AS dev
@@ -48,6 +49,9 @@ FROM base AS prod
 ENV DJANGO_SETTINGS_MODULE=config.settings.prod \
     DEBUG=0
 
+# Create a non-root user for running the application (security best practice)
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser
+
 # Copy the full application code into the image
 COPY . .
 
@@ -60,7 +64,18 @@ RUN python manage.py collectstatic --noinput
 RUN rm -rf .git .pytest_cache __pycache__ \
     && find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
+# Ensure the app user owns the application directory (and uploads folder)
+RUN mkdir -p /app/static/uploads \
+    && chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
 EXPOSE 8000
+
+# Healthcheck: verifica que el servidor responda en el puerto 8000
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD curl -s http://localhost:8000/ > /dev/null || exit 1
 
 COPY install/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

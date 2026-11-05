@@ -11,12 +11,12 @@ from apps.patients.models import Anamnesis, EvolucionPaciente, PerfilPaciente
 class ProfessionalRepository:
     def assign_patient(self, professional_id, patient_id):
         if not Register.objects.filter(idUsuario=patient_id, rol="paciente").exists():
-            return False
-        PacientesProfesional.objects.get_or_create(
+            return False, False  # paciente no existe
+        _, created = PacientesProfesional.objects.get_or_create(
             idProfesional_id=professional_id,
             idPaciente_id=patient_id,
         )
-        return True
+        return True, created  # paciente existe, ¿asignación nueva?
 
     def get_professional_profile(self, user_id):
         try:

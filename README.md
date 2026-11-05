@@ -7,9 +7,9 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Django](https://img.shields.io/badge/Django-5.0-092E20?logo=django&logoColor=white)](https://djangoproject.com)
 [![DRF](https://img.shields.io/badge/DRF-3.14-ff1709?logo=django&logoColor=white)](https://django-rest-framework.org)
-[![MySQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://postgresql.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://docker.com)
-[![Tests](https://img.shields.io/badge/Tests-259%2B-brightgreen)](#-testing)
+[![Tests](https://img.shields.io/badge/Tests-701%2B-brightgreen)](#-testing)
 [![License](https://img.shields.io/badge/License-Educational-blue)](#-licencia)
 
 *Conecta pacientes con profesionales, automatiza el triaje con IA y centraliza la operación clínica en una sola plataforma.*
@@ -122,7 +122,7 @@ PsyAI-Connect/
 ├── apps/
 │   ├── admin_panel/          # Panel administración
 │   ├── authentication/       # Auth completa
-│   ├── billing/              # Facturación + Wompi
+│   ├── billing/              # Facturación con pago manual y evidencia
 │   ├── chatbot/              # IA Gemini
 │   ├── core/                 # Permisos, middlewares
 │   ├── documents/            # Documentos clínicos
@@ -216,9 +216,10 @@ pytest apps/scheduling/tests/ -v
 docker compose -f install/docker-compose.yml exec app python -m pytest apps/ -q
 ```
 
-> **259+ tests** cubriendo servicios, repositorios, vistas y endpoints HTTP.  
-> Unit tests usan **SQLite en memoria** (rápidos, sin servidor).  
-> Integration tests marcados con `@pytest.mark.integration` requieren **PostgreSQL** (levantable con `docker compose -f install/docker-compose.yml up`).
+> **701+ tests** cubriendo servicios, repositorios, vistas y endpoints HTTP.  
+> Unit tests usan **PostgreSQL** (configuración en `config/settings/test.py`).  
+> Integration tests marcados con `@pytest.mark.integration` requieren **PostgreSQL** (levantable con `docker compose -f install/docker-compose.yml up`).  
+> *Nota: 6 tests pre-existentes fallan por problemas de configuración de email y claves foráneas no relacionados con esta actualización.*
 
 ---
 
@@ -258,12 +259,12 @@ Ver `.env.example` para lista completa.
 | 📅 **Agendamiento** | Citas con estados, recordatorios, conflictos |
 | 📋 **Historia clínica** | Diagnósticos + documentos adjuntos |
 | 📈 **Evolución paciente** | Seguimiento diario del progreso |
-| 💳 **Facturación** | Facturas + integración Wompi |
+| 💳 **Facturación** | Facturas con pago manual y evidencia (sin pasarela automática) |
 | 📊 **Telemetría live** | CPU, RAM, disco, peticiones, endpoints, eventos seguridad |
 | 🌓 **Temas** | Claro/oscuro persistido por usuario |
 | 📱 **Responsive** | Móvil, tablet, desktop por sección |
 | 🐳 **Docker ready** | Dev (hot-reload) + Prod (Waitress) |
-| ✅ **Tests** | 259+ unit + integration |
+| ✅ **Tests** | 701+ unit + integration |
 
 ---
 

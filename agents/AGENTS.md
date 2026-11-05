@@ -1,12 +1,12 @@
 # PsyAI Connect — guía para agentes de IA
 
-Plataforma web de salud mental: Django 5 + DRF + MySQL, plantillas Django con Bootstrap 5 y JavaScript.
+Plataforma web de salud mental: Django 5 + DRF + PostgreSQL, plantillas Django con Bootstrap 5 y JavaScript.
 Roles: `paciente`, `profesional`, `admin`. Maneja **datos clínicos sensibles**: ante la duda, gana la opción más segura.
 
 ## Equipo de agentes (`agents/`, se invocan con `@nombre`)
 | Agente | Responsabilidad |
 |---|---|
-| `architect` | Mantener la arquitectura Views → Services → Repositories → MySQL y que `docs/` la refleje |
+| `architect` | Mantener la arquitectura Views → Services → Repositories → PostgreSQL y que `docs/` la refleje |
 | `django-backend` | Modelos, vistas, servicios, repositorios, API REST y permisos |
 | `frontend` | Bootstrap 5, Django Templates, JavaScript y diseño responsive |
 | `security-auditor` | Autenticación, autorización, privacidad de datos clínicos, secretos y vulnerabilidades |
@@ -20,7 +20,7 @@ Flujo habitual: `@architect` plantea el cambio → `@django-backend` y `@fronten
 - Docker (desde la raíz): `docker compose -f install/docker-compose.yml up`.
 
 ## Arquitectura (cada app en `apps/<nombre>/`)
-`Views (DRF) → Services → Repositories → MySQL`, más `models.py`, `urls.py`, `serializers.py` y `tests/`.
+`Views (DRF) → Services → Repositories → PostgreSQL`, más `models.py`, `urls.py`, `serializers.py` y `tests/`.
 - Las vistas no tocan el ORM; llaman a servicios. Los servicios no conocen `request`. Solo los repositorios consultan la base.
 - El id del usuario sale **siempre de la sesión**, nunca del body ni de la URL (evita IDOR).
 - Permisos DRF por rol: `IsPaciente`, `IsProfesional`, `IsAdmin`, `IsAuthenticatedDRF`. Toda vista nueva declara el suyo.

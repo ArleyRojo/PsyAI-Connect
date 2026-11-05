@@ -47,7 +47,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         user.nombre = (
             extra.get("name") or extra.get("given_name") or extra.get("first_name") or user.email
         )
-        # Contraseña aleatoria hasheada (argon2) para satisfecer NOT NULL en MySQL.
+        # Contraseña aleatoria hasheada (argon2) para satisfecer NOT NULL en PostgreSQL.
         user.set_password(uuid.uuid4().hex)
         user.email_verificado = True  # Google ya verificó el correo
 

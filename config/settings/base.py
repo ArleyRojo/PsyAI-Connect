@@ -103,7 +103,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
 ]
 
-# Solo para crear cuentas de prueba/bootstrap directo en MySQL. False en producción.
+# Solo para crear cuentas de prueba/bootstrap directo en PostgreSQL. False en producción.
 ALLOW_PLAINTEXT_BOOTSTRAP = False
 
 LANGUAGE_CODE = "es-co"

@@ -37,24 +37,28 @@ class FacturaListView(APIView):
             profesional = request.query_params.get("profesional")
             fecha_desde = request.query_params.get("fecha_desde")
             fecha_hasta = request.query_params.get("fecha_hasta")
+            tipo_servicio = request.query_params.get("tipo_servicio")
             payload, status_code = invoice_service.list_patient_invoices(
                 user_id,
                 estado=estado,
                 profesional=profesional,
                 fecha_desde=fecha_desde,
                 fecha_hasta=fecha_hasta,
+                tipo_servicio=tipo_servicio,
             )
         elif user_role == "profesional":
             estado = request.query_params.get("estado")
             paciente = request.query_params.get("paciente")
             fecha_desde = request.query_params.get("fecha_desde")
             fecha_hasta = request.query_params.get("fecha_hasta")
+            tipo_servicio = request.query_params.get("tipo_servicio")
             payload, status_code = invoice_service.list_professional_invoices(
                 user_id,
                 estado=estado,
                 paciente=paciente,
                 fecha_desde=fecha_desde,
                 fecha_hasta=fecha_hasta,
+                tipo_servicio=tipo_servicio,
             )
         elif user_role == "admin":
             payload, status_code = invoice_service.list_all_invoices(
@@ -63,6 +67,7 @@ class FacturaListView(APIView):
                 estado=request.query_params.get("estado"),
                 fecha_desde=request.query_params.get("fecha_desde"),
                 fecha_hasta=request.query_params.get("fecha_hasta"),
+                tipo_servicio=request.query_params.get("tipo_servicio"),
             )
         else:
             return Response(

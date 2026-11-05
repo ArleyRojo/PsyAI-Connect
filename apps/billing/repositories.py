@@ -52,7 +52,7 @@ class InvoiceRepository:
         result["nombreProfesional"] = factura.idProfesional.nombre if factura.idProfesional else None
         return result
 
-    def list_invoices_by_patient(self, patient_id, estado=None, profesional=None, fecha_desde=None, fecha_hasta=None):
+    def list_invoices_by_patient(self, patient_id, estado=None, profesional=None, fecha_desde=None, fecha_hasta=None, tipo_servicio=None):
         qs = self._base_invoice_qs().filter(idPaciente_id=patient_id)
         if estado == "Anulada":
             qs = qs.filter(anulada=True)
@@ -64,7 +64,9 @@ class InvoiceRepository:
             qs = qs.filter(fecha__gte=fecha_desde)
         if fecha_hasta:
             qs = qs.filter(fecha__lte=fecha_hasta)
-        facturas = qs.order_by("-fecha")
+        if tipo_servicio:
+            qs = qs.filter(items__descripcion__icontains=tipo_servicio)
+        facturas = qs.order_by("-fecha").distinct()
         result = []
         for f in facturas:
             d = f.to_dict()
@@ -72,7 +74,7 @@ class InvoiceRepository:
             result.append(d)
         return result
 
-    def list_invoices_by_professional(self, professional_id, estado=None, paciente=None, fecha_desde=None, fecha_hasta=None):
+    def list_invoices_by_professional(self, professional_id, estado=None, paciente=None, fecha_desde=None, fecha_hasta=None, tipo_servicio=None):
         qs = self._base_invoice_qs().filter(idProfesional_id=professional_id)
         if estado == "Anulada":
             qs = qs.filter(anulada=True)
@@ -84,7 +86,9 @@ class InvoiceRepository:
             qs = qs.filter(fecha__gte=fecha_desde)
         if fecha_hasta:
             qs = qs.filter(fecha__lte=fecha_hasta)
-        facturas = qs.order_by("-fecha")
+        if tipo_servicio:
+            qs = qs.filter(items__descripcion__icontains=tipo_servicio)
+        facturas = qs.order_by("-fecha").distinct()
         result = []
         for f in facturas:
             d = f.to_dict()
@@ -92,7 +96,7 @@ class InvoiceRepository:
             result.append(d)
         return result
 
-    def list_all_invoices(self, paciente=None, profesional=None, estado=None, fecha_desde=None, fecha_hasta=None):
+    def list_all_invoices(self, paciente=None, profesional=None, estado=None, fecha_desde=None, fecha_hasta=None, tipo_servicio=None):
         qs = self._base_invoice_qs().all()
         if paciente:
             qs = qs.filter(idPaciente__nombre__icontains=paciente)
@@ -106,7 +110,9 @@ class InvoiceRepository:
             qs = qs.filter(fecha__gte=fecha_desde)
         if fecha_hasta:
             qs = qs.filter(fecha__lte=fecha_hasta)
-        facturas = qs.order_by("-fecha")
+        if tipo_servicio:
+            qs = qs.filter(items__descripcion__icontains=tipo_servicio)
+        facturas = qs.order_by("-fecha").distinct()
         result = []
         for f in facturas:
             d = f.to_dict()

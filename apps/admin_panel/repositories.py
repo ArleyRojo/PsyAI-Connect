@@ -251,7 +251,7 @@ class AdminRepository:
         except Register.DoesNotExist:
             pass
 
-    def block_user(self, user_id, accion):
+    def block_user(self, user_id, accion, motivo=None):
         activo = 0 if accion in ("bloquear", "suspender") else 1
         estado = "Suspendida" if activo == 0 else "Activa"
         user_info = None
@@ -262,9 +262,12 @@ class AdminRepository:
             user.save(update_fields=["activo", "estadoCuenta"])
             user_info = {"nombre": user.nombre, "email": user.email}
             accion_str = "Suspender usuario" if activo == 0 else "Reestablecer usuario"
+            detalle = f"{'Suspendido' if activo == 0 else 'Reestablecido'}: {user.nombre}"
+            if motivo:
+                detalle += f" | Motivo: {motivo}"
             self.registrar_log(
                 "usuarios", accion_str,
-                f"{'Suspendido' if activo == 0 else 'Reestablecido'}: {user.nombre}",
+                detalle,
                 administrador=self.get_admin_name(),
             )
         except Register.DoesNotExist:
@@ -602,13 +605,35 @@ class AdminRepository:
             for u in users
         ]
 
-    def get_logs(self, limit=None):
+    def get_logs(self, limit=None, usuario=None, accion=None, fecha_desde=None, fecha_hasta=None):
         from django.utils import timezone
+        from datetime import datetime, time
 
         limit_val = limit or 200
         combined = []
 
-        for l in Logs.objects.order_by("-fecha")[:limit_val]:
+        # ── Filtros sobre Logs ─────────────────────────────────────────────
+        logs_qs = Logs.objects.all()
+        if usuario:
+            logs_qs = logs_qs.filter(
+                Q(administrador__icontains=usuario) | Q(usuario_afectado__icontains=usuario)
+            )
+        if accion:
+            logs_qs = logs_qs.filter(accion__icontains=accion)
+        if fecha_desde:
+            try:
+                fd = datetime.strptime(fecha_desde, "%Y-%m-%d").date()
+                logs_qs = logs_qs.filter(fecha__date__gte=fd)
+            except ValueError:
+                pass  # fecha inválida se valida en la vista
+        if fecha_hasta:
+            try:
+                fh = datetime.strptime(fecha_hasta, "%Y-%m-%d").date()
+                logs_qs = logs_qs.filter(fecha__date__lte=fh)
+            except ValueError:
+                pass
+
+        for l in logs_qs.order_by("-fecha")[:limit_val]:
             combined.append((
                 l.fecha,
                 {
@@ -622,7 +647,26 @@ class AdminRepository:
                 },
             ))
 
-        logs_auditoria = AuditoriaAccesos.objects.select_related("idUsuario").order_by("-fecha")[:limit_val]
+        # ── Filtros sobre AuditoriaAccesos ─────────────────────────────────
+        auditoria_qs = AuditoriaAccesos.objects.select_related("idUsuario").all()
+        if usuario:
+            auditoria_qs = auditoria_qs.filter(idUsuario__nombre__icontains=usuario)
+        if accion:
+            auditoria_qs = auditoria_qs.filter(accion__icontains=accion)
+        if fecha_desde:
+            try:
+                fd = datetime.strptime(fecha_desde, "%Y-%m-%d").date()
+                auditoria_qs = auditoria_qs.filter(fecha__date__gte=fd)
+            except ValueError:
+                pass
+        if fecha_hasta:
+            try:
+                fh = datetime.strptime(fecha_hasta, "%Y-%m-%d").date()
+                auditoria_qs = auditoria_qs.filter(fecha__date__lte=fh)
+            except ValueError:
+                pass
+
+        logs_auditoria = auditoria_qs.order_by("-fecha")[:limit_val]
         for a in logs_auditoria:
             combined.append((
                 a.fecha,

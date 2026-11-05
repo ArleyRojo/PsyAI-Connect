@@ -43,12 +43,30 @@ services:
     restart: unless-stopped
     networks:
       - psyai_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/ > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
   db:
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: ${DB_USER:?Set DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME:?Set DB_NAME}
     # In production, consider removing the port mapping (internal only)
     ports: []
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:?Set DB_USER} -d ${DB_NAME:?Set DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - psyai_net

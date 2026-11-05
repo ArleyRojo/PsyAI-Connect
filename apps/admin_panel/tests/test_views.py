@@ -11,6 +11,7 @@ from apps.admin_panel.views import (
     AdminStatsStreamAPIView,
     AdminChatbotConfigViewSet,
     AdminChatbotPalabrasAPIView,
+    AdminLogAPIView,
 )
 from apps.core.permissions import IsAuthenticatedDRF
 
@@ -164,6 +165,162 @@ class TestAdminUsuarioPatch:
         resp = view(req, pk="1")
 
         assert resp.status_code == 400
+
+
+# ── RF-17: Motivo requerido para desbloquear/reestablecer/activar ────────────
+
+
+class TestAdminUsuarioPatchMotivo:
+    def test_patch_reestablecer_sin_motivo_retorna_400(self, rf, mock_auth_admin):
+        req = rf.patch(
+            "/api/admin/usuarios/2",
+            data=json.dumps({"accion": "reestablecer"}),
+            content_type="application/json",
+        )
+        view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+        resp = view(req, pk="2")
+
+        assert resp.status_code == 400
+        assert resp.data["success"] is False
+        assert "motivo" in resp.data["message"].lower()
+
+    def test_patch_activar_sin_motivo_retorna_400(self, rf, mock_auth_admin):
+        req = rf.patch(
+            "/api/admin/usuarios/2",
+            data=json.dumps({"accion": "activar"}),
+            content_type="application/json",
+        )
+        view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+        resp = view(req, pk="2")
+
+        assert resp.status_code == 400
+        assert resp.data["success"] is False
+        assert "motivo" in resp.data["message"].lower()
+
+    def test_patch_desbloquear_sin_motivo_retorna_400(self, rf, mock_auth_admin):
+        req = rf.patch(
+            "/api/admin/usuarios/2",
+            data=json.dumps({"accion": "desbloquear"}),
+            content_type="application/json",
+        )
+        view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+        resp = view(req, pk="2")
+
+        assert resp.status_code == 400
+        assert resp.data["success"] is False
+        assert "motivo" in resp.data["message"].lower()
+
+    def test_patch_reestablecer_con_motivo_llama_service(self, rf, mock_auth_admin):
+        req = rf.patch(
+            "/api/admin/usuarios/2",
+            data=json.dumps({"accion": "reestablecer", "motivo": "Incumplimiento de políticas"}),
+            content_type="application/json",
+        )
+        view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+
+        with patch("apps.admin_panel.views.admin_service") as mock_svc:
+            mock_svc.block_user.return_value = (
+                {"success": True, "message": "Usuario reestablecido"},
+                200,
+            )
+            resp = view(req, pk="2")
+
+        assert resp.status_code == 200
+        mock_svc.block_user.assert_called_once()
+        call_args = mock_svc.block_user.call_args[0][0]
+        assert call_args["motivo"] == "Incumplimiento de políticas"
+
+    def test_patch_suspender_sin_motivo_funciona(self, rf, mock_auth_admin):
+        """Suspender no requiere motivo (solo desbloquear/reestablecer/activar)."""
+        req = rf.patch(
+            "/api/admin/usuarios/2",
+            data=json.dumps({"accion": "suspender"}),
+            content_type="application/json",
+        )
+        view = AdminUsuarioViewSet.as_view({"patch": "partial_update"})
+
+        with patch("apps.admin_panel.views.admin_service") as mock_svc:
+            mock_svc.block_user.return_value = (
+                {"success": True, "message": "Usuario suspendido"},
+                200,
+            )
+            resp = view(req, pk="2")
+
+        assert resp.status_code == 200
+        mock_svc.block_user.assert_called_once()
+
+
+# ── RF-25: Filtros de logs por usuario, acción y fechas ───────────────────────
+
+
+class TestAdminLogsFilters:
+    def test_logs_filtro_usuario(self, rf, mock_auth_admin):
+        req = rf.get(
+            "/api/admin/logs?usuario=juan",
+            content_type="application/json",
+        )
+        view = AdminLogAPIView.as_view()
+        with patch("apps.admin_panel.views.admin_service") as mock_svc:
+            mock_svc.get_logs.return_value = ({"success": True, "logs": []}, 200)
+            resp = view(req)
+        assert resp.status_code == 200
+        mock_svc.get_logs.assert_called_once()
+        kwargs = mock_svc.get_logs.call_args[1]
+        assert kwargs["usuario"] == "juan"
+
+    def test_logs_filtro_accion(self, rf, mock_auth_admin):
+        req = rf.get(
+            "/api/admin/logs?accion=suspender",
+            content_type="application/json",
+        )
+        view = AdminLogAPIView.as_view()
+        with patch("apps.admin_panel.views.admin_service") as mock_svc:
+            mock_svc.get_logs.return_value = ({"success": True, "logs": []}, 200)
+            resp = view(req)
+        assert resp.status_code == 200
+        kwargs = mock_svc.get_logs.call_args[1]
+        assert kwargs["accion"] == "suspender"
+
+    def test_logs_filtro_fechas(self, rf, mock_auth_admin):
+        req = rf.get(
+            "/api/admin/logs?fecha_desde=2026-01-01&fecha_hasta=2026-12-31",
+            content_type="application/json",
+        )
+        view = AdminLogAPIView.as_view()
+        with patch("apps.admin_panel.views.admin_service") as mock_svc:
+            mock_svc.get_logs.return_value = ({"success": True, "logs": []}, 200)
+            resp = view(req)
+        assert resp.status_code == 200
+        kwargs = mock_svc.get_logs.call_args[1]
+        assert kwargs["fecha_desde"] == "2026-01-01"
+        assert kwargs["fecha_hasta"] == "2026-12-31"
+
+    def test_logs_fecha_invalida_retorna_400(self, rf, mock_auth_admin):
+        req = rf.get(
+            "/api/admin/logs?fecha_desde=invalida",
+            content_type="application/json",
+        )
+        view = AdminLogAPIView.as_view()
+        resp = view(req)
+        assert resp.status_code == 400
+        assert resp.data["success"] is False
+        assert "formato" in resp.data["message"].lower()
+
+    def test_logs_combinado_filtros(self, rf, mock_auth_admin):
+        req = rf.get(
+            "/api/admin/logs?usuario=admin&accion=login&fecha_desde=2026-01-01",
+            content_type="application/json",
+        )
+        view = AdminLogAPIView.as_view()
+        with patch("apps.admin_panel.views.admin_service") as mock_svc:
+            mock_svc.get_logs.return_value = ({"success": True, "logs": []}, 200)
+            resp = view(req)
+        assert resp.status_code == 200
+        kwargs = mock_svc.get_logs.call_args[1]
+        assert kwargs["usuario"] == "admin"
+        assert kwargs["accion"] == "login"
+        assert kwargs["fecha_desde"] == "2026-01-01"
+        assert kwargs["fecha_hasta"] is None
 
 
 # ── BUG 3: AdminNotificacionView.delete — orden de require_role ────────────
