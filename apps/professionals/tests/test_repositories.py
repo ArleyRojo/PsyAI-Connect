@@ -169,6 +169,17 @@ class TestDiagnosisCRUD:
         assert d.sintomas == "Ansiedad generalizada"
         assert d.diagnostico == "Trastorno de Ansiedad"
 
+    def test_save_respeta_fecha_enviada_como_texto(self, repo, professional_user, patient_user, professional_patient):
+        data = {
+            "idPaciente": patient_user.idUsuario,
+            "diagnostico": "TAD",
+            "fecha_diagnostico": "2025-03-10",
+        }
+        repo.save_diagnosis(professional_user.idUsuario, data)
+
+        d = Diagnostico.objects.filter(idAsignacion__idPaciente=patient_user).first()
+        assert d.fechaDiagnostico == date(2025, 3, 10)
+
     def test_save_accumulates_diagnoses(self, repo, professional_user, patient_user, professional_patient):
         data = {
             "idPaciente": patient_user.idUsuario,

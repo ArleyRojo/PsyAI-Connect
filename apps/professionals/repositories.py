@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 from django.db.models import Q, Count, Value, CharField
 from django.db.models.functions import Lower, Coalesce
