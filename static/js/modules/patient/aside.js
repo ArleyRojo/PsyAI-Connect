@@ -87,6 +87,12 @@
             else sidebar.classList.remove('is-animating');
         }
 
+        function handleMediaChange() {
+            if (!isMobile() && sidebar.classList.contains('active')) {
+                closeSidebar();
+            }
+        }
+
         function openSidebar() {
             if (sidebar.classList.contains('active')) return;
             if (!isMobile()) return;
@@ -121,7 +127,7 @@
             lockBodyScroll(false);
         }
 
-                mediaQuery.addEventListener('change', handleMediaChange);
+        mediaQuery.addEventListener('change', handleMediaChange);
         handleMediaChange();
 
         toggleBtn.addEventListener('click', function (e) {
