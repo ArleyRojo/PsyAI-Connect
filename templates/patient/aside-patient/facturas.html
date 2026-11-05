@@ -277,50 +277,8 @@ document.addEventListener("DOMContentLoaded", async function() {
   loadPagoCuentaBtn();
 });
 
-async function loadTopPagoInfo(profesionalId) {
-  const qrImg = document.getElementById('qrImage');
-  const qrLoading = document.getElementById('qrLoading');
-  const accountCard = document.getElementById('accountInfoCard');
-  const accountTextEl = document.getElementById('accountText');
-  const accountLoading = document.getElementById('accountLoading');
-  // show loaders
-  qrLoading.style.display = 'block';
-  qrImg.classList.add('d-none');
-  accountLoading.style.display = 'block';
-  accountCard.classList.add('d-none');
-  accountTextEl.classList.add('d-none');
-  accountTextEl.textContent = '';
-  try {
-    const res = await fetch('/api/profesional/' + profesionalId + '/payment-info', { credentials: 'include' });
-    const data = await res.json();
-    if (!pagoInfoOk(data)) {
-      qrLoading.style.display = 'none';
-      accountLoading.style.display = 'none';
-      accountTextEl.textContent = 'No hay datos de pago disponibles.';
-      accountTextEl.classList.remove('d-none');
-      return;
-    }
-    const info = resolvePagoInfo(data.data);
-    if (info.qr_image) {
-      qrImg.src = info.qr_image;
-      qrImg.classList.remove('d-none');
-    }
-    qrLoading.style.display = 'none';
-    if (info.mensaje_texto) {
-      renderBankInfoCard('accountInfoCard', info.mensaje_texto);
-    } else {
-      accountTextEl.textContent = 'No hay datos de cuenta disponibles.';
-      accountTextEl.classList.remove('d-none');
-    }
-    accountLoading.style.display = 'none';
-  } catch(e) {
-    console.error(e);
-    qrLoading.style.display = 'none';
-    accountLoading.style.display = 'none';
-    accountTextEl.textContent = 'Error al cargar la información de pago.';
-    accountTextEl.classList.remove('d-none');
-  }
-}
+// La tarjeta superior de pago ahora es estática (HTML); no hay nada que cargar.
+async function loadTopPagoInfo(profesionalId) { /* no-op */ }
 
 async function loadPagoCuentaBtn() {
   try {
@@ -483,79 +441,161 @@ function renderRawBankInfo(preId, text) {
   }
 }
 
-function clearTopPagoInfo() {
-  const qrImg = document.getElementById('qrImage');
-  const qrLoading = document.getElementById('qrLoading');
-  const accountTextEl = document.getElementById('accountText');
-  const accountLoading = document.getElementById('accountLoading');
-  qrImg.classList.add('d-none');
-  qrImg.src = '';
-  qrLoading.style.display = 'none';
-  accountTextEl.textContent = '';
-  accountLoading.style.display = 'none';
+function clearTopPagoInfo() { /* no-op: tarjeta estática */ }
+
+// ─── Datos de ejemplo (respaldo si el servidor no responde) ───
+const DEMO_FACTURAS = [
+  {
+    idFactura: 101,
+    fecha: new Date().toISOString(),
+    nombreProfesional: "Dra. María González",
+    items: [{ descripcion: "Consulta psicológica individual", precioUnitario: 80000 }],
+    monto: 80000,
+    estadoPago: "Pendiente",
+    anulada: false,
+    idProfesional: 7
+  },
+  {
+    idFactura: 102,
+    fecha: new Date(Date.now() - 86400000 * 3).toISOString(),
+    nombreProfesional: "Dr. Carlos Ramírez",
+    items: [{ descripcion: "Terapia de pareja", precioUnitario: 120000 }],
+    monto: 120000,
+    estadoPago: "Pagado",
+    anulada: false,
+    idProfesional: 12,
+    tieneEvidencia: true
+  },
+  {
+    idFactura: 103,
+    fecha: new Date(Date.now() - 86400000 * 7).toISOString(),
+    nombreProfesional: "Dra. Lucía Fernández",
+    items: [{ descripcion: "Consulta de seguimiento", precioUnitario: 70000 }],
+    monto: 70000,
+    estadoPago: "Pendiente",
+    anulada: false,
+    idProfesional: 7
+  }
+];
+
+function renderFacturasTabla(facturas, tbody, esDemo = false) {
+  if (esDemo) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-warning py-2"><i class="fas fa-exclamation-triangle me-1"></i> Modo de prueba: servidor no disponible, mostrando datos de ejemplo</td></tr>';
+  }
+  let firstProfId = null;
+  for (const f of facturas) {
+    if (f.idProfesional) { firstProfId = f.idProfesional; break; }
+  }
+  if (firstProfId) {
+    loadTopPagoInfo(firstProfId);
+  } else {
+    clearTopPagoInfo();
+  }
+  const filas = facturas.map(function(f) {
+    const servicios = (f.items || []).map(function(i) { return esc(i.descripcion); }).join(", ") || "Consulta";
+    const badgeClass = f.anulada ? "bg-secondary" :
+      f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
+    const badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
+
+    let accion = "";
+    if (f.anulada || f.estadoPago === "Cancelado") {
+      accion = '<button class="btn btn-sm btn-outline-secondary" onclick="verMotivoAnulacion(\'' + esc(f.motivoAnulacion || "Sin motivo registrado") + '\')"><i class="fas fa-info-circle"></i></button>';
+    } else if (f.estadoPago === "Pagado") {
+      var btnEvidencia = f.tieneEvidencia ? '<button class="btn btn-sm btn-outline-info ms-1" onclick="verEvidencia(' + f.idFactura + ')" title="Ver evidencia"><i class="fas fa-file-image"></i></button>' : '';
+      accion = '<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(' + f.idFactura + ')"><i class="fas fa-receipt"></i> Ver</button>' + btnEvidencia;
+    } else {
+      if (f.idProfesional) {
+        accion = '<button class="btn btn-sm btn-success" onclick="abrirModalPago(' + f.idProfesional + ', ' + f.idFactura + ')"><i class="fas fa-qrcode me-1"></i> Pagar</button>';
+      } else {
+        accion = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-lock me-1"></i> Pendiente</button>';
+      }
+    }
+
+    let toggleBtn = '';
+    if (f.estadoPago === "Pendiente" && f.idProfesional) {
+      toggleBtn = '<button class="btn btn-sm btn-outline-info ms-1" onclick="togglePagoInfo(' + f.idFactura + ')"><i class="fas fa-info-circle"></i></button>';
+    }
+    const mainRow = '<tr class="align-middle" id="rowFactura-' + f.idFactura + '">' +
+      '<td data-label="Fecha">' + formatFecha(f.fecha) + '</td>' +
+      '<td data-label="Profesional" class="fw-semibold">' + esc(f.nombreProfesional || "---") + '</td>' +
+      '<td data-label="Servicio(s)">' + servicios + '</td>' +
+      '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
+      '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
+      '<td data-label="Acción" class="text-center">' + accion + ' ' + toggleBtn + '</td>' +
+      '</tr>';
+    const hiddenRow = '<tr id="pagoInfo-' + f.idFactura + '" style="display:none;" data-profesional-id="' + (f.idProfesional || '') + '">' +
+      '<td colspan="6">' +
+      '<div class="row p-3">' +
+      '<div class="col-12 col-md-6 text-center" id="qrContainer-' + f.idFactura + '"><p class="small text-muted mb-2">Código QR</p><div class="spinner-border text-primary" id="qrLoading-' + f.idFactura + '"></div><img id="qrImg-' + f.idFactura + '" src="" alt="QR de pago" class="img-fluid d-none" style="max-width:200px;"></div>' +
+      '<div class="col-12 col-md-6"><p class="small text-muted mb-2">Datos de la cuenta</p><div class="spinner-border text-primary" id="accountLoading-' + f.idFactura + '"></div><div id="accountInfoCard-' + f.idFactura + '" class="d-none"></div><pre id="accountText-' + f.idFactura + '" class="text-start small text-muted d-none" style="white-space: pre-wrap;"></pre></div>' +
+      '</div></td></tr>';
+    return mainRow + hiddenRow;
+  }).join("");
+  if (!esDemo) tbody.innerHTML = filas;
+  else tbody.innerHTML += filas;
 }
 
+const API_BASE = "http://127.0.0.1:8000";
+
 async function cargarFacturasPaciente() {
+  console.log("[facturas] cargarFacturasPaciente iniciado");
   const tbody = document.getElementById("tablaFacturas");
   try {
-    const res = await fetch("/api/facturas/mias", { credentials: "include" });
-    const data = await res.json();
+    const res = await fetch(API_BASE + "/api/facturas/mias", { credentials: "include" });
+    console.log("[facturas] respuesta HTTP:", res.status, res.ok);
+
+    // Si la respuesta no es exitosa (401, 403, 500, etc.), leer el cuerpo para mostrar el mensaje real
+    if (!res.ok) {
+      let msg = "Error del servidor (" + res.status + ")";
+      try {
+        const err = await res.json();
+        if (err.message) msg = err.message;
+        else if (err.detail) msg = err.detail;
+        else if (err.error) msg = err.error;
+      } catch (_) {
+        // Si el cuerpo no es JSON (ej. redirect a login), leer texto plano
+        try {
+          const txt = await res.text();
+          if (txt && txt.trim()) msg = "Respuesta inesperada del servidor (" + res.status + ")";
+        } catch (__) {}
+      }
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">' + esc(msg) + '</td></tr>';
+      clearTopPagoInfo();
+      console.error("[facturas] HTTP", res.status, msg);
+      renderFacturasTabla(DEMO_FACTURAS, tbody, true);
+      return;
+    }
+
+    // Intentar parsear JSON; si falla, el servidor pudo devolver HTML (redirect/login)
+    let data;
+    try {
+      data = await res.json();
+      console.log("[facturas] datos recibidos:", data);
+    } catch (jsonErr) {
+      const txt = await res.text();
+      console.error("[facturas] Respuesta no es JSON:", txt.substring(0, 200));
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Sesión expirada o respuesta inválida del servidor. Inicia sesión de nuevo.</td></tr>';
+      clearTopPagoInfo();
+      renderFacturasTabla(DEMO_FACTURAS, tbody, true);
+      return;
+    }
+
     if (!data.success || !data.facturas || data.facturas.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No tienes facturas registradas</td></tr>';
       clearTopPagoInfo();
       return;
     }
-    let firstProfId = null;
-    for (const f of data.facturas) {
-      if (f.idProfesional) { firstProfId = f.idProfesional; break; }
-    }
-    if (firstProfId) {
-      loadTopPagoInfo(firstProfId);
-    } else {
-      clearTopPagoInfo();
-    }
-    tbody.innerHTML = data.facturas.map(function(f) {
-      const servicios = (f.items || []).map(function(i) { return esc(i.descripcion); }).join(", ") || "Consulta";
-      const badgeClass = f.anulada ? "bg-secondary" :
-        f.estadoPago === "Pagado" ? "bg-success" : "bg-warning text-dark";
-      const badgeText = f.anulada ? "Anulada" : (f.estadoPago === "Pagado" ? "Completado" : "Pendiente");
-
-      let accion = "";
-      if (f.anulada || f.estadoPago === "Cancelado") {
-        accion = '<button class="btn btn-sm btn-outline-secondary" onclick="verMotivoAnulacion(\'' + esc(f.motivoAnulacion || "Sin motivo registrado") + '\')"><i class="fas fa-info-circle"></i></button>';
-      } else if (f.estadoPago === "Pagado") {
-        var btnEvidencia = f.tieneEvidencia ? '<button class="btn btn-sm btn-outline-info ms-1" onclick="verEvidencia(' + f.idFactura + ')" title="Ver evidencia"><i class="fas fa-file-image"></i></button>' : '';
-        accion = '<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(' + f.idFactura + ')"><i class="fas fa-receipt"></i> Ver</button>' + btnEvidencia;
-      } else {
-        if (f.idProfesional) {
-          accion = '<button class="btn btn-sm btn-success" onclick="abrirModalPago(' + f.idProfesional + ', ' + f.idFactura + ')"><i class="fas fa-qrcode me-1"></i> Pagar</button>';
-        } else {
-          accion = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-lock me-1"></i> Pendiente</button>';
-        }
-      }
-
-      let toggleBtn = '';
-      if (f.estadoPago === "Pendiente" && f.idProfesional) {
-        toggleBtn = '<button class="btn btn-sm btn-outline-info ms-1" onclick="togglePagoInfo(' + f.idFactura + ')"><i class="fas fa-info-circle"></i></button>';
-      }
-      const mainRow = '<tr class="align-middle" id="rowFactura-' + f.idFactura + '">' +
-        '<td data-label="Fecha">' + formatFecha(f.fecha) + '</td>' +
-        '<td data-label="Profesional" class="fw-semibold">' + esc(f.nombreProfesional || "---") + '</td>' +
-        '<td data-label="Servicio(s)">' + servicios + '</td>' +
-        '<td data-label="Monto" class="fw-bold">$' + Number(f.monto).toLocaleString("es-CO", {minimumFractionDigits:0}) + '</td>' +
-        '<td data-label="Estado"><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
-        '<td data-label="Acción" class="text-center">' + accion + ' ' + toggleBtn + '</td>' +
-        '</tr>';
-      const hiddenRow = '<tr id="pagoInfo-' + f.idFactura + '" style="display:none;" data-profesional-id="' + (f.idProfesional || '') + '">' +
-        '<td colspan="6">' +
-        '<div class="row p-3">' +
-        '<div class="col-12 col-md-6 text-center" id="qrContainer-' + f.idFactura + '"><p class="small text-muted mb-2">Código QR</p><div class="spinner-border text-primary" id="qrLoading-' + f.idFactura + '"></div><img id="qrImg-' + f.idFactura + '" src="" alt="QR de pago" class="img-fluid d-none" style="max-width:200px;"></div>' +
-        '<div class="col-12 col-md-6"><p class="small text-muted mb-2">Datos de la cuenta</p><div class="spinner-border text-primary" id="accountLoading-' + f.idFactura + '"></div><div id="accountInfoCard-' + f.idFactura + '" class="d-none"></div><pre id="accountText-' + f.idFactura + '" class="text-start small text-muted d-none" style="white-space: pre-wrap;"></pre></div>' +
-        '</div></td></tr>';
-      return mainRow + hiddenRow;
-    }).join("");
+    renderFacturasTabla(data.facturas, tbody, false);
+    return;
   } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar facturas</td></tr>';
+    console.error("Error cargando facturas:", e);
+    let msg = "No se pudo conectar con el servidor. Verifica que Django esté corriendo en http://127.0.0.1:8000";
+    if (e.name === "TypeError" && /fetch|network/i.test(e.message || "")) msg = "Error de red: no se pudo contactar al servidor.";
+    else if (e.name === "TypeError") msg = "Error al mostrar las facturas: " + e.message;
+    else if (e.name === "AbortError") msg = "La solicitud tardó demasiado y se canceló.";
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">' + esc(msg) + '</td></tr>';
+    clearTopPagoInfo();
+    renderFacturasTabla(DEMO_FACTURAS, tbody, true);
   }
 }
 
@@ -734,5 +774,3 @@ async function verComprobante(idFactura) {
 </script>
 </body>
 </html>
-
-
