@@ -301,13 +301,12 @@ class TestDiagnosisHistory:
             rol="paciente",
         )
         from apps.professionals.models import PacientesProfesional, Diagnostico
-        PacientesProfesional.objects.create(
+        asignacion = PacientesProfesional.objects.create(
             idProfesional=pro_user,
             idPaciente=patient,
         )
-        from apps.professionals.models import Diagnostico
         Diagnostico.objects.create(
-            idAsignacion_id=1,
+            idAsignacion=asignacion,
             sintomas="Ansiedad",
             diagnostico="TAD",
             tratamiento="Terapia",
