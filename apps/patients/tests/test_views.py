@@ -338,3 +338,22 @@ class TestProfesionalGet:
         assert resp.data["success"] is True
         assert len(resp.data["profesionales"]) == 1
         mock_service.list_professionals.assert_called_once()
+
+
+# ── ChatMensajeViewSet list ──────────────────────────────────────────────────
+
+
+class TestChatMensajeViewSetList:
+    def test_lista_mensajes_con_el_usuario_de_la_sesion(self, rf):
+        req = rf.get("/api/paciente/chat/mensajes", {"receptor": 5})
+
+        with patch.object(IsAuthenticatedDRF, "has_permission", _auth_paciente), \
+                patch("apps.patients.views.MensajesService") as svc_cls:
+            svc = svc_cls.return_value
+            svc.puede_chatear.return_value = True
+            svc.get_mensajes.return_value = []
+            view = ChatMensajeViewSet.as_view({"get": "list"})
+            resp = view(req)
+
+        assert resp.status_code == 200
+        svc.puede_chatear.assert_called_once_with(1, 5)

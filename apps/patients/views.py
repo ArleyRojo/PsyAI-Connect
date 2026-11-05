@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.apps import apps
@@ -407,11 +408,11 @@ class ChatMensajeViewSet(viewsets.ViewSet):
                 {"success": False, "message": "Falta receptor"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        user_id = getattr(request, "user_id", None)
         svc = MensajesService()
         if not svc.puede_chatear(user_id, id_receptor):
             return Response({"success": False, "message": "No tienes acceso a la conversación con este profesional"}, status=status.HTTP_403_FORBIDDEN)
         desde = int(request.query_params.get("desde", 0))
-        user_id = getattr(request, "user_id", None)
         msgs = svc.get_mensajes(user_id, id_receptor, desde)
         return Response({"success": True, "mensajes": msgs}, status=status.HTTP_200_OK)
 
