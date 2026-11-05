@@ -18,6 +18,10 @@ sdist/
 var/
 wheels/
 *.egg-info/
+
+# SQLite de pruebas local (no subir)
+browser_check.sqlite3
+*.sqlite3
 .installed.cfg
 *.egg
 
