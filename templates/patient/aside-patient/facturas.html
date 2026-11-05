@@ -108,16 +108,47 @@
       <div class="row g-3">
         <div class="col-12 col-md-6 text-center">
           <p class="small text-muted mb-2">Código QR</p>
-          <div id="qrLoading" class="spinner-border text-primary mb-2"></div>
-          <img id="qrImage" src="" alt="QR de pago" class="img-fluid d-none" style="max-width:200px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+          <img src="/img/qr-demo.png" alt="QR de pago" class="img-fluid" style="max-width:200px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
         </div>
         <div class="col-12 col-md-6">
           <p class="small text-muted mb-2">Datos de la cuenta bancaria</p>
-          <div id="accountLoading" class="spinner-border text-primary mb-2"></div>
-          <div id="accountInfoCard" class="d-none">
-            <!-- Bank account info will be rendered here by JS -->
+          <div id="accountInfoCard" class="bank-info-card">
+            <div class="bank-info-section">
+              <div class="bank-info-section-title"><i class="fas fa-university"></i> Cuenta Bancaria</div>
+              <div class="bank-info-grid">
+                <div class="bank-info-field">
+                  <div class="bank-info-label"><i class="fas fa-building-columns"></i> Banco</div>
+                  <div class="bank-info-value">Bancolombia</div>
+                </div>
+                <div class="bank-info-field">
+                  <div class="bank-info-label"><i class="fas fa-wallet"></i> Tipo de cuenta</div>
+                  <div class="bank-info-value">Ahorros</div>
+                </div>
+                <div class="bank-info-field">
+                  <div class="bank-info-label"><i class="fas fa-hashtag"></i> Número de cuenta</div>
+                  <div class="bank-info-value">2456 7890 1234 5678</div>
+                </div>
+                <div class="bank-info-field">
+                  <div class="bank-info-label"><i class="fas fa-user"></i> Titular</div>
+                  <div class="bank-info-value">PsyAI Connect SAS</div>
+                </div>
+                <div class="bank-info-field">
+                  <div class="bank-info-label"><i class="fas fa-id-card"></i> Documento</div>
+                  <div class="bank-info-value">900.123.456-7</div>
+                </div>
+              </div>
+            </div>
+            <div class="bank-info-section">
+              <div class="bank-info-section-title"><i class="fas fa-mobile-screen-button"></i> Nequi</div>
+              <div class="bank-info-grid">
+                <div class="bank-info-field nequi-field">
+                  <div class="bank-info-label"><i class="fas fa-mobile-screen-button"></i> Número Nequi</div>
+                  <div class="bank-info-value">300 987 6543</div>
+                </div>
+              </div>
+            </div>
+            <div class="bank-info-disclaimer"><i class="fas fa-info-circle"></i> Datos de ejemplo para demostración.</div>
           </div>
-          <pre id="accountText" class="text-start small text-muted p-3 bg-light rounded d-none" style="white-space: pre-wrap; max-height:200px; overflow:auto;"></pre>
         </div>
       </div>
     </section>
