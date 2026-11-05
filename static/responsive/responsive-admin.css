@@ -47,14 +47,18 @@
     max-width: var(--admin-sidebar-width, 300px) !important;
     height: 100dvh;
     z-index: 1100;
-    background: var(--color-bg-light, #ffffff);
+    background: linear-gradient(145deg, #0D47A1 0%, #1976D2 40%, #42A5F5 75%, #64B5F6 100%);
     border-radius: 0 20px 20px 0;
-    box-shadow: none;
-    transition: transform var(--admin-transition), box-shadow 0.35s ease;
+    border-right: 1px solid rgba(255,255,255,.12);
+    box-shadow: 2px 0 24px rgba(13,71,161,.25);
+    transition: transform var(--admin-transition);
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar.is-animating {
     will-change: transform;
   }
 
@@ -73,7 +77,7 @@
   /* Scrollbar sidebar */
   .sidebar::-webkit-scrollbar { width: 4px; }
   .sidebar::-webkit-scrollbar-thumb {
-    background: var(--color-border, #d6e8fa);
+    background: rgba(255,255,255,.3);
     border-radius: 2px;
   }
   
@@ -83,13 +87,10 @@
     position: fixed;
     inset: 0;
     background: rgba(13, 47, 97, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
     z-index: 1099;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.35s ease, visibility 0.35s ease;
-    /* Mejora accesibilidad: el overlay bloquea interacción */
+    transition: opacity var(--admin-transition), visibility var(--admin-transition);
     pointer-events: none;
   }
 
@@ -105,15 +106,19 @@
   /* ── Logo ── */
   .sidebar__logo {
     padding: 1.5rem 1.25rem;
-    border-bottom: 1px solid var(--color-border, #d6e8fa);
+    border-bottom: 1px solid rgba(255,255,255,.12);
   }
   
 
   .sidebar__logo img {
     width: 68px;
     height: 68px;
-    border: 2.5px solid var(--color-primary, #90CAF9);
-    box-shadow: 0 0 0 4px var(--color-accent, #E3F2FD);
+    border: none;
+    background: rgba(255,255,255,.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    border-radius: 50% !important;
+    padding: 6px;
+    display: block;
   }
 
   .sidebar__logo h5 {
@@ -137,6 +142,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    color: #fff !important;
+    text-decoration: none;
     transition: background-color 0.2s ease, color 0.2s ease;
     -webkit-tap-highlight-color: transparent;
   }
@@ -146,15 +153,33 @@
     font-size: 1rem;
     text-align: center;
     flex-shrink: 0;
+    color: #fff !important;
   }
 
-  .sidebar .nav-link:active { transform: scale(0.98); }
+  .sidebar .nav-link:hover {
+    background: rgba(255,255,255,.12);
+    color: #fff !important;
+  }
+
+  .sidebar .nav-link:hover i {
+    color: #fff !important;
+  }
+
+  .sidebar .nav-link:active {
+    transform: scale(0.98);
+    background: rgba(255,255,255,.2);
+  }
+
+  .sidebar .nav-link.active {
+    background: rgba(255,255,255,.2);
+    color: #fff !important;
+  }
 
   /* ── Footer ── */
   .sidebar__footer {
     padding: 1rem 1.25rem;
     margin-top: auto;
-    border-top: 1px solid var(--color-border, #d6e8fa);
+    border-top: 1px solid rgba(255,255,255,.12);
   }
   
 
@@ -1129,148 +1154,252 @@
   }
   .badge-origin i { font-size: 0.5rem; }
 
-/* ══════════════════════════════════════════════════════════════
-   17. LOGS
-   ══════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
+   17. LOGS — tarjeta de cada fila (móvil/tablet)
+   ════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-  #tab-log-todos .table-clean tbody tr,
-  #tab-log-usuarios .table-clean tbody tr,
-  #tab-log-roles .table-clean tbody tr,
-  #tab-log-notificaciones .table-clean tbody tr {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 12px;
-  }
+   @media (max-width: 991.98px) {
 
-  #tab-log-todos .table-clean tbody td,
-  #tab-log-usuarios .table-clean tbody td,
-  #tab-log-roles .table-clean tbody td,
-  #tab-log-notificaciones .table-clean tbody td {
-    display: inline;
-    padding: 0;
-    border: none;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    line-height: 1.6;
-  }
+      /* Grid de tarjetas por pestaña */
+      #tab-log-todos .table-clean tbody tr {
+        grid-template-areas:
+          "sev accion accion"
+          "sev fecha fecha"
+          "sev usuario usuario"
+          "sev modulo modulo"
+          "sev origen origen"
+          "sev detalle detalle";
+      }
 
-  #tab-log-todos .table-clean tbody td:last-child,
-  #tab-log-usuarios .table-clean tbody td:last-child,
-  #tab-log-roles .table-clean tbody td:last-child,
-  #tab-log-notificaciones .table-clean tbody td:last-child {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-left: auto;
-  }
+      #tab-log-usuarios .table-clean tbody tr {
+        grid-template-areas:
+          "sev accion accion"
+          "sev fecha fecha"
+          "sev usuario usuario"
+          "sev origen origen"
+          "sev detalle detalle";
+      }
 
-  /* Suprimir pseudo-labels en logs */
-  #tab-log-todos .table-clean tbody td::before,
-  #tab-log-usuarios .table-clean tbody td::before,
-  #tab-log-roles .table-clean tbody td::before,
-  #tab-log-notificaciones .table-clean tbody td::before { display: none; }
+      #tab-log-roles .table-clean tbody tr {
+        grid-template-areas:
+          "sev accion accion"
+          "sev fecha fecha"
+          "sev usuario usuario"
+          "sev origen origen"
+          "sev modulo modulo"
+          "sev rolAntigo rolAntigo"
+          "sev rolNuevo rolNuevo"
+          "sev detalle detalle";
+      }
 
-  /* Badges de logs */
-  :is(
-    #tab-log-todos,
-    #tab-log-usuarios,
-    #tab-log-roles,
-    #tab-log-notificaciones
-  ) .table-clean tbody td .log-badge {
-    font-size: 0.625rem !important;
-    padding: 1px 6px !important;
-    display: inline-flex !important;
-    align-items: center;
-    gap: 3px;
-    white-space: nowrap;
-  }
+      #tab-log-notificaciones .table-clean tbody tr {
+        grid-template-areas:
+          "sev accion accion"
+          "sev fecha fecha"
+          "sev origen origen"
+          "sev usuario usuario"
+          "sev detalle detalle";
+      }
 
-  :is(
-    #tab-log-todos,
-    #tab-log-usuarios,
-    #tab-log-roles,
-    #tab-log-notificaciones
-  ) .table-clean tbody td .mono {
-    font-size: 0.7rem !important;
-  }
+      /* Cada fila = tarjeta CSS grid */
+      #tab-log-todos .table-clean tbody tr,
+      #tab-log-usuarios .table-clean tbody tr,
+      #tab-log-roles .table-clean tbody tr,
+      #tab-log-notificaciones .table-clean tbody tr {
+        display: grid !important;
+        gap: 8px !important;
+        padding: 12px 14px !important;
+        margin-bottom: 10px !important;
+        border-radius: var(--admin-card-radius, 14px) !important;
+        background: var(--color-bg-light, #ffffff) !important;
+        border: 1px solid var(--color-border, #d6e8fa) !important;
+        overflow: hidden !important;
+      }
 
-  :is(
-    #tab-log-todos,
-    #tab-log-usuarios,
-    #tab-log-roles,
-    #tab-log-notificaciones
-  ) .table-clean tbody td .badge-origin {
-    font-size: 0.6rem !important;
-    padding: 1px 5px !important;
-    display: inline-flex !important;
-    align-items: center;
-    gap: 2px;
-    white-space: nowrap;
-  }
+      /* Punto de severidad */
+      #tab-log-todos .table-clean tbody td:nth-child(1),
+      #tab-log-usuarios .table-clean tbody td:nth-child(1),
+      #tab-log-roles .table-clean tbody td:nth-child(1),
+      #tab-log-notificaciones .table-clean tbody td:nth-child(1) {
+        grid-area: sev !important;
+        align-self: start !important;
+        justify-self: center !important;
+        padding: 0 !important;
+        border: none !important;
+        font-size: 0 !important;
+        width: 4px !important;
+        height: 4px !important;
+        min-width: 4px !important;
+        min-height: 4px !important;
+        background: transparent !important;
+        position: relative !important;
+        z-index: 2 !important;
+      }
 
-  :is(
-    #tab-log-todos,
-    #tab-log-usuarios,
-    #tab-log-roles,
-    #tab-log-notificaciones
-  ) .table-clean tbody td .detalle-badge {
-    font-size: 0.625rem !important;
-    padding: 1px 6px !important;
-    max-width: 140px;
-    display: inline !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+      /* Acción */
+      #tab-log-todos .table-clean tbody td:nth-child(5),
+      #tab-log-usuarios .table-clean tbody td:nth-child(3),
+      #tab-log-roles .table-clean tbody td:nth-child(3),
+      #tab-log-notificaciones .table-clean tbody td:nth-child(3) {
+        grid-area: accion !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+      }
 
-  :is(
-    #tab-log-todos,
-    #tab-log-usuarios,
-    #tab-log-roles,
-    #tab-log-notificaciones
-  ) .table-clean tbody td .badge-modulo {
-    font-size: 0.6rem !important;
-    padding: 1px 5px !important;
-    display: inline-flex !important;
-    align-items: center;
-    gap: 2px;
-    white-space: nowrap;
-  }
+      /* Fecha */
+      #tab-log-todos .table-clean tbody td:nth-child(2),
+      #tab-log-usuarios .table-clean tbody td:nth-child(2),
+      #tab-log-roles .table-clean tbody td:nth-child(2),
+      #tab-log-notificaciones .table-clean tbody td:nth-child(2) {
+        grid-area: fecha !important;
+        color: var(--color-text-muted, #60758f) !important;
+        font-size: 0.75rem !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+      }
 
-  :is(
-    #tab-log-todos,
-    #tab-log-usuarios,
-    #tab-log-roles,
-    #tab-log-notificaciones
-  ) .table-clean tbody td .sev-dot {
-    width: 8px;
-    height: 8px;
-    display: inline-block;
-    margin-right: 2px;
-    vertical-align: middle;
-  }
+      /* Usuario */
+      #tab-log-todos .table-clean tbody td:nth-child(3),
+      #tab-log-roles .table-clean tbody td:nth-child(4),
+      #tab-log-notificaciones .table-clean tbody td:nth-child(5) {
+        grid-area: usuario !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+      }
 
-  :is(
-    #tab-log-todos,
-    #tab-log-usuarios,
-    #tab-log-roles,
-    #tab-log-notificaciones
-  ) .table-clean tbody td .d-flex { display: inline-flex !important; gap: 4px; }
+      #tab-log-usuarios .table-clean tbody td:nth-child(4) {
+        grid-area: usuario !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+      }
 
-  .sev-inline {
-    font-size: 0.625rem !important;
-    padding: 1px 6px !important;
-    display: inline-flex !important;
-    align-items: center;
-    gap: 3px;
-  }
+      /* Origen / Módulo */
+      #tab-log-todos .table-clean tbody td:nth-child(6),
+      #tab-log-usuarios .table-clean tbody td:nth-child(5),
+      #tab-log-roles .table-clean tbody td:nth-child(5),
+      #tab-log-notificaciones .table-clean tbody td:nth-child(4) {
+        grid-area: origen !important;
+        font-size: 0.72rem !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+      }
 
-  .log-badge  { font-size: 0.75rem; padding: 3px 8px; }
-  .detalle-badge { font-size: 0.75rem; padding: 3px 8px; max-width: 200px; }
-  .mono       { font-size: 0.78rem; }
+      #tab-log-roles .table-clean tbody td:nth-child(6) {
+        grid-area: modulo !important;
+        font-size: 0.72rem !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+      }
 
+      /* Rol anterior / nuevo */
+      #tab-log-roles .table-clean tbody td:nth-child(6) {
+        grid-area: rolAntigo !important;
+        font-size: 0.72rem !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+      }
+      #tab-log-roles .table-clean tbody td:nth-child(7) {
+        grid-area: rolNuevo !important;
+        font-size: 0.72rem !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+      }
+
+      /* Detalle */
+      #tab-log-todos .table-clean tbody td:nth-child(7),
+      #tab-log-usuarios .table-clean tbody td:nth-child(6),
+      #tab-log-roles .table-clean tbody td:nth-child(7),
+      #tab-log-notificaciones .table-clean tbody td:nth-child(6) {
+        grid-area: detalle !important;
+        font-size: 0.75rem !important;
+        align-self: start !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+        border-top: 1px solid rgba(0,0,0,0.05) !important;
+        padding-top: 6px !important;
+        margin-top: 6px !important;
+      }
+
+      /* Ocultar pseudo-labels */
+      #tab-log-todos .table-clean tbody td::before,
+      #tab-log-usuarios .table-clean tbody td::before,
+      #tab-log-roles .table-clean tbody td::before,
+      #tab-log-notificaciones .table-clean tbody td::before {
+        display: none !important;
+        content: none !important;
+      }
+
+      /* Ocultar celdas vacías */
+      #tab-log-todos .table-clean tbody td:empty,
+      #tab-log-usuarios .table-clean tbody td:empty,
+      #tab-log-roles .table-clean tbody td:empty,
+      #tab-log-notificaciones .table-clean tbody td:empty {
+        display: none !important;
+      }
+
+      /* Punto de severidad */
+      #tab-log-todos .table-clean tbody td .sev-dot,
+      #tab-log-usuarios .table-clean tbody td .sev-dot,
+      #tab-log-roles .table-clean tbody td .sev-dot,
+      #tab-log-notificaciones .table-clean tbody td .sev-dot {
+        width: 8px !important;
+        height: 8px !important;
+        display: inline-block !important;
+        margin-right: 2px !important;
+        vertical-align: middle !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Badges */
+      #tab-log-todos .table-clean tbody td .log-badge,
+      #tab-log-usuarios .table-clean tbody td .log-badge,
+      #tab-log-roles .table-clean tbody td .log-badge,
+      #tab-log-notificaciones .table-clean tbody td .log-badge,
+      #tab-log-todos .table-clean tbody td .badge-origin,
+      #tab-log-usuarios .table-clean tbody td .badge-origin,
+      #tab-log-roles .table-clean tbody td .badge-origin,
+      #tab-log-notificaciones .table-clean tbody td .badge-origin,
+      #tab-log-todos .table-clean tbody td .badge-modulo,
+      #tab-log-usuarios .table-clean tbody td .badge-modulo,
+      #tab-log-roles .table-clean tbody td .badge-modulo,
+      #tab-log-notificaciones .table-clean tbody td .badge-modulo,
+      #tab-log-todos .table-clean tbody td .detalle-badge,
+      #tab-log-usuarios .table-clean tbody td .detalle-badge,
+      #tab-log-roles .table-clean tbody td .detalle-badge,
+      #tab-log-notificaciones .table-clean tbody td .detalle-badge {
+        font-size: 0.625rem !important;
+        padding: 2px 7px !important;
+        border-radius: 999px !important;
+        white-space: nowrap !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 2px !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Mono texto */
+      #tab-log-todos .table-clean tbody td .mono,
+      #tab-log-usuarios .table-clean tbody td .mono,
+      #tab-log-roles .table-clean tbody td .mono,
+      #tab-log-notificaciones .table-clean tbody td .mono {
+        font-family: monospace !important;
+        font-size: 0.7rem !important;
+      }
+   }
 /* ══════════════════════════════════════════════════════════════
    18. TABS ROLES & USUARIOS
    ══════════════════════════════════════════════════════════════ */

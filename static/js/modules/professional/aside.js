@@ -1,184 +1,8 @@
-// JavaScript para Dashboard Responsive (Chatbot y todas las páginas del paciente)
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.querySelector('.sidebar');
-    if (!sidebar) {
-        return;
-    }
-
-    const STORAGE_KEY = 'psyai_ui_state';
-
-    function getStoredState() {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            return stored ? JSON.parse(stored) : {};
-        } catch (e) {
-            return {};
-        }
-    }
-
-    function saveSidebarState(isOpen) {
-        try {
-            const state = getStoredState();
-            state.sidebarOpen = isOpen;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch (e) {}
-    }
-
-    const storedState = getStoredState();
-
-    // Crear botón hamburguesa si no existe
-    let menuToggle = document.getElementById('menuToggle') || document.getElementById('toggleSidebar');
-    
-    if (!menuToggle) {
-        menuToggle = document.createElement('button');
-        menuToggle.className = 'menu-toggle';
-        menuToggle.id = 'menuToggle';
-        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-        document.body.appendChild(menuToggle);
-    }
-
-    if (!sidebar.id) {
-        sidebar.id = 'sidebar';
-    }
-    menuToggle.setAttribute('aria-controls', sidebar.id || 'sidebar');
-    menuToggle.setAttribute('aria-expanded', 'false');
-
-    // Crear overlay si no existe
-    let overlay = document.getElementById('sidebarOverlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        overlay.id = 'sidebarOverlay';
-        document.body.appendChild(overlay);
-    }
-
-    let closeTimer = null;
-
-    const hideSidebarImmediately = () => {
-        if (closeTimer) {
-            clearTimeout(closeTimer);
-            closeTimer = null;
-        }
-
-        overlay.classList.remove('active', 'closing');
-        sidebar.classList.remove('active', 'closing');
-        if (menuToggle) {
-            menuToggle.classList.remove('active');
-            menuToggle.setAttribute('aria-expanded', 'false');
-        }
-        saveSidebarState(false);
-    };
-
-    const openSidebar = () => {
-        if (closeTimer) {
-            clearTimeout(closeTimer);
-            closeTimer = null;
-        }
-        overlay.classList.remove('closing');
-        sidebar.classList.remove('closing');
-        sidebar.classList.add('active');
-        overlay.classList.add('active');
-        if (menuToggle) {
-            menuToggle.classList.add('active');
-            menuToggle.setAttribute('aria-expanded', 'true');
-        }
-        saveSidebarState(true);
-    };
-
-    const closeSidebar = () => {
-        if (!sidebar.classList.contains('active')) {
-            return;
-        }
-
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-        overlay.classList.add('closing');
-        if (menuToggle) {
-            menuToggle.classList.remove('active');
-            menuToggle.setAttribute('aria-expanded', 'false');
-        }
-
-        if (closeTimer) {
-            clearTimeout(closeTimer);
-        }
-
-        closeTimer = setTimeout(() => {
-            overlay.classList.remove('closing');
-            closeTimer = null;
-        }, 320);
-
-        saveSidebarState(false);
-    };
-
-    // Restore sidebar state from localStorage on page load
-    if (storedState.sidebarOpen === true) {
-        setTimeout(function() {
-            openSidebar();
-        }, 100);
-    }
-
-    // Toggle sidebar al hacer clic en el botón
-    menuToggle.addEventListener('click', function() {
-        if (sidebar.classList.contains('active')) {
-            closeSidebar();
-        } else {
-            openSidebar();
-        }
-    });
-
-    // Cerrar sidebar al hacer clic en el overlay
-    overlay.addEventListener('click', closeSidebar);
-
-    // Cerrar sidebar al hacer clic en un enlace (solo en móvil)
-    const navLinks = document.querySelectorAll('.sidebar .nav-link, .sidebar .sidebar__nav-item');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 991) {
-                hideSidebarImmediately();
-            }
-        });
-    });
-
-    // Ajustar al cambiar tamaño de ventana
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 991) {
-            closeSidebar();
-        }
-    });
-
-    window.addEventListener('beforeunload', hideSidebarImmediately);
-    window.addEventListener('pagehide', hideSidebarImmediately);
-
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartedAtEdge = false;
-
-    function isTabletSidebarViewport() {
-        return window.innerWidth >= 768 && window.innerWidth <= 991;
-    }
-
-    document.addEventListener('touchstart', function(event) {
-        if (!isTabletSidebarViewport() || !event.touches || event.touches.length !== 1) return;
-        const touch = event.touches[0];
-        touchStartX = touch.clientX;
-        touchStartY = touch.clientY;
-        touchStartedAtEdge = touchStartX <= 30;
-    }, { passive: true });
-
-    document.addEventListener('touchend', function(event) {
-        if (!isTabletSidebarViewport() || !event.changedTouches || event.changedTouches.length !== 1) return;
-        const touch = event.changedTouches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = Math.abs(touch.clientY - touchStartY);
-        if (deltaY > 60 || Math.abs(deltaX) < 70) return;
-        if (deltaX > 0 && touchStartedAtEdge) openSidebar();
-        if (deltaX < 0) closeSidebar();
-    }, { passive: true });
-});
-
+// JavaScript para Dashboard Profesional
+// La lógica del aside se encuentra en /js/core/shared/aside.js (API: PsyAIAside.open/close/toggle/isOpen)
+// Este archivo mantiene el menú inferior móvil y la inicialización del sidebar en páginas profesionales.
 (function () {
     function isProfessionalPage() {
-        // Detectar por clase de <body> para cubrir /aside-professional/... además del dashboard.
         return document.body.classList.contains('professional-dashboard') ||
                document.body.classList.contains('aside-professional');
     }
@@ -211,9 +35,179 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(nav);
     }
 
+    // ------------------------------------------------------------------
+    // Inicialización del sidebar (mismo código que core/shared/aside.js)
+    // ------------------------------------------------------------------
+    function initSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar) return;
+
+        const overlay = document.getElementById('sidebarOverlay') || (function () {
+            const el = document.createElement('div');
+            el.className = 'sidebar-overlay';
+            el.id = 'sidebarOverlay';
+            document.body.appendChild(el);
+            return el;
+        })();
+
+        const toggleBtn = document.getElementById('toggleSidebar') || document.getElementById('menuToggle') || document.querySelector('.menu-toggle, .toggle-btn');
+
+        if (!toggleBtn) {
+            const btn = document.createElement('button');
+            btn.className = 'menu-toggle';
+            btn.id = 'menuToggle';
+            btn.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(btn);
+            toggleBtn = btn;
+        }
+
+        if (!sidebar.id) sidebar.id = 'sidebar';
+        if (!overlay.id) overlay.id = 'sidebarOverlay';
+
+        toggleBtn.setAttribute('aria-controls', sidebar.id);
+        toggleBtn.setAttribute('aria-expanded', 'false');
+
+        const MOBILE_QUERY = '(max-width: 991.98px)';
+        const mediaQuery = window.matchMedia(MOBILE_QUERY);
+
+        function isMobile() {
+            return mediaQuery.matches;
+        }
+
+        function lockBodyScroll(lock) {
+            if (lock) {
+                document.documentElement.classList.add('sidebar-open');
+            } else {
+                document.documentElement.classList.remove('sidebar-open');
+            }
+        }
+
+        function setAnimating(animating) {
+            if (animating) sidebar.classList.add('is-animating');
+            else sidebar.classList.remove('is-animating');
+        }
+
+        function openSidebar() {
+            if (sidebar.classList.contains('active')) return;
+            if (!isMobile()) return;
+
+            sidebar.classList.remove('closing');
+            sidebar.classList.add('active');
+            overlay.classList.remove('closing');
+            overlay.classList.add('active');
+            toggleBtn.classList.add('active');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            sidebar.removeAttribute('aria-hidden');
+            sidebar.removeAttribute('inert');
+            overlay.removeAttribute('aria-hidden');
+            overlay.removeAttribute('inert');
+            lockBodyScroll(true);
+            const firstLink = sidebar.querySelector('.sidebar__nav-item, .nav-link');
+            if (firstLink) firstLink.focus({ preventScroll: true });
+        }
+
+        function closeSidebar() {
+            if (!sidebar.classList.contains('active')) return;
+
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            overlay.classList.add('closing');
+            toggleBtn.classList.remove('active');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            sidebar.setAttribute('aria-hidden', 'true');
+            sidebar.setAttribute('inert', 'true');
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.setAttribute('inert', 'true');
+            lockBodyScroll(false);
+        }
+
+        // Cerrado por defecto en móvil
+        sidebar.setAttribute('aria-hidden', 'true');
+        sidebar.setAttribute('inert', 'true');
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.setAttribute('inert', 'true');
+
+        function handleMediaChange() {
+            if (!isMobile()) {
+                sidebar.classList.remove('active', 'closing');
+                overlay.classList.remove('active', 'closing');
+                sidebar.removeAttribute('aria-hidden');
+                sidebar.removeAttribute('inert');
+                overlay.removeAttribute('aria-hidden');
+                overlay.removeAttribute('inert');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                lockBodyScroll(false);
+            } else {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                toggleBtn.classList.remove('active');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                sidebar.setAttribute('aria-hidden', 'true');
+                sidebar.setAttribute('inert', 'true');
+                overlay.setAttribute('aria-hidden', 'true');
+                overlay.setAttribute('inert', 'true');
+                lockBodyScroll(false);
+            }
+        }
+
+        mediaQuery.addEventListener('change', handleMediaChange);
+        handleMediaChange();
+
+        toggleBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (sidebar.classList.contains('active')) closeSidebar(); else openSidebar();
+        });
+
+        overlay.addEventListener('click', function () {
+            closeSidebar();
+        });
+
+        sidebar.addEventListener('click', function (e) {
+            if (!isMobile()) return;
+            const link = e.target.closest('.sidebar__nav-item, .nav-link, a');
+            if (link && link.tagName === 'A') {
+                closeSidebar();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('active') && isMobile()) {
+                e.preventDefault();
+                closeSidebar();
+                toggleBtn.focus({ preventScroll: true });
+            }
+        });
+
+        sidebar.addEventListener('transitionend', function (e) {
+            if (e.propertyName === 'transform') {
+                sidebar.classList.remove('is-animating');
+            }
+        });
+
+        window.addEventListener('beforeunload', function () {
+            sidebar.classList.remove('active', 'closing', 'is-animating');
+            overlay.classList.remove('active', 'closing');
+            toggleBtn.classList.remove('active');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            lockBodyScroll(false);
+        });
+        window.addEventListener('pagehide', function () {
+            sidebar.classList.remove('active', 'closing', 'is-animating');
+            overlay.classList.remove('active', 'closing');
+            toggleBtn.classList.remove('active');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            lockBodyScroll(false);
+        });
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', createBottomNav);
+        document.addEventListener('DOMContentLoaded', function () {
+            createBottomNav();
+            initSidebar();
+        });
     } else {
         createBottomNav();
+        initSidebar();
     }
 })();

@@ -59,8 +59,15 @@
     box-shadow: 2px 0 24px rgba(13,71,161,.25);
     overflow: hidden;
     overflow-x: hidden;
-    transition: left .35s ease, transform .35s ease, background .35s ease, border-color .35s ease;
+    transition: transform .35s ease;
     z-index: 100;
+}
+
+/* No animación en el primer pintado */
+html.no-transition .sidebar,
+html.no-transition .sidebar-overlay {
+    transition: none !important;
+    animation: none !important;
 }
 
 /* Scrollbar del sidebar */

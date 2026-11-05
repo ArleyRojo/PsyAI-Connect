@@ -1,6 +1,5 @@
 (function () {
-    const MOBILE_QUERY = '(max-width: 991px)';
-    const INITIAL_SYNC_DELAYS = [0, 120, 320, 800];
+    const MOBILE_QUERY = '(max-width: 991.98px)';
     let scheduled = false;
     let observerStarted = false;
 
@@ -22,7 +21,7 @@
         toggler.setAttribute('data-bs-target', '#navmenu');
         toggler.setAttribute('aria-controls', 'navmenu');
         toggler.setAttribute('aria-expanded', 'false');
-        toggler.setAttribute('aria-label', 'Abrir navegacion');
+        toggler.setAttribute('aria-label', 'Abrir navegación');
         return toggler;
     }
 
@@ -36,7 +35,7 @@
         toggler.setAttribute('aria-controls', 'navmenu');
 
         if (!toggler.getAttribute('aria-label')) {
-            toggler.setAttribute('aria-label', 'Abrir navegacion');
+            toggler.setAttribute('aria-label', 'Abrir navegación');
         }
 
         let icon = toggler.querySelector('.custom-toggler-icon');
@@ -206,10 +205,6 @@
         startObserver();
         scheduleSync();
 
-        INITIAL_SYNC_DELAYS.forEach((delay) => {
-            window.setTimeout(scheduleSync, delay);
-        });
-
         if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(scheduleSync).catch(function () {});
         }
@@ -239,32 +234,20 @@
         }
     }
 
+    // ---------------------------------------------------------------
+    // Swipe para abrir/cerrar aside (teléfonos y tablets ≤ 991.98px)
+    // Llama a la API unificada de PsyAIAside en lugar de manipular clases.
+    // ---------------------------------------------------------------
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartedAtEdge = false;
 
-    function isTabletSidebarViewport() {
-        return window.matchMedia('(min-width: 768px) and (max-width: 991px)').matches;
-    }
-
-    function openSidebarBySwipe() {
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-overlay');
-        if (!sidebar) return;
-        sidebar.classList.add('active');
-        if (overlay) overlay.classList.add('active');
-    }
-
-    function closeSidebarBySwipe() {
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-overlay');
-        if (!sidebar) return;
-        sidebar.classList.remove('active', 'show');
-        if (overlay) overlay.classList.remove('active', 'show');
+    function isSwipeViewport() {
+        return window.matchMedia('(max-width: 991.98px)').matches;
     }
 
     document.addEventListener('touchstart', function (event) {
-        if (!isTabletSidebarViewport() || !event.touches || event.touches.length !== 1) return;
+        if (!isSwipeViewport() || !event.touches || event.touches.length !== 1) return;
         const touch = event.touches[0];
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
@@ -272,16 +255,16 @@
     }, { passive: true });
 
     document.addEventListener('touchend', function (event) {
-        if (!isTabletSidebarViewport() || !event.changedTouches || event.changedTouches.length !== 1) return;
+        if (!isSwipeViewport() || !event.changedTouches || event.changedTouches.length !== 1) return;
         const touch = event.changedTouches[0];
         const deltaX = touch.clientX - touchStartX;
         const deltaY = Math.abs(touch.clientY - touchStartY);
         if (deltaY > 60 || Math.abs(deltaX) < 70) return;
 
         if (deltaX > 0 && touchStartedAtEdge) {
-            openSidebarBySwipe();
+            window.PsyAIAside.open();
         } else if (deltaX < 0) {
-            closeSidebarBySwipe();
+            window.PsyAIAside.close();
         }
     }, { passive: true });
 })();

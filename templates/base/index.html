@@ -5,10 +5,18 @@
     {% include 'base/partials/head.html' %}
     <title>PsyAI Connect | Bienestar Emocional</title>
 
+    <!-- Preload fuentes críticas para evitar retraso en render de texto -->
+    <link rel="preload" href="/vendor/fonts/PlusJakartaSans-400.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/vendor/fonts/PlusJakartaSans-600.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/vendor/fonts/PlusJakartaSans-700.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/vendor/fonts/Lora-700.ttf" as="font" type="font/ttf" crossorigin>
+
     <!-- AOS Animation Library -->
     <link href="/vendor/aos/aos.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/pages/landing.css?v=20261029-3">
+    <!-- CSS de landing diferido (no bloqueante) para el primer pantallazo -->
+    <link rel="preload" href="/css/pages/landing.css?v=20261029-3" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/css/pages/landing.css?v=20261029-3"></noscript>
     <link rel="stylesheet" href="/css/components/card-3d.css?v=20260718-1">
     <link rel="stylesheet" href="/responsive/index.css?v=20261101-navfix-3">
     <link rel="stylesheet" href="/css/base/animations.css?v=20260921-1">
@@ -613,10 +621,10 @@
 
 <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js" defer></script>
 <script src="/vendor/aos/aos.js" defer></script>
-<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-rescue">
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-sidebar-opt">
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
     <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
-    <script src="/js/core/shared/mobile-navbar-toggle.js?v=20260727-mobile-polish-1"></script>
+    <script src="/js/core/shared/mobile-navbar-toggle.js?v=20261104-aside-unified"></script>
     <script src="/js/base/index.js?v=20261013-navfix-1"></script>
 
     <script>

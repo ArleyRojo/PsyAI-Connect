@@ -23,17 +23,19 @@
     }
 }
 
-/* Persistent elements across navigations */
-.sidebar { view-transition-name: app-sidebar; }
-.toggle-btn { view-transition-name: app-toggle; }
-.mobile-bottom-nav { view-transition-name: app-bottomnav; }
-.main-header { view-transition-name: app-header; }
+/* Persistent elements across navigations — solo en escritorio */
+@media (min-width: 992px) {
+    .sidebar { view-transition-name: app-sidebar; }
+    .toggle-btn { view-transition-name: app-toggle; }
+    .mobile-bottom-nav { view-transition-name: app-bottomnav; }
+    .main-header { view-transition-name: app-header; }
 
-::view-transition-group(app-sidebar),
-::view-transition-group(app-toggle),
-::view-transition-group(app-bottomnav),
-::view-transition-group(app-header) {
-    animation: none;
+    ::view-transition-group(app-sidebar),
+    ::view-transition-group(app-toggle),
+    ::view-transition-group(app-bottomnav),
+    ::view-transition-group(app-header) {
+        animation: none;
+    }
 }
 
 /* ------------------------------

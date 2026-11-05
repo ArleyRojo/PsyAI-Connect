@@ -1,207 +1,260 @@
-// Sidebar toggle compartido (admin + professional dashboard)
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.querySelector('.sidebar');
-    if (!sidebar) {
-        return;
+// Sidebar toggle unificado (admin + profesional + paciente)
+// API pequeña: PsyAIAside.open(), .close(), .toggle(), .isOpen()
+// Solo afecta móvil/tablet (≤ 991.98px). En PC el aside permanece fijo.
+(function () {
+    'use strict';
+
+    const MOBILE_QUERY = '(max-width: 991.98px)';
+    const TRANSITION_MS = 280;
+    const ANIMATING_CLASS = 'is-animating';
+    const SCROLL_LOCK_CLASS = 'sidebar-open';
+
+    let sidebar = null;
+    let overlay = null;
+    let toggleBtn = null;
+    let mediaQuery = null;
+    let isAnimating = false;
+    let rafId = null;
+
+    // ------------------------------------------------------------------
+    // Utilidades
+    // ------------------------------------------------------------------
+    function isMobile() {
+        return mediaQuery ? mediaQuery.matches : window.matchMedia(MOBILE_QUERY).matches;
     }
 
-    const STORAGE_KEY = 'psyai_ui_state';
-
-    function getStoredState() {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            return stored ? JSON.parse(stored) : {};
-        } catch (e) {
-            return {};
-        }
+    function getSidebar() {
+        return document.querySelector('.sidebar');
     }
 
-    function saveSidebarState(isOpen) {
-        try {
-            const state = getStoredState();
-            state.sidebarOpen = isOpen;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch (e) {}
+    function getOverlay() {
+        return document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-overlay');
     }
 
-    const storedState = getStoredState();
-
-    // Crear botón hamburguesa si no existe
-    let menuToggle = document.getElementById('menuToggle') || document.getElementById('toggleSidebar');
-    
-    if (!menuToggle) {
-        menuToggle = document.createElement('button');
-        menuToggle.className = 'menu-toggle';
-        menuToggle.id = 'menuToggle';
-        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-        document.body.appendChild(menuToggle);
+    function getToggle() {
+        return document.getElementById('toggleSidebar') || document.getElementById('menuToggle') || document.querySelector('.menu-toggle, .toggle-btn');
     }
 
-    if (!sidebar.id) {
-        sidebar.id = 'sidebar';
-    }
-    menuToggle.setAttribute('aria-controls', sidebar.id || 'sidebar');
-    menuToggle.setAttribute('aria-expanded', 'false');
-
-    // Crear overlay si no existe
-    let overlay = document.getElementById('sidebarOverlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        overlay.id = 'sidebarOverlay';
-        document.body.appendChild(overlay);
+    function raf(fn) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(fn);
     }
 
-    let closeTimer = null;
-
-    const hideSidebarImmediately = () => {
-        if (closeTimer) {
-            clearTimeout(closeTimer);
-            closeTimer = null;
-        }
-
-        overlay.classList.remove('active', 'closing');
-        sidebar.classList.remove('active', 'closing');
-        menuToggle.classList.remove('active');
-        menuToggle.setAttribute('aria-expanded', 'false');
-        saveSidebarState(false);
-    };
-
-    const openSidebar = () => {
-        if (closeTimer) {
-            clearTimeout(closeTimer);
-            closeTimer = null;
-        }
-        overlay.classList.remove('closing');
-        sidebar.classList.remove('closing');
-        sidebar.classList.add('active');
-        overlay.classList.add('active');
-        menuToggle.classList.add('active');
-        menuToggle.setAttribute('aria-expanded', 'true');
-        saveSidebarState(true);
-    };
-
-    const closeSidebar = () => {
-        if (!sidebar.classList.contains('active')) {
-            return;
-        }
-
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-        overlay.classList.add('closing');
-        menuToggle.classList.remove('active');
-        menuToggle.setAttribute('aria-expanded', 'false');
-
-        if (closeTimer) {
-            clearTimeout(closeTimer);
-        }
-
-        closeTimer = setTimeout(() => {
-            overlay.classList.remove('closing');
-            closeTimer = null;
-        }, 320);
-
-        saveSidebarState(false);
-    };
-
-    // Restore sidebar state from localStorage on page load
-    if (storedState.sidebarOpen === true) {
-        setTimeout(function() {
-            openSidebar();
-        }, 100);
-    }
-
-    // Toggle sidebar al hacer clic en el botón
-    menuToggle.addEventListener('click', function() {
-        if (sidebar.classList.contains('active')) {
-            closeSidebar();
+    function lockBodyScroll(lock) {
+        if (lock) {
+            document.documentElement.classList.add(SCROLL_LOCK_CLASS);
         } else {
-            openSidebar();
+            document.documentElement.classList.remove(SCROLL_LOCK_CLASS);
         }
+    }
+
+    function setAnimating(animating) {
+        isAnimating = animating;
+        if (sidebar) {
+            if (animating) sidebar.classList.add(ANIMATING_CLASS);
+            else sidebar.classList.remove(ANIMATING_CLASS);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // API pública
+    // ------------------------------------------------------------------
+    const PsyAIAside = {
+        isOpen: function () {
+            return sidebar ? sidebar.classList.contains('active') : false;
+        },
+
+        open: function () {
+            if (!sidebar || !overlay || !toggleBtn) return;
+            if (sidebar.classList.contains('active')) return;
+            if (!isMobile()) return; // En PC no hace nada
+
+            raf(function () {
+                setAnimating(true);
+                sidebar.classList.remove('closing');
+                sidebar.classList.add('active');
+                overlay.classList.remove('closing');
+                overlay.classList.add('active');
+                toggleBtn.classList.add('active');
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                sidebar.removeAttribute('aria-hidden');
+                sidebar.removeAttribute('inert');
+                overlay.removeAttribute('aria-hidden');
+                overlay.removeAttribute('inert');
+                lockBodyScroll(true);
+                // Focus primer enlace del aside
+                const firstLink = sidebar.querySelector('.sidebar__nav-item, .nav-link');
+                if (firstLink) firstLink.focus({ preventScroll: true });
+            });
+        },
+
+        close: function () {
+            if (!sidebar || !overlay || !toggleBtn) return;
+            if (!sidebar.classList.contains('active')) return;
+
+            raf(function () {
+                setAnimating(true);
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                overlay.classList.add('closing');
+                toggleBtn.classList.remove('active');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                sidebar.setAttribute('aria-hidden', 'true');
+                sidebar.setAttribute('inert', 'true');
+                overlay.setAttribute('aria-hidden', 'true');
+                overlay.setAttribute('inert', 'true');
+                lockBodyScroll(false);
+            });
+        },
+
+        toggle: function () {
+            if (this.isOpen()) this.close(); else this.open();
+        },
+    };
+
+    // Exponer global
+    window.PsyAIAside = PsyAIAside;
+
+    // Quitar no-transition tras el primer pintado para permitir animaciones posteriores
+    document.documentElement.classList.add('no-transition');
+    window.addEventListener('load', function () {
+        document.documentElement.classList.remove('no-transition');
     });
 
-    // Cerrar sidebar al hacer clic en el overlay
-    overlay.addEventListener('click', closeSidebar);
+    // ------------------------------------------------------------------
+    // Inicialización
+    // ------------------------------------------------------------------
+    function init() {
+        sidebar = getSidebar();
+        if (!sidebar) return; // No hay aside en esta página
 
-    // Cerrar sidebar al hacer clic en un enlace (solo en móvil)
-    const navLinks = document.querySelectorAll('.sidebar .nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 991) {
-                hideSidebarImmediately();
+        overlay = getOverlay();
+        toggleBtn = getToggle();
+
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'sidebar-overlay';
+            overlay.id = 'sidebarOverlay';
+            document.body.appendChild(overlay);
+        }
+
+        if (!toggleBtn) {
+            toggleBtn = document.createElement('button');
+            toggleBtn.className = 'menu-toggle';
+            toggleBtn.id = 'menuToggle';
+            toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.appendChild(toggleBtn);
+        }
+
+        if (!sidebar.id) sidebar.id = 'sidebar';
+        if (!overlay.id) overlay.id = 'sidebarOverlay';
+
+        toggleBtn.setAttribute('aria-controls', sidebar.id);
+        toggleBtn.setAttribute('aria-expanded', 'false');
+
+        mediaQuery = window.matchMedia(MOBILE_QUERY);
+
+        // En móvil, cerrado por defecto (no restaurar de localStorage)
+        // En PC, el sidebar permanece visible y navegable (sin aria-hidden/inert)
+        if (isMobile()) {
+            sidebar.setAttribute('aria-hidden', 'true');
+            sidebar.setAttribute('inert', 'true');
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.setAttribute('inert', 'true');
+        } else {
+            sidebar.removeAttribute('aria-hidden');
+            sidebar.removeAttribute('inert');
+            overlay.removeAttribute('aria-hidden');
+            overlay.removeAttribute('inert');
+        }
+
+        function handleMediaChange() {
+            if (!isMobile()) {
+                // Pasando a PC: cerrar y limpiar clases de móvil
+                PsyAIAside.close();
+                sidebar.classList.remove('active', 'closing');
+                overlay.classList.remove('active', 'closing');
+                sidebar.removeAttribute('aria-hidden');
+                sidebar.removeAttribute('inert');
+                overlay.removeAttribute('aria-hidden');
+                overlay.removeAttribute('inert');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                lockBodyScroll(false);
+            } else {
+                // Volviendo a móvil: asegurar cerrado
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                toggleBtn.classList.remove('active');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                sidebar.setAttribute('aria-hidden', 'true');
+                sidebar.setAttribute('inert', 'true');
+                overlay.setAttribute('aria-hidden', 'true');
+                overlay.setAttribute('inert', 'true');
+                lockBodyScroll(false);
+            }
+        }
+
+        mediaQuery.addEventListener('change', handleMediaChange);
+        handleMediaChange(); // Ejecutar inmediatamente para asegurar estado correcto en PC y móvil
+
+        // Click botón hamburguesa
+        toggleBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            PsyAIAside.toggle();
+        });
+
+        // Click overlay cierra
+        overlay.addEventListener('click', function () {
+            PsyAIAside.close();
+        });
+
+        // Clic en enlace del menú cierra el aside
+        sidebar.addEventListener('click', function (e) {
+            if (!isMobile()) return;
+            const link = e.target.closest('.sidebar__nav-item, .nav-link, a');
+            if (link && link.tagName === 'A') {
+                PsyAIAside.close();
             }
         });
-    });
 
-    // Ajustar al cambiar tamaño de ventana
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 991) {
-            closeSidebar();
-        }
-    });
+        // Tecla Esc cierra
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && PsyAIAside.isOpen() && isMobile()) {
+                e.preventDefault();
+                PsyAIAside.close();
+                // Devolver foco al botón
+                toggleBtn.focus({ preventScroll: true });
+            }
+        });
 
-    window.addEventListener('beforeunload', hideSidebarImmediately);
-    window.addEventListener('pagehide', hideSidebarImmediately);
+        // Transition end para limpiar is-animating
+        sidebar.addEventListener('transitionend', function (e) {
+            if (e.propertyName === 'transform') {
+                setAnimating(false);
+            }
+        });
 
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartedAtEdge = false;
-
-    function isTabletSidebarViewport() {
-        return window.innerWidth >= 768 && window.innerWidth <= 991;
-    }
-
-    document.addEventListener('touchstart', function(event) {
-        if (!isTabletSidebarViewport() || !event.touches || event.touches.length !== 1) return;
-        const touch = event.touches[0];
-        touchStartX = touch.clientX;
-        touchStartY = touch.clientY;
-        touchStartedAtEdge = touchStartX <= 30;
-    }, { passive: true });
-
-    document.addEventListener('touchend', function(event) {
-        if (!isTabletSidebarViewport() || !event.changedTouches || event.changedTouches.length !== 1) return;
-        const touch = event.changedTouches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = Math.abs(touch.clientY - touchStartY);
-        if (deltaY > 60 || Math.abs(deltaX) < 70) return;
-        if (deltaX > 0 && touchStartedAtEdge) openSidebar();
-        if (deltaX < 0) closeSidebar();
-    }, { passive: true });
-});
-
-(function () {
-    function createProfessionalBottomNav() {
-        const current = window.location.pathname.replace(/\\/g, '/');
-        const isProfessional = current.includes('/professional') || current.endsWith('/professional.dashboard.html');
-        if (!isProfessional || document.querySelector('.mobile-bottom-nav[data-role="professional"]')) return;
-
-        const items = [
-            { href: '/', icon: 'fas fa-home', label: 'Inicio' },
-            { href: '/aside-professional/patients.html', icon: 'fas fa-users', label: 'Pacientes' },
-            { href: '/aside-professional/my.agenda.html', icon: 'fas fa-calendar-check', label: 'Agenda' },
-            { href: '/aside-professional/mensajes.html', icon: 'fas fa-comments', label: 'Mensajes' },
-            { href: '/aside-professional/reports.html', icon: 'fas fa-chart-line', label: 'Reportes' },
-            { href: '/aside-professional/my.profile2.html', icon: 'fas fa-user-circle', label: 'Perfil' }
-        ];
-
-        const nav = document.createElement('nav');
-        nav.className = 'mobile-bottom-nav';
-        nav.dataset.role = 'professional';
-        nav.setAttribute('aria-label', 'Navegacion profesional');
-        nav.innerHTML = items.map(item => {
-            const target = item.href.replace(/^\//, '');
-            const active = current.endsWith(target) || (target === 'professional.dashboard.html' && current.endsWith('/professional.dashboard.html'));
-            return `<a class="mobile-bottom-nav__item${active ? ' active' : ''}" href="${item.href}"><i class="${item.icon}"></i><span>${item.label}</span></a>`;
-        }).join('');
-
-        document.body.classList.add('has-mobile-bottom-nav');
-        document.body.appendChild(nav);
+        // beforeunload / pagehide: asegurar cerrado sin animación
+        window.addEventListener('beforeunload', function () {
+            sidebar.classList.remove('active', 'closing', ANIMATING_CLASS);
+            overlay.classList.remove('active', 'closing');
+            toggleBtn.classList.remove('active');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            lockBodyScroll(false);
+        });
+        window.addEventListener('pagehide', function () {
+            sidebar.classList.remove('active', 'closing', ANIMATING_CLASS);
+            overlay.classList.remove('active', 'closing');
+            toggleBtn.classList.remove('active');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            lockBodyScroll(false);
+        });
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', createProfessionalBottomNav);
+        document.addEventListener('DOMContentLoaded', init);
     } else {
-        createProfessionalBottomNav();
+        init();
     }
 })();

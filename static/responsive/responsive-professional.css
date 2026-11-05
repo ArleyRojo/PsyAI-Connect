@@ -37,7 +37,10 @@
     overflow-x: clip;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    transition: transform var(--pro-transition), box-shadow 0.35s ease;
+    transition: transform var(--pro-transition);
+  }
+
+  .sidebar.is-animating {
     will-change: transform;
   }
 
@@ -54,15 +57,12 @@
   .sidebar-overlay {
     position: fixed;
     inset: 0;
-    display: block;
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
     z-index: 1099;
     background: rgba(13, 47, 97, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    transition: opacity 0.35s ease, visibility 0.35s ease;
+    transition: opacity var(--pro-transition), visibility var(--pro-transition);
   }
 
   .sidebar-overlay.active,
