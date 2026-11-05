@@ -384,7 +384,7 @@ class PatientRepository:
         from apps.authentication.models import Register
         from apps.patients.models import (
             PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar,
-            SolicitudDerechos, ConsentimientoUsuario
+            SolicitudDerechos,
         )
         from apps.chatbot.models import ConversacionesChatbot, PrediagnosticoChatbot
         from apps.documents.models import DocumentosPaciente
@@ -431,7 +431,7 @@ class PatientRepository:
             MensajesChat.objects.filter(idEmisor_id=user_id) | MensajesChat.objects.filter(idReceptor_id=user_id)
         )
         mensajes = list(MensajesChat.objects.filter(
-            models.Q(idEmisor_id=user_id) | models.Q(idReceptor_id=user_id)
+            Q(idEmisor_id=user_id) | Q(idReceptor_id=user_id)
         ).order_by("fecha").values("idEmisor_id", "idReceptor_id", "mensaje", "leido", "fecha"))
 
         # Citas
@@ -541,7 +541,7 @@ class PatientRepository:
             ConversacionesChatbot.objects.filter(idPaciente_id=user_id).delete()
             from apps.chatbot.models import MensajesChat
             MensajesChat.objects.filter(
-                models.Q(idEmisor_id=user_id) | models.Q(idReceptor_id=user_id)
+                Q(idEmisor_id=user_id) | Q(idReceptor_id=user_id)
             ).delete()
 
             # 2. Si no retener historia clínica, borrar datos clínicos

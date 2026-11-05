@@ -254,3 +254,29 @@ class TestListProfessionals:
         repo = PatientRepository()
         result = repo.list_professionals()
         assert result == []
+
+
+@pytest.mark.django_db
+class TestDerechosDelPaciente:
+    def _paciente(self):
+        return Register.objects.create_user(
+            email="derechos@test.com",
+            nombre="Paciente Derechos",
+            password="Abc123",
+            rol="paciente",
+        )
+
+    def test_exportar_datos_usuario(self):
+        user = self._paciente()
+        data = PatientRepository().exportar_datos_usuario(user.idUsuario)
+
+        assert data is not None
+        assert data["cuenta"]["email"] == "derechos@test.com"
+
+    def test_anonimizar_cuenta(self):
+        user = self._paciente()
+        ok, _msg = PatientRepository().anonimizar_cuenta(user.idUsuario, "Abc123")
+
+        assert ok is True
+        user.refresh_from_db()
+        assert user.activo is False
