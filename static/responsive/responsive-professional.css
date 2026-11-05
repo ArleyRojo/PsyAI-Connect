@@ -34,7 +34,7 @@
     z-index: 1100;
     border-radius: 0 20px 20px 0;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: clip;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     transition: transform var(--pro-transition), box-shadow 0.35s ease;
@@ -292,7 +292,7 @@
   }
 
   .table {
-    min-width: 0;
+    min-width: 720px;
   }
 
   .table th,
@@ -1100,7 +1100,7 @@
   }
 
   body:has(#tablaReportes) .table {
-    min-width: 0;
+    min-width: 720px;
     margin-bottom: 0;
   }
 

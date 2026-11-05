@@ -442,9 +442,6 @@ html.dark-mode body #mainNav .navbar-nav-actions .btn-outline-primary {
     100% { opacity: 0; transform: translateY(-10px) scaleY(0.94); }
 }
 
-html {
-    scroll-padding-top: 100px;
-}
 
 .hero-btn-secondary {
     background: #ffffff;
@@ -557,6 +554,9 @@ html {
 
 /* Solo forzar visibilidad en desktop (≥992px) para evitar que el collapse quede bloqueado en móvil */
 @media (min-width: 992px) {
+    html {
+        scroll-padding-top: 100px;
+    }
     #mainNav .navbar-collapse {
         visibility: visible !important;
         opacity: 1 !important;

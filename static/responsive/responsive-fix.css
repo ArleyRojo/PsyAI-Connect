@@ -9,20 +9,9 @@
 /* ═══════════════════════════════════════════════════
    GLOBAL: BOX-SIZING y overflow
    ═══════════════════════════════════════════════════ */
-html {
-  overflow-x: clip;
-}
-body {
-  overflow-x: clip;
-  width: 100%;
-  max-width: 100vw;
-}
 img, video, canvas, svg, iframe {
   max-width: 100%;
   height: auto;
-}
-table {
-  max-width: 100%;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1288,65 +1277,115 @@ body.has-mobile-bottom-nav {
   box-sizing: border-box;
 }
 
-html {
-  width: 100%;
-  -webkit-text-size-adjust: 100%;
-}
+@media (max-width: 991.98px) {
+  html {
+    width: 100%;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
+  }
 
-body {
-  min-width: 0;
-}
+  body {
+    min-width: 0;
+    overflow-x: clip;
+    width: 100%;
+    max-width: 100vw;
+  }
 
-.main-content,
-.main-content > *,
-main,
-section,
-.card,
-.modal-content,
-.tab-content,
-.admin-panel,
-.panel-step,
-.form-section {
-  min-width: 0;
-}
+  table {
+    max-width: 100%;
+  }
 
-.main-content {
-  max-width: 100vw;
-}
+  .main-content,
+  .main-content > *,
+  main,
+  section,
+  .card,
+  .modal-content,
+  .tab-content,
+  .admin-panel,
+  .panel-step,
+  .form-section {
+    min-width: 0;
+  }
 
-.row,
-.d-flex {
-  min-width: 0;
-}
+  .main-content {
+    max-width: 100vw;
+  }
 
-.row > *,
-.d-flex > * {
-  min-width: 0;
-}
+  .row,
+  .d-flex {
+    min-width: 0;
+  }
 
-.table-responsive,
-.table-responsive-wrapper,
-.table-container {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
+  .row > *,
+  .d-flex > * {
+    min-width: 0;
+  }
 
-.table-responsive table,
-.table-responsive-wrapper table,
-.table-container table {
-  margin-bottom: 0;
-}
+  .table-responsive,
+  .table-responsive-wrapper,
+  .table-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
 
-pre,
-code,
-.text-break,
-.card,
-.modal-body,
-.toast,
-.alert {
-  overflow-wrap: anywhere;
+  .table-responsive table,
+  .table-responsive-wrapper table,
+  .table-container table {
+    margin-bottom: 0;
+  }
+
+  pre,
+  code,
+  .text-break,
+  .card,
+  .modal-body,
+  .toast,
+  .alert {
+    overflow-wrap: anywhere;
+  }
+
+  .main-content section.chat-wrapper,
+  section.chat-wrapper,
+  .chat-wrapper {
+    display: flex !important;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden !important;
+  }
+
+  .chat-sidebar,
+  .chat-panel,
+  .chat-active-view,
+  .chat-messages-area,
+  .chat-item-info {
+    min-width: 0;
+  }
+
+  .chat-sidebar {
+    width: clamp(280px, 32vw, 360px);
+  }
+
+  .chat-list,
+  .chat-messages-area {
+    min-height: 0;
+  }
+
+  .chat-item {
+    width: 100%;
+  }
+
+  .chat-item-name,
+  .chat-item-preview,
+  .chat-active-name,
+  .chat-active-status {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 @media (min-width: 992px) {
@@ -1383,7 +1422,7 @@ code,
     height: 100dvh !important;
     max-height: 100dvh !important;
     overflow-y: auto !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     transform: translateX(-105%) !important;
     z-index: 1100 !important;
   }
@@ -1717,10 +1756,6 @@ section.chat-wrapper,
   .chat-bubble {
     max-width: 88% !important;
   }
-}
-
-.chat-back-btn {
-  display: none !important;
 }
 
 @media (min-width: 768px) {

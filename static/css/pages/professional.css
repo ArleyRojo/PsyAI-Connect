@@ -11100,12 +11100,12 @@ body.aside-professional .reports-page .professional-table-panel {
 }
 
 body.aside-professional .reports-page .professional-table-panel .table {
-    min-width: 0;
+    min-width: 720px;
     margin-bottom: 0;
 }
 
 body.aside-professional .reports-page .professional-table-panel .section-heading {
-    min-width: 0;
+    min-width: 720px;
 }
 
 body.aside-professional .reports-page .professional-table-panel thead th {
@@ -11589,7 +11589,7 @@ body.aside-professional .reports-page .reports-table-panel--deleted {
 }
 
 body.aside-professional .reports-page .deleted-table-heading {
-    min-width: 0;
+    min-width: 720px;
     margin: 0;
     padding: 1rem;
     background: #FFFDFB;
