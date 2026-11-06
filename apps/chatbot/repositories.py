@@ -2,13 +2,11 @@ import logging
 from datetime import timedelta
 
 from django.db.models import Q, Count
-from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from apps.chatbot.models import (
     ChatbotConfig,
     ConversacionesChatbot,
-    EncuestaChatbot,
     MensajesChat,
     PrediagnosticoChatbot,
 )
@@ -315,8 +313,7 @@ class MensajesRepository:
     def get_ultimos_mensajes_batch(self, id_usuario, id_otro_ids):
         if not id_otro_ids:
             return {}
-        from django.db.models import Max, Q, Subquery, OuterRef, CharField
-        from django.db.models.functions import Coalesce
+        from django.db.models import Q
 
         base_q = Q(idEmisor_id=id_usuario) | Q(idReceptor_id=id_usuario)
         other_ids = set(id_otro_ids)
@@ -342,7 +339,7 @@ class MensajesRepository:
     def contar_no_leidos_batch(self, id_usuario, id_otro_ids):
         if not id_otro_ids:
             return {}
-        from django.db.models import Q, Count
+        from django.db.models import Count
 
         rows = (
             MensajesChat.objects.filter(

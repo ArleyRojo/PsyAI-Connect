@@ -1,5 +1,4 @@
 import logging
-from queue import Empty
 
 from django.http import StreamingHttpResponse
 from django.views import View
@@ -15,7 +14,6 @@ from apps.chatbot.serializers import (
 )
 from apps.chatbot.services import (
     ChatEventsServiceManager,
-    ChatbotConfigEventsService,
     ChatbotConfigService,
     ChatbotService,
     chatbot_config_events,
