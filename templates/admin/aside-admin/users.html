@@ -134,6 +134,36 @@
       </button>
     </div>
 
+    <!-- Profesionales pendientes de verificación -->
+    <section class="card shadow-sm border-0 mt-4 mb-4" aria-labelledby="tituloProfesionalesPendientes">
+      <div class="card-header bg-white border-0 pt-4 pb-2 px-4 d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="h5 fw-bold mb-1" id="tituloProfesionalesPendientes">
+            <i class="fas fa-user-check me-2 text-primary"></i>Verificación de profesionales
+          </h2>
+          <p class="text-muted small mb-0">Revisa y verifica profesionales para habilitar sus funciones clínicas.</p>
+        </div>
+        <span class="badge bg-warning-subtle text-warning-emphasis" id="cntProfesionalesPendientes">0</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-clean mb-0" id="tablaProfesionalesPendientes">
+          <thead>
+            <tr>
+              <th class="ps-4">Profesional</th>
+              <th>Especialidad</th>
+              <th>Tarjeta profesional</th>
+              <th>ReTHUS</th>
+              <th>Registro</th>
+              <th class="text-end pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" class="text-center text-muted py-4">Cargando profesionales pendientes...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- TAB: Todos -->
     <div id="tab-u-todos">
       <div class="toolbar">

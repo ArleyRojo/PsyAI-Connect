@@ -6,6 +6,15 @@ let paginaActualUsuarios = 1;
 let usuariosFiltrados = [];
 let profesionalesPendientes = [];
 
+function usuarioEstaActivo(usuario) {
+    const activo = usuario?.activo === true || Number(usuario?.activo) === 1;
+    return activo && (!usuario.estadoCuenta || usuario.estadoCuenta === 'Activa');
+}
+
+function usuarioEstaSuspendido(usuario) {
+    return usuario?.activo === false || Number(usuario?.activo) === 0 || usuario.estadoCuenta === 'Suspendida';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     cargarUsuarios();
     cargarProfesionalesPendientes();
@@ -88,8 +97,8 @@ async function cargarUsuarios() {
 
         // Stats
         const total     = data.usuarios.length;
-        const activos   = data.usuarios.filter(u => parseInt(u.activo) === 1 && (u.estadoCuenta === 'Activa' || !u.estadoCuenta)).length;
-        const suspendidos = data.usuarios.filter(u => parseInt(u.activo) === 0 || u.estadoCuenta === 'Suspendida').length;
+        const activos   = data.usuarios.filter(usuarioEstaActivo).length;
+        const suspendidos = data.usuarios.filter(usuarioEstaSuspendido).length;
 
         document.getElementById('statTotal').textContent     = total;
         document.getElementById('statActivos').textContent   = activos;
@@ -132,13 +141,13 @@ function renderizarPaginaUsuarios() {
             const rolClass   = u.rol === 'admin' ? 'badge-rol-admin' : u.rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
             const rolIcon    = u.rol === 'admin' ? 'fa-user-shield' : u.rol === 'profesional' ? 'fa-user-md' : 'fa-user';
             const rolBadge   = `<span class="badge-rol ${rolClass}"><i class="fas ${rolIcon}"></i> ${rolLabel}</span>`;
-            const activoNum  = parseInt(u.activo);
+            const suspendido = usuarioEstaSuspendido(u);
             const estado = u.estadoCuenta || 'Activa';
             let estadoBadge, btnToggle;
             if (estado === 'Pendiente' || estado === 'Verificacion') {
                 estadoBadge = '<span class="badge-estado badge-estado-pendiente">Pendiente</span>';
                 btnToggle = `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'activar')" title="Activar"><i class="fas fa-check"></i></button>`;
-            } else if (activoNum === 0 || estado === 'Suspendida') {
+            } else if (suspendido) {
                 estadoBadge = '<span class="badge-estado badge-estado-suspendido">Suspendido</span>';
                 btnToggle = `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'activar')" title="Activar"><i class="fas fa-check"></i></button>`;
             } else {
@@ -212,8 +221,8 @@ function filtrarTabla() {
         const coincideTexto  = u.nombre.toLowerCase().includes(texto) || u.email.toLowerCase().includes(texto);
         const coincideRol    = rol === '' || u.rol === rol;
         const coincideEstado = estado === '' ||
-            (estado === 'activo' && parseInt(u.activo) === 1 && (u.estadoCuenta === 'Activa' || !u.estadoCuenta)) ||
-            (estado === 'suspendido' && (parseInt(u.activo) === 0 || u.estadoCuenta === 'Suspendida'));
+            (estado === 'activo' && usuarioEstaActivo(u)) ||
+            (estado === 'suspendido' && usuarioEstaSuspendido(u));
         return coincideTexto && coincideRol && coincideEstado;
     });
 
@@ -388,10 +397,10 @@ function mostrarTabUsuarios(tab, btn) {
     if (tab === 'todos') {
         renderTabla(usuarios);
     } else if (tab === 'activos') {
-        const activos = usuarios.filter(u => parseInt(u.activo) === 1 && (u.estadoCuenta === 'Activa' || !u.estadoCuenta));
+        const activos = usuarios.filter(usuarioEstaActivo);
         renderTablaFiltrada('tab-u-activos', activos);
     } else if (tab === 'suspendidos') {
-        const suspendidos = usuarios.filter(u => parseInt(u.activo) === 0 || u.estadoCuenta === 'Suspendida');
+        const suspendidos = usuarios.filter(usuarioEstaSuspendido);
         renderTablaFiltrada('tab-u-suspendidos', suspendidos);
     } else if (tab === 'verificacion') {
         cargarProfesionalesPendientes();
@@ -445,8 +454,8 @@ function renderTablaFiltrada(tabId, lista) {
         const rolIcon   = u.rol === 'admin' ? 'fa-user-shield' : u.rol === 'profesional' ? 'fa-user-md' : 'fa-user';
         const rolBadge  = `<span class="badge-rol ${rolClass}"><i class="fas ${rolIcon}"></i> ${rolLabel}</span>`;
         
-        const activoNum = parseInt(u.activo);
-        const btnToggle = activoNum === 0
+        const suspendido = usuarioEstaSuspendido(u);
+        const btnToggle = suspendido
             ? `<button class="btn btn-sm btn-outline-success" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'activar')" title="Activar"><i class="fas fa-check"></i></button>`
             : `<button class="btn btn-sm btn-outline-warning" onclick="abrirBloqueo(${Number(u.idUsuario)},${inlineJsArgAdmin(u.nombre)},'suspender')" title="Suspender"><i class="fas fa-ban"></i></button>`;
 
