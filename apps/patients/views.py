@@ -4,33 +4,22 @@ import os
 from django.apps import apps
 from django.conf import settings
 from django.views import View
-from rest_framework import viewsets, status, generics
-from rest_framework.permissions import AllowAny
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.core.permissions import (
     IsAuthenticatedDRF,
     IsPaciente,
-    IsProfesional,
     IsAdminOrProfesional,
-    parse_json_body,
 )
 from apps.patients.services import PatientService
 from apps.patients.serializers import (
     ChatbotEncuestaSerializer,
-    ChatbotMessageSerializer,
     ChatMensajeSerializer,
     ConsentimientoSerializer,
-    DocumentoAutorizacionSerializer,
-    DocumentoUploadSerializer,
-    EvolucionSerializer,
-    PreferenciasSerializer,
-    SolicitudDerechosSerializer,
-    ConsentimientoUsuarioSerializer,
     RevocarConsentimientoSerializer,
     EliminarCuentaSerializer,
-    MisDatosExportSerializer,
 )
 
 if apps.is_installed("apps.chatbot"):

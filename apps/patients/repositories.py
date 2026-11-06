@@ -1,13 +1,10 @@
-from django.db.models import OuterRef, Subquery, Q
-from django.utils import timezone
+from django.db.models import Q
 
-from apps.authentication.models import Register, ConsentimientoUsuario
+from apps.authentication.models import Register
 from apps.patients.models import (
-    PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar,
-    SolicitudDerechos
+    PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar
 )
 from apps.professionals.models import PacientesProfesional, PerfilProfesional
-from apps.chatbot.models import MensajesChat
 
 
 class PatientRepository:
@@ -370,7 +367,6 @@ class PatientRepository:
     def crear_solicitud_derechos(self, user_id, tipo, descripcion=""):
         """Crea una nueva solicitud de derechos con fecha límite calculada."""
         from apps.patients.models import SolicitudDerechos, calcular_fecha_limite_solicitud
-        from django.utils import timezone
         fecha_limite = calcular_fecha_limite_solicitud(tipo)
         return SolicitudDerechos.objects.create(
             idUsuario_id=user_id,
@@ -383,8 +379,7 @@ class PatientRepository:
         """Exporta todos los datos del usuario para derecho de acceso."""
         from apps.authentication.models import Register
         from apps.patients.models import (
-            PerfilPaciente, EvolucionPaciente, Anamnesis, Familiar,
-            SolicitudDerechos,
+            PerfilPaciente, Anamnesis, SolicitudDerechos,
         )
         from apps.chatbot.models import ConversacionesChatbot, PrediagnosticoChatbot
         from apps.documents.models import DocumentosPaciente

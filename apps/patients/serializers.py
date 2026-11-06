@@ -2,7 +2,6 @@ import re
 from rest_framework import serializers
 from .models import PerfilPaciente
 from apps.patients.models import SolicitudDerechos
-from apps.authentication.models import ConsentimientoUsuario
 
 
 class PerfilPacienteSerializer(serializers.Serializer):
