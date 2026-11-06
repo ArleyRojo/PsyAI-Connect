@@ -2,8 +2,7 @@ import logging
 import threading
 
 from django.db import close_old_connections
-from django.db.models import Count, Q
-from django.db.models.functions import Coalesce
+from django.db.models import Q
 from django.db import connection, transaction
 
 from apps.admin_panel.models import AuditoriaAccesos, Logs
@@ -474,12 +473,7 @@ class AdminRepository:
 
     def create_notification(self, data):
         from apps.scheduling.models import Notificaciones
-        from django.core.mail import EmailMultiAlternatives
-        from django.conf import settings
-        from django.template.loader import render_to_string
         from apps.core.utils import parse_bogota_datetime
-        from apps.authentication.models import Register
-        from apps.patients.models import PerfilPaciente
         import re
 
         # Validar campos obligatorios
@@ -607,7 +601,7 @@ class AdminRepository:
 
     def get_logs(self, limit=None, usuario=None, accion=None, fecha_desde=None, fecha_hasta=None):
         from django.utils import timezone
-        from datetime import datetime, time
+        from datetime import datetime
 
         limit_val = limit or 200
         combined = []
@@ -705,7 +699,6 @@ class AdminRepository:
 
     def get_chatbot_historial_stats(self):
         from apps.chatbot.models import ConversacionesChatbot
-        from django.db.models import Count, Q
         qs = ConversacionesChatbot.objects.all()
         alto = qs.filter(nivelEmocionalDetectado="Alto").count()
         medio = qs.filter(nivelEmocionalDetectado="Medio").count()
@@ -781,7 +774,6 @@ class AdminRepository:
     def _resolve_recipients(self, destinatario, email_individual=None):
         """Resuelve la lista de destinatarios según el tipo, aplicando filtros"""
         from apps.authentication.models import Register
-        from apps.patients.models import PerfilPaciente
         
         if destinatario == "individual" and email_individual:
             try:
@@ -821,9 +813,7 @@ class AdminRepository:
         from django.core.mail import EmailMultiAlternatives
         from django.conf import settings
         from django.template.loader import render_to_string
-        from apps.scheduling.models import Notificaciones
         from apps.core.notifier import notificar_paciente
-        from django.utils import timezone
 
         style = self._get_tipo_style(tipo)
         site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
