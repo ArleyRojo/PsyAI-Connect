@@ -25,7 +25,7 @@
     opacity: .72;
 }
 
-/* ── Shell layout (2 columnas) ── */
+/* ── Shell layout (2 columnas en desktop, 1 columna si no hay arte o en móvil) ── */
 .register-shell {
     position: relative;
     z-index: 1;
@@ -35,6 +35,9 @@
     padding: clamp(12px, 2vw, 24px);
     gap: clamp(14px, 1.8vw, 22px);
     overflow: hidden;
+}
+.register-shell:not(:has(.register-art)) {
+    grid-template-columns: 1fr;
 }
 .register-shell > * {
     animation: pageFadeIn 0.5s ease both;
@@ -162,6 +165,12 @@
     min-width: 0;
     height: 100%;
     overflow-y: auto;
+    padding: clamp(14px, 2.5vh, 28px) clamp(10px, 1.5vw, 20px);
+    box-sizing: border-box;
+}
+
+.register-stage > .login-card {
+    margin: auto;
 }
 
 /* ── Login card ── */
@@ -203,9 +212,9 @@
 }
 
 .login-card.login-card--register {
-    width: min(100%, 660px);
-    max-height: 100%;
-    border-radius: 30px;
+    width: min(100%, 640px);
+    max-height: none;
+    border-radius: 28px;
     padding: clamp(20px, 2.4vw, 30px);
     background: rgba(255,255,255,.94);
     border: 1px solid rgba(255,255,255,.72);
@@ -217,11 +226,15 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+}
+
+.login-shell .login-card.login-card--register {
+    width: min(100%, 480px);
 }
 .login-card--register::before {
     height: 8px;
-    border-radius: 30px 30px 0 0;
+    border-radius: 28px 28px 0 0;
 }
 .login-card--register .card-lines-svg { display: none; }
 
@@ -1013,7 +1026,6 @@ select.form-control {
         padding: clamp(6px, 1.2vh, 14px);
         gap: clamp(8px, 1.2vw, 16px);
     }
-    .register-art { display: none !important; }
     .brand-mark {
         padding: 5px 12px;
         font-size: 0.9rem;
@@ -1046,11 +1058,18 @@ select.form-control {
         font-size: 0.72rem;
         line-height: 1.2;
     }
-    .login-card,
-    .login-card.login-card--register {
-        padding: clamp(1rem, 2.2vh, 1.6rem) clamp(1rem, 2vw, 1.8rem);
+    .login-card {
+        padding: clamp(1rem, 2vh, 1.5rem) clamp(1rem, 2vw, 1.8rem);
         border-radius: 20px;
-        max-width: 440px;
+        max-width: 460px;
+    }
+    .login-card.login-card--register {
+        padding: clamp(1rem, 2vh, 1.5rem) clamp(1rem, 2vw, 1.8rem);
+        border-radius: 20px;
+        max-width: 580px;
+    }
+    .login-shell .login-card.login-card--register {
+        max-width: 460px;
     }
     .auth-topbar {
         margin-bottom: 6px;
