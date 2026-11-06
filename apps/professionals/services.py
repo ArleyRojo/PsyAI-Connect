@@ -67,21 +67,49 @@ class ProfessionalService:
         if not patient_exists:
             return {"success": False, "message": "Paciente no encontrado"}, 404
 
-        # RF-49: notificar al profesional solo si la asignación es nueva (idempotente)
-        if created:
-            try:
-                from apps.scheduling.repositories import AppointmentRepository
-                from apps.authentication.models import Register
-                appointment_repo = AppointmentRepository()
-                paciente = Register.objects.filter(idUsuario=patient_id).first()
-                nombre_paciente = paciente.nombre if paciente else f"Paciente #{patient_id}"
-                titulo = "Nuevo paciente asignado"
-                mensaje = f"Se te ha asignado un nuevo paciente: {nombre_paciente}."
+        try:
+            from apps.scheduling.models import Notificaciones
+            from apps.scheduling.repositories import AppointmentRepository
+            from apps.authentication.models import Register
+
+            appointment_repo = AppointmentRepository()
+            paciente = Register.objects.filter(idUsuario=patient_id).first()
+            profesional = Register.objects.filter(idUsuario=professional_id).first()
+            nombre_paciente = paciente.nombre if paciente else f"Paciente #{patient_id}"
+            nombre_profesional = profesional.nombre if profesional else "Tu profesional"
+
+            if created:
                 appointment_repo.create_notification(
-                    professional_id, "profesional", titulo, mensaje, "Asignacion"
+                    professional_id,
+                    "profesional",
+                    "Nuevo paciente asignado",
+                    f"Se te ha asignado un nuevo paciente: {nombre_paciente}.",
+                    "Asignacion",
                 )
-            except Exception as e:
-                logger.warning(f"Error creando notificación de asignación: {e}")
+
+            if paciente:
+                titulo_paciente = "Te asignaron un profesional"
+                mensaje_paciente = (
+                    f"{nombre_profesional} fue asignado a tu atención. "
+                    "Puedes escribirle desde Mensajes."
+                )
+                ya_notificado = Notificaciones.objects.filter(
+                    idUsuario_id=patient_id,
+                    rol="paciente",
+                    tipo="Asignacion",
+                    titulo=titulo_paciente,
+                    mensaje=mensaje_paciente,
+                ).exists()
+                if created or not ya_notificado:
+                    appointment_repo.create_notification(
+                        patient_id,
+                        "paciente",
+                        titulo_paciente,
+                        mensaje_paciente,
+                        "Asignacion",
+                    )
+        except Exception as e:
+            logger.warning(f"Error creando notificación de asignación: {e}")
 
         return {"success": True, "message": "Paciente asignado correctamente"}, 200
 

@@ -4,7 +4,7 @@
     <title>PsyAI Connect | Dashboard Paciente</title>
     {% include 'base/partials/head.html' %}
     <link rel="stylesheet" href="/css/pages/patient.css?v=20261104-pat">
-    <link rel="stylesheet" href="/css/pages/patient-dashboard-v2.css?v=20261030-1">
+    <link rel="stylesheet" href="/css/pages/patient-dashboard-v2.css?v=20261106-notifications">
 </head>
 <body class="patient-dashboard">
     <button class="toggle-btn" id="toggleSidebar" aria-label="Abrir menú"><i class="fas fa-bars"></i></button>
@@ -96,6 +96,21 @@
                 <span class="dash-topbar__date" id="heroDate"><i class="fas fa-calendar-day"></i> {% now "j \d\e F \d\e Y" %}</span>
             </div>
             <div class="dash-topbar__right">
+                <div class="patient-notifications" id="patientNotifications">
+                    <button type="button" class="patient-notifications__toggle" id="patientNotificationsToggle" aria-label="Ver notificaciones" aria-expanded="false" aria-controls="patientNotificationsPanel">
+                        <i class="fas fa-bell" aria-hidden="true"></i>
+                        <span class="patient-notifications__badge" id="patientNotificationsBadge" hidden>0</span>
+                    </button>
+                    <section class="patient-notifications__panel" id="patientNotificationsPanel" aria-label="Notificaciones" hidden>
+                        <div class="patient-notifications__header">
+                            <strong>Notificaciones</strong>
+                            <button type="button" class="patient-notifications__close" id="patientNotificationsClose" aria-label="Cerrar notificaciones">&times;</button>
+                        </div>
+                        <div class="patient-notifications__list" id="patientNotificationsList">
+                            <p class="patient-notifications__empty">Cargando notificaciones...</p>
+                        </div>
+                    </section>
+                </div>
                 <div class="dash-topbar__avatar" id="heroAvatar" data-avatar="inicial" data-nombre="{{ request.user.nombre|default:'' }}" data-foto="{{ request.user.foto_perfil|default:'' }}"></div>
             </div>
             </div>
@@ -327,6 +342,7 @@
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-sidebar-opt">
     <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260712-1">
     <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
+    <script src="/js/modules/patient/notifications.js?v=20261106-assignment"></script>
 <script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
     <script src="/js/modules/patient/aside.js?v=20261105-fix-handleMediaChange"></script>
     <script src="/js/modules/auth/logout.js?v=20261023-1"></script>

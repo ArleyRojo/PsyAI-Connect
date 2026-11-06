@@ -3198,7 +3198,7 @@ html.dark-mode .tab.active {
     border-color: #1565C0 !important;
     color: #fff !important;
 }
-.btn-seleccionar.active-btn::before { content: "âœ“ "; }
+.btn-seleccionar.active-btn::before { content: "\2713 "; }
 
 /* â”€â”€ Card paciente seleccionado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .selected-patient-banner {

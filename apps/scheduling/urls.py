@@ -7,6 +7,7 @@ from apps.scheduling.views import (
     CitaDisponibleResource,
     CitaProximaResource,
     CitaHorarioOcupadoResource,
+    PatientNotificationsResource,
 )
 
 app_name = "scheduling"
@@ -23,6 +24,7 @@ urlpatterns = [
     # Alias con tilde para compatibilidad con frontend
     path("citas/próxima", CitaProximaResource.as_view(), name="cita_proxima_tilde"),
     path("citas/horarios-ocupados", CitaHorarioOcupadoResource.as_view(), name="citas_horarios_ocupados"),
+    path("paciente/notificaciones", PatientNotificationsResource.as_view(), name="paciente_notificaciones"),
     path("citas/profesional", CitaViewSet.as_view({"get": "list"}), name="citas_profesional"),
     path("citas/paciente", CitaViewSet.as_view({"get": "list"}), name="citas_paciente"),
     path("", include(router.urls)),

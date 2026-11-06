@@ -12,7 +12,7 @@ from apps.core.permissions import (
     IsProfesional,
 )
 from apps.scheduling.services import AppointmentService
-from apps.scheduling.models import Citas
+from apps.scheduling.models import Citas, Notificaciones
 
 logger = logging.getLogger(__name__)
 
@@ -173,3 +173,40 @@ class CitaHorarioOcupadoResource(APIView):
         fecha = request.query_params.get("fecha")
         payload, status_code = appointment_service.get_taken_slots(id_profesional, fecha)
         return Response(payload, status=status_code)
+
+
+class PatientNotificationsResource(APIView):
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def get(self, request):
+        user_id = getattr(request, "user_id", None)
+        notifications = Notificaciones.objects.filter(
+            idUsuario_id=user_id,
+            rol="paciente",
+            canal="interno",
+        ).order_by("-fecha", "-idNotificacion")
+        recent = notifications[:30]
+        return Response({
+            "success": True,
+            "no_leidas": notifications.filter(leido=False).count(),
+            "notificaciones": [
+                {
+                    "idNotificacion": item.idNotificacion,
+                    "titulo": item.titulo or "Notificación",
+                    "mensaje": item.mensaje or "",
+                    "fecha": item.fecha.isoformat() if item.fecha else None,
+                    "leido": bool(item.leido),
+                }
+                for item in recent
+            ],
+        }, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        user_id = getattr(request, "user_id", None)
+        updated = Notificaciones.objects.filter(
+            idUsuario_id=user_id,
+            rol="paciente",
+            canal="interno",
+            leido=False,
+        ).update(leido=True)
+        return Response({"success": True, "actualizadas": updated}, status=status.HTTP_200_OK)

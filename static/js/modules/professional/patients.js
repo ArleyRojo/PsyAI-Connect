@@ -124,7 +124,7 @@ async function cargarPacientes() {
     tbody.innerHTML = "<tr><td colspan='7' class='text-center py-3'><i class='fas fa-spinner fa-spin me-2'></i>Cargando...</td></tr>";
 
     try {
-        var res = await fetch("/api/pacientes", { credentials: "include" });
+        var res = await fetch("/api/profesional/pacientes/todos", { credentials: "include" });
         if (await manejarErrorApi(res, tbody)) return;
 
         var data = await res.json();
@@ -192,9 +192,11 @@ function renderPage(page) {
         var fotoSafe  = (p.fotoPerfil || "").replace(/"/g, '"');
         var pacienteId = Number(p.idUsuario);
 
-        var badgeAnamnesis = p.tieneAnamnesis
-            ? '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="fas fa-check-circle me-1"></i>Registrada</span>'
-            : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1"><i class="fas fa-clock me-1"></i>Pendiente</span>';
+        var badgeAnamnesis = p.tieneAnamnesis === undefined
+            ? '<span class="text-muted">—</span>'
+            : p.tieneAnamnesis
+                ? '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="fas fa-check-circle me-1"></i>Registrada</span>'
+                : '<span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1"><i class="fas fa-clock me-1"></i>Pendiente</span>';
 
         return '<tr class="patient-row' + (isSelected ? " selected-patient" : "") + '">' +
             '<td><img src="' + fotoUrl + '" class="rounded-circle me-2" style="width:35px;height:35px;object-fit:cover;" data-inicial="' + inicial + '" data-color="' + colorLetra + '" data-size="35" data-fz="14" onerror="fallbackAvatar(this)">' + (p.nombre || "—") + '</td>' +
@@ -202,7 +204,7 @@ function renderPage(page) {
             "<td>—</td>" +
             "<td>" + (p.email || p.contacto || "—") + "</td>" +
             "<td>" + badgeAnamnesis + "</td>" +
-            '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + pacienteId + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this, ' + estaAsignado + ')\'>' + btnTxt + "</button></td>" +
+            '<td><button class="' + btnClass + '" onclick=\'seleccionarPaciente(' + pacienteId + ', "' + nomSafe + '", "' + fotoSafe + '", "' + emailSafe + '", this)\'>' + btnTxt + "</button></td>" +
             '<td><a href="historia_clinica_pro.html?pacienteId=' + pacienteId + '" class="btn btn-sm btn-outline-info" title="Ver historia clínica"><i class="fas fa-file-medical"></i></a></td>' +
             "</tr>";
     }).join('');
@@ -244,24 +246,24 @@ function goToPage(page) {
 
 // ── Seleccionar paciente ─────────────────────────────────────
 
-async function seleccionarPaciente(id, nombre, fotoPerfil, email, btn, yaAsignado) {
+async function seleccionarPaciente(id, nombre, fotoPerfil, email, btn) {
     try {
-        if (!yaAsignado && !pacientesAsignados.has(Number(id))) {
-            var asignacionRes = await fetch("/api/profesional/pacientes/" + encodeURIComponent(id) + "/asignar", {
-                method: "POST",
-                credentials: "include"
-            });
-            var asignacion = await asignacionRes.json();
-            if (!asignacionRes.ok || !asignacion.success) {
-                if (window.PsyAIAlerts?.error) {
-                    window.PsyAIAlerts.error("No se pudo asignar", asignacion.message || "Verifica que tu cuenta profesional este aprobada.");
-                } else {
-                    window.alert(asignacion.message || "Verifica que tu cuenta profesional este aprobada.");
-                }
-                return;
+        // El endpoint es idempotente: también completa una notificación faltante
+        // si esta relación ya existía antes de habilitar avisos al paciente.
+        var asignacionRes = await fetch("/api/profesional/pacientes/" + encodeURIComponent(id) + "/asignar", {
+            method: "POST",
+            credentials: "include"
+        });
+        var asignacion = await asignacionRes.json();
+        if (!asignacionRes.ok || !asignacion.success) {
+            if (window.PsyAIAlerts?.error) {
+                window.PsyAIAlerts.error("No se pudo asignar", asignacion.message || "Verifica que tu cuenta profesional este aprobada.");
+            } else {
+                window.alert(asignacion.message || "Verifica que tu cuenta profesional este aprobada.");
             }
-            pacientesAsignados.add(Number(id));
+            return;
         }
+        pacientesAsignados.add(Number(id));
 
         // Si ya estaba seleccionado, solo avisar
         if (pacienteSeleccionado === id) {
@@ -326,7 +328,7 @@ async function seleccionarPaciente(id, nombre, fotoPerfil, email, btn, yaAsignad
         }
 
         if (typeof PsyAIAlerts !== 'undefined') {
-            PsyAIAlerts.success('Paciente seleccionado', nombre + ' ha sido seleccionado');
+            PsyAIAlerts.success(nombre + ' quedó asignado y seleccionado.', 'Paciente asignado');
         }
 
     } catch (e) {
