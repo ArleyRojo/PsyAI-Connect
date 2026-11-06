@@ -211,6 +211,7 @@
     let pollTimer = null;
     let contactPollTimer = null;
     let loadingContacts = false;
+    let authorizationFailed = false;
 
     function getSearchPlaceholder() {
       return contactMode === "professional" ? "Buscar profesional..." : "Buscar paciente...";
@@ -257,30 +258,18 @@
       }
     }
 
-    function getCachedUser() {
-      try {
-        const cached = localStorage.getItem('usuario') || localStorage.getItem('sessionUser');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed && parsed.idUsuario) return parsed;
-        }
-      } catch {}
-      return null;
-    }
-
     async function ensureAllowedSession() {
       if (!requiredRole) return true;
 
-      // Try cached user first to avoid visible "Verificando sesión..." flash
-      const cached = getCachedUser();
-      if (cached && rolesMatch(cached.rol || cached.role, requiredRole)) {
-        return true;
-      }
-
+      // localStorage may outlive the server session, so authorize from the live session.
       const user = await getSessionUser();
 
       if (!user) {
-        renderAuthState("fas fa-lock", "Redirigiendo al inicio de sesión...");
+        try {
+          localStorage.removeItem('usuario');
+          localStorage.removeItem('sessionUser');
+        } catch {}
+        renderAuthState("fas fa-lock", "Tu sesión expiró. Inicia sesión nuevamente.");
         return false;
       }
 
@@ -301,6 +290,25 @@
         clearInterval(contactPollTimer);
         contactPollTimer = null;
       }
+    }
+
+    function handleAuthorizationFailure(statusCode) {
+      if (statusCode !== 401 && statusCode !== 403) return false;
+
+      authorizationFailed = true;
+      clearPolling();
+      sendButton.disabled = true;
+      textarea.disabled = true;
+      if (statusCode === 401) {
+        try {
+          localStorage.removeItem('usuario');
+          localStorage.removeItem('sessionUser');
+        } catch {}
+      }
+      renderAuthState("fas fa-lock", statusCode === 401
+        ? "Tu sesion expiro. Inicia sesion nuevamente."
+        : "No tienes acceso a esta conversacion.");
+      return true;
     }
 
     function startPolling() {
@@ -476,7 +484,7 @@
     }
 
     async function loadMessages(onlyNew) {
-      if (!activeContact) return;
+      if (authorizationFailed || !activeContact) return;
 
       const params = new URLSearchParams({ receptor: activeContact.idUsuario });
       if (onlyNew && lastMessageId > 0) {
@@ -487,6 +495,8 @@
         const response = await fetch(`${messagesEndpoint}?${params.toString()}`, {
           credentials: "include",
         });
+        if (handleAuthorizationFailure(response.status)) return;
+        if (!response.ok) throw new Error(`No se pudieron cargar los mensajes (${response.status}).`);
         const data = await response.json();
 
         if (!data.success) return;
@@ -512,8 +522,17 @@
         credentials: "include",
         cache: "no-store",
       });
+      if (!response.ok) {
+        const error = new Error(`No se pudieron cargar los contactos (${response.status}).`);
+        error.status = response.status;
+        throw error;
+      }
       const data = await response.json();
-      if (!response.ok || data.success === false) return [];
+      if (data.success === false) {
+        const error = new Error(data.message || "No se pudieron cargar los contactos.");
+        error.status = response.status;
+        throw error;
+      }
 
       const candidates = [
         key,
@@ -547,7 +566,7 @@
     }
 
     async function loadContacts(showSkeleton = true) {
-      if (loadingContacts) return;
+      if (authorizationFailed || loadingContacts) return;
       loadingContacts = true;
       if (showSkeleton) {
         renderSkeleton();
@@ -561,11 +580,21 @@
         renderContacts();
       } catch (error) {
         console.error("Error cargando conversaciones:", error);
+        if (handleAuthorizationFailure(error.status)) return;
+        if (error.status === 401 || error.status === 403) {
+          renderAuthState("fas fa-lock", "Tu sesión expiró o no tiene acceso. Inicia sesión nuevamente.");
+          return;
+        }
         if (fallbackEndpoint) {
           try {
             contacts = enrichFallbackContacts(await fetchContactList(fallbackEndpoint, fallbackKey));
           } catch (fallbackError) {
             console.error("Error cargando usuarios registrados:", fallbackError);
+            if (handleAuthorizationFailure(fallbackError.status)) return;
+            if (fallbackError.status === 401 || fallbackError.status === 403) {
+              renderAuthState("fas fa-lock", "Tu sesión expiró o no tiene acceso. Inicia sesión nuevamente.");
+              return;
+            }
         contacts = [];
           }
         } else {
@@ -614,7 +643,7 @@
     }
 
     async function sendMessage() {
-      if (!activeContact) return;
+      if (authorizationFailed || !activeContact) return;
       const text = textarea.value.trim();
       if (!text) return;
 
