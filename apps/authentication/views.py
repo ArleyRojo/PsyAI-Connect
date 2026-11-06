@@ -1,9 +1,7 @@
 import os
 
-from django.contrib.auth import login as django_login
 from django.middleware.csrf import get_token
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
 from rest_framework import permissions, status
@@ -16,7 +14,6 @@ from apps.authentication.serializers import (
     RegisterSerializer,
     ResetPasswordSerializer,
     VerifyEmailSerializer,
-    TOTPSetupSerializer,
     TOTPVerifySerializer,
     TOTPDisableSerializer,
 )

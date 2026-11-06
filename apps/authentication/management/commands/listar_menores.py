@@ -2,7 +2,6 @@ from datetime import date
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from apps.authentication.models import Register
-from apps.patients.models import PerfilPaciente
 
 
 class Command(BaseCommand):

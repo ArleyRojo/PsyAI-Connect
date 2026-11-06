@@ -2,7 +2,7 @@ import logging
 import os
 import re
 import secrets
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.conf import settings as dj_settings
 from django.core.mail import EmailMultiAlternatives

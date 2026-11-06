@@ -103,8 +103,7 @@ class TestLoginView:
                 mock_user = MagicMock()
                 mock_user.idUsuario = 1
                 mock_reg.objects.get.return_value = mock_user
-                with patch("apps.authentication.views.django_login"):
-                    resp = LoginView.as_view()(req)
+                resp = LoginView.as_view()(req)
 
         resp.render()
         assert resp.status_code == 200
@@ -167,8 +166,7 @@ class TestLoginView:
                 mock_user = MagicMock()
                 mock_user.idUsuario = 5
                 mock_reg.objects.get.return_value = mock_user
-                with patch("apps.authentication.views.django_login"):
-                    resp = LoginView.as_view()(req)
+                resp = LoginView.as_view()(req)
 
         resp.render()
         assert resp.status_code == 200

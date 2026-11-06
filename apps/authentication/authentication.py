@@ -1,7 +1,7 @@
 import logging
 from django.middleware.csrf import CsrfViewMiddleware, get_token
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
