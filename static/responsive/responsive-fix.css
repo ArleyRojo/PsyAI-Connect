@@ -2889,6 +2889,40 @@ html.dark-mode body.admin-panel #tab-programadas .table-clean tbody td::before {
   color: var(--dm-text-muted) !important;
 }
 
+/* Keep the desktop chatbot inside the viewport; only its conversation scrolls. */
+@media (min-width: 992px) {
+  body:has(#chatbot-section) {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  body:has(#chatbot-section) .main-content {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  body:has(#chatbot-section) .main-header {
+    flex: 0 0 auto;
+  }
+
+  body:has(#chatbot-section) #chatbot-section:not(.fullscreen-active) {
+    flex: 1 1 auto;
+    height: auto !important;
+    min-height: 0;
+  }
+
+  body:has(#chatbot-section) #chatbot-section .chat-area {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+}
+
 html.dark-mode body.admin-panel #tab-historial .table-clean tbody td,
 html.dark-mode body.admin-panel #tablaNotificaciones .table-clean tbody td,
 html.dark-mode body.admin-panel #tab-programadas .table-clean tbody td {

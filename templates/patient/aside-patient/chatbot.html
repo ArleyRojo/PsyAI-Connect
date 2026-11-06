@@ -4,8 +4,27 @@
     <title>PsyAI Connect | Chatbot Emocional</title>
     {% include 'base/partials/head.html' %}
     <link rel="stylesheet" href="/css/pages/patient.css?v=20261104-pat">
-    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-sidebar-opt">
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261106-chat-scroll">
     <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+    <style>
+      .consent-warning.is-visible {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        animation: consentShake 0.4s ease;
+      }
+      .psyai-modal__consent-check.has-error {
+        border-color: #ef4444 !important;
+        background: #fef2f2 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18) !important;
+        animation: consentShake 0.4s ease;
+      }
+      @keyframes consentShake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
+      }
+    </style>
 </head>
 <body class="patient-dashboard">
 
@@ -312,6 +331,7 @@
     const btnNoAcepto = document.getElementById('btn-no-acepto');
     const checkConsent = document.getElementById('checkConsent');
     const warning = document.getElementById('consentimientoWarning');
+    const consentCheck = checkConsent?.closest('.psyai-modal__consent-check');
     const formControls = chatbotSection ? chatbotSection.querySelectorAll('input, button, textarea, select') : [];
     const consentimientoModal = modalElement && typeof bootstrap !== 'undefined'
       ? new bootstrap.Modal(modalElement, {
@@ -403,6 +423,7 @@
     if (btnAcepto) {
       btnAcepto.addEventListener('click', async function() {
         if (!checkConsent || !checkConsent.checked) {
+          consentCheck?.classList.add('has-error');
           if (warning) {
             warning.classList.add('is-visible');
           }
@@ -426,6 +447,9 @@
         btnAcepto.disabled = !checkConsent.checked;
         if (warning && checkConsent.checked) {
           warning.classList.remove('is-visible');
+        }
+        if (checkConsent.checked) {
+          consentCheck?.classList.remove('has-error');
         }
       });
     }
