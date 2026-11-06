@@ -27,11 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function cargarUsuarios() {
     try {
-        console.log('Cargando usuarios desde API...');
         const res = await fetch('/api/admin/usuarios');
-        console.log('Status:', res.status);
         const data = await res.json();
-        console.log('Respuesta API:', data);
         
         if (!res.ok) {
             console.error('Error HTTP:', res.status);
@@ -48,8 +45,6 @@ async function cargarUsuarios() {
         
         todosUsuarios = data.usuarios || [];
         rolesFiltrados = todosUsuarios;
-        
-        console.log('Usuarios encontrados:', todosUsuarios.length);
         
         if (todosUsuarios.length > 0) {
             renderizarPaginaRoles();
