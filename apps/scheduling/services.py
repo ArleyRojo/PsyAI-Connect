@@ -1,15 +1,12 @@
 ﻿import logging
-from decimal import Decimal, InvalidOperation
 from datetime import date, datetime, timedelta
 
 from django.conf import settings
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from django.template.loader import render_to_string
 from django.utils import timezone as tz
 from apps.core.notifier import notificar_paciente
 from apps.scheduling.repositories import AppointmentRepository
-from apps.scheduling.models import Citas
-from apps.billing.repositories import InvoiceRepository
 
 logger = logging.getLogger(__name__)
 

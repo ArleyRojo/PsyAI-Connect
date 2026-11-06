@@ -1,14 +1,12 @@
 import logging
 
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.core.permissions import (
     IsAuthenticatedDRF,
     IsPaciente,
-    IsPacienteOrProfesional,
     IsProfesional,
 )
 from apps.scheduling.services import AppointmentService

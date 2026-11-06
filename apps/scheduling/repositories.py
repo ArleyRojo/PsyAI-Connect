@@ -1,13 +1,11 @@
 import logging
-from datetime import date, timedelta
+from datetime import timedelta
 
 from django.db import transaction
-from django.db.models import Q, Count, F
-from django.db.models.functions import TruncDate
+from django.db.models import Count
 from django.utils import timezone
 
 from apps.scheduling.models import Citas, Disponibilidad, Notificaciones
-from apps.authentication.models import Register
 from apps.billing.models import Facturas
 
 logger = logging.getLogger(__name__)
