@@ -4,7 +4,6 @@ import logging
 from django.utils.deprecation import MiddlewareMixin
 
 from apps.admin_panel.services import (
-    telemetry_service,
     track_request,
     track_latency,
     _normalize_ip,

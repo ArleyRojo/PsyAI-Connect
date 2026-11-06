@@ -1,6 +1,5 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.urls import resolve, Resolver404
 from django.utils.deprecation import MiddlewareMixin
 
 from apps.authentication.models import Register
