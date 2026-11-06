@@ -1,22 +1,14 @@
-import json
 import logging
 import os
 from decimal import Decimal
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.http import HttpResponse, FileResponse, Http404
-from django.template.loader import render_to_string
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from django.http import FileResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as drf_status
-from datetime import datetime
 
 from apps.billing.services import InvoiceService
 from apps.billing.repositories import InvoiceRepository
-from apps.core.permissions import IsAuthenticatedDRF, IsPaciente, IsProfesional, IsAdmin
+from apps.core.permissions import IsAuthenticatedDRF, IsProfesional
 from apps.billing.models import Facturas
 
 logger = logging.getLogger(__name__)

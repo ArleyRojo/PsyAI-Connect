@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.db import transaction
-from django.db.models import Q, Prefetch
+from django.db.models import Prefetch
 from django.utils import timezone
 
 from apps.billing.models import Facturas, ItemsFactura

@@ -1,5 +1,4 @@
 import uuid
-import os
 from django.db import models
 
 from apps.authentication.models import Register

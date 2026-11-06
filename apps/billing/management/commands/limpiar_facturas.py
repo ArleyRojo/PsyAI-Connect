@@ -1,6 +1,4 @@
 import os
-import json
-import shutil
 from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError

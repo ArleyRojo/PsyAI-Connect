@@ -1,8 +1,6 @@
 import logging
-from decimal import Decimal
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.utils import timezone
 
 from apps.billing.repositories import InvoiceRepository
 from apps.billing.models import Facturas
