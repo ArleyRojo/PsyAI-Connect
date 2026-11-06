@@ -121,7 +121,32 @@
             lockBodyScroll(false);
         }
 
-                mediaQuery.addEventListener('change', handleMediaChange);
+        function handleMediaChange() {
+            if (!isMobile()) {
+                sidebar.classList.remove('active', 'closing');
+                overlay.classList.remove('active', 'closing');
+                toggleBtn.classList.remove('active');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+                sidebar.removeAttribute('aria-hidden');
+                sidebar.removeAttribute('inert');
+                overlay.removeAttribute('aria-hidden');
+                overlay.removeAttribute('inert');
+                lockBodyScroll(false);
+                return;
+            }
+
+            sidebar.classList.remove('active', 'closing');
+            overlay.classList.remove('active', 'closing');
+            toggleBtn.classList.remove('active');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            sidebar.setAttribute('aria-hidden', 'true');
+            sidebar.setAttribute('inert', 'true');
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.setAttribute('inert', 'true');
+            lockBodyScroll(false);
+        }
+
+        mediaQuery.addEventListener('change', handleMediaChange);
         handleMediaChange();
 
         toggleBtn.addEventListener('click', function (e) {
