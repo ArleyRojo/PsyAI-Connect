@@ -483,8 +483,10 @@ function renderFacturasTabla(facturas, tbody, esDemo = false) {
     tbody.innerHTML = '<tr><td colspan="6" class="text-center text-warning py-2"><i class="fas fa-exclamation-triangle me-1"></i> Modo de prueba: servidor no disponible, mostrando datos de ejemplo</td></tr>';
   }
   let firstProfId = null;
-  for (const f of facturas) {
-    if (f.idProfesional) { firstProfId = f.idProfesional; break; }
+  if (!esDemo) {
+    for (const f of facturas) {
+      if (f.idProfesional) { firstProfId = f.idProfesional; break; }
+    }
   }
   if (firstProfId) {
     loadTopPagoInfo(firstProfId);
@@ -535,7 +537,7 @@ function renderFacturasTabla(facturas, tbody, esDemo = false) {
   else tbody.innerHTML += filas;
 }
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = ""; // rutas relativas: mismo origen (local y producción)
 
 async function cargarFacturasPaciente() {
   console.log("[facturas] cargarFacturasPaciente iniciado");
@@ -589,7 +591,7 @@ async function cargarFacturasPaciente() {
     return;
   } catch(e) {
     console.error("Error cargando facturas:", e);
-    let msg = "No se pudo conectar con el servidor. Verifica que Django esté corriendo en http://127.0.0.1:8000";
+    let msg = "No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.";
     if (e.name === "TypeError" && /fetch|network/i.test(e.message || "")) msg = "Error de red: no se pudo contactar al servidor.";
     else if (e.name === "TypeError") msg = "Error al mostrar las facturas: " + e.message;
     else if (e.name === "AbortError") msg = "La solicitud tardó demasiado y se canceló.";
