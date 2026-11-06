@@ -551,7 +551,6 @@ class ProfessionalVerificacionViewSet(viewsets.ViewSet):
 
     def pendientes(self, request):
         """GET /api/admin/profesionales/pendientes"""
-        from apps.professionals.models import PerfilProfesional
         from apps.authentication.models import Register
         profesionales = Register.objects.filter(
             rol="profesional",

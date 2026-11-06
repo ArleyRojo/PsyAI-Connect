@@ -1,8 +1,7 @@
 from datetime import date
 
 from django.db import models
-from django.db.models import Q, Count, Value, CharField
-from django.db.models.functions import Lower, Coalesce
+from django.db.models import Q, Count
 from django.utils import timezone
 
 from apps.authentication.models import Register
@@ -57,7 +56,7 @@ class ProfessionalRepository:
             perfil.save(update_fields=["especialidad", "tarjetaProfesional", "numeroRethus", "experiencia"])
 
     def list_professional_patients(self, professional_id):
-        from django.db.models import OuterRef, Subquery
+        from django.db.models import OuterRef
 
         latest_diag_subquery = Diagnostico.objects.filter(
             idAsignacion__idProfesional_id=professional_id,
@@ -351,8 +350,7 @@ class ProfessionalRepository:
         return False
 
     def get_dashboard_stats(self, professional_id):
-        from django.db.models import Count, Q, F, Value, CharField
-        from django.db.models.functions import Coalesce
+        from django.db.models import Count, Q
         from datetime import timedelta
         from django.utils import timezone
 
