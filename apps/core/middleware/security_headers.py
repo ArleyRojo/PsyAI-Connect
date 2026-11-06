@@ -29,7 +29,7 @@ class SecurityHeadersMiddleware:
                 "frame-src 'self' https://accounts.google.com; "
                 "frame-ancestors 'none'; "
                 "base-uri 'self'; "
-                "form-action 'self';"
+                "form-action 'self' https://accounts.google.com;"
             )
             # En desarrollo usar Report-Only para no romper funcionalidad mientras se ajusta
             if settings.DEBUG:
