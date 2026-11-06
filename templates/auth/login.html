@@ -3,8 +3,8 @@
 <head>
     <title>PsyAI Connect | Inicio de sesión</title>
     {% include 'base/partials/head.html' %}
-    <link rel="stylesheet" href="/css/pages/auth.css?v=20261030-1">
-    <link rel="stylesheet" href="/responsive/auth.css?v=20261104-1">
+    <link rel="stylesheet" href="/css/pages/auth.css?v=20261105-fix">
+    <link rel="stylesheet" href="/responsive/auth.css?v=20261105-fix">
 </head>
 <body>
     <canvas id="bgCanvas" class="canvas-bg"></canvas>
@@ -43,10 +43,11 @@
                     <p>Entra con tus datos y selecciona el rol correspondiente a tu cuenta.</p>
                 </div>
 
-                <div class="alert-box" style="background: rgba(13,71,161,.08); border: 1px solid rgba(13,71,161,.22); color: #0d47a1; padding: 12px 16px; margin-bottom: 1rem; border-radius: 10px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Antes de iniciar con Google:</strong>
-                    Si es tu primera vez, <a href="{% url 'account_signup' %}" style="color: #0d47a1; text-decoration: underline; font-weight: 700;">regístrate primero</a> con el mismo correo que usarás en Google.
+                <div class="alert-box" style="background: rgba(13,71,161,.08); border: 1px solid rgba(13,71,161,.22); color: #0d47a1; padding: 10px 14px; margin-bottom: 1rem; border-radius: 12px; font-size: 0.85rem; line-height: 1.45; text-align: left; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px; font-weight: 700;">
+                        <i class="fas fa-info-circle"></i> Antes de iniciar con Google:
+                    </div>
+                    <div>Si es tu primera vez, <a href="{% url 'account_signup' %}" style="color: #0d47a1; text-decoration: underline; font-weight: 700;">regístrate primero</a> con el mismo correo que usarás en Google.</div>
                 </div>
 
                 <form>
