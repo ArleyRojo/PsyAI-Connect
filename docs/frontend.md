@@ -41,14 +41,11 @@ static/
 │   ├── responsive-fix.css      # Correcciones globales, se carga al final
 │   ├── responsive-admin.css
 │   ├── responsive-professional.css
-│   ├── auth.css                # (sin referencias en plantillas)
-│   └── general.css             # (sin referencias en plantillas)
+│   └── auth.css                # Login, registro y recuperación
 ├── js/
 │   ├── base/                   # Landing
 │   │   ├── index.js            # Único script de landing cargado por index.html
-│   │   ├── landing.js          # (sin referencias)
-│   │   ├── hero-carousel.js    # (sin referencias)
-│   │   └── navbar-scroll.js    # (sin referencias)
+│   │   └── landing.js          # (sin referencias)
 │   ├── components/
 │   │   └── custom-select.js
 │   ├── core/shared/            # Utilidades globales
@@ -63,8 +60,7 @@ static/
 │   │   ├── mobile-navbar-toggle.js
 │   │   ├── nombre.usuario.js           # Nombre en el encabezado
 │   │   ├── professional-notifications.js
-│   │   ├── aside.js                    # Sidebar del panel admin
-│   │   └── scroll-reveal.js            # (sin referencias)
+│   │   └── aside.js                    # Sidebar del panel admin
 │   ├── modules/
 │   │   ├── auth/       # auth-guard, auth-ui, login, logout, register, recover
 │   │   ├── patient/    # aside, chatbot, agendaquotes, evolution, historia_clinica_paciente, my.profile
@@ -313,8 +309,7 @@ Los portales de paciente y profesional comparten `alerts.js`, `logout.js` y `nom
 |---|---|
 | SweetAlert2 por CDN | Es la única librería de UI que no es local; depende de internet y de que la política CSP permita `cdn.jsdelivr.net` |
 | Doble manejo de CSRF | `csrf.js` parchea `fetch` y `api-connection.js` gestiona su propio token; conviene unificarlos |
-| Archivos sin referencias | `base/landing.js`, `base/hero-carousel.js`, `base/navbar-scroll.js`, `core/shared/scroll-reveal.js`, `css/base/animations.css`, `css/components/cookies.css`, `responsive/auth.css` y `responsive/general.css` no aparecen en ninguna plantilla ni script |
-| Copia de respaldo en el repo | `static/css/pages/landing.css.bak-impacto` |
+| Archivos sin referencias | `base/landing.js` no se carga en ninguna plantilla: la landing usa `base/index.js` |
 | Dos `aside.js` por rol | Cada portal tiene el suyo, y el de admin vive en `core/shared/`; hay lógica repetida |
 | Estilos en línea | `connection-status.js` aplica sus estilos con JavaScript en vez de usar clases |
 | Lógica dentro de plantillas | Las páginas de facturas (paciente, profesional y admin) y el formulario del boletín de la landing llevan su JavaScript dentro de la plantilla; conviene moverlo a `static/js/modules/` |
