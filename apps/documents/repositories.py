@@ -1,14 +1,11 @@
 from datetime import datetime
 
-from django.db.models import F, CharField, Value
-from django.db.models.functions import Concat
 
 from apps.documents.models import (
     AutorizacionesDocumento,
     DocumentosClinicos,
     DocumentosPaciente,
 )
-from apps.authentication.models import Register
 
 
 class DocumentoRepository:
