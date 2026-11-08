@@ -32,61 +32,6 @@ class ValidationError(Exception):
         super().__init__(message)
 
 
-class Validator:
-    @staticmethod
-    def required(value, field_name):
-        if value is None or (isinstance(value, str) and not value.strip()):
-            raise ValidationError(f"El campo '{field_name}' es requerido", field_name)
-        return value
-
-    @staticmethod
-    def email(value, field_name="email"):
-        if not value:
-            raise ValidationError(f"El campo '{field_name}' es requerido", field_name)
-        pattern = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
-        if not re.match(pattern, value):
-            raise ValidationError(f"Formato de '{field_name}' inválido", field_name)
-        return value.strip().lower()
-
-    @staticmethod
-    def password(value):
-        if not value:
-            raise ValidationError("La contraseña es requerida", "password")
-        if len(value) < 6:
-            raise ValidationError(
-                "La contraseña debe tener al menos 6 caracteres", "password"
-            )
-        if not re.search(r"[A-Z]", value):
-            raise ValidationError(
-                "La contraseña debe contener al menos una mayúscula", "password"
-            )
-        if not re.search(r"[0-9]", value):
-            raise ValidationError(
-                "La contraseña debe contener al menos un número", "password"
-            )
-        return value
-
-    @staticmethod
-    def role(value, allowed=("paciente", "profesional", "admin")):
-        if value not in allowed:
-            raise ValidationError(
-                f"Rol inválido. Roles permitidos: {', '.join(allowed)}", "rol"
-            )
-        return value
-
-    @staticmethod
-    def positive_integer(value, field_name):
-        try:
-            num = int(value)
-        except (TypeError, ValueError):
-            raise ValidationError(f"'{field_name}' debe ser un número entero", field_name)
-        if num <= 0:
-            raise ValidationError(
-                f"'{field_name}' debe ser un número positivo", field_name
-            )
-        return num
-
-
 class MailService:
     @staticmethod
     def send_recovery_email(recipient_email, recovery_link):

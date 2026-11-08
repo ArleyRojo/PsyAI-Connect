@@ -27,13 +27,6 @@ class AppointmentRepository:
             return value[:5] if len(value) >= 5 else value
         return str(value)
 
-    def appointment_exists(self, professional_id, fecha, hora):
-        return Citas.objects.filter(
-            idProfesional_id=professional_id,
-            fecha=fecha,
-            hora=hora,
-        ).exclude(estado="Cancelada").exists()
-
     def get_appointment_in_slot(self, professional_id, fecha, hora):
         try:
             cita = Citas.objects.get(

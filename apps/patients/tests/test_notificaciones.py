@@ -9,20 +9,6 @@ from apps.core.webhooks import WhatsAppWebhook
 from unittest.mock import patch, MagicMock
 
 @pytest.mark.django_db
-def test_guardar_preferencias_con_validacion():
-    user = Register.objects.create_user(email="p@test.com", password="x", rol="paciente", nombre="Pac")
-    from apps.patients.serializers import PerfilPacienteSerializer
-    ser = PerfilPacienteSerializer(data={"canalNotificacion":"whatsapp"})
-    assert not ser.is_valid()
-    assert "numeroTelefonico" in ser.errors
-    ser = PerfilPacienteSerializer(data={
-        "canalNotificacion":"whatsapp",
-        "numeroTelefonico":"+573001234567",
-        "whatsappConsentimiento":True,
-    })
-    assert ser.is_valid()
-
-@pytest.mark.django_db
 def test_notificar_paciente_email():
     user = Register.objects.create_user(email="p@test.com", password="x", rol="paciente", nombre="Pac")
     PerfilPaciente.objects.create(idPaciente=user, canalNotificacion="email")

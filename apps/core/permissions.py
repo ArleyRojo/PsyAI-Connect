@@ -1,4 +1,3 @@
-import json
 
 from django.http import JsonResponse
 from rest_framework.permissions import BasePermission
@@ -19,17 +18,6 @@ def require_role(request, *roles):
             {"success": False, "message": "No autorizado"}, status=403
         )
     return user, None
-
-
-def parse_json_body(request):
-    if not request.body:
-        return {}, None
-    try:
-        return json.loads(request.body), None
-    except (json.JSONDecodeError, ValueError, TypeError):
-        return None, JsonResponse(
-            {"success": False, "message": "JSON inválido"}, status=400
-        )
 
 
 def _normalize_rol(rol):

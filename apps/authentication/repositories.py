@@ -234,14 +234,3 @@ class SecurityRepository:
             }
         )
         return device
-
-    def delete_totp_device(self, user_id):
-        from apps.authentication.models import TOTPDevice
-        TOTPDevice.objects.filter(idUsuario_id=user_id).delete()
-
-    def get_totp_device_by_user(self, user_id):
-        from apps.authentication.models import TOTPDevice
-        try:
-            return TOTPDevice.objects.get(idUsuario_id=user_id)
-        except TOTPDevice.DoesNotExist:
-            return None

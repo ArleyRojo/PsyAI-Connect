@@ -288,28 +288,6 @@ class MensajesRepository:
             leido=False,
         ).update(leido=True)
 
-    def contar_no_leidos(self, id_receptor, id_emisor):
-        return MensajesChat.objects.filter(
-            idReceptor_id=id_receptor,
-            idEmisor_id=id_emisor,
-            leido=False,
-        ).count()
-
-    def get_ultimo_mensaje(self, id_usuario, id_otro):
-        qs = MensajesChat.objects.filter(
-            Q(idEmisor_id=id_usuario, idReceptor_id=id_otro)
-            | Q(idEmisor_id=id_otro, idReceptor_id=id_usuario)
-        ).order_by("-fecha")
-        msg = qs.first()
-        if msg:
-            return {
-                "idMensaje": msg.idMensaje,
-                "idEmisor": msg.idEmisor_id,
-                "mensaje": msg.mensaje,
-                "fecha": msg.fecha,
-            }
-        return None
-
     def get_ultimos_mensajes_batch(self, id_usuario, id_otro_ids):
         if not id_otro_ids:
             return {}

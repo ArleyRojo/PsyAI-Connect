@@ -1,7 +1,6 @@
 import logging
-from django.middleware.csrf import CsrfViewMiddleware, get_token
+from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -22,9 +21,6 @@ class _CSRFCheck:
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         return self._middleware.process_view(request, view_func, view_args, view_kwargs)
-
-    def _reject(self, request, reason):
-        raise PermissionDenied(f"CSRF validation failed: {reason}")
 
 
 class CsrfEnforcedSessionAuthentication(SessionAuthentication):
@@ -81,20 +77,3 @@ class CsrfEnforcedSessionAuthentication(SessionAuthentication):
         self.enforce_csrf(request)
 
         return (user, None)
-
-
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-    """
-    Autenticación de sesión SIN verificación CSRF.
-    Útil para endpoints públicos que usan sesión (ej. login, registro, recuperación).
-    """
-    def enforce_csrf(self, request):
-        return  # No hace nada - exento de CSRF
-
-
-def get_csrf_token(request):
-    """
-    Obtiene o genera el token CSRF para la sesión actual.
-    Útil para exponer el token vía API al frontend.
-    """
-    return get_token(request)

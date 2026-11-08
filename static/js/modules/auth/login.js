@@ -59,16 +59,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const submitBtn = form.querySelector('button[type="submit"]');
-    const submitText = submitBtn ? submitBtn.querySelector('.btn-text') : null;
-    const originalBtnText = submitText ? submitText.textContent : 'Entrar';
+    let loginOverlay = null;
+    let loginOverlayTimer = null;
 
     function setLoading(loading) {
-        if (!submitBtn || !submitText) return;
+        if (!submitBtn) return;
         submitBtn.disabled = loading;
-        if (loading) {
-            submitText.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Iniciando sesión...';
-        } else {
-            submitText.textContent = originalBtnText;
+        submitBtn.setAttribute('aria-busy', String(loading));
+    }
+
+    function ocultarCargaLogin() {
+        if (loginOverlayTimer) {
+            clearTimeout(loginOverlayTimer);
+            loginOverlayTimer = null;
+        }
+        if (loginOverlay) {
+            loginOverlay.remove();
+            loginOverlay = null;
+            document.querySelector('style[data-logout-overlay]')?.remove();
         }
     }
 
@@ -126,10 +134,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        isSubmitting = true;
+        setLoading(true);
+        let loginExitoso = false;
         try {
-            setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            isSubmitting = true;
+            if (typeof mostrarOverlayCierreSesion === 'function') {
+                loginOverlay = mostrarOverlayCierreSesion('Iniciando sesión...');
+                loginOverlayTimer = setTimeout(ocultarCargaLogin, 2000);
+            }
             const res = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -140,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await res.json();
 
             if (data.success) {
+                loginExitoso = true;
                 if (recordarLogin && recordarLogin.checked) {
                     localStorage.setItem('savedEmail', email);
                     localStorage.setItem('savedPassword', password);
@@ -153,9 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const nombre = data.usuario.nombre || email;
                 const saludo = nombre.endsWith('a') ? 'Bienvenida, ' : 'Bienvenid@, ';
                 bloquearAtrasDuranteTransicion();
-                if (typeof mostrarOverlayCierreSesion === 'function') {
-                    mostrarOverlayCierreSesion('Iniciando sesión...');
-                } else {
+                if (!loginOverlay) {
                     mostrarToast(saludo + nombre + '!', 'success');
                 }
                 setTimeout(() => redirigir(data.usuario.rol || rol), 1800);
@@ -173,8 +184,11 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.removeItem('sessionUser');
             mostrarToast('No fue posible iniciar sesion. Verifica que el servidor este disponible e intenta nuevamente.', 'danger');
         } finally {
-            isSubmitting = false;
-            setLoading(false);
+            if (!loginExitoso) {
+                ocultarCargaLogin();
+                isSubmitting = false;
+                setLoading(false);
+            }
         }
     });
 

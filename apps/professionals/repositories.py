@@ -101,23 +101,6 @@ class ProfessionalRepository:
             })
         return result
 
-    def list_verified_professionals(self):
-        """Lista solo profesionales verificados para el chat."""
-        professionals = Register.objects.filter(
-            rol="profesional",
-            perfil_profesional__verificado=True
-        ).order_by("nombre")
-        return [
-            {
-                "idUsuario": u.idUsuario,
-                "nombre": u.nombre,
-                "fotoPerfil": u.fotoPerfil,
-                "especialidad": u.perfil_profesional.especialidad if hasattr(u, 'perfil_profesional') and u.perfil_profesional else None,
-                "fotoPerfil": u.fotoPerfil,
-            }
-            for u in professionals
-        ]
-
     def save_diagnosis(self, professional_id, data):
         from django.db import transaction
         with transaction.atomic():

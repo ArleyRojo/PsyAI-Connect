@@ -113,15 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         initializeTheme();
     */
-        
-        // Escuchar cambios de preferencia del sistema
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (!localStorage.getItem('theme')) {
-                initializeTheme();
-            }
-        });
-    }
-    
+
     /* ─────────────────────────────────────────────────────── */
     /* 7. Counter Animation on Scroll                         */
     /* ─────────────────────────────────────────────────────── */

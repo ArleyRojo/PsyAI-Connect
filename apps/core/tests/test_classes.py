@@ -1,40 +1,11 @@
 import pytest
-from django.test import RequestFactory, override_settings
+from django.test import RequestFactory
 from django.urls import reverse
-from unittest.mock import patch, MagicMock
 
 from apps.core.services import CoreService, core_service, subscribe_newsletter
-from apps.core.notifier import NotificationService, notification_service
-from apps.core.utils import (
-    DateTimeHelper,
-    FileValidator,
-    AuthHelper,
-    fmt_bogota,
-    fmt_bogota_short,
-    fmt_bogota_time,
-    to_bogota,
-    parse_bogota_datetime,
-    validate_file_upload,
-    get_current_user,
-    require_auth,
-    require_role,
-)
-from apps.core.views import (
-    health_check,
-    client_errors,
-    serve_pages,
-    notificacion_prueba,
-    config_pago,
-    theme_preference,
-    newsletter_subscribe,
-    HealthCheckView,
-    ClientErrorsView,
-    ServePagesView,
-    NotificacionPruebaView,
-    ConfigPagoView,
-    ThemePreferenceView,
-    NewsletterSubscribeView,
-)
+from apps.core.notifier import notification_service
+from apps.core.utils import DateTimeHelper, FileValidator, AuthHelper, fmt_bogota, fmt_bogota_short, fmt_bogota_time, to_bogota, parse_bogota_datetime, get_current_user, require_auth, require_role
+from apps.core.views import health_check, HealthCheckView, ClientErrorsView, ServePagesView, ConfigPagoView, ThemePreferenceView, NewsletterSubscribeView
 
 
 # ── DateTimeHelper ───────────────────────────────────────────────────────────
@@ -272,7 +243,6 @@ class TestCoreViews:
         assert issubclass(HealthCheckView, APIView)
         assert issubclass(ClientErrorsView, APIView)
         assert issubclass(ServePagesView, View)
-        assert issubclass(NotificacionPruebaView, APIView)
         assert issubclass(ConfigPagoView, APIView)
         assert issubclass(ThemePreferenceView, APIView)
         assert issubclass(NewsletterSubscribeView, APIView)

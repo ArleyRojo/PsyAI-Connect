@@ -42,9 +42,6 @@ class AdminRepository:
         except Exception:
             pass
 
-    def registrar_evento_seguridad(self, accion, detalle, administrador="Sistema"):
-        self.registrar_log("seguridad", accion, detalle, administrador=administrador)
-
     def ensure_report_columns(self):
         pass
 

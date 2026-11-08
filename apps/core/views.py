@@ -15,7 +15,7 @@ from django.http import (
 from django.shortcuts import render
 from django.utils._os import safe_join
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
 
@@ -325,18 +325,6 @@ def _notificacion_prueba(request):
             return JsonResponse({"success": False, "ok": False, "message": "No se pudo enviar el correo", "mensaje": "No se pudo enviar el correo"}, status=500)
 
     return JsonResponse({"error": "Canal no soportado"}, status=400)
-
-
-@method_decorator(csrf_protect, name="dispatch")
-class NotificacionPruebaView(APIView):
-    authentication_classes = []
-    permission_classes = []
-
-    def post(self, request):
-        return _notificacion_prueba(request)
-
-    def get(self, request):
-        return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
 def notificacion_prueba(request):

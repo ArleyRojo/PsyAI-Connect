@@ -2,89 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.authentication.services import AuthService, ValidationError, Validator
 
 
-# ── Validator unit tests ─────────────────────────────────────────────────────
-
-
-class TestValidatorRequired:
-    def test_raises_on_none(self):
-        with pytest.raises(ValidationError, match="requerido"):
-            Validator.required(None, "campo")
-
-    def test_raises_on_empty_string(self):
-        with pytest.raises(ValidationError, match="requerido"):
-            Validator.required("", "campo")
-
-    def test_returns_value(self):
-        assert Validator.required("hola", "campo") == "hola"
-
-
-class TestValidatorEmail:
-    def test_valid_email(self):
-        assert Validator.email("test@example.com") == "test@example.com"
-
-    def test_strips_and_lowercases(self):
-        assert Validator.email("User@Example.Com") == "user@example.com"
-
-    def test_invalid_format(self):
-        with pytest.raises(ValidationError, match="inválido"):
-            Validator.email("not-an-email")
-
-    def test_missing_at(self):
-        with pytest.raises(ValidationError):
-            Validator.email("testexample.com")
-
-
-class TestValidatorPassword:
-    def test_valid_password(self):
-        assert Validator.password("Abc123") == "Abc123"
-
-    def test_too_short(self):
-        with pytest.raises(ValidationError, match="6 caracteres"):
-            Validator.password("Ab1")
-
-    def test_no_uppercase(self):
-        with pytest.raises(ValidationError, match="mayúscula"):
-            Validator.password("abc123")
-
-    def test_no_number(self):
-        with pytest.raises(ValidationError, match="número"):
-            Validator.password("Abcdef")
-
-    def test_empty(self):
-        with pytest.raises(ValidationError, match="requerida"):
-            Validator.password("")
-
-
-class TestValidatorRole:
-    def test_valid_role(self):
-        assert Validator.role("paciente") == "paciente"
-
-    def test_invalid_role(self):
-        with pytest.raises(ValidationError, match="inválido"):
-            Validator.role("hacker")
-
-
-class TestValidatorPositiveInteger:
-    def test_valid(self):
-        assert Validator.positive_integer(5, "count") == 5
-
-    def test_string_number(self):
-        assert Validator.positive_integer("10", "count") == 10
-
-    def test_zero(self):
-        with pytest.raises(ValidationError, match="positivo"):
-            Validator.positive_integer(0, "count")
-
-    def test_negative(self):
-        with pytest.raises(ValidationError, match="positivo"):
-            Validator.positive_integer(-1, "count")
-
-    def test_not_a_number(self):
-        with pytest.raises(ValidationError, match="entero"):
-            Validator.positive_integer("abc", "count")
 
 
 # ── AuthService.register_user tests ──────────────────────────────────────────

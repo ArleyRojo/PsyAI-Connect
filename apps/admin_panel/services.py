@@ -28,12 +28,6 @@ class AdminService:
     def __init__(self):
         self.repo = AdminRepository()
 
-    def init_db(self):
-        try:
-            self.repo.ensure_report_columns()
-        except Exception as exc:
-            logger.error("Error initializing DB: %s", exc)
-
     def create_report_columns(self):
         self.repo.ensure_report_columns()
         return {"success": True, "message": "Columnas creadas correctamente"}, 200
@@ -205,22 +199,6 @@ class AdminService:
             "notificaciones": actividades[:100],
             "stats": stats,
         }, 200
-
-    def _notification_stats(self, actividades):
-        total = len(actividades)
-        enviadas = sum(1 for item in actividades if item.get("estado") != "pendiente")
-        programadas = sum(1 for item in actividades if item.get("estado") == "pendiente")
-        alcanzados = sum(
-            1 for item in actividades
-            if item.get("estado") != "pendiente"
-            and (item.get("destinatario") or item.get("email_individual") or item.get("mensaje"))
-        )
-        return {
-            "enviadas": enviadas,
-            "programadas": programadas,
-            "tasa": f"{round((enviadas / total) * 100)}%" if total else "0%",
-            "alcanzados": alcanzados,
-        }
 
     def create_notification(self, data):
         try:

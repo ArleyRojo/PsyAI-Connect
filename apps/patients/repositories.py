@@ -364,17 +364,6 @@ class PatientRepository:
             .values("idSolicitud", "tipo", "descripcion", "estado", "fecha", "fechaLimite", "fechaRespuesta", "respuesta", "prorrogada")
         )
 
-    def crear_solicitud_derechos(self, user_id, tipo, descripcion=""):
-        """Crea una nueva solicitud de derechos con fecha límite calculada."""
-        from apps.patients.models import SolicitudDerechos, calcular_fecha_limite_solicitud
-        fecha_limite = calcular_fecha_limite_solicitud(tipo)
-        return SolicitudDerechos.objects.create(
-            idUsuario_id=user_id,
-            tipo=tipo,
-            descripcion=descripcion,
-            fechaLimite=fecha_limite,
-        )
-
     def exportar_datos_usuario(self, user_id):
         """Exporta todos los datos del usuario para derecho de acceso."""
         from apps.authentication.models import Register

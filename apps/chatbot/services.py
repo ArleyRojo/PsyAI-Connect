@@ -41,20 +41,6 @@ CONFIG_CACHE_TTL_SECONDS = 30
 # Session reutilizada para keep-alive (evita handshake TLS en cada request)
 _GEMINI_SESSION: requests.Session | None = None
 
-def _get_gemini_session() -> requests.Session:
-    global _GEMINI_SESSION
-    if _GEMINI_SESSION is None:
-        _GEMINI_SESSION = requests.Session()
-        # Adapter con pool de conexiones para reutilización
-        adapter = requests.adapters.HTTPAdapter(
-            pool_connections=2,
-            pool_maxsize=4,
-            max_retries=0,  # manejamos reintentos manualmente
-        )
-        _GEMINI_SESSION.mount("https://", adapter)
-        _GEMINI_SESSION.mount("http://", adapter)
-    return _GEMINI_SESSION
-
 # Constantes por defecto para configuración de crisis
 DEFAULT_CRISIS_PHONE = "106"
 DEFAULT_CRISIS_RESPONSE = (
