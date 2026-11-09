@@ -2,6 +2,7 @@ import json
 import pytest
 from unittest.mock import patch, MagicMock
 from django.core import mail
+from django.db import connection
 from django.utils import timezone
 from datetime import timedelta
 
@@ -549,6 +550,10 @@ class TestPrediagnosticoEmailStillWorks:
             patch.object(svc, "_call_gemini_json", return_value=gemini_response),
             patch.object(svc.chat_repo, "get_professional_emails", return_value=[("prof_prediag@test.com", "Prof Prediag")]),
             patch.object(svc.appointment_repo, "create_notification"),
+            # El correo se envía en un hilo aparte (commit 34ed40c); en la prueba se ejecuta en el mismo
+            # hilo y sin cerrar la conexión de la base de datos de la prueba.
+            patch("apps.chatbot.services.threading", MagicMock(Thread=_HiloSincrono)),
+            patch.object(connection, "close"),
         ):
             result, status = svc.generar_prediagnostico(patient_id=patient.pk)
         
