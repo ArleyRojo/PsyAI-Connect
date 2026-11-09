@@ -24,7 +24,7 @@
 
 ---
 
-## Qué es
+## 💡 Qué es
 
 PsyAI Connect digitaliza la operación de un consultorio o red de psicólogos. Reúne en una sola aplicación web tres espacios de trabajo, cada uno con su propio rol y permisos:
 
@@ -34,7 +34,7 @@ PsyAI Connect digitaliza la operación de un consultorio o red de psicólogos. R
 | **Profesional** | Gestionar disponibilidad y citas, atender pacientes asignados, llevar diagnósticos e historia clínica, compartir documentos, crear reportes y facturar. |
 | **Administración** | Gestionar usuarios y roles, verificar profesionales, revisar logs y métricas en vivo, y configurar el chatbot. |
 
-## Capturas
+## 🖼️ Capturas
 
 <p align="center">
   <img src="docs/screenshots/01-inicio.webp" alt="Página de inicio de PsyAI Connect" width="860">
@@ -56,37 +56,37 @@ PsyAI Connect digitaliza la operación de un consultorio o red de psicólogos. R
 
 <sub>Capturas del tema oscuro con datos de demostración ficticios. La interfaz también tiene tema claro.</sub>
 
-## Funcionalidades
+## ✨ Funcionalidades
 
-**Agenda clínica**
+### 📅 Agenda clínica
 - Disponibilidad del profesional, citas con estados (Pendiente, Confirmada, Completada, Cancelada) y recordatorios.
 - Control de conflictos: no puede haber dos citas activas del mismo profesional a la misma fecha y hora.
 
-**Seguimiento del paciente**
+### 📈 Seguimiento del paciente
 - Evolución diaria, anamnesis, diagnósticos y reportes.
 - Documentos clínicos con visibilidad y autorización controladas por el paciente.
 
-**Chatbot con IA (Google Gemini)**
+### 🤖 Chatbot con IA (Google Gemini)
 - Apoyo conversacional con prompt y configuración editables desde el panel de administración.
 - Detección de riesgo emocional por niveles (alto, medio, bajo) con términos configurables y aviso a los profesionales.
 - Rotación de varias API keys, límite diario de mensajes y respuesta local de respaldo si Gemini no está disponible.
 - Prediagnóstico generado a partir de la conversación, visible para el profesional.
 
-**Comunicación**
+### 💬 Comunicación
 - Chat paciente-profesional en tiempo real (SSE).
 - Correos transaccionales por SMTP y notificaciones por WhatsApp (Twilio), esta última opcional.
 
-**Acceso y seguridad**
+### 🔐 Acceso y seguridad
 - Registro, inicio de sesión, recuperación de contraseña y verificación de correo.
 - Inicio de sesión con Google (allauth).
 - Contraseñas con Argon2id, CSRF, límites de peticiones y permisos por rol.
 
-**Operación**
+### 🧾 Operación
 - Facturación manual: el profesional confirma el pago con evidencia, sin pasarela automática.
 - Panel de administración con métricas del sistema, auditoría de accesos y registros de actividad.
 - Interfaz adaptable a móvil, tablet y escritorio, con tema claro y oscuro.
 
-## Tecnología y arquitectura
+## 🧱 Tecnología y arquitectura
 
 | Área | Tecnologías |
 |---|---|
@@ -111,7 +111,7 @@ URL → Vista → Servicio → Repositorio → PostgreSQL
 
 Los permisos reutilizables están en `apps/core/permissions.py`. Los endpoints viven bajo `/api/`.
 
-### Aplicaciones
+### 🧩 Aplicaciones
 
 | App | Función |
 |---|---|
@@ -125,14 +125,14 @@ Los permisos reutilizables están en `apps/core/permissions.py`. Los endpoints v
 | `admin_panel` | Usuarios, roles, logs, métricas y telemetría. |
 | `core` | Permisos, middlewares, notificaciones y utilidades comunes. |
 
-## Inicio rápido
+## 🚀 Inicio rápido
 
-### Requisitos
+### 📋 Requisitos
 
 - **Docker y Docker Compose** (recomendado), o bien Python 3.10+ y PostgreSQL 16+.
 - Una API key de [Google AI Studio](https://aistudio.google.com/) para el chatbot. Sin ella, el chatbot responde con el modo de respaldo local.
 
-### Con Docker
+### 🐳 Con Docker
 
 ```bash
 git clone https://github.com/ArleyRojo/PsyAI-Connect.git
@@ -158,7 +158,7 @@ docker compose -f install/docker-compose.yml exec app bash   # abrir una termina
 docker compose -f install/docker-compose.yml down            # detener
 ```
 
-### Instalación manual
+### 💻 Instalación manual
 
 ```bash
 git clone https://github.com/ArleyRojo/PsyAI-Connect.git
@@ -179,14 +179,14 @@ También puedes ejecutar `python install/install.py` para crear el entorno virtu
 
 En desarrollo, si no defines SMTP, los correos se imprimen en la consola.
 
-### Primeros pasos
+### ✅ Primeros pasos
 
 1. Entra con el administrador.
 2. Desde el panel de administración crea usuarios y asígnales rol de profesional o paciente.
 3. Verifica al profesional y define su disponibilidad.
 4. Entra como paciente y agenda una cita.
 
-## Configuración
+## ⚙️ Configuración
 
 Toda la configuración se hace con variables de entorno en `.env`. Las más importantes:
 
@@ -205,7 +205,7 @@ Toda la configuración se hace con variables de entorno en `.env`. Las más impo
 
 La lista completa y comentada está en [`.env.example`](.env.example).
 
-### Producción
+### 🌐 Producción
 
 ```bash
 docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml up -d --build
@@ -213,7 +213,7 @@ docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml 
 
 La configuración de producción usa Waitress, exige `SECRET_KEY`, redirige a HTTPS, activa HSTS y marca las cookies como seguras. Consulta [docs/deployment.md](docs/deployment.md) para el checklist completo.
 
-## Pruebas
+## 🧪 Pruebas
 
 ```bash
 # Linux/macOS
@@ -232,7 +232,7 @@ docker compose -f install/docker-compose.yml exec app python -m pytest apps/ -q
 
 Las pruebas usan PostgreSQL. Los tests marcados como `integration` requieren que la base de datos esté disponible; para omitirlos usa `pytest -m "not integration"`.
 
-## Documentación
+## 📚 Documentación
 
 La documentación técnica está en [`docs/`](docs/README.md), organizada por tema:
 
@@ -266,7 +266,7 @@ La documentación técnica está en [`docs/`](docs/README.md), organizada por te
 
 </details>
 
-## Estructura del proyecto
+## 🗂️ Estructura del proyecto
 
 ```text
 PsyAI-Connect/
@@ -283,14 +283,14 @@ PsyAI-Connect/
 └── .env.example
 ```
 
-## Contribuir
+## 🤝 Contribuir
 
 1. Crea un fork y una rama para tu cambio: `git checkout -b feature/mi-cambio`.
 2. Mantén el patrón de capas: la lógica de negocio va en `services.py`, el acceso a datos en `repositories.py`.
 3. Ejecuta las pruebas pertinentes antes de enviar el cambio.
 4. Abre un pull request con un resumen de lo que cambió y por qué.
 
-## Licencia
+## 📄 Licencia
 
 Uso educativo e interno. Consulta el repositorio para más detalles.
 
