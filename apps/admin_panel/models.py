@@ -89,3 +89,32 @@ class Logs(models.Model):
             "usuario_afectado": self.usuario_afectado,
             "origen": self.origen or "admin",
         }
+
+
+class ConfiguracionSeguridad(models.Model):
+    """Ajustes de seguridad del sistema (una sola fila). HU-13: cierre por inactividad."""
+
+    MINUTOS_MIN = 5
+    MINUTOS_MAX = 120
+    MINUTOS_DEFECTO = 15
+
+    minutosInactividad = models.PositiveSmallIntegerField(default=MINUTOS_DEFECTO)
+    actualizadoPor = models.CharField(max_length=120, null=True, blank=True)
+    fechaActualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "ConfiguracionSeguridad"
+
+    @classmethod
+    def obtener(cls):
+        config, _ = cls.objects.get_or_create(pk=1)
+        return config
+
+    def to_dict(self):
+        return {
+            "minutosInactividad": self.minutosInactividad,
+            "minutosMin": self.MINUTOS_MIN,
+            "minutosMax": self.MINUTOS_MAX,
+            "actualizadoPor": self.actualizadoPor,
+            "fechaActualizacion": self.fechaActualizacion.isoformat() if self.fechaActualizacion else None,
+        }

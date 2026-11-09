@@ -67,6 +67,16 @@ urlpatterns = [
         name="admin_online",
     ),
     path(
+        "admin/seguridad",
+        views.AdminSeguridadAPIView.as_view(),
+        name="admin_seguridad",
+    ),
+    path(
+        "sesion/inactividad",
+        views.SesionInactividadAPIView.as_view(),
+        name="sesion_inactividad",
+    ),
+    path(
         "admin/chatbot-historial",
         views.AdminChatbotHistorialAPIView.as_view(),
         name="admin_chatbot_historial",

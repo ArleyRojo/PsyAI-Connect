@@ -374,3 +374,32 @@ class AdminChatbotPalabrasAPIView(APIView):
         chatbot_config_service = ChatbotConfigService()
         payload, status_code = chatbot_config_service.get_historial_palabras_riesgo()
         return Response(payload, status=status_code)
+
+
+# ── HU-13: cierre automático de sesión por inactividad ──────────────────────
+class SesionInactividadAPIView(APIView):
+    """GET /api/sesion/inactividad — tiempo de inactividad para el temporizador del navegador.
+    Como cualquier request, también cuenta como actividad para el servidor."""
+    permission_classes = [IsAuthenticatedDRF]
+
+    def get(self, request):
+        from apps.admin_panel import seguridad
+        payload, status_code = seguridad.info_para_usuario(getattr(request, "user_role", None))
+        return Response(payload, status=status_code)
+
+
+class AdminSeguridadAPIView(APIView):
+    """GET/PUT /api/admin/seguridad — el administrador consulta y cambia los minutos."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def get(self, request):
+        from apps.admin_panel import seguridad
+        payload, status_code = seguridad.obtener_config()
+        return Response(payload, status=status_code)
+
+    def put(self, request):
+        from apps.admin_panel import seguridad
+        payload, status_code = seguridad.actualizar_config(
+            request.data, administrador=getattr(request, "user_name", None) or "Admin"
+        )
+        return Response(payload, status=status_code)
