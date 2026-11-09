@@ -16,6 +16,7 @@
             { href: 'aside-patient/mensajes.html', icon: 'fas fa-comments', label: 'Mensajes' },
             { href: 'aside-patient/evolution.html', icon: 'fas fa-chart-area', label: 'Evolucion' },
             { href: 'aside-patient/historia_clinica_paciente.html', icon: 'fas fa-file-medical', label: 'Documentos' },
+            { href: 'aside-patient/consejos.html', icon: 'fas fa-lightbulb', label: 'Consejos' },
             { href: 'aside-patient/my.profile.html', icon: 'fas fa-user-circle', label: 'Perfil' }
         ];
 
