@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 
 from django.db import transaction
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
 from django.utils import timezone
 
 from apps.scheduling.models import CalificacionCita, Citas, Disponibilidad, Notificaciones
@@ -113,7 +113,10 @@ class AppointmentRepository:
         if pending_only:
             qs = qs.filter(estado="Pendiente")
         else:
-            qs = qs.exclude(estado="Cancelada").filter(fecha__gte=timezone.localdate())
+            # Próximas citas + las Confirmadas que ya pasaron y siguen sin completar
+            qs = qs.exclude(estado="Cancelada").filter(
+                Q(fecha__gte=timezone.localdate()) | Q(estado="Confirmada")
+            )
 
         qs = qs.order_by("fecha", "hora")[offset : offset + limit]
 

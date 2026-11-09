@@ -144,6 +144,17 @@ class TestGetProfessionalAppointments:
         page1 = repo.get_professional_appointments(profesional.idUsuario, page=1, limit=2)
         assert len(page1) == 2
 
+    def test_incluye_confirmadas_pasadas_sin_completar(self, repo, paciente, profesional):
+        ayer = date.today() - timedelta(days=1)
+        for hora, estado in ((time(8, 0), "Confirmada"), (time(9, 0), "Completada"), (time(10, 0), "Pendiente")):
+            Citas.objects.create(
+                idPaciente=paciente, idProfesional=profesional, fecha=ayer, hora=hora,
+                tipoCita="Virtual", motivo=estado, estado=estado,
+            )
+        result = repo.get_professional_appointments(profesional.idUsuario)
+        pasadas = [c for c in result if c["fecha"] == ayer]
+        assert [c["estado"] for c in pasadas] == ["Confirmada"]
+
 
 @pytest.mark.django_db
 class TestGetNextPatientAppointment:

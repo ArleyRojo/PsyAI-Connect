@@ -255,8 +255,20 @@ async function cargarCitasProfesional() {
             let acciones = [];
             if (c.estado === 'Cancelada') {
                 estadoBadge = `<span class="badge bg-danger">Cancelada</span>`;
+            } else if (c.estado === 'Completada') {
+                estadoBadge = `<span class="badge bg-primary">Completada</span>`;
+                acciones.push(`<a href="facturacion.html?paciente=${Number.isSafeInteger(pacienteId) ? pacienteId : ''}" class="btn btn-outline-primary btn-sm flex-shrink-0" title="Facturar" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                    <i class="fas fa-file-invoice-dollar me-1"></i>Facturar
+                </a>`);
             } else if (c.estado === 'Confirmada') {
                 estadoBadge = `<span class="badge bg-success">Confirmada</span>`;
+                // Desde la hora de la cita se puede marcar como completada (así el paciente puede calificarla)
+                const fechaCita = fechaHoraCita(c);
+                if (fechaCita && fechaCita <= new Date()) {
+                    acciones.push(`<button class="btn btn-primary btn-sm flex-shrink-0" onclick="completarCita(${citaId})" title="Marcar la cita como completada" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
+                        <i class="fas fa-check-double me-1"></i>Completar
+                    </button>`);
+                }
                 // Facturar solo si confirmada
                 acciones.push(`<a href="facturacion.html?paciente=${Number.isSafeInteger(pacienteId) ? pacienteId : ''}" class="btn btn-outline-primary btn-sm flex-shrink-0" title="Facturar" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
                     <i class="fas fa-file-invoice-dollar me-1"></i>Facturar
@@ -330,8 +342,8 @@ function actualizarStats(citas) {
     const hoy = new Date();
     const proximas = citas.filter(c => {
         if (c.estado === 'Cancelada') return false;
-        const fechaCita = new Date(c.fecha + 'T' + (c.hora || '00:00'));
-        return fechaCita >= hoy;
+        const fechaCita = fechaHoraCita(c);
+        return fechaCita !== null && fechaCita >= hoy;
     }).length;
 
     const animarNumero = (el, valor) => {
@@ -384,6 +396,47 @@ function abrirModalCancelarCita(idCita) {
     document.getElementById('motivoCancelacionPro').value = '';
     document.getElementById('charCountMotivo').textContent = '0';
     _modalCancelarCitaPro.show();
+}
+
+// La API envía la fecha como dd/mm/aaaa y la hora como HH:MM:SS
+function fechaHoraCita(c) {
+    const partes = String(c.fecha || '').split('/');
+    if (partes.length !== 3) return null;
+    const [h, m] = String(c.hora || '00:00').split(':');
+    const fecha = new Date(Number(partes[2]), Number(partes[1]) - 1, Number(partes[0]), Number(h) || 0, Number(m) || 0);
+    return isNaN(fecha) ? null : fecha;
+}
+
+async function completarCita(idCita) {
+    if (window.Swal) {
+        const r = await Swal.fire({
+            title: '¿Marcar la cita como completada?',
+            text: 'El paciente podrá calificar la atención.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, completar',
+            cancelButtonText: 'Cancelar',
+        });
+        if (!r.isConfirmed) return;
+    }
+    try {
+        const res = await fetch(`/api/citas/${idCita}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ estado: 'Completada' })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
+            PsyAIAlerts.success('Cita completada', 'El paciente ya puede calificar la atención.');
+            cargarCitasProfesional();
+        } else {
+            PsyAIAlerts.error('Error', data.message || 'No se pudo completar la cita.');
+        }
+    } catch (err) {
+        console.error(err);
+        PsyAIAlerts.error('Error', 'Error de conexión.');
+    }
 }
 
 async function confirmarCita(idCita) {
