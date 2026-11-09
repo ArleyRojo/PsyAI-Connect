@@ -3100,7 +3100,16 @@ html.dark-mode .main-content::after {
         padding: 14px !important;
     }
 
-    html.dark-mode .mobile-bottom-nav {
+    /* Paciente: ocultar la barra inferior móvil también en modo oscuro */
+    html.dark-mode .mobile-bottom-nav[data-role="patient"] {
+        display: none !important;
+    }
+
+    html.dark-mode body.has-mobile-bottom-nav {
+        padding-bottom: 0 !important;
+    }
+
+    html.dark-mode .mobile-bottom-nav:not([data-role="patient"]) {
         display: flex !important;
     }
 }
