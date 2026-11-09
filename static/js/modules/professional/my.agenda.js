@@ -262,9 +262,9 @@ async function cargarCitasProfesional() {
                 </a>`);
             } else if (c.estado === 'Confirmada') {
                 estadoBadge = `<span class="badge bg-success">Confirmada</span>`;
-                // Desde la hora de la cita se puede marcar como completada (así el paciente puede calificarla)
-                const fechaCita = fechaHoraCita(c);
-                if (fechaCita && fechaCita <= new Date()) {
+                // Desde la hora de la cita se puede marcar como completada (así el paciente puede calificarla).
+                // El servidor decide con su hora (Colombia), no con el reloj del PC.
+                if (c.puedeCompletar) {
                     acciones.push(`<button class="btn btn-primary btn-sm flex-shrink-0" onclick="completarCita(${citaId})" title="Marcar la cita como completada" style="border-radius:8px;font-weight:600;font-size:0.75rem;padding:0.3rem 0.7rem;">
                         <i class="fas fa-check-double me-1"></i>Completar
                     </button>`);

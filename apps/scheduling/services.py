@@ -341,6 +341,9 @@ class AppointmentService:
             cita_dt = tz.make_aware(datetime.combine(cita_obj.fecha, cita_obj.hora))
             if cita_dt < tz.now():
                 return {"success": False, "message": "No se puede confirmar una cita pasada"}, 400
+        # Solo se completa desde la hora de inicio de la cita (hora del servidor)
+        if estado == "Completada" and cita_obj.estado == "Confirmada" and not self.repo.cita_ya_empezo(cita_obj):
+            return {"success": False, "message": "La cita se puede completar desde su hora de inicio"}, 400
 
         # Actualizar estado dentro de transacciÃ³n para crear factura atÃ³micamente
         from django.db import transaction

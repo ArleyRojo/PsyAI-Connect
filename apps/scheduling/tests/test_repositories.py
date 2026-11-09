@@ -155,6 +155,47 @@ class TestGetProfessionalAppointments:
         pasadas = [c for c in result if c["fecha"] == ayer]
         assert [c["estado"] for c in pasadas] == ["Confirmada"]
 
+    def test_puede_completar_lo_decide_la_hora_del_servidor(self, repo, paciente, profesional):
+        ayer = date.today() - timedelta(days=1)
+        manana = date.today() + timedelta(days=1)
+        for fecha in (ayer, manana):
+            Citas.objects.create(
+                idPaciente=paciente, idProfesional=profesional, fecha=fecha, hora=time(10, 0),
+                tipoCita="Virtual", motivo="Control", estado="Confirmada",
+            )
+        result = {c["fecha"]: c["puedeCompletar"] for c in repo.get_professional_appointments(profesional.idUsuario)}
+        assert result == {ayer: True, manana: False}
+
+
+@pytest.mark.django_db
+class TestCompletarCita:
+    def _cita(self, paciente, profesional, fecha):
+        return Citas.objects.create(
+            idPaciente=paciente, idProfesional=profesional, fecha=fecha, hora=time(10, 0),
+            tipoCita="Virtual", motivo="Control", estado="Confirmada",
+        )
+
+    def test_no_se_completa_antes_de_la_hora(self, paciente, profesional):
+        from apps.scheduling.services import AppointmentService
+        cita = self._cita(paciente, profesional, date.today() + timedelta(days=1))
+
+        payload, status = AppointmentService().update_status(cita.idCita, "Completada", profesional.idUsuario)
+
+        assert status == 400
+        assert "hora de inicio" in payload["message"]
+        cita.refresh_from_db()
+        assert cita.estado == "Confirmada"
+
+    def test_se_completa_despues_de_la_hora(self, paciente, profesional):
+        from apps.scheduling.services import AppointmentService
+        cita = self._cita(paciente, profesional, date.today() - timedelta(days=1))
+
+        _, status = AppointmentService().update_status(cita.idCita, "Completada", profesional.idUsuario)
+
+        assert status == 200
+        cita.refresh_from_db()
+        assert cita.estado == "Completada"
+
 
 @pytest.mark.django_db
 class TestGetNextPatientAppointment:

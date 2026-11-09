@@ -1,5 +1,5 @@
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.db import transaction
 from django.db.models import Avg, Count, Q
@@ -133,9 +133,18 @@ class AppointmentRepository:
                 "estado": cita.estado,
                 "creado_por_profesional": cita.creado_por_profesional,
                 "idPaciente": cita.idPaciente_id,
+                # Se decide con la hora del servidor (Colombia), no con el reloj del PC
+                "puedeCompletar": self.cita_ya_empezo(cita),
             }
             result.append(d)
         return result
+
+    @staticmethod
+    def cita_ya_empezo(cita):
+        """True si la cita está Confirmada y ya llegó su hora de inicio."""
+        if cita.estado != "Confirmada" or not cita.fecha or not cita.hora:
+            return False
+        return timezone.make_aware(datetime.combine(cita.fecha, cita.hora)) <= timezone.now()
 
     def get_taken_times_by_professional(self, professional_id, fecha):
         rows = Citas.objects.filter(
