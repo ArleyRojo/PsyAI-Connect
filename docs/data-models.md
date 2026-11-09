@@ -731,5 +731,4 @@ erDiagram
 - [`roles-and-permissions.md`](roles-and-permissions.md) — Qué modelos ve cada rol
 - [`frontend.md`](frontend.md) — Cómo se consumen estos modelos desde el frontend
 - [`chatbot-ai.md`](chatbot-ai.md) — Modelos específicos del chatbot
-- [`pagos-facturacion.md`](pagos-facturacion.md) — Modelos de facturación
 - [`security.md`](security.md) — Modelos de seguridad (`TOTPDevice`, `RecoveryTokens`, etc.)

@@ -107,6 +107,8 @@ Archivo: `config/settings/base.py`
 | `CommonPasswordValidator` | Rechaza contraseñas comunes |
 | `NumericPasswordValidator` | Rechaza contraseñas solo numéricas |
 
+> Estos validadores de Django están declarados en settings, pero los endpoints REST de registro y recuperación no llaman a `validate_password()`. El registro exige mínimo 6 caracteres, una mayúscula y un número; el cambio de contraseña también permite desde 6 caracteres.
+
 #### 2.6. Verificación de dos factores (TOTP / 2FA)
 
 Archivo: `apps/authentication/models.py` → `TOTPDevice`  
@@ -119,7 +121,7 @@ Archivo: `apps/authentication/views.py` → vistas REST
 | RFC 6238 / RFC 4226 | Compatible con Google Authenticator, Authy, etc. |
 | Servicios | `create_totp_device()`, `get_totp_provisioning_uri()`, `get_totp_qr_code_svg()`, `verify_totp_token()`, `confirm_totp_device()`, `disable_totp_device()`, `is_totp_enabled()`, `require_totp_for_role()`. |
 | Vistas REST | `TOTPSetupView`, `TOTPConfirmView`, `TOTPDisableView`, `TOTPStatusView`, `TOTPVerifyLoginView`. |
-| Obligatoriedad por rol | `require_totp_for_role(role)` retorna `True` para `admin` y `profesional`; `False` para `paciente`. |
+| Política por rol | `require_totp_for_role(role)` marca `admin` y `profesional`; el login solo pide el código si el usuario ya activó 2FA, no fuerza su configuración. |
 | Rate limiting TOTP login | `TOTPVerifyLoginView` limitado a 5/min por IP (`django-ratelimit`). |
 
 #### 2.7. Verificación de correo electrónico
@@ -197,7 +199,7 @@ Configurado en `REST_FRAMEWORK.DEFAULT_THROTTLE_CLASSES` y `DEFAULT_THROTTLE_RAT
 | `POST /api/register` | 3/min por IP | Cuentas falsas masivas |
 | `POST /api/forgot-password` | 3/min por IP | Enumeración de emails y spam |
 | `POST /api/reset-password` | 3/min por IP | Lo mismo que forgot-password |
-| `POST /api/auth/totp-verify-login` | 5/min por IP | Fuerza bruta de códigos TOTP de 6 dígitos |
+| `POST /api/totp/verify-login` | 5/min por IP | Fuerza bruta de códigos TOTP de 6 dígitos |
 
 Implementado con `@method_decorator(ratelimit(key='ip', rate='X/m', method='POST', block=True))`.
 
@@ -361,7 +363,7 @@ Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
 | PII / IA | Sanitización antes de Gemini (emails, teléfonos, documentos, tarjetas) | `apps/chatbot/services.py` |
 | Cabeceras HTTP | CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy | `security_headers.py`, `base.py`, `prod.py` |
 | — | — | — |
-| 2FA | TOTP RFC 6238, obligatorio para admin/profesional | `TOTPDevice`, `AuthService`, vistas REST |
+| 2FA | TOTP RFC 6238, opcional; el login pide código si el usuario lo activó | `TOTPDevice`, `AuthService`, vistas REST |
 | Email verificado | Token un uso, 24h, bloqueo profesional si no verificado | `EmailVerificationToken`, `VerifyEmailView` |
 | Estado de cuenta | Middleware verifica activo/estadoCuenta en cada request | `account_status.py` |
 | Auditoría | Registro de acciones con máscara de PII | `audit.py` |
@@ -381,7 +383,7 @@ Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
 3. Si credenciales válidas:
    ├── Verificar estadoCuenta == 'Activa' y activo == True
    ├── Si rol == profesional: verificar email_verificado == True (si no → 403)
-   ├── Si 2FA requerido para el rol: crear sesión temporal pending_2fa
+   ├── Si dispositivo TOTP confirmado: crear sesión temporal pending_2fa
    │   └── Usuario debe completar TOTPVerifyLoginView (5/min por IP)
    │
 4. Login exitoso:

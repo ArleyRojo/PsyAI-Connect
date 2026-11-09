@@ -294,7 +294,7 @@ Mensajería directa paciente–profesional: `idEmisor`, `idReceptor`, `mensaje`,
 
 ## 11. Variables de entorno relevantes
 
-Definidas en `.env` y documentadas en [`despliegue.md`](despliegue.md#8-variables-de-entorno-env):
+Definidas en `.env` y documentadas en [`deployment.md`](deployment.md#8-variables-de-entorno-env):
 
 - `GEMINI_API_KEY`, `GEMINI_API_KEYS`, `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`
 - `GEMINI_THINKING_LEVEL`, `GEMINI_REQUEST_TIMEOUT_CONNECT`, `GEMINI_REQUEST_TIMEOUT_READ`

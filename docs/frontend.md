@@ -319,8 +319,8 @@ Los portales de paciente y profesional comparten `alerts.js`, `logout.js` y `nom
 
 ## Ver también
 
-- [`API_DOCUMENTATION.md`](../API_DOCUMENTATION.md) — endpoints que consumen estos scripts
-- [`ARCHITECTURE.md`](../ARCHITECTURE.md) — arquitectura general
+- [`API_DOCUMENTATION.md`](api.md) — endpoints que consumen estos scripts
+- [`ARCHITECTURE.md`](architecture.md) — arquitectura general
 - [`data-models.md`](data-models.md) — modelos de datos
 - [`chatbot-ai.md`](chatbot-ai.md) — detalle de `chatbot.js`
 - [`security.md`](security.md) — CSRF, sesiones y CSP

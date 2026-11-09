@@ -41,8 +41,8 @@ Cada rol tiene su carpeta dedicada bajo `templates/`:
 | Rol | Carpeta | Páginas principales |
 |-----|---------|---------------------|
 | **paciente** | `templates/patient/` | `patient.dashboard.html`, `aside-patient/chatbot.html`, `aside-patient/agenda-quotes.html`, `aside-patient/evolution.html`, `aside-patient/historia_clinica_paciente.html`, `aside-patient/facturas.html`, `aside-patient/mensajes.html`, `aside-patient/my.profile.html` |
-| **profesional** | `templates/professional/` | `professional.dashboard.html`, `aside-professional/my.agenda.html`, `aside-professional/patients.html`, `aside-professional/patients.evolution.html`, `aside-professional/historia_clinica_pro.html`, `aside-professional/facturacion.html`, `aside-professional/reports.html`, `aside-professional/mensajes.html`, `aside-professional/my.profile2.html` |
-| **admin** | `templates/admin/` | `admin.dashboard.html`, `aside-admin/users.html`, `aside-admin/roles.html`, `aside-admin/logs.html`, `aside-admin/notifications.html`, `aside-admin/rendimiento.html`, `aside-admin/chatbot.config.html`, `aside-admin/facturacion.html` |
+| **profesional** | `templates/professional/` | `professional.dashboard.html`, `aside-professional/my.agenda.html`, `aside-professional/patients.html`, `aside-professional/historia_clinica_pro.html`, `aside-professional/facturacion.html`, `aside-professional/reports.html`, `aside-professional/mensajes.html`, `aside-professional/my.profile2.html` |
+| **admin** | `templates/admin/` | `admin.dashboard.html`, `aside-admin/users.html`, `aside-admin/roles.html`, `aside-admin/logs.html`, `aside-admin/notifications.html`, `aside-admin/chatbot.config.html`, `aside-admin/facturacion.html` |
 
 > **Compartidos:** `templates/auth/` (login, registro, recuperación, 2FA), `templates/base/` (layout base, partials `head.html`, `scripts.html`), `templates/legal/` (términos, privacidad, cookies), `templates/emails/` (plantillas de correo), `templates/socialaccount/` (login/registro con Google).
 
@@ -150,17 +150,17 @@ Todas las vistas de Django REST Framework usan clases de permiso que heredan de 
 
 | Paso | Momento | Cómo se asigna el rol |
 |------|---------|----------------------|
-| Registro | `POST /api/register` | El cliente envía `rol` en el body. Default: `paciente`. Valores permitidos: `paciente`, `profesional`, `admin`. |
+| Registro | `POST /api/register` | El cliente envía `rol` en el body. Default: `paciente`. Valores permitidos: `paciente` y `profesional`; `admin` no se admite en el registro público. |
 | Login | `POST /api/login` | El cliente envía `rol` deseado. El backend verifica que `usuario["rol"] == rol` solicitado; de lo contrario rechaza. |
 | Superuser | `createsuperuser` / `Register.objects.create_superuser` | Fuerza `rol='admin'`; si se intenta otro rol lanza `ValueError`. |
 | Social login (Google) | `SocialAccountAdapter` | Fuerza `rol='paciente'` independientemente de lo que envíe el proveedor. |
 | Cambio por admin | `PATCH /api/admin/usuarios/<id>` | Solo `admin` puede modificar el rol de cualquier usuario (`apps/admin_panel/views.py`). |
-| 2FA obligatorio | `AuthService.require_totp_for_role(rol)` | Retorna `True` para `admin` y `profesional`; `False` para `paciente`. |
+| Política de 2FA por rol | `AuthService.require_totp_for_role(rol)` | El helper marca `admin` y `profesional`, pero el login solo solicita el código si el usuario ya activó 2FA. |
 
 ### Restricciones por rol en registro
 
 - **Email verificado:** obligatorio para `profesional`, opcional para `paciente` (`EmailVerificationToken`).
-- **2FA (TOTP):** opcional pero requerido para `admin` y `profesional` según `require_totp_for_role`.
+- **2FA (TOTP):** el usuario puede activarlo; el login solicita el código si tiene un dispositivo confirmado. Aunque el helper marca `admin` y `profesional`, el login no obliga a configurar 2FA.
 - **Perfil:** `PerfilPaciente` o `PerfilProfesional` se crea automáticamente tras el registro según el rol.
 
 ---
@@ -250,7 +250,7 @@ Este comportamiento se implementa en `apps/core/views.py` (`ServePagesView.get`)
 | Cuenta suspendida | `estadoCuenta='Suspendida'` → 403 en cualquier endpoint protegido; sesión limpiada |
 | Intentos fallidos | Modelo `IntentosFallidos` (bloqueo por email tras umbral) |
 | Verificación email | `EmailVerificationToken` obligatorio para `profesional`, opcional para `paciente` |
-| 2FA | Modelo `TOTPDevice` (RFC 6238). Obligatorio para `admin` y `profesional`. Endpoints: setup, confirm, disable, status, verify-login. |
+| 2FA | Modelo `TOTPDevice` (RFC 6238). Opcional; si hay un dispositivo confirmado, el login solicita el código. El helper marca `admin` y `profesional`, pero no se fuerza su configuración. Endpoints: setup, confirm, disable, status, verify-login. |
 
 ---
 
