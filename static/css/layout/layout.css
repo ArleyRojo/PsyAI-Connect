@@ -1036,3 +1036,67 @@ html.dark-mode .swal2-validation-message {
     background: var(--dm-elevated, #0f1d32);
     color: var(--dm-text1, #d0dde8);
 }
+
+/* Preferencias de notificaciones del paciente (Mi Perfil) */
+#notif-prefs-form .channel-option {
+    border: 2px solid transparent !important;
+    cursor: pointer;
+    transition: border-color .2s;
+}
+
+#notif-prefs-form .channel-option:has(input:checked) {
+    border-color: #1565c0 !important;
+}
+
+html.dark-mode #notif-prefs-form legend,
+html.dark-mode #notif-prefs-form strong,
+html.dark-mode #notif-prefs-form .form-check-label {
+    color: var(--dm-heading, #e8f0f8);
+}
+
+html.dark-mode #notif-prefs-form .text-muted {
+    color: var(--dm-text2, #8aa0bc) !important;
+}
+
+html.dark-mode #notif-prefs-form .channel-option:has(input:checked) {
+    border-color: var(--dm-accent, #90CAF9) !important;
+}
+
+html.dark-mode #notif-prefs-form .bg-light {
+    background: var(--dm-elevated, #0f1d32) !important;
+    color: var(--dm-text1, #d0dde8);
+}
+
+/* Casillas, radios e interruptores en modo oscuro.
+   theme.css pinta todos los input con "background: ... !important", que borra la
+   marca de verificación y la bolita de los interruptores; aquí se restauran. */
+html.dark-mode input.form-check-input {
+    border-color: var(--dm-border2, #243352) !important;
+    background-color: var(--dm-bg, #030610) !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: contain !important;
+}
+
+html.dark-mode input.form-check-input:checked {
+    border-color: #1d4ed8 !important;
+    background-color: #1d4ed8 !important;
+}
+
+html.dark-mode input.form-check-input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
+}
+
+html.dark-mode input.form-check-input[type="radio"]:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e") !important;
+}
+
+html.dark-mode .form-switch input.form-check-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%238aa0bc'/%3e%3c/svg%3e") !important;
+    background-position: left center !important;
+}
+
+html.dark-mode .form-switch input.form-check-input:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e") !important;
+    background-position: right center !important;
+}

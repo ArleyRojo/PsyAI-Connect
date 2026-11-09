@@ -434,7 +434,8 @@ class PatientRepository:
             Citas.objects.filter(idPaciente_id=user_id)
             .select_related("idProfesional")
             .order_by("-fecha", "-hora")
-            .values("idCita", "idProfesional__nombre", "fecha", "hora", "tipoCita", "tipoSesion", "estado", "motivo")
+            .values("idCita", "idProfesional__nombre", "fecha", "hora", "tipoCita", "tipoSesion", "estado", "motivo",
+                    "calificacion__puntuacion", "calificacion__comentario")
         )
 
         # Facturas
@@ -475,6 +476,14 @@ class PatientRepository:
             .values("tipo", "descripcion", "estado", "fecha", "fechaLimite", "fechaRespuesta", "respuesta", "prorrogada")
         )
 
+        # Consejos del profesional (HU-54 / HU-68)
+        from apps.professionals.models import ConsejoPaciente
+        consejos = list(
+            ConsejoPaciente.objects.filter(idAsignacion__idPaciente_id=user_id, activo=True)
+            .order_by("-fecha")
+            .values("titulo", "descripcion", "completado", "fechaCompletado", "fecha", "idAsignacion__idProfesional__nombre")
+        )
+
         return {
             "cuenta": {
                 "idUsuario": user.idUsuario,
@@ -498,6 +507,7 @@ class PatientRepository:
             "documentos": documentos,
             "consentimientos": consentimientos,
             "solicitudes_derechos": solicitudes,
+            "consejos": consejos,
         }
 
     def anonimizar_cuenta(self, user_id, password_confirm):

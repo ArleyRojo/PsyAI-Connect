@@ -10,14 +10,14 @@
         if (!isPatientPage() || document.querySelector('.mobile-bottom-nav[data-role="patient"]')) return;
 
         const items = [
-            { href: '/', icon: 'fas fa-home', label: 'Inicio' },
-            { href: 'aside-patient/chatbot.html', icon: 'fas fa-robot', label: 'Chatbot' },
-            { href: 'aside-patient/agenda-quotes.html', icon: 'fas fa-calendar-alt', label: 'Agenda' },
-            { href: 'aside-patient/mensajes.html', icon: 'fas fa-comments', label: 'Mensajes' },
-            { href: 'aside-patient/evolution.html', icon: 'fas fa-chart-area', label: 'Evolucion' },
-            { href: 'aside-patient/historia_clinica_paciente.html', icon: 'fas fa-file-medical', label: 'Documentos' },
-            { href: 'aside-patient/consejos.html', icon: 'fas fa-lightbulb', label: 'Consejos' },
-            { href: 'aside-patient/my.profile.html', icon: 'fas fa-user-circle', label: 'Perfil' }
+            { href: '/patient.dashboard.html', icon: 'fas fa-home', label: 'Inicio' },
+            { href: '/aside-patient/chatbot.html', icon: 'fas fa-robot', label: 'Chatbot' },
+            { href: '/aside-patient/agenda-quotes.html', icon: 'fas fa-calendar-alt', label: 'Agenda' },
+            { href: '/aside-patient/mensajes.html', icon: 'fas fa-comments', label: 'Mensajes' },
+            { href: '/aside-patient/evolution.html', icon: 'fas fa-chart-area', label: 'Evolucion' },
+            { href: '/aside-patient/historia_clinica_paciente.html', icon: 'fas fa-file-medical', label: 'Documentos' },
+            { href: '/aside-patient/consejos.html', icon: 'fas fa-lightbulb', label: 'Consejos' },
+            { href: '/aside-patient/my.profile.html', icon: 'fas fa-user-circle', label: 'Perfil' }
         ];
 
         const current = window.location.pathname.replace(/\\/g, '/');
@@ -27,8 +27,8 @@
         nav.setAttribute('aria-label', 'Navegacion paciente');
 
         nav.innerHTML = items.map(item => {
-            const target = item.href.replace(/^\//, '');
-            const active = current.endsWith(target) || (target === 'patient.dashboard.html' && current.endsWith('/patient.dashboard.html'));
+            // Rutas absolutas: funcionan igual desde el dashboard y desde /aside-patient/*
+            const active = current === item.href;
             return `<a class="mobile-bottom-nav__item${active ? ' active' : ''}" href="${item.href}"><i class="${item.icon}"></i><span>${item.label}</span></a>`;
         }).join('');
 

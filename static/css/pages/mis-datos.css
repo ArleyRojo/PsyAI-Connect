@@ -1,0 +1,193 @@
+/* Mis datos personales (HU-66): documento listo para "Guardar como PDF".
+   Siempre en colores claros, porque es un documento para imprimir. */
+
+:root {
+  --md-azul: #0d47a1;
+  --md-azul-claro: #e8f0fb;
+  --md-texto: #1e293b;
+  --md-suave: #64748b;
+  --md-borde: #dbe4f0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 24px 16px 48px;
+  background: #eef2f7;
+  color: var(--md-texto);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Barra de acciones */
+.md-barra {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  max-width: 820px;
+  margin: 0 auto 6px;
+}
+
+.md-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 18px;
+  background: var(--md-azul);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.md-btn:disabled { opacity: .6; cursor: wait; }
+.md-btn--secundario { background: #fff; color: var(--md-azul); border: 1px solid var(--md-borde); }
+
+.md-ayuda {
+  max-width: 820px;
+  margin: 0 auto 14px;
+  color: var(--md-suave);
+  font-size: 12px;
+  text-align: right;
+}
+
+/* Hoja */
+.md-documento {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 36px 40px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
+}
+
+.md-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 3px solid var(--md-azul);
+}
+
+.md-logo { width: 56px; height: 56px; object-fit: contain; }
+
+.md-cabecera h1 {
+  margin: 0;
+  color: var(--md-azul);
+  font-size: 22px;
+}
+
+.md-sub { margin: 2px 0 0; color: var(--md-suave); }
+
+.md-fecha {
+  margin-left: auto;
+  color: var(--md-suave);
+  font-size: 11.5px;
+  text-align: right;
+}
+
+.md-cargando, .md-error { margin: 24px 0; color: var(--md-suave); }
+.md-error { color: #b91c1c; }
+
+/* Secciones */
+.md-seccion { margin-top: 22px; break-inside: auto; }
+
+.md-seccion h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--md-azul-claro);
+  color: var(--md-azul);
+  font-size: 14.5px;
+  break-after: avoid;
+}
+
+.md-subtitulo { margin: 14px 0 6px; font-size: 13px; color: var(--md-azul); }
+
+.md-vacio { margin: 4px 0; color: var(--md-suave); font-style: italic; }
+
+/* Campos (dato: valor) */
+.md-campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 24px;
+  margin: 0;
+}
+
+.md-campo {
+  display: flex;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px dotted var(--md-borde);
+  break-inside: avoid;
+}
+
+.md-campo dt { flex: 0 0 46%; color: var(--md-suave); }
+.md-campo dd { margin: 0; font-weight: 600; word-break: break-word; }
+
+/* Tablas */
+.md-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.md-tabla th,
+.md-tabla td {
+  padding: 6px 8px;
+  border: 1px solid var(--md-borde);
+  text-align: left;
+  vertical-align: top;
+}
+
+.md-tabla th { background: #f5f8fc; font-weight: 700; }
+.md-tabla tr { break-inside: avoid; }
+
+/* Tarjetas (consejos, prediagnósticos) */
+.md-tarjeta {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--md-borde);
+  border-left: 4px solid var(--md-azul);
+  border-radius: 6px;
+  break-inside: avoid;
+}
+
+.md-tarjeta h3 { margin: 0 0 4px; font-size: 13px; }
+.md-tarjeta p { margin: 0 0 4px; white-space: pre-line; }
+.md-tarjeta small { color: var(--md-suave); }
+
+.md-pie {
+  margin-top: 28px;
+  padding-top: 12px;
+  border-top: 1px solid var(--md-borde);
+  color: var(--md-suave);
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .md-documento { padding: 22px 16px; }
+  .md-campos { grid-template-columns: 1fr; }
+  .md-cabecera { flex-wrap: wrap; }
+  .md-fecha { margin-left: 0; text-align: left; }
+  .md-tabla { display: block; overflow-x: auto; }
+}
+
+/* Al imprimir / guardar como PDF */
+@page { size: A4; margin: 14mm; }
+
+@media print {
+  body { padding: 0; background: #fff; font-size: 11.5px; }
+  .md-barra, .md-ayuda { display: none; }
+  .md-documento { max-width: none; padding: 0; border-radius: 0; box-shadow: none; }
+  .md-seccion h2, .md-tabla th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .md-cabecera { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

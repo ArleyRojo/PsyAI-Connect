@@ -81,6 +81,8 @@ async function cargarPerfil(idUsuario) {
 
             if (p.genero) localStorage.setItem('perfil_genero', p.genero);
 
+            llenarPreferenciasNotif(p);
+
             const headerSpan = document.querySelector('.user-info span');
             if (headerSpan) headerSpan.textContent = p.nombre || 'Paciente';
 
@@ -91,6 +93,30 @@ async function cargarPerfil(idUsuario) {
                      || JSON.parse(localStorage.getItem('sessionUser'));
         cargarDesdeLocal(usuario);
     }
+}
+
+// ── Marcar en el formulario las preferencias guardadas ────────
+// La página no recibe el perfil desde Django, así que sin esto todos los
+// interruptores salían apagados y al guardar se desactivaba todo.
+function llenarPreferenciasNotif(p) {
+    const form = document.getElementById('notif-prefs-form');
+    if (!form || !p) return;
+
+    const canal = form.querySelector(`input[name="canalNotificacion"][value="${p.canalNotificacion || 'email'}"]`)
+               || form.querySelector('input[name="canalNotificacion"][value="email"]');
+    if (canal) {
+        canal.checked = true;
+        canal.dispatchEvent(new Event('change'));
+    }
+
+    const tel = document.getElementById('numeroTelefonico');
+    if (tel && p.numeroTelefonico) tel.value = p.numeroTelefonico;
+
+    ['whatsappConsentimiento', 'recibirRecordatorioCita', 'recibirConfirmacion',
+     'recibirMensajePro', 'recibirFacturas', 'recibirNotificacionesAdmin'].forEach(campo => {
+        const input = document.getElementById(campo);
+        if (input && typeof p[campo] === 'boolean') input.checked = p[campo];
+    });
 }
 
 // ── Cargar desde localStorage (sin Flask) ────────────────────

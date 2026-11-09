@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis datos personales &ndash; PsyAI Connect</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico" sizes="any">
+    <link rel="stylesheet" href="/vendor/fonts/fonts.css">
+    <link rel="stylesheet" href="/vendor/font-awesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/pages/mis-datos.css?v=20261109-1">
+</head>
+<body>
+
+<!-- Barra de acciones: no sale en el PDF -->
+<div class="md-barra">
+    <a href="/aside-patient/my.profile.html" class="md-btn md-btn--secundario"><i class="fas fa-arrow-left"></i> Volver a mi perfil</a>
+    <button type="button" class="md-btn" id="btnGuardarPdf" disabled><i class="fas fa-file-pdf"></i> Guardar como PDF</button>
+</div>
+<p class="md-ayuda">En la ventana de impresión elige <strong>"Guardar como PDF"</strong> como destino.</p>
+
+<main class="md-documento" id="documento">
+    <header class="md-cabecera">
+        <img src="/img/Logo.webp" alt="" class="md-logo">
+        <div>
+            <h1>Mis datos personales</h1>
+            <p class="md-sub">PsyAI Connect &middot; Derecho de acceso (Ley 1581 de 2012)</p>
+        </div>
+        <div class="md-fecha" id="fechaGenerado"></div>
+    </header>
+
+    <div id="contenido">
+        <p class="md-cargando"><i class="fas fa-spinner fa-spin"></i> Cargando tus datos...</p>
+    </div>
+
+    <footer class="md-pie">
+        Este documento contiene los datos personales que PsyAI Connect tiene registrados sobre ti, conforme al
+        derecho de acceso de la Ley 1581 de 2012 de protección de datos personales. No incluye el historial de
+        conversaciones con el chatbot ni los mensajes del chat. Es información confidencial: guárdala en un lugar seguro.
+    </footer>
+</main>
+
+<script src="/js/modules/patient/mis-datos.js?v=20261109-1"></script>
+</body>
+</html>

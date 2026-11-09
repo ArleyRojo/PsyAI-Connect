@@ -186,7 +186,7 @@
                                        {% if perfil.canalNotificacion == "whatsapp" %}checked{% endif %}>
                                 <label class="form-check-label d-flex flex-column align-items-center p-3 h-100 w-100"
                                        for="canal-whatsapp">
-                                    <i class="fas fa-whatsapp fa-2x text-primary mb-2"></i>
+                                    <i class="fab fa-whatsapp fa-2x text-primary mb-2"></i>
                                     <strong>WhatsApp</strong>
                                     <small class="text-muted mt-1">Mensajes directos a tu WhatsApp</small>
                                 </label>
@@ -321,6 +321,19 @@
                     </button>
                 </div>
             </form>
+        </div>
+
+        <!-- Privacidad y mis datos (HU-66) -->
+        <div class="card profile-card p-4 mb-4">
+            <h5><i class="fas fa-shield-halved icon-id"></i>Privacidad y mis datos</h5>
+            <p class="text-muted small mb-3">
+                Por la Ley 1581 de 2012 tienes derecho a conocer los datos personales que guardamos sobre ti.
+                Descárgalos en un PDF con tu cuenta, perfil, historia clínica inicial, citas, consejos, pagos,
+                documentos y consentimientos.
+            </p>
+            <a href="/aside-patient/mis-datos.html?imprimir=1" target="_blank" rel="noopener" class="button btn-profile-grad" id="btnDescargarMisDatos">
+                <i class="fas fa-file-arrow-down"></i> Descargar mis datos (PDF)
+            </a>
         </div>
     </main>
 </div>
@@ -500,8 +513,8 @@
 <script src="/js/modules/auth/auth-guard.js?v=20261031-xss"></script>
 <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
 <script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
-<script src="/js/modules/patient/aside.js?v=20261109-consejos"></script>
-<script src="/js/modules/patient/my.profile.js?v=20261028-1"></script>
+<script src="/js/modules/patient/aside.js?v=20261109-nav"></script>
+<script src="/js/modules/patient/my.profile.js?v=20261109-prefs"></script>
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script>
