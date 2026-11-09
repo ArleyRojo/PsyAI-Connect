@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from apps.core.permissions import (
     IsAdminOrProfesional,
     IsAuthenticatedDRF,
+    IsPaciente,
     IsProfesional,
 )
 from apps.professionals.services import ProfessionalService
@@ -22,6 +23,8 @@ from apps.professionals.serializers import (
     VisibilidadSerializer,
     ChatMensajeSerializer,
     ProfessionalPaymentInfoSerializer,
+    ConsejoSerializer,
+    ConsejoEstadoSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -584,4 +587,53 @@ class ProfessionalVerificacionViewSet(viewsets.ViewSet):
         if not pk:
             return Response({"success": False, "message": "ID de profesional requerido"}, status=status.HTTP_400_BAD_REQUEST)
         payload, status_code = _get_prof_service().desverificar_profesional(admin_id, int(pk))
+        return Response(payload, status=status_code)
+
+
+class ConsejosPacienteProfesionalResource(APIView):
+    """GET/POST /api/profesional/pacientes/<id>/consejos — consejos que el profesional envía (HU-54)."""
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def get(self, request, id_paciente):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_prof_service().listar_consejos(user_id, id_paciente)
+        return Response(payload, status=status_code)
+
+    def post(self, request, id_paciente):
+        serializer = ConsejoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_prof_service().crear_consejo(user_id, id_paciente, serializer.validated_data)
+        return Response(payload, status=status_code)
+
+
+class ConsejoProfesionalResource(APIView):
+    """DELETE /api/profesional/consejos/<id> — baja lógica de un consejo propio."""
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def delete(self, request, pk):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_prof_service().eliminar_consejo(user_id, pk)
+        return Response(payload, status=status_code)
+
+
+class ConsejosPacienteResource(APIView):
+    """GET /api/paciente/consejos — consejos recibidos por el paciente (HU-68)."""
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def get(self, request):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_prof_service().consejos_del_paciente(user_id)
+        return Response(payload, status=status_code)
+
+
+class ConsejoPacienteResource(APIView):
+    """PATCH /api/paciente/consejos/<id> — el paciente marca un consejo como completado o pendiente."""
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def patch(self, request, pk):
+        serializer = ConsejoEstadoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = _get_prof_service().marcar_consejo(user_id, pk, serializer.validated_data["completado"])
         return Response(payload, status=status_code)

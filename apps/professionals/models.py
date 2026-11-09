@@ -200,3 +200,38 @@ class Reportes(models.Model):
             "diagnostico": self.diagnostico,
             "tratamiento": self.tratamiento,
         }
+
+
+class ConsejoPaciente(models.Model):
+    """Consejo de texto que el profesional envía a un paciente asignado (HU-54 / HU-68)."""
+
+    idConsejo = models.AutoField(primary_key=True)
+    idAsignacion = models.ForeignKey(
+        PacientesProfesional,
+        on_delete=models.CASCADE,
+        db_column="idAsignacion",
+        related_name="consejos",
+    )
+    titulo = models.CharField(max_length=120)
+    descripcion = models.TextField()
+    completado = models.BooleanField(default=False)
+    fechaCompletado = models.DateTimeField(null=True, blank=True)
+    activo = models.BooleanField(default=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "ConsejosPaciente"
+        ordering = ["-fecha", "-idConsejo"]
+
+    def __str__(self):
+        return f"Consejo {self.idConsejo} - Asignacion {self.idAsignacion_id}"
+
+    def to_dict(self):
+        return {
+            "idConsejo": self.idConsejo,
+            "titulo": self.titulo,
+            "descripcion": self.descripcion,
+            "completado": self.completado,
+            "fechaCompletado": self.fechaCompletado.isoformat() if self.fechaCompletado else None,
+            "fecha": self.fecha.isoformat() if self.fecha else None,
+        }

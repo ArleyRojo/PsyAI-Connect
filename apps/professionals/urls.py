@@ -19,6 +19,10 @@ from apps.professionals.views import (
     ProfessionalPaymentInfoViewSet,
     ProfessionalPaymentInfoPublicView,
     ProfessionalVerificacionViewSet,
+    ConsejosPacienteProfesionalResource,
+    ConsejoProfesionalResource,
+    ConsejosPacienteResource,
+    ConsejoPacienteResource,
 )
 
 app_name = "professionals"
@@ -32,6 +36,10 @@ urlpatterns = [
     path("profesional/pacientes", ProfesionalPacienteResource.as_view(), name="profesional_pacientes"),
     path("profesional/pacientes/todos", AllPacientesProfesionalResource.as_view(), name="profesional_pacientes_todos"),
     path("profesional/pacientes/<int:id_paciente>/asignar", PacienteAsignarResource.as_view(), name="profesional_paciente_asignar"),
+    path("profesional/pacientes/<int:id_paciente>/consejos", ConsejosPacienteProfesionalResource.as_view(), name="profesional_paciente_consejos"),
+    path("profesional/consejos/<int:pk>", ConsejoProfesionalResource.as_view(), name="profesional_consejo"),
+    path("paciente/consejos", ConsejosPacienteResource.as_view(), name="paciente_consejos"),
+    path("paciente/consejos/<int:pk>", ConsejoPacienteResource.as_view(), name="paciente_consejo"),
     path("diagnosticos", DiagnosticoViewSet.as_view({"get": "list", "post": "create"}), name="diagnosticos"),
     path("reportes", ReporteViewSet.as_view({"get": "list", "post": "create"}), name="reportes"),
     path("reportes/eliminados", ReporteViewSet.as_view({"get": "list_deleted"}), name="reportes_eliminados"),

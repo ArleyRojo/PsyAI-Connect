@@ -132,6 +132,10 @@
                         <i class="fas fa-robot"></i> Prediagnósticos IA
                         <span class="tab-badge" id="badgePrediag">0</span>
                     </button>
+                    <button class="tab" id="tabConsejos" onclick="mostrarPestana('consejos', this)">
+                        <i class="fas fa-lightbulb"></i> Consejos
+                        <span class="tab-badge" id="badgeConsejos">0</span>
+                    </button>
                 </div>
             </div>
 
@@ -702,6 +706,49 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ══ CONSEJOS AL PACIENTE (HU-54) ══ -->
+            <div id="pestana-consejos" style="display:none;">
+                <div class="card p-4 mb-4">
+                    <h4 class="fw-bold mb-1"><i class="fas fa-lightbulb me-2 text-warning"></i>Enviar un consejo</h4>
+                    <p class="text-muted small mb-3">El paciente lo verá en "Mis consejos" y recibirá un aviso.</p>
+                    <form id="formConsejo" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="selectPacienteConsejo">Paciente</label>
+                            <select class="form-control" id="selectPacienteConsejo" required>
+                                <option value="">Selecciona un paciente asignado</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="tituloConsejo">Título</label>
+                            <input type="text" class="form-control" id="tituloConsejo" maxlength="120" placeholder="Ej.: Respiración 4-7-8" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" for="descripcionConsejo">Consejo</label>
+                            <textarea class="form-control" id="descripcionConsejo" rows="4" maxlength="2000" placeholder="Describe el consejo o la recomendación para el paciente" required></textarea>
+                            <small class="text-muted" id="contadorConsejo">0 / 2000</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="btnEnviarConsejo">
+                            <i class="fas fa-paper-plane me-1"></i> Enviar consejo
+                        </button>
+                    </form>
+                </div>
+                <div class="card p-4">
+                    <h4 class="fw-bold mb-3"><i class="fas fa-list-check me-2 text-primary"></i>Consejos enviados</h4>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th><th>Título</th><th>Consejo</th><th>Estado</th><th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaConsejos">
+                                <tr><td colspan="5" class="text-center text-muted">Selecciona un paciente para ver sus consejos.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div><!-- /p-4 -->
     </main>
 </div>
@@ -713,9 +760,10 @@
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script src="/js/modules/professional/anamnesis.js?v=20260929-1"></script>
-<script src="/js/modules/professional/patients.js?v=20261106-assignment-notification"></script>
+<script src="/js/modules/professional/patients.js?v=20261109-consejos"></script>
 <script src="/js/modules/professional/patients.evolution.js?v=20260803-1"></script>
 <script src="/js/modules/professional/patients.prediagnostico.js?v=20260930-1"></script>
+<script src="/js/modules/professional/patients.consejos.js?v=20261109-1"></script>
 </body>
 </html>
 

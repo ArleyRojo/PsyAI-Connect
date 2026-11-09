@@ -256,3 +256,59 @@ class ProfessionalService:
         perfil.verificadoPor = None
         perfil.save(update_fields=["verificado", "fechaVerificacion", "verificadoPor"])
         return {"success": True, "message": "Profesional desverificado correctamente"}, 200
+
+    # ── Consejos al paciente (HU-54 / HU-68) ──────────────────────────────
+
+    def crear_consejo(self, professional_id, patient_id, data):
+        check = self._check_verificacion(professional_id)
+        if check:
+            return check
+        titulo = (data.get("titulo") or "").strip()
+        descripcion = (data.get("descripcion") or "").strip()
+        if not titulo or not descripcion:
+            return {"success": False, "message": "El título y la descripción son obligatorios"}, 400
+        asignacion = self.repo.get_assignment(professional_id, patient_id)
+        if not asignacion:
+            return {"success": False, "message": "No tienes asignado este paciente"}, 403
+        consejo = self.repo.create_consejo(asignacion, titulo, descripcion)
+        self._avisar_consejo_nuevo(asignacion, titulo)
+        return {"success": True, "message": "Consejo enviado al paciente", "consejo": consejo.to_dict()}, 201
+
+    def listar_consejos(self, professional_id, patient_id):
+        asignacion = self.repo.get_assignment(professional_id, patient_id)
+        if not asignacion:
+            return {"success": False, "message": "No tienes asignado este paciente"}, 403
+        return {"success": True, "consejos": self.repo.list_consejos_asignacion(asignacion)}, 200
+
+    def eliminar_consejo(self, professional_id, consejo_id):
+        consejo = self.repo.get_consejo_profesional(consejo_id, professional_id)
+        if not consejo:
+            return {"success": False, "message": "Consejo no encontrado"}, 404
+        self.repo.delete_consejo(consejo)
+        return {"success": True, "message": "Consejo eliminado"}, 200
+
+    def consejos_del_paciente(self, patient_id):
+        return {"success": True, "consejos": self.repo.list_consejos_paciente(patient_id)}, 200
+
+    def marcar_consejo(self, patient_id, consejo_id, completado):
+        consejo = self.repo.get_consejo_paciente(consejo_id, patient_id)
+        if not consejo:
+            return {"success": False, "message": "Consejo no encontrado"}, 404
+        data = self.repo.set_consejo_completado(consejo, completado)
+        mensaje = "Consejo marcado como completado" if completado else "Consejo marcado como pendiente"
+        return {"success": True, "message": mensaje, "consejo": data}, 200
+
+    def _avisar_consejo_nuevo(self, asignacion, titulo):
+        """Aviso en la campana del paciente y por su canal elegido (correo/WhatsApp)."""
+        try:
+            from apps.scheduling.repositories import AppointmentRepository
+            from apps.core.notifier import notificar_paciente
+
+            profesional = asignacion.idProfesional.nombre
+            mensaje = f"{profesional} te envió un consejo: {titulo}. Míralo en Mis consejos."
+            AppointmentRepository().create_notification(
+                asignacion.idPaciente_id, "paciente", "Nuevo consejo de tu profesional", mensaje, "Consejo"
+            )
+            notificar_paciente(asignacion.idPaciente, "Nuevo consejo de tu profesional", mensaje, "mensaje_profesional")
+        except Exception as e:
+            logger.warning(f"Error avisando consejo nuevo: {e}")

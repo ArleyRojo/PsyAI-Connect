@@ -67,6 +67,15 @@ class ChatMensajeSerializer(serializers.Serializer):
     mensaje = serializers.CharField(max_length=2000)
 
 
+class ConsejoSerializer(serializers.Serializer):
+    titulo = serializers.CharField(max_length=120)
+    descripcion = serializers.CharField(max_length=2000)
+
+
+class ConsejoEstadoSerializer(serializers.Serializer):
+    completado = serializers.BooleanField()
+
+
 class ProfessionalPaymentInfoSerializer(serializers.Serializer):
     qr_image = serializers.ImageField(required=False, allow_null=True)
     mensaje_texto = serializers.CharField(required=False, allow_blank=True)

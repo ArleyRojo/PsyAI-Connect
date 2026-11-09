@@ -477,10 +477,12 @@ function mostrarPestana(pestana, btnEl) {
     var panelDiagnosticos = document.getElementById('pestana-diagnosticos');
     var panelEvolucion = document.getElementById('pestana-evolucion');
     var panelPrediagnosticos = document.getElementById('pestana-prediagnosticos');
+    var panelConsejos = document.getElementById('pestana-consejos');
 
     if (panelDiagnosticos) panelDiagnosticos.style.display = pestana === 'diagnosticos' ? '' : 'none';
     if (panelEvolucion) panelEvolucion.style.display = pestana === 'evolucion' ? '' : 'none';
     if (panelPrediagnosticos) panelPrediagnosticos.style.display = pestana === 'prediagnosticos' ? '' : 'none';
+    if (panelConsejos) panelConsejos.style.display = pestana === 'consejos' ? '' : 'none';
 
     if (pestana === 'diagnosticos') {
         cargarPacientes();
@@ -489,6 +491,8 @@ function mostrarPestana(pestana, btnEl) {
         cargarEvolucion();
     } else if (pestana === 'prediagnosticos') {
         cargarPrediagnosticos();
+    } else if (pestana === 'consejos') {
+        cargarPacientesConsejos();
     }
 }
 

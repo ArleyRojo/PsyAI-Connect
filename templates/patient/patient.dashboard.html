@@ -5,6 +5,7 @@
     {% include 'base/partials/head.html' %}
     <link rel="stylesheet" href="/css/pages/patient.css?v=20261104-pat">
     <link rel="stylesheet" href="/css/pages/patient-dashboard-v2.css?v=20261106-notifications">
+    <link rel="stylesheet" href="/css/pages/patient-consejos.css?v=20261109-1">
 </head>
 <body class="patient-dashboard">
     <button class="toggle-btn" id="toggleSidebar" aria-label="Abrir menú"><i class="fas fa-bars"></i></button>
@@ -59,6 +60,11 @@
                 <a href="aside-patient/historia_clinica_paciente.html" class="sidebar__nav-item" data-tooltip="Documentos">
                     <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
                     <span>Mis Documentos</span>
+                    <div class="sidebar__nav-indicator"></div>
+                </a>
+                <a href="aside-patient/consejos.html" class="sidebar__nav-item" data-tooltip="Consejos">
+                    <div class="sidebar__nav-icon"><i class="fas fa-lightbulb"></i></div>
+                    <span>Mis Consejos</span>
                     <div class="sidebar__nav-indicator"></div>
                 </a>
             </nav>
@@ -330,6 +336,15 @@
                             </div>
                             <p class="dash-tip-v2__text" id="tipText">Cargando...</p>
                         </div>
+
+                        <!-- Consejos del profesional (HU-54) -->
+                        <div class="dash-tip-v2 mt-3" id="consejosSection">
+                            <div class="dash-tip-v2__eyebrow">
+                                <i class="fas fa-user-doctor"></i> Consejos de tu profesional
+                            </div>
+                            <div id="dashConsejos"><p class="dash-tip-v2__text">Cargando...</p></div>
+                            <a href="aside-patient/consejos.html" class="dash-section-heading__action">Ver todos <i class="fas fa-arrow-right" style="font-size:0.65rem"></i></a>
+                        </div>
                     </div>
                 </div>
 
@@ -343,6 +358,7 @@
     <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260712-1">
     <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
     <script src="/js/modules/patient/notifications.js?v=20261106-assignment"></script>
+    <script src="/js/modules/patient/dashboard.consejos.js?v=20261109-1"></script>
 <script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
     <script src="/js/modules/patient/aside.js?v=20261105-fix-handleMediaChange"></script>
     <script src="/js/modules/auth/logout.js?v=20261023-1"></script>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>Mis Consejos &ndash; PsyAI Connect</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="/css/pages/patient.css?v=20261104-pat">
+    <link rel="stylesheet" href="/css/pages/historia_clinica_paciente.css?v=20261023-1">
+    <link rel="stylesheet" href="/css/pages/patient-consejos.css?v=20261109-1">
+    <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-sidebar-opt">
+    <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+</head>
+<body class="patient-dashboard patient-agenda-page">
+
+<button class="toggle-btn" id="toggleSidebar" aria-label="Abrir menú"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-img-wrap">
+        <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
+        <div class="sidebar__logo-glow"></div>
+      </div>
+      <h5 class="sidebar__brand">PsyAI Connect</h5>
+      <span class="sidebar__role-badge">Paciente</span>
+    </div>
+    <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
+      <div class="sidebar__nav-section-label">Menú Principal</div>
+      <a href="../patient.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
+        <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
+        <span>Dashboard</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="chatbot.html" class="sidebar__nav-item" data-tooltip="Chatbot">
+        <div class="sidebar__nav-icon"><i class="fas fa-robot"></i></div>
+        <span>Chatbot Emocional</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="agenda-quotes.html" class="sidebar__nav-item" data-tooltip="Agenda">
+        <div class="sidebar__nav-icon"><i class="fas fa-calendar-alt"></i></div>
+        <span>Agenda de Citas</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="facturas.html" class="sidebar__nav-item" data-tooltip="Facturas">
+        <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+        <span>Mis Pagos</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <div class="sidebar__nav-section-label">Comunicación</div>
+      <a href="mensajes.html" class="sidebar__nav-item" data-tooltip="Mensajes">
+        <div class="sidebar__nav-icon"><i class="fas fa-comments"></i></div>
+        <span>Mensajes</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <div class="sidebar__nav-section-label">Seguimiento</div>
+      <a href="evolution.html" class="sidebar__nav-item" data-tooltip="Evolución">
+        <div class="sidebar__nav-icon"><i class="fas fa-chart-area"></i></div>
+        <span>Mi Evolución</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="historia_clinica_paciente.html" class="sidebar__nav-item" data-tooltip="Documentos">
+        <div class="sidebar__nav-icon"><i class="fas fa-file-medical"></i></div>
+        <span>Mis Documentos</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+      <a href="consejos.html" class="sidebar__nav-item active" data-tooltip="Consejos">
+        <div class="sidebar__nav-icon"><i class="fas fa-lightbulb"></i></div>
+        <span>Mis Consejos</span>
+        <div class="sidebar__nav-indicator"></div>
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user-card">
+        <div class="sidebar__user-avatar" data-avatar="inicial">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="sidebar__user-info">
+          <span class="sidebar__user-name" id="sidebarUserName">Paciente</span>
+          <span class="sidebar__user-role">Paciente</span>
+        </div>
+        <a href="my.profile.html" class="sidebar__user-settings" title="Mi Perfil">
+          <i class="fas fa-cog"></i>
+        </a>
+      </div>
+      <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+        <button id="theme-toggle" title="Cambiar modo"></button>
+      </div>
+    </div>
+    <div class="sidebar__logout-section">
+      <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Cerrar Sesión</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content flex-grow-1 ms-280 p-4">
+
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h3 fw-bold mb-0"><i class="fas fa-lightbulb me-2"></i>Mis Consejos</h1>
+      <div class="user-info d-flex align-items-center">
+        <span class="user-greeting me-3" id="nombrePaciente">Hola, </span>
+        <button class="btn-notif" title="Notificaciones">
+          <i class="fas fa-bell"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23E8F1FF'/%3E%3C/svg%3E" alt="Avatar" class="user-avatar">
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="card-title">
+        <i class="fas fa-lightbulb"></i> Consejos de tu profesional
+        <span class="card-count" id="consejos-count">0 pendientes</span>
+      </div>
+
+      <div class="notice blue">
+        <i class="fas fa-info-circle"></i>
+        <span>Tu profesional te envía estos consejos para tu proceso. Márcalos como completados cuando los pongas en práctica.</span>
+      </div>
+
+      <div class="consejos-filtros" role="group" aria-label="Filtrar consejos">
+        <button type="button" class="consejos-filtro active" data-filtro="todos">Todos</button>
+        <button type="button" class="consejos-filtro" data-filtro="pendientes">Pendientes</button>
+        <button type="button" class="consejos-filtro" data-filtro="completados">Completados</button>
+      </div>
+
+      <div class="consejos-lista" id="consejos-lista">
+        <p class="consejos-vacio"><i class="fas fa-spinner fa-spin me-2"></i>Cargando consejos...</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+{% include 'base/partials/scripts.html' %}
+<script src="/js/modules/auth/auth-guard.js?v=20261031-xss"></script>
+<script src="/js/core/shared/alerts.js?v=20261023-1"></script>
+<script src="/js/modules/patient/aside.js?v=20261105-fix-handleMediaChange"></script>
+<script src="/js/modules/auth/logout.js?v=20261023-1"></script>
+<script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
+<script src="/js/modules/patient/consejos.js?v=20261109-1"></script>
+</body>
+</html>

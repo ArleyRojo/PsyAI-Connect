@@ -5,7 +5,9 @@ from django.db.models import Q, Count
 from django.utils import timezone
 
 from apps.authentication.models import Register
-from apps.professionals.models import PerfilProfesional, PacientesProfesional, Reportes, Diagnostico
+from apps.professionals.models import (
+    ConsejoPaciente, PerfilProfesional, PacientesProfesional, Reportes, Diagnostico,
+)
 from apps.patients.models import Anamnesis, EvolucionPaciente, PerfilPaciente
 
 
@@ -520,3 +522,50 @@ class ProfessionalRepository:
             },
             "alertas": alertas,
         }
+
+    # ── Consejos al paciente (HU-54 / HU-68) ──────────────────────────────
+
+    def get_assignment(self, professional_id, patient_id):
+        return PacientesProfesional.objects.filter(
+            idProfesional_id=professional_id, idPaciente_id=patient_id
+        ).first()
+
+    def create_consejo(self, asignacion, titulo, descripcion):
+        return ConsejoPaciente.objects.create(
+            idAsignacion=asignacion, titulo=titulo, descripcion=descripcion
+        )
+
+    def list_consejos_asignacion(self, asignacion):
+        return [c.to_dict() for c in asignacion.consejos.filter(activo=True)]
+
+    def get_consejo_profesional(self, consejo_id, professional_id):
+        return ConsejoPaciente.objects.filter(
+            idConsejo=consejo_id, activo=True, idAsignacion__idProfesional_id=professional_id
+        ).first()
+
+    def get_consejo_paciente(self, consejo_id, patient_id):
+        return ConsejoPaciente.objects.filter(
+            idConsejo=consejo_id, activo=True, idAsignacion__idPaciente_id=patient_id
+        ).first()
+
+    def delete_consejo(self, consejo):
+        consejo.activo = False
+        consejo.save(update_fields=["activo"])
+
+    def set_consejo_completado(self, consejo, completado):
+        consejo.completado = completado
+        consejo.fechaCompletado = timezone.now() if completado else None
+        consejo.save(update_fields=["completado", "fechaCompletado"])
+        return consejo.to_dict()
+
+    def list_consejos_paciente(self, patient_id):
+        consejos = (
+            ConsejoPaciente.objects.filter(activo=True, idAsignacion__idPaciente_id=patient_id)
+            .select_related("idAsignacion__idProfesional")
+        )
+        resultado = []
+        for c in consejos:
+            item = c.to_dict()
+            item["profesional"] = c.idAsignacion.idProfesional.nombre
+            resultado.append(item)
+        return resultado
