@@ -599,7 +599,7 @@ function configurarFinalizarSesion() {
             // PsyAIConnection.post ya devuelve el JSON parseado.
             // La rama de respaldo (fetch) también debe devolver datos parseados.
             var data = await (window.PsyAIConnection?.post
-                ? window.PsyAIConnection.post('/api/chatbot/prediagnostico/')
+                ? window.PsyAIConnection.post('/api/chatbot/prediagnostico/', null, { timeout: 60000 })
                 : fetch('/api/chatbot/prediagnostico/', {
                     method: 'POST',
                     credentials: 'include'
