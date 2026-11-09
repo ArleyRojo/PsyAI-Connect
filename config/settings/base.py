@@ -215,6 +215,7 @@ SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "5"))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 

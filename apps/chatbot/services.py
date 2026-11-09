@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import threading
 import time
 from datetime import datetime, timezone
 from queue import Queue
@@ -1441,7 +1442,13 @@ class ChatbotService:
                 resultado["nivel_riesgo"] = "alto"
 
         prediagnostico = self.chat_repo.save_prediagnostico(patient_id, resultado)
-        self._notify_prediagnostico(patient_id, prediagnostico)
+        # El prediagnóstico ya está generado y guardado: se responde al paciente
+        # y la notificación + correo se envían DESPUÉS, en segundo plano.
+        threading.Thread(
+            target=self._notify_en_segundo_plano,
+            args=(patient_id, prediagnostico),
+            daemon=True,
+        ).start()
 
         return {
             "success": True,
@@ -1449,6 +1456,15 @@ class ChatbotService:
             "recomendaciones": prediagnostico.recomendaciones,
             "nivel_riesgo": prediagnostico.nivelRiesgo,
         }, 201
+
+    def _notify_en_segundo_plano(self, patient_id, prediagnostico):
+        from django.db import connection
+        try:
+            self._notify_prediagnostico(patient_id, prediagnostico)
+        except Exception:
+            self.logger.exception("Error notificando prediagnostico")
+        finally:
+            connection.close()
 
     def _notify_prediagnostico(self, patient_id, prediagnostico):
         patient_name = self._get_patient_name(patient_id) or f"Paciente #{patient_id}"
