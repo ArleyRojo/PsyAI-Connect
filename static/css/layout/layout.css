@@ -403,6 +403,40 @@ html.no-transition .sidebar-overlay {
     text-decoration: underline;
 }
 
+/* Notificaciones del profesional en modo oscuro */
+html.dark-mode .professional-notification-panel {
+    border-color: var(--dm-border2, #243352);
+    background: var(--dm-card, #0b1429);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, .55);
+    color: var(--dm-text1, #d0dde8);
+}
+
+html.dark-mode .professional-notification-panel__header {
+    border-bottom-color: var(--dm-border, #1a2b4a);
+    color: var(--dm-heading, #e8f0f8);
+}
+
+html.dark-mode .professional-notification-close {
+    color: var(--dm-text2, #8aa0bc);
+}
+
+html.dark-mode .professional-notification-item {
+    border-bottom-color: var(--dm-border, #1a2b4a);
+}
+
+html.dark-mode .professional-notification-item__title {
+    color: var(--dm-heading, #e8f0f8);
+}
+
+html.dark-mode .professional-notification-item__message,
+html.dark-mode .professional-notification-empty {
+    color: var(--dm-text2, #8aa0bc);
+}
+
+html.dark-mode .professional-notification-action {
+    color: var(--dm-accent, #90CAF9);
+}
+
 /* ── Footer sidebar ── */
 .sidebar__footer {
     margin-top: auto;
@@ -962,4 +996,43 @@ html.no-transition .sidebar-overlay {
     .section-card__body {
         padding: 12px 14px;
     }
+}
+
+/* Ventanas de confirmación (SweetAlert2) en modo oscuro */
+html.dark-mode .swal2-popup {
+    border: 1px solid var(--dm-border2, #243352);
+    background: var(--dm-card, #0b1429);
+    color: var(--dm-text1, #d0dde8);
+}
+
+html.dark-mode .swal2-popup .swal2-title {
+    color: var(--dm-heading, #e8f0f8);
+}
+
+html.dark-mode .swal2-popup .swal2-actions .swal2-confirm {
+    background: #1d4ed8;
+    color: #fff;
+}
+
+html.dark-mode .swal2-popup .swal2-actions .swal2-cancel {
+    border: 1px solid var(--dm-border2, #243352);
+    background: var(--dm-elevated, #0f1d32);
+    color: var(--dm-text1, #d0dde8);
+}
+
+html.dark-mode .swal2-popup .swal2-html-container {
+    color: var(--dm-text2, #8aa0bc);
+}
+
+html.dark-mode .swal2-input,
+html.dark-mode .swal2-textarea,
+html.dark-mode .swal2-select {
+    border-color: var(--dm-border2, #243352);
+    background: var(--dm-elevated, #0f1d32);
+    color: var(--dm-text1, #d0dde8);
+}
+
+html.dark-mode .swal2-validation-message {
+    background: var(--dm-elevated, #0f1d32);
+    color: var(--dm-text1, #d0dde8);
 }
