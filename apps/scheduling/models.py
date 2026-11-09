@@ -166,3 +166,39 @@ class Notificaciones(models.Model):
             "fecha_programada": self.fecha_programada.isoformat() if self.fecha_programada else None,
             "omitidos": self.omitidos,
         }
+
+
+class CalificacionCita(models.Model):
+    """Calificación del paciente a una cita completada (HU-67)."""
+
+    idCalificacion = models.AutoField(primary_key=True)
+    idCita = models.OneToOneField(
+        Citas,
+        on_delete=models.CASCADE,
+        db_column="idCita",
+        related_name="calificacion",
+    )
+    puntuacion = models.PositiveSmallIntegerField()
+    comentario = models.TextField(blank=True, default="")
+    fecha = models.DateTimeField(auto_now_add=True)
+    fechaActualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "CalificacionesCita"
+        ordering = ["-fecha"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(puntuacion__gte=1) & Q(puntuacion__lte=5),
+                name="ck_calificacion_puntuacion_1_5",
+            )
+        ]
+
+    def __str__(self):
+        return f"Calificacion {self.idCalificacion} - Cita {self.idCita_id}"
+
+    def to_dict(self):
+        return {
+            "puntuacion": self.puntuacion,
+            "comentario": self.comentario,
+            "fecha": self.fecha.isoformat() if self.fecha else None,
+        }

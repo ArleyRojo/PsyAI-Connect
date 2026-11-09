@@ -208,3 +208,23 @@ class PatientNotificationsResource(APIView):
             leido=False,
         ).update(leido=True)
         return Response({"success": True, "actualizadas": updated}, status=status.HTTP_200_OK)
+
+
+class CalificacionCitaResource(APIView):
+    """PUT /api/citas/<id>/calificacion — el paciente califica una cita completada (HU-67)."""
+    permission_classes = [IsAuthenticatedDRF, IsPaciente]
+
+    def put(self, request, pk):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = appointment_service.calificar_cita(user_id, pk, request.data)
+        return Response(payload, status=status_code)
+
+
+class CalificacionesProfesionalResource(APIView):
+    """GET /api/profesional/calificaciones — promedio y comentarios anónimos del profesional (HU-67)."""
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def get(self, request):
+        user_id = getattr(request, "user_id", None)
+        payload, status_code = appointment_service.mis_calificaciones(user_id)
+        return Response(payload, status=status_code)

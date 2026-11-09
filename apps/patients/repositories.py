@@ -180,7 +180,18 @@ class PatientRepository:
             estadoCuenta="Activa",
             perfil_profesional__verificado=True,
         ).order_by("nombre").values("idUsuario", "nombre")
-        return [{"idUsuario": r["idUsuario"], "nombre": r["nombre"]} for r in rows]
+        from apps.scheduling.repositories import AppointmentRepository
+        resumen = AppointmentRepository().resumen_por_profesional()
+        resultado = []
+        for r in rows:
+            promedio, total = resumen.get(r["idUsuario"], (None, 0))
+            resultado.append({
+                "idUsuario": r["idUsuario"],
+                "nombre": r["nombre"],
+                "promedioCalificacion": promedio,
+                "totalCalificaciones": total,
+            })
+        return resultado
 
     def list_professionals_for_patient(self, patient_id):
         assigned_ids = PacientesProfesional.objects.filter(

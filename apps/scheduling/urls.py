@@ -8,6 +8,8 @@ from apps.scheduling.views import (
     CitaProximaResource,
     CitaHorarioOcupadoResource,
     PatientNotificationsResource,
+    CalificacionCitaResource,
+    CalificacionesProfesionalResource,
 )
 
 app_name = "scheduling"
@@ -18,6 +20,8 @@ router.register(r"citas", CitaViewSet, basename="cita")
 urlpatterns = [
     path("citas", CitaViewSet.as_view({"post": "create"}), name="citas_crear"),
     path("citas/<int:pk>", CitaDetailViewSet.as_view({"patch": "partial_update", "delete": "destroy"}), name="cita"),
+    path("citas/<int:pk>/calificacion", CalificacionCitaResource.as_view(), name="cita_calificacion"),
+    path("profesional/calificaciones", CalificacionesProfesionalResource.as_view(), name="profesional_calificaciones"),
     path("citas/disponibles", CitaDisponibleResource.as_view(), name="citas_disponibles"),
     path("citas/fechas-disponibles", CitaDisponibleResource.as_view(), name="citas_fechas_disponibles"),
     path("citas/proxima", CitaProximaResource.as_view(), name="cita_proxima"),

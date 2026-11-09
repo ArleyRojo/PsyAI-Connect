@@ -2,10 +2,10 @@ import logging
 from datetime import timedelta
 
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Avg, Count
 from django.utils import timezone
 
-from apps.scheduling.models import Citas, Disponibilidad, Notificaciones
+from apps.scheduling.models import CalificacionCita, Citas, Disponibilidad, Notificaciones
 from apps.billing.models import Facturas
 
 logger = logging.getLogger(__name__)
@@ -199,6 +199,11 @@ class AppointmentRepository:
             for f in facturas:
                 factura_map[f["idCita"]] = {"idFactura": f["idFactura"], "estadoPago": f["estadoPago"]}
 
+        calificacion_map = {}
+        if cita_ids:
+            for cal in CalificacionCita.objects.filter(idCita_id__in=cita_ids):
+                calificacion_map[cal.idCita_id] = {"puntuacion": cal.puntuacion, "comentario": cal.comentario}
+
         result = []
         for cita in qs:
             factura = factura_map.get(cita.idCita)
@@ -214,6 +219,7 @@ class AppointmentRepository:
                 "creado_por_profesional": cita.creado_por_profesional,
                 "estadoPago": factura["estadoPago"] if factura else None,
                 "idFactura": factura["idFactura"] if factura else None,
+                "calificacion": calificacion_map.get(cita.idCita),
             }
             result.append(d)
         return result
@@ -267,3 +273,39 @@ class AppointmentRepository:
             .annotate(ocupadas=Count("idCita"))
         )
         return {row["fecha"].strftime("%Y-%m-%d"): row["ocupadas"] for row in rows}
+
+    # ── Calificaciones de citas (HU-67) ───────────────────────────────────
+
+    def get_cita_del_paciente(self, cita_id, patient_id):
+        return Citas.objects.filter(idCita=cita_id, idPaciente_id=patient_id).first()
+
+    def guardar_calificacion(self, cita, puntuacion, comentario):
+        calificacion, creada = CalificacionCita.objects.update_or_create(
+            idCita=cita, defaults={"puntuacion": puntuacion, "comentario": comentario}
+        )
+        return calificacion, creada
+
+    def resumen_calificaciones(self, professional_id):
+        datos = CalificacionCita.objects.filter(idCita__idProfesional_id=professional_id).aggregate(
+            promedio=Avg("puntuacion"), total=Count("idCalificacion")
+        )
+        promedio = round(float(datos["promedio"]), 1) if datos["promedio"] is not None else None
+        return promedio, datos["total"]
+
+    def calificaciones_del_profesional(self, professional_id):
+        """Sin datos del paciente: las calificaciones son anónimas para el profesional."""
+        return [
+            c.to_dict()
+            for c in CalificacionCita.objects.filter(idCita__idProfesional_id=professional_id)
+        ]
+
+    def resumen_por_profesional(self):
+        """{idProfesional: (promedio, total)} para mostrar en la lista pública de profesionales."""
+        filas = (
+            CalificacionCita.objects.values("idCita__idProfesional_id")
+            .annotate(promedio=Avg("puntuacion"), total=Count("idCalificacion"))
+        )
+        return {
+            f["idCita__idProfesional_id"]: (round(float(f["promedio"]), 1), f["total"])
+            for f in filas
+        }

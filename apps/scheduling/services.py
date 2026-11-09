@@ -593,6 +593,38 @@ class AppointmentService:
             if ocupadas_por_fecha.get(fecha_key, 0) < total_slots
         ]
         return {"success": True, "fechas": sorted(fechas)}, 200
+    # ── Calificaciones de citas (HU-67) ───────────────────────────────────
+
+    def calificar_cita(self, patient_id, cita_id, data):
+        try:
+            puntuacion = int(data.get("puntuacion"))
+        except (TypeError, ValueError):
+            puntuacion = 0
+        if puntuacion < 1 or puntuacion > 5:
+            return {"success": False, "message": "La calificación debe estar entre 1 y 5 estrellas"}, 400
+        comentario = (data.get("comentario") or "").strip()
+        if len(comentario) > 500:
+            return {"success": False, "message": "El comentario no puede superar 500 caracteres"}, 400
+
+        cita = self.repo.get_cita_del_paciente(cita_id, patient_id)
+        if not cita:
+            return {"success": False, "message": "Cita no encontrada"}, 404
+        if cita.estado != "Completada":
+            return {"success": False, "message": "Solo puedes calificar citas completadas"}, 400
+
+        calificacion, creada = self.repo.guardar_calificacion(cita, puntuacion, comentario)
+        mensaje = "¡Gracias por calificar tu cita!" if creada else "Calificación actualizada"
+        return {"success": True, "message": mensaje, "calificacion": calificacion.to_dict()}, 200
+
+    def mis_calificaciones(self, professional_id):
+        promedio, total = self.repo.resumen_calificaciones(professional_id)
+        return {
+            "success": True,
+            "promedio": promedio,
+            "total": total,
+            "calificaciones": self.repo.calificaciones_del_profesional(professional_id),
+        }, 200
+
 
 class DisponibilidadService:
     def __init__(self):
