@@ -221,6 +221,8 @@ async function cargarCitasPaciente() {
     });
 
     _citasHistorialGlobal = historial;
+    window._citasPorId = {};
+    data.citas.forEach(c => { window._citasPorId[Number(c.idCita)] = c; });
     
     if (btnHist) {
       btnHist.style.display = 'inline-flex';
@@ -244,7 +246,9 @@ async function cargarCitasPaciente() {
           if (c.estado === 'Pendiente' && creadaPorProfesional) {
             acciones.push(`<button class="btn btn-success btn-sm py-0 me-1" onclick="confirmarCitaPaciente(${citaId})" title="Confirmar cita">Confirmar</button>`);
           }
-          if (c.estado !== 'Cancelada') {
+          if (c.estado === 'Completada') {
+            acciones.push(botonCalificar(c));
+          } else if (c.estado !== 'Cancelada') {
             acciones.push(`<button class="btn btn-outline-danger btn-sm py-0" onclick="abrirModalCancelar(${citaId})" title="Cancelar cita">Cancelar</button>`);
           } else {
             acciones.push('<span class="badge bg-secondary">Cancelada</span>');
@@ -282,6 +286,17 @@ async function cargarCitasPaciente() {
     console.error(err);
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar citas</td></tr>';
   }
+}
+
+// Botón "Calificar" (o las estrellas ya puestas) de una cita completada (HU-67)
+function botonCalificar(c) {
+  const citaId = Number(c.idCita);
+  if (c.calificacion) {
+    const n = Number(c.calificacion.puntuacion) || 0;
+    const estrellas = '★'.repeat(n) + '☆'.repeat(5 - n);
+    return `<button class="btn btn-link btn-sm p-0 text-warning text-decoration-none" onclick="abrirCalificacion(${citaId})" title="Editar calificación"><span aria-label="${n} de 5 estrellas">${estrellas}</span> <i class="fas fa-pen ms-1 text-muted"></i></button>`;
+  }
+  return `<button class="btn btn-warning btn-sm py-0" onclick="abrirCalificacion(${citaId})" title="Calificar la atención"><i class="fas fa-star me-1"></i>Calificar</button>`;
 }
 
 window.confirmarCitaPaciente = async function(idCita) {
@@ -322,7 +337,10 @@ async function cargarProfesionales() {
     (data.profesionales || []).forEach(p => {
       const opt = document.createElement("option");
       opt.value = p.idUsuario;
-      opt.textContent = p.nombre;
+      const total = Number(p.totalCalificaciones) || 0;
+      opt.textContent = total > 0
+        ? `${p.nombre}  ★ ${Number(p.promedioCalificacion).toFixed(1).replace('.', ',')} (${total} ${total === 1 ? 'calificación' : 'calificaciones'})`
+        : p.nombre;
       select.appendChild(opt);
     });
   } catch(e) {
@@ -362,6 +380,8 @@ function inicializarModalHistorial() {
         const [d,m,a] = c.fecha.split('/');
         return new Date(a,m-1,d) < hoy || c.estado === 'Cancelada';
       });
+      window._citasPorId = window._citasPorId || {};
+      data.citas.forEach(c => { window._citasPorId[Number(c.idCita)] = c; });
 
       if (historial.length === 0) {
         histDiv.innerHTML = `
@@ -411,6 +431,7 @@ function inicializarModalHistorial() {
                   ${c.estadoPago ? `<span class="badge ${c.estadoPago === 'Pagado' ? 'bg-success' : 'bg-warning text-dark'} ms-1">${c.estadoPago === 'Pagado' ? 'Completado' : 'Pendiente'}</span>` : ''}
                 </div>
                 ${c.motivoCancelacion ? `<div class="hist-card__cancel-reason"><i class="fas fa-info-circle"></i><strong>Motivo:</strong> ${escapeHtmlAgenda(c.motivoCancelacion)}</div>` : ''}
+                ${c.estado === 'Completada' ? `<div class="hist-card__rating">${botonCalificar(c)}</div>` : ''}
               </div>
             </div>
           </div>

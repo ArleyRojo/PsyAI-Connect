@@ -1,0 +1,71 @@
+/* Calificaciones de citas (HU-67): modal del paciente y sección del perfil del profesional */
+
+.calificar-estrellas {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+
+.calificar-estrella {
+  border: none;
+  background: transparent;
+  font-size: 32px;
+  line-height: 1;
+  color: #d1d5db;
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 0.15s, color 0.15s;
+}
+
+.calificar-estrella:hover { transform: scale(1.12); }
+.calificar-estrella.activa { color: #f59e0b; }
+
+.hist-card__rating { margin-top: 8px; }
+
+/* Perfil del profesional */
+.calif-resumen {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.calif-resumen__numero {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  color: #f59e0b;
+}
+
+.calif-estrellas { color: #f59e0b; letter-spacing: 2px; }
+.calif-resumen__total { font-size: 13px; color: #64748b; }
+
+.calif-lista { display: flex; flex-direction: column; gap: 10px; }
+
+.calif-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.calif-item__cabecera {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.calif-item__comentario {
+  margin: 6px 0 0;
+  font-size: 14px;
+  white-space: pre-line;
+}
+
+.calif-item__sin-comentario { margin: 6px 0 0; font-size: 13px; font-style: italic; color: #94a3b8; }
+
+html.dark-mode .calificar-estrella { color: #475569; }
+html.dark-mode .calificar-estrella.activa { color: #fbbf24; }
+html.dark-mode .calif-item { border-color: #334155; }
+html.dark-mode .calif-resumen__total,
+html.dark-mode .calif-item__cabecera { color: #94a3b8; }

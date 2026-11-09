@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/components/custom-select.css?v=20261009-1">
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-sidebar-opt">
     <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+    <link rel="stylesheet" href="/css/pages/calificaciones.css?v=20261109-1">
 </head>
 <body class="patient-dashboard patient-agenda-page">
 
@@ -294,6 +295,39 @@
 </div>
 </div>
 
+<!-- Modal Calificar Cita (HU-67) -->
+<div class="modal fade" id="modalCalificar" tabindex="-1" aria-labelledby="modalCalificarLabel" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content border-0 shadow">
+<div class="modal-header border-0 pb-0">
+  <h5 class="modal-title fw-bold" id="modalCalificarLabel"><i class="fas fa-star me-2 text-warning"></i>Califica tu cita</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+</div>
+<div class="modal-body py-4">
+  <p class="text-muted text-center mb-2" id="calificarDetalle"></p>
+  <div class="calificar-estrellas" id="calificarEstrellas" role="radiogroup" aria-label="Calificación de 1 a 5 estrellas">
+    <button type="button" class="calificar-estrella" data-valor="1" role="radio" aria-label="1 estrella"><i class="fas fa-star"></i></button>
+    <button type="button" class="calificar-estrella" data-valor="2" role="radio" aria-label="2 estrellas"><i class="fas fa-star"></i></button>
+    <button type="button" class="calificar-estrella" data-valor="3" role="radio" aria-label="3 estrellas"><i class="fas fa-star"></i></button>
+    <button type="button" class="calificar-estrella" data-valor="4" role="radio" aria-label="4 estrellas"><i class="fas fa-star"></i></button>
+    <button type="button" class="calificar-estrella" data-valor="5" role="radio" aria-label="5 estrellas"><i class="fas fa-star"></i></button>
+  </div>
+  <p class="text-center small text-muted mb-3" id="calificarTexto">Elige de 1 a 5 estrellas</p>
+  <label for="calificarComentario" class="form-label fw-semibold">Comentario <span class="text-muted fw-normal">(opcional)</span></label>
+  <textarea class="form-control" id="calificarComentario" rows="3" maxlength="500" placeholder="¿Cómo te sentiste en la atención?"></textarea>
+  <div class="d-flex justify-content-between mt-1">
+    <small class="text-muted">Tu profesional verá tu comentario sin tu nombre.</small>
+    <small class="text-muted" id="calificarContador">0/500</small>
+  </div>
+</div>
+<div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+  <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Volver</button>
+  <button type="button" class="btn btn-primary px-4" id="btnGuardarCalificacion" disabled>Guardar calificación</button>
+</div>
+</div>
+</div>
+</div>
+
 <!-- Modal Historial de Citas Paciente -->
 <div class="modal fade" id="modalHistorialCitasPaciente" tabindex="-1" aria-labelledby="modalHistorialCitasPacienteLabel" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -322,11 +356,12 @@
 <script src="/js/modules/auth/auth-guard.js?v=20261031-xss"></script>
 <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
 <script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
-<script src="/js/modules/patient/aside.js?v=20261105-fix-handleMediaChange"></script>
+<script src="/js/modules/patient/aside.js?v=20261109-consejos"></script>
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 <script src="/js/core/shared/nombre.usuario.js?v=20260711-1"></script>
 <script src="/js/components/custom-select.js?v=20261009-1"></script>
-<script src="/js/modules/patient/agendaquotes.js?v=20261030-xss-1"></script>
+<script src="/js/modules/patient/agendaquotes.js?v=20261109-calificar"></script>
+<script src="/js/modules/patient/calificaciones.js?v=20261109-1"></script>
 <script>
 // Forzar que todos los acordeones inicien cerrados
 document.querySelectorAll('.accordion-collapse').forEach(function(el) {
