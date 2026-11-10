@@ -1,0 +1,79 @@
+/* Mantenimiento (admin) — HU-24, HU-30, HU-31 */
+.mant-estado {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.mant-tarjeta {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #94a3b8;
+}
+
+.mant-tarjeta--ok { border-left-color: #16a34a; }
+.mant-tarjeta--aviso { border-left-color: #f59e0b; }
+.mant-tarjeta--error { border-left-color: #dc2626; }
+.mant-tarjeta i { font-size: 1.15rem; margin-top: 3px; color: #64748b; }
+.mant-tarjeta--ok i { color: #16a34a; }
+.mant-tarjeta--aviso i { color: #f59e0b; }
+.mant-tarjeta--error i { color: #dc2626; }
+.mant-tarjeta__nombre { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #64748b; font-weight: 700; }
+.mant-tarjeta__texto { font-weight: 700; color: #1e293b; }
+.mant-tarjeta__detalle { font-size: .78rem; color: #64748b; word-break: break-word; }
+
+.mant-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.mant-resultado {
+  max-height: 180px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #1e293b;
+  font-size: .8rem;
+  white-space: pre-wrap;
+}
+
+.mant-modo-estado { font-size: .85rem; font-weight: 600; }
+.mant-modo-estado--activo { color: #b45309; }
+.mant-modo-estado--inactivo { color: #166534; }
+
+.mant-peligro {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #7f1d1d;
+}
+
+.mant-tipo {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  background: #e0ecff;
+  color: #1d4ed8;
+}
+
+.mant-tipo--manual { background: #dcfce7; color: #166534; }
+.mant-tipo--previa { background: #fef3c7; color: #92400e; }
+
+/* Modo oscuro */
+html.dark-mode .mant-tarjeta { background: var(--dm-card, #0b1429); border-color: var(--dm-border, #1a2b4a); }
+html.dark-mode .mant-tarjeta__texto { color: var(--dm-heading, #e8f0f8); }
+html.dark-mode .mant-tarjeta__nombre,
+html.dark-mode .mant-tarjeta__detalle { color: var(--dm-text2, #8aa0bc); }
+html.dark-mode .mant-resultado { background: var(--dm-elevated, #0f1d32); color: var(--dm-text1, #d0dde8); }
+html.dark-mode .mant-modo-estado--activo { color: #fbbf24; }
+html.dark-mode .mant-modo-estado--inactivo { color: #86efac; }
+html.dark-mode .mant-peligro { background: rgba(220, 38, 38, .12); border-color: rgba(248, 113, 113, .4); color: #fecaca; }
+html.dark-mode .mant-tipo { background: rgba(96, 165, 250, .18); color: #93c5fd; }
+html.dark-mode .mant-tipo--manual { background: rgba(22, 163, 74, .2); color: #86efac; }
+html.dark-mode .mant-tipo--previa { background: rgba(245, 158, 11, .18); color: #fcd34d; }

@@ -51,6 +51,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.core.middleware.account_status.AccountStatusMiddleware",
     "apps.core.middleware.inactividad.InactividadMiddleware",
+    "apps.core.middleware.mantenimiento.MantenimientoMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
@@ -114,6 +115,9 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# Copias de seguridad cifradas (HU-30/31). En Docker es un volumen compartido por app y scheduler.
+BACKUP_DIR = os.getenv("BACKUP_DIR", str(BASE_DIR / "backups"))
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_ROOT = BASE_DIR / "media"

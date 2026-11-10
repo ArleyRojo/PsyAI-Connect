@@ -36,6 +36,8 @@ services:
       - ..:/app
       # Persist uploaded documents between container restarts
       - uploads_data:/app/static/uploads
+      # Copias de seguridad cifradas (HU-30), compartidas con el scheduler
+      - backups_data:/app/backups
     depends_on:
       db:
         condition: service_healthy
@@ -51,7 +53,8 @@ services:
 
   # ── Programador de tareas (recordatorios de cita, de cobro y notificaciones) ──
   # Ejecuta `python manage.py programador`, que corre sin parar:
-  #   cada 5 min: recordatorios de cita (24 h antes) y notificaciones programadas del admin
+  #   cada 5 min: recordatorios de cita (24 h antes), notificaciones programadas del admin
+  #               y la copia de seguridad diaria cuando llega la hora (HU-30)
   #   cada hora: recordatorios de facturas pendientes (HU-77)
   # Ver lo que hace:  docker compose -f install/docker-compose.yml logs -f scheduler
   scheduler:
@@ -76,6 +79,7 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - ..:/app
+      - backups_data:/app/backups
     depends_on:
       app:
         condition: service_healthy
@@ -110,6 +114,8 @@ volumes:
   pgdata:
     driver: local
   uploads_data:
+    driver: local
+  backups_data:
     driver: local
 
 # ── Network ────────────────────────────────────────────────────────────────

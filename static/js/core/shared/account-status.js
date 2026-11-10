@@ -33,6 +33,16 @@
     var originalFetch = window.fetch;
     window.fetch = function (url, options) {
       return originalFetch.apply(this, arguments).then(function (response) {
+        // Modo mantenimiento activado por el admin (HU-24): recargar muestra la página de aviso
+        if (response.status === 503 && !window.__psyaiMantenimiento) {
+          var copia = response.clone();
+          copia.json().then(function (data) {
+            if (data && data.code === "maintenance" && !window.__psyaiMantenimiento) {
+              window.__psyaiMantenimiento = true;
+              window.location.reload();
+            }
+          }).catch(function () {});
+        }
         // Solo nos importan respuestas 403 con code account_suspended
         if (response.status === 403) {
           var ct = response.headers.get("content-type") || "";

@@ -1,4 +1,5 @@
 from datetime import date as date_cls
+from datetime import time as dt_time
 from django.db import models
 from django.utils import timezone
 
@@ -166,6 +167,38 @@ class ConfiguracionSeguridad(models.Model):
             "proximaRevision": proxima.isoformat() if proxima else None,
             "revisionVencida": self.revision_vencida(),
             "rangos": {k: list(v) for k, v in self.RANGOS.items()},
+            "actualizadoPor": self.actualizadoPor,
+            "fechaActualizacion": self.fechaActualizacion.isoformat() if self.fechaActualizacion else None,
+        }
+
+
+class ConfiguracionSistema(models.Model):
+    """Ajustes de mantenimiento del sistema (una sola fila). HU-24 y HU-30."""
+
+    modoMantenimiento = models.BooleanField(default=False)
+    mensajeMantenimiento = models.CharField(
+        max_length=300, blank=True,
+        default="Estamos haciendo mejoras en la plataforma. Vuelve a intentarlo en unos minutos.",
+    )
+    horaCopia = models.TimeField(default=dt_time(2, 0))
+    programadorLatido = models.DateTimeField(null=True, blank=True)
+    actualizadoPor = models.CharField(max_length=120, null=True, blank=True)
+    fechaActualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "ConfiguracionSistema"
+
+    @classmethod
+    def obtener(cls):
+        config, _ = cls.objects.get_or_create(pk=1)
+        return config
+
+    def to_dict(self):
+        return {
+            "modoMantenimiento": self.modoMantenimiento,
+            "mensajeMantenimiento": self.mensajeMantenimiento,
+            "horaCopia": self.horaCopia.strftime("%H:%M") if self.horaCopia else "02:00",
+            "programadorLatido": self.programadorLatido.isoformat() if self.programadorLatido else None,
             "actualizadoPor": self.actualizadoPor,
             "fechaActualizacion": self.fechaActualizacion.isoformat() if self.fechaActualizacion else None,
         }

@@ -96,6 +96,13 @@ urlpatterns = [
         views.PoliticaContrasenaAPIView.as_view(),
         name="politica_contrasena",
     ),
+    path("admin/mantenimiento", views.AdminMantenimientoEstadoAPIView.as_view(), name="admin_mantenimiento"),
+    path("admin/mantenimiento/accion", views.AdminMantenimientoAccionAPIView.as_view(),
+         name="admin_mantenimiento_accion"),
+    path("admin/mantenimiento/modo", views.AdminMantenimientoModoAPIView.as_view(), name="admin_mantenimiento_modo"),
+    path("admin/copias", views.AdminCopiasAPIView.as_view(), name="admin_copias"),
+    path("admin/copias/hora", views.AdminCopiasHoraAPIView.as_view(), name="admin_copias_hora"),
+    path("admin/copias/restaurar", views.AdminCopiasRestaurarAPIView.as_view(), name="admin_copias_restaurar"),
     path(
         "sesion/inactividad",
         views.SesionInactividadAPIView.as_view(),

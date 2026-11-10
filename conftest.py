@@ -17,6 +17,12 @@ def enable_db_access_for_all_tests(db):
     pass
 
 
+@pytest.fixture(autouse=True)
+def copias_en_carpeta_temporal(settings, tmp_path):
+    """Las pruebas nunca escriben copias de seguridad en la carpeta real backups/ (HU-30)."""
+    settings.BACKUP_DIR = str(tmp_path / "backups")
+
+
 # ── Reusable fixtures ────────────────────────────────────────────────────────
 
 

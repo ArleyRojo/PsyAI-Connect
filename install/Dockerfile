@@ -65,7 +65,7 @@ RUN rm -rf .git .pytest_cache __pycache__ \
     && find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
 # Ensure the app user owns the application directory (and uploads folder)
-RUN mkdir -p /app/static/uploads \
+RUN mkdir -p /app/static/uploads /app/backups \
     && chown -R appuser:appuser /app
 
 # Switch to non-root user

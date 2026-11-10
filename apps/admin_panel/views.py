@@ -466,3 +466,75 @@ class AdminRevisarPoliticasAPIView(APIView):
         from apps.admin_panel import seguridad
         payload, status_code = seguridad.marcar_revisadas(getattr(request, "user_name", None) or "Admin")
         return Response(payload, status=status_code)
+
+
+# ── HU-24 mantenimiento y HU-30/31 copias de seguridad ──────────────────────
+def _nombre_admin(request):
+    return getattr(request, "user_name", None) or "Admin"
+
+
+class AdminMantenimientoEstadoAPIView(APIView):
+    """GET /api/admin/mantenimiento — estado del sistema y configuración."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def get(self, request):
+        from apps.admin_panel import mantenimiento
+        payload, status_code = mantenimiento.estado()
+        return Response(payload, status=status_code)
+
+
+class AdminMantenimientoAccionAPIView(APIView):
+    """POST /api/admin/mantenimiento/accion {accion} — limpiezas y tareas manuales."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def post(self, request):
+        from apps.admin_panel import mantenimiento
+        from apps.authentication.models import Register
+        email = Register.objects.filter(idUsuario=getattr(request, "user_id", None)).values_list("email", flat=True).first()
+        payload, status_code = mantenimiento.ejecutar_accion(request.data, _nombre_admin(request), email)
+        return Response(payload, status=status_code)
+
+
+class AdminMantenimientoModoAPIView(APIView):
+    """PUT /api/admin/mantenimiento/modo {activo, mensaje} — activar o desactivar el modo mantenimiento."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def put(self, request):
+        from apps.admin_panel import mantenimiento
+        payload, status_code = mantenimiento.cambiar_modo(request.data, _nombre_admin(request))
+        return Response(payload, status=status_code)
+
+
+class AdminCopiasAPIView(APIView):
+    """GET /api/admin/copias — listado. POST /api/admin/copias — crear copia ahora."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def get(self, request):
+        from apps.admin_panel import mantenimiento
+        payload, status_code = mantenimiento.listar_copias()
+        return Response(payload, status=status_code)
+
+    def post(self, request):
+        from apps.admin_panel import mantenimiento
+        payload, status_code = mantenimiento.crear_copia(_nombre_admin(request), "manual")
+        return Response(payload, status=status_code)
+
+
+class AdminCopiasHoraAPIView(APIView):
+    """PUT /api/admin/copias/hora {hora: "HH:MM"} — hora de la copia automática."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def put(self, request):
+        from apps.admin_panel import mantenimiento
+        payload, status_code = mantenimiento.cambiar_hora_copia(request.data, _nombre_admin(request))
+        return Response(payload, status=status_code)
+
+
+class AdminCopiasRestaurarAPIView(APIView):
+    """POST /api/admin/copias/restaurar {archivo, confirmacion: "RESTAURAR"} (HU-31)."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def post(self, request):
+        from apps.admin_panel import mantenimiento
+        payload, status_code = mantenimiento.restaurar_copia(request.data, _nombre_admin(request))
+        return Response(payload, status=status_code)

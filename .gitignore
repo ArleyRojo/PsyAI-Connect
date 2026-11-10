@@ -58,3 +58,6 @@ staticfiles/
 
 # Python cache
 .pyrevision
+
+# Copias de seguridad cifradas (HU-30): nunca se suben al repositorio
+backups/

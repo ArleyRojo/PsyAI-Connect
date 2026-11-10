@@ -37,6 +37,7 @@ services:
     # Only mount uploads for persistence
     volumes:
       - uploads_data:/app/static/uploads
+      - backups_data:/app/backups
     depends_on:
       db:
         condition: service_healthy
