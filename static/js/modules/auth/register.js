@@ -46,7 +46,8 @@ const FIELDS = [
         id: 'password',
         check: () => {
             const v = document.getElementById('password').value;
-            return v.length >= 6 && /[A-Z]/.test(v) && /[0-9]/.test(v);
+            // Reglas definidas por el admin (politica-contrasena.js, HU-23)
+            return window.cumplePoliticaPass ? window.cumplePoliticaPass(v) : (v.length >= 6 && /[A-Z]/.test(v) && /[0-9]/.test(v));
         },
         step: 2
     },
@@ -186,7 +187,8 @@ function checkPwd() {
     const val      = document.getElementById('password').value;
     const fill     = document.getElementById('pwdFill');
     const hint     = document.getElementById('pwdHint');
-    const hasLen   = val.length >= 6;
+    const minimo   = (window.PSY_POLITICA_PASS && window.PSY_POLITICA_PASS.minimo) || 6;
+    const hasLen   = val.length >= minimo;
     const hasUpper = /[A-Z]/.test(val);
     const hasNum   = /[0-9]/.test(val);
     const hasSpec  = /[^A-Za-z0-9]/.test(val);
@@ -200,6 +202,7 @@ function checkPwd() {
     setRule('rule-len',   hasLen);
     setRule('rule-upper', hasUpper);
     setRule('rule-num',   hasNum);
+    setRule('rule-sym',   hasSpec);
 
     let score = 0;
     if (hasLen)   score++;

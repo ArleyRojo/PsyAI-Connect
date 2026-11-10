@@ -124,7 +124,9 @@ class SecurityRepository:
             row = IntentosFallidos.objects.filter(email__iexact=email).first()
             if not row:
                 return False, 0
-            if row.intentos < 5:
+            from apps.admin_panel.seguridad import bloqueo
+            intentos_maximos, _ = bloqueo()
+            if row.intentos < intentos_maximos:
                 return False, 0
             if not row.bloqueado_hasta:
                 return False, 0
@@ -143,8 +145,10 @@ class SecurityRepository:
             if row:
                 row.intentos += 1
                 row.ultimo_intento = now
-                if row.intentos >= 5:
-                    row.bloqueado_hasta = now + timedelta(minutes=15)
+                from apps.admin_panel.seguridad import bloqueo
+                intentos_maximos, minutos_bloqueo = bloqueo()
+                if row.intentos >= intentos_maximos:
+                    row.bloqueado_hasta = now + timedelta(minutes=minutos_bloqueo)
                 row.save(update_fields=["intentos", "ultimo_intento", "bloqueado_hasta"])
             else:
                 IntentosFallidos.objects.create(

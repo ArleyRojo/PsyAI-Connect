@@ -87,6 +87,16 @@ urlpatterns = [
         name="admin_asignaciones_historial",
     ),
     path(
+        "admin/seguridad/revisar",
+        views.AdminRevisarPoliticasAPIView.as_view(),
+        name="admin_seguridad_revisar",
+    ),
+    path(
+        "politicas/contrasena",
+        views.PoliticaContrasenaAPIView.as_view(),
+        name="politica_contrasena",
+    ),
+    path(
         "sesion/inactividad",
         views.SesionInactividadAPIView.as_view(),
         name="sesion_inactividad",

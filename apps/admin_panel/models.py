@@ -92,13 +92,36 @@ class Logs(models.Model):
 
 
 class ConfiguracionSeguridad(models.Model):
-    """Ajustes de seguridad del sistema (una sola fila). HU-13: cierre por inactividad."""
+    """Políticas de seguridad del sistema (una sola fila).
+    HU-13: cierre por inactividad. HU-23: contraseñas, bloqueo por intentos y revisión periódica."""
 
     MINUTOS_MIN = 5
     MINUTOS_MAX = 120
     MINUTOS_DEFECTO = 15
 
+    # Rangos permitidos para cada política: campo -> (mínimo, máximo)
+    RANGOS = {
+        "minutosInactividad": (MINUTOS_MIN, MINUTOS_MAX),
+        "passMinimo": (6, 32),
+        "intentosMaximos": (3, 10),
+        "minutosBloqueo": (5, 120),
+        "revisionMeses": (1, 24),
+    }
+
     minutosInactividad = models.PositiveSmallIntegerField(default=MINUTOS_DEFECTO)
+    # Contraseñas (los valores por defecto son las reglas que ya tenía el registro)
+    passMinimo = models.PositiveSmallIntegerField(default=6)
+    passMayuscula = models.BooleanField(default=True)
+    passNumero = models.BooleanField(default=True)
+    passSimbolo = models.BooleanField(default=False)
+    # Bloqueo por intentos fallidos de inicio de sesión
+    intentosMaximos = models.PositiveSmallIntegerField(default=5)
+    minutosBloqueo = models.PositiveSmallIntegerField(default=15)
+    # Revisión periódica de las políticas (RN-14)
+    revisionMeses = models.PositiveSmallIntegerField(default=6)
+    fechaUltimaRevision = models.DateTimeField(null=True, blank=True)
+    revisadoPor = models.CharField(max_length=120, null=True, blank=True)
+
     actualizadoPor = models.CharField(max_length=120, null=True, blank=True)
     fechaActualizacion = models.DateTimeField(auto_now=True)
 
@@ -110,11 +133,39 @@ class ConfiguracionSeguridad(models.Model):
         config, _ = cls.objects.get_or_create(pk=1)
         return config
 
+    def proxima_revision(self):
+        if not self.fechaUltimaRevision:
+            return None
+        import calendar
+        fecha = self.fechaUltimaRevision
+        meses = fecha.month - 1 + self.revisionMeses
+        anio, mes = fecha.year + meses // 12, meses % 12 + 1
+        dia = min(fecha.day, calendar.monthrange(anio, mes)[1])
+        return fecha.replace(year=anio, month=mes, day=dia)
+
+    def revision_vencida(self):
+        from django.utils import timezone
+        proxima = self.proxima_revision()
+        return proxima is None or proxima <= timezone.now()
+
     def to_dict(self):
+        proxima = self.proxima_revision()
         return {
             "minutosInactividad": self.minutosInactividad,
             "minutosMin": self.MINUTOS_MIN,
             "minutosMax": self.MINUTOS_MAX,
+            "passMinimo": self.passMinimo,
+            "passMayuscula": self.passMayuscula,
+            "passNumero": self.passNumero,
+            "passSimbolo": self.passSimbolo,
+            "intentosMaximos": self.intentosMaximos,
+            "minutosBloqueo": self.minutosBloqueo,
+            "revisionMeses": self.revisionMeses,
+            "fechaUltimaRevision": self.fechaUltimaRevision.isoformat() if self.fechaUltimaRevision else None,
+            "revisadoPor": self.revisadoPor,
+            "proximaRevision": proxima.isoformat() if proxima else None,
+            "revisionVencida": self.revision_vencida(),
+            "rangos": {k: list(v) for k, v in self.RANGOS.items()},
             "actualizadoPor": self.actualizadoPor,
             "fechaActualizacion": self.fechaActualizacion.isoformat() if self.fechaActualizacion else None,
         }

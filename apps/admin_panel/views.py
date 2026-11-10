@@ -4,6 +4,7 @@ import time as _time
 from django.http import StreamingHttpResponse
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
 from apps.admin_panel.services import (
@@ -443,4 +444,25 @@ class AdminHistorialAsignacionesAPIView(APIView):
     def get(self, request):
         from apps.professionals import asignaciones
         payload, status_code = asignaciones.historial()
+        return Response(payload, status=status_code)
+
+
+# ── HU-23: políticas de seguridad ───────────────────────────────────────────
+class PoliticaContrasenaAPIView(APIView):
+    """GET /api/politicas/contrasena — requisitos de contraseña (público, para los formularios)."""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        from apps.admin_panel import seguridad
+        return Response({"success": True, **seguridad.requisitos_contrasena()}, status=status.HTTP_200_OK)
+
+
+class AdminRevisarPoliticasAPIView(APIView):
+    """POST /api/admin/seguridad/revisar — el admin confirma que revisó las políticas (RN-14)."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def post(self, request):
+        from apps.admin_panel import seguridad
+        payload, status_code = seguridad.marcar_revisadas(getattr(request, "user_name", None) or "Admin")
         return Response(payload, status=status_code)

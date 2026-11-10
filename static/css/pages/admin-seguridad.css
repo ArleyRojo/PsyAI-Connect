@@ -1,0 +1,15 @@
+/* Seguridad (admin) — HU-13 y HU-23 */
+.seguridad-ejemplo {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f1f6fd;
+  color: #1e3a5f;
+  font-size: .85rem;
+}
+
+#estadoRevision.bg-vigente { background: #dcfce7; color: #166534; }
+#estadoRevision.bg-vencida { background: #fee2e2; color: #991b1b; }
+
+html.dark-mode .seguridad-ejemplo { background: var(--dm-elevated, #0f1d32); color: var(--dm-text1, #d0dde8); }
+html.dark-mode #estadoRevision.bg-vigente { background: rgba(22, 163, 74, .2); color: #86efac; }
+html.dark-mode #estadoRevision.bg-vencida { background: rgba(220, 38, 38, .2); color: #fca5a5; }

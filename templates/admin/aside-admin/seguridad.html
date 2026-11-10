@@ -5,6 +5,7 @@
     {% include 'base/partials/head.html' %}
     <link rel="stylesheet" href="/css/pages/admin.css?v=20261030-sidebar-fix-1">
     <link rel="stylesheet" href="/responsive/responsive-admin.css?v=20261104-sidebar-opt">
+    <link rel="stylesheet" href="/css/pages/admin-seguridad.css?v=20261109-1">
 </head>
 <body class="admin-panel">
 
@@ -102,7 +103,7 @@
     <header class="main-header d-flex justify-content-between align-items-center mb-4">
       <div>
         <h1 class="h3 fw-bold mb-0"><i class="fas fa-lock me-2 text-primary"></i>Seguridad</h1>
-        <small class="text-muted">Ajustes de seguridad de las sesiones de los usuarios.</small>
+        <small class="text-muted">Políticas de seguridad y privacidad de la plataforma.</small>
       </div>
       <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i></div>
     </header>
@@ -140,6 +141,70 @@
       </form>
     </div>
 
+    <!-- HU-23: Revisión periódica de las políticas (RN-14) -->
+    <div class="card shadow-sm border-0 p-4 seguridad-card mt-4" id="cardRevision">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div>
+          <h2 class="h5 fw-bold mb-1"><i class="fas fa-clipboard-check me-2 text-primary"></i>Revisión de las políticas</h2>
+          <p class="text-muted mb-0" style="font-size:.88rem;" id="textoRevision">Cargando...</p>
+        </div>
+        <span class="badge rounded-pill" id="estadoRevision"></span>
+      </div>
+      <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mt-3">
+        <div>
+          <label for="revisionMeses" class="form-label fw-semibold">Revisar cada</label>
+          <div class="input-group" style="max-width:200px;">
+            <input type="number" class="form-control" id="revisionMeses" min="1" max="24" step="1">
+            <span class="input-group-text">meses</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-success" id="btnMarcarRevisadas">
+          <i class="fas fa-check-double me-1"></i>Marcar como revisadas
+        </button>
+      </div>
+    </div>
+
+    <!-- HU-23: Contraseñas y bloqueo -->
+    <div class="card shadow-sm border-0 p-4 seguridad-card mt-4">
+      <h2 class="h5 fw-bold mb-1"><i class="fas fa-key me-2 text-primary"></i>Contraseñas</h2>
+      <p class="text-muted mb-3" style="font-size:.88rem;">Se aplican al registrarse y al crear una contraseña nueva. Las contraseñas actuales siguen funcionando.</p>
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+          <label for="passMinimo" class="form-label fw-semibold">Largo mínimo</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="passMinimo" min="6" max="32" step="1">
+            <span class="input-group-text">caracteres</span>
+          </div>
+        </div>
+        <div class="col-12 col-md-8 d-flex flex-wrap gap-4">
+          <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="passMayuscula"><label class="form-check-label" for="passMayuscula">Exigir mayúscula</label></div>
+          <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="passNumero"><label class="form-check-label" for="passNumero">Exigir número</label></div>
+          <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="passSimbolo"><label class="form-check-label" for="passSimbolo">Exigir símbolo</label></div>
+        </div>
+      </div>
+      <p class="seguridad-ejemplo mt-3 mb-0" id="textoPolitica"></p>
+
+      <h2 class="h5 fw-bold mb-1 mt-4"><i class="fas fa-user-lock me-2 text-primary"></i>Bloqueo por intentos fallidos</h2>
+      <p class="text-muted mb-3" style="font-size:.88rem;">Si alguien se equivoca muchas veces con la contraseña, la cuenta se bloquea un tiempo.</p>
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <label for="intentosMaximos" class="form-label fw-semibold">Intentos permitidos</label>
+          <input type="number" class="form-control" id="intentosMaximos" min="3" max="10" step="1">
+        </div>
+        <div class="col-12 col-md-4">
+          <label for="minutosBloqueo" class="form-label fw-semibold">Tiempo de bloqueo</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="minutosBloqueo" min="5" max="120" step="1">
+            <span class="input-group-text">minutos</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end mt-4">
+        <button type="button" class="btn btn-primary" id="btnGuardarPoliticas"><i class="fas fa-save me-1"></i>Guardar políticas</button>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -149,7 +214,7 @@
 <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
 <script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
 <script src="/js/core/shared/aside.js?v=20261104-aside-unified"></script>
-<script src="/js/modules/admin/admin.seguridad.js?v=20261109-1"></script>
+<script src="/js/modules/admin/admin.seguridad.js?v=20261109-politicas"></script>
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 
 </body>

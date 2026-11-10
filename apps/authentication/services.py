@@ -113,18 +113,11 @@ class AuthService:
             password = password.strip()
         if not password:
             raise ValidationError("La contraseña es requerida", "password")
-        if len(password) < 6:
-            raise ValidationError(
-                "La contraseña debe tener al menos 6 caracteres", "password"
-            )
-        if not re.search(r"[A-Z]", password):
-            raise ValidationError(
-                "La contraseña debe contener al menos una mayúscula", "password"
-            )
-        if not re.search(r"[0-9]", password):
-            raise ValidationError(
-                "La contraseña debe contener al menos un número", "password"
-            )
+        # Política de contraseñas configurable por el admin (HU-23)
+        from apps.admin_panel.seguridad import validar_contrasena
+        error_password = validar_contrasena(password)
+        if error_password:
+            raise ValidationError(error_password, "password")
 
         rol = (data.get("rol", "paciente") or "paciente").strip().lower()
         allowed = ("paciente", "profesional", "admin")
@@ -182,18 +175,11 @@ class AuthService:
         password = data.get("new_password", "")
         if not password:
             raise ValidationError("La contraseña es requerida", "password")
-        if len(password) < 6:
-            raise ValidationError(
-                "La contraseña debe tener al menos 6 caracteres", "password"
-            )
-        if not re.search(r"[A-Z]", password):
-            raise ValidationError(
-                "La contraseña debe contener al menos una mayúscula", "password"
-            )
-        if not re.search(r"[0-9]", password):
-            raise ValidationError(
-                "La contraseña debe contener al menos un número", "password"
-            )
+        # Política de contraseñas configurable por el admin (HU-23)
+        from apps.admin_panel.seguridad import validar_contrasena
+        error_password = validar_contrasena(password)
+        if error_password:
+            raise ValidationError(error_password, "password")
 
         return {"token": token, "password": password}
 
