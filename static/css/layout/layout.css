@@ -1105,3 +1105,50 @@ html.dark-mode .form-switch input.form-check-input:checked {
 html.dark-mode #tablaCatalogo strong {
     color: var(--dm-heading, #e8f0f8);
 }
+
+/* Campanita del administrador (botón y panel) */
+.admin-campana {
+    position: relative;
+    display: inline-flex;
+}
+
+/* El encabezado recorta lo que sobresale, por eso el panel va fijo y el JS lo ubica bajo la campana */
+.admin-campana__panel.professional-notification-panel {
+    position: fixed;
+    z-index: 20000;
+}
+
+.admin-campana__todas {
+    display: block;
+    padding: 10px 16px;
+    border-top: 1px solid #e7edf5;
+    color: #0d47a1;
+    font-size: .82rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+}
+
+.admin-campana__todas:hover { text-decoration: underline; }
+.admin-campana__fecha { font-size: .75rem !important; }
+
+/* En modo claro el encabezado es azul: la campana va translúcida con el ícono blanco */
+html:not(.dark-mode) .main-header .header-notification {
+    border-color: rgba(255, 255, 255, .35);
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+}
+
+html:not(.dark-mode) .main-header .header-notification:hover {
+    background: rgba(255, 255, 255, .28);
+    color: #fff;
+}
+
+html:not(.dark-mode) .main-header .notification-dot {
+    border-color: #1d4ed8;
+}
+
+html.dark-mode .admin-campana__todas {
+    border-top-color: var(--dm-border, #1a2b4a);
+    color: var(--dm-accent, #90CAF9);
+}
