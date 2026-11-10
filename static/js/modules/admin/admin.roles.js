@@ -13,6 +13,12 @@ let rolesFiltrados = [];
 document.addEventListener('DOMContentLoaded', () => {
     cargarUsuarios();
     cargarHistorial();
+    cargarCatalogo();
+    document.getElementById('btnCrearRolCatalogo')?.addEventListener('click', crearRolCatalogo);
+    document.getElementById('tablaCatalogo')?.addEventListener('click', e => {
+        const btn = e.target.closest('[data-eliminar-rol]');
+        if (btn) eliminarRolCatalogo(Number(btn.dataset.eliminarRol), btn.dataset.nombre);
+    });
     document.getElementById('buscarUsuario')?.addEventListener('input', filtrarUsuarios);
     document.getElementById('filtroRol')?.addEventListener('change', filtrarUsuarios);
     document.getElementById('filtroEstado')?.addEventListener('change', filtrarUsuarios);
@@ -109,12 +115,12 @@ function renderizarPaginaRoles() {
                   <div><div class="user-name">${escapeHtmlRoles(u.nombre)}</div><div class="user-email">${escapeHtmlRoles(u.email)}</div></div>
                 </div>
               </td>
-              <td data-label="Rol">${rolBadge(u.rol)}</td>
+              <td data-label="Rol">${rolBadge(u.rol, u.rolPersonalizado)}</td>
               <td data-label="Estado">${estadoBadge(u)}</td>
               <td data-label="Última actividad" class="text-muted" style="font-size:.82rem;">${escapeHtmlRoles(u.fechaRegistro||'—')}</td>
               <td class="text-end">
                 <div class="d-flex justify-content-end gap-1">
-                  <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEditar(${Number(u.idUsuario)},${inlineJsArgRoles(u.nombre)},${inlineJsArgRoles(u.rol)})" title="Editar"><i class="fas fa-edit"></i></button>
+                  <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEditar(${Number(u.idUsuario)},${inlineJsArgRoles(u.nombre)},${inlineJsArgRoles(u.idRolPersonalizado ? 'custom:' + u.idRolPersonalizado : u.rol)})" title="Editar"><i class="fas fa-edit"></i></button>
                 </div>
               </td>
             </tr>`;
@@ -252,7 +258,7 @@ async function guardarRol() {
         const data = await res.json();
         bootstrap.Modal.getInstance(document.getElementById('modalEditarRol')).hide();
         mostrarAlerta(data.success ? 'success' : 'danger', data.message);
-        if (data.success) { cargarUsuarios(); cargarHistorial(); }
+        if (data.success) { cargarUsuarios(); cargarHistorial(); cargarCatalogo(); }
     } catch(e) { console.error(e); }
 }
 window.guardarRol = guardarRol;
@@ -268,7 +274,7 @@ async function confirmarAccion(id, nombre, accion) {
         });
         const data = await res.json();
         mostrarAlerta(data.success ? 'success' : 'danger', data.message);
-        if (data.success) { cargarUsuarios(); cargarHistorial(); }
+        if (data.success) { cargarUsuarios(); cargarHistorial(); cargarCatalogo(); }
     } catch(e) { console.error(e); }
 }
 
@@ -301,14 +307,14 @@ async function asignarRol() {
             document.getElementById('emailUsuario').value = '';
             document.getElementById('nuevoRol').value = '';
             document.getElementById('motivoAsignacion').value = '';
-            cargarUsuarios(); cargarHistorial();
+            cargarUsuarios(); cargarHistorial(); cargarCatalogo();
         }
     } catch(e) { console.error(e); }
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function mostrarTab(tab, btn) {
-    ['usuarios','agregar','historial'].forEach(t => {
+    ['usuarios','catalogo','agregar','historial'].forEach(t => {
         const el = document.getElementById(`tab-${t}`);
         if (el) {
             el.style.display = t === tab ? '' : 'none';
@@ -327,9 +333,14 @@ function mostrarTab(tab, btn) {
 
 
 
-function rolBadge(rol) {
+function rolBadge(rol, personalizado) {
     if (!rol) return '—';
     const cls = rol === 'admin' ? 'badge-rol-admin' : rol === 'profesional' ? 'badge-rol-profesional' : 'badge-rol-paciente';
+    if (personalizado) {
+        // Rol del catálogo (HU-11): se muestra su nombre y debajo el rol base del que hereda permisos
+        return `<span class="badge-rol ${cls}">${escapeHtmlRoles(personalizado)}</span>` +
+            `<small class="d-block text-muted" style="font-size:.72rem;">Base: ${escapeHtmlRoles(capitalizar(rol))}</small>`;
+    }
     return `<span class="badge-rol ${cls}">${escapeHtmlRoles(capitalizar(rol))}</span>`;
 }
 
@@ -379,4 +390,120 @@ function filtrarUsuarios() {
     renderizarPaginaRoles();
     set('cntUsuarios', filtrados.length);
     set('cntUsuariosEncontrados', filtrados.length);
+}
+
+
+// ── Catálogo de roles (HU-11) ─────────────────────────────────────────────────
+const NOMBRES_BASE = { paciente: 'Paciente', profesional: 'Profesional', admin: 'Administrador' };
+let catalogoPersonalizados = [];
+
+function avisoRoles(tipo, mensaje, titulo) {
+    if (window.PsyAIAlerts && typeof window.PsyAIAlerts[tipo] === 'function') window.PsyAIAlerts[tipo](mensaje, titulo);
+}
+
+// Llena los selectores de rol (asignar y editar) con los roles base y los personalizados
+function llenarSelectoresRol() {
+    const opcionesBase = Object.keys(NOMBRES_BASE)
+        .map(k => `<option value="${k}">${NOMBRES_BASE[k]}</option>`).join('');
+    const opcionesCustom = catalogoPersonalizados.length
+        ? '<optgroup label="Roles personalizados">' + catalogoPersonalizados.map(r =>
+            `<option value="custom:${Number(r.idRol)}">${escapeHtmlRoles(r.nombre)} (${escapeHtmlRoles(r.rolBaseNombre)})</option>`).join('') + '</optgroup>'
+        : '';
+    const asignar = document.getElementById('nuevoRol');
+    if (asignar) {
+        const valor = asignar.value;
+        asignar.innerHTML = '<option value="">Seleccionar rol</option><optgroup label="Roles base">' + opcionesBase + '</optgroup>' + opcionesCustom;
+        asignar.value = valor;
+    }
+    const editar = document.getElementById('modalNuevoRol');
+    if (editar) {
+        const valor = editar.value;
+        editar.innerHTML = '<optgroup label="Roles base">' + opcionesBase + '</optgroup>' + opcionesCustom;
+        editar.value = valor;
+    }
+}
+
+async function cargarCatalogo() {
+    const tbody = document.getElementById('tablaCatalogo');
+    try {
+        const res = await fetch('/api/admin/roles/catalogo', { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Error');
+        catalogoPersonalizados = data.personalizados || [];
+        set('cntCatalogo', (data.base || []).length + catalogoPersonalizados.length);
+        const filasBase = (data.base || []).map(r => `
+            <tr>
+              <td><strong>${escapeHtmlRoles(r.nombre)}</strong><small class="d-block text-muted">${escapeHtmlRoles(r.descripcion)}</small></td>
+              <td>${rolBadge(r.rolBase)}</td>
+              <td>${Number(r.usuarios)}</td>
+              <td class="text-end"><span class="text-muted" style="font-size:.78rem;"><i class="fas fa-lock me-1"></i>Rol del sistema</span></td>
+            </tr>`).join('');
+        const filasCustom = catalogoPersonalizados.map(r => `
+            <tr>
+              <td><strong>${escapeHtmlRoles(r.nombre)}</strong><small class="d-block text-muted">${escapeHtmlRoles(r.descripcion || 'Sin descripción')}</small></td>
+              <td>${rolBadge(r.rolBase)}</td>
+              <td>${Number(r.usuarios)}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger" data-eliminar-rol="${Number(r.idRol)}" data-nombre="${escapeHtmlRoles(r.nombre)}" title="Eliminar rol"${r.usuarios ? ' disabled' : ''}>
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>`).join('');
+        tbody.innerHTML = filasBase + (filasCustom || '<tr><td colspan="4" class="text-center text-muted py-3">Todavía no hay roles personalizados.</td></tr>');
+        llenarSelectoresRol();
+    } catch (e) {
+        console.error(e);
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4">No se pudo cargar el catálogo.</td></tr>';
+    }
+}
+
+async function crearRolCatalogo() {
+    const nombre = document.getElementById('catNombre').value.trim();
+    const rolBase = document.getElementById('catBase').value;
+    const descripcion = document.getElementById('catDescripcion').value.trim();
+    if (nombre.length < 3) return avisoRoles('warning', 'Escribe un nombre de al menos 3 caracteres.', 'Falta un dato');
+    if (!rolBase) return avisoRoles('warning', 'Elige el rol base.', 'Falta un dato');
+    const btn = document.getElementById('btnCrearRolCatalogo');
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/admin/roles/catalogo', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre, rolBase, descripcion })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) return avisoRoles('error', data.message || 'No se pudo crear el rol.', 'Error');
+        avisoRoles('success', data.message, 'Rol creado');
+        document.getElementById('catNombre').value = '';
+        document.getElementById('catBase').value = '';
+        document.getElementById('catDescripcion').value = '';
+        cargarCatalogo();
+        cargarHistorial();
+    } catch (e) {
+        console.error(e);
+        avisoRoles('error', 'No se pudo conectar con el servidor.', 'Error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function eliminarRolCatalogo(idRol, nombre) {
+    if (window.Swal) {
+        const r = await Swal.fire({
+            title: `¿Eliminar el rol "${nombre}"?`, icon: 'warning', showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar',
+        });
+        if (!r.isConfirmed) return;
+    }
+    try {
+        const res = await fetch(`/api/admin/roles/catalogo/${idRol}`, { method: 'DELETE', credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok || !data.success) return avisoRoles('error', data.message || 'No se pudo eliminar.', 'No se eliminó');
+        avisoRoles('success', data.message, 'Rol eliminado');
+        cargarCatalogo();
+        cargarHistorial();
+    } catch (e) {
+        console.error(e);
+        avisoRoles('error', 'No se pudo conectar con el servidor.', 'Error');
+    }
 }

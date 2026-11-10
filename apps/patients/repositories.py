@@ -23,6 +23,7 @@ class PatientRepository:
         return {
             "nombre": user.nombre,
             "email": user.email,
+            "rolNombre": user.rol_nombre,  # rol personalizado si tiene (HU-11)
             "fotoPerfil": user.fotoPerfil,
             "fechaRegistro": user.fechaRegistro,
             "edad": perfil.edad if perfil else None,

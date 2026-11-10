@@ -538,3 +538,26 @@ class AdminCopiasRestaurarAPIView(APIView):
         from apps.admin_panel import mantenimiento
         payload, status_code = mantenimiento.restaurar_copia(request.data, _nombre_admin(request))
         return Response(payload, status=status_code)
+
+
+# ── HU-11: catálogo de roles ────────────────────────────────────────────────
+class AdminCatalogoRolesAPIView(APIView):
+    """GET /api/admin/roles/catalogo — roles base y personalizados.
+    POST /api/admin/roles/catalogo — crear un rol personalizado.
+    DELETE /api/admin/roles/catalogo/<id> — eliminar un rol personalizado sin usuarios."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def get(self, request):
+        from apps.admin_panel import roles
+        payload, status_code = roles.catalogo()
+        return Response(payload, status=status_code)
+
+    def post(self, request):
+        from apps.admin_panel import roles
+        payload, status_code = roles.crear(request.data, _nombre_admin(request))
+        return Response(payload, status=status_code)
+
+    def delete(self, request, id_rol=None):
+        from apps.admin_panel import roles
+        payload, status_code = roles.eliminar(id_rol, _nombre_admin(request))
+        return Response(payload, status=status_code)

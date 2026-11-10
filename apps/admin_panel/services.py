@@ -156,7 +156,10 @@ class AdminService:
         return {"success": True, "usuarios": self.repo.list_role_users()}, 200
 
     def change_role(self, data):
-        self.repo.change_role(data.get("idUsuario"), data.get("nuevoRol"))
+        try:
+            self.repo.change_role(data.get("idUsuario"), data.get("nuevoRol"))
+        except ValueError as e:
+            return {"success": False, "message": str(e)}, 400
         return {"success": True, "message": "Rol actualizado"}, 200
 
     def role_history(self):

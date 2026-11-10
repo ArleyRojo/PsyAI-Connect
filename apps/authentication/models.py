@@ -19,6 +19,45 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, nombre, password, **extra_fields)
 
 
+class RolPersonalizado(models.Model):
+    """Catálogo de roles creados por el administrador (HU-11).
+    Cada rol se basa en uno de los 3 roles del sistema y hereda sus permisos."""
+
+    ROLES_BASE = [
+        ("paciente", "Paciente"),
+        ("profesional", "Profesional"),
+        ("admin", "Administrador"),
+    ]
+
+    idRol = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=40, unique=True)
+    descripcion = models.CharField(max_length=200, blank=True, default="")
+    rolBase = models.CharField(max_length=20, choices=ROLES_BASE)
+    creadoPor = models.CharField(max_length=120, null=True, blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "RolesPersonalizados"
+        ordering = ["rolBase", "nombre"]
+
+    def __str__(self):
+        return self.nombre
+
+    def to_dict(self, usuarios=None):
+        datos = {
+            "idRol": self.idRol,
+            "nombre": self.nombre,
+            "descripcion": self.descripcion,
+            "rolBase": self.rolBase,
+            "rolBaseNombre": dict(self.ROLES_BASE).get(self.rolBase, self.rolBase),
+            "creadoPor": self.creadoPor,
+            "fecha": self.fecha.isoformat() if self.fecha else None,
+        }
+        if usuarios is not None:
+            datos["usuarios"] = usuarios
+        return datos
+
+
 class Register(AbstractBaseUser):
     ROL_CHOICES = [
         ("paciente", "Paciente"),
@@ -37,6 +76,15 @@ class Register(AbstractBaseUser):
         max_length=255, db_column="contrasena", verbose_name="contrasena"
     )
     rol = models.CharField(max_length=20, choices=ROL_CHOICES)
+    # Rol personalizado del catálogo (HU-11). El permiso real sigue siendo `rol` (su rol base).
+    rolPersonalizado = models.ForeignKey(
+        RolPersonalizado,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        db_column="idRolPersonalizado",
+        related_name="usuarios",
+    )
     fotoPerfil = models.CharField(max_length=255, null=True, blank=True)
     estadoCuenta = models.CharField(
         max_length=20, choices=ESTADO_CHOICES, default="Activa"
@@ -98,6 +146,13 @@ class Register(AbstractBaseUser):
             "fotoPerfil": self.fotoPerfil,
         }
 
+    @property
+    def rol_nombre(self):
+        """Nombre del rol que se muestra: el personalizado si tiene, si no el rol base."""
+        if self.rolPersonalizado_id:
+            return self.rolPersonalizado.nombre
+        return dict(RolPersonalizado.ROLES_BASE).get(self.rol, (self.rol or "").capitalize())
+
     def to_session_dict(self):
         """Return minimal user data for session storage (consistent across all auth flows)."""
         return {
@@ -105,6 +160,7 @@ class Register(AbstractBaseUser):
             "nombre": self.nombre,
             "email": self.email,
             "rol": self.rol,
+            "rolNombre": self.rol_nombre,
             "fotoPerfil": self.fotoPerfil,
         }
 

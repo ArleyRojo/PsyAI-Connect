@@ -152,8 +152,10 @@ class AdminRepository:
                        COALESCE(r.activo, TRUE) as activo,
                        r."estadoCuenta",
                        r."fechaRegistro",
-                       (SELECT MAX(a.fecha) FROM "AuditoriaAccesos" a WHERE a."idUsuario" = r."idUsuario") as ultimoAcceso
+                       (SELECT MAX(a.fecha) FROM "AuditoriaAccesos" a WHERE a."idUsuario" = r."idUsuario") as ultimoAcceso,
+                       rp."idRol" as "idRolPersonalizado", rp.nombre as "rolPersonalizado"
                 FROM "Register" r
+                LEFT JOIN "RolesPersonalizados" rp ON rp."idRol" = r."idRolPersonalizado"
                 ORDER BY
                     CASE r.rol
                         WHEN 'admin' THEN 1
@@ -286,15 +288,35 @@ class AdminRepository:
         ]
 
     def change_role(self, user_id, nuevo_rol):
+        """nuevo_rol: un rol base ("paciente", "profesional", "admin") o un rol del
+        catálogo como "custom:<id>" (HU-11). Con un rol personalizado el usuario
+        queda con el rol base de ese rol (hereda sus permisos)."""
+        from apps.authentication.models import RolPersonalizado
+
+        personalizado = None
+        valor = str(nuevo_rol or "").strip()
+        if valor.startswith("custom:"):
+            try:
+                personalizado = RolPersonalizado.objects.get(idRol=int(valor.split(":", 1)[1]))
+            except (ValueError, RolPersonalizado.DoesNotExist):
+                raise ValueError("El rol elegido no existe")
+            rol_base = personalizado.rolBase
+        elif valor in dict(Register.ROL_CHOICES):
+            rol_base = valor
+        else:
+            raise ValueError("Rol no válido")
+
         try:
-            user = Register.objects.get(idUsuario=user_id)
-            rol_anterior = user.rol
-            user.rol = nuevo_rol
-            user.save(update_fields=["rol"])
+            user = Register.objects.select_related("rolPersonalizado").get(idUsuario=user_id)
+            rol_anterior = user.rol_nombre
+            user.rol = rol_base
+            user.rolPersonalizado = personalizado
+            user.save(update_fields=["rol", "rolPersonalizado"])
+            rol_nuevo = personalizado.nombre if personalizado else rol_base
             self.registrar_log(
                 "roles", "Cambio de rol",
-                f"{user.nombre}: {rol_anterior} -> {nuevo_rol}",
-                rol_anterior, nuevo_rol, user.nombre,
+                f"{user.nombre}: {rol_anterior} -> {rol_nuevo}" + (f" (base {rol_base})" if personalizado else ""),
+                rol_anterior[:20], rol_nuevo[:20], user.nombre,
                 administrador=self.get_admin_name(),
             )
         except Register.DoesNotExist:

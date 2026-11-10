@@ -77,7 +77,7 @@ async function cargarPerfil(idUsuario) {
             setField('genero',   p.genero              || 'No especificado');
             setField('email',    p.email               || 'Sin correo');
             setField('telefono', p.numeroTelefonico     || 'Sin teléfono');
-            setField('rol',      getRolLabel(p.rol));
+            setField('rol',      p.rolNombre || getRolLabel(p.rol));
 
             if (p.genero) localStorage.setItem('perfil_genero', p.genero);
 

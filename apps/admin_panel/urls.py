@@ -96,6 +96,8 @@ urlpatterns = [
         views.PoliticaContrasenaAPIView.as_view(),
         name="politica_contrasena",
     ),
+    path("admin/roles/catalogo", views.AdminCatalogoRolesAPIView.as_view(), name="admin_roles_catalogo"),
+    path("admin/roles/catalogo/<int:id_rol>", views.AdminCatalogoRolesAPIView.as_view(), name="admin_rol_catalogo"),
     path("admin/mantenimiento", views.AdminMantenimientoEstadoAPIView.as_view(), name="admin_mantenimiento"),
     path("admin/mantenimiento/accion", views.AdminMantenimientoAccionAPIView.as_view(),
          name="admin_mantenimiento_accion"),

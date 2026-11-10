@@ -315,6 +315,11 @@ class LogoutView(APIView):
         )
 
 
+def _nombre_rol(id_usuario):
+    usuario = Register.objects.filter(idUsuario=id_usuario).select_related("rolPersonalizado").first()
+    return usuario.rol_nombre if usuario else None
+
+
 class SessionView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -338,6 +343,8 @@ class SessionView(APIView):
                         "id": request.session.get("idUsuario"),
                         "nombre": request.session.get("nombre"),
                         "rol": request.session.get("rol"),
+                        # Nombre del rol a mostrar, incluido el personalizado (HU-11)
+                        "rolNombre": _nombre_rol(id_usuario),
                     },
                     "idUsuario": request.session.get("idUsuario"),
                     "nombre": request.session.get("nombre"),
