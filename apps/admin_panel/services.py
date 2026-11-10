@@ -513,7 +513,7 @@ class TelemetryService:
         actividad_hora = len(self._requests_history)
         requests_minuto = sum(1 for ts in self._requests_history if ts >= now - 60)
 
-        top = self._endpoints.most_common(4)
+        top = self._endpoints.most_common(5)
         top_endpoints = []
         for url, count in top:
             pct = int((count / self._requests_total) * 100) if self._requests_total > 0 else 0

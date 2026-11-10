@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.db import connection, transaction
 
 from apps.admin_panel.models import AuditoriaAccesos, Logs
+from apps.admin_panel.resumen import resumen as resumen_dashboard
 from apps.authentication.models import Register
 from apps.core.utils import fmt_bogota
 
@@ -142,6 +143,7 @@ class AdminRepository:
             "alertas_info": tokens_invalidos,
             "security_timeline": security_timeline,
             "actividad_reciente": actividad,
+            **resumen_dashboard(),
         }
 
     def list_users(self, page=1, limit=20):

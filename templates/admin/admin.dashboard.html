@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/css/pages/admin.css?v=20261030-sidebar-fix-1">
     <link rel="stylesheet" href="/responsive/responsive-admin.css?v=20261104-sidebar-opt">
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-sidebar-opt">
+    <link rel="stylesheet" href="/css/pages/admin-dashboard.css?v=20261110-2">
 </head>
 <body class="admin-panel">
 
@@ -121,179 +122,157 @@
             </div>
         </header>
 
-        <!-- Secciones del Dashboard -->
-        <div>
+        <!-- Secciones del Dashboard (rediseño: propuesta A "Resumen claro") -->
+        <div class="adm-dash">
 
-            <!-- Estadísticas con gráficos -->
-            <div class="dashboard-section p-3 mb-4">
-                <h5 class="fw-bold mb-3"><i class="fas fa-chart-bar me-2"></i> Estadísticas del Sistema</h5>
-                <div>
-                    <!-- Stat cards -->
-                    <div class="row g-3 mb-4" aria-live="polite" aria-label="Resumen de estadísticas">
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="stat-card">
-                                <div class="stat-icon blue"><i class="fas fa-users"></i></div>
-                                <div><div class="stat-value" id="statTotal"><span class="skeleton">0</span></div><div class="stat-label">Usuarios registrados</div></div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="stat-card">
-                                <div class="stat-icon green"><i class="fas fa-user-check"></i></div>
-                                <div><div class="stat-value" id="statActivos"><span class="skeleton">0</span></div><div class="stat-label">Usuarios activos</div></div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="stat-card">
-                                <div class="stat-icon orange"><i class="fas fa-bell"></i></div>
-                                <div><div class="stat-value" id="statNotifs"><span class="skeleton">0</span></div><div class="stat-label">Notificaciones enviadas</div></div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="stat-card">
-                                <div class="stat-icon red"><i class="fas fa-user-slash"></i></div>
-                                <div><div class="stat-value" id="statSuspendidos"><span class="skeleton">0</span></div><div class="stat-label">Cuentas suspendidas</div></div>
-                            </div>
-                        </div>
-                    </div>
+            <p class="adm-dash__fecha"><span id="dashFecha">Hoy</span> · <span id="dashActualizado">cargando datos…</span></p>
 
-                    <!-- Charts row -->
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="dashboard-section chart-panel p-3">
-                                <h6 class="fw-bold mb-3 chart-panel-title"><i class="fas fa-users me-1"></i> Distribución de Usuarios</h6>
-                                <div class="chart-container-sm">
-                                    <canvas id="chartUsers"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="dashboard-section chart-panel p-3">
-                                <h6 class="fw-bold mb-3 chart-panel-title"><i class="fas fa-activity me-1"></i> Métricas de Actividad</h6>
-                                <div class="chart-container">
-                                    <canvas id="chartActivity"></canvas>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Indicadores -->
+            <section class="adm-kpis" aria-live="polite" aria-label="Resumen de estadísticas">
+                <article class="adm-card adm-kpi">
+                    <div class="adm-kpi__top">
+                        <span class="adm-kpi__nombre">Usuarios activos</span>
+                        <span class="adm-chip" id="chipActivos"></span>
                     </div>
+                    <div class="adm-kpi__valor"><span id="statActivos"><span class="skeleton">0</span></span><span class="adm-kpi__unidad">de <span id="statTotal">0</span></span></div>
+                    <span class="adm-kpi__delta" id="deltaActivos"></span>
+                    <div class="adm-spark" id="sparkRegistros" aria-hidden="true"></div>
+                    <span class="adm-kpi__pie">Registros nuevos · últimos 7 días</span>
+                </article>
+                <article class="adm-card adm-kpi">
+                    <div class="adm-kpi__top">
+                        <span class="adm-kpi__nombre">Citas pendientes</span>
+                        <span class="adm-chip adm-chip--info" id="chipCitas"></span>
+                    </div>
+                    <div class="adm-kpi__valor"><span id="statCitas"><span class="skeleton">0</span></span><span class="adm-kpi__unidad">por confirmar</span></div>
+                    <span class="adm-kpi__delta" id="deltaCitas"></span>
+                    <div class="adm-spark" id="sparkCitas" aria-hidden="true"></div>
+                    <span class="adm-kpi__pie">Citas por día · últimos 7 días</span>
+                </article>
+                <article class="adm-card adm-kpi">
+                    <div class="adm-kpi__top">
+                        <span class="adm-kpi__nombre">Visitas hoy</span>
+                        <span class="adm-chip adm-chip--info" id="chipVisitas"></span>
+                    </div>
+                    <div class="adm-kpi__valor"><span id="statVisitas"><span class="skeleton">0</span></span><span class="adm-kpi__unidad" id="unidadVisitas">visitas</span></div>
+                    <span class="adm-kpi__delta" id="deltaVisitas"></span>
+                    <div class="adm-spark adm-spark--vacia" aria-hidden="true"></div>
+                    <span class="adm-kpi__pie">Se cuentan desde que arrancó el servidor</span>
+                </article>
+                <article class="adm-card adm-kpi">
+                    <div class="adm-kpi__top">
+                        <span class="adm-kpi__nombre">Alertas de seguridad</span>
+                        <span class="adm-chip" id="chipAlertas"></span>
+                    </div>
+                    <div class="adm-kpi__valor"><span id="statAlertas"><span class="skeleton">0</span></span><span class="adm-kpi__unidad">desde ayer</span></div>
+                    <span class="adm-kpi__delta" id="deltaAlertas"></span>
+                    <div class="adm-spark" id="sparkSeguridad" aria-hidden="true"></div>
+                    <span class="adm-kpi__pie">Eventos de seguridad · últimos 7 días</span>
+                </article>
+            </section>
 
-                    <!-- Real-time line chart -->
-                    <div class="row g-3 mt-2">
-                        <div class="col-12">
-                            <div class="dashboard-section chart-panel p-3">
-                                <h6 class="fw-bold mb-3 chart-panel-title"><i class="fas fa-wave-square me-1"></i> Tiempo Real <small class="text-muted fw-normal">(CPU, RAM, Req/min)</small></h6>
-                                <div class="chart-container-lg">
-                                    <canvas id="chartRealtime"></canvas>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Actividad por hora + salud del servidor -->
+            <div class="adm-fila">
+                <section class="adm-card adm-card--ancha" aria-labelledby="tituloActividadHora">
+                    <div class="adm-card__cabecera">
+                        <h2 class="adm-card__titulo" id="tituloActividadHora">Actividad por hora</h2>
+                        <span class="adm-card__nota" id="resumenHoras">Acciones registradas hoy</span>
                     </div>
-                </div>
+                    <div class="adm-barras" id="barrasHoras" role="img" aria-label="Acciones registradas por hora durante el día de hoy"></div>
+                    <div class="adm-barras__eje" aria-hidden="true"><span>0 h</span><span>6 h</span><span>12 h</span><span>18 h</span><span>23 h</span></div>
+                    <p class="adm-card__ayuda">Cada barra es una hora de hoy. La oscura es la hora actual; las que faltan del día aparecen vacías.</p>
+                </section>
+
+                <section class="adm-card adm-card--lateral" aria-labelledby="tituloSalud" aria-live="polite">
+                    <h2 class="adm-card__titulo" id="tituloSalud">Salud del servidor</h2>
+                    <div class="adm-medidor" data-medidor="cpu">
+                        <div class="adm-medidor__fila"><span>CPU</span><strong id="metricCpu">—</strong></div>
+                        <div class="adm-medidor__pista"><div class="adm-medidor__relleno" id="metricCpuBar"></div></div>
+                        <span class="adm-medidor__nota" id="notaCpu"></span>
+                    </div>
+                    <div class="adm-medidor" data-medidor="ram">
+                        <div class="adm-medidor__fila"><span>Memoria RAM</span><strong id="metricRam">—</strong></div>
+                        <div class="adm-medidor__pista"><div class="adm-medidor__relleno" id="metricRamBar"></div></div>
+                        <span class="adm-medidor__nota" id="notaRam"></span>
+                    </div>
+                    <div class="adm-medidor" data-medidor="disco">
+                        <div class="adm-medidor__fila"><span>Disco</span><strong id="metricDisk">—</strong></div>
+                        <div class="adm-medidor__pista"><div class="adm-medidor__relleno" id="metricDiskBar"></div></div>
+                        <span class="adm-medidor__nota" id="notaDisk"></span>
+                    </div>
+                    <div class="adm-salud__pie">
+                        <div><span>Latencia</span><strong id="metricLatency">—</strong></div>
+                        <div><span>Activo hace</span><strong id="metricUptime">—</strong></div>
+                        <div><span>En línea</span><strong id="metricOnline">—</strong></div>
+                    </div>
+                </section>
             </div>
 
-            <!-- Rendimiento del Servidor -->
-            <div class="dashboard-section p-3 mb-4">
-                <h5 class="fw-bold mb-3"><i class="fas fa-server me-2"></i> Rendimiento del Servidor</h5>
-                <div aria-live="polite" aria-label="Métricas de rendimiento">
-                    <!-- Server status -->
-                    <div class="server-status-bar mb-4">
-                        <div class="d-flex align-items-center gap-3">
-                            <span id="metricServerDot" class="server-dot stable"></span>
-                            <div>
-                                <span class="fw-bold">Servidor:</span>
-                                <span id="metricServerStatus" class="badge bg-success ms-1">estable</span>
-                            </div>
-                            <div class="server-meta">
-                                <small><i class="fas fa-code-branch me-1"></i> v<span id="metricServerVersion">-</span></small>
-                                <small><i class="fas fa-layer-group me-1"></i> <span id="metricServerEnv">-</span></small>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="online-badge-wrapper">
-                                <i class="fas fa-circle text-success" style="font-size:.5rem;"></i>
-                                <span class="fw-bold small">Online:</span>
-                                <span id="onlineUsersBadge" class="badge bg-success">0</span>
-                            </div>
-                            <small class="text-muted"><i class="fas fa-clock me-1"></i> <span id="metricServerTime">-</span></small>
-                        </div>
+            <!-- Endpoints, cuentas y actividad reciente -->
+            <div class="adm-fila adm-fila--arriba">
+                <section class="adm-card adm-card--tercio" aria-labelledby="tituloEndpoints">
+                    <h2 class="adm-card__titulo" id="tituloEndpoints">Endpoints más usados</h2>
+                    <div class="adm-endpoints" id="listaEndpoints">
+                        <p class="adm-vacio">Cargando…</p>
                     </div>
+                </section>
 
-                    <!-- Online users list -->
-                    <div class="online-users-section mb-4">
-                        <h6 class="fw-bold mb-2 small text-uppercase"><i class="fas fa-circle text-success me-1" style="font-size:.5rem;"></i> Conectados Ahora</h6>
-                        <div id="onlineUsersList">
-                            <div class="text-muted small py-2">Cargando...</div>
-                        </div>
+                <section class="adm-card adm-card--tercio" aria-labelledby="tituloCuentas">
+                    <h2 class="adm-card__titulo" id="tituloCuentas">Estado de cuentas</h2>
+                    <p class="adm-card__nota" id="resumenCuentas">—</p>
+                    <div class="adm-apilada" id="barraCuentas" role="img" aria-label="Estado de las cuentas">
+                        <div class="adm-apilada__seg adm-apilada__seg--activas" id="segActivas"></div>
+                        <div class="adm-apilada__seg adm-apilada__seg--suspendidas" id="segSuspendidas"></div>
+                        <div class="adm-apilada__seg adm-apilada__seg--otras" id="segOtras"></div>
                     </div>
-
-                    <div class="row g-3">
-                        <div class="col-md-3 col-6">
-                            <div class="small-metric-card text-center">
-                                <div class="metric-label">CPU</div>
-                                <div class="metric-value" id="metricCpu"><span class="skeleton">-</span></div>
-                                <div class="progress-track mt-2"><div class="progress-fill" data-pct="0" id="metricCpuBar" style="width:0%"></div></div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="small-metric-card text-center">
-                                <div class="metric-label">RAM</div>
-                                <div class="metric-value" id="metricRam"><span class="skeleton">-</span></div>
-                                <div class="progress-track mt-2"><div class="progress-fill" data-pct="0" id="metricRamBar" style="width:0%"></div></div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="small-metric-card text-center">
-                                <div class="metric-label">Disco</div>
-                                <div class="metric-value" id="metricDisk"><span class="skeleton">-</span></div>
-                                <div class="progress-track mt-2"><div class="progress-fill" data-pct="0" id="metricDiskBar" style="width:0%"></div></div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="small-metric-card text-center">
-                                <div class="metric-label">Uptime</div>
-                                <div class="metric-value" id="metricUptime"><span class="skeleton">-</span></div>
-                                <div class="metric-foot">desde inicio</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="small-metric-card text-center">
-                                <div class="metric-label">Req/min</div>
-                                <div class="metric-value" id="metricRequests"><span class="skeleton">-</span></div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="small-metric-card text-center">
-                                <div class="metric-label">Usuarios Online</div>
-                                <div class="metric-value" id="metricOnline"><span class="skeleton">-</span></div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="small-metric-card text-center">
-                                <div class="metric-label">Latencia</div>
-                                <div class="metric-value" id="metricLatency"><span class="skeleton">-</span><small class="fs-6 text-muted">ms</small></div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6">
-                            <div class="small-metric-card text-center">
-                                <div class="metric-label">Logs Hoy</div>
-                                <div class="metric-value" id="metricLogsHoy"><span class="skeleton">-</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actividad reciente -->
-            <div class="dashboard-section p-3 mb-4">
-                <h5 class="fw-bold mb-3"><i class="fas fa-clock me-2"></i> Actividad Reciente</h5>
-                <div>
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                        <input type="text" id="activityFilter" class="form-control form-control-sm" style="max-width:260px;" placeholder="Filtrar actividad..." oninput="filterActivity()">
-                        <button class="btn-export btn-sm" onclick="exportActivityCSV()"><i class="fas fa-download"></i> Exportar CSV</button>
-                    </div>
-                    <ul class="list-unstyled mb-0" id="listaActividad" role="log" aria-live="polite" aria-label="Actividad reciente del sistema">
-                        <li class="text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Cargando actividad...</li>
+                    <ul class="adm-leyenda">
+                        <li><span class="adm-punto adm-punto--activas"></span><span>Activas</span><strong id="cntActivas">0</strong></li>
+                        <li><span class="adm-punto adm-punto--suspendidas"></span><span>Suspendidas</span><strong id="statSuspendidos">0</strong></li>
+                        <li><span class="adm-punto adm-punto--otras"></span><span>Inactivas o sin verificar</span><strong id="cntOtras">0</strong></li>
                     </ul>
-                </div>
+                    <a href="./aside-admin/users.html" class="adm-enlace">Gestionar usuarios</a>
+                </section>
+
+                <section class="adm-card adm-card--tercio" aria-labelledby="tituloActividad">
+                    <div class="adm-card__cabecera">
+                        <h2 class="adm-card__titulo" id="tituloActividad">Actividad reciente</h2>
+                        <button type="button" class="adm-boton-icono" onclick="exportActivityCSV()" title="Exportar CSV" aria-label="Exportar actividad en CSV"><i class="fas fa-download"></i></button>
+                    </div>
+                    <label class="visually-hidden" for="activityFilter">Filtrar actividad</label>
+                    <input type="text" id="activityFilter" class="form-control form-control-sm mb-2" placeholder="Filtrar actividad..." oninput="filterActivity()">
+                    <ul class="adm-recientes" id="listaActividad" role="log" aria-live="polite" aria-label="Actividad reciente del sistema">
+                        <li class="adm-vacio"><i class="fas fa-spinner fa-spin me-2"></i>Cargando actividad...</li>
+                    </ul>
+                    <a href="./aside-admin/logs.html" class="adm-enlace">Ver todos los logs</a>
+                </section>
+            </div>
+
+            <!-- Tiempo real -->
+            <div class="adm-fila">
+                <section class="adm-card adm-card--ancha" aria-labelledby="tituloTiempoReal">
+                    <div class="adm-card__cabecera">
+                        <h2 class="adm-card__titulo" id="tituloTiempoReal">Tiempo real</h2>
+                        <span class="adm-card__nota">CPU, RAM y peticiones por minuto (<span id="metricRequests">—</span> ahora)</span>
+                    </div>
+                    <div class="chart-container-lg">
+                        <canvas id="chartRealtime"></canvas>
+                    </div>
+                </section>
+
+                <section class="adm-card adm-card--lateral" aria-labelledby="tituloConectados">
+                    <div class="adm-card__cabecera">
+                        <h2 class="adm-card__titulo" id="tituloConectados">Conectados ahora</h2>
+                        <span id="onlineUsersBadge" class="adm-chip adm-chip--ok">0</span>
+                    </div>
+                    <div class="adm-servidor">
+                        <span id="metricServerDot" class="server-dot stable"></span>
+                        <span>Servidor <strong id="metricServerStatus">estable</strong></span>
+                        <small>v<span id="metricServerVersion">-</span> · <span id="metricServerEnv">-</span> · <span id="metricServerTime">-</span></small>
+                    </div>
+                    <div id="onlineUsersList" class="adm-conectados">
+                        <div class="adm-vacio">Cargando...</div>
+                    </div>
+                </section>
             </div>
 
             <!-- Accesos rápidos -->
@@ -349,8 +328,8 @@
 <script src="/js/modules/admin/admin.dashboard.utils.js?v=20260711-1"></script>
 <script src="/js/modules/admin/admin.dashboard.sse.js?v=20261023-1"></script>
 <script src="/js/vendor/chart.umd.min.js?v=20260720"></script>
-<script src="/js/modules/admin/admin.dashboard.charts.js?v=20260711-1"></script>
-<script src="/js/modules/admin/admin.dashboard.js?v=20260711-1"></script>
+<script src="/js/modules/admin/admin.dashboard.charts.js?v=20261110-1"></script>
+<script src="/js/modules/admin/admin.dashboard.js?v=20261110-1"></script>
 <script src="/js/modules/admin/admin.aviso-politicas.js?v=20261109-1"></script>
 
 </body>

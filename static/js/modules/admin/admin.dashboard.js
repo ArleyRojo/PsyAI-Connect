@@ -24,7 +24,7 @@ function conectarSSE() {
         if (data.success && data.logs && data.logs.length > 0) {
             const lista = document.getElementById('listaActividad');
             if (lista) {
-                const recientes = data.logs.slice(0, 8);
+                const recientes = data.logs.slice(0, 5);
                 lista.innerHTML = recientes.map(log => buildItem(log)).join('');
             }
         }
@@ -74,32 +74,212 @@ async function cargarStats() {
 }
 
 function aplicarStatsIniciales(stats) {
-    quitarSkeletons();
-    setText('statTotal', stats.total_usuarios);
-    setText('statActivos', stats.usuarios_activos);
-    setText('statNotifs', stats.notificaciones);
-    setText('statSuspendidos', stats.cuentas_suspendidas ?? stats.cuentas_bloqueadas);
-    setText('metricCpu', stats.cpu ?? '—');
-    setText('metricRam', stats.ram ?? '—');
-    setText('metricDisk', stats.disk_pct ?? '—');
-    setText('metricUptime', stats.uptime ?? '—');
-    setText('metricRequests', stats.requests_minuto ?? '—');
-    setText('metricOnline', stats.usuarios_online ?? '—');
-    setText('metricLatency', stats.latencia ?? '—');
-    setText('metricPendientes', stats.citas_pendientes ?? '—');
-    setText('metricLogsHoy', stats.logs_hoy ?? '—');
-
-    document.querySelectorAll('.progress-fill').forEach(el => {
-        const pct = parseInt(el.dataset.pct || '0', 10);
-        el.style.width = `${pct}%`;
-    });
-
+    pintarDashboard(stats);
     if (typeof initCharts === 'function') initCharts(stats);
     // verificarServidor y cargarUsuariosOnline son independientes → paralelo
     Promise.all([
         typeof verificarServidor === 'function' ? verificarServidor() : Promise.resolve(),
         cargarUsuariosOnline(),
     ]).catch(() => {});
+}
+
+function aplicarStatsLive(stats) {
+    pintarDashboard(stats);
+    setText('metricServerTime', new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }));
+    if (typeof updateCharts === 'function') updateCharts(stats);
+}
+
+// ── Rediseño del dashboard (propuesta A "Resumen claro") ───────────────────
+const UMBRAL_AVISO = 75;
+const UMBRAL_CRITICO = 90;
+const ZONA = 'America/Bogota';
+
+function numero(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function suma(lista) {
+    return (lista || []).reduce((a, b) => a + numero(b), 0);
+}
+
+function plural(n, uno, varios) {
+    return `${n} ${n === 1 ? uno : varios}`;
+}
+
+function horaActualColombia() {
+    return Number(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hourCycle: 'h23', timeZone: ZONA }).format(new Date()));
+}
+
+function nombreHora(h) {
+    if (h === 0) return '12 a. m.';
+    if (h < 12) return `${h} a. m.`;
+    if (h === 12) return '12 m.';
+    return `${h - 12} p. m.`;
+}
+
+function pintarChip(id, texto, tono) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = texto;
+    el.className = `adm-chip adm-chip--${tono}`;
+}
+
+function pintarDelta(id, texto, tono) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = texto;
+    el.classList.toggle('adm-kpi__delta--aviso', tono === 'aviso');
+}
+
+function pintarSparkline(id, serie) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const datos = (serie || []).map(numero);
+    if (datos.length < 2) { el.innerHTML = ''; return; }
+    const max = Math.max(...datos), min = Math.min(...datos);
+    const puntos = datos.map((v, i) => {
+        const x = (i * 120 / (datos.length - 1)).toFixed(1);
+        const y = (max === min ? 31 : 32 - (v - min) / (max - min) * 26).toFixed(1);
+        return `${x},${y}`;
+    }).join(' ');
+    el.innerHTML = `<svg viewBox="0 0 120 36" preserveAspectRatio="none" focusable="false">
+        <polyline class="adm-spark__area" points="0,36 ${puntos} 120,36"></polyline>
+        <polyline class="adm-spark__linea" points="${puntos}"></polyline></svg>`;
+    el.title = datos.join(' · ');
+}
+
+function pintarHoras(horas) {
+    const cont = document.getElementById('barrasHoras');
+    if (!cont) return;
+    const datos = Array.from({ length: 24 }, (_, i) => numero((horas || [])[i]));
+    if (cont.children.length !== 24) {
+        cont.innerHTML = datos.map(() => '<div class="adm-barra"></div>').join('');
+    }
+    const ahora = horaActualColombia();
+    const max = Math.max(1, ...datos);
+    datos.forEach((v, i) => {
+        const barra = cont.children[i];
+        const futura = i > ahora;
+        barra.style.height = futura ? '0px' : `${v ? Math.max(4, Math.round(v / max * 170)) : 2}px`;
+        barra.classList.toggle('adm-barra--ahora', i === ahora);
+        barra.classList.toggle('adm-barra--futura', futura);
+        barra.title = futura ? `${nombreHora(i)} · aún no` : `${nombreHora(i)} · ${plural(v, 'acción', 'acciones')}`;
+    });
+    const total = suma(datos);
+    const pico = datos.indexOf(Math.max(...datos));
+    const resumen = total
+        ? `${plural(total, 'acción registrada', 'acciones registradas')} hoy · pico a las ${nombreHora(pico)} (${datos[pico]})`
+        : 'Aún no hay acciones registradas hoy';
+    setText('resumenHoras', resumen);
+    cont.setAttribute('aria-label', `Acciones registradas por hora hoy. ${resumen}.`);
+}
+
+function pintarMedidor(sufijo, valor, nota) {
+    const v = Math.max(0, Math.min(100, numero(valor)));
+    const tono = v >= UMBRAL_CRITICO ? 'critico' : v >= UMBRAL_AVISO ? 'aviso' : 'normal';
+    setText(`metric${sufijo}`, valor == null ? '—' : `${Math.round(v)} %`);
+    const barra = document.getElementById(`metric${sufijo}Bar`);
+    if (barra) {
+        barra.style.width = `${v}%`;
+        barra.dataset.tono = tono;
+    }
+    const valorEl = document.getElementById(`metric${sufijo}`);
+    if (valorEl) valorEl.dataset.tono = tono;
+    const estado = tono === 'critico' ? 'Crítico' : tono === 'aviso' ? 'Atención' : 'Normal';
+    setText(`nota${sufijo}`, `${estado} · ${nota}`);
+}
+
+function pintarEndpoints(lista) {
+    const cont = document.getElementById('listaEndpoints');
+    if (!cont) return;
+    const items = (lista || []).filter(e => e && e.url);
+    if (!items.length) {
+        cont.innerHTML = '<p class="adm-vacio">Aún no hay peticiones registradas.</p>';
+        return;
+    }
+    const max = Math.max(1, ...items.map(e => numero(e.count)));
+    cont.innerHTML = items.map(e => `
+        <div class="adm-endpoint">
+            <div class="adm-endpoint__fila"><code title="${escapeHtml(e.url)}">${escapeHtml(e.url)}</code><strong>${numero(e.count).toLocaleString('es-CO')}</strong></div>
+            <div class="adm-endpoint__pista"><div class="adm-endpoint__barra" style="width:${Math.round(numero(e.count) / max * 100)}%"></div></div>
+        </div>`).join('');
+}
+
+function pintarCuentas(total, activas, suspendidas) {
+    const otras = Math.max(0, total - activas - suspendidas);
+    const pct = total ? Math.round(activas / total * 100) : 0;
+    setText('resumenCuentas', `${plural(total, 'cuenta', 'cuentas')} · ${pct} % activas`);
+    setText('cntActivas', activas);
+    setText('statSuspendidos', suspendidas);
+    setText('cntOtras', otras);
+    [['segActivas', activas], ['segSuspendidas', suspendidas], ['segOtras', otras]].forEach(([id, n]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.flexGrow = n;
+        el.style.display = n ? '' : 'none';
+    });
+    const barra = document.getElementById('barraCuentas');
+    if (barra) barra.setAttribute('aria-label', `${activas} activas, ${suspendidas} suspendidas, ${otras} inactivas o sin verificar`);
+}
+
+function pintarDashboard(stats) {
+    const s = stats || {};
+    quitarSkeletons();
+    const t = s.tendencias || {};
+    const total = numero(s.total_usuarios);
+    const activos = numero(s.usuarios_activos);
+    const suspendidas = numero(s.cuentas_suspendidas ?? s.cuentas_bloqueadas);
+
+    // Usuarios activos
+    setText('statActivos', activos);
+    setText('statTotal', total);
+    const pct = total ? Math.round(activos / total * 100) : 0;
+    pintarChip('chipActivos', `${pct} %`, pct >= 90 ? 'ok' : 'aviso');
+    const nuevos = suma(t.registros);
+    pintarDelta('deltaActivos', `${plural(nuevos, 'registro nuevo', 'registros nuevos')} esta semana`);
+    pintarSparkline('sparkRegistros', t.registros);
+
+    // Citas pendientes
+    setText('statCitas', numero(s.citas_pendientes));
+    pintarChip('chipCitas', `${numero(s.citas_hoy)} hoy`, 'info');
+    pintarDelta('deltaCitas', `${plural(suma(t.citas), 'cita', 'citas')} en los últimos 7 días`);
+    pintarSparkline('sparkCitas', t.citas);
+
+    // Visitas
+    setText('statVisitas', numero(s.visitas_hoy));
+    setText('unidadVisitas', numero(s.visitas_hoy) === 1 ? 'visita' : 'visitas');
+    pintarChip('chipVisitas', `${numero(s.usuarios_online)} en línea`, 'info');
+    pintarDelta('deltaVisitas', `${plural(numero(s.requests_minuto), 'petición', 'peticiones')} por minuto ahora`);
+
+    // Alertas de seguridad
+    const alertas = numero(s.alertas_criticas) + numero(s.alertas_warnings) + numero(s.alertas_info);
+    setText('statAlertas', alertas);
+    pintarChip('chipAlertas', alertas ? 'Revisar' : 'Bien', alertas ? 'aviso' : 'ok');
+    pintarDelta('deltaAlertas',
+        `${plural(numero(s.fallos_login), 'fallo', 'fallos')} de login · ${plural(numero(s.ips_bloqueadas), 'IP bloqueada', 'IPs bloqueadas')}`,
+        alertas ? 'aviso' : null);
+    pintarSparkline('sparkSeguridad', t.seguridad);
+
+    pintarHoras(s.actividad_por_hora);
+
+    // Salud del servidor
+    pintarMedidor('Cpu', s.cpu, `avisa sobre ${UMBRAL_AVISO} %`);
+    pintarMedidor('Ram', s.ram, `avisa sobre ${UMBRAL_AVISO} %`);
+    const libre = Math.max(0, numero(s.disk_total_gb) - numero(s.disk_used_gb)).toFixed(1);
+    pintarMedidor('Disk', s.disk_pct, s.disk_total_gb ? `quedan ${libre} GB libres` : 'sin datos del disco');
+    setText('metricLatency', s.latencia != null ? `${s.latencia} ms` : '—');
+    setText('metricUptime', s.uptime ?? '—');
+    setText('metricOnline', numero(s.usuarios_online));
+    setText('metricRequests', numero(s.requests_minuto));
+
+    pintarEndpoints(s.top_endpoints);
+    pintarCuentas(total, activos, suspendidas);
+
+    const hoy = new Date();
+    const fecha = hoy.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', timeZone: ZONA });
+    setText('dashFecha', fecha.charAt(0).toUpperCase() + fecha.slice(1));
+    setText('dashActualizado', `actualizado a las ${hoy.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit', timeZone: ZONA })}`);
 }
 
 async function cargarUsuariosOnline() {
@@ -112,45 +292,19 @@ async function cargarUsuariosOnline() {
         if (badge) badge.textContent = data.total || 0;
         if (!container) return;
         if (!data.usuarios || data.usuarios.length === 0) {
-            container.innerHTML = '<div class="text-muted small py-2">No hay usuarios conectados.</div>';
+            container.innerHTML = '<div class="adm-vacio">No hay usuarios conectados.</div>';
             return;
         }
         container.innerHTML = data.usuarios.map(u => `
-            <div class="d-flex align-items-center gap-2 py-1">
-                <span class="server-dot stable" style="width:8px;height:8px;"></span>
-                <span class="fw-semibold small">${escapeHtml(u.nombre)}</span>
-                <small class="text-muted">${escapeHtml(u.rol)}</small>
+            <div class="adm-conectado">
+                <span class="server-dot stable"></span>
+                <span class="adm-conectado__nombre">${escapeHtml(u.nombre)}</span>
+                <small>${escapeHtml(u.rol)}</small>
             </div>
         `).join('');
     } catch (e) {
         console.error('Error cargando usuarios online:', e);
     }
-}
-
-function aplicarStatsLive(stats) {
-    setText('statTotal', stats.total_usuarios);
-    setText('statActivos', stats.usuarios_activos);
-    setText('statNotifs', stats.notificaciones);
-    setText('statSuspendidos', stats.cuentas_suspendidas ?? stats.cuentas_bloqueadas);
-    setText('metricCpu', stats.cpu ?? '—');
-    setText('metricRam', stats.ram ?? '—');
-    setText('metricDisk', stats.disk_pct ?? '—');
-    setText('metricUptime', stats.uptime ?? '—');
-    setText('metricRequests', stats.requests_minuto ?? '—');
-    setText('metricOnline', stats.usuarios_online ?? '—');
-    setText('metricLatency', stats.latencia ?? '—');
-    setText('metricPendientes', stats.citas_pendientes ?? '—');
-    setText('metricLogsHoy', stats.logs_hoy ?? '—');
-    setText('metricServerTime', new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }));
-
-    document.querySelectorAll('.progress-fill[data-pct]').forEach(el => {
-        const pct = parseInt(el.dataset.pct || '0', 10);
-        el.style.width = `${pct}%`;
-        toggleClass(el, 'warning', pct >= 66 && pct < 82);
-        toggleClass(el, 'critical', pct >= 82);
-    });
-
-    if (typeof updateCharts === 'function') updateCharts(stats);
 }
 
 function quitarSkeletons() {
@@ -164,10 +318,10 @@ async function cargarActividadReciente() {
         const res  = await fetch(`${API}/api/admin/logs`, { credentials: 'include' });
         const data = await res.json();
         if (!data.success || !data.logs || data.logs.length === 0) {
-            lista.innerHTML = '<li class="text-muted">No hay actividad reciente.</li>';
+            lista.innerHTML = '<li class="adm-vacio">No hay actividad reciente.</li>';
             return;
         }
-        const recientes = data.logs.slice(0, 8);
+        const recientes = data.logs.slice(0, 5);
         lista.innerHTML = recientes.map(log => buildItem(log)).join('');
     } catch (e) {
         console.error('Error cargando actividad:', e);
@@ -204,21 +358,14 @@ function exportActivityCSV() {
 
 function buildItem(log) {
     const { icono, color } = getIconoOrigen(log.origen, log.accion);
-    const accionFormateada  = formatearAccion(log.accion);
-    const detalle           = log.detalle ? `<span class="text-muted ms-1">— ${escapeHtml(log.detalle)}</span>` : '';
-    const autor             = log.administrador ? `<small class="text-muted">${escapeHtml(log.administrador)}</small>` : '';
-    return `<li class="d-flex align-items-start gap-3 py-2 border-bottom border-light">
-        <div class="actividad-icono rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-             style="width:36px;height:36px;background:${color}15;">
-            <i class="fas ${icono}" style="color:${color};font-size:.85rem;"></i>
-        </div>
-        <div class="flex-grow-1 lh-sm">
-            <div class="fw-semibold" style="font-size:.875rem;">${accionFormateada}${detalle}</div>
-            <div class="d-flex gap-2 align-items-center mt-1">
-                ${autor}
-                <span class="badge rounded-pill" style="background:${color}18;color:${color};font-size:.68rem;">${etiquetaOrigen(log.origen)}</span>
-                <small class="text-muted ms-auto">${escapeHtml(log.fecha)}</small>
-            </div>
+    const meta = [log.administrador, etiquetaOrigen(log.origen), log.fecha].filter(Boolean).map(escapeHtml).join(' · ');
+    const detalle = log.detalle ? `<div class="adm-reciente__detalle" title="${escapeHtml(log.detalle)}">${escapeHtml(log.detalle)}</div>` : '';
+    return `<li class="adm-reciente">
+        <span class="adm-reciente__icono" style="color:${color};background:${color}1f;"><i class="fas ${icono}"></i></span>
+        <div class="adm-reciente__texto">
+            <div class="adm-reciente__accion">${escapeHtml(formatearAccion(log.accion))}</div>
+            ${detalle}
+            <div class="adm-reciente__meta">${meta}</div>
         </div>
     </li>`;
 }
