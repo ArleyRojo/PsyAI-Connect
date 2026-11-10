@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/css/pages/admin.css?v=20261030-sidebar-fix-1">
     <link rel="stylesheet" href="/responsive/responsive-admin.css?v=20261104-sidebar-opt">
     <link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-sidebar-opt">
-    <link rel="stylesheet" href="/css/pages/admin-dashboard.css?v=20261110-2">
+    <link rel="stylesheet" href="/css/pages/admin-dashboard.css?v=20261110-3">
 </head>
 <body class="admin-panel">
 
@@ -209,15 +209,16 @@
             </div>
 
             <!-- Endpoints, cuentas y actividad reciente -->
-            <div class="adm-fila adm-fila--arriba">
-                <section class="adm-card adm-card--tercio" aria-labelledby="tituloEndpoints">
+            <div class="adm-fila">
+                <div class="adm-columna">
+                <section class="adm-card" aria-labelledby="tituloEndpoints">
                     <h2 class="adm-card__titulo" id="tituloEndpoints">Endpoints más usados</h2>
                     <div class="adm-endpoints" id="listaEndpoints">
                         <p class="adm-vacio">Cargando…</p>
                     </div>
                 </section>
 
-                <section class="adm-card adm-card--tercio" aria-labelledby="tituloCuentas">
+                <section class="adm-card" aria-labelledby="tituloCuentas">
                     <h2 class="adm-card__titulo" id="tituloCuentas">Estado de cuentas</h2>
                     <p class="adm-card__nota" id="resumenCuentas">—</p>
                     <div class="adm-apilada" id="barraCuentas" role="img" aria-label="Estado de las cuentas">
@@ -232,8 +233,9 @@
                     </ul>
                     <a href="./aside-admin/users.html" class="adm-enlace">Gestionar usuarios</a>
                 </section>
+                </div>
 
-                <section class="adm-card adm-card--tercio" aria-labelledby="tituloActividad">
+                <section class="adm-card adm-card--actividad" aria-labelledby="tituloActividad">
                     <div class="adm-card__cabecera">
                         <h2 class="adm-card__titulo" id="tituloActividad">Actividad reciente</h2>
                         <button type="button" class="adm-boton-icono" onclick="exportActivityCSV()" title="Exportar CSV" aria-label="Exportar actividad en CSV"><i class="fas fa-download"></i></button>
