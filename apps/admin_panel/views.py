@@ -403,3 +403,44 @@ class AdminSeguridadAPIView(APIView):
             request.data, administrador=getattr(request, "user_name", None) or "Admin"
         )
         return Response(payload, status=status_code)
+
+
+# ── HU-57 / HU-58: asignación y reasignación de pacientes ───────────────────
+class AdminAsignacionesAPIView(APIView):
+    """GET /api/admin/asignaciones — pacientes con sus profesionales.
+    POST /api/admin/asignaciones — asignar un profesional a un paciente."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def get(self, request):
+        from apps.professionals import asignaciones
+        payload, status_code = asignaciones.listar_asignaciones()
+        return Response(payload, status=status_code)
+
+    def post(self, request):
+        from apps.professionals import asignaciones
+        payload, status_code = asignaciones.asignar(
+            request.data, administrador=getattr(request, "user_name", None) or "Admin"
+        )
+        return Response(payload, status=status_code)
+
+
+class AdminReasignarAPIView(APIView):
+    """POST /api/admin/asignaciones/reasignar — pasa el caso a otro profesional."""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def post(self, request):
+        from apps.professionals import asignaciones
+        payload, status_code = asignaciones.reasignar(
+            request.data, administrador=getattr(request, "user_name", None) or "Admin"
+        )
+        return Response(payload, status=status_code)
+
+
+class AdminHistorialAsignacionesAPIView(APIView):
+    """GET /api/admin/asignaciones/historial"""
+    permission_classes = [IsAuthenticatedDRF, IsAdmin]
+
+    def get(self, request):
+        from apps.professionals import asignaciones
+        payload, status_code = asignaciones.historial()
+        return Response(payload, status=status_code)

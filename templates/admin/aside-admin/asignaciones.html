@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es" class="{% if request.COOKIES.theme == 'dark' %}dark-mode{% endif %}">
+<head>
+    <title>PsyAI Connect | Asignaciones</title>
+    {% include 'base/partials/head.html' %}
+    <link rel="stylesheet" href="/css/pages/admin.css?v=20261030-sidebar-fix-1">
+    <link rel="stylesheet" href="/responsive/responsive-admin.css?v=20261104-sidebar-opt">
+    <link rel="stylesheet" href="/css/pages/admin-asignaciones.css?v=20261109-1">
+</head>
+<body class="admin-panel">
+
+<button class="toggle-btn" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="d-flex w-100">
+
+  <aside class="sidebar d-flex flex-column position-fixed shadow-sm" id="sidebar">
+    <div class="sidebar__logo">
+        <div class="sidebar__logo-img-wrap">
+            <img src="/img/Logo.webp" alt="PsyAI Connect Logo" class="sidebar__logo-img">
+            <div class="sidebar__logo-glow"></div>
+        </div>
+        <h5 class="sidebar__brand">PsyAI Connect</h5>
+        <span class="sidebar__role-badge"></span>
+    </div>
+    <nav class="sidebar__nav flex-column" aria-label="Navegación principal">
+        <div class="sidebar__nav-section-label">Menú Principal</div>
+        <a href="../admin.dashboard.html" class="sidebar__nav-item" data-tooltip="Dashboard">
+            <div class="sidebar__nav-icon"><i class="fas fa-home"></i></div>
+            <span>Dashboard</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="users.html" class="sidebar__nav-item" data-tooltip="Usuarios">
+            <div class="sidebar__nav-icon"><i class="fas fa-users"></i></div>
+            <span>Usuarios</span>
+            <div class="sidebar__nav-indicator"></div>
+            <span id="sidebarBloqueados" class="sidebar__badge" style="display:none">0</span>
+        </a>
+        <a href="roles.html" class="sidebar__nav-item" data-tooltip="Roles">
+            <div class="sidebar__nav-icon"><i class="fas fa-user-shield"></i></div>
+            <span>Roles</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="asignaciones.html" class="sidebar__nav-item active" data-tooltip="Asignaciones">
+            <div class="sidebar__nav-icon"><i class="fas fa-people-arrows"></i></div>
+            <span>Asignaciones</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <div class="sidebar__nav-section-label">Sistema</div>
+        <a href="notifications.html" class="sidebar__nav-item" data-tooltip="Notificaciones">
+            <div class="sidebar__nav-icon"><i class="fas fa-bell"></i></div>
+            <span>Notificaciones</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="logs.html" class="sidebar__nav-item" data-tooltip="Logs">
+            <div class="sidebar__nav-icon"><i class="fas fa-clipboard-list"></i></div>
+            <span>Logs</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <div class="sidebar__nav-section-label">Configuración</div>
+        <a href="chatbot.config.html" class="sidebar__nav-item" data-tooltip="Chatbot">
+            <div class="sidebar__nav-icon"><i class="fas fa-robot"></i></div>
+            <span>Chatbot</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="facturacion.html" class="sidebar__nav-item" data-tooltip="Pagos">
+            <div class="sidebar__nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <span>Pagos</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+        <a href="seguridad.html" class="sidebar__nav-item" data-tooltip="Seguridad">
+            <div class="sidebar__nav-icon"><i class="fas fa-lock"></i></div>
+            <span>Seguridad</span>
+            <div class="sidebar__nav-indicator"></div>
+        </a>
+    </nav>
+    <div class="sidebar__footer">
+        <div class="sidebar__user-card">
+            <div class="sidebar__user-avatar" data-avatar="inicial">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="sidebar__user-info">
+                <span class="sidebar__user-name" id="sidebarUserName"></span>
+                <span class="sidebar__user-role"></span>
+            </div>
+
+        </div>
+        <div class="theme-switch-container" style="display:flex;justify-content:center;padding:4px 0;">
+            <button id="theme-toggle" title="Cambiar modo"></button>
+        </div>
+    </div>
+    <div class="sidebar__logout-section">
+        <a href="#" onclick="cerrarSesion()" class="sidebar__logout-btn" title="Cerrar Sesión">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span>
+        </a>
+    </div>
+  </aside>
+
+  <main class="main-content flex-grow-1 ms-250 p-4">
+
+    <!-- Header -->
+    <header class="main-header d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 fw-bold mb-0"><i class="fas fa-people-arrows me-2 text-primary"></i>Asignaciones</h1>
+        <small class="text-muted">Asigna pacientes a profesionales y reasigna casos conservando el historial clínico.</small>
+      </div>
+      <div class="user-info"><i class="fas fa-bell me-2 text-secondary"></i></div>
+    </header>
+
+    <div class="admin-panel-tabs" role="tablist" aria-label="Secciones de asignaciones">
+      <button class="admin-panel-tab active" type="button" role="tab" aria-selected="true" data-tab="pacientes">
+        <i class="fas fa-user-injured"></i> Pacientes <span class="tab-count" id="cntPacientes">0</span>
+      </button>
+      <button class="admin-panel-tab" type="button" role="tab" aria-selected="false" data-tab="historial">
+        <i class="fas fa-clock-rotate-left"></i> Historial <span class="tab-count" id="cntHistorial">0</span>
+      </button>
+    </div>
+
+    <!-- TAB: Pacientes -->
+    <div id="tab-pacientes">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="search" id="buscarPaciente" class="form-control form-control-sm" placeholder="Buscar paciente o profesional..." style="width:260px;" aria-label="Buscar paciente o profesional">
+          <select id="filtroAsignacion" class="form-control form-control-sm" style="width:190px;" aria-label="Filtrar pacientes">
+            <option value="">Todos los pacientes</option>
+            <option value="sin">Sin profesional</option>
+            <option value="con">Con profesional</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <span class="text-muted" style="font-size:.82rem; align-self:center;"><span id="cntSinProfesional">0</span> sin profesional</span>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+          <table class="table table-clean mb-0">
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Profesional responsable</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAsignaciones">
+              <tr><td colspan="3" class="text-center text-muted py-4">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Historial -->
+    <div id="tab-historial" style="display:none;">
+      <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+          <table class="table table-clean mb-0">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Paciente</th>
+                <th>De</th>
+                <th>A</th>
+                <th>Motivo</th>
+                <th>Citas canceladas</th>
+                <th>Administrador</th>
+              </tr>
+            </thead>
+            <tbody id="tablaHistorial">
+              <tr><td colspan="8" class="text-center text-muted py-4">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL: Asignar / Reasignar -->
+<div class="modal fade" id="modalAsignacion" tabindex="-1" aria-labelledby="modalAsignacionTitulo" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="modalAsignacionTitulo">Reasignar caso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" style="font-size:.9rem;">
+        <div class="asig-resumen">
+          <div><span class="text-muted">Paciente</span><strong id="asigPaciente"></strong></div>
+          <div id="asigActualWrap"><span class="text-muted">Profesional actual</span><strong id="asigActual"></strong></div>
+        </div>
+
+        <label for="asigNuevo" class="form-label fw-semibold mt-3" id="asigNuevoLabel">Nuevo profesional</label>
+        <select id="asigNuevo" class="form-select"></select>
+
+        <label for="asigMotivo" class="form-label fw-semibold mt-3">Motivo</label>
+        <textarea id="asigMotivo" class="form-control" rows="3" maxlength="500" placeholder="Ej.: el paciente pidió cambio de horario"></textarea>
+        <small class="text-muted d-block text-end" id="asigContador">0/500</small>
+
+        <div class="asig-aviso" id="asigAviso">
+          <div><i class="fas fa-folder-open"></i><span>Todo el historial clínico (diagnósticos, anamnesis, documentos, reportes y consejos) pasa al nuevo profesional.</span></div>
+          <div><i class="fas fa-user-lock"></i><span id="asigAvisoAcceso"></span></div>
+          <div id="asigAvisoCitasWrap"><i class="fas fa-calendar-xmark"></i><span id="asigAvisoCitas"></span></div>
+          <div><i class="fas fa-bell"></i><span id="asigAvisoNotif"></span></div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmarAsignacion"><i class="fas fa-people-arrows me-1"></i>Reasignar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include 'base/partials/scripts.html' %}
+<link rel="stylesheet" href="/responsive/responsive-fix.css?v=20261104-sidebar-opt">
+<link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
+<script src="/js/core/shared/alerts.js?v=20261023-1"></script>
+<script src="/js/modules/auth/auth-ui.js?v=20260803-1"></script>
+<script src="/js/core/shared/aside.js?v=20261104-aside-unified"></script>
+<script src="/js/modules/admin/admin.asignaciones.js?v=20261109-1"></script>
+<script src="/js/modules/auth/logout.js?v=20261023-1"></script>
+
+</body>
+</html>

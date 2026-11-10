@@ -235,3 +235,54 @@ class ConsejoPaciente(models.Model):
             "fechaCompletado": self.fechaCompletado.isoformat() if self.fechaCompletado else None,
             "fecha": self.fecha.isoformat() if self.fecha else None,
         }
+
+
+class ReasignacionCaso(models.Model):
+    """Registro de asignaciones y reasignaciones de pacientes hechas por el administrador
+    (HU-57 / HU-58, RN-27). Si idProfesionalAnterior es nulo, fue una asignación nueva."""
+
+    idReasignacion = models.AutoField(primary_key=True)
+    idPaciente = models.ForeignKey(
+        Register,
+        on_delete=models.CASCADE,
+        db_column="idPaciente",
+        related_name="reasignaciones_paciente",
+    )
+    idProfesionalAnterior = models.ForeignKey(
+        Register,
+        on_delete=models.SET_NULL,
+        db_column="idProfesionalAnterior",
+        related_name="casos_entregados",
+        null=True,
+        blank=True,
+    )
+    idProfesionalNuevo = models.ForeignKey(
+        Register,
+        on_delete=models.SET_NULL,
+        db_column="idProfesionalNuevo",
+        related_name="casos_recibidos",
+        null=True,
+        blank=True,
+    )
+    motivo = models.TextField()
+    administrador = models.CharField(max_length=120, null=True, blank=True)
+    citasCanceladas = models.PositiveIntegerField(default=0)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "ReasignacionesCaso"
+        ordering = ["-fecha"]
+
+    def to_dict(self):
+        return {
+            "idReasignacion": self.idReasignacion,
+            "tipo": "Reasignación" if self.idProfesionalAnterior_id else "Asignación",
+            "idPaciente": self.idPaciente_id,
+            "paciente": self.idPaciente.nombre if self.idPaciente_id else None,
+            "profesionalAnterior": self.idProfesionalAnterior.nombre if self.idProfesionalAnterior_id else None,
+            "profesionalNuevo": self.idProfesionalNuevo.nombre if self.idProfesionalNuevo_id else None,
+            "motivo": self.motivo,
+            "administrador": self.administrador,
+            "citasCanceladas": self.citasCanceladas,
+            "fecha": self.fecha.isoformat() if self.fecha else None,
+        }

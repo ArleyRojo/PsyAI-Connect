@@ -72,6 +72,21 @@ urlpatterns = [
         name="admin_seguridad",
     ),
     path(
+        "admin/asignaciones",
+        views.AdminAsignacionesAPIView.as_view(),
+        name="admin_asignaciones",
+    ),
+    path(
+        "admin/asignaciones/reasignar",
+        views.AdminReasignarAPIView.as_view(),
+        name="admin_asignaciones_reasignar",
+    ),
+    path(
+        "admin/asignaciones/historial",
+        views.AdminHistorialAsignacionesAPIView.as_view(),
+        name="admin_asignaciones_historial",
+    ),
+    path(
         "sesion/inactividad",
         views.SesionInactividadAPIView.as_view(),
         name="sesion_inactividad",

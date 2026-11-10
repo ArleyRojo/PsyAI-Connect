@@ -1,0 +1,87 @@
+/* Asignaciones (admin) — HU-57 / HU-58 */
+
+.asig-paciente { display: flex; flex-direction: column; }
+.asig-paciente small { color: #64748b; }
+
+.asig-profesional {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.asig-profesional + .asig-profesional { border-top: 1px dashed #e2e8f0; }
+.asig-profesional__nombre { font-weight: 600; }
+.asig-profesional__meta { font-size: .78rem; color: #64748b; }
+
+.asig-sin {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.asig-tipo {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  background: #e0ecff;
+  color: #1d4ed8;
+}
+
+.asig-tipo--asignacion { background: #dcfce7; color: #166534; }
+.asig-motivo { max-width: 280px; white-space: pre-line; }
+
+.asig-resumen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f5f8fc;
+}
+
+.asig-resumen div { display: flex; flex-direction: column; }
+.asig-resumen span { font-size: .75rem; }
+
+.asig-aviso {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  background: #fffbeb;
+  color: #78350f;
+  font-size: .82rem;
+}
+
+.asig-aviso div { display: flex; gap: 10px; align-items: flex-start; }
+.asig-aviso i { margin-top: 3px; width: 14px; text-align: center; }
+
+/* Modo oscuro */
+html.dark-mode .asig-paciente strong,
+html.dark-mode .asig-resumen strong,
+html.dark-mode .asig-profesional__nombre { color: var(--dm-heading, #e8f0f8); }
+html.dark-mode .asig-profesional .btn-outline-primary { color: var(--dm-accent, #90CAF9); border-color: var(--dm-accent, #90CAF9); }
+html.dark-mode .asig-profesional .btn-outline-primary:hover { background: var(--dm-accent, #90CAF9); color: #0b1220; }
+html.dark-mode .asig-paciente small,
+html.dark-mode .asig-profesional__meta { color: var(--dm-text2, #8aa0bc); }
+html.dark-mode .asig-profesional + .asig-profesional { border-top-color: var(--dm-border, #1a2b4a); }
+html.dark-mode .asig-sin { background: rgba(245, 158, 11, .18); color: #fcd34d; }
+html.dark-mode .asig-tipo { background: rgba(96, 165, 250, .18); color: #93c5fd; }
+html.dark-mode .asig-tipo--asignacion { background: rgba(22, 163, 74, .2); color: #86efac; }
+html.dark-mode .asig-resumen { background: var(--dm-elevated, #0f1d32); }
+html.dark-mode .asig-aviso { background: rgba(245, 158, 11, .1); border-color: rgba(245, 158, 11, .35); color: #fde68a; }
+
+@media (max-width: 575.98px) {
+  .asig-resumen { grid-template-columns: 1fr; }
+}

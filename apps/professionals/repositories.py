@@ -500,6 +500,23 @@ class ProfessionalRepository:
                 "accion": "ver_pacientes",
             })
 
+        # Asignaciones y reasignaciones de pacientes hechas por el admin (últimos 7 días)
+        try:
+            from apps.scheduling.models import Notificaciones
+            avisos = Notificaciones.objects.filter(
+                idUsuario_id=professional_id, rol="profesional", canal="interno", tipo="Asignacion",
+                fecha__gte=timezone.now() - timedelta(days=7),
+            ).order_by("-fecha")[:3]
+            for aviso in reversed(list(avisos)):
+                alertas.insert(0, {
+                    "tipo": "info", "icono": "fa-user-plus",
+                    "titulo": aviso.titulo,
+                    "mensaje": aviso.mensaje,
+                    "accion": "ver_pacientes",
+                })
+        except Exception:
+            pass
+
         nivel_energia = (
             round(evolucion_data["nivel_energia_promedio"], 1)
             if evolucion_data.get("nivel_energia_promedio") is not None else None
