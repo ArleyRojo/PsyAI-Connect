@@ -245,4 +245,13 @@ class FacturaConfirmarPagoView(APIView):
             referencia=referencia,
             notas=notas,
         )
-        return Response(payload, status=status_code)
+        return Response(payload, status=status_code)
+
+class FacturaRecordarPagoView(APIView):
+    """POST /api/facturas/<id>/recordar — el profesional recuerda el pago al paciente (HU-77)."""
+    permission_classes = [IsAuthenticatedDRF, IsProfesional]
+
+    def post(self, request, id_factura):
+        from apps.billing.recordatorios import recordar_manual
+        payload, status_code = recordar_manual(id_factura, getattr(request, "user_id", None))
+        return Response(payload, status=status_code)

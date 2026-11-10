@@ -49,6 +49,40 @@ services:
       retries: 3
       start_period: 10s
 
+  # ── Programador de tareas (recordatorios de cita, de cobro y notificaciones) ──
+  # Ejecuta `python manage.py programador`, que corre sin parar:
+  #   cada 5 min: recordatorios de cita (24 h antes) y notificaciones programadas del admin
+  #   cada hora: recordatorios de facturas pendientes (HU-77)
+  # Ver lo que hace:  docker compose -f install/docker-compose.yml logs -f scheduler
+  scheduler:
+    build:
+      context: ..
+      dockerfile: install/Dockerfile
+      target: dev
+    container_name: psyai_scheduler
+    # Sin el entrypoint: las migraciones ya las hace el servicio app
+    entrypoint: []
+    command: ["python", "manage.py", "programador"]
+    env_file:
+      - ../.env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - DEBUG=1
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-psyai_connect}
+      - DB_USER=${DB_USER:-psyai}
+      - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ..:/app
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - psyai_net
+
   # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
   db:
     image: postgres:16-alpine

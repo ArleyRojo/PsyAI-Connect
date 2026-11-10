@@ -50,6 +50,35 @@ services:
       retries: 3
       start_period: 15s
 
+  # ── Programador de tareas (Production) ───────────────────────────────────
+  scheduler:
+    build:
+      context: ..
+      dockerfile: install/Dockerfile
+      target: prod
+      args:
+        SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or environment}
+    container_name: psyai_scheduler_prod
+    entrypoint: []
+    command: ["python", "manage.py", "programador"]
+    env_file:
+      - ../.env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.prod
+      - DEBUG=0
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-psyai_connect}
+      - DB_USER=${DB_USER:-psyai}
+      - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - psyai_net
+
   # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
   db:
     image: postgres:16-alpine

@@ -426,6 +426,9 @@ function renderFacturaCard(f) {
     }
     if (isPending) {
         acciones += '<button class="facturas-btn facturas-btn--pay" onclick="confirmarPago(' + f.idFactura + ')"><i class="fas fa-check"></i> Confirmar pago</button>';
+        var veces = Number(f.recordatoriosEnviados) || 0;
+        var tituloRecordar = veces ? 'Recordado ' + veces + ' vez/veces' : 'Enviar recordatorio de pago al paciente';
+        acciones += '<button class="facturas-btn facturas-btn--receipt" onclick="recordarPago(' + f.idFactura + ', this)" title="' + tituloRecordar + '"><i class="fas fa-bell"></i> Recordar pago</button>';
     }
     if (!f.anulada && f.estadoPago !== "Pagado") {
         acciones += '<button class="facturas-btn facturas-btn--info" onclick="abrirModalAnular(' + f.idFactura + ')" aria-label="Anular factura" title="Anular"><i class="fas fa-ban"></i></button>';
@@ -654,6 +657,26 @@ async function confirmarAnularFactura() {
 }
 
 /* ---------- Confirmar pago con evidencia ---------- */
+/* ---------- Recordar pago (HU-77) ---------- */
+async function recordarPago(id, btn) {
+    if (btn) btn.disabled = true;
+    try {
+        var res = await fetch("/api/facturas/" + id + "/recordar", { method: "POST", credentials: "include" });
+        var data = await res.json().catch(function () { return {}; });
+        if (res.ok && data.success) {
+            PsyAIAlerts.success(data.message, "Recordatorio enviado");
+            cargarFacturasProfesional();
+        } else {
+            PsyAIAlerts.warning(data.message || "No se pudo enviar el recordatorio", "Recordatorio");
+            if (btn) btn.disabled = false;
+        }
+    } catch (e) {
+        console.error(e);
+        PsyAIAlerts.error("No se pudo conectar con el servidor", "Error");
+        if (btn) btn.disabled = false;
+    }
+}
+
 function confirmarPago(id) {
     facturaIdConfirmar = id;
     resetEvidenciaModal();

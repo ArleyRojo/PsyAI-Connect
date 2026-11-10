@@ -64,6 +64,9 @@ class Facturas(models.Model):
         related_name="facturas_confirmadas",
     )
     fecha_confirmacion = models.DateTimeField(null=True, blank=True)
+    # Recordatorios de cobro (HU-77)
+    recordatoriosEnviados = models.PositiveSmallIntegerField(default=0)
+    ultimoRecordatorio = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "Facturas"
@@ -105,6 +108,8 @@ class Facturas(models.Model):
             "confirmadaPor": self.confirmada_por_id,
             "nombreConfirmador": self.confirmada_por.nombre if self.confirmada_por else None,
             "fechaConfirmacion": self.fecha_confirmacion.isoformat() if self.fecha_confirmacion else None,
+            "recordatoriosEnviados": self.recordatoriosEnviados,
+            "ultimoRecordatorio": self.ultimoRecordatorio.isoformat() if self.ultimoRecordatorio else None,
             "items": [item.to_dict() for item in self.items.all()],
         }
 
