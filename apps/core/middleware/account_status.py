@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.deprecation import MiddlewareMixin
 
-from apps.authentication.models import Register
+from apps.authentication.repositories import AuthRepository
 
 
 EXEMPT_PATHS = {
@@ -63,9 +63,8 @@ class AccountStatusMiddleware(MiddlewareMixin):
         activo = request.session.get("activo")
         estado_cuenta = request.session.get("estadoCuenta")
         if activo is None or estado_cuenta is None:
-            try:
-                user = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
-            except Register.DoesNotExist:
+            fila = AuthRepository().estado_cuenta(user_id)
+            if fila is None:
                 request.session.flush()
                 if _wants_json(request):
                     return JsonResponse(
@@ -77,8 +76,7 @@ class AccountStatusMiddleware(MiddlewareMixin):
                         status=403,
                     )
                 return redirect("/login.html?suspendida=1")
-            activo = user.activo
-            estado_cuenta = user.estadoCuenta
+            activo, estado_cuenta = fila
             request.session["activo"] = activo
             request.session["estadoCuenta"] = estado_cuenta
             request.session.modified = True

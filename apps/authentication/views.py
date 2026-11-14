@@ -18,7 +18,6 @@ from apps.authentication.serializers import (
     TOTPDisableSerializer,
 )
 from apps.authentication.services import AuthService
-from apps.authentication.models import Register
 
 
 auth_service = AuthService()
@@ -133,9 +132,8 @@ class TOTPDisableView(APIView):
         user_id = request.user.id
 
         # Verificar contraseña actual
-        try:
-            user = Register.objects.get(idUsuario=user_id)
-        except Register.DoesNotExist:
+        user = auth_service.get_user(user_id)
+        if user is None:
             return Response(
                 {"success": False, "message": "Usuario no encontrado"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -196,9 +194,8 @@ class TOTPVerifyLoginView(APIView):
             )
 
         # Login exitoso - completar el login
-        try:
-            user_model = Register.objects.get(idUsuario=user_id)
-        except Register.DoesNotExist:
+        user_model = auth_service.get_user(user_id)
+        if user_model is None:
             return Response(
                 {"success": False, "message": "Usuario no encontrado"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -270,9 +267,8 @@ class LoginView(APIView):
 
         if session_user:
             # Obtener el modelo de usuario real
-            try:
-                user_model = Register.objects.get(idUsuario=session_user["id"])
-            except Register.DoesNotExist:
+            user_model = auth_service.get_user(session_user["id"])
+            if user_model is None:
                 return Response(
                     {"success": False, "message": "Usuario no encontrado"},
                     status=status.HTTP_404_NOT_FOUND,
@@ -316,7 +312,7 @@ class LogoutView(APIView):
 
 
 def _nombre_rol(id_usuario):
-    usuario = Register.objects.filter(idUsuario=id_usuario).select_related("rolPersonalizado").first()
+    usuario = auth_service.get_user(id_usuario)
     return usuario.rol_nombre if usuario else None
 
 

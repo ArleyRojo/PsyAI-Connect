@@ -117,21 +117,20 @@ class TestRegisterUser:
         mock_auth_repo.user_exists_by_email.return_value = False
         mock_auth_repo.create_user.return_value = 1
 
-        with patch("apps.authentication.models.ConsentimientoUsuario.objects.create") as mock_consent:
-            payload, status = auth_service.register_user({
-                "nombre": "Test User",
-                "email": "new@test.com",
-                "password": "Abc123",
-                "confirm_password": "Abc123",
-                "rol": "paciente",
-                "genero": "F",
-                "edad": 25,
-                "acepta_terminos": True,
-            })
+        payload, status = auth_service.register_user({
+            "nombre": "Test User",
+            "email": "new@test.com",
+            "password": "Abc123",
+            "confirm_password": "Abc123",
+            "rol": "paciente",
+            "genero": "F",
+            "edad": 25,
+            "acepta_terminos": True,
+        })
         assert status == 201
         assert payload["success"] is True
         mock_auth_repo.create_user.assert_called_once()
-        mock_consent.assert_called_once()
+        mock_auth_repo.registrar_consentimiento.assert_called_once()
 
 
 # ── AuthService.login_user tests ─────────────────────────────────────────────
@@ -374,15 +373,11 @@ class TestResetPasswordEmail:
         class FakeRequest:
             META = {}
 
+        mock_auth_repo.get_user_by_id.return_value = FakeUser()
         with patch(
             "apps.authentication.services.MailService.send_password_changed_email"
-        ) as mock_mail, patch(
-            "apps.authentication.models.Register.objects.filter"
-        ) as mock_filter:
+        ) as mock_mail:
             mock_mail.return_value = True
-            mock_qs = MagicMock()
-            mock_qs.first.return_value = FakeUser()
-            mock_filter.return_value = mock_qs
 
             payload, status = auth_service.reset_password(
                 {

@@ -19,6 +19,7 @@ from apps.chatbot.services import (
     chatbot_config_events,
     DEFAULT_CRISIS_PHONE,
 )
+from apps.authentication.services import cuenta_activa
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +97,6 @@ class ChatbotConfigViewSet(viewsets.ViewSet):
 
 class ChatbotConfigEventsResource(View):
     def get(self, request):
-        from apps.authentication.models import Register
         import json
         from queue import Empty
 
@@ -109,12 +109,7 @@ class ChatbotConfigEventsResource(View):
                 while True:
                     # Verify account status each iteration
                     if user_id:
-                        try:
-                            usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
-                            if not usr.activo or usr.estadoCuenta != "Activa":
-                                yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
-                                return
-                        except Register.DoesNotExist:
+                        if not cuenta_activa(request, user_id, usar_sesion=False):
                             yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
                             return
                     try:

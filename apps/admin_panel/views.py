@@ -16,6 +16,7 @@ from apps.admin_panel.services import (
 from apps.core.permissions import IsAuthenticatedDRF, IsAdmin
 from apps.core.renderers import EventStreamRenderer
 from apps.admin_panel.repositories import AdminRepository
+from apps.authentication.services import cuenta_activa
 
 admin_service = AdminService()
 admin_repo = AdminRepository()
@@ -42,7 +43,6 @@ class AdminStatsStreamAPIView(APIView):
     renderer_classes = [EventStreamRenderer]
 
     def get(self, request):
-        from apps.authentication.models import Register
         client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
         telemetry_service.sse_connected(client_ip)
         user_id = request.session.get("idUsuario")
@@ -55,20 +55,7 @@ class AdminStatsStreamAPIView(APIView):
                 while True:
                     # Verify account status each iteration
                     if user_id:
-                        try:
-                            usr_activo = request.session.get("activo")
-                            usr_estado = request.session.get("estadoCuenta")
-                            if usr_activo is None or usr_estado is None:
-                                usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
-                                usr_activo = usr.activo
-                                usr_estado = usr.estadoCuenta
-                                request.session["activo"] = usr_activo
-                                request.session["estadoCuenta"] = usr_estado
-                                request.session.modified = True
-                            if not usr_activo or usr_estado != "Activa":
-                                yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
-                                return
-                        except Register.DoesNotExist:
+                        if not cuenta_activa(request, user_id):
                             yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
                             return
 
@@ -105,7 +92,6 @@ class AdminLogsStreamAPIView(APIView):
     renderer_classes = [EventStreamRenderer]
 
     def get(self, request):
-        from apps.authentication.models import Register
         client_ip = _normalize_ip(request.META.get("REMOTE_ADDR", "127.0.0.1"))
         telemetry_service.sse_connected(client_ip)
         user_id = request.session.get("idUsuario")
@@ -118,20 +104,7 @@ class AdminLogsStreamAPIView(APIView):
                 while True:
                     # Verify account status each iteration
                     if user_id:
-                        try:
-                            usr_activo = request.session.get("activo")
-                            usr_estado = request.session.get("estadoCuenta")
-                            if usr_activo is None or usr_estado is None:
-                                usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
-                                usr_activo = usr.activo
-                                usr_estado = usr.estadoCuenta
-                                request.session["activo"] = usr_activo
-                                request.session["estadoCuenta"] = usr_estado
-                                request.session.modified = True
-                            if not usr_activo or usr_estado != "Activa":
-                                yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
-                                return
-                        except Register.DoesNotExist:
+                        if not cuenta_activa(request, user_id):
                             yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
                             return
 

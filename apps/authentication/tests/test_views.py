@@ -99,11 +99,10 @@ class TestLoginView:
                 session_user,
             )
             mock_svc.is_totp_enabled.return_value = False
-            with patch("apps.authentication.views.Register") as mock_reg:
-                mock_user = MagicMock()
-                mock_user.idUsuario = 1
-                mock_reg.objects.get.return_value = mock_user
-                resp = LoginView.as_view()(req)
+            mock_user = MagicMock()
+            mock_user.idUsuario = 1
+            mock_svc.get_user.return_value = mock_user
+            resp = LoginView.as_view()(req)
 
         resp.render()
         assert resp.status_code == 200
@@ -162,11 +161,10 @@ class TestLoginView:
                 session_user,
             )
             mock_svc.is_totp_enabled.return_value = False
-            with patch("apps.authentication.views.Register") as mock_reg:
-                mock_user = MagicMock()
-                mock_user.idUsuario = 5
-                mock_reg.objects.get.return_value = mock_user
-                resp = LoginView.as_view()(req)
+            mock_user = MagicMock()
+            mock_user.idUsuario = 5
+            mock_svc.get_user.return_value = mock_user
+            resp = LoginView.as_view()(req)
 
         resp.render()
         assert resp.status_code == 200

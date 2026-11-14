@@ -21,6 +21,7 @@ from apps.patients.serializers import (
     RevocarConsentimientoSerializer,
     EliminarCuentaSerializer,
 )
+from apps.authentication.services import cuenta_activa
 
 if apps.is_installed("apps.chatbot"):
     from apps.chatbot.services import ChatbotService
@@ -236,7 +237,6 @@ class ChatbotConfigEventsResource(View):
     def get(self, request):
         from django.http import StreamingHttpResponse
         from queue import Empty
-        from apps.authentication.models import Register
 
         if not chatbot_config_events:
             def error_stream():
@@ -252,20 +252,7 @@ class ChatbotConfigEventsResource(View):
                 while True:
                     # Verify account status each iteration
                     if user_id:
-                        try:
-                            usr_activo = request.session.get("activo")
-                            usr_estado = request.session.get("estadoCuenta")
-                            if usr_activo is None or usr_estado is None:
-                                usr = Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
-                                usr_activo = usr.activo
-                                usr_estado = usr.estadoCuenta
-                                request.session["activo"] = usr_activo
-                                request.session["estadoCuenta"] = usr_estado
-                                request.session.modified = True
-                            if not usr_activo or usr_estado != "Activa":
-                                yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
-                                return
-                        except Register.DoesNotExist:
+                        if not cuenta_activa(request, user_id):
                             yield f"event: account_suspended\ndata: {json.dumps({'message': 'Tu cuenta ha sido suspendida. Contacta al administrador.'})}\n\n"
                             return
                     try:

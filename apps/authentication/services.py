@@ -90,6 +90,28 @@ class MailService:
             return False
 
 
+def cuenta_activa(request, user_id, usar_sesion=True):
+    """
+    True si la cuenta sigue activa. Lo usan los streams SSE en cada vuelta.
+    Con usar_sesion=True toma los datos guardados en la sesión y, si no están, los lee
+    una sola vez de la base y los guarda; con False consulta la base cada vez.
+    """
+    if not usar_sesion:
+        fila = AuthRepository().estado_cuenta(user_id)
+        return fila is not None and bool(fila[0]) and fila[1] == "Activa"
+    activo = request.session.get("activo")
+    estado = request.session.get("estadoCuenta")
+    if activo is None or estado is None:
+        fila = AuthRepository().estado_cuenta(user_id)
+        if fila is None:
+            return False
+        activo, estado = fila
+        request.session["activo"] = activo
+        request.session["estadoCuenta"] = estado
+        request.session.modified = True
+    return bool(activo) and estado == "Activa"
+
+
 class AuthService:
     def __init__(self):
         self.repo = AuthRepository()
@@ -235,19 +257,16 @@ class AuthService:
         )
 
         # Guardar consentimiento de términos y privacidad
-        from apps.authentication.models import ConsentimientoUsuario
         from django.conf import settings
-        legal_version = getattr(settings, "LEGAL_VERSION", "2026-10-26")
         client_ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "")) if request else ""
         user_agent = request.META.get("HTTP_USER_AGENT", "") if request else ""
 
-        ConsentimientoUsuario.objects.create(
-            idUsuario_id=user_id,
+        self.repo.registrar_consentimiento(
+            user_id,
             tipo="terminos_privacidad",
             version=getattr(settings, "LEGAL_VERSION", "2026-10-26"),
-            aceptado=True,
             ip=client_ip.split(",")[0].strip() if client_ip else None,
-            userAgent=user_agent,
+            user_agent=user_agent,
         )
 
         # Si es profesional o email no verificado, crear token de verificación y enviar email
@@ -473,8 +492,7 @@ class AuthService:
 
         # Enviar correo de aviso (no incluye contraseña ni token)
         try:
-            from apps.authentication.models import Register
-            user = Register.objects.filter(idUsuario=user_id).first()
+            user = self.repo.get_user_by_id(user_id)
             if user:
                 client_ip = None
                 if request:
@@ -498,33 +516,17 @@ class AuthService:
             raise ValidationError("Funcionalidad 2FA no disponible. Instale pyotp y qrcode.")
 
     def get_totp_device(self, user_id):
-        """Obtiene o crea el dispositivo TOTP del usuario."""
-        from apps.authentication.models import TOTPDevice
-        try:
-            return TOTPDevice.objects.get(idUsuario_id=user_id)
-        except TOTPDevice.DoesNotExist:
-            return None
+        """Dispositivo TOTP del usuario, o None si no tiene."""
+        return self.security_repo.get_totp_device(user_id)
 
     def create_totp_device(self, user_id, name=""):
-        """Crea un nuevo secreto TOTP para el usuario (aún no confirmado)."""
-        from apps.authentication.models import TOTPDevice
+        """Crea (o regenera) el secreto TOTP del usuario, aún sin confirmar."""
         self._check_totp_available()
+        return self.security_repo.create_totp_device(user_id, name=name, secret=pyotp.random_base32())
 
-        device = self.get_totp_device(user_id)
-        if device:
-            # Regenerar secreto si ya existe
-            device.secret = pyotp.random_base32()
-            device.name = name
-            device.confirmed = False
-            device.save()
-        else:
-            device = TOTPDevice.objects.create(
-                idUsuario_id=user_id,
-                secret=pyotp.random_base32(),
-                name=name,
-                confirmed=False,
-            )
-        return device
+    def get_user(self, user_id):
+        """Usuario por id, o None si no existe."""
+        return self.repo.get_user_by_id(user_id)
 
     def get_totp_provisioning_uri(self, user_id, email):
         """Genera la URI para QR code (otpauth://...)."""

@@ -230,3 +230,47 @@ class TestEmailVerificationTokenFlow:
     def test_validate_nonexistent_token(self):
         repo = AuthRepository()
         assert repo.validate_email_verification_token("bogus_token") is None
+
+
+# ── Consultas que se movieron de vistas y servicios al repositorio ─────────────
+@pytest.mark.django_db
+class TestConsultasMovidas:
+    def _usuario(self, **extra):
+        from apps.authentication.models import Register
+        datos = {"nombre": "Ana", "email": "ana@test.com", "contrasena": "x", "rol": "paciente",
+                 "activo": True, "estadoCuenta": "Activa"}
+        datos.update(extra)
+        return Register.objects.create(**datos)
+
+    def test_get_user_by_id(self):
+        from apps.authentication.repositories import AuthRepository
+        u = self._usuario()
+        assert AuthRepository().get_user_by_id(u.idUsuario).email == "ana@test.com"
+        assert AuthRepository().get_user_by_id(999999) is None
+
+    def test_estado_cuenta(self):
+        from apps.authentication.repositories import AuthRepository
+        u = self._usuario(estadoCuenta="Suspendida", activo=False)
+        assert AuthRepository().estado_cuenta(u.idUsuario) == (False, "Suspendida")
+        assert AuthRepository().estado_cuenta(999999) is None
+
+    def test_cuenta_activa_usa_la_sesion(self):
+        from apps.authentication.models import Register
+        from apps.authentication.services import cuenta_activa
+
+        class Sesion(dict):
+            modified = False
+
+        class Peticion:
+            def __init__(self):
+                self.session = Sesion()
+
+        u = self._usuario()
+        p = Peticion()
+        assert cuenta_activa(p, u.idUsuario) is True
+        assert p.session["estadoCuenta"] == "Activa"
+        # Si cambia en la base, con sesión sigue el valor guardado; sin sesión se ve el cambio
+        Register.objects.filter(pk=u.pk).update(estadoCuenta="Suspendida")
+        assert cuenta_activa(p, u.idUsuario) is True
+        assert cuenta_activa(p, u.idUsuario, usar_sesion=False) is False
+        assert cuenta_activa(Peticion(), 999999) is False

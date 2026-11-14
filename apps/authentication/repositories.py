@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from apps.authentication.models import (
+    ConsentimientoUsuario,
     EmailVerificationToken,
     IntentosFallidos,
     Login,
@@ -37,6 +38,24 @@ class AuthRepository:
         if user:
             return user.to_dict()
         return None
+
+    def get_user_by_id(self, user_id):
+        """Usuario por id (con su rol personalizado), o None si no existe."""
+        return Register.objects.select_related("rolPersonalizado").filter(idUsuario=user_id).first()
+
+    def estado_cuenta(self, user_id):
+        """(activo, estadoCuenta) del usuario, o None si no existe. Solo lee esas dos columnas."""
+        return Register.objects.filter(pk=user_id).values_list("activo", "estadoCuenta").first()
+
+    def registrar_consentimiento(self, user_id, tipo, version, ip, user_agent):
+        return ConsentimientoUsuario.objects.create(
+            idUsuario_id=user_id,
+            tipo=tipo,
+            version=version,
+            aceptado=True,
+            ip=ip,
+            userAgent=user_agent,
+        )
 
     def active_user_exists_by_email(self, email):
         return Register.objects.filter(
