@@ -25,7 +25,7 @@ class AppointmentMailService:
                 "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
                 "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
             ]
-            dias = ["Lunes", "Martes", "MiÃ©rcoles", "Jueves", "Viernes", "SÃ¡bado", "Domingo"]
+            dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
             return f"{dias[fecha.weekday()]} {fecha.day} de {meses[fecha.month]} de {fecha.year}"
         return str(fecha)
 
@@ -48,7 +48,7 @@ class AppointmentMailService:
                                motivo=None, estado=None, motivo_cancelacion=None, cta_link=None,
                                cta_texto=None, recipient_user_id=None):
         if not recipient_email:
-            logger.warning("No se enviÃ³ correo de cita: destinatario vacÃ­o")
+            logger.warning("No se envió correo de cita: destinatario vacío")
             return
 
         if recipient_user_id:
@@ -93,7 +93,7 @@ class AppointmentMailService:
                 logger.info(f"Notificación de cita enrutada al paciente {recipient_user_id}: {titulo}")
                 return
         if not recipient_email:
-            logger.warning("No se enviÃ³ correo de cita: destinatario vacÃ­o")
+            logger.warning("No se envió correo de cita: destinatario vacío")
             return
 
         site_url = cls._get_site_url()
@@ -141,7 +141,7 @@ class AppointmentService:
     def _notify(paciente, tipo, **ctx):
         textos = {
             "recordatorio_cita": ("Recordatorio de cita",
-                "Tu cita es maÃ±ana a las {hora}. DirecciÃ³n: {lugar}."),
+                "Tu cita es mañana a las {hora}. Dirección: {lugar}."),
             "confirmacion_cita": ("Cita confirmada",
                 "Tu cita del {fecha} a las {hora} ha sido confirmada."),
             "cancelacion_cita": ("Cita cancelada",
@@ -166,13 +166,21 @@ class AppointmentService:
             return {"success": False, "message": "Datos incompletos"}, 400
 
         try:
-            fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
-            hora_obj = datetime.strptime(hora, "%H:%M").time() if isinstance(hora, str) else hora
+            fecha_obj = (
+                datetime.strptime(fecha, "%Y-%m-%d").date()
+                if isinstance(fecha, str) else fecha
+            )
+            hora_obj = (
+                datetime.strptime(hora, "%H:%M").time()
+                if isinstance(hora, str) else hora
+            )
+            if not isinstance(fecha_obj, date) or not hasattr(hora_obj, "hour"):
+                raise ValueError("Fecha u hora inválida")
             fecha_hora_cita = tz.make_aware(datetime.combine(fecha_obj, hora_obj))
-            if fecha_hora_cita < tz.now():
-                return {"success": False, "message": "No se pueden agendar citas en el pasado"}, 400
         except (ValueError, TypeError):
-            pass
+            return {"success": False, "message": "Fecha u hora inválida"}, 400
+        if fecha_hora_cita < tz.now():
+            return {"success": False, "message": "No se pueden agendar citas en el pasado"}, 400
 
         if created_by_professional:
             target_patient_id = data.get("idPaciente")
@@ -181,7 +189,7 @@ class AppointmentService:
         else:
             target_patient_id = patient_id
             if not target_patient_id:
-                return {"success": False, "message": "SesiÃ³n de usuario invÃ¡lida"}, 401
+                return {"success": False, "message": "Sesión de usuario inválida"}, 401
 
         existing = self.repo.get_appointment_in_slot(professional_id, fecha, hora)
         if existing:
@@ -191,7 +199,7 @@ class AppointmentService:
                     "Reemplazada por nuevo intento de agendamiento"
                 )
             else:
-                msg = "Ese horario ya estÃ¡ ocupado" if created_by_professional else "Horario no disponible"
+                msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
                 return {"success": False, "message": msg}, 409
 
         try:
@@ -202,7 +210,7 @@ class AppointmentService:
             # Toda cita empieza pendiente; la confirma la contraparte correspondiente.
             self.repo.update_appointment_status(cita_id, "Pendiente")
         except IntegrityError:
-            msg = "Ese horario ya estÃ¡ ocupado" if created_by_professional else "Horario no disponible"
+            msg = "Ese horario ya está ocupado" if created_by_professional else "Horario no disponible"
             return {"success": False, "message": msg}, 409
 
         try:
@@ -242,7 +250,7 @@ class AppointmentService:
                     AppointmentMailService.send_cita_notificacion(
                         recipient_email=pac.email if pac else None,
                         titulo="Solicitud de cita enviada",
-                        mensaje=f"Tu solicitud de cita con {prof.nombre if prof else 'tu profesional'} ha sido enviada. Queda pendiente de confirmaciÃ³n.",
+                        mensaje=f"Tu solicitud de cita con {prof.nombre if prof else 'tu profesional'} ha sido enviada. Queda pendiente de confirmación.",
                         nombre_contraparte=prof.nombre if prof else None,
                         contraparte_label="Profesional",
                         fecha=cita.fecha, hora=cita.hora,
@@ -251,7 +259,7 @@ class AppointmentService:
                         cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                         recipient_user_id=pac.idUsuario if pac else None,
                     )
-                    # No enviar notificaciÃ³n centralizada de confirmaciÃ³n aquÃ­
+                    # No enviar notificación centralizada de confirmación aquí
         except Exception as e:
             logger.error(f"Error enviando correo de nueva cita: {e}")
 
@@ -320,13 +328,13 @@ class AppointmentService:
             return {"success": False, "message": "Datos incompletos"}, 400
 
         if estado not in VALID_CITAS_ESTADOS:
-            return {"success": False, "message": f"Estado invÃ¡lido. Opciones: {', '.join(VALID_CITAS_ESTADOS)}"}, 400
+            return {"success": False, "message": f"Estado inválido. Opciones: {', '.join(VALID_CITAS_ESTADOS)}"}, 400
 
         row = self.repo.get_appointment_owner(appointment_id)
         if not row:
             return {"success": False, "message": "Cita no encontrada"}, 404
 
-        # Validaciones de transiciÃ³n
+        # Validaciones de transición
         cita_obj = self.repo.get_appointment_full(appointment_id)
         if not cita_obj:
             return {"success": False, "message": "Cita no encontrada"}, 404
@@ -352,7 +360,7 @@ class AppointmentService:
         if estado == "Completada" and cita_obj.estado == "Confirmada" and not self.repo.cita_ya_empezo(cita_obj):
             return {"success": False, "message": "La cita se puede completar desde su hora de inicio"}, 400
 
-        # Actualizar estado dentro de transacciÃ³n para crear factura atÃ³micamente
+        # Actualizar estado dentro de transacción para crear factura atómicamente
         from django.db import transaction
         from apps.billing.models import Facturas
         from apps.billing.repositories import InvoiceRepository
@@ -395,7 +403,7 @@ class AppointmentService:
             cita_locked.estado = estado
             self.repo.save_appointment(cita_locked, ["estado"])
 
-        # Notificaciones (fuera de transacciÃ³n)
+        # Notificaciones (fuera de transacción)
         try:
             cita = self.repo.get_appointment_full(appointment_id)
             if cita:
@@ -423,7 +431,7 @@ class AppointmentService:
                         AppointmentMailService.send_cita_notificacion(
                             recipient_email=prof.email if prof else None,
                             titulo="Cita aceptada por el paciente",
-                            mensaje=f"{pac.nombre if pac else 'El paciente'} confirmÃ³ la cita que agendaste.",
+                            mensaje=f"{pac.nombre if pac else 'El paciente'} confirmó la cita que agendaste.",
                             nombre_contraparte=pac.nombre if pac else None,
                             contraparte_label="Paciente",
                             fecha=cita.fecha, hora=cita.hora,
@@ -437,7 +445,7 @@ class AppointmentService:
                                  hora=cita.hora.strftime("%H:%M"),
                                  lugar=getattr(cita, "lugar", None) or "Por definir")
         except Exception as e:
-            logger.error(f"Error enviando correo de actualizaciÃ³n de estado: {e}")
+            logger.error(f"Error enviando correo de actualización de estado: {e}")
 
         return {"success": True, "message": f"Cita {estado}"}, 200
 
@@ -452,7 +460,7 @@ class AppointmentService:
 
     def cancel_appointment(self, appointment_id, patient_id, motivo_cancelacion):
         if not motivo_cancelacion or not motivo_cancelacion.strip():
-            return {"success": False, "message": "Debes indicar el motivo de la cancelaciÃ³n"}, 400
+            return {"success": False, "message": "Debes indicar el motivo de la cancelación"}, 400
 
         row = self.repo.get_appointment_owner(appointment_id)
         if not row:
@@ -502,19 +510,19 @@ class AppointmentService:
                     cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                     recipient_user_id=pac.idUsuario if pac else None,
                 )
-                # notificaciÃ³n centralizada
+                # notificación centralizada
                 self._notify(pac, "cancelacion_cita",
                              fecha=cita.fecha.strftime("%d/%m/%Y"),
                              hora=cita.hora.strftime("%H:%M"),
                              lugar=getattr(cita, "lugar", None) or "Por definir")
         except Exception as e:
-            logger.error(f"Error enviando correo de cancelaciÃ³n (paciente): {e}")
+            logger.error(f"Error enviando correo de cancelación (paciente): {e}")
 
         return {"success": True, "message": "Cita cancelada correctamente"}, 200
 
     def cancel_professional_appointment(self, appointment_id, professional_id, motivo_cancelacion):
         if not motivo_cancelacion or not motivo_cancelacion.strip():
-            return {"success": False, "message": "Debes indicar el motivo de la cancelaciÃ³n"}, 400
+            return {"success": False, "message": "Debes indicar el motivo de la cancelación"}, 400
 
         row = self.repo.get_appointment_owner(appointment_id)
         if not row:
@@ -556,13 +564,13 @@ class AppointmentService:
                     cta_link=f"{site_url}/aside-patient/agenda-quotes.html",
                     recipient_user_id=pac.idUsuario if pac else None,
                 )
-                # notificaciÃ³n centralizada
+                # notificación centralizada
                 self._notify(pac, "cancelacion_cita",
                              fecha=cita.fecha.strftime("%d/%m/%Y"),
                              hora=cita.hora.strftime("%H:%M"),
                              lugar=getattr(cita, "lugar", None) or "Por definir")
         except Exception as e:
-            logger.error(f"Error enviando correo de cancelaciÃ³n (profesional): {e}")
+            logger.error(f"Error enviando correo de cancelación (profesional): {e}")
 
         return {"success": True, "message": "Cita cancelada correctamente"}, 200
 
@@ -574,7 +582,7 @@ class AppointmentService:
             anio = int(anio)
             mes = int(mes)
         except (ValueError, TypeError):
-            return {"success": False, "message": "AÃ±o o mes invÃ¡lido"}, 400
+            return {"success": False, "message": "Año o mes inválido"}, 400
 
         disponibilidades = self.repo.get_month_availability(professional_id, anio, mes)
         if not disponibilidades:

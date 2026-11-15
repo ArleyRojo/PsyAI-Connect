@@ -61,6 +61,25 @@ class TestCreateAppointment:
         assert status == 200
         assert payload["idCita"] == 20
 
+    @pytest.mark.parametrize("fecha,hora", [("2026-13-45", "10:00"), ("2027-06-15", "99:99")])
+    def test_invalid_date_or_time_is_rejected(self, appointment_service, fecha, hora):
+        payload, status = appointment_service.create_appointment(1, {"idProfesional": 5, "fecha": fecha, "hora": hora})
+        assert status == 400
+        assert payload["message"] == "Fecha u hora inválida"
+
+    def test_past_date_is_rejected(self, appointment_service):
+        payload, status = appointment_service.create_appointment(1, {"idProfesional": 5, "fecha": "2000-01-01", "hora": "10:00"})
+        assert status == 400
+
+    def test_date_and_time_objects_are_accepted(self, appointment_service, mock_appointment_repo):
+        mock_appointment_repo.get_appointment_in_slot.return_value = None
+        mock_appointment_repo.create_appointment.return_value = 20
+        future = date.today() + timedelta(days=30)
+        payload, status = appointment_service.create_appointment(1, {
+            "idProfesional": 5, "fecha": future, "hora": time(10, 0),
+        })
+        assert status == 200
+
 
 # ── AppointmentService.get_available_times ────────────────────────────────────
 
