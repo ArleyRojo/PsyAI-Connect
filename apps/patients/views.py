@@ -360,10 +360,10 @@ class ChatContactoViewSet(viewsets.ViewSet):
         msg_svc = MensajesService()
         payload, _ = _get_patient_service().list_professionals_for_patient(user_id)
         profesionales = payload.get("profesionales", [])
-        upload_dir = os.path.join(settings.STATICFILES_DIRS[0], "uploads")
+        upload_dir = os.path.join(settings.MEDIA_ROOT, "uploads")
         for p in profesionales:
             fp = p.get("fotoPerfil")
-            if fp and not os.path.exists(os.path.join(upload_dir, fp)):
+            if fp and not fp.startswith("http") and not os.path.exists(os.path.join(upload_dir, fp)):
                 p["fotoPerfil"] = None
         resultado = msg_svc.get_contactos_con_mensajes(user_id, profesionales)
         return Response({"success": True, "profesionales": resultado}, status=status.HTTP_200_OK)

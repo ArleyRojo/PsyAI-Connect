@@ -2,6 +2,7 @@ import json
 from unittest.mock import patch, MagicMock
 
 import pytest
+import os
 from rest_framework import status
 
 from apps.patients.views import (
@@ -338,6 +339,22 @@ class TestProfesionalGet:
         assert resp.data["success"] is True
         assert len(resp.data["profesionales"]) == 1
         mock_service.list_professionals.assert_called_once()
+
+    def test_chat_contacts_keep_media_photo_and_external_url(self, rf, mock_auth_paciente, tmp_path, settings):
+        settings.MEDIA_ROOT = str(tmp_path)
+        os.makedirs(tmp_path / "uploads")
+        (tmp_path / "uploads" / "doctor.jpg").write_bytes(b"image")
+        req = rf.get("/api/paciente/chat/contactos")
+        with patch("apps.patients.views._get_patient_service") as patient_svc, patch("apps.patients.views.MensajesService") as msg_cls:
+            patient_svc.return_value.list_professionals_for_patient.return_value = ({"profesionales": [
+                {"idUsuario": 5, "fotoPerfil": "doctor.jpg"},
+                {"idUsuario": 6, "fotoPerfil": "https://example.com/photo.jpg"},
+            ]}, 200)
+            msg_cls.return_value.get_contactos_con_mensajes.side_effect = lambda uid, pros: pros
+            response = ChatContactoViewSet.as_view({"get": "list"})(req)
+        assert response.status_code == 200
+        assert response.data["profesionales"][0]["fotoPerfil"] == "doctor.jpg"
+        assert response.data["profesionales"][1]["fotoPerfil"] == "https://example.com/photo.jpg"
 
 
 # ── ChatMensajeViewSet list ──────────────────────────────────────────────────
