@@ -4,7 +4,7 @@ import re
 import secrets
 from datetime import timedelta
 
-from django.conf import settings as dj_settings
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -446,19 +446,13 @@ class AuthService:
             host = request.get_host() if request else "localhost"
             scheme = request.scheme if request else "http"
             # Forzar HTTPS en producción (DEBUG=False)
-            from django.conf import settings
             if not settings.DEBUG:
                 scheme = "https"
             recovery_link = f"{scheme}://{host}/reset-password.html?token={token}"
             email_sent = MailService.send_recovery_email(email, recovery_link)
 
             if not email_sent:
-                print(
-                    "\n[RECUPERAR PASSWORD] No se pudo enviar correo por proveedor externo.",
-                    flush=True,
-                )
-                print(f"[RECUPERAR PASSWORD] Email: {email}", flush=True)
-                print(f"[RECUPERAR PASSWORD] Enlace local: {recovery_link}\n", flush=True)
+                logger.warning("No se pudo enviar el correo de recuperación")
 
         if not existe:
             return (
@@ -467,12 +461,7 @@ class AuthService:
             )
 
         payload = {"success": True, "message": "Fue enviado al correo."}
-        env = os.getenv("DJANGO_SETTINGS_MODULE", "")
-        if (
-            recovery_link
-            and not email_sent
-            and "production" not in env.lower()
-        ):
+        if recovery_link and not email_sent and settings.DEBUG:
             payload["recovery_link"] = recovery_link
 
         return payload, 200

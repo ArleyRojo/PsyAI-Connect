@@ -312,6 +312,14 @@ class TestRecoverPassword:
         assert payload["success"] is True
         mock_auth_repo.create_password_recovery_token.assert_called_once()
 
+    @patch("apps.authentication.services.MailService.send_recovery_email", return_value=False)
+    def test_production_does_not_return_recovery_link(self, mock_mail, auth_service, mock_auth_repo, settings):
+        settings.DEBUG = False
+        mock_auth_repo.active_user_exists_by_email.return_value = True
+        payload, status = auth_service.recover_password("user@test.com")
+        assert status == 200
+        assert "recovery_link" not in payload
+
 
 # ── AuthService.reset_password tests ─────────────────────────────────────────
 
