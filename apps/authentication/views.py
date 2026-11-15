@@ -210,6 +210,7 @@ class TOTPVerifyLoginView(APIView):
 
         # Limpiar sesión temporal
         request.session.pop("pending_2fa_user_id", None)
+        request.session.cycle_key()
 
         # Datos de sesión
         session_user = {
@@ -289,7 +290,7 @@ class LoginView(APIView):
                 }, status=status.HTTP_200_OK)
 
             # Sin 2FA - login directo
-
+            request.session.cycle_key()
             request.session["usuario"] = session_user
             request.session["idUsuario"] = session_user["id"]
             request.session["nombre"] = session_user["nombre"]

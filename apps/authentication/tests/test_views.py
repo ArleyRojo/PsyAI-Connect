@@ -1,5 +1,5 @@
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 import pytest
 from rest_framework.test import force_authenticate
@@ -174,6 +174,20 @@ class TestLoginView:
         assert calls["nombre"] == "Jane"
         assert calls["rol"] == "profesional"
         assert calls["fotoPerfil"] == "photos/jane.jpg"
+
+    def test_login_cycles_session_key_before_writing_user(self, rf):
+        req = rf.post("/api/auth/login", data=json.dumps({"email": "test@test.com", "password": "Abc123"}), content_type="application/json")
+        mock_session = MagicMock()
+        mock_session.get.return_value = None
+        req.session = mock_session
+        with patch("apps.authentication.views.auth_service") as mock_svc:
+            mock_svc.login_user.return_value = ({"success": True}, 200, {"id": 1, "nombre": "Test", "email": "test@test.com", "rol": "paciente", "fotoPerfil": None})
+            mock_svc.is_totp_enabled.return_value = False
+            user = MagicMock(idUsuario=1)
+            mock_svc.get_user_by_id.return_value = user
+            LoginView.as_view()(req)
+        mock_session.cycle_key.assert_called_once_with()
+        assert mock_session.mock_calls.index(call.cycle_key()) < mock_session.mock_calls.index(call.__setitem__("idUsuario", 1))
 
 
 # ── LogoutView ───────────────────────────────────────────────────────────────
