@@ -169,7 +169,7 @@ class ChatMensajeViewSet(viewsets.ViewSet):
         if not id_receptor:
             return Response({"success": False, "message": "Falta receptor"}, status=status.HTTP_400_BAD_REQUEST)
         if not mensajes_service.puede_chatear(request.user_id, id_receptor):
-            return Response({"success": False, "message": "No tienes acceso a esta conversaciÃ³n"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"success": False, "message": "No tienes acceso a esta conversación"}, status=status.HTTP_403_FORBIDDEN)
         msgs = mensajes_service.get_mensajes(
             request.user_id, id_receptor,
             int(request.query_params.get("desde", 0) or 0),
@@ -185,7 +185,7 @@ class ChatMensajeViewSet(viewsets.ViewSet):
         if not receptor or not mensaje:
             return Response({"success": False, "message": "Datos incompletos"}, status=status.HTTP_400_BAD_REQUEST)
         if not mensajes_service.puede_chatear(request.user_id, receptor):
-            return Response({"success": False, "message": "No tienes acceso a esta conversaciÃ³n"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"success": False, "message": "No tienes acceso a esta conversación"}, status=status.HTTP_403_FORBIDDEN)
         id_msg = mensajes_service.enviar_mensaje(request.user_id, receptor, mensaje)
         return Response({"success": True, "idMensaje": id_msg}, status=status.HTTP_201_CREATED)
 

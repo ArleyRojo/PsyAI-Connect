@@ -396,7 +396,7 @@ class NewsletterSubscribeView(APIView):
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
-# â”€â”€ Aliases de compatibilidad hacia atrÃ¡s (no eliminar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Aliases de compatibilidad hacia atrás (no eliminar) ─────────────────────
 health_check = HealthCheckView.as_view()
 client_errors = ClientErrorsView.as_view()
 serve_pages = ServePagesView.as_view()
