@@ -132,7 +132,7 @@ class TOTPDisableView(APIView):
         user_id = request.user.id
 
         # Verificar contraseña actual
-        user = auth_service.get_user(user_id)
+        user = auth_service.get_user_by_id(user_id)
         if user is None:
             return Response(
                 {"success": False, "message": "Usuario no encontrado"},
@@ -194,7 +194,7 @@ class TOTPVerifyLoginView(APIView):
             )
 
         # Login exitoso - completar el login
-        user_model = auth_service.get_user(user_id)
+        user_model = auth_service.get_user_by_id(user_id)
         if user_model is None:
             return Response(
                 {"success": False, "message": "Usuario no encontrado"},
@@ -267,7 +267,7 @@ class LoginView(APIView):
 
         if session_user:
             # Obtener el modelo de usuario real
-            user_model = auth_service.get_user(session_user["id"])
+            user_model = auth_service.get_user_by_id(session_user["id"])
             if user_model is None:
                 return Response(
                     {"success": False, "message": "Usuario no encontrado"},
@@ -312,8 +312,7 @@ class LogoutView(APIView):
 
 
 def _nombre_rol(id_usuario):
-    usuario = auth_service.get_user(id_usuario)
-    return usuario.rol_nombre if usuario else None
+    return auth_service.get_user_with_role(id_usuario)
 
 
 class SessionView(APIView):

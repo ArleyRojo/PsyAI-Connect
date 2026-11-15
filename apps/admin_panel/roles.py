@@ -4,10 +4,9 @@ Cada rol personalizado se basa en paciente, profesional o administrador y hereda
 permisos (el sistema sigue decidiendo los permisos con el rol base). Los 3 roles base
 no se pueden eliminar, y tampoco un rol que tenga usuarios asignados.
 """
-from django.db.models import Count, Q
-
 from apps.admin_panel.repositories import AdminRepository
-from apps.authentication.models import Register, RolPersonalizado
+from apps.authentication.models import RolPersonalizado
+from apps.authentication.repositories import AuthRepository
 
 NOMBRE_MIN = 3
 NOMBRE_MAX = 40
@@ -24,9 +23,8 @@ def _log(accion, detalle, administrador):
 
 
 def catalogo():
-    conteo_base = dict(
-        Register.objects.filter(rolPersonalizado__isnull=True).values_list("rol").annotate(n=Count("idUsuario"))
-    )
+    repo = AuthRepository()
+    conteo_base, roles_personalizados = repo.get_custom_role_catalog()
     base = [
         {
             "rolBase": clave, "nombre": nombre, "descripcion": DESCRIPCIONES_BASE[clave],
@@ -36,7 +34,7 @@ def catalogo():
     ]
     personalizados = [
         r.to_dict(usuarios=r.n)
-        for r in RolPersonalizado.objects.annotate(n=Count("usuarios"))
+        for r in roles_personalizados
     ]
     return {"success": True, "base": base, "personalizados": personalizados}, 200
 
@@ -51,21 +49,23 @@ def crear(data, administrador="Admin"):
         return {"success": False, "message": f"El nombre debe tener entre {NOMBRE_MIN} y {NOMBRE_MAX} caracteres"}, 400
     if nombre.lower() in NOMBRES_RESERVADOS:
         return {"success": False, "message": "Ese nombre es de un rol base del sistema"}, 400
-    if RolPersonalizado.objects.filter(nombre__iexact=nombre).exists():
+    repo = AuthRepository()
+    if repo.custom_role_exists(nombre):
         return {"success": False, "message": f"Ya existe un rol llamado \"{nombre}\""}, 400
     if rol_base not in dict(RolPersonalizado.ROLES_BASE):
         return {"success": False, "message": "Elige en qué rol base se apoya (paciente, profesional o administrador)"}, 400
     if len(descripcion) > 200:
         return {"success": False, "message": "La descripción no puede superar 200 caracteres"}, 400
 
-    rol = RolPersonalizado.objects.create(nombre=nombre, descripcion=descripcion, rolBase=rol_base,
-                                          creadoPor=administrador)
+    rol = repo.create_custom_role(nombre=nombre, descripcion=descripcion, rolBase=rol_base,
+                                  creadoPor=administrador)
     _log("Crear rol", f"Rol \"{nombre}\" creado sobre la base {rol.to_dict()['rolBaseNombre']}", administrador)
     return {"success": True, "message": f"Rol \"{nombre}\" creado", "rol": rol.to_dict(usuarios=0)}, 201
 
 
 def eliminar(id_rol, administrador="Admin"):
-    rol = RolPersonalizado.objects.filter(idRol=id_rol).annotate(n=Count("usuarios")).first()
+    repo = AuthRepository()
+    rol = repo.get_custom_role_for_deletion(id_rol)
     if not rol:
         return {"success": False, "message": "Rol no encontrado"}, 404
     if rol.n:
@@ -74,6 +74,6 @@ def eliminar(id_rol, administrador="Admin"):
             "message": f"\"{rol.nombre}\" tiene {rol.n} usuario(s). Asígnales otro rol antes de eliminarlo.",
         }, 400
     nombre = rol.nombre
-    rol.delete()
+    repo.delete_custom_role(rol)
     _log("Eliminar rol", f"Rol \"{nombre}\" eliminado", administrador)
     return {"success": True, "message": f"Rol \"{nombre}\" eliminado"}, 200

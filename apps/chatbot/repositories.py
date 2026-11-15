@@ -7,6 +7,7 @@ from django.utils import timezone
 from apps.chatbot.models import (
     ChatbotConfig,
     ConversacionesChatbot,
+    EncuestaChatbot,
     MensajesChat,
     PrediagnosticoChatbot,
 )
@@ -16,6 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 class ChatRepository:
+    def mark_prediagnostico_professional_notified(self, prediagnostico):
+        prediagnostico.save(update_fields=["profesionalNotificado"])
+        return prediagnostico
+    def create_survey(self, patient_id, **data):
+        return EncuestaChatbot.objects.create(idPaciente_id=patient_id, **data)
+
     def save_conversation(self, patient_id, mensaje_usuario, respuesta_bot, nivel_emocional, palabras_riesgo):
         ConversacionesChatbot.objects.create(
             idPaciente_id=patient_id,

@@ -272,7 +272,7 @@ class TestCitaDetailViewSetPartialUpdate:
 
         with (
             patch.object(IsAuthenticatedDRF, "has_permission", _auth_paciente),
-            patch("apps.scheduling.views.Citas.objects.get", return_value=SimpleNamespace(idPaciente_id=1, creado_por_profesional=True)),
+            patch("apps.scheduling.repositories.AppointmentRepository.get_appointment_by_id_or_none", return_value=SimpleNamespace(idPaciente_id=1, creado_por_profesional=True)),
         ):
             view = CitaDetailViewSet.as_view({"patch": "partial_update"})
             resp = view(req, pk=1)

@@ -1,6 +1,7 @@
+from datetime import timedelta
 from decimal import Decimal
 from django.db import transaction
-from django.db.models import Prefetch
+from django.db.models import F, Prefetch, Q, Sum
 from django.utils import timezone
 
 from apps.billing.models import Facturas, ItemsFactura
@@ -8,6 +9,101 @@ from apps.authentication.models import Register
 
 
 class InvoiceRepository:
+    def _cleanup_invoices(self, patient_id=None, professional_id=None, *, lock=False):
+        qs = Facturas.objects.all()
+        if patient_id:
+            qs = qs.filter(idPaciente_id=patient_id)
+        if professional_id:
+            qs = qs.filter(idProfesional_id=professional_id)
+        if lock:
+            qs = qs.select_for_update()
+        return qs
+
+    def get_cleanup_summary(self, patient_id=None, professional_id=None):
+        qs = self._cleanup_invoices(patient_id, professional_id)
+        invoice_ids = list(qs.values_list("idFactura", flat=True))
+        total_items = ItemsFactura.objects.filter(idFactura__in=invoice_ids).count()
+        evidence = list(qs.exclude(evidencia="").values_list("evidencia", flat=True))
+        return len(invoice_ids), total_items, evidence
+
+    def serialize_cleanup_backup(self, patient_id=None, professional_id=None):
+        from django.core.serializers import serialize
+
+        qs = self._cleanup_invoices(patient_id, professional_id).select_related(
+            "idPaciente", "idProfesional", "confirmada_por"
+        ).prefetch_related("items")
+        return serialize("json", qs)
+
+    def delete_invoices_for_cleanup(self, patient_id=None, professional_id=None):
+        deleted = deleted_files = 0
+        errors = []
+        with transaction.atomic():
+            for factura in self._cleanup_invoices(patient_id, professional_id, lock=True):
+                if factura.evidencia and factura.evidencia.name:
+                    try:
+                        factura.evidencia.delete(save=False)
+                        deleted_files += 1
+                    except Exception as exc:
+                        errors.append((factura.idFactura, str(exc)))
+                factura.delete()
+                deleted += 1
+        return deleted, deleted_files, errors
+
+    def get_invoices_due_for_reminder(self, now, max_notices, first_days, repeat_days):
+        return list(
+            Facturas.objects.filter(
+                estadoPago="Pendiente", anulada=False,
+                recordatoriosEnviados__lt=max_notices,
+            ).filter(
+                Q(recordatoriosEnviados=0, fecha__lte=now - timedelta(days=first_days))
+                | Q(recordatoriosEnviados__gt=0, ultimoRecordatorio__lte=now - timedelta(days=repeat_days))
+            ).select_related("idPaciente", "idProfesional")
+            .prefetch_related("items")
+            .order_by("idPaciente_id", "fecha")
+        )
+
+    def get_invoice_for_manual_reminder(self, invoice_id):
+        return (
+            Facturas.objects.filter(idFactura=invoice_id)
+            .select_related("idPaciente", "idProfesional")
+            .prefetch_related("items")
+            .first()
+        )
+
+    def increment_reminder_count(self, invoice_ids, now):
+        return Facturas.objects.filter(idFactura__in=invoice_ids).update(
+            recordatoriosEnviados=F("recordatoriosEnviados") + 1,
+            ultimoRecordatorio=now,
+        )
+
+    def get_reminder_status(self, invoice_id):
+        return Facturas.objects.filter(idFactura=invoice_id).values(
+            "recordatoriosEnviados", "ultimoRecordatorio"
+        ).first()
+
+    def get_invoice_item_total(self, invoice_id):
+        return ItemsFactura.objects.filter(idFactura_id=invoice_id).aggregate(total=Sum("precioUnitario"))["total"]
+
+    def has_active_invoice_for_appointment(self, appointment_id):
+        return Facturas.objects.filter(idCita=appointment_id, anulada=False).exists()
+
+    def has_duplicate_invoice(self, patient_id, professional_id, amount, payment_date):
+        return Facturas.objects.filter(
+            idPaciente_id=patient_id,
+            idProfesional_id=professional_id,
+            monto=amount,
+            fechaPago__date=payment_date,
+            anulada=False,
+        ).exists()
+
+    def get_invoice_with_payment_relations(self, invoice_id):
+        try:
+            return Facturas.objects.select_related(
+                "idPaciente", "idProfesional", "confirmada_por"
+            ).get(idFactura=invoice_id)
+        except Facturas.DoesNotExist:
+            return None
+
     def create_invoice(self, patient_id, professional_id, cita_id, items,
                        fechaPago=None, metodoPago=None, referencia=None, notas=None,
                        evidencia=None, confirmada_por_id=None, estadoPago="Pendiente"):

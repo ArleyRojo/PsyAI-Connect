@@ -462,8 +462,7 @@ class AdminMantenimientoAccionAPIView(APIView):
 
     def post(self, request):
         from apps.admin_panel import mantenimiento
-        from apps.authentication.models import Register
-        email = Register.objects.filter(idUsuario=getattr(request, "user_id", None)).values_list("email", flat=True).first()
+        email = admin_service.get_user_email(getattr(request, "user_id", None))
         payload, status_code = mantenimiento.ejecutar_accion(request.data, _nombre_admin(request), email)
         return Response(payload, status=status_code)
 

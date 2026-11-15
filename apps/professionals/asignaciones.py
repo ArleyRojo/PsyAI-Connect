@@ -13,13 +13,13 @@ import logging
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import transaction
-from django.db.models import Count, Q
 from django.utils import timezone
 
-from apps.authentication.models import Register
-from apps.professionals.models import (
-    ConsejoPaciente, Diagnostico, PacientesProfesional, PerfilProfesional, ReasignacionCaso, Reportes,
-)
+from apps.authentication.repositories import AuthRepository
+from apps.documents.repositories import DocumentoRepository
+from apps.patients.repositories import PatientRepository
+from apps.professionals.repositories import ProfessionalRepository
+from apps.scheduling.repositories import AppointmentRepository
 
 logger = logging.getLogger(__name__)
 
@@ -29,29 +29,17 @@ ESTADOS_CITA_ACTIVA = ("Pendiente", "Confirmada")
 
 
 # ── Consultas ──────────────────────────────────────────────────────────────
-def _citas_futuras(paciente_id=None, profesional_id=None):
-    from apps.scheduling.models import Citas
-    qs = Citas.objects.filter(estado__in=ESTADOS_CITA_ACTIVA, fecha__gte=timezone.localdate())
-    if paciente_id:
-        qs = qs.filter(idPaciente_id=paciente_id)
-    if profesional_id:
-        qs = qs.filter(idProfesional_id=profesional_id)
-    return qs
-
-
 def listar_asignaciones():
     """Pacientes activos con sus profesionales y los profesionales verificados disponibles."""
-    pacientes = list(
-        Register.objects.filter(rol="paciente", activo=True).order_by("nombre")
-        .values("idUsuario", "nombre", "email", "fotoPerfil")
-    )
-    asignaciones = (
-        PacientesProfesional.objects.filter(idPaciente__isnull=False)
-        .select_related("idProfesional").order_by("fecha")
-    )
+    auth_repo = AuthRepository()
+    professional_repo = ProfessionalRepository()
+    pacientes = auth_repo.get_active_patients_for_assignment()
+    asignaciones = professional_repo.list_patient_assignments()
     citas = {
         (r["idPaciente_id"], r["idProfesional_id"]): r["n"]
-        for r in _citas_futuras().values("idPaciente_id", "idProfesional_id").annotate(n=Count("idCita"))
+        for r in AppointmentRepository().get_future_appointment_counts_by_pair(
+            ESTADOS_CITA_ACTIVA, timezone.localdate()
+        )
     }
     por_paciente = {}
     for a in asignaciones:
@@ -62,13 +50,7 @@ def listar_asignaciones():
             "citasFuturas": citas.get((a.idPaciente_id, a.idProfesional_id), 0),
         })
 
-    profesionales = list(
-        Register.objects.filter(
-            rol="profesional", activo=True, perfil_profesional__verificado=True,
-        ).annotate(
-            pacientes=Count("pacientes_profesional", filter=Q(pacientes_profesional__idPaciente__isnull=False)),
-        ).order_by("nombre").values("idUsuario", "nombre", "perfil_profesional__especialidad", "pacientes")
-    )
+    profesionales = auth_repo.get_verified_professionals_for_assignment()
     return {
         "success": True,
         "pacientes": [
@@ -94,9 +76,7 @@ def listar_asignaciones():
 
 
 def historial():
-    filas = ReasignacionCaso.objects.select_related(
-        "idPaciente", "idProfesionalAnterior", "idProfesionalNuevo"
-    )[:200]
+    filas = ProfessionalRepository().get_assignment_history_rows()
     return {"success": True, "historial": [f.to_dict() for f in filas]}, 200
 
 
@@ -109,14 +89,11 @@ def _entero(valor):
 
 
 def _paciente(paciente_id):
-    return Register.objects.filter(idUsuario=paciente_id, rol="paciente", activo=True).first()
+    return AuthRepository().get_active_patient_for_assignment(paciente_id)
 
 
 def _profesional_verificado(profesional_id):
-    return Register.objects.filter(
-        idUsuario=profesional_id, rol="profesional", activo=True,
-        perfil_profesional__verificado=True,
-    ).first()
+    return AuthRepository().get_verified_professional_for_assignment(profesional_id)
 
 
 def _motivo(data):
@@ -139,12 +116,13 @@ def asignar(data, administrador="Admin"):
     motivo, error = _motivo(data)
     if error:
         return {"success": False, "message": error}, 400
-    if PacientesProfesional.objects.filter(idPaciente=paciente, idProfesional=profesional).exists():
+    repo = ProfessionalRepository()
+    if repo.assignment_exists_for_users(paciente, profesional):
         return {"success": False, "message": f"{paciente.nombre} ya está asignado a {profesional.nombre}"}, 400
 
     with transaction.atomic():
-        PacientesProfesional.objects.create(idPaciente=paciente, idProfesional=profesional)
-        registro = ReasignacionCaso.objects.create(
+        repo.create_case_assignment(paciente, profesional)
+        registro = repo.create_case_history(
             idPaciente=paciente, idProfesionalNuevo=profesional, motivo=motivo, administrador=administrador,
         )
     _registrar_log("Asignar paciente", f"{paciente.nombre} asignado a {profesional.nombre}. Motivo: {motivo}",
@@ -162,9 +140,8 @@ def reasignar(data, administrador="Admin"):
         return {"success": False, "message": "Paciente no encontrado"}, 404
 
     anterior_id = _entero(data.get("idProfesionalAnterior"))
-    asignacion = PacientesProfesional.objects.filter(
-        idPaciente=paciente, idProfesional_id=anterior_id
-    ).select_related("idProfesional").first()
+    repo = ProfessionalRepository()
+    asignacion = repo.get_case_assignment(paciente, anterior_id)
     if not asignacion:
         return {"success": False, "message": "El paciente no está asignado a ese profesional"}, 400
     anterior = asignacion.idProfesional
@@ -180,23 +157,21 @@ def reasignar(data, administrador="Admin"):
         return {"success": False, "message": error}, 400
 
     with transaction.atomic():
-        destino = PacientesProfesional.objects.filter(idPaciente=paciente, idProfesional=nuevo).first()
+        destino = repo.get_destination_assignment(paciente, nuevo)
         if destino:
             # El nuevo ya atendía al paciente: se le pasan los registros y se quita la asignación anterior
-            Diagnostico.objects.filter(idAsignacion=asignacion).update(idAsignacion=destino)
-            ConsejoPaciente.objects.filter(idAsignacion=asignacion).update(idAsignacion=destino)
-            asignacion.delete()
+            repo.transfer_assignment_records(asignacion, destino)
+            repo.delete_assignment(asignacion)
         else:
-            asignacion.idProfesional = nuevo
-            asignacion.save(update_fields=["idProfesional"])
+            repo.change_assignment_professional(asignacion, nuevo)
 
         _transferir_historial(paciente.idUsuario, anterior.idUsuario, nuevo.idUsuario)
 
-        citas_canceladas = _citas_futuras(paciente.idUsuario, anterior.idUsuario).update(
-            estado="Cancelada",
-            motivoCancelacion=f"Caso reasignado a {nuevo.nombre}",
+        citas_canceladas = AppointmentRepository().cancel_future_appointments_for_reassignment(
+            paciente.idUsuario, anterior.idUsuario, nuevo.nombre,
+            ESTADOS_CITA_ACTIVA, timezone.localdate(),
         )
-        registro = ReasignacionCaso.objects.create(
+        registro = repo.create_case_history(
             idPaciente=paciente, idProfesionalAnterior=anterior, idProfesionalNuevo=nuevo,
             motivo=motivo, administrador=administrador, citasCanceladas=citas_canceladas,
         )
@@ -217,14 +192,9 @@ def reasignar(data, administrador="Admin"):
 
 def _transferir_historial(paciente_id, anterior_id, nuevo_id):
     """Pasa al nuevo profesional los registros clínicos del paciente que tenía el anterior."""
-    from apps.documents.models import DocumentosClinicos
-    from apps.patients.models import Anamnesis
-
-    Anamnesis.objects.filter(idPaciente_id=paciente_id, idProfesional_id=anterior_id).update(idProfesional_id=nuevo_id)
-    DocumentosClinicos.objects.filter(idPaciente_id=paciente_id, idProfesional_id=anterior_id).update(
-        idProfesional_id=nuevo_id
-    )
-    Reportes.objects.filter(idPaciente_id=paciente_id, idProfesional_id=anterior_id).update(idProfesional_id=nuevo_id)
+    PatientRepository().transfer_anamnesis(paciente_id, anterior_id, nuevo_id)
+    DocumentoRepository().transfer_clinical_documents(paciente_id, anterior_id, nuevo_id)
+    ProfessionalRepository().transfer_professional_reports(paciente_id, anterior_id, nuevo_id)
 
 
 # ── Registro y avisos ──────────────────────────────────────────────────────
@@ -237,9 +207,8 @@ def _registrar_log(accion, detalle, administrador, paciente_nombre):
 
 
 def _campana(usuario, rol, titulo, mensaje, tipo):
-    from apps.scheduling.models import Notificaciones
     try:
-        Notificaciones.objects.create(
+        AppointmentRepository().create_notification_attempt(
             idUsuario=usuario, rol=rol, titulo=titulo, mensaje=mensaje, tipo=tipo,
             enviado_por="Sistema", estado="enviado", canal="interno",
         )

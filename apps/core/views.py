@@ -131,9 +131,9 @@ class ServePagesView(View):
                 raise Http404
             if os.path.splitext(relative_name)[1].lower() not in {".jpg", ".jpeg", ".png", ".gif", ".webp"}:
                 raise Http404
-            from apps.authentication.models import Register
+            from apps.authentication.repositories import AuthRepository
 
-            if not Register.objects.filter(fotoPerfil=relative_name).exists():
+            if not AuthRepository().user_has_profile_photo(relative_name):
                 raise Http404
             try:
                 safe_path = safe_join(settings.MEDIA_ROOT, filename)
@@ -269,12 +269,10 @@ def _notificacion_prueba(request):
     if not uid:
         return JsonResponse({"success": False, "message": "Debes iniciar sesión"}, status=401)
 
-    from apps.authentication.models import Register
-    from apps.patients.models import PerfilPaciente
+    from apps.authentication.repositories import AuthRepository
+    from apps.patients.repositories import PatientRepository
 
-    user = Register.objects.filter(
-        idUsuario=uid, rol="paciente", activo=True, estadoCuenta="Activa"
-    ).first()
+    user = AuthRepository().get_active_patient_user(uid)
     if not user:
         return JsonResponse({"success": False, "message": "No autorizado"}, status=403)
 
@@ -289,7 +287,7 @@ def _notificacion_prueba(request):
     if canal == "whatsapp":
         if not numero:
             return JsonResponse({"error": "Número requerido"}, status=400)
-        perfil = PerfilPaciente.objects.filter(idPaciente_id=uid).first()
+        perfil = PatientRepository().get_patient_profile_or_none(uid)
 
         def normalizar(value):
             digits = "".join(c for c in value if c.isdigit())

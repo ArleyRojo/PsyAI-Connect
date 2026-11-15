@@ -7,13 +7,16 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
 
-from apps.core.models import NewsletterSubscriber
+from apps.core.repositories import CoreRepository
 
 logger = logging.getLogger(__name__)
 
 
 class CoreService:
     """Servicios generales de la app core (newsletter, bienvenida, errores de cliente)."""
+
+    def __init__(self):
+        self.repo = CoreRepository()
 
     def _get_site_url(self):
         return getattr(settings, "SITE_URL", "http://localhost:8000")
@@ -56,14 +59,10 @@ class CoreService:
         except ValidationError:
             return {"error": "Correo electronico invalido"}, 400
 
-        subscriber, created = NewsletterSubscriber.objects.get_or_create(
-            email=email,
-            defaults={"is_active": True},
-        )
+        subscriber, created = self.repo.get_or_create_subscriber(email)
 
         if not created and not subscriber.is_active:
-            subscriber.is_active = True
-            subscriber.save(update_fields=["is_active"])
+            self.repo.set_subscriber_active(subscriber, True)
 
         if created:
             self.send_welcome_email(email)

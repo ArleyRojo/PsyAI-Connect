@@ -477,12 +477,8 @@ class ProfessionalPaymentInfoViewSet(viewsets.ViewSet):
 
     def retrieve(self, request):
         """GET /api/professional/payment-info/ – datos de la profesional autenticada."""
-        from apps.professionals.models import ProfessionalPaymentInfo
         user_id = getattr(request, "user_id", None)
-        try:
-            info = ProfessionalPaymentInfo.objects.get(idProfesional_id=user_id)
-        except ProfessionalPaymentInfo.DoesNotExist:
-            info = ProfessionalPaymentInfo(idProfesional_id=user_id)
+        info = _get_prof_service().get_payment_info(user_id)
         serializer = ProfessionalPaymentInfoSerializer(info)
         return Response({"success": True, "data": serializer.data}, status=status.HTTP_200_OK)
 
@@ -494,13 +490,7 @@ class ProfessionalPaymentInfoViewSet(viewsets.ViewSet):
         serializer = ProfessionalPaymentInfoSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         user_id = getattr(request, "user_id", None)
-        from apps.professionals.models import ProfessionalPaymentInfo
-        info, _ = ProfessionalPaymentInfo.objects.get_or_create(idProfesional_id=user_id)
-        if "qr_image" in serializer.validated_data:
-            info.qr_image = serializer.validated_data["qr_image"]
-        if "mensaje_texto" in serializer.validated_data:
-            info.mensaje_texto = serializer.validated_data["mensaje_texto"]
-        info.save()
+        _get_prof_service().update_payment_info(user_id, serializer.validated_data)
         return Response({"success": True, "message": "Datos de cobro actualizados"}, status=status.HTTP_200_OK)
 
 
@@ -509,7 +499,6 @@ class ProfessionalPaymentInfoPublicView(APIView):
     permission_classes = [IsAuthenticatedDRF]
 
     def get(self, request, id_profesional):
-        from apps.professionals.models import ProfessionalPaymentInfo
         from apps.professionals.repositories import ProfessionalRepository
         user_id = getattr(request, "user_id", None)
         user_role = getattr(request, "user_role", None)
@@ -525,10 +514,7 @@ class ProfessionalPaymentInfoPublicView(APIView):
         else:
             return Response({"success": False, "message": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
 
-        try:
-            info = ProfessionalPaymentInfo.objects.get(idProfesional_id=id_profesional)
-        except ProfessionalPaymentInfo.DoesNotExist:
-            info = ProfessionalPaymentInfo(idProfesional_id=id_profesional)
+        info = _get_prof_service().get_payment_info(id_profesional)
         serializer = ProfessionalPaymentInfoSerializer(info)
         return Response({"success": True, "data": serializer.data}, status=status.HTTP_200_OK)
 
@@ -554,23 +540,7 @@ class ProfessionalVerificacionViewSet(viewsets.ViewSet):
 
     def pendientes(self, request):
         """GET /api/admin/profesionales/pendientes"""
-        from apps.authentication.models import Register
-        profesionales = Register.objects.filter(
-            rol="profesional",
-            perfil_profesional__verificado=False
-        ).select_related("perfil_profesional").order_by("fechaRegistro")
-        data = [
-            {
-                "idUsuario": p.idUsuario,
-                "nombre": p.nombre,
-                "email": p.email,
-                "fechaRegistro": p.fechaRegistro,
-                "especialidad": p.perfil_profesional.especialidad if p.perfil_profesional else None,
-                "tarjetaProfesional": p.perfil_profesional.tarjetaProfesional if p.perfil_profesional else None,
-                "numeroRethus": p.perfil_profesional.numeroRethus if p.perfil_profesional else None,
-            }
-            for p in profesionales
-        ]
+        data = _get_prof_service().list_pending_professionals()
         return Response({"success": True, "profesionales": data}, status=status.HTTP_200_OK)
 
     def verificar(self, request, pk=None):

@@ -9,7 +9,6 @@ from rest_framework import status as drf_status
 from apps.billing.services import InvoiceService
 from apps.billing.repositories import InvoiceRepository
 from apps.core.permissions import IsAuthenticatedDRF, IsProfesional
-from apps.billing.models import Facturas
 
 logger = logging.getLogger(__name__)
 
@@ -205,9 +204,8 @@ class FacturaEvidenciaView(APIView):
         user_id = getattr(request, "user_id", None)
         user_role = getattr(request, "user_role", None)
 
-        try:
-            factura = Facturas.objects.select_related("idPaciente", "idProfesional", "confirmada_por").get(idFactura=id_factura)
-        except Facturas.DoesNotExist:
+        factura = InvoiceRepository().get_invoice_with_payment_relations(id_factura)
+        if factura is None:
             return Response({"success": False, "message": "Factura no encontrada"}, status=drf_status.HTTP_404_NOT_FOUND)
 
         # Permisos: paciente dueño, profesional dueño, admin

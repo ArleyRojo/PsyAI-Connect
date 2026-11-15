@@ -83,10 +83,9 @@ class TestRequireAuth:
         assert user is None
         assert err.status_code == 401
 
-    @patch("apps.authentication.models.Register")
-    def test_returns_401_when_user_not_in_db(self, MockRegister):
-        MockRegister.DoesNotExist = DoesNotExist
-        MockRegister.objects.get.side_effect = DoesNotExist()
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_returns_401_when_user_not_in_db(self, get_user_by_id):
+        get_user_by_id.return_value = None
         request = _make_request_with_mock_session(
             {"idUsuario": 999, "rol": "paciente", "nombre": "Ghost"}
         )
@@ -97,9 +96,9 @@ class TestRequireAuth:
         assert "no encontrado" in body["message"].lower()
         request.session.flush.assert_called_once()
 
-    @patch("apps.authentication.models.Register")
-    def test_returns_403_when_user_suspended(self, MockRegister):
-        MockRegister.objects.get.return_value = _mock_db_user(
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_returns_403_when_user_suspended(self, get_user_by_id):
+        get_user_by_id.return_value = _mock_db_user(
             activo=False, estado_cuenta="Suspendida"
         )
         request = _make_request_with_mock_session(
@@ -112,9 +111,9 @@ class TestRequireAuth:
         assert "suspendida" in body["message"].lower()
         request.session.flush.assert_called_once()
 
-    @patch("apps.authentication.models.Register")
-    def test_returns_403_when_estado_cuenta_not_activa(self, MockRegister):
-        MockRegister.objects.get.return_value = _mock_db_user(
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_returns_403_when_estado_cuenta_not_activa(self, get_user_by_id):
+        get_user_by_id.return_value = _mock_db_user(
             activo=True, estado_cuenta="Suspendida"
         )
         request = _make_request_with_mock_session(
@@ -124,9 +123,9 @@ class TestRequireAuth:
         assert user is None
         assert err.status_code == 403
 
-    @patch("apps.authentication.models.Register")
-    def test_returns_403_when_activo_false_but_estado_activa(self, MockRegister):
-        MockRegister.objects.get.return_value = _mock_db_user(
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_returns_403_when_activo_false_but_estado_activa(self, get_user_by_id):
+        get_user_by_id.return_value = _mock_db_user(
             activo=False, estado_cuenta="Activa"
         )
         request = _make_request_with_mock_session(
@@ -136,9 +135,9 @@ class TestRequireAuth:
         assert user is None
         assert err.status_code == 403
 
-    @patch("apps.authentication.models.Register")
-    def test_returns_user_when_active(self, MockRegister):
-        MockRegister.objects.get.return_value = _mock_db_user(
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_returns_user_when_active(self, get_user_by_id):
+        get_user_by_id.return_value = _mock_db_user(
             activo=True, estado_cuenta="Activa"
         )
         request = _make_request({"idUsuario": 1, "rol": "paciente", "nombre": "Test"})
@@ -147,19 +146,18 @@ class TestRequireAuth:
         assert user["idUsuario"] == 1
         assert err is None
 
-    @patch("apps.authentication.models.Register")
-    def test_session_flushed_on_user_not_found(self, MockRegister):
-        MockRegister.DoesNotExist = DoesNotExist
-        MockRegister.objects.get.side_effect = DoesNotExist()
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_session_flushed_on_user_not_found(self, get_user_by_id):
+        get_user_by_id.return_value = None
         request = _make_request_with_mock_session(
             {"idUsuario": 999, "rol": "paciente", "nombre": "Ghost"}
         )
         require_auth(request)
         request.session.flush.assert_called_once()
 
-    @patch("apps.authentication.models.Register")
-    def test_session_flushed_on_suspension(self, MockRegister):
-        MockRegister.objects.get.return_value = _mock_db_user(
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_session_flushed_on_suspension(self, get_user_by_id):
+        get_user_by_id.return_value = _mock_db_user(
             activo=False, estado_cuenta="Suspendida"
         )
         request = _make_request_with_mock_session(
@@ -173,9 +171,9 @@ class TestRequireAuth:
 
 
 class TestRequireRole:
-    @patch("apps.authentication.models.Register")
-    def test_returns_403_when_wrong_role(self, MockRegister):
-        MockRegister.objects.get.return_value = _mock_db_user(
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_returns_403_when_wrong_role(self, get_user_by_id):
+        get_user_by_id.return_value = _mock_db_user(
             activo=True, estado_cuenta="Activa"
         )
         request = _make_request({"idUsuario": 1, "rol": "paciente", "nombre": "Test"})
@@ -183,9 +181,9 @@ class TestRequireRole:
         assert user is None
         assert err.status_code == 403
 
-    @patch("apps.authentication.models.Register")
-    def test_returns_user_when_role_matches(self, MockRegister):
-        MockRegister.objects.get.return_value = _mock_db_user(
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_returns_user_when_role_matches(self, get_user_by_id):
+        get_user_by_id.return_value = _mock_db_user(
             activo=True, estado_cuenta="Activa"
         )
         request = _make_request({"idUsuario": 1, "rol": "admin", "nombre": "Admin"})
@@ -193,9 +191,9 @@ class TestRequireRole:
         assert user is not None
         assert err is None
 
-    @patch("apps.authentication.models.Register")
-    def test_returns_403_when_suspended_even_with_correct_role(self, MockRegister):
-        MockRegister.objects.get.return_value = _mock_db_user(
+    @patch("apps.authentication.repositories.AuthRepository.get_user_by_id_or_none")
+    def test_returns_403_when_suspended_even_with_correct_role(self, get_user_by_id):
+        get_user_by_id.return_value = _mock_db_user(
             activo=False, estado_cuenta="Suspendida"
         )
         request = _make_request_with_mock_session(

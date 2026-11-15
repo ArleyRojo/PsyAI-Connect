@@ -15,10 +15,11 @@ import logging
 from datetime import timedelta
 from decimal import Decimal
 
-from django.db.models import F, Q
 from django.utils import timezone
 
-from apps.billing.models import Facturas
+from apps.billing.repositories import InvoiceRepository
+
+invoice_repo = InvoiceRepository()
 
 logger = logging.getLogger(__name__)
 
@@ -45,21 +46,14 @@ def _fecha(dt):
 def _monto(factura):
     if factura.monto is not None:
         return factura.monto
-    return sum((i.precioUnitario or Decimal("0")) for i in factura.items.all())
+    return invoice_repo.get_invoice_item_total(factura.idFactura) or Decimal("0")
 
 
 def facturas_por_recordar(ahora=None):
     """Facturas a las que hoy les toca recordatorio automático."""
     ahora = ahora or timezone.now()
-    return (
-        Facturas.objects.filter(estadoPago="Pendiente", anulada=False, recordatoriosEnviados__lt=MAX_AVISOS)
-        .filter(
-            Q(recordatoriosEnviados=0, fecha__lte=ahora - timedelta(days=DIAS_PRIMER_AVISO))
-            | Q(recordatoriosEnviados__gt=0, ultimoRecordatorio__lte=ahora - timedelta(days=DIAS_ENTRE_AVISOS))
-        )
-        .select_related("idPaciente", "idProfesional")
-        .prefetch_related("items")
-        .order_by("idPaciente_id", "fecha")
+    return invoice_repo.get_invoices_due_for_reminder(
+        ahora, MAX_AVISOS, DIAS_PRIMER_AVISO, DIAS_ENTRE_AVISOS
     )
 
 
@@ -79,11 +73,11 @@ def _mensaje(facturas):
 
 def _avisar(paciente, facturas):
     """Campanita siempre; correo/WhatsApp según preferencias. Devuelve True si salió por algún canal externo."""
-    from apps.scheduling.models import Notificaciones
+    from apps.scheduling.repositories import AppointmentRepository
 
     titulo = "Recordatorio de pago"
     mensaje = _mensaje(facturas)
-    Notificaciones.objects.create(
+    AppointmentRepository().create_notification_attempt(
         idUsuario=paciente, rol="paciente", titulo=titulo, mensaje=mensaje, tipo="Factura",
         enviado_por="Sistema", estado="enviado", canal="interno",
     )
@@ -96,9 +90,7 @@ def _avisar(paciente, facturas):
 
 
 def _marcar(facturas, ahora):
-    Facturas.objects.filter(idFactura__in=[f.idFactura for f in facturas]).update(
-        recordatoriosEnviados=F("recordatoriosEnviados") + 1, ultimoRecordatorio=ahora,
-    )
+    invoice_repo.increment_reminder_count([f.idFactura for f in facturas], ahora)
 
 
 def enviar_automaticos(ahora=None):
@@ -123,10 +115,7 @@ def enviar_automaticos(ahora=None):
 
 def recordar_manual(factura_id, profesional_id):
     """Botón "Recordar pago" del profesional."""
-    factura = (
-        Facturas.objects.filter(idFactura=factura_id)
-        .select_related("idPaciente", "idProfesional").prefetch_related("items").first()
-    )
+    factura = invoice_repo.get_invoice_for_manual_reminder(factura_id)
     if not factura:
         return {"success": False, "message": "Factura no encontrada"}, 404
     if factura.idProfesional_id != profesional_id:
@@ -140,11 +129,11 @@ def recordar_manual(factura_id, profesional_id):
 
     externo = _avisar(factura.idPaciente, [factura])
     _marcar([factura], ahora)
-    factura.refresh_from_db()
+    reminder_status = invoice_repo.get_reminder_status(factura_id)
     detalle = "Le llegó a su campanita" + (" y a su correo/WhatsApp." if externo else ".")
     return {
         "success": True,
         "message": f"Recordatorio enviado a {factura.idPaciente.nombre}. {detalle}",
-        "recordatoriosEnviados": factura.recordatoriosEnviados,
-        "ultimoRecordatorio": factura.ultimoRecordatorio.isoformat(),
+        "recordatoriosEnviados": reminder_status["recordatoriosEnviados"],
+        "ultimoRecordatorio": reminder_status["ultimoRecordatorio"].isoformat(),
     }, 200

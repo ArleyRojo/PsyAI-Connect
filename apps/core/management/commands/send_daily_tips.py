@@ -5,7 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.management import BaseCommand
 from django.template.loader import render_to_string
 
-from apps.core.models import NewsletterSubscriber
+from apps.core.repositories import CoreRepository
 
 
 DAILY_TIPS = [
@@ -100,9 +100,7 @@ class Command(BaseCommand):
         today = date.today()
         tip = DAILY_TIPS[today.toordinal() % len(DAILY_TIPS)]
 
-        subscribers = list(
-            NewsletterSubscriber.objects.filter(is_active=True).values_list("email", flat=True)
-        )
+        subscribers = CoreRepository().get_active_subscriber_emails()
 
         if not subscribers:
             self.stdout.write(self.style.WARNING("No hay suscriptores activos."))

@@ -11,6 +11,8 @@ from django.utils import timezone
 from apps.admin_panel.models import ConfiguracionSeguridad
 from apps.admin_panel.repositories import AdminRepository
 
+_repo = AdminRepository()
+
 CACHE_MINUTOS = "psyai:minutos_inactividad"
 CACHE_POLITICAS = "psyai:politicas_seguridad"
 AVISO_SEGUNDOS = 60
@@ -41,7 +43,7 @@ def politicas():
     """Diccionario con las políticas vigentes (caché de 60 s)."""
     datos = cache.get(CACHE_POLITICAS)
     if datos is None:
-        datos = ConfiguracionSeguridad.obtener().to_dict()
+        datos = _repo.get_security_config().to_dict()
         cache.set(CACHE_POLITICAS, datos, 60)
     return datos
 
@@ -51,7 +53,7 @@ def minutos_inactividad():
     """Minutos sin actividad antes de cerrar la sesión (con caché de 60 s)."""
     minutos = cache.get(CACHE_MINUTOS)
     if minutos is None:
-        minutos = ConfiguracionSeguridad.obtener().minutosInactividad
+        minutos = _repo.get_security_config().minutosInactividad
         cache.set(CACHE_MINUTOS, minutos, 60)
     return minutos
 
@@ -114,7 +116,7 @@ def bloqueo():
 
 # ── API del admin ──────────────────────────────────────────────────────────
 def obtener_config():
-    return {"success": True, "config": ConfiguracionSeguridad.obtener().to_dict()}, 200
+    return {"success": True, "config": _repo.get_security_config().to_dict()}, 200
 
 
 def _texto_valor(valor):
@@ -157,7 +159,7 @@ def actualizar_config(data, administrador="Admin"):
     if not cambios:
         return {"success": False, "message": "No hay cambios para guardar."}, 400
 
-    config = ConfiguracionSeguridad.obtener()
+    config = _repo.get_security_config()
     detalles = []
     for campo, nuevo in cambios.items():
         anterior = getattr(config, campo)
@@ -169,7 +171,7 @@ def actualizar_config(data, administrador="Admin"):
                 detalles.append(f"{nombre}: de {_texto_valor(anterior)} a {_texto_valor(nuevo)}")
             setattr(config, campo, nuevo)
     config.actualizadoPor = administrador
-    config.save()
+    _repo.save_security_config(config)
     _limpiar_cache()
 
     if detalles:
@@ -185,10 +187,10 @@ def actualizar_config(data, administrador="Admin"):
 
 def marcar_revisadas(administrador="Admin"):
     """El admin confirma que revisó las políticas (RN-14): reinicia el plazo de revisión."""
-    config = ConfiguracionSeguridad.obtener()
+    config = _repo.get_security_config()
     config.fechaUltimaRevision = timezone.now()
     config.revisadoPor = administrador
-    config.save()
+    _repo.save_security_config(config)
     _limpiar_cache()
     proxima = config.proxima_revision()
     AdminRepository().registrar_log(

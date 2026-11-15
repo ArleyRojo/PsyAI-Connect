@@ -3,6 +3,7 @@ import uuid
 from django.shortcuts import redirect
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from apps.authentication.models import Register
+from apps.authentication.repositories import AuthRepository
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -16,18 +17,16 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         email = sociallogin.account.extra_data.get("email")
         if email:
-            try:
-                Register.objects.get(email__iexact=email)
+            if AuthRepository().get_user_by_email_for_auth_or_none(email):
                 # El usuario existe, permitir login normal
                 return None
-            except Register.DoesNotExist:
-                # Usuario no registrado: redirigir a registro con indicador de Google
-                request.session["social_pending_email"] = email
-                return redirect("/register.html?google=1")
+            # Usuario no registrado: redirigir a registro con indicador de Google
+            request.session["social_pending_email"] = email
+            return redirect("/register.html?google=1")
         return None
 
     def new_user(self, request, sociallogin):
-        user = Register()
+        user = AuthRepository().new_social_login_user()
         user.rol = "paciente"
         user.contrasena = uuid.uuid4().hex
         return user
@@ -55,7 +54,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             user.fotoPerfil = extra["picture"]
 
         # Guarda el usuario Y crea el SocialAccount (allauth lo requiere)
-        sociallogin.save(request)
+        AuthRepository().save_social_login(sociallogin, request)
 
         self._create_perfil_paciente(user)
         self._setup_session(request, user)
@@ -74,15 +73,8 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         return user
 
     def _create_perfil_paciente(self, user):
-        from apps.patients.models import PerfilPaciente
-
-        PerfilPaciente.objects.get_or_create(
-            idPaciente=user,
-            defaults={
-                "consentimientoDatos": True,
-                "consentimiento_chatbot": True,
-            },
-        )
+        from apps.patients.repositories import PatientRepository
+        PatientRepository().ensure_social_login_patient_profile(user)
 
     def _setup_session(self, request, user):
         if isinstance(user, Register):

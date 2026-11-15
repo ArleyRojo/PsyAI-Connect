@@ -21,6 +21,9 @@ class PatientService:
             perfil["fechaRegistro"] = perfil["fechaRegistro"].strftime("%d/%m/%Y")
         return {"success": True, "perfil": perfil}, 200
 
+    def update_chatbot_consent(self, user_id, consent):
+        return self.repo.set_chatbot_consent_for_user(user_id, consent)
+
     def update_patient_profile(self, data):
         numero = data.get("numeroTelefonico")
         if numero is None:
@@ -118,12 +121,11 @@ class PatientService:
         return {"success": True, "anamnesis": anamnesis.to_dict(include_familiares=True)}, 200
 
     def registrar_anamnesis(self, paciente_id, profesional_id, data):
-        from apps.authentication.models import Register
+        from apps.authentication.repositories import AuthRepository
 
         # Verificar que el paciente existe y tiene rol correcto
-        try:
-            paciente = Register.objects.get(idUsuario=paciente_id)
-        except Register.DoesNotExist:
+        paciente = AuthRepository().get_user_by_id_or_none(paciente_id)
+        if not paciente:
             return {"success": False, "message": "El paciente no existe"}, 400
         if paciente.rol != "paciente":
             return {"success": False, "message": "El usuario no tiene rol de paciente"}, 400
@@ -167,7 +169,7 @@ class PatientService:
             return {"success": False, "message": "Anamnesis no encontrada"}, 404
         if anamnesis.idProfesional_id != profesional_id:
             return {"success": False, "message": "No autorizado para eliminar esta anamnesis"}, 403
-        anamnesis.delete()
+        self.repo.delete_anamnesis(anamnesis)
         return {"success": True, "message": "Anamnesis eliminada correctamente"}, 200
 
     @staticmethod

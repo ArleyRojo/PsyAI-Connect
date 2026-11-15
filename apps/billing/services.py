@@ -96,13 +96,16 @@ class InvoiceMailService:
 class InvoiceService:
     def __init__(self):
         self.repo = InvoiceRepository()
+        from apps.authentication.repositories import AuthRepository
+        from apps.professionals.repositories import ProfessionalRepository
+        self.auth_repo = AuthRepository()
+        self.professional_repo = ProfessionalRepository()
 
     def create_invoice(self, professional_user_id, patient_id, cita_id, items,
                        fechaPago, metodoPago, referencia, notas, evidencia):
         # Validaciones de items ya hechas en la vista
         # Validar relación profesional-paciente
-        from apps.professionals.models import PacientesProfesional
-        if not PacientesProfesional.objects.filter(idProfesional_id=professional_user_id, idPaciente_id=patient_id).exists():
+        if not self.professional_repo.has_patient_assignment(professional_user_id, patient_id):
             return {"success": False, "message": "No tienes relación profesional-paciente para facturar a este paciente"}, 403
 
         # Validar fechaPago no futura
@@ -137,20 +140,16 @@ class InvoiceService:
         with transaction.atomic():
             # Duplicada por cita: misma cita no anulada
             if cita_id:
-                if Facturas.objects.filter(idCita=cita_id, anulada=False).exists():
+                if self.repo.has_active_invoice_for_appointment(cita_id):
                     return {
                         "success": False,
                         "message": "Ya existe una factura no anulada para esta cita",
                     }, 409
             # Duplicada sin cita: mismo paciente + profesional + monto + misma día de fechaPago
             else:
-                if Facturas.objects.filter(
-                    idPaciente_id=patient_id,
-                    idProfesional_id=professional_user_id,
-                    monto=monto_total,
-                    fechaPago__date=fechaPago_dt.date(),
-                    anulada=False,
-                ).exists():
+                if self.repo.has_duplicate_invoice(
+                    patient_id, professional_user_id, monto_total, fechaPago_dt.date()
+                ):
                     return {
                         "success": False,
                         "message": "Ya existe una factura no anulada para este paciente, profesional, monto y fecha",
@@ -174,9 +173,8 @@ class InvoiceService:
 
         # enviar correo al paciente (fuera de la transacción)
         try:
-            from apps.authentication.models import Register
-            paciente = Register.objects.filter(idUsuario=patient_id).first()
-            profesional = Register.objects.filter(idUsuario=professional_user_id).first()
+            paciente = self.auth_repo.get_user_by_id_or_none(patient_id)
+            profesional = self.auth_repo.get_user_by_id_or_none(professional_user_id)
             site_url = InvoiceMailService._get_site_url()
             InvoiceMailService.send_factura_notificacion(
                 recipient_email=paciente.email if paciente else None,
@@ -269,8 +267,8 @@ class InvoiceService:
             from apps.authentication.models import Register
             factura_data = self.repo.get_invoice_by_id(invoice_id)
             if factura_data:
-                paciente = Register.objects.filter(idUsuario=factura_data["idPaciente"]).first()
-                profesional = Register.objects.filter(idUsuario=factura_data["idProfesional"]).first()
+                paciente = self.auth_repo.get_user_by_id_or_none(factura_data["idPaciente"])
+                profesional = self.auth_repo.get_user_by_id_or_none(factura_data["idProfesional"])
                 site_url = InvoiceMailService._get_site_url()
                 # El paciente respeta sus preferencias de notificación; el profesional
                 # recibe el correo directo (no es una notificación al paciente).
@@ -351,8 +349,7 @@ class InvoiceService:
             if metodoPago not in allowed_methods:
                 return {"success": False, "message": "Método de pago inválido"}, 400
 
-        from apps.authentication.models import Register
-        confirmador = Register.objects.filter(idUsuario=professional_user_id).first()
+        confirmador = self.auth_repo.get_user_by_id_or_none(professional_user_id)
 
         ok = self.repo.confirmar_pago(
             invoice_id,
@@ -367,7 +364,7 @@ class InvoiceService:
 
         # Enviar correo de notificación al paciente
         try:
-            paciente = Register.objects.filter(idUsuario=factura_data["idPaciente"]).first()
+            paciente = self.auth_repo.get_user_by_id_or_none(factura_data["idPaciente"])
             profesional = confirmador
             site_url = InvoiceMailService._get_site_url()
             items_fmt = [

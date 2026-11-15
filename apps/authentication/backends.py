@@ -1,4 +1,4 @@
-from apps.authentication.models import Register
+from apps.authentication.repositories import AuthRepository
 
 
 class EmailBackend:
@@ -6,9 +6,8 @@ class EmailBackend:
         email = kwargs.get("email", username)
         if not email:
             return None
-        try:
-            user = Register.objects.get(email__iexact=email)
-        except Register.DoesNotExist:
+        user = AuthRepository().get_user_by_email_for_auth_or_none(email)
+        if user is None:
             return None
 
         from apps.authentication.security import SecurityHelper
@@ -18,7 +17,4 @@ class EmailBackend:
         return None
 
     def get_user(self, user_id):
-        try:
-            return Register.objects.get(pk=user_id)
-        except Register.DoesNotExist:
-            return None
+        return AuthRepository().get_user_by_pk_or_none(user_id)

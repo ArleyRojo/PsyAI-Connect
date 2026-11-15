@@ -3,10 +3,11 @@ import threading
 
 from django.db import close_old_connections
 from django.db.models import Q
+from django.db.models import Count
+from django.db.models.functions import ExtractHour, TruncDate
 from django.db import connection, transaction
 
 from apps.admin_panel.models import AuditoriaAccesos, Logs
-from apps.admin_panel.resumen import resumen as resumen_dashboard
 from apps.authentication.models import Register
 from apps.core.utils import fmt_bogota
 
@@ -26,6 +27,84 @@ class AdminRepository:
 
     def get_admin_name(self):
         return "Admin"
+
+    def create_access_audit(self, **data):
+        return AuditoriaAccesos.objects.create(**data)
+
+    def get_security_config(self):
+        from apps.admin_panel.models import ConfiguracionSeguridad
+
+        return ConfiguracionSeguridad.obtener()
+
+    def save_security_config(self, config):
+        config.save()
+        return config
+
+    def get_system_config(self):
+        from apps.admin_panel.models import ConfiguracionSistema
+
+        return ConfiguracionSistema.obtener()
+
+    def save_system_config(self, config):
+        config.save()
+        return config
+
+    def update_scheduler_heartbeat(self, config_id, now):
+        from apps.admin_panel.models import ConfiguracionSistema
+
+        return ConfiguracionSistema.objects.filter(pk=config_id).update(programadorLatido=now)
+
+    def delete_old_logs(self, cutoff):
+        return Logs.objects.filter(fecha__lt=cutoff).delete()
+
+    def delete_expired_sessions(self, now):
+        from django.contrib.sessions.models import Session
+
+        return Session.objects.filter(expire_date__lt=now).delete()
+
+    def invalidate_user_sessions(self, user_id):
+        from django.contrib.sessions.models import Session
+
+        try:
+            candidates = Session.objects.filter(
+                session_data__contains=f'"_auth_user_id": "{user_id}"'
+            )
+            for session in candidates:
+                try:
+                    decoded = session.get_decoded()
+                    if str(decoded.get("_auth_user_id")) == str(user_id):
+                        session.delete()
+                except Exception:
+                    continue
+        except Exception:
+            pass
+        try:
+            for session in Session.objects.all():
+                try:
+                    decoded = session.get_decoded()
+                    if str(decoded.get("_auth_user_id") or decoded.get("idUsuario")) == str(user_id):
+                        session.delete()
+                except Exception:
+                    continue
+        except RuntimeError:
+            pass
+
+    def get_activity_counts_by_hour(self, start, end):
+        return list(
+            Logs.objects.filter(fecha__gte=start, fecha__lt=end)
+            .annotate(hora=ExtractHour("fecha")).values("hora")
+            .annotate(total=Count("pk"))
+        )
+
+    def get_log_counts_by_day(self, start, end, *, module=None):
+        qs = Logs.objects.all()
+        if module:
+            qs = qs.filter(modulo=module)
+        return list(
+            qs.filter(fecha__gte=start, fecha__lt=end)
+            .annotate(dia=TruncDate("fecha")).values("dia")
+            .annotate(total=Count("pk"))
+        )
 
     def registrar_log(self, modulo, accion, detalle, rol_anterior=None, rol_nuevo=None, usuario_afectado=None, administrador="Admin", origen="admin"):
         try:
@@ -143,8 +222,12 @@ class AdminRepository:
             "alertas_info": tokens_invalidos,
             "security_timeline": security_timeline,
             "actividad_reciente": actividad,
-            **resumen_dashboard(),
+            **self.get_dashboard_summary(),
         }
+
+    def get_dashboard_summary(self):
+        from apps.admin_panel.resumen import resumen
+        return resumen()
 
     def list_users(self, page=1, limit=20):
         offset = (page - 1) * limit

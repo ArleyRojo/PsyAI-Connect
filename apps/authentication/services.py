@@ -117,6 +117,13 @@ class AuthService:
         self.repo = AuthRepository()
         self.security_repo = SecurityRepository()
 
+    def get_user_by_id(self, user_id):
+        return self.repo.get_user_by_id_or_none(user_id)
+
+    def get_user_with_role(self, user_id):
+        user = self.repo.get_user_by_id_with_role(user_id)
+        return user.rol_nombre if user else None
+
     def _validate_register_data(self, data):
         nombre = data.get("nombre", "").strip() if data.get("nombre") else ""
         if not nombre:
@@ -492,7 +499,7 @@ class AuthService:
 
         # Enviar correo de aviso (no incluye contraseña ni token)
         try:
-            user = self.repo.get_user_by_id(user_id)
+            user = self.repo.get_user_contact_for_password_notice(user_id)
             if user:
                 client_ip = None
                 if request:
@@ -523,10 +530,6 @@ class AuthService:
         """Crea (o regenera) el secreto TOTP del usuario, aún sin confirmar."""
         self._check_totp_available()
         return self.security_repo.create_totp_device(user_id, name=name, secret=pyotp.random_base32())
-
-    def get_user(self, user_id):
-        """Usuario por id, o None si no existe."""
-        return self.repo.get_user_by_id(user_id)
 
     def get_totp_provisioning_uri(self, user_id, email):
         """Genera la URI para QR code (otpauth://...)."""
@@ -570,14 +573,14 @@ class AuthService:
             return False, "Código inválido"
         device.confirmed = True
         device.last_used = timezone.now()
-        device.save()
+        self.security_repo.persist_totp_device(device)
         return True, "2FA activado correctamente"
 
     def disable_totp_device(self, user_id):
         """Desactiva/elimina el dispositivo 2FA del usuario."""
         device = self.get_totp_device(user_id)
         if device:
-            device.delete()
+            self.security_repo.delete_totp_device(device)
             return True
         return False
 

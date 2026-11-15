@@ -16,10 +16,10 @@ from django.db.migrations.executor import MigrationExecutor
 from django.utils import timezone
 
 from apps.admin_panel import copias
-from apps.admin_panel.models import ConfiguracionSistema, Logs
 from apps.admin_panel.repositories import AdminRepository
 
 logger = logging.getLogger(__name__)
+_repo = AdminRepository()
 
 CACHE_MODO = "psyai:modo_mantenimiento"
 DIAS_NOTIFICACIONES = 180   # se limpian las notificaciones de más de 6 meses
@@ -37,7 +37,7 @@ def modo_actual():
     """(activo, mensaje) con caché de 15 s (lo consulta el middleware en cada request)."""
     datos = cache.get(CACHE_MODO)
     if datos is None:
-        config = ConfiguracionSistema.obtener()
+        config = _repo.get_system_config()
         datos = (config.modoMantenimiento, config.mensajeMantenimiento)
         cache.set(CACHE_MODO, datos, 15)
     return datos
@@ -51,12 +51,12 @@ def cambiar_modo(data, administrador="Admin"):
     if len(mensaje) > 300:
         return {"success": False, "message": "El mensaje no puede superar 300 caracteres"}, 400
 
-    config = ConfiguracionSistema.obtener()
+    config = _repo.get_system_config()
     config.modoMantenimiento = activo
     if mensaje:
         config.mensajeMantenimiento = mensaje
     config.actualizadoPor = administrador
-    config.save()
+    _repo.save_system_config(config)
     cache.delete(CACHE_MODO)
     _log("Activar modo mantenimiento" if activo else "Desactivar modo mantenimiento",
          f"Mensaje: {config.mensajeMantenimiento}" if activo else "La plataforma vuelve a estar disponible",
@@ -105,7 +105,7 @@ def _estado_disco():
 
 
 def _estado_programador():
-    latido = ConfiguracionSistema.obtener().programadorLatido
+    latido = _repo.get_system_config().programadorLatido
     if not latido:
         return {"estado": "error", "texto": "Sin señales", "detalle": "El servicio scheduler no ha arrancado"}
     if timezone.now() - latido > timedelta(minutes=MINUTOS_LATIDO):
@@ -138,7 +138,7 @@ def _estado_copias():
 
 
 def estado():
-    config = ConfiguracionSistema.obtener()
+    config = _repo.get_system_config()
     return {
         "success": True,
         "estado": {
@@ -161,21 +161,20 @@ def _comando(nombre):
 
 
 def _limpiar_sesiones():
-    from django.contrib.sessions.models import Session
-    borradas, _ = Session.objects.filter(expire_date__lt=timezone.now()).delete()
+    borradas, _ = _repo.delete_expired_sessions(timezone.now())
     return f"Se borraron {borradas} sesión(es) vencida(s)."
 
 
 def _limpiar_notificaciones():
-    from apps.scheduling.models import Notificaciones
     limite = timezone.now() - timedelta(days=DIAS_NOTIFICACIONES)
-    borradas, _ = Notificaciones.objects.filter(fecha__lt=limite).exclude(estado="pendiente").delete()
+    from apps.scheduling.repositories import AppointmentRepository
+    borradas, _ = AppointmentRepository().delete_old_notifications(limite)
     return f"Se borraron {borradas} notificación(es) de más de 6 meses."
 
 
 def _limpiar_logs():
     limite = timezone.now() - timedelta(days=DIAS_LOGS)
-    borrados, _ = Logs.objects.filter(fecha__lt=limite).delete()
+    borrados, _ = _repo.delete_old_logs(limite)
     return f"Se borraron {borrados} log(s) de más de 1 año."
 
 
@@ -232,7 +231,7 @@ def listar_copias():
         "success": True,
         "copias": copias.listar(),
         "maxCopias": copias.MAX_COPIAS,
-        "horaCopia": ConfiguracionSistema.obtener().to_dict()["horaCopia"],
+        "horaCopia": _repo.get_system_config().to_dict()["horaCopia"],
     }, 200
 
 
@@ -253,11 +252,11 @@ def cambiar_hora_copia(data, administrador="Admin"):
         hora = datetime.strptime(texto, "%H:%M").time()
     except ValueError:
         return {"success": False, "message": "Escribe la hora en formato HH:MM"}, 400
-    config = ConfiguracionSistema.obtener()
+    config = _repo.get_system_config()
     anterior = config.horaCopia.strftime("%H:%M")
     config.horaCopia = hora
     config.actualizadoPor = administrador
-    config.save()
+    _repo.save_system_config(config)
     _log("Cambiar hora de copia automática", f"De {anterior} a {texto}", administrador)
     return {"success": True, "message": f"La copia automática se hará todos los días a las {texto}",
             "horaCopia": texto}, 200
@@ -295,7 +294,7 @@ def restaurar_copia(data, administrador="Admin"):
 
 def copia_automatica_si_toca():
     """La llama el programador cada 5 minutos: crea la copia del día cuando llega la hora."""
-    config = ConfiguracionSistema.obtener()
+    config = _repo.get_system_config()
     ahora = timezone.localtime()
     if ahora.time() < config.horaCopia or copias.hay_copia_automatica_hoy():
         return "Copia automática: no toca todavía"
@@ -304,4 +303,4 @@ def copia_automatica_si_toca():
 
 
 def registrar_latido():
-    ConfiguracionSistema.objects.filter(pk=ConfiguracionSistema.obtener().pk).update(programadorLatido=timezone.now())
+    _repo.update_scheduler_heartbeat(_repo.get_system_config().pk, timezone.now())

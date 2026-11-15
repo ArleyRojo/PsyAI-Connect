@@ -637,7 +637,7 @@ function configurarFiltroRiesgo() {
 
 async function guardarRiskTerms() {
     try {
-        const res = await fetch('/api/admin/chatbot-config', {
+        const res = await fetch('/api/admin/chatbot-config/1', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -729,7 +729,7 @@ async function configurarLimpiarPalabras() {
             if (!confirm('¿Estás seguro de eliminar todas las palabras de riesgo?')) return;
             
             try {
-                const res = await fetch('/api/admin/chatbot-config', {
+                const res = await fetch('/api/admin/chatbot-config/1', {
                     method: 'DELETE',
                     credentials: 'include'
                 });

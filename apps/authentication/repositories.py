@@ -1,6 +1,8 @@
 import logging
 from datetime import timedelta
 
+from django.db.models import Count, Q
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from apps.authentication.models import (
@@ -10,12 +12,164 @@ from apps.authentication.models import (
     Login,
     RecoveryTokens,
     Register,
+    RolPersonalizado,
 )
 
 logger = logging.getLogger(__name__)
 
 
 class AuthRepository:
+    def new_social_login_user(self):
+        return Register()
+    def save_user(self, user, fields=None):
+        user.save(update_fields=fields) if fields else user.save()
+        return user
+
+    def save_social_login(self, sociallogin, request):
+        return sociallogin.save(request)
+    def get_active_patients_for_assignment(self):
+        return list(Register.objects.filter(rol="paciente", activo=True).order_by("nombre").values(
+            "idUsuario", "nombre", "email", "fotoPerfil"
+        ))
+
+    def get_verified_professionals_for_assignment(self):
+        return list(Register.objects.filter(
+            rol="profesional", activo=True, perfil_profesional__verificado=True
+        ).annotate(
+            pacientes=Count("pacientes_profesional", filter=Q(pacientes_profesional__idPaciente__isnull=False))
+        ).order_by("nombre").values(
+            "idUsuario", "nombre", "perfil_profesional__especialidad", "pacientes"
+        ))
+
+    def get_active_patient_for_assignment(self, patient_id):
+        return Register.objects.filter(idUsuario=patient_id, rol="paciente", activo=True).first()
+
+    def get_verified_professional_for_assignment(self, professional_id):
+        return Register.objects.filter(
+            idUsuario=professional_id, rol="profesional", activo=True,
+            perfil_profesional__verificado=True,
+        ).first()
+    def get_registration_counts_by_day(self, start, end):
+        return list(
+            Register.objects.filter(fechaRegistro__gte=start, fechaRegistro__lt=end)
+            .annotate(dia=TruncDate("fechaRegistro")).values("dia")
+            .annotate(total=Count("pk"))
+        )
+    def get_custom_role_catalog(self):
+        base_counts = dict(
+            Register.objects.filter(rolPersonalizado__isnull=True)
+            .values_list("rol")
+            .annotate(n=Count("idUsuario"))
+        )
+        custom_roles = list(RolPersonalizado.objects.annotate(n=Count("usuarios")))
+        return base_counts, custom_roles
+
+    def custom_role_exists(self, name):
+        return RolPersonalizado.objects.filter(nombre__iexact=name).exists()
+
+    def create_custom_role(self, **data):
+        return RolPersonalizado.objects.create(**data)
+
+    def get_custom_role_for_deletion(self, role_id):
+        return RolPersonalizado.objects.filter(idRol=role_id).annotate(n=Count("usuarios")).first()
+
+    def delete_custom_role(self, role):
+        return role.delete()
+
+    def get_user_by_email_or_none(self, email):
+        return Register.objects.filter(email__iexact=email).first()
+
+    def get_user_by_name(self, name):
+        return Register.objects.filter(nombre__icontains=name).first()
+
+    def get_user_by_pk_or_none(self, user_id):
+        return Register.objects.filter(pk=user_id).first()
+
+    def get_user_contact_for_password_notice(self, user_id):
+        return Register.objects.filter(idUsuario=user_id).first()
+
+    def get_user_email(self, user_id):
+        return Register.objects.filter(idUsuario=user_id).values_list("email", flat=True).first()
+
+    def get_active_user_roles(self, user_ids):
+        return dict(
+            Register.objects.filter(
+                idUsuario__in=user_ids, activo=True, estadoCuenta="Activa"
+            ).values_list("idUsuario", "rol")
+        )
+
+    def list_pending_professionals(self):
+        return list(
+            Register.objects.filter(
+                rol="profesional", perfil_profesional__verificado=False
+            ).select_related("perfil_profesional").order_by("fechaRegistro")
+        )
+
+    def get_users_by_ids(self, user_ids):
+        return {user.idUsuario: user for user in Register.objects.filter(idUsuario__in=user_ids)}
+
+    def get_session_user(self, user_id):
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        try:
+            return User.objects.get(pk=user_id, activo=True, estadoCuenta="Activa")
+        except User.DoesNotExist:
+            return None
+
+    def get_minor_candidates(self, active_only=True):
+        qs = Register.objects.select_related("perfil_paciente").filter(
+            perfil_paciente__fecha_nacimiento__isnull=False
+        )
+        if active_only:
+            qs = qs.filter(activo=True, estadoCuenta="Activa")
+        return qs
+
+    def get_google_social_account(self, user):
+        from allauth.socialaccount.models import SocialAccount
+        try:
+            return SocialAccount.objects.get(user=user, provider="google")
+        except SocialAccount.DoesNotExist:
+            return None
+
+    def list_users_for_role_normalization(self):
+        return Register.objects.all().only("idUsuario", "rol", "email", "nombre")
+
+    def update_user_role(self, user_id, role):
+        return Register.objects.filter(idUsuario=user_id).update(rol=role)
+
+    def user_has_profile_photo(self, filename):
+        return Register.objects.filter(fotoPerfil=filename).exists()
+
+    def get_active_patient_user(self, user_id):
+        return Register.objects.filter(
+            idUsuario=user_id, rol="paciente", activo=True, estadoCuenta="Activa"
+        ).first()
+
+    def get_user_by_id_or_none(self, user_id):
+        try:
+            return Register.objects.get(idUsuario=user_id)
+        except Register.DoesNotExist:
+            return None
+
+    def get_user_account_status(self, user_id):
+        return Register.objects.only("activo", "estadoCuenta").get(pk=user_id)
+
+    def get_user_account_status_or_none(self, user_id):
+        return Register.objects.filter(pk=user_id).only("activo", "estadoCuenta").first()
+
+    def get_user_by_pk(self, user_id):
+        return Register.objects.get(pk=user_id)
+
+    def get_user_by_email_for_auth(self, email):
+        return Register.objects.get(email__iexact=email)
+
+    def get_user_by_email_for_auth_or_none(self, email):
+        return Register.objects.filter(email__iexact=email).first()
+
+    def get_user_by_id_with_role(self, user_id):
+        return Register.objects.filter(idUsuario=user_id).select_related("rolPersonalizado").first()
+
     def user_exists_by_email(self, email):
         return Register.objects.filter(email__iexact=email).exists()
 
@@ -138,6 +292,12 @@ class AuthRepository:
 
 
 class SecurityRepository:
+    def persist_totp_device(self, device):
+        device.save()
+        return device
+
+    def delete_totp_device(self, device):
+        return device.delete()
     def check_brute_force(self, email):
         try:
             row = IntentosFallidos.objects.filter(email__iexact=email).first()

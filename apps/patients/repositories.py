@@ -8,6 +8,35 @@ from apps.professionals.models import PacientesProfesional, PerfilProfesional
 
 
 class PatientRepository:
+    def delete_anamnesis(self, anamnesis):
+        return anamnesis.delete()
+    def transfer_anamnesis(self, patient_id, previous_id, new_id):
+        return Anamnesis.objects.filter(
+            idPaciente_id=patient_id, idProfesional_id=previous_id
+        ).update(idProfesional_id=new_id)
+    def set_chatbot_consent_for_user(self, user_id, consent):
+        return PerfilPaciente.objects.filter(idPaciente_id=user_id).update(
+            consentimiento_chatbot=consent
+        )
+
+    def ensure_social_login_patient_profile(self, user):
+        return PerfilPaciente.objects.get_or_create(
+            idPaciente=user,
+            defaults={"consentimientoDatos": True, "consentimiento_chatbot": True},
+        )
+
+    def get_patient_profile_or_none(self, user_id):
+        return PerfilPaciente.objects.filter(idPaciente_id=user_id).first()
+
+    def get_patient_profile_by_phone(self, phone):
+        return PerfilPaciente.objects.filter(numeroTelefonico=phone).first()
+
+    def revoke_whatsapp_consent(self, profile):
+        profile.whatsappConsentimiento = False
+        profile.canalNotificacion = "email"
+        profile.whatsappConsentimientoFecha = None
+        profile.save(update_fields=["whatsappConsentimiento", "canalNotificacion", "whatsappConsentimientoFecha"])
+
     def update_profile_photo(self, filename, user_id):
         Register.objects.filter(idUsuario=user_id).update(fotoPerfil=filename)
 
