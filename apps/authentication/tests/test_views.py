@@ -101,7 +101,7 @@ class TestLoginView:
             mock_svc.is_totp_enabled.return_value = False
             mock_user = MagicMock()
             mock_user.idUsuario = 1
-            mock_svc.get_user.return_value = mock_user
+            mock_svc.get_user_by_id.return_value = mock_user
             resp = LoginView.as_view()(req)
 
         resp.render()
@@ -163,7 +163,7 @@ class TestLoginView:
             mock_svc.is_totp_enabled.return_value = False
             mock_user = MagicMock()
             mock_user.idUsuario = 5
-            mock_svc.get_user.return_value = mock_user
+            mock_svc.get_user_by_id.return_value = mock_user
             resp = LoginView.as_view()(req)
 
         resp.render()

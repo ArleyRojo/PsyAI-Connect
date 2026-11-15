@@ -12,17 +12,15 @@ def setup_session_on_login(request, user, **kwargs):
         foto = user.fotoPerfil
 
         if not foto:
-            from allauth.socialaccount.models import SocialAccount
+            from apps.authentication.repositories import AuthRepository
 
-            try:
-                sa = SocialAccount.objects.get(user=user, provider="google")
+            sa = AuthRepository().get_google_social_account(user)
+            if sa:
                 picture = sa.extra_data.get("picture")
                 if picture:
                     foto = picture
                     user.fotoPerfil = foto
-                    user.save(update_fields=["fotoPerfil"])
-            except SocialAccount.DoesNotExist:
-                pass
+                    AuthRepository().save_user(user, ["fotoPerfil"])
 
         request.session["usuario"] = user.to_session_dict()
         request.session["idUsuario"] = user.idUsuario

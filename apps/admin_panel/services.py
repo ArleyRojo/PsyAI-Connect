@@ -5,13 +5,13 @@ import logging
 import psutil
 from collections import Counter, deque
 from django.conf import settings
-from django.contrib.sessions.models import Session
 from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
 from django.template.loader import render_to_string
 
 from apps.admin_panel.repositories import AdminRepository
+from apps.authentication.repositories import AuthRepository
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,13 @@ STATS_CACHE_TTL = 10
 class AdminService:
     def __init__(self):
         self.repo = AdminRepository()
+        self.auth_repo = AuthRepository()
+
+    def get_account_status(self, user_id):
+        return self.auth_repo.get_user_account_status_or_none(user_id)
+
+    def get_user_email(self, user_id):
+        return self.auth_repo.get_user_email(user_id)
 
     def create_report_columns(self):
         self.repo.ensure_report_columns()
@@ -109,31 +116,7 @@ class AdminService:
 
         # Invalidate sessions of the affected user (only when suspending)
         if activo == 0:
-            # Intento rápido: filtrar sesiones cuyo session_data contenga el user_id
-            try:
-                candidates = Session.objects.filter(
-                    session_data__contains=f'"_auth_user_id": "{target_id}"'
-                )
-                for session in candidates:
-                    try:
-                        decoded = session.get_decoded()
-                        if str(decoded.get("_auth_user_id")) == str(target_id):
-                            session.delete()
-                    except Exception:
-                        continue
-            except Exception:
-                pass
-            # Fallback: recorrer todas las sesiones si el filtro no encontró nada
-            try:
-                for session in Session.objects.all():
-                    try:
-                        decoded = session.get_decoded()
-                        if str(decoded.get("_auth_user_id") or decoded.get("idUsuario")) == str(target_id):
-                            session.delete()
-                    except Exception:
-                        continue
-            except RuntimeError:
-                pass
+            self.repo.invalidate_user_sessions(target_id)
 
             if user_info and user_info.get("email"):
                 self._send_suspension_email(user_info["email"], user_info["nombre"], data.get("motivo", ""))

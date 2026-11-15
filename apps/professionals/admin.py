@@ -14,12 +14,16 @@ class PerfilProfesionalAdmin(admin.ModelAdmin):
     @admin.action(description="Verificar profesionales seleccionados")
     def verificar_profesionales(self, request, queryset):
         from django.utils import timezone
-        updated = queryset.update(verificado=True, fechaVerificacion=timezone.now(), verificadoPor=request.user)
+        from apps.professionals.repositories import ProfessionalRepository
+        updated = ProfessionalRepository().bulk_set_verification(
+            queryset, verified=True, verified_by=request.user, verified_at=timezone.now()
+        )
         self.message_user(request, f"{updated} profesionales verificados.")
 
     @admin.action(description="Desverificar profesionales seleccionados")
     def desverificar_profesionales(self, request, queryset):
-        updated = queryset.update(verificado=False, fechaVerificacion=None, verificadoPor=None)
+        from apps.professionals.repositories import ProfessionalRepository
+        updated = ProfessionalRepository().bulk_set_verification(queryset, verified=False)
         self.message_user(request, f"{updated} profesionales desverificados.")
 
 

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.utils import timezone
 
+
 logger = logging.getLogger(__name__)
 
 # Zona horaria de Colombia
@@ -178,11 +179,10 @@ class AuthHelper:
                 {"success": False, "message": "No autenticado"}, status=401
             )
 
-        from apps.authentication.models import Register
+        from apps.authentication.repositories import AuthRepository
 
-        try:
-            db_user = Register.objects.get(idUsuario=user["idUsuario"])
-        except Register.DoesNotExist:
+        db_user = AuthRepository().get_user_by_id_or_none(user["idUsuario"])
+        if db_user is None:
             request.session.flush()
             return None, JsonResponse(
                 {"success": False, "message": "Usuario no encontrado"}, status=401

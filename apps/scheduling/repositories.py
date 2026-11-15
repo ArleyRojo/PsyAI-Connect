@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from django.db import transaction
 from django.db.models import Avg, Count, Q
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from apps.scheduling.models import CalificacionCita, Citas, Disponibilidad, Notificaciones
@@ -12,6 +13,111 @@ logger = logging.getLogger(__name__)
 
 
 class AppointmentRepository:
+    def save_appointment(self, appointment, fields=None):
+        appointment.save(update_fields=fields) if fields else appointment.save()
+        return appointment
+
+    def save_notification(self, notification, fields):
+        notification.save(update_fields=fields)
+        return notification
+
+    def update_notification_status_by_provider_id(self, provider_msg_id, status):
+        return Notificaciones.objects.filter(providerMsgId=provider_msg_id).update(estado=status)
+
+    def get_future_appointment_counts_by_pair(self, active_states, day):
+        return list(
+            Citas.objects.filter(estado__in=active_states, fecha__gte=day)
+            .values("idPaciente_id", "idProfesional_id").annotate(n=Count("idCita"))
+        )
+
+    def cancel_future_appointments_for_reassignment(self, patient_id, professional_id, new_name, active_states, day):
+        return Citas.objects.filter(
+            estado__in=active_states, fecha__gte=day,
+            idPaciente_id=patient_id, idProfesional_id=professional_id,
+        ).update(estado="Cancelada", motivoCancelacion=f"Caso reasignado a {new_name}")
+    def delete_old_notifications(self, cutoff):
+        return Notificaciones.objects.filter(fecha__lt=cutoff).exclude(estado="pendiente").delete()
+
+    def get_appointment_counts_by_day(self, start_date, end_date):
+        return list(
+            Citas.objects.filter(fecha__gte=start_date, fecha__lte=end_date)
+            .exclude(estado="Cancelada").values("fecha")
+            .annotate(total=Count("pk"))
+        )
+
+    def count_appointments_for_day(self, day):
+        return Citas.objects.filter(fecha=day).exclude(estado="Cancelada").count()
+    def notification_exists(self, user_id, role, kind, title, message):
+        return Notificaciones.objects.filter(
+            idUsuario_id=user_id, rol=role, tipo=kind, titulo=title, mensaje=message
+        ).exists()
+
+    def get_appointment_by_id_or_none(self, appointment_id):
+        return Citas.objects.filter(idCita=appointment_id).first()
+
+    def get_patient_notifications(self, user_id):
+        notifications = Notificaciones.objects.filter(
+            idUsuario_id=user_id, rol="paciente", canal="interno"
+        ).order_by("-fecha", "-idNotificacion")
+        recent = notifications[:30]
+        return {
+            "no_leidas": notifications.filter(leido=False).count(),
+            "notificaciones": [
+                {
+                    "idNotificacion": item.idNotificacion,
+                    "titulo": item.titulo or "Notificación",
+                    "mensaje": item.mensaje or "",
+                    "fecha": item.fecha.isoformat() if item.fecha else None,
+                    "leido": bool(item.leido),
+                }
+                for item in recent
+            ],
+        }
+
+    def mark_patient_notifications_read(self, user_id):
+        return Notificaciones.objects.filter(
+            idUsuario_id=user_id, rol="paciente", canal="interno", leido=False
+        ).update(leido=True)
+
+    def get_appointment_for_update(self, appointment_id):
+        return Citas.objects.select_for_update().get(idCita=appointment_id)
+
+    def get_scheduled_admin_notifications(self, now):
+        return Notificaciones.objects.filter(
+            estado="pendiente", enviado_por="Admin", fecha_programada__lte=now
+        ).order_by("fecha_programada")
+
+    def get_appointments_for_reminder(self, window):
+        return Citas.objects.filter(
+            window,
+            estado__in=["Pendiente", "Confirmada"],
+            recordatorio_enviado=False,
+        ).select_related("idPaciente")
+
+    def get_appointments_in_reminder_window(self, start, end):
+        if start.date() == end.date():
+            window = Q(fecha=start.date(), hora__range=(start.time(), end.time()))
+        else:
+            window = (
+                Q(fecha=start.date(), hora__gte=start.time())
+                | Q(fecha=end.date(), hora__lte=end.time())
+            )
+        return self.get_appointments_for_reminder(window)
+
+    def mark_reminder_sent(self, appointment_id):
+        return Citas.objects.filter(idCita=appointment_id).update(recordatorio_enviado=True)
+
+    def create_notification_attempt(self, **data):
+        return Notificaciones.objects.create(**data)
+
+    def get_notification_by_provider_id(self, provider_msg_id):
+        return Notificaciones.objects.filter(providerMsgId=provider_msg_id).first()
+
+    def save_provider_notification_status(self, notification, status):
+        notification.estado = status
+        notification.save(update_fields=["estado"])
+        return notification
+
     @staticmethod
     def _format_time(value):
         if value is None:

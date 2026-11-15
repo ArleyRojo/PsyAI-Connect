@@ -5,7 +5,7 @@ from django.conf import settings
 
 from apps.core.utils import validate_file_upload
 from apps.documents.repositories import DocumentoRepository
-from apps.professionals.models import PacientesProfesional, PerfilProfesional
+from apps.professionals.repositories import ProfessionalRepository
 
 UPLOAD_SUBDIR = "uploads/documentos"
 
@@ -33,6 +33,7 @@ def _normalize_categoria(categoria):
 class DocumentoService:
     def __init__(self):
         self.repo = DocumentoRepository()
+        self.professional_repo = ProfessionalRepository()
 
     def _upload_dir(self):
         return os.path.join(settings.MEDIA_ROOT, UPLOAD_SUBDIR)
@@ -67,12 +68,7 @@ class DocumentoService:
         return validate_file_upload(file, allowed_extensions=allowed_extensions)
 
     def _professional_can_access_patient(self, professional_id, patient_id):
-        return (
-            PerfilProfesional.objects.filter(idProfesional_id=professional_id, verificado=True).exists()
-            and PacientesProfesional.objects.filter(
-                idProfesional_id=professional_id, idPaciente_id=patient_id
-            ).exists()
-        )
+        return self.professional_repo.can_access_patient(professional_id, patient_id)
 
     def list_patient_docs(self, professional_id, patient_id):
         if not patient_id or not self._professional_can_access_patient(professional_id, patient_id):
@@ -210,12 +206,7 @@ class DocumentoService:
         doc = self.repo.get_patient_doc_by_id(documento_id, patient_id)
         if not doc:
             return {"success": False, "message": "Documento no encontrado"}, 404
-        if not PerfilProfesional.objects.filter(
-            idProfesional_id=professional_id,
-            verificado=True,
-            idProfesional__activo=True,
-            idProfesional__estadoCuenta="Activa",
-        ).exists():
+        if not self.professional_repo.is_verified_active(professional_id):
             return {"success": False, "message": "El profesional no existe o no está verificado"}, 404
 
         aut = self.repo.get_autorizacion(documento_id, professional_id)

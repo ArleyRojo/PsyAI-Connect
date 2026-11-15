@@ -53,7 +53,8 @@ class AppointmentMailService:
 
         if recipient_user_id:
             from apps.authentication.models import Register
-            paciente = Register.objects.filter(idUsuario=recipient_user_id).first()
+            from apps.authentication.repositories import AuthRepository
+            paciente = AuthRepository().get_user_by_id_or_none(recipient_user_id)
             if paciente:
                 est = (estado or "").lower()
                 titu = (titulo or "").lower()
@@ -129,6 +130,12 @@ class AppointmentMailService:
 class AppointmentService:
     def __init__(self):
         self.repo = AppointmentRepository()
+
+    def get_patient_notifications(self, user_id):
+        return self.repo.get_patient_notifications(user_id)
+
+    def mark_patient_notifications_read(self, user_id):
+        return self.repo.mark_patient_notifications_read(user_id)
 
     @staticmethod
     def _notify(paciente, tipo, **ctx):
@@ -354,11 +361,11 @@ class AppointmentService:
         with transaction.atomic():
             # Bloquear fila de cita
             from apps.scheduling.models import Citas
-            cita_locked = Citas.objects.select_for_update().get(idCita=appointment_id)
+            cita_locked = self.repo.get_appointment_for_update(appointment_id)
 
             # Si se confirma, crear factura si no existe
             if estado == "Confirmada":
-                if not Facturas.objects.filter(idCita=appointment_id, anulada=False).exists():
+                if not InvoiceRepository().has_active_invoice_for_appointment(appointment_id):
                     monto = None
                     descripcion = f"Cita {cita_locked.tipoCita}"
                     if extra_data:
@@ -386,7 +393,7 @@ class AppointmentService:
                         estadoPago="Pendiente",
                     )
             cita_locked.estado = estado
-            cita_locked.save(update_fields=["estado"])
+            self.repo.save_appointment(cita_locked, ["estado"])
 
         # Notificaciones (fuera de transacciÃ³n)
         try:

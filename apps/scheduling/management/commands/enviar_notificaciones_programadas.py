@@ -2,7 +2,8 @@ import logging
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from apps.admin_panel.repositories import AdminRepository
-from apps.scheduling.models import Notificaciones
+from apps.scheduling.repositories import AppointmentRepository
+from apps.scheduling.repositories import AppointmentRepository
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +22,7 @@ class Command(BaseCommand):
         now = timezone.now()
         
         # Buscar notificaciones pendientes de admin con fecha_programada <= now
-        notificaciones = Notificaciones.objects.filter(
-            estado="pendiente",
-            enviado_por="Admin",
-            fecha_programada__lte=now,
-        ).order_by("fecha_programada")
+        notificaciones = AppointmentRepository().get_scheduled_admin_notifications(now)
         
         count = notificaciones.count()
         if count == 0:
@@ -35,6 +32,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Encontradas {count} notificación(es) programada(s) para enviar")
         
         repo = AdminRepository()
+        appointment_repo = AppointmentRepository()
         total_enviados = 0
         total_fallidos = 0
         total_omitidos = 0
@@ -73,12 +71,12 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.ERROR(f"    Fallida: {notif.errorDetalle}"))
                 
                 notif.omitidos = omitidos
-                notif.save(update_fields=["estado", "errorDetalle", "omitidos"])
+                appointment_repo.save_notification(notif, ["estado", "errorDetalle", "omitidos"])
                 
             except Exception as e:
                 notif.estado = "fallido"
                 notif.errorDetalle = str(e)
-                notif.save(update_fields=["estado", "errorDetalle"])
+                appointment_repo.save_notification(notif, ["estado", "errorDetalle"])
                 total_fallidos += 1
                 self.stdout.write(self.style.ERROR(f"    Error: {e}"))
                 logger.exception("Error enviando notificación programada #%d", notif.idNotificacion)

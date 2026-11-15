@@ -27,7 +27,10 @@ STORAGES = {
 }
 
 # Caché inmutable (1 año) y compresión automática gzip/brotli en WhiteNoise
-WHITENOISE_MAX_AGE = 31536000
+WHITENOISE_MAX_AGE = 86400
+# Sirve static/ también en la raíz del sitio (/css/…, /js/…, /vendor/)
+# para que los assets no pasen por Django ni consulten la sesión en BD.
+WHITENOISE_ROOT = BASE_DIR / "static"
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = False

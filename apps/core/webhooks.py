@@ -5,7 +5,6 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
-from apps.patients.models import PerfilPaciente
 from apps.core.whatsapp import get_whatsapp_provider
 
 logger = logging.getLogger(__name__)
@@ -35,16 +34,16 @@ class WhatsAppWebhook(View):
 
         if body in ("STOP", "BAJA", "UNSUBSCRIBE"):
             try:
-                perfil = PerfilPaciente.objects.get(numeroTelefonico=from_num)
-                perfil.whatsappConsentimiento = False
-                perfil.canalNotificacion = "email"
-                perfil.whatsappConsentimientoFecha = None
-                perfil.save(update_fields=["whatsappConsentimiento", "canalNotificacion", "whatsappConsentimientoFecha"])
+                from apps.patients.repositories import PatientRepository
+                perfil = PatientRepository().get_patient_profile_by_phone(from_num)
+                if perfil is None:
+                    raise LookupError("unknown_phone")
+                PatientRepository().revoke_whatsapp_consent(perfil)
                 provider = get_whatsapp_provider()
                 provider.enviar_whatsapp(from_num,
                     texto="Has sido dado de baja de notificaciones por WhatsApp. Seguirás recibiendo correos.")
                 logger.info("Opt-out processed for %s", from_num)
-            except PerfilPaciente.DoesNotExist:
+            except LookupError:
                 logger.warning("Opt-out from unknown number %s", from_num)
             except Exception as exc:
                 logger.error("Error processing opt-out for %s: %s", from_num, exc)
@@ -67,11 +66,12 @@ class WhatsAppStatusCallback(View):
         status = request.POST.get('MessageStatus')  # sent, delivered, failed, undelivered
         if not sid:
             return HttpResponse(status=400)
-        from apps.scheduling.models import Notificaciones
+        from apps.scheduling.repositories import AppointmentRepository
         try:
-            notif = Notificaciones.objects.get(providerMsgId=sid)
-            notif.estado = status
-            notif.save(update_fields=["estado"])
-        except Notificaciones.DoesNotExist:
+            notif = AppointmentRepository().get_notification_by_provider_id(sid)
+            if notif is None:
+                raise LookupError("unknown_provider_message")
+            AppointmentRepository().save_provider_notification_status(notif, status)
+        except LookupError:
             logger.warning("Status callback for unknown SID %s", sid)
         return HttpResponse(status=200)

@@ -1,10 +1,9 @@
 # apps/scheduling/management/commands/enviar_recordatorios.py
 import logging
 from django.core.management.base import BaseCommand
-from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
-from apps.scheduling.models import Citas
+from apps.scheduling.repositories import AppointmentRepository
 from apps.core.notifier import notificar_paciente
 
 logger = logging.getLogger(__name__)
@@ -20,17 +19,8 @@ class Command(BaseCommand):
         ventana_inicio = ahora + timedelta(hours=23, minutes=55)
         ventana_fin = ahora + timedelta(hours=24, minutes=5)
 
-        if ventana_inicio.date() == ventana_fin.date():
-            en_ventana = Q(fecha=ventana_inicio.date(), hora__range=(ventana_inicio.time(), ventana_fin.time()))
-        else:  # la ventana cruza la medianoche
-            en_ventana = (Q(fecha=ventana_inicio.date(), hora__gte=ventana_inicio.time())
-                          | Q(fecha=ventana_fin.date(), hora__lte=ventana_fin.time()))
-
-        citas = Citas.objects.filter(
-            en_ventana,
-            estado__in=["Pendiente","Confirmada"],
-            recordatorio_enviado=False,
-        ).select_related("idPaciente")
+        repo = AppointmentRepository()
+        citas = repo.get_appointments_in_reminder_window(ventana_inicio, ventana_fin)
 
         for cita in citas:
             for intento in range(3):
@@ -43,8 +33,7 @@ class Command(BaseCommand):
                         "recordatorio_cita",
                     )
                     if ok:
-                        cita.recordatorio_enviado = True
-                        cita.save(update_fields=["recordatorio_enviado"])
+                        repo.mark_reminder_sent(cita.idCita)
                         logger.info("Recordatorio enviado cita %s", cita.idCita)
                         break
                     else:

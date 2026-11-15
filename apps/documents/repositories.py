@@ -9,6 +9,11 @@ from apps.documents.models import (
 
 
 class DocumentoRepository:
+    def transfer_clinical_documents(self, patient_id, previous_id, new_id):
+        from apps.documents.models import DocumentosClinicos
+        return DocumentosClinicos.objects.filter(
+            idPaciente_id=patient_id, idProfesional_id=previous_id
+        ).update(idProfesional_id=new_id)
     def list_profesional_docs(self, professional_id, patient_id):
         docs = DocumentosClinicos.objects.filter(
             idProfesional_id=professional_id,

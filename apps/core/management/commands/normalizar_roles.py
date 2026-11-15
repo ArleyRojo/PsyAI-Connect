@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from apps.authentication.models import Register
+from apps.authentication.repositories import AuthRepository
 
 VALID_ROLES = {"paciente", "profesional", "admin"}
 
@@ -18,8 +18,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
         cambios = []
+        repo = AuthRepository()
 
-        for user in Register.objects.all().only("idUsuario", "rol", "email", "nombre"):
+        for user in repo.list_users_for_role_normalization():
             rol_actual = user.rol or ""
             rol_normalizado = rol_actual.strip().lower()
             if rol_actual != rol_normalizado:
@@ -59,7 +60,7 @@ class Command(BaseCommand):
 
         aplicados = 0
         for c in cambios:
-            Register.objects.filter(idUsuario=c["id"]).update(rol=c["rol_nuevo"])
+            repo.update_user_role(c["id"], c["rol_nuevo"])
             aplicados += 1
 
         self.stdout.write(

@@ -247,10 +247,8 @@ def registrar_log(
 
 def registrar_acceso(usuario_id, accion, ip):
     try:
-        from apps.admin_panel.models import AuditoriaAccesos
         from apps.admin_panel.repositories import AdminRepository
-
-        AuditoriaAccesos.objects.create(
+        AdminRepository().create_access_audit(
             idUsuario_id=usuario_id,
             accion=accion,
             ip=ip,

@@ -1,7 +1,7 @@
 from datetime import date
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from apps.authentication.models import Register
+from apps.authentication.repositories import AuthRepository
 
 
 class Command(BaseCommand):
@@ -33,12 +33,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Buscando usuarios menores de {edad_minima} años...")
 
         # Obtener todos los usuarios con fecha_nacimiento en su perfil
-        usuarios_con_fecha = Register.objects.select_related('perfil_paciente').filter(
-            perfil_paciente__fecha_nacimiento__isnull=False
-        )
-
-        if not incluir_activos:
-            usuarios_con_fecha = usuarios_con_fecha.filter(activo=True, estadoCuenta='Activa')
+        usuarios_con_fecha = AuthRepository().get_minor_candidates(active_only=not incluir_activos)
 
         menores = []
         for usuario in usuarios_con_fecha:

@@ -1,9 +1,7 @@
 import logging
 from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework.authentication import SessionAuthentication
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from apps.authentication.repositories import AuthRepository
 
 logger = logging.getLogger(__name__)
 
@@ -68,9 +66,8 @@ class CsrfEnforcedSessionAuthentication(SessionAuthentication):
         if not user_id:
             return None
 
-        try:
-            user = User.objects.get(pk=user_id, activo=True, estadoCuenta="Activa")
-        except User.DoesNotExist:
+        user = AuthRepository().get_session_user(user_id)
+        if not user:
             return None
 
         # Validar CSRF para peticiones no seguras una vez autenticado

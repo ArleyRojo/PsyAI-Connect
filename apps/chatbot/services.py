@@ -306,7 +306,9 @@ class ChatbotConfigService:
                     "tone": "",
                     "interaction_rules": "",
                     "risk_terms": "[]",
-                    "crisis_response": "",
+                    "crisis_response": DEFAULT_CRISIS_RESPONSE.format(
+                        crisis_phone=DEFAULT_CRISIS_PHONE
+                    ),
                  "medium_response": "",
                 "fallback_response": "",
                 "off_topic_response": "Ese tema se sale de mi alcance, pero si quieres cuéntame cómo te has sentido emocionalmente.",
@@ -323,6 +325,12 @@ class ChatbotConfigService:
                     "actualizado_por": None,
                 },
             }, 200
+        crisis_response = (config.get("crisis_response") or "").strip()
+        if not crisis_response:
+            crisis_phone = (config.get("crisis_phone") or DEFAULT_CRISIS_PHONE).strip()
+            config["crisis_response"] = DEFAULT_CRISIS_RESPONSE.format(
+                crisis_phone=crisis_phone
+            )
         return {"success": True, "config": config}, 200
 
     def save_config(self, data, admin_id):
@@ -416,6 +424,20 @@ class ChatEventsServiceManager:
     def __init__(self):
         self.repo = MensajesRepository()
         self.chat_repo = ChatRepository()
+        from apps.professionals.repositories import ProfessionalRepository
+        from apps.authentication.repositories import AuthRepository
+        self.professional_repo = ProfessionalRepository()
+        self.auth_repo = AuthRepository()
+
+    def can_chat(self, id_a, id_b):
+        roles = self.auth_repo.get_active_user_roles((id_a, id_b))
+        if roles.get(id_a) == "profesional" and roles.get(id_b) == "paciente":
+            professional_id, patient_id = id_a, id_b
+        elif roles.get(id_b) == "profesional" and roles.get(id_a) == "paciente":
+            professional_id, patient_id = id_b, id_a
+        else:
+            return False
+        return self.professional_repo.can_access_patient(professional_id, patient_id)
 
     def get_contactos_con_mensajes(self, id_usuario, lista_contactos, id_field="idUsuario"):
         try:
@@ -461,25 +483,7 @@ class ChatEventsServiceManager:
         ]
 
     def puede_chatear(self, id_a, id_b):
-        from apps.authentication.models import Register
-        from apps.professionals.models import PacientesProfesional, PerfilProfesional
-
-        roles = dict(
-            Register.objects.filter(idUsuario__in=(id_a, id_b), activo=True, estadoCuenta="Activa")
-            .values_list("idUsuario", "rol")
-        )
-        if roles.get(id_a) == "profesional" and roles.get(id_b) == "paciente":
-            profesional_id, paciente_id = id_a, id_b
-        elif roles.get(id_b) == "profesional" and roles.get(id_a) == "paciente":
-            profesional_id, paciente_id = id_b, id_a
-        else:
-            return False
-        return (
-            PerfilProfesional.objects.filter(idProfesional_id=profesional_id, verificado=True).exists()
-            and PacientesProfesional.objects.filter(
-                idProfesional_id=profesional_id, idPaciente_id=paciente_id
-            ).exists()
-        )
+        return self.can_chat(id_a, id_b)
 
     def enviar_mensaje(self, id_emisor, id_receptor, mensaje):
         return self.repo.enviar_mensaje(id_emisor, id_receptor, mensaje)
@@ -492,6 +496,8 @@ class ChatbotService:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.chat_repo = ChatRepository()
+        from apps.authentication.repositories import AuthRepository
+        self.auth_repo = AuthRepository()
         self.appointment_repo = AppointmentRepository()
         self.config_repo = ChatbotConfigRepository()
         self._cached_config_version = None
@@ -500,6 +506,20 @@ class ChatbotService:
         self._cached_config_ts = 0.0
         self._key_index = 0
         _chatbot_service_registry.append(self)
+
+    def create_survey(self, patient_id, **data):
+        return self.chat_repo.create_survey(patient_id, **data)
+
+    def get_chatbot_consent(self, user_id):
+        from apps.patients.services import PatientService
+        return PatientService().repo.get_chatbot_consent(user_id)
+
+    def update_chatbot_consent(self, user_id, consent):
+        from apps.patients.services import PatientService
+        return PatientService().update_chatbot_consent(user_id, consent)
+
+    def get_account_status(self, user_id):
+        return self.auth_repo.get_user_account_status_or_none(user_id)
 
     def _now_ts(self):
         return datetime.now(timezone.utc).timestamp()
@@ -1484,7 +1504,7 @@ class ChatbotService:
             self.appointment_repo.create_notification(profesional_id, "profesional", titulo, mensaje, tipo)
 
         prediagnostico.profesionalNotificado = True
-        prediagnostico.save(update_fields=["profesionalNotificado"])
+        self.chat_repo.mark_prediagnostico_professional_notified(prediagnostico)
 
         if prediagnostico.requiereAtencionUrgente:
             # Urgente: reutilizar flujo de alerta de riesgo alto (ya envía email)

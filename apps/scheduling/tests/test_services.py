@@ -173,6 +173,7 @@ class TestUpdateStatus:
             tipoCita="Presencial", motivo="Consulta",
         )
         mock_appointment_repo.get_appointment_owner.return_value = (5, 1)
+        mock_appointment_repo.get_appointment_for_update.return_value = Citas.objects.get(idCita=1)
         payload, status = appointment_service.update_status(1, "Completada", 5)
         assert status == 200
         cita = Citas.objects.get(idCita=1)
@@ -291,6 +292,7 @@ class TestConfirmarCitaMontoDefault:
         cita, prof, pac = self._crear_cita_pendiente(id_cita=201)
         mock_appointment_repo.get_appointment_owner.return_value = (5, 1)
         mock_appointment_repo.get_appointment_full.return_value = cita
+        mock_appointment_repo.get_appointment_for_update.return_value = cita
         payload, status = appointment_service.update_status(
             cita.idCita, "Confirmada", 5, extra_data={}
         )
@@ -308,6 +310,7 @@ class TestConfirmarCitaMontoDefault:
         cita, prof, pac = self._crear_cita_pendiente(id_cita=202)
         mock_appointment_repo.get_appointment_owner.return_value = (5, 1)
         mock_appointment_repo.get_appointment_full.return_value = cita
+        mock_appointment_repo.get_appointment_for_update.return_value = cita
         payload, status = appointment_service.update_status(
             cita.idCita, "Confirmada", 5,
             extra_data={"monto": 150000, "descripcion": "Consulta inicial"},

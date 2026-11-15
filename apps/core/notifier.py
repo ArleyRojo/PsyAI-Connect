@@ -39,8 +39,8 @@ class NotificationService:
         return subject, text, html
 
     def _registrar_intento(self, paciente, canal, estado, error="", provider_msg_id="", titulo="", mensaje=""):
-        from apps.scheduling.models import Notificaciones
-        Notificaciones.objects.create(
+        from apps.scheduling.repositories import AppointmentRepository
+        AppointmentRepository().create_notification_attempt(
             idUsuario=paciente,
             rol="paciente",
             titulo=titulo,

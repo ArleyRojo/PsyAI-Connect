@@ -30,10 +30,9 @@ class IsAuthenticatedDRF(BasePermission):
         user = getattr(request, "user", None)
         if user and hasattr(user, "is_authenticated") and user.is_authenticated:
             # Get the Register user from the authenticated user
-            from apps.authentication.models import Register
-            try:
-                db_user = Register.objects.get(idUsuario=user.idUsuario if hasattr(user, "idUsuario") else user.pk)
-            except (Register.DoesNotExist, AttributeError):
+            from apps.authentication.repositories import AuthRepository
+            db_user = AuthRepository().get_user_by_id_or_none(user.idUsuario if hasattr(user, "idUsuario") else user.pk)
+            if db_user is None:
                 return False
             if not db_user.activo or db_user.estadoCuenta != "Activa":
                 return False
@@ -47,11 +46,10 @@ class IsAuthenticatedDRF(BasePermission):
         if not user:
             return False
 
-        from apps.authentication.models import Register
+        from apps.authentication.repositories import AuthRepository
 
-        try:
-            db_user = Register.objects.get(idUsuario=user["idUsuario"])
-        except Register.DoesNotExist:
+        db_user = AuthRepository().get_user_by_id_or_none(user["idUsuario"])
+        if db_user is None:
             return False
 
         if not db_user.activo or db_user.estadoCuenta != "Activa":

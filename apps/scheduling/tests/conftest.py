@@ -13,4 +13,5 @@ def mock_appointment_repo():
 def appointment_service(mock_appointment_repo):
     svc = AppointmentService()
     svc.repo = mock_appointment_repo
+    mock_appointment_repo.save_appointment.side_effect = lambda appointment, fields=None: appointment.save(update_fields=fields) if fields else appointment.save()
     return svc

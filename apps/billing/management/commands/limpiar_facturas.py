@@ -2,9 +2,8 @@ import os
 from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.core.serializers import serialize
-from django.db import transaction
-from apps.billing.models import Facturas, ItemsFactura
+from apps.authentication.repositories import AuthRepository
+from apps.billing.repositories import InvoiceRepository
 
 
 class Command(BaseCommand):
@@ -41,23 +40,14 @@ class Command(BaseCommand):
         """value can be numeric id or name (partial). Returns user_id or None."""
         if not value:
             return None
-        from apps.authentication.models import Register
         try:
             return int(value)
         except ValueError:
             # buscar por nombre (icontains)
-            user = Register.objects.filter(nombre__icontains=value).first()
+            user = AuthRepository().get_user_by_name(value)
             if not user:
                 raise CommandError(f"No se encontró {field_name} con nombre/id '{value}'")
             return user.idUsuario
-
-    def _build_queryset(self, paciente_id=None, profesional_id=None):
-        qs = Facturas.objects.all()
-        if paciente_id:
-            qs = qs.filter(idPaciente_id=paciente_id)
-        if profesional_id:
-            qs = qs.filter(idProfesional_id=profesional_id)
-        return qs
 
     def handle(self, *args, **options):
         dry_run = not options["yes"]
@@ -74,11 +64,8 @@ class Command(BaseCommand):
         paciente_id = self._resolve_user_id(paciente_filter, "paciente")
         profesional_id = self._resolve_user_id(profesional_filter, "profesional")
 
-        qs = self._build_queryset(paciente_id, profesional_id)
-
-        total_facturas = qs.count()
-        total_items = ItemsFactura.objects.filter(idFactura__in=qs.values_list("idFactura", flat=True)).count()
-        evidencia_files = list(qs.exclude(evidencia="").values_list("evidencia", flat=True))
+        repo = InvoiceRepository()
+        total_facturas, total_items, evidencia_files = repo.get_cleanup_summary(paciente_id, profesional_id)
 
         self.stdout.write(self.style.NOTICE(
             f"Dry-run: {total_facturas} facturas, {total_items} ítems, {len(evidencia_files)} archivos de evidencia."
@@ -95,28 +82,18 @@ class Command(BaseCommand):
             os.makedirs(backup_dir, exist_ok=True)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             backup_path = os.path.join(backup_dir, f"billing_{timestamp}.json")
-            data = serialize("json", qs.select_related("idPaciente", "idProfesional", "confirmada_por").prefetch_related("items"))
+            data = repo.serialize_cleanup_backup(paciente_id, profesional_id)
             with open(backup_path, "w", encoding="utf-8") as f:
                 f.write(data)
             self.stdout.write(self.style.SUCCESS(f"Backup creado en {backup_path}"))
 
         # Borrado real dentro de transacción
-        deleted_facturas = 0
+        deleted_facturas, deleted_files, file_errors = repo.delete_invoices_for_cleanup(
+            paciente_id, profesional_id
+        )
         deleted_items = 0
-        deleted_files = 0
-
-        with transaction.atomic():
-            for factura in qs.select_for_update():
-                # eliminar archivo de evidencia
-                if factura.evidencia and factura.evidencia.name:
-                    try:
-                        # delete file from storage
-                        factura.evidencia.delete(save=False)
-                        deleted_files += 1
-                    except Exception as e:
-                        self.stdout.write(self.style.WARNING(f"No se pudo borrar evidencia de factura {factura.idFactura}: {e}"))
-                factura.delete()
-                deleted_facturas += 1
+        for factura_id, error in file_errors:
+            self.stdout.write(self.style.WARNING(f"No se pudo borrar evidencia de factura {factura_id}: {error}"))
 
         self.stdout.write(self.style.SUCCESS(
             f"Borrado completado: {deleted_facturas} facturas, {deleted_items} ítems (cascada), {deleted_files} archivos de evidencia."

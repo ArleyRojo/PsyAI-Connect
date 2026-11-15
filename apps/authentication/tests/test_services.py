@@ -373,7 +373,7 @@ class TestResetPasswordEmail:
         class FakeRequest:
             META = {}
 
-        mock_auth_repo.get_user_by_id.return_value = FakeUser()
+        mock_auth_repo.get_user_contact_for_password_notice.return_value = FakeUser()
         with patch(
             "apps.authentication.services.MailService.send_password_changed_email"
         ) as mock_mail:
@@ -404,16 +404,11 @@ class TestResetPasswordEmail:
         class FakeRequest:
             META = {}
 
+        mock_auth_repo.get_user_contact_for_password_notice.return_value = FakeUser()
         with patch(
             "apps.authentication.services.MailService.send_password_changed_email",
             side_effect=Exception("SMTP down"),
-        ), patch(
-            "apps.authentication.models.Register.objects.filter"
-        ) as mock_filter:
-            mock_qs = MagicMock()
-            mock_qs.first.return_value = FakeUser()
-            mock_filter.return_value = mock_qs
-
+        ):
             payload, status = auth_service.reset_password(
                 {
                     "token": "valid_token",

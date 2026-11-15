@@ -382,6 +382,7 @@ class TestGetConfig:
         assert status == 200
         assert payload["success"] is True
         assert payload["config"]["risk_terms"] == "[]"
+        assert "106" in payload["config"]["crisis_response"]
 
     def test_returns_existing_config(self, config_service, mock_config_repo):
         mock_config_repo.get_config.return_value = {
@@ -393,6 +394,18 @@ class TestGetConfig:
 
         assert status == 200
         assert payload["config"]["system_prompt"] == "test"
+
+    def test_returns_default_crisis_response_when_existing_config_is_empty(self, config_service, mock_config_repo):
+        mock_config_repo.get_config.return_value = {
+            "system_prompt": "test",
+            "crisis_response": "",
+            "crisis_phone": "123",
+        }
+
+        payload, status = config_service.get_config()
+
+        assert status == 200
+        assert "123" in payload["config"]["crisis_response"]
 
 
 # ── ChatbotConfigService.save_config validation ───────────────────────────

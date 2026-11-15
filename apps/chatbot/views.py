@@ -57,11 +57,9 @@ class ChatbotEncuestaViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        from apps.chatbot.models import EncuestaChatbot
-
         try:
-            encuesta = EncuestaChatbot.objects.create(
-                idPaciente_id=request.user_id,
+            encuesta = chatbot_service.create_survey(
+                request.user_id,
                 utilidad=bool(data.get("utilidad")),
                 claridad=bool(data.get("claridad")),
                 recomendaria=data.get("recomendaria", "si"),
@@ -131,11 +129,9 @@ class ConsentimientoChatbotViewSet(viewsets.ViewSet):
 
     def list(self, request):
         try:
-            from apps.patients.models import PerfilPaciente
-            paciente = PerfilPaciente.objects.get(idPaciente_id=request.user_id)
             return Response({
                 "success": True,
-                "consentimiento_chatbot": getattr(paciente, "consentimiento_chatbot", False),
+                "consentimiento_chatbot": chatbot_service.get_chatbot_consent(request.user_id),
             }, status=status.HTTP_200_OK)
         except Exception:
             return Response({
@@ -148,10 +144,7 @@ class ConsentimientoChatbotViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         consent = bool(serializer.validated_data.get("consentimiento_chatbot"))
         try:
-            from apps.patients.models import PerfilPaciente
-            PerfilPaciente.objects.filter(idPaciente_id=request.user_id).update(
-                consentimiento_chatbot=consent
-            )
+            chatbot_service.update_chatbot_consent(request.user_id, consent)
             return Response({"success": True, "consentimiento_chatbot": consent}, status=status.HTTP_200_OK)
         except Exception:
             return Response({"success": False, "message": "Error al actualizar consentimiento"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

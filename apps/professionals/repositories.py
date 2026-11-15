@@ -7,11 +7,99 @@ from django.utils import timezone
 from apps.authentication.models import Register
 from apps.professionals.models import (
     ConsejoPaciente, PerfilProfesional, PacientesProfesional, Reportes, Diagnostico,
+    ProfessionalPaymentInfo, ReasignacionCaso,
 )
 from apps.patients.models import Anamnesis, EvolucionPaciente, PerfilPaciente
 
 
 class ProfessionalRepository:
+    def bulk_set_verification(self, queryset, *, verified, verified_by=None, verified_at=None):
+        return queryset.update(
+            verificado=verified,
+            fechaVerificacion=verified_at if verified else None,
+            verificadoPor=verified_by if verified else None,
+        )
+    def list_patient_assignments(self):
+        return list(PacientesProfesional.objects.filter(
+            idPaciente__isnull=False
+        ).select_related("idProfesional").order_by("fecha"))
+
+    def get_assignment_history_rows(self, limit=200):
+        return list(ReasignacionCaso.objects.select_related(
+            "idPaciente", "idProfesionalAnterior", "idProfesionalNuevo"
+        )[:limit])
+
+    def assignment_exists_for_users(self, patient, professional):
+        return PacientesProfesional.objects.filter(idPaciente=patient, idProfesional=professional).exists()
+
+    def create_case_assignment(self, patient, professional):
+        return PacientesProfesional.objects.create(idPaciente=patient, idProfesional=professional)
+
+    def create_case_history(self, **data):
+        return ReasignacionCaso.objects.create(**data)
+
+    def get_case_assignment(self, patient, professional_id):
+        return PacientesProfesional.objects.filter(
+            idPaciente=patient, idProfesional_id=professional_id
+        ).select_related("idProfesional").first()
+
+    def get_destination_assignment(self, patient, professional):
+        return PacientesProfesional.objects.filter(idPaciente=patient, idProfesional=professional).first()
+
+    def transfer_assignment_records(self, source, destination):
+        Diagnostico.objects.filter(idAsignacion=source).update(idAsignacion=destination)
+        ConsejoPaciente.objects.filter(idAsignacion=source).update(idAsignacion=destination)
+
+    def change_assignment_professional(self, assignment, professional):
+        assignment.idProfesional = professional
+        assignment.save(update_fields=["idProfesional"])
+
+    def delete_assignment(self, assignment):
+        return assignment.delete()
+
+    def transfer_professional_reports(self, patient_id, previous_id, new_id):
+        return Reportes.objects.filter(
+            idPaciente_id=patient_id, idProfesional_id=previous_id
+        ).update(idProfesional_id=new_id)
+    def get_professional_profile_model(self, professional_id):
+        return PerfilProfesional.objects.filter(idProfesional_id=professional_id).first()
+
+    def save_professional_verification(self, profile, fields):
+        profile.save(update_fields=fields)
+        return profile
+
+    def get_payment_info_or_unsaved(self, professional_id):
+        try:
+            return ProfessionalPaymentInfo.objects.get(idProfesional_id=professional_id)
+        except ProfessionalPaymentInfo.DoesNotExist:
+            return ProfessionalPaymentInfo(idProfesional_id=professional_id)
+
+    def get_or_create_payment_info(self, professional_id):
+        return ProfessionalPaymentInfo.objects.get_or_create(idProfesional_id=professional_id)
+
+    def save_payment_info(self, info):
+        info.save()
+        return info
+
+    def can_access_patient(self, professional_id, patient_id):
+        return (
+            PerfilProfesional.objects.filter(idProfesional_id=professional_id, verificado=True).exists()
+            and self.has_patient_assignment(professional_id, patient_id)
+        )
+
+    def is_verified_active(self, professional_id):
+        return PerfilProfesional.objects.filter(
+            idProfesional_id=professional_id,
+            verificado=True,
+            idProfesional__activo=True,
+            idProfesional__estadoCuenta="Activa",
+        ).exists()
+
+    def has_patient_assignment(self, professional_id, patient_id):
+        return PacientesProfesional.objects.filter(
+            idProfesional_id=professional_id, idPaciente_id=patient_id
+        ).exists()
+
     def assign_patient(self, professional_id, patient_id):
         if not Register.objects.filter(idUsuario=patient_id, rol="paciente").exists():
             return False, False  # paciente no existe

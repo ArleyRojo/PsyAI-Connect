@@ -14,6 +14,33 @@ class ProfessionalService:
     def __init__(self):
         self.repo = ProfessionalRepository()
         self.chat_repo = ChatRepository() if ChatRepository else None
+        from apps.authentication.repositories import AuthRepository
+        self.auth_repo = AuthRepository()
+
+    def get_payment_info(self, professional_id):
+        return self.repo.get_payment_info_or_unsaved(professional_id)
+
+    def update_payment_info(self, professional_id, data):
+        info, _ = self.repo.get_or_create_payment_info(professional_id)
+        for field in ("qr_image", "mensaje_texto"):
+            if field in data:
+                setattr(info, field, data[field])
+        return self.repo.save_payment_info(info)
+
+    def list_pending_professionals(self):
+        rows = self.auth_repo.list_pending_professionals()
+        return [
+            {
+                "idUsuario": row.idUsuario,
+                "nombre": row.nombre,
+                "email": row.email,
+                "fechaRegistro": row.fechaRegistro,
+                "especialidad": row.perfil_profesional.especialidad if row.perfil_profesional else None,
+                "tarjetaProfesional": row.perfil_profesional.tarjetaProfesional if row.perfil_profesional else None,
+                "numeroRethus": row.perfil_profesional.numeroRethus if row.perfil_profesional else None,
+            }
+            for row in rows
+        ]
 
     def _check_verificacion(self, professional_id):
         """Verifica si el profesional está verificado."""
@@ -68,13 +95,12 @@ class ProfessionalService:
             return {"success": False, "message": "Paciente no encontrado"}, 404
 
         try:
-            from apps.scheduling.models import Notificaciones
             from apps.scheduling.repositories import AppointmentRepository
-            from apps.authentication.models import Register
 
             appointment_repo = AppointmentRepository()
-            paciente = Register.objects.filter(idUsuario=patient_id).first()
-            profesional = Register.objects.filter(idUsuario=professional_id).first()
+            users = self.auth_repo.get_users_by_ids([patient_id, professional_id])
+            paciente = users.get(patient_id)
+            profesional = users.get(professional_id)
             nombre_paciente = paciente.nombre if paciente else f"Paciente #{patient_id}"
             nombre_profesional = profesional.nombre if profesional else "Tu profesional"
 
@@ -93,13 +119,9 @@ class ProfessionalService:
                     f"{nombre_profesional} fue asignado a tu atención. "
                     "Puedes escribirle desde Mensajes."
                 )
-                ya_notificado = Notificaciones.objects.filter(
-                    idUsuario_id=patient_id,
-                    rol="paciente",
-                    tipo="Asignacion",
-                    titulo=titulo_paciente,
-                    mensaje=mensaje_paciente,
-                ).exists()
+                ya_notificado = appointment_repo.notification_exists(
+                    patient_id, "paciente", "Asignacion", titulo_paciente, mensaje_paciente
+                )
                 if created or not ya_notificado:
                     appointment_repo.create_notification(
                         patient_id,
@@ -231,8 +253,7 @@ class ProfessionalService:
     def verificar_profesional(self, admin_user_id, professional_id):
         """Verifica un profesional (solo admin)."""
         from django.utils import timezone
-        from apps.professionals.models import PerfilProfesional
-        perfil = PerfilProfesional.objects.filter(idProfesional_id=professional_id).first()
+        perfil = self.repo.get_professional_profile_model(professional_id)
         if not perfil:
             return {"success": False, "message": "Profesional no encontrado"}, 404
         if perfil.verificado:
@@ -240,13 +261,12 @@ class ProfessionalService:
         perfil.verificado = True
         perfil.fechaVerificacion = timezone.now()
         perfil.verificadoPor_id = admin_user_id
-        perfil.save(update_fields=["verificado", "fechaVerificacion", "verificadoPor"])
+        self.repo.save_professional_verification(perfil, ["verificado", "fechaVerificacion", "verificadoPor"])
         return {"success": True, "message": "Profesional verificado correctamente"}, 200
 
     def desverificar_profesional(self, admin_user_id, professional_id):
         """Desverifica un profesional (solo admin)."""
-        from apps.professionals.models import PerfilProfesional
-        perfil = PerfilProfesional.objects.filter(idProfesional_id=professional_id).first()
+        perfil = self.repo.get_professional_profile_model(professional_id)
         if not perfil:
             return {"success": False, "message": "Profesional no encontrado"}, 404
         if not perfil.verificado:
@@ -254,7 +274,7 @@ class ProfessionalService:
         perfil.verificado = False
         perfil.fechaVerificacion = None
         perfil.verificadoPor = None
-        perfil.save(update_fields=["verificado", "fechaVerificacion", "verificadoPor"])
+        self.repo.save_professional_verification(perfil, ["verificado", "fechaVerificacion", "verificadoPor"])
         return {"success": True, "message": "Profesional desverificado correctamente"}, 200
 
     # ── Consejos al paciente (HU-54 / HU-68) ──────────────────────────────

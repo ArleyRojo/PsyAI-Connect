@@ -10,7 +10,6 @@ from apps.core.permissions import (
     IsProfesional,
 )
 from apps.scheduling.services import AppointmentService
-from apps.scheduling.models import Citas, Notificaciones
 
 logger = logging.getLogger(__name__)
 
@@ -80,9 +79,8 @@ class CitaDetailViewSet(viewsets.ViewSet):
 
         # El paciente confirma únicamente las citas creadas por el profesional.
         if user_role == "paciente":
-            try:
-                cita = Citas.objects.get(idCita=pk)
-            except Citas.DoesNotExist:
+            cita = appointment_service.repo.get_appointment_by_id_or_none(pk)
+            if cita is None:
                 return Response(
                     {"success": False, "message": "Cita no encontrada"},
                     status=status.HTTP_404_NOT_FOUND,
@@ -178,37 +176,13 @@ class PatientNotificationsResource(APIView):
 
     def get(self, request):
         user_id = getattr(request, "user_id", None)
-        notifications = Notificaciones.objects.filter(
-            idUsuario_id=user_id,
-            rol="paciente",
-            canal="interno",
-        ).order_by("-fecha", "-idNotificacion")
-        recent = notifications[:30]
-        return Response({
-            "success": True,
-            "no_leidas": notifications.filter(leido=False).count(),
-            "notificaciones": [
-                {
-                    "idNotificacion": item.idNotificacion,
-                    "titulo": item.titulo or "Notificación",
-                    "mensaje": item.mensaje or "",
-                    "fecha": item.fecha.isoformat() if item.fecha else None,
-                    "leido": bool(item.leido),
-                }
-                for item in recent
-            ],
-        }, status=status.HTTP_200_OK)
+        notifications = appointment_service.get_patient_notifications(user_id)
+        return Response({"success": True, **notifications}, status=status.HTTP_200_OK)
 
     def post(self, request):
         user_id = getattr(request, "user_id", None)
-        updated = Notificaciones.objects.filter(
-            idUsuario_id=user_id,
-            rol="paciente",
-            canal="interno",
-            leido=False,
-        ).update(leido=True)
+        updated = appointment_service.mark_patient_notifications_read(user_id)
         return Response({"success": True, "actualizadas": updated}, status=status.HTTP_200_OK)
-
 
 class CalificacionCitaResource(APIView):
     """PUT /api/citas/<id>/calificacion — el paciente califica una cita completada (HU-67)."""
