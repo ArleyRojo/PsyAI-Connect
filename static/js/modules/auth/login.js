@@ -2,6 +2,8 @@
 // js/login.js
 // ============================================================
 
+localStorage.removeItem('savedPassword');
+
 document.addEventListener('DOMContentLoaded', function () {
     const roleBtns = document.querySelectorAll('.role-btn');
     const form = document.querySelector('form');
@@ -81,14 +83,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const savedEmail = localStorage.getItem('savedEmail');
-    const savedPassword = localStorage.getItem('savedPassword');
     const recordarLogin = document.getElementById('recordar-login');
     if (savedEmail) {
         emailInput.value = savedEmail;
         if (recordarLogin) recordarLogin.checked = true;
-    }
-    if (savedPassword) {
-        passwordInput.value = savedPassword;
     }
 
     function redirigir(rol) {
@@ -155,10 +153,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 loginExitoso = true;
                 if (recordarLogin && recordarLogin.checked) {
                     localStorage.setItem('savedEmail', email);
-                    localStorage.setItem('savedPassword', password);
                 } else {
                     localStorage.removeItem('savedEmail');
-                    localStorage.removeItem('savedPassword');
                 }
                 localStorage.setItem('usuario', JSON.stringify(data.usuario));
                 localStorage.removeItem('sessionUser');

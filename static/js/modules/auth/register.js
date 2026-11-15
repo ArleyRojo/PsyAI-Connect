@@ -278,7 +278,6 @@ async function submitRegister() {
             const recordar = document.getElementById('recordar-cuenta') && document.getElementById('recordar-cuenta').checked;
             if (recordar) {
                 localStorage.setItem('savedEmail', email);
-                localStorage.setItem('savedPassword', password);
             }
             mostrarToast('¡Bienvenido/a a PsyAI Connect! Redirigiendo al inicio de sesión...', 'success');
             setTimeout(() => { window.location.href = 'login.html'; }, 1500);
