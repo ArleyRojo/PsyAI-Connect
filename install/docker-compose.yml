@@ -35,7 +35,7 @@ services:
       # Hot-reload: mount the code so changes reflect immediately
       - ..:/app
       # Persist uploaded documents between container restarts
-      - uploads_data:/app/static/uploads
+      - uploads_data:/app/media
       # Copias de seguridad cifradas (HU-30), compartidas con el scheduler
       - backups_data:/app/backups
     depends_on:
@@ -80,6 +80,7 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - ..:/app
+      - uploads_data:/app/media
       - backups_data:/app/backups
     depends_on:
       app:

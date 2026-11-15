@@ -36,7 +36,7 @@ services:
     # No volume mount — code is baked into the image
     # Only mount uploads for persistence
     volumes:
-      - uploads_data:/app/static/uploads
+      - uploads_data:/app/media
       - backups_data:/app/backups
     depends_on:
       db:
@@ -73,6 +73,8 @@ services:
       - DB_USER=${DB_USER:-psyai}
       - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
       - PYTHONUNBUFFERED=1
+    volumes:
+      - uploads_data:/app/media
     depends_on:
       app:
         condition: service_healthy

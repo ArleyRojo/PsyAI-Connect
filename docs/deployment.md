@@ -224,7 +224,7 @@ services:
       # Hot-reload: el código del host se refleja al instante en el contenedor
       - ..:/app
       # Persistencia de documentos subidos entre reinicios
-      - uploads_data:/app/static/uploads
+      - uploads_data:/app/media
     depends_on:
       db:
         condition: service_healthy
@@ -326,7 +326,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-psyai_pass}
     # Código embebido en la imagen: no se monta volumen de código
     volumes:
-      - uploads_data:/app/static/uploads
+      - uploads_data:/app/media
     depends_on:
       db:
         condition: service_healthy
@@ -378,6 +378,17 @@ docker compose -f install/docker-compose.yml -f install/docker-compose.prod.yml 
 | `SECRET_KEY` | Obligatoria, pasada como `ARG` en el build |
 | Archivos estáticos | `collectstatic` ejecutado durante el build de la imagen |
 | Archivos subidos | Persisten en el volumen `uploads_data` |
+
+### Migrar archivos existentes
+
+Antes de actualizar el montaje, conserva los archivos del volumen actual:
+
+```bash
+# 1. Con el stack ACTUAL aún levantado, copia lo que ya hay:
+docker compose exec app sh -c "mkdir -p /app/media && cp -a /app/static/uploads/. /app/media/uploads/ 2>/dev/null; ls /app/media"
+# (o respalda el volumen con docker run --rm -v <volumen>:/v -v $PWD:/b alpine tar czf /b/uploads.tgz -C /v .)
+# 2. Despliega con el nuevo montaje y restaura los archivos en /app/media.
+```
 
 > **Reverse proxy (recomendado):** el archivo `docker-compose.prod.yml` no incluye nginx por defecto. En producción expón la app detrás de un reverse proxy (nginx, Traefik, AWS ALB, Cloudflare Tunnel, etc.) que termine TLS, adelante `X-Forwarded-Proto` y `X-Forwarded-For`, y redirija tráfico al puerto `8000` del contenedor `app`.
 
