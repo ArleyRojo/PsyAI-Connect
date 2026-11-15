@@ -50,7 +50,7 @@ class MailService:
             msg = EmailMultiAlternatives(
                 subject=subject,
                 body="Recupera tu contraseña en PsyAI Connect: " + recovery_link,
-                from_email=dj_settings.DEFAULT_FROM_EMAIL,
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[recipient_email],
             )
             msg.attach_alternative(body_html, "text/html")
@@ -71,14 +71,14 @@ class MailService:
             "nombre": nombre,
             "fecha_hora": fecha_str,
             "ip": ip_str,
-            "site_url": getattr(dj_settings, "SITE_URL", "http://localhost:8000"),
+            "site_url": getattr(settings, "SITE_URL", "http://localhost:8000"),
         })
 
         try:
             msg = EmailMultiAlternatives(
                 subject=subject,
                 body=f"Hola {nombre}, tu contraseña en PsyAI Connect fue cambiada el {fecha_str}. IP: {ip_str}",
-                from_email=dj_settings.DEFAULT_FROM_EMAIL,
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[recipient_email],
             )
             msg.attach_alternative(body_html, "text/html")
