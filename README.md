@@ -236,6 +236,11 @@ Las pruebas usan PostgreSQL. Los tests marcados como `integration` requieren que
 
 La documentación técnica está en [`docs/`](docs/README.md), organizada por tema:
 
+> ### 🗂️ Wiki del proyecto
+> Consulta la documentación colaborativa y los recursos del equipo en Taiga.
+>
+> **[Explorar la wiki en Taiga →](https://tree.taiga.io/project/arleyrojo-psyai-connect/wiki/home)**
+
 | Tema | Guía |
 |---|---|
 | Índice | [docs/README.md](docs/README.md) |
