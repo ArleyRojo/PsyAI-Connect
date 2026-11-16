@@ -2242,3 +2242,89 @@ body.admin-panel .main-header .user-info i {
 body.admin-panel {
   animation: none;
 }
+
+
+/* Motivo de reactivacion en el modal de usuarios */
+.modal-user-state-dialog {
+    max-width: 440px;
+}
+
+#modalBloqueo .motivo-bloqueo-panel {
+    margin: 0 1.5rem 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--surface-canvas);
+    text-align: left;
+}
+
+#modalBloqueo .motivo-bloqueo-label {
+    margin-bottom: .45rem;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+#modalBloqueo .motivo-bloqueo-label span {
+    color: #D64545;
+}
+
+#modalBloqueo .motivo-bloqueo-textarea {
+    min-height: 96px;
+    resize: vertical;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: var(--surface-card);
+    color: var(--text-primary);
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+#modalBloqueo .motivo-bloqueo-textarea:focus {
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 3px rgba(47, 111, 228, .16);
+}
+
+#modalBloqueo .motivo-bloqueo-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+#modalBloqueo .motivo-bloqueo-hint {
+    margin-top: .45rem;
+    color: var(--text-muted);
+    font-size: .78rem;
+    line-height: 1.4;
+}
+
+html.dark-mode #modalBloqueo .motivo-bloqueo-panel {
+    border-color: var(--dm-border);
+    background: var(--dm-elevated);
+}
+
+html.dark-mode #modalBloqueo .motivo-bloqueo-label {
+    color: var(--dm-text1);
+}
+
+html.dark-mode #modalBloqueo .motivo-bloqueo-label span {
+    color: #FF8A8A;
+}
+
+html.dark-mode #modalBloqueo .motivo-bloqueo-textarea {
+    border-color: var(--dm-border);
+    background: var(--dm-card);
+    color: var(--dm-text1);
+}
+
+html.dark-mode #modalBloqueo .motivo-bloqueo-textarea:focus {
+    border-color: var(--dm-accent);
+    box-shadow: 0 0 0 3px rgba(144, 202, 249, .2);
+}
+
+html.dark-mode #modalBloqueo .motivo-bloqueo-hint {
+    color: var(--dm-muted);
+}
+
+@media (max-width: 575.98px) {
+    #modalBloqueo .motivo-bloqueo-panel {
+        margin-right: 1rem;
+        margin-left: 1rem;
+    }
+}

@@ -342,36 +342,61 @@ async function confirmarEliminar() {
 
 function abrirBloqueo(id, nombre, accion) {
     usuarioSeleccionado = { idUsuario: id, accion };
-    const textoAccion = accion === 'suspender' ? 'suspender' : 'reestablecer';
+    const textoAccion = accion === 'suspender'
+        ? 'suspender'
+        : (accion === 'activar' ? 'activar' : 'restablecer');
+    const requiereMotivo = ['desbloquear', 'reestablecer', 'activar'].includes(accion);
+    const motivoGroup = document.getElementById('motivoBloqueoGroup');
+    const motivoField = document.getElementById('motivoBloqueo');
+    const botonConfirmar = document.getElementById('btnConfirmarBloqueo');
+    const modalElement = document.getElementById('modalBloqueo');
+
     document.getElementById('bloqueoAccion').textContent = textoAccion;
     document.getElementById('bloqueoNombre').textContent = nombre;
-    new bootstrap.Modal(document.getElementById('modalBloqueo')).show();
+    motivoGroup?.classList.toggle('d-none', !requiereMotivo);
+    if (motivoField) {
+        motivoField.value = '';
+        motivoField.classList.remove('is-invalid');
+        motivoField.removeAttribute('aria-invalid');
+    }
+    if (botonConfirmar) {
+        botonConfirmar.classList.toggle('btn-danger', accion === 'suspender');
+        botonConfirmar.classList.toggle('btn-success', accion !== 'suspender');
+    }
+    modalElement?.addEventListener('shown.bs.modal', () => {
+        if (requiereMotivo) motivoField?.focus();
+    }, { once: true });
+    bootstrap.Modal.getOrCreateInstance(modalElement).show();
 }
 
 async function confirmarBloqueo() {
-    // RF-17: exigir motivo para desbloquear/reestablecer/activar
+    // RF-17: exigir motivo para desbloquear/reestablecer/activar.
     const accion = usuarioSeleccionado.accion;
-    const necesitaMotivo = ["desbloquear", "reestablecer", "activar"].includes(accion);
+    const necesitaMotivo = ['desbloquear', 'reestablecer', 'activar'].includes(accion);
+    const motivoField = document.getElementById('motivoBloqueo');
     let motivo = null;
+
     if (necesitaMotivo) {
-        motivo = prompt(`Indica el motivo para ${accion}:`);
-        if (!motivo || !motivo.trim()) {
-            PsyAIAlerts.error('Motivo requerido', 'Debes indicar un motivo para esta acción.');
+        motivo = motivoField?.value.trim() || '';
+        if (!motivo) {
+            motivoField?.classList.add('is-invalid');
+            motivoField?.setAttribute('aria-invalid', 'true');
+            motivoField?.focus();
             return;
         }
-        motivo = motivo.trim();
+        motivoField?.classList.remove('is-invalid');
+        motivoField?.removeAttribute('aria-invalid');
     }
 
-    const res = await fetch(`${API}/api/admin/usuarios/${usuarioSeleccionado.idUsuario}`, {
+    const res = await fetch(API + '/api/admin/usuarios/' + usuarioSeleccionado.idUsuario, {
         method: 'PATCH', headers: {'Content-Type': 'application/json'},
         credentials: 'include',
-        body: JSON.stringify({ accion: usuarioSeleccionado.accion, ...(motivo ? { motivo } : {}) })
+        body: JSON.stringify({ accion, ...(motivo ? { motivo } : {}) })
     });
     const data = await res.json();
     if (data.success) {
         bootstrap.Modal.getInstance(document.getElementById('modalBloqueo'))?.hide();
-        const msg = usuarioSeleccionado.accion === 'suspender' ? 'Usuario suspendido' : 'Cuenta reestablecida';
-        PsyAIAlerts.success('Actualizado', msg);
+        PsyAIAlerts.success('Actualizado', accion === 'suspender' ? 'Usuario suspendido' : 'Cuenta restablecida');
         cargarUsuarios();
     } else {
         PsyAIAlerts.error('Error', data.message);

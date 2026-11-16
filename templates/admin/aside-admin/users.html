@@ -3,7 +3,7 @@
 <head>
     <title>PsyAI Connect | Gesti&oacute;n de Usuarios</title>
     {% include 'base/partials/head.html' %}
-    <link rel="stylesheet" href="/css/pages/admin.css?v=20261030-sidebar-fix-1">
+    <link rel="stylesheet" href="/css/pages/admin.css?v=20261116-modal-motivo">
     <link rel="stylesheet" href="/responsive/responsive-admin.css?v=20261104-sidebar-opt">
 </head>
 <body class="admin-panel">
@@ -411,19 +411,28 @@
 </div>
 
 <!-- MODAL: Bloqueo -->
-<div class="modal fade" id="modalBloqueo" tabindex="-1">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
+<div class="modal fade" id="modalBloqueo" tabindex="-1" aria-labelledby="tituloModalBloqueo" aria-describedby="bloqueoDescripcion">
+  <div class="modal-dialog modal-dialog-centered modal-user-state-dialog">
     <div class="modal-content">
       <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold">Confirmar acción</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title fw-bold" id="tituloModalBloqueo">Confirmar acci&oacute;n</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body text-center py-3">
-        ¿Deseas <strong id="bloqueoAccion"></strong> a <strong id="bloqueoNombre"></strong>?
+      <div class="modal-body py-3">
+        <p id="bloqueoDescripcion" class="text-center mb-0">
+          &iquest;Deseas <strong id="bloqueoAccion"></strong> a <strong id="bloqueoNombre"></strong>?
+        </p>
+      </div>
+      <div id="motivoBloqueoGroup" class="motivo-bloqueo-panel d-none">
+        <label for="motivoBloqueo" class="form-label motivo-bloqueo-label">Motivo <span aria-hidden="true">*</span></label>
+        <textarea id="motivoBloqueo" class="form-control motivo-bloqueo-textarea" rows="3" maxlength="500"
+                  placeholder="Escribe el motivo de esta acci&oacute;n..." aria-describedby="motivoBloqueoError motivoBloqueoHint"></textarea>
+        <div id="motivoBloqueoError" class="invalid-feedback">Indica el motivo para continuar.</div>
+        <div id="motivoBloqueoHint" class="motivo-bloqueo-hint">Este motivo es obligatorio para reestablecer o activar la cuenta.</div>
       </div>
       <div class="modal-footer border-0 justify-content-center gap-2">
-        <button class="btn btn-light btn-sm px-4" data-bs-dismiss="modal">Cancelar</button>
-        <button id="btnConfirmarBloqueo" class="btn btn-danger btn-sm px-4">Confirmar</button>
+        <button type="button" class="btn btn-light btn-sm px-4" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnConfirmarBloqueo" class="btn btn-danger btn-sm px-4">Confirmar</button>
       </div>
     </div>
   </div>
@@ -456,7 +465,7 @@
 <link rel="stylesheet" href="/css/components/custom-alerts.css?v=20260711-1">
 <script src="/js/core/shared/alerts.js?v=20261023-1"></script>
 <script src="/js/core/shared/aside.js?v=20261104-aside-unified"></script>
-<script src="/js/modules/admin/admin.users.js?v=20261104-rf17-motivo"></script>
+<script src="/js/modules/admin/admin.users.js?v=20261116-modal-motivo"></script>
 <script src="/js/modules/auth/logout.js?v=20261023-1"></script>
 </body>
 </html>
