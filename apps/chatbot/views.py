@@ -95,6 +95,10 @@ class ChatbotConfigViewSet(viewsets.ViewSet):
 
 class ChatbotConfigEventsResource(View):
     def get(self, request):
+        if not request.session.get("idUsuario") or request.session.get("rol") != "paciente":
+            from django.http import JsonResponse
+            return JsonResponse({"success": False, "message": "No autorizado"}, status=401)
+
         import json
         from queue import Empty
 

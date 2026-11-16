@@ -3836,6 +3836,17 @@ body {
     display: block;
 }
 
+.prof-avatar-initials {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+    color: #fff;
+    font-size: 3rem;
+    font-weight: 700;
+}
+
 .prof-avatar-badge {
     position: absolute;
     bottom: 6px;

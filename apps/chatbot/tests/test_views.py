@@ -185,3 +185,23 @@ class TestChatHistorialDeleteViewSet:
         resp = view(req)
         assert resp.status_code == 200
         mock_svc.eliminar_historial_chatbot.assert_called_once_with(1)
+
+
+class TestChatbotConfigEventsResource:
+    def test_get_without_session_returns_401(self, client):
+        response = client.get("/api/chatbot/config/events")
+
+        assert response.status_code == 401
+        response.close()
+
+    def test_get_with_patient_session_returns_sse(self, client, db_user):
+        session = client.session
+        session["idUsuario"] = db_user.idUsuario
+        session["rol"] = "paciente"
+        session.save()
+
+        response = client.get("/api/chatbot/config/events")
+
+        assert response.status_code == 200
+        assert response["Content-Type"].startswith("text/event-stream")
+        response.close()

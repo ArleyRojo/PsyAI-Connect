@@ -235,6 +235,10 @@ class ChatbotConfigEventsResource(View):
     permission_classes = [IsAuthenticatedDRF, IsPaciente]
 
     def get(self, request):
+        if not request.session.get("idUsuario") or request.session.get("rol") != "paciente":
+            from django.http import JsonResponse
+            return JsonResponse({"success": False, "message": "No autorizado"}, status=401)
+
         from django.http import StreamingHttpResponse
         from queue import Empty
 
