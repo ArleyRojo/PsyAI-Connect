@@ -11,7 +11,7 @@ Plataforma web de bienestar emocional que combina un chatbot con IA y la conexi�
 | Frontend | Plantillas Django, Bootstrap 5, JavaScript modular (`static/js/{base,components,core,modules}`), CSS por rol |
 | IA | Google Gemini (respuestas del chatbot y prediagnóstico), con modelo de respaldo configurable |
 | Mensajería | SMTP (correos), WhatsApp vía Twilio (con proveedor `Dummy` para desarrollo) |
-| Servidor | Waitress en producción (`--threads=4` en `install/Dockerfile`), Docker multi-stage |
+| Servidor | Waitress en producción (`--threads=32` en `install/Dockerfile`), Docker multi-stage |
 | Pruebas | pytest + pytest-django (`config.settings.test`) |
 
 ## 2. Vista general

@@ -108,7 +108,7 @@ COPY install/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["waitress-serve", "--host=0.0.0.0", "--port=8000", "--threads=4", "config.wsgi:application"]
+CMD ["waitress-serve", "--host=0.0.0.0", "--port=8000", "--threads=32", "config.wsgi:application"]
 ```
 
 ### Qué hace cada etapa
