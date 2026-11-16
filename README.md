@@ -256,18 +256,18 @@ La documentación técnica está en [`docs/`](docs/README.md), organizada por te
 | Testing | [docs/testing.md](docs/testing.md) |
 
 <details>
-  <summary>Documentos del proyecto (casos de uso, mockups, UML y más)</summary>
+  <summary>Documentos del release v1.0-docs (casos de uso, mockups, UML y más)</summary>
 
 | Documento | Enlace |
 |---|---|
-| Casos de uso | [PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FCasos_de_Uso_PsyAI_Connect_1.pdf&embedded=true) |
-| Historias de usuario | [PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FHistorias_de_Usuario_PsyAI_Connect.pdf&embedded=true) |
-| Manual de usuario | [PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FManual_Usuario_PsyAI_Connect_1.1.pdf&embedded=true) |
-| Matriz de requisitos | [XLSX](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FMatriz_de_requisitos_PsyAi_Connect_actualizada_v2.xlsx&embedded=true) |
-| Mockups | [PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2Fmockups.1.pdf&embedded=true) |
-| Diagramas UML | [PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FPsyAI_Connect_Diagramas_UML.pdf&embedded=true) |
-| Guía de marca | [PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FPsyAI-Connect-Guia-de-marca.pdf&embedded=true) |
-| Mapa de navegación | [PDF](https://docs.google.com/viewer?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Flatest%2Fdownload%2FPsyAI-Connect-Mapa-de-navegacion-oscuro.1.pdf&embedded=true) |
+| Casos de uso | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Casos_de_Uso_PsyAI_Connect_1.pdf) |
+| Historias de usuario | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Historias_de_Usuario_PsyAI_Connect.pdf) |
+| Manual de usuario | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Manual_Usuario_PsyAI_Connect_1.1.pdf) |
+| Matriz de requisitos | [XLSX](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Matriz_de_requisitos_PsyAi_Connect_actualizada_v2.xlsx) |
+| Mockups | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/mockups.1.pdf) |
+| Diagramas UML | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/PsyAI_Connect_Diagramas_UML.pdf) |
+| Guía de marca | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/PsyAI-Connect-Guia-de-marca.pdf) |
+| Mapa de navegación | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/PsyAI-Connect-Mapa-de-navegacion-oscuro.1.pdf) |
 
 </details>
 
