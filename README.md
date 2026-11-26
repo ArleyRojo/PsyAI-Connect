@@ -258,18 +258,20 @@ La documentación técnica está en [`docs/`](docs/README.md), organizada por te
 <details>
   <summary>Documentos del release v1.0-docs (casos de uso, mockups, UML y más)</summary>
 
-| Documento | Enlace |
-|---|---|
-| Casos de uso | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FCasos_de_Uso_PsyAI_Connect_actualizado_2026-11.pdf) |
-| Historias de usuario | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FHistorias_de_Usuario_PsyAI_Connect_actualizadas_2026-11.pdf) |
-| Manual de usuario | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FManual_Usuario_PsyAI_Connect_actualizado_2026-11.pdf) |
-| Matriz de requisitos v3.1.1 | [Previsualizar en Excel Online](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FMatriz_de_requisitos_PsyAi_Connect_v3.1.1.xlsx) · [Descargar XLSX](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Matriz_de_requisitos_PsyAi_Connect_v3.1.1.xlsx) |
-| Mockups | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2Fmockups.1.pdf) |
-| Diagramas UML | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagramas_UML_actualizados_2026-11.pdf) |
-| Diagrama entidad-relación ordenado | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagrama_ER_ordenado.3.pdf) |
-| Diagrama relacional | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagrama_Relacional.pdf) |
-| Guía de marca v1.1 | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI-Connect-Guia-de-marca_V1.1.pdf) |
-| Mapa de navegación | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI-Connect-Mapa-de-navegacion_actualizado_2026-11.pdf) |
+Haz clic en **Previsualizar** para abrir el documento en el navegador. Los enlaces de descarga entregan el archivo original.
+
+| Documento | Previsualizar | Descargar |
+|---|---|---|
+| Casos de uso | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FCasos_de_Uso_PsyAI_Connect_actualizado_2026-11.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Casos_de_Uso_PsyAI_Connect_actualizado_2026-11.pdf) |
+| Historias de usuario | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FHistorias_de_Usuario_PsyAI_Connect_actualizadas_2026-11.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Historias_de_Usuario_PsyAI_Connect_actualizadas_2026-11.pdf) |
+| Manual de usuario | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FManual_Usuario_PsyAI_Connect_actualizado_2026-11.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Manual_Usuario_PsyAI_Connect_actualizado_2026-11.pdf) |
+| Matriz de requisitos v3.1.1 | [Abrir en Excel Online](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FMatriz_de_requisitos_PsyAi_Connect_v3.1.1.xlsx) | [XLSX](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Matriz_de_requisitos_PsyAi_Connect_v3.1.1.xlsx) |
+| Mockups | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2Fmockups.1.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/mockups.1.pdf) |
+| Diagramas UML | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagramas_UML_actualizados_2026-11.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/PsyAI_Connect_Diagramas_UML_actualizados_2026-11.pdf) |
+| Diagrama entidad-relación ordenado | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagrama_ER_ordenado.3.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/PsyAI_Connect_Diagrama_ER_ordenado.3.pdf) |
+| Diagrama relacional | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagrama_Relacional.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/PsyAI_Connect_Diagrama_Relacional.pdf) |
+| Guía de marca v1.1 | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI-Connect-Guia-de-marca_V1.1.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/PsyAI-Connect-Guia-de-marca_V1.1.pdf) |
+| Mapa de navegación | [Abrir visor PDF](https://docs.google.com/gview?url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI-Connect-Mapa-de-navegacion_actualizado_2026-11.pdf) | [PDF](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/PsyAI-Connect-Mapa-de-navegacion_actualizado_2026-11.pdf) |
 
 </details>
 
