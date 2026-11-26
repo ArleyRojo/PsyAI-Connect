@@ -263,10 +263,12 @@ La documentación técnica está en [`docs/`](docs/README.md), organizada por te
 | Casos de uso | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FCasos_de_Uso_PsyAI_Connect_actualizado_2026-11.pdf) |
 | Historias de usuario | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FHistorias_de_Usuario_PsyAI_Connect_actualizadas_2026-11.pdf) |
 | Manual de usuario | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FManual_Usuario_PsyAI_Connect_actualizado_2026-11.pdf) |
-| Matriz de requisitos | [Ver en Excel Online](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FMatriz_de_requisitos_PsyAi_Connect_actualizada_v2.3.xlsx) |
+| Matriz de requisitos v3.1.1 | [Previsualizar en Excel Online](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FMatriz_de_requisitos_PsyAi_Connect_v3.1.1.xlsx) · [Descargar XLSX](https://github.com/ManuelRojas22/PsyAi-Connect/releases/download/v1.0-docs/Matriz_de_requisitos_PsyAi_Connect_v3.1.1.xlsx) |
 | Mockups | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2Fmockups.1.pdf) |
 | Diagramas UML | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagramas_UML_actualizados_2026-11.pdf) |
-| Guía de marca | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI-Connect-Guia-de-marca_actualizada_2026-11.pdf) |
+| Diagrama entidad-relación ordenado | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagrama_ER_ordenado.3.pdf) |
+| Diagrama relacional | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI_Connect_Diagrama_Relacional.pdf) |
+| Guía de marca v1.1 | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI-Connect-Guia-de-marca_V1.1.pdf) |
 | Mapa de navegación | [Ver PDF](https://docs.google.com/gview?embedded=1&url=https%3A%2F%2Fgithub.com%2FManuelRojas22%2FPsyAi-Connect%2Freleases%2Fdownload%2Fv1.0-docs%2FPsyAI-Connect-Mapa-de-navegacion_actualizado_2026-11.pdf) |
 
 </details>
