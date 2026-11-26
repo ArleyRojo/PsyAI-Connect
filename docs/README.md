@@ -1,7 +1,7 @@
 # Documentación Técnica de PsyAI Connect
 
-> **Índice de la carpeta `docs/`** — Aquí vive toda la documentación técnica detallada del proyecto.  
-> El archivo `README.md` en la **raíz del repositorio** sigue siendo la puerta de entrada general (visión general, instalación rápida, stack tecnológico). Todo lo demás — incluida la referencia completa de la API — se encuentra en esta carpeta.
+> **Índice de la carpeta `docs/`** — Aquí vive toda la documentación técnica detallada del proyecto.
+> El archivo `README.md` en la **raíz del repositorio** sigue siendo la puerta de entrada general (visión general, instalación rápida, stack tecnológico). La referencia completa de la API y las demás guías están en esta carpeta.
 
 ---
 
@@ -40,4 +40,4 @@
 
 ---
 
-> **Nota:** El archivo `README.md` en la **raíz del repositorio** es la única documentación que queda en la raíz. Cualquier otro `.md` (incluyendo `API.md` y `SEGURIDAD.md`) vive en `docs/`.
+> **Nota:** El archivo `README.md` en la **raíz del repositorio** es la única documentación que queda en la raíz. Cualquier otro `.md` (incluyendo `api.md` y `security.md`) vive en `docs/`.

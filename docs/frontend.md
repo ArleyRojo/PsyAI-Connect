@@ -1,6 +1,6 @@
 # Frontend — PsyAI Connect
 
-> **Resumen:** Organización del frontend (HTML, CSS y JavaScript vanilla sobre plantillas Django), carga de estilos y scripts, cliente HTTP con CSRF, notificaciones, tema claro/oscuro y convenciones.  
+> **Resumen:** Organización del frontend (HTML, CSS y JavaScript vanilla sobre plantillas Django), carga de estilos y scripts, cliente HTTP con CSRF, notificaciones, tema claro/oscuro y convenciones.
 > **Audiencia:** Desarrolladores frontend y full-stack que tocan la UI.
 
 ---
@@ -18,7 +18,6 @@ static/
 │   │   ├── custom-alerts.css   # Estilos de PsyAIAlerts
 │   │   ├── custom-select.css   # Select personalizado
 │   │   ├── card-3d.css         # Tarjetas 3D (landing)
-│   │   └── cookies.css         # Banner de cookies (sin referencias en plantillas)
 │   ├── layout/
 │   │   └── layout.css          # Layout general (sidebar, header, grid)
 │   ├── pages/
@@ -114,7 +113,7 @@ Cada plantilla añade sus módulos después de los parciales. Los scripts de `co
 
 ## 3. Cliente HTTP y CSRF
 
-La API usa sesiones y CSRF (ver `API_DOCUMENTATION.md`). En el navegador hay tres piezas que trabajan juntas.
+La API usa sesiones y CSRF (ver `api.md`). En el navegador hay tres piezas que trabajan juntas.
 
 ### `csrf.js` — CSRF automático
 
@@ -172,7 +171,7 @@ try {
 
 ## 4. Notificaciones — `PsyAIAlerts`
 
-**Archivo:** `static/js/core/shared/alerts.js` · **Estilos:** `static/css/components/custom-alerts.css`  
+**Archivo:** `static/js/core/shared/alerts.js` · **Estilos:** `static/css/components/custom-alerts.css`
 **Globales:** `window.PsyAIAlerts` y `window.mostrarToast`.
 
 ```js
@@ -319,9 +318,31 @@ Los portales de paciente y profesional comparten `alerts.js`, `logout.js` y `nom
 
 ## Ver también
 
-- [`API_DOCUMENTATION.md`](api.md) — endpoints que consumen estos scripts
-- [`ARCHITECTURE.md`](architecture.md) — arquitectura general
+- [`api.md`](api.md) — endpoints que consumen estos scripts
+- [`architecture.md`](architecture.md) — arquitectura general
 - [`data-models.md`](data-models.md) — modelos de datos
 - [`chatbot-ai.md`](chatbot-ai.md) — detalle de `chatbot.js`
 - [`security.md`](security.md) — CSRF, sesiones y CSP
 - [`deployment.md`](deployment.md) — build y estáticos en Docker
+## Inventario real de `static/css/` y `static/js/`
+
+El inventario completo del disco (sin incluir vendor) es:
+
+```text
+static/css/base/{animations.css,base.css}
+static/css/components/{card-3d.css,components.css,custom-alerts.css,custom-select.css}
+static/css/layout/layout.css
+static/css/pages/{admin-asignaciones.css,admin-dashboard.css,admin-mantenimiento.css,admin-seguridad.css,admin.css,auth.css,calificaciones.css,evolution-polish.css,historia_clinica_paciente.css,historia_clinica_pro.css,landing.css,mis-datos.css,patient-agenda-v2.css,patient-consejos.css,patient-dashboard-v2.css,patient-facturas-responsive.css,patient-facturas-v2.css,patient.css,professional.css}
+static/css/themes/{dark-polish.css,theme.css}
+static/js/base/{index.js,landing.js}
+static/js/components/custom-select.js
+static/js/core/shared/{account-status.js,alerts.js,api-connection.js,aside.js,connection-status.js,csrf.js,inactividad.js,localStorage-detector.js,mobile-navbar-toggle.js,nombre.usuario.js,politica-contrasena.js,professional-notifications.js,rol-usuario.js,theme-inline.js,theme.js}
+static/js/modules/admin/{admin.asignaciones.js,admin.aviso-politicas.js,admin.campana.js,admin.chatbot.config.js,admin.dashboard.charts.js,admin.dashboard.js,admin.dashboard.sse.js,admin.dashboard.utils.js,admin.logs.js,admin.mantenimiento.js,admin.notifications.js,admin.rendimiento.js,admin.roles.js,admin.seguridad.js,admin.users.js}
+static/js/modules/auth/{auth-guard.js,auth-ui.js,login.js,logout.js,recover.js,register.js}
+static/js/modules/patient/{agendaquotes.js,aside.js,calificaciones.js,chatbot.js,consejos.js,dashboard.consejos.js,evolution.js,historia_clinica_paciente.js,mis-datos.js,my.profile.js,notifications.js}
+static/js/modules/professional/{anamnesis.js,aside.js,calificaciones.js,historia_clinica_pro.js,my.agenda.js,my.profile2.js,patients.consejos.js,patients.evolution.js,patients.js,patients.prediagnostico.js,reports.js}
+static/js/modules/shared/direct-chat.js
+static/js/vendor/chart.umd.min.js
+```
+
+`static/responsive/` contiene estilos responsive fuera de `static/css/`; existen `static/css/pages/admin-asignaciones.css`, `admin-mantenimiento.css`, `admin-seguridad.css`, `patient-consejos.css`, `mis-datos.css`, `calificaciones.css` y `patient-facturas-responsive.css`. No existe `components/cookies.css`.

@@ -1,6 +1,6 @@
 # Roles y Permisos — PsyAI Connect
 
-> **Resumen:** Define los tres roles del sistema (`paciente`, `profesional`, `admin`), qué pantallas y funcionalidades tiene cada uno, cómo se asignan los roles al registrarse o iniciar sesión, y cómo se protegen los endpoints mediante clases DRF en `apps/core/permissions.py` y utilidades en `apps/core/utils.py`.  
+> **Resumen:** Define los tres roles del sistema (`paciente`, `profesional`, `admin`), qué pantallas y funcionalidades tiene cada uno, cómo se asignan los roles al registrarse o iniciar sesión, y cómo se protegen los endpoints mediante clases DRF en `apps/core/permissions.py` y utilidades en `apps/core/utils.py`.
 > **Audiencia:** desarrolladores y QA que necesitan entender el modelo de autorización.
 
 ---
@@ -22,7 +22,7 @@ El modelo de usuario es `Register` (`apps/authentication/models.py`), que extien
 | `idUsuario` | AutoField (PK) | Identificador del usuario |
 | `nombre` | CharField(120) | Nombre completo |
 | `email` | EmailField (único) | Usuario de autenticación (`USERNAME_FIELD`) |
-| `password` | CharField(255) | Hash bcrypt (columna `contrasena`) |
+| `password` | CharField(255) | Hash Argon2id (columna `contrasena`) |
 | `rol` | CharField(20) | `choices=[('paciente','Paciente'), ('profesional','Profesional'), ('admin','Admin')]` |
 | `fotoPerfil` | CharField(255) | URL de foto de perfil |
 | `estadoCuenta` | CharField(20) | `choices=[('Activa','Activa'), ('Suspendida','Suspendida')]`, default `Activa` |
@@ -95,7 +95,7 @@ Todas las vistas de Django REST Framework usan clases de permiso que heredan de 
 | 2FA verify login | `POST /api/totp/verify-login` | ✅ | ✅ | ✅ |
 | **Perfil** | | | | |
 | Ver/editar propio perfil | `GET/PUT /api/perfil/paciente`, `/api/perfil/profesional` | ✅ | ✅ | ✅ (propio) |
-| Subir foto | `PUT /api/perfil/paciente/foto`, `/api/perfil/profesional/foto` | ✅ | ✅ | ✅ |
+| Subir foto | `PUT /api/perfil/paciente/foto`, `/api/perfil/foto` | ✅ | ✅ | ✅ |
 | **Agenda / Citas** | | | | |
 | Ver disponibilidad pública | `GET /api/citas/disponibles`, `/fechas-disponibles` | ✅ | ✅ | ✅ |
 | Crear cita | `POST /api/citas` | ✅ | ✅ | ❌ |
@@ -121,7 +121,7 @@ Todas las vistas de Django REST Framework usan clases de permiso que heredan de 
 | Historia clínica (paciente) | `GET/POST/DELETE /api/documentos/paciente/*` | ✅ | ❌ | ✅ |
 | Historia clínica (profesional) | `GET/POST/PATCH/DELETE /api/documentos/profesional/*` | ❌ | ✅ | ✅ |
 | Autorización de documentos | `POST /api/documentos/autorizacion/<id>` | ✅ | ✅ | ✅ |
-| **Consentimiento chatbot** | `GET/POST /paciente/consentimiento-chatbot` | ✅ | ❌ | ❌ |
+| **Consentimiento chatbot** | `GET/POST /api/paciente/consentimiento-chatbot` | ✅ | ❌ | ❌ |
 | **Encuesta chatbot** | `POST /api/chatbot/encuesta` | ✅ | ❌ | ❌ |
 | **Reportes** | | | | |
 | Mis reportes | `GET/POST/PATCH/DELETE /api/reportes` | ❌ | ✅ | ✅ |
@@ -129,16 +129,16 @@ Todas las vistas de Django REST Framework usan clases de permiso que heredan de 
 | Evolución de pacientes | `GET /api/evolucion/profesional` | ❌ | ✅ | ✅ |
 | **Facturación** | | | | |
 | Listar/crear facturas | `GET/POST /api/facturas` | ✅ (propias) | ✅ (propias) | ✅ (todas) |
-| Detalle/Anular factura | `GET/PATCH/DELETE /api/facturas/<id>` | ✅ (propias) | ✅ (propias) | ✅ |
-| Adjuntar evidencia de pago | `POST /api/facturas/<id>/evidencia` | ✅ (propias) | ✅ (propias) | ✅ |
-| Confirmar pago manual | `POST /api/facturas/<id>/confirmar-pago` | ✅ | ❌ | ❌ |
+| Consultar factura | `GET /api/facturas/<id>` | ✅ (propias) | ✅ (propias) | ✅ |
+| Anular factura | `PATCH /api/facturas/<id>` | ❌ | ✅ (propias) | ❌ |
+| Confirmar pago manual | `POST /api/facturas/<id>/confirmar-pago` | ❌ | ✅ | ❌ |
 | Ver evidencia | `GET /api/facturas/<id>/evidencia` | ✅ | ✅ | ✅ |
 | Stats facturación | `GET /api/facturas/stats` | ❌ | ✅ (propias) | ✅ (todas) |
 | **Panel Admin** | | | | |
 | Usuarios (listar/crear/editar/borrar) | `/api/admin/usuarios*` | ❌ | ❌ | ✅ |
 | Roles | `/api/admin/roles*` | ❌ | ❌ | ✅ |
-| Logs / Auditoría | `/api/admin/logs`, `/actividad` | ❌ | ❌ | ✅ |
-| Métricas servidor | `/api/admin/stats`, `/usuarios-online` | ❌ | ❌ | ✅ |
+| Logs / Auditoría | `/api/admin/logs` | ❌ | ❌ | ✅ |
+| Métricas servidor | `/api/admin/stats`, `/api/admin/online` | ❌ | ❌ | ✅ |
 | Configuración chatbot | `GET/POST /api/admin/chatbot/*` | ❌ | ❌ | ✅ |
 | Notificaciones | `/api/admin/notificaciones*` | ❌ | ❌ | ✅ |
 
@@ -244,7 +244,7 @@ Este comportamiento se implementa en `apps/core/views.py` (`ServePagesView.get`)
 | Concepto | Implementación |
 |----------|---------------|
 | Usuario de login | `email` (`USERNAME_FIELD = 'email'`) |
-| Contraseña | Hash bcrypt (`SecurityHelper.hash_password`, `SecurityHelper.verify_password`) |
+| Contraseña | Hash Argon2id (`SecurityHelper.hash_password`, `SecurityHelper.verify_password`) |
 | Sesión | `request.session` con `idUsuario`, `rol`, `nombre`, `email`, `fotoPerfil` |
 | Cuenta activa | `activo=True` y `estadoCuenta='Activa'` verificadas en cada petición |
 | Cuenta suspendida | `estadoCuenta='Suspendida'` → 403 en cualquier endpoint protegido; sesión limpiada |
@@ -261,3 +261,10 @@ Este comportamiento se implementa en `apps/core/views.py` (`ServePagesView.get`)
 - [`security.md`](security.md) — Autenticación, CSRF, 2FA, rate limiting, cookies seguras
 - [`chatbot-ai.md`](chatbot-ai.md) — Chatbot solo para pacientes; configuración accesible por admin
 - [`deployment.md`](deployment.md) — Variables de entorno y despliegue (no afecta al modelo de roles)
+## Precisiones de permisos y rutas
+
+- `POST /api/facturas/<id>/confirmar-pago` exige el rol Profesional (`IsProfesional`).
+- No existe `POST /api/facturas/<id>/evidencia` ni `DELETE /api/facturas/<id>`. La evidencia tiene lectura/descarga `GET`; el detalle de factura expone `GET` y `PATCH`.
+- El registro no permite crear cuentas Admin. Las vistas TOTP requieren autenticación, sin comprobar un rol específico.
+- Las rutas actuales incluyen `/api/admin/online` y `/api/admin/chatbot-config`.
+- Las páginas administrativas incluyen asignaciones, mantenimiento y seguridad; las del paciente incluyen consejos y mis-datos.

@@ -4,12 +4,12 @@
   <p><strong>Gestión clínica para conectar pacientes y profesionales de psicología.</strong></p>
   <p>Agenda, seguimiento y comunicación en una sola plataforma, con asistencia de IA.</p>
   <p>
-    <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" alt="Python 3.10+"></a>
+    <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white" alt="Python 3.13"></a>
     <a href="https://djangoproject.com"><img src="https://img.shields.io/badge/Django-5.x-092E20?logo=django&logoColor=white" alt="Django 5.x"></a>
     <a href="https://django-rest-framework.org"><img src="https://img.shields.io/badge/DRF-3.15%2B-ff1709?logo=django&logoColor=white" alt="Django REST Framework 3.15+"></a>
     <img src="https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white" alt="PostgreSQL 16">
     <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker ready">
-    <img src="https://img.shields.io/badge/Tests-700%2B-brightgreen" alt="700+ tests">
+    <img src="https://img.shields.io/badge/Tests-835%2B-brightgreen" alt="700+ tests">
   </p>
   <p>
     <a href="#qué-es">Qué es</a> ·
@@ -73,7 +73,7 @@ PsyAI Connect digitaliza la operación de un consultorio o red de psicólogos. R
 - Prediagnóstico generado a partir de la conversación, visible para el profesional.
 
 ### 💬 Comunicación
-- Chat paciente-profesional en tiempo real (SSE).
+- Chat paciente-profesional mediante sondeo periódico.
 - Correos transaccionales por SMTP y notificaciones por WhatsApp (Twilio), esta última opcional.
 
 ### 🔐 Acceso y seguridad
@@ -129,7 +129,7 @@ Los permisos reutilizables están en `apps/core/permissions.py`. Los endpoints v
 
 ### 📋 Requisitos
 
-- **Docker y Docker Compose** (recomendado), o bien Python 3.10+ y PostgreSQL 16+.
+- **Docker y Docker Compose** (recomendado), o bien Python 3.13 y PostgreSQL 16+.
 - Una API key de [Google AI Studio](https://aistudio.google.com/) para el chatbot. Sin ella, el chatbot responde con el modo de respaldo local.
 
 ### 🐳 Con Docker
@@ -200,7 +200,7 @@ Toda la configuración se hace con variables de entorno en `.env`. Las más impo
 | `SITE_URL` | URL pública, usada en los enlaces de los correos. | En producción |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Inicio de sesión con Google. | No |
 | `PAGO_CUENTA_URL`, `PAGO_CUENTA_NOMBRE`, `CITA_MONTO_DEFAULT` | Datos del pago manual y precio por defecto de una cita. | No |
-| `LOGIN_RATE_LIMIT`, `REGISTER_RATE_LIMIT`, `PASSWORD_RECOVERY_RATE_LIMIT` | Límites de peticiones en autenticación. | No |
+| `*_RATE_LIMIT` | Variables heredadas del ejemplo; no se consumen para aplicar límites. El código limita rutas con decoradores. | No |
 | `WHATSAPP_ENABLED`, `TWILIO_*` | Notificaciones por WhatsApp. | No |
 
 La lista completa y comentada está en [`.env.example`](.env.example).

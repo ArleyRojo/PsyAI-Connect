@@ -1,8 +1,8 @@
 # Documentación de Seguridad — PsyAI Connect
 
-> **Versión:** 1.2  
-> **Estado:** Documento activo. Refleja el estado real del código fuente en `config/settings/`, `apps/authentication/`, `apps/core/` y `apps/chatbot/`.  
-> **Audiencia:** desarrolladores, auditores de seguridad y equipo de operaciones.  
+> **Versión:** 1.2
+> **Estado:** Documento activo. Refleja el estado real del código fuente en `config/settings/`, `apps/authentication/`, `apps/core/` y `apps/chatbot/`.
+> **Audiencia:** desarrolladores, auditores de seguridad y equipo de operaciones.
 > **Enfoque:** defensa en capas (defense in depth) — autenticación, autorización, transporte, entrada, almacenamiento y auditoría.
 
 ---
@@ -49,7 +49,7 @@ Archivo: `apps/authentication/models.py`
 | `idUsuario` | AutoField (PK) | Identificador único |
 | `nombre` | CharField(120) | Nombre completo |
 | `email` | EmailField (único) | Credencial de login |
-| `password` | CharField(255, db_column=`contrasena`) | Hash bcrypt / Argon2id / SHA-256 legacy |
+| `password` | CharField(255, db_column=`contrasena`) | Argon2id; bcrypt y SHA-256 solo se aceptan como formatos heredados |
 | `rol` | CharField(20) | `choices=[paciente, profesional, admin]` |
 | `fotoPerfil` | CharField(255) | URL de foto de perfil |
 | `estadoCuenta` | CharField(20) | `choices=[Activa, Suspendida]`, default `Activa` |
@@ -72,7 +72,7 @@ Autentica por email + contraseña contra `Register`. Usa `SecurityHelper.verify_
 - **Motor de sesión:** `django.contrib.sessions.backends.db` (almacenamiento en BD, `config/settings/base.py`).
 - **Vida de sesión:** `SESSION_COOKIE_AGE = 604800` (7 días).
 - **Rotación tras login:** `request.session.cycle_key()` en `apps/authentication/views.py` (previene session fixation).
-- **Cierre de sesión:** `request.session.flush()` en `LogoutView` (requiere `IsAuthenticated`).
+- **Cierre de sesión:** `request.session.flush()` en `LogoutView` (`AllowAny`).
 - **Verificación por request:** `AccountStatusMiddleware` valida `activo` y `estadoCuenta='Activa'` en cada petición autenticada. Si la cuenta está suspendida, limpia la sesión y devuelve 403 JSON o redirige a `/login.html?suspendida=1`.
 
 Rutas exentas de verificación de estado de cuenta: `/static/`, `/healthz/`, `/api/login`, `/api/logout`, `/login.html`, `/favicon.ico`, `/api/session`, `/api/csrf`, `/legal/`, `/uploads/`.
@@ -91,28 +91,19 @@ El sistema soporta tres formatos en la columna `contrasena`:
 
 `SecurityHelper.hash_password()` usa `make_password()` de Django → Argon2id por defecto (configurado en `PASSWORD_HASHERS` de `config/settings/base.py`):
 ```
-Argon2PasswordHasher → PBKDF2PasswordHasher → BCryptSHA256PasswordHasher
+Argon2PasswordHasher → PBKDF2PasswordHasher → BCryptSHA256PasswordHasher (bcrypt se conserva para hashes heredados)
 ```
 
 `needs_upgrade()` retorna `True` solo para texto plano (bootstrap). Los hashes SHA-256 existentes **no se migran automáticamente** — siguen funcionando sin intervención del usuario.
 
-#### 2.5. Validadores de contraseña (`AUTH_PASSWORD_VALIDATORS`)
+#### 2.5. Política dinámica de contraseña
 
-Archivo: `config/settings/base.py`
-
-| Validador | Propósito |
-|-----------|-----------|
-| `UserAttributeSimilarityValidator` | Rechaza contraseñas similares a atributos del usuario |
-| `MinimumLengthValidator` | Mínimo 10 caracteres |
-| `CommonPasswordValidator` | Rechaza contraseñas comunes |
-| `NumericPasswordValidator` | Rechaza contraseñas solo numéricas |
-
-> Estos validadores de Django están declarados en settings, pero los endpoints REST de registro y recuperación no llaman a `validate_password()`. El registro exige mínimo 6 caracteres, una mayúscula y un número; el cambio de contraseña también permite desde 6 caracteres.
+La política se almacena en `ConfiguracionSeguridad` y se aplica a registro y restablecimiento mediante `validar_contrasena` (`apps/admin_panel/seguridad.py`). La longitud mínima configurable está entre 6 y 32 caracteres; por defecto se exige mínimo 6, mayúscula y número. El símbolo es opcional por defecto.
 
 #### 2.6. Verificación de dos factores (TOTP / 2FA)
 
-Archivo: `apps/authentication/models.py` → `TOTPDevice`  
-Archivo: `apps/authentication/services.py` → `AuthService`  
+Archivo: `apps/authentication/models.py` → `TOTPDevice`
+Archivo: `apps/authentication/services.py` → `AuthService`
 Archivo: `apps/authentication/views.py` → vistas REST
 
 | Componente | Descripción |
@@ -126,8 +117,8 @@ Archivo: `apps/authentication/views.py` → vistas REST
 
 #### 2.7. Verificación de correo electrónico
 
-Archivo: `apps/authentication/models.py` → `EmailVerificationToken`  
-Archivo: `apps/authentication/services.py`  
+Archivo: `apps/authentication/models.py` → `EmailVerificationToken`
+Archivo: `apps/authentication/services.py`
 Archivo: `apps/authentication/views.py` → `VerifyEmailView`
 
 | Componente | Descripción |
@@ -137,13 +128,13 @@ Archivo: `apps/authentication/views.py` → `VerifyEmailView`
 | Generación | `secrets.token_urlsafe(32)`, enlace `verify-email.html?token=...`. |
 | Endpoint | `POST /api/verify-email/` valida token, marca `email_verificado=True`, invalida el token. |
 | Bloqueo de login | Si `rol == "profesional"` y `email_verificado == False`, `login_user()` rechaza con 403. |
-| Recuperación de contraseña | `RecoveryTokens` (tabla `RecoveryTokens`) con token, expiración y un solo uso. Endpoints: `POST /api/forgot-password`, `POST /api/reset-password`. |
+| Recuperación de contraseña | `RecoveryTokens` (tabla `RecoveryTokens`) con token, vencimiento de una hora y un solo uso. Endpoints: `POST /api/forgot-password`, `POST /api/reset-password`. |
 
 ---
 
 ### Capa 3 — Autorización (RBAC)
 
-Archivo principal: `apps/core/permissions.py`  
+Archivo principal: `apps/core/permissions.py`
 Utilidades: `apps/core/utils.py` → `AuthHelper`
 
 #### 3.1. Clases de permiso DRF
@@ -178,8 +169,8 @@ Utilidades: `apps/core/utils.py` → `AuthHelper`
 
 ### Capa 4 — Rate limiting y protección contra fuerza bruta
 
-Archivo: `apps/authentication/repositories.py` → `SecurityRepository`  
-Archivo: `config/settings/base.py` → `REST_FRAMEWORK` throttling  
+Archivo: `apps/authentication/repositories.py` → `SecurityRepository`
+Archivo: `config/settings/base.py` → `REST_FRAMEWORK` throttling
 Archivo: `apps/authentication/views.py` → decoradores `django-ratelimit`
 
 #### 4.1. Throttling de DRF (API global)
@@ -205,13 +196,13 @@ Implementado con `@method_decorator(ratelimit(key='ip', rate='X/m', method='POST
 
 #### 4.3. Bloqueo por intentos fallidos (`IntentosFallidos`)
 
-Archivo: `apps/authentication/models.py` → `IntentosFallidos`  
+Archivo: `apps/authentication/models.py` → `IntentosFallidos`
 Archivo: `apps/authentication/repositories.py` → `SecurityRepository`
 
 | Comportamiento | Umbral | Acción |
 |----------------|--------|--------|
 | Registro de intento fallido | — | Incrementa contador por email |
-| Bloqueo tras 5 intentos | `intentos >= 5` | `bloqueado_hasta = ahora + 15 min` |
+| Bloqueo tras 5 intentos (valor predeterminado configurable; rango 3–10) | `intentos >= 5` | `bloqueado_hasta = ahora + 15 min (valor predeterminado configurable; rango 5–120 min)` |
 | `check_brute_force(email)` | — | Retorna si está bloqueado y segundos restantes |
 | `reset_failed_attempts(email)` | — | Reinicia contador y bloqueo tras login exitoso |
 | `check_rate_limit(key, ...)` | configurable | Bloqueo temporal por clave (registro, recuperación) |
@@ -253,7 +244,7 @@ Validación de email, contraseña (mínimo 6 caracteres, mayúscula, número), e
 
 ### Capa 6 — Middleware de seguridad y cabeceras HTTP
 
-Archivo: `apps/core/middleware/security_headers.py` → `SecurityHeadersMiddleware`  
+Archivo: `apps/core/middleware/security_headers.py` → `SecurityHeadersMiddleware`
 Archivo: `config/settings/base.py` y `prod.py`
 
 #### 6.1. Cabeceras inyectadas por `SecurityHeadersMiddleware`
@@ -266,7 +257,7 @@ Archivo: `config/settings/base.py` y `prod.py`
 | `Content-Security-Policy` | Ver abajo | Controla fuentes de recursos (en prod se enforced; en dev es `Report-Only`) |
 | `frame-ancestors` | `'none'` | Evita clickjacking (complementa `X-Frame-Options`) |
 | `base-uri` | `'self'` | Evita inyección de `<base>` malicioso |
-| `form-action` | `'self'` | Restringe a dónde pueden enviar formularios |
+| `form-action` | `'self' https://accounts.google.com` | Permite el flujo de Google OAuth |
 
 #### 6.2. Content Security Policy (CSP)
 
@@ -282,7 +273,7 @@ connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com;
 frame-src 'self' https://accounts.google.com;
 frame-ancestors 'none';
 base-uri 'self';
-form-action 'self';
+form-action 'self' https://accounts.google.com;
 ```
 
 - **Desarrollo (`DEBUG=True`):** `Content-Security-Policy-Report-Only` (no rompe funcionalidad mientras se ajusta).
@@ -308,7 +299,7 @@ form-action 'self';
 
 Ver sección **2.4** (formatos híbridos) y `PASSWORD_HASHERS` en `config/settings/base.py`:
 ```
-Argon2PasswordHasher → PBKDF2PasswordHasher → BCryptSHA256PasswordHasher
+Argon2PasswordHasher → PBKDF2PasswordHasher → BCryptSHA256PasswordHasher (bcrypt se conserva para hashes heredados)
 ```
 
 Campo `contrasena` (`CharField(max_length=255)`) suficiente para hash Argon2id (~97 caracteres).
@@ -317,7 +308,7 @@ Campo `contrasena` (`CharField(max_length=255)`) suficiente para hash Argon2id (
 
 | Modelo | Tabla | Un solo uso | Expiración |
 |--------|-------|-------------|------------|
-| `RecoveryTokens` | `RecoveryTokens` | Sí (`used=True`) | 24 horas |
+| `RecoveryTokens` | `RecoveryTokens` | Sí (`used=True`) | 1 hora |
 | `EmailVerificationToken` | `EmailVerificationTokens` | Sí (`used=True`) | 24 horas |
 
 Ambos invalidan tokens previos no usados al crear uno nuevo (evita acumulación de tokens válidos).
@@ -355,10 +346,10 @@ Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
 
 | Área | Controles principales | Archivos clave |
 |------|----------------------|----------------|
-| Autenticación | Email backend, sesión, ciclo de clave, bcrypt/Argon2id | `backends.py`, `security.py`, `views.py` |
+| Autenticación | Email backend, sesión, ciclo de clave, Argon2id (bcrypt heredado) | `backends.py`, `security.py`, `views.py` |
 | Autorización | 7 clases DRF RBAC, `IsOwnerOrStaff` | `apps/core/permissions.py` |
 | Sesión | DB engine, HttpOnly, SameSite, Secure (prod), rotación | `base.py`, `prod.py`, `views.py` |
-| Fuerza bruta | Rate limiting por endpoint, bloqueo 15 min tras 5 fallos | `repositories.py`, `views.py` |
+| Fuerza bruta | Rate limiting por endpoint, bloqueo 15 min (valor predeterminado configurable; rango 5–120 min) tras 5 fallos | `repositories.py`, `views.py` |
 | Entrada | Validación archivos (ext, tamaño, magic bytes), DRF serializers | `apps/core/utils.py`, `serializers.py` |
 | PII / IA | Sanitización antes de Gemini (emails, teléfonos, documentos, tarjetas) | `apps/chatbot/services.py` |
 | Cabeceras HTTP | CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy | `security_headers.py`, `base.py`, `prod.py` |
@@ -393,7 +384,7 @@ Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
    │
 5. Si credenciales inválidas:
    ├── register_failed_attempt(email) → incrementa IntentosFallidos
-   ├── Si intentos >= 5 → bloqueado_hasta = ahora + 15 min
+   ├── Si intentos >= 5 → bloqueado_hasta = ahora + 15 min (valor predeterminado configurable; rango 5–120 min)
    └── Respuesta 401 (sin revelar si el email existe)
 ```
 
@@ -451,3 +442,10 @@ Archivo: `apps/core/middleware/audit.py` → `AuditActivityMiddleware`
 - [`data-models.md`](data-models.md) — Modelos de autenticación y seguridad
 - [`api.md`](api.md) — Referencia completa de endpoints con permisos requeridos
 - [`architecture.md`](architecture.md) — Arquitectura general del sistema
+### Política vigente de contraseñas
+
+La política es dinámica y se lee de `ConfiguracionSeguridad`; la validación la implementa `validar_contrasena` en `apps/admin_panel/seguridad.py`. Exige longitud entre 6 y 32 caracteres, al menos una mayúscula y un número; el símbolo es opcional. Se aplica en el registro y en el restablecimiento de contraseña. No depende únicamente de `AUTH_PASSWORD_VALIDATORS`.
+
+La configuración de intentos usa por defecto 5 intentos y 15 minutos de bloqueo. `ConfiguracionSeguridad` permite configurar entre 3 y 10 intentos y entre 5 y 120 minutos.
+
+`RecoveryTokens` vence en una hora. `EmailVerificationToken` conserva su vencimiento de 24 horas. La ruta de verificación es `/api/verify-email` (sin barra final).

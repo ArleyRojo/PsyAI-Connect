@@ -7,8 +7,8 @@ Plataforma web de bienestar emocional que combina un chatbot con IA y la conexi�
 | Capa | Tecnología |
 |---|---|
 | Backend | Django 5.2, Django REST Framework, django-allauth (login con Google) |
-| Base de datos | PostgreSQL 16 (SQLite en memoria para pruebas unitarias) |
-| Frontend | Plantillas Django, Bootstrap 5, JavaScript modular (`static/js/{base,components,core,modules}`), CSS por rol |
+| Base de datos | PostgreSQL 16 (también en pruebas) |
+| Frontend | Plantillas Django, Bootstrap 5, JavaScript modular (`static/js/base/`, `static/js/components/`, `static/js/core/` y `static/js/modules/`), CSS por rol |
 | IA | Google Gemini (respuestas del chatbot y prediagnóstico), con modelo de respaldo configurable |
 | Mensajería | SMTP (correos), WhatsApp vía Twilio (con proveedor `Dummy` para desarrollo) |
 | Servidor | Waitress en producción (`--threads=32` en `install/Dockerfile`), Docker multi-stage |
@@ -26,7 +26,7 @@ flowchart LR
     D --> T[Twilio WhatsApp]
     U -->|Google OAuth| A[allauth]
     A --> D
-    D -.->|SSE| U
+    D -.->|sondeo periódico| U
 ```
 
 El cobro de las citas es **manual** (link de cobro configurado por variables de entorno); no hay pasarela de pago integrada.
@@ -67,7 +67,8 @@ La separación se cumple en la mayor parte del código, pero hay excepciones que
 | `admin_panel` | Panel de administración, estadísticas y logs en tiempo real | `AuditoriaAccesos`, `Logs` |
 | `core` | Permisos, middleware, WhatsApp, webhooks, utilidades compartidas | `NewsletterSubscriber` |
 
-Comandos de gestión (`manage.py`): `enviar_recordatorios`, `enviar_notificaciones_programadas`, `probar_whatsapp`, `send_daily_tips`, `limpiar_facturas`, `listar_menores`, `generar_hash`, `normalizar_roles`.
+Comandos de gestión (`manage.py`): `enviar_recordatorios`, `enviar_notificaciones_programadas`, `probar_whatsapp`, `send_daily_tips`, `limpiar_facturas`, `listar_menores`, `generar_hash`,
+ormalizar_roles`.
 
 ## 5. Cadena de middleware
 
@@ -84,7 +85,8 @@ Orden en `config/settings/base.py`:
 9. `MessageMiddleware`
 10. `XFrameOptionsMiddleware`
 11. allauth `AccountMiddleware`
-12. `SecurityHeadersMiddleware` — CSP, `nosniff`, `Referrer-Policy`
+12. `SecurityHeadersMiddleware` — CSP,
+osniff`, `Referrer-Policy`
 13. `TelemetryMiddleware` — métricas de peticiones y latencia para el panel admin
 14. `AuditActivityMiddleware` — auditoría de acciones
 
@@ -142,7 +144,7 @@ sequenceDiagram
 
 ### Chatbot y detección de riesgo
 
-El chatbot envía el mensaje a Gemini con un prompt que pide un nivel de riesgo (`bajo`, `moderado`, `alto`, `crítico`). Ante ideación suicida o autolesión, la respuesta incluye la línea de crisis configurada (`DEFAULT_CRISIS_PHONE` en `chatbot/services.py`) y se puede enviar un correo de alerta (`emails/alerta_riesgo.html`). El resultado se guarda en `PrediagnosticoChatbot`.
+El chatbot envía el mensaje a Gemini con un prompt que pide un nivel de riesgo del chat (Alto, Medio, Bajo, Sin riesgo) y prediagnóstico (`bajo`, `moderado`, `alto`, `critico`). Ante ideación suicida o autolesión, la respuesta incluye la línea de crisis configurada (`DEFAULT_CRISIS_PHONE` en `chatbot/services.py`) y se puede enviar un correo de alerta (`emails/alerta_riesgo.html`). El resultado se guarda en `PrediagnosticoChatbot`.
 
 ```mermaid
 flowchart LR
@@ -165,8 +167,10 @@ El panel de administración y parte del paciente usan **Server-Sent Events** (`S
 flowchart LR
     subgraph Docker
         APP[psyai_app_prod<br/>Waitress + Django] --> DB[(PostgreSQL 16<br/>sin puerto expuesto)]
+        SCH[psyai_scheduler_prod<br/>manage.py programador] --> DB
     end
     APP --- V[(volumen uploads_data)]
+    APP --- B[(volumen backups_data)]
     PX[Proxy HTTPS<br/>X-Forwarded-Proto] --> APP
 ```
 
@@ -180,10 +184,17 @@ flowchart LR
 | Tema | Detalle |
 |---|---|
 | Caché | `LocMemCache`: cada proceso tiene la suya; no se comparte entre workers ni contenedores |
-| Concurrencia | Waitress con 4 hilos; ajustar según la carga esperada |
+| Concurrencia | Waitress con 32 hilos |
 | Cuentas SHA-256 antiguas | Siguen aceptadas; no se migran automáticamente |
 | CSP | Permite `'unsafe-inline'` y hay manejadores `onclick` en plantillas |
-| 2FA | Existe el modelo `TOTPDevice` y código asociado, pero la librería TOTP no figura en `requirements.txt` |
-| Superusuario de prueba | `install/entrypoint.sh` crea un superusuario de demostración si no existe; revisar que no se use en producción |
-| Rutas heredadas | Hay rutas `*_legacy` en `chatbot/urls.py` pendientes de retirar |
+| 2FA | `pyotp` y `qrcode` están declarados en `requirements.txt` |
+| Superusuario de prueba | `admin@psyai.com` se crea solo con `config.settings.dev` |
+| Rutas heredadas | Las rutas `*_legacy` están registradas en `chatbot/urls.py` y `patients/urls.py` |
 | `chatbot/services.py` | Archivo muy grande (~73 KB); candidato a dividirse en módulos |
+### Servicios de ejecución y niveles de riesgo
+
+En Compose, `scheduler` ejecuta `python manage.py programador` para tareas periódicas de recordatorios y respaldos. Waitress sirve Django con 32 hilos. El entorno de pruebas usa PostgreSQL y el superusuario de demostración pertenece solo a settings de desarrollo.
+
+Los niveles que devuelve el chat son **Alto / Medio / Bajo / Sin riesgo**. El prediagnóstico usa los valores `bajo | moderado | alto | critico`; son escalas distintas.
+
+Las rutas heredadas marcadas `*_legacy` están registradas tanto en `apps/chatbot/urls.py` como en `apps/patients/urls.py`.

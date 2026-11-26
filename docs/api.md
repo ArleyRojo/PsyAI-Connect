@@ -80,11 +80,11 @@ Donde existe paginación se usan `page` y `limit` (por defecto `limit=20` en la 
 | GET | `/api/csrf/` | Público | Devuelve el token CSRF |
 | POST | `/api/register` | Público | Registro de paciente o profesional |
 | POST | `/api/login` | Público | Inicio de sesión |
-| POST | `/api/logout` | Público | Cierra la sesión |
+| POST | `/api/logout` | Público (AllowAny) | Cierra la sesión |
 | GET | `/api/session` | Público | Estado de la sesión actual |
 | POST | `/api/forgot-password` | Público | Solicita el correo de recuperación |
 | POST | `/api/reset-password` | Público | Cambia la contraseña con el token recibido |
-| POST | `/api/verify-email` | Público | Verifica el correo con el token recibido |
+| POST | `/api/verify-email` (sin barra final) | Público | Verifica el correo con el token recibido |
 | GET | `/api/social-redirect` | — | Redirección posterior al login con Google |
 | GET | `/api/totp/status` | Sesión | Estado del 2FA |
 | GET | `/api/totp/setup` | Sesión | Inicia la configuración del 2FA (`?name=`) |
@@ -94,7 +94,7 @@ Donde existe paginación se usan `page` y `limit` (por defecto `limit=20` en la 
 
 El inicio de sesión con Google se hace con django-allauth bajo `/accounts/`.
 
-> El 2FA depende de la librería `pyotp`, que no figura en `requirements.txt`; sin ella estos endpoints no funcionan.
+> `pyotp` y `qrcode` están incluidos en `requirements.txt`.
 
 ### POST `/api/register`
 
@@ -285,7 +285,7 @@ Los cobros son manuales: la factura queda `Pendiente` al confirmar la cita y pas
 | GET | `/api/facturas/stats` · `/api/facturas/estadisticas-admin` | Sesión | Estadísticas según el rol |
 | GET | `/api/facturas/pacientes-profesional` | Profesional | Pacientes a los que puede facturar |
 | GET, PATCH | `/api/facturas/<id>` | Sesión | Consulta o actualiza (anular, `estadoPago`) |
-| POST | `/api/facturas/<id>/confirmar-pago` | Profesional | Marca como pagada subiendo la evidencia |
+| POST | `/api/facturas/<id>/confirmar-pago` | Profesional (`IsProfesional`) | Marca como pagada subiendo la evidencia |
 | GET | `/api/facturas/<id>/evidencia` | Sesión | Descarga la evidencia del pago |
 
 Filtros del listado: `estado`, `profesional`, `paciente`, `fecha_desde`, `fecha_hasta` (según el rol).
@@ -424,5 +424,37 @@ Todas exigen sesión con rol `admin`, salvo donde se indica.
 ## 11. Notas de seguridad de la API
 
 - Los endpoints de **citas disponibles** (`/api/citas/disponibles` y `/api/citas/fechas-disponibles`) no exigen autenticación.
-- Varias rutas de utilidades (`config/pago`, `newsletter`, `client-errors`, `theme`, `whatsapp/webhook`) no declaran clases de permisos DRF; conviene confirmar que cada una valida lo necesario por su cuenta.
+- Varias rutas de utilidades (`/api/config/pago/`, `/api/newsletter/subscribe`, `/api/client-errors`, `/api/theme`, `/api/whatsapp/webhook/`) no declaran clases de permisos DRF; conviene confirmar que cada una valida lo necesario por su cuenta.
 - No hay documentación OpenAPI generada automáticamente. Una opción es añadir `drf-spectacular` para exponerla en `/api/docs/`.
+## Rutas adicionales confirmadas en las vistas
+
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| POST | `/api/facturas/<id>/recordar` | Profesional | Envía un recordatorio de pago de la factura. |
+| PUT | `/api/citas/<id>/calificacion` | Paciente (`IsPaciente`) | Consulta o registra la calificación de una cita. |
+| GET | `/api/profesional/calificaciones` | Profesional (`IsProfesional`) | Consulta calificaciones recibidas. |
+| GET, POST | `/api/paciente/notificaciones` | Paciente (`IsPaciente`) | Lista sus notificaciones. |
+| GET, POST | `/api/profesional/pacientes/<id>/consejos` | Profesional (`IsProfesional`; paciente asignado) | Lista o crea consejos para el paciente asignado. |
+| DELETE | `/api/profesional/consejos/<pk>` | Profesional (`IsProfesional`) | Elimina lógicamente un consejo propio. |
+| GET | `/api/paciente/consejos` | Paciente (`IsPaciente`) | Lista consejos recibidos. |
+| PATCH | `/api/paciente/consejos/<pk>` | Paciente (`IsPaciente`) | Marca un consejo como completado o pendiente. |
+| GET | `/api/admin/roles/catalogo` | Admin | Lista roles personalizados. |
+| POST | `/api/admin/roles/catalogo` | Admin | Crea un rol personalizado. |
+| DELETE | `/api/admin/roles/catalogo/<id>` | Admin (`IsAdmin`) | Elimina el rol si no tiene usuarios asignados. |
+| GET, PUT | `/api/admin/seguridad` | Admin (`IsAdmin`) | Consulta y actualiza parámetros de seguridad. |
+| POST | `/api/admin/seguridad/revisar` | Admin | Revisa políticas y configuración de seguridad. |
+| GET | `/api/admin/asignaciones` | Admin | Lista asignaciones profesional-paciente. |
+| POST | `/api/admin/asignaciones/reasignar` | Admin | Reasigna un caso. |
+| GET | `/api/admin/asignaciones/historial` | Admin | Consulta el historial de reasignaciones. |
+| GET | `/api/admin/mantenimiento` | Admin | Consulta estado de mantenimiento. |
+| POST | `/api/admin/mantenimiento/accion` | Admin | Ejecuta una acción de mantenimiento. |
+| PUT | `/api/admin/mantenimiento/modo` | Admin (`IsAdmin`) | Activa o desactiva el modo de mantenimiento. |
+| GET, POST | `/api/admin/copias` | Admin | Lista o crea una copia de seguridad. |
+| PUT | `/api/admin/copias/hora` | Admin (`IsAdmin`) | Configura la hora de la copia programada. |
+| POST | `/api/admin/copias/restaurar` | Admin | Restaura una copia de seguridad. |
+| GET | `/api/politicas/contrasena` | Público | Devuelve la política vigente de contraseñas. |
+| GET | `/api/sesion/inactividad` | Sesión (`IsAuthenticatedDRF`) | Devuelve el tiempo de inactividad permitido. |
+| POST | `/api/notificaciones/probar/` | Paciente autenticado | Envía una notificación de prueba a su cuenta. |
+
+El acceso indicado refleja `permission_classes` y las comprobaciones adicionales de propiedad que realizan los servicios y vistas.
+| POST | `/api/admin/profesionales/<id>/desverificar` | Admin | Retira la verificación de un profesional. |

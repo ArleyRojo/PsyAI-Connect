@@ -1,7 +1,7 @@
 # Chatbot con Google Gemini — PsyAI Connect
 
-> **Resumen:** Detalla la integración del chatbot de triaje psicológico con la API de Google Gemini: arquitectura, flujo de mensajes, rotación de API keys, detección de riesgo emocional y alerta de emergencia.  
-> **Audiencia:** Desarrolladores que mantienen o extienden el chatbot.  
+> **Resumen:** Detalla la integración del chatbot de triaje psicológico con la API de Google Gemini: arquitectura, flujo de mensajes, rotación de API keys, detección de riesgo emocional y alerta de emergencia.
+> **Audiencia:** Desarrolladores que mantienen o extienden el chatbot.
 > **Nota importante:** Este chatbot es una herramienta de **triaje y apoyo emocional**, **no sustituye** la atención psicológica profesional.
 
 ---
@@ -18,7 +18,7 @@ El módulo `apps/chatbot/` ofrece:
 | Prediagnóstico | `POST /api/chatbot/prediagnostico` — resumen orientativo de la sesión del día |
 | Encuesta | `POST /api/chatbot/encuesta` — utilidad, claridad, recomendación |
 | Consentimiento | `GET/POST /paciente/consentimiento-chatbot` — opt-in/opt-out del paciente |
-| Chat directo | `GET/POST /chat/mensajes`, `GET /chat/contactos`, `DELETE /chat/historial` — mensajería paciente–profesional |
+| Chat directo | `GET/POST /api/chat/mensajes`, `GET /api/chat/contactos`, `DELETE /api/chat/historial` — mensajería paciente–profesional |
 
 Todas las vistas requieren autenticación (`IsAuthenticatedDRF`) y, para acciones de chatbot, el rol `IsPaciente`.
 
@@ -51,7 +51,7 @@ El frontend vive en `templates/patient/aside-patient/chatbot.html` y usa `static
 Flujo principal (`enviarMensaje`):
 
 1. Añade burbuja "escribiendo..." y guarda el mensaje para posible reintento.
-2. Ejecuta `POST /api/chatbot/enviar` con `fetchConTimeout` (timeout 8 s, credenciales incluidas).
+2. Ejecuta `POST /api/chatbot/enviar` con `fetchConTimeout` (timeout 30 s, credenciales incluidas).
 3. Procesa la respuesta JSON: quita el indicador de escritura y pinta la respuesta del bot con `agregarMensajeBot`.
 4. Si falla (red, timeout, 5xx), `showChatbotError()` muestra un botón **Reintentar** que re-ejecuta `enviarMensaje` con el mensaje original.
 
@@ -152,7 +152,7 @@ La detección se basa en `ChatbotConfig` (tabla `ChatbotConfig`), editable desde
 | `fallback_response` | Respuesta genérica por defecto |
 | `crisis_phone` | Teléfono de emergencia (default `106`, Colombia) |
 
-**Lógica en `_detect_risk` / `build_response`:**
+**Lógica en `build_response`:**
 
 1. Busca términos de riesgo **alto** en el mensaje del usuario → nivel `Alto`, respuesta de crisis, notificación urgente.
 2. Busca términos de riesgo **medio** → nivel `Medio`, respuesta de derivación, notificación.
@@ -201,7 +201,7 @@ Endpoint: `POST /api/chatbot/prediagnostico` (rol paciente). Implementado en `Pr
 
 ## 8. Configuración dinámica (`ChatbotConfig`)
 
-Un registro singleton editable desde el panel admin (`/admin/chatbot/chatbotconfig/`). Campos principales:
+Un registro singleton editable desde el panel admin (`/django-admin/`). Campos principales:
 
 | Campo | Default | Descripción |
 |-------|---------|-------------|
@@ -283,12 +283,12 @@ Mensajería directa paciente–profesional: `idEmisor`, `idReceptor`, `mensaje`,
 | `POST` | `/api/chatbot/prediagnostico` | Autenticado + Paciente | Generar prediagnóstico |
 | `GET` | `/api/prediagnosticos/profesional` | Autenticado + Profesional | Listar prediagnósticos asignados |
 | `POST` | `/api/chatbot/encuesta` | Autenticado + Paciente | Enviar encuesta de satisfacción |
-| `GET` | `/paciente/consentimiento-chatbot` | Autenticado + Paciente | Leer consentimiento |
-| `POST` | `/paciente/consentimiento-chatbot` | Autenticado + Paciente | Actualizar consentimiento |
-| `GET` | `/chat/contactos` | Autenticado + Paciente | Listar profesionales con mensajes |
-| `GET` | `/chat/mensajes` | Autenticado | Obtener mensajes de una conversación |
-| `POST` | `/chat/mensajes` | Autenticado | Enviar mensaje directo |
-| `DELETE` | `/chat/historial` | Autenticado + Paciente | Borrar historial de chat |
+| `GET` | `/api/paciente/consentimiento-chatbot` | Autenticado + Paciente | Leer consentimiento |
+| `POST` | `/api/paciente/consentimiento-chatbot` | Autenticado + Paciente | Actualizar consentimiento |
+| `GET` | `/api/chat/contactos` | Autenticado + Paciente | Listar profesionales con mensajes |
+| `GET` | `/api/chat/mensajes` | Autenticado | Obtener mensajes de una conversación |
+| `POST` | `/api/chat/mensajes` | Autenticado | Enviar mensaje directo |
+| `DELETE` | `/api/chat/historial` | Autenticado + Paciente | Borrar historial de chat |
 
 ---
 
@@ -321,10 +321,17 @@ Definidas en `.env` y documentadas en [`deployment.md`](deployment.md#8-variable
 
 ## 13. Ver también
 
-- [`despliegue.md`](deployment.md) — Variables de entorno `GEMINI_API_KEY*` y despliegue con Docker
-- [`modelos-de-datos.md`](data-models.md) — Modelos del chatbot y relaciones
+- [`deployment.md`](deployment.md) — Variables de entorno `GEMINI_API_KEY*` y despliegue con Docker
+- [`data-models.md`](data-models.md) — Modelos del chatbot y relaciones
 - [`frontend.md`](frontend.md) — Scripts JS del chatbot y organización de `static/js/`
-- [`roles-y-permisos.md`](roles-and-permissions.md) — `IsPaciente`, permisos del chatbot
-- [`seguridad.md`](security.md) — Rate limiting y validación de entrada
+- [`roles-and-permissions.md`](roles-and-permissions.md) — `IsPaciente`, permisos del chatbot
+- [`security.md`](security.md) — Rate limiting y validación de entrada
 - [`api.md`](api.md) — Referencia completa de endpoints REST
 - [`architecture.md`](architecture.md) — Arquitectura general del sistema
+### Aclaraciones sobre rutas y configuración
+
+El cliente del navegador aplica un timeout de 30 segundos (`CHATBOT_TIMEOUT_MS`). Los endpoints de esta guía incluyen el prefijo `/api/`, por ejemplo `/api/chatbot/enviar` y `/api/chat/mensajes/`.
+
+`ChatbotAPIView` de `apps/patients/views.py` atiende `/api/chatbot` y sus alias de envío e historial. `apps/patients/urls.py` se incluye antes de `apps/chatbot/urls.py`, por lo que esas rutas coincidentes se resuelven primero hacia la vista de patients. La detección de riesgo ocurre dentro de `build_response`; no existe una función `_detect_risk`.
+
+La configuración puede cambiarse desde el panel propio del sistema o desde `/django-admin/` (`django-admin` de Django). No existe una ruta `/admin/chatbot/chatbotconfig/`.

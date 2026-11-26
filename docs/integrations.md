@@ -1,7 +1,7 @@
 # Integraciones Externas — PsyAI Connect
 
-> **Resumen:** Documenta las integraciones con servicios de terceros implementadas en el proyecto: Google Gemini (IA), Twilio (WhatsApp), Google OAuth (allauth), correo transaccional (SMTP) y pagos manuales con evidencia.  
-> **Audiencia:** desarrolladores y DevOps que configuran o mantienen las integraciones.  
+> **Resumen:** Documenta las integraciones con servicios de terceros implementadas en el proyecto: Google Gemini (IA), Twilio (WhatsApp), Google OAuth (allauth), correo transaccional (SMTP) y pagos manuales con evidencia.
+> **Audiencia:** desarrolladores y DevOps que configuran o mantienen las integraciones.
 > **Estado:** refleja el código real de `apps/chatbot/`, `apps/core/`, `apps/authentication/`, `apps/billing/` y `config/settings/`.
 
 ---
@@ -13,7 +13,7 @@
 | **Chatbot IA** | Google Gemini API | Respuestas del chatbot de triaje y apoyo emocional | `apps/chatbot/services.py` | Activa |
 | **Mensajería WhatsApp** | Twilio | Notificaciones de citas, recordatorios, opt-in/opt-out | `apps/core/whatsapp.py`, `apps/core/notifier.py` | Activa (modo simulado si no hay credenciales) |
 | **Autenticación social** | Google (OAuth 2.0 vía allauth) | Login con cuenta de Google | `apps/authentication/adapters.py` | Activa |
-| **Correo transaccional** | SMTP (configurable, p. ej. Brevo) | Bienvenida, facturas, citas, alertas de riesgo, recuperación de contraseña | `apps/core/services.py`, `apps/core/notifier.py`, `apps/authentication/services.py` | Activa (SMTP) |
+| **Correo transaccional** | SMTP (configurable, p. ej. SMTP) | Bienvenida, facturas, citas, alertas de riesgo, recuperación de contraseña | `apps/core/services.py`, `apps/core/notifier.py`, `apps/authentication/services.py` | Activa (SMTP) |
 | **Pagos** | Manual (evidencia de pago) | Creación y confirmación de facturas con comprobante adjunto | `apps/billing/services.py`, `apps/billing/views.py` | Activa (sin pasarela automática) |
 | **Boletín informativo** | Interno (base de datos) | Suscripción y envío de tips de bienestar emocional | `apps/core/services.py` | Activa |
 
@@ -101,8 +101,6 @@ Archivos principales:
 | `TWILIO_SID` | Account SID de Twilio | Si `WHATSAPP_ENABLED=true` | — |
 | `TWILIO_TOKEN` | Auth Token de Twilio | Si `WHATSAPP_ENABLED=true` | — |
 | `TWILIO_WHATSAPP_FROM` | Número remitente (`whatsapp:+...`) | Si `WHATSAPP_ENABLED=true` | — |
-| `TWILIO_WEBHOOK_URL` | URL pública del webhook entrante | No | — |
-| `TWILIO_STATUS_CALLBACK_URL` | URL para callbacks de estado | Opcional | — |
 | `TWILIO_TPL_RECORDATORIO` | Content SID plantilla recordatorio cita | No | — |
 | `TWILIO_TPL_CONFIRMACION` | Content SID plantilla confirmación cita | No | — |
 | `TWILIO_TPL_CANCELACION` | Content SID plantilla cancelación cita | No | — |
@@ -115,8 +113,8 @@ Archivos principales:
 
 | Endpoint | Método | Descripción |
 |----------|--------|-------------|
-| `/api/paciente/whatsapp/webhook/` | `POST` | Webhook entrante de Twilio. Verifica firma HMAC (`X-Twilio-Signature`). Maneja opt-out (`STOP`, `BAJA`, `UNSUBSCRIBE`). |
-| WhatsApp Status Callback | `POST` | Actualiza estado de notificaciones (`sent`, `delivered`, `failed`, `undelivered`) por `providerMsgId`. |
+| `/api/whatsapp/webhook/` | `POST` | Webhook entrante de Twilio. Verifica firma HMAC (`X-Twilio-Signature`). Maneja opt-out (`STOP`, `BAJA`, `UNSUBSCRIBE`). |
+| WhatsApp Status Callback | Sin ruta registrada | No hay vista conectada para callbacks de estado. |
 
 ### 3.4. Notificaciones al paciente
 
@@ -200,7 +198,7 @@ Django usa `django.core.mail.backends.smtp.EmailBackend` por defecto. En desarro
 | `DEFAULT_FROM_EMAIL` | Remitente | `PsyAI Connect <noreply@psyaiconnect.com>` |
 | `SITE_URL` | URL base para enlaces en emails | `http://localhost:8000` |
 
-> **Nota sobre Brevo:** El README menciona Brevo como servicio de correos transaccionales, pero el código implementa envío vía SMTP estándar de Django. Se puede configurar Brevo como servidor SMTP definiendo `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER` y `EMAIL_HOST_PASSWORD` con las credenciales de Brevo.
+> **Nota sobre SMTP:** El README menciona SMTP como servicio de correos transaccionales, pero el código implementa envío vía SMTP estándar de Django. Se puede configurar SMTP como servidor SMTP definiendo `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER` y `EMAIL_HOST_PASSWORD` con las credenciales de SMTP.
 
 ### 5.3. Plantillas de email
 
@@ -279,8 +277,6 @@ Archivo: `apps/core/services.py` → `CoreService`
 | `TWILIO_SID` | Twilio | Si `WHATSAPP_ENABLED=true` | — |
 | `TWILIO_TOKEN` | Twilio | Si `WHATSAPP_ENABLED=true` | — |
 | `TWILIO_WHATSAPP_FROM` | Twilio | Si `WHATSAPP_ENABLED=true` | — |
-| `TWILIO_WEBHOOK_URL` | Twilio | No | — |
-| `TWILIO_STATUS_CALLBACK_URL` | Twilio | No | — |
 | `TWILIO_TPL_RECORDATORIO` | Twilio | No | — |
 | `TWILIO_TPL_CONFIRMACION` | Twilio | No | — |
 | `TWILIO_TPL_CANCELACION` | Twilio | No | — |
@@ -302,12 +298,12 @@ Archivo: `apps/core/services.py` → `CoreService`
 | Método | Endpoint | Integración | Permiso |
 |--------|----------|-------------|---------|
 | `POST` | `/api/chatbot/enviar` | Gemini | Autenticado + Paciente |
-| `POST` | `/api/paciente/whatsapp/webhook/` | Twilio (webhook) | Público (firma HMAC) |
-| `GET/POST` | `/api/auth/social/google/` | Google OAuth | Público |
+| `POST` | `/api/whatsapp/webhook/` | Twilio (webhook) | Público (firma HMAC) |
+| `GET/POST` | `/accounts/google/login/` | Google OAuth | Público |
 | `GET/POST` | `/api/facturas` | Pagos (manual) | Autenticado |
 | `POST` | `/api/facturas/<id>/confirmar-pago` | Pagos (manual) | Profesional |
 | `GET` | `/api/facturas/<id>/evidencia` | Pagos (manual) | Autenticado |
-| `POST` | `/api/newsletter/suscribir` | Newsletter | Público |
+| `POST` | `/api/newsletter/subscribe` | Newsletter | Público |
 
 ---
 
@@ -337,3 +333,15 @@ Archivo: `apps/core/services.py` → `CoreService`
 - [`chatbot-ai.md`](chatbot-ai.md) — Detalle del chatbot con Gemini
 - [`roles-and-permissions.md`](roles-and-permissions.md) — Permisos por endpoint de integración
 - [`api.md`](api.md) — Referencia completa de endpoints REST
+## Rutas y comportamiento verificados
+
+- WhatsApp: webhook `POST /api/whatsapp/webhook/`. `WhatsAppStatusCallback` no tiene ruta registrada.
+- Google OAuth inicia en `/accounts/google/login/`; el retorno propio usa `/api/social-redirect`.
+- Newsletter: `/api/newsletter/subscribe`.
+- El profesional crea una factura aportando evidencia y queda `Pagado`, o confirma el pago adjuntando evidencia. El paciente no adjunta evidencia.
+- `ProfessionalPaymentInfo` está definido en `apps/professionals/models.py`.
+- El acceso social crea una contraseña aleatoria, guardada mediante Argon2id.
+
+Plantillas Twilio configurables en `config/settings/base.py`: `TWILIO_TPL_RECORDATORIO`, `TWILIO_TPL_CONFIRMACION`, `TWILIO_TPL_CANCELACION`, `TWILIO_TPL_MENSAJE_PRO`, `TWILIO_TPL_FACTURA`, `TWILIO_TPL_CITA_GENERAL` y `TWILIO_TPL_NOTIFICACION_ADMIN`.
+
+Plantillas de correo referenciadas por el código (en `templates/emails/`): `alerta_riesgo.html`, `cita_notificacion.html`, `cuenta_bloqueada.html`, `factura_notificacion.html`, `newsletter_daily_tip.html`, `newsletter_welcome.html`, `notificacion_admin.html`, `notificacion_masiva.html`, `pago_confirmado_webhook.html`, `password_changed.html`, `password_recovery.html` y `prediagnostico.html`.

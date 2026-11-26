@@ -1,6 +1,6 @@
 # Modelos de Datos — PsyAI Connect
 
-> **Resumen:** Este documento describe el modelo de datos del proyecto: modelos principales por app, sus campos clave, relaciones (FK, OneToOne, M2M) y un diagrama entidad-relación en Mermaid.  
+> **Resumen:** Este documento describe el modelo de datos del proyecto: modelos principales por app, sus campos clave, relaciones (FK, OneToOne, M2M) y un diagrama entidad-relación en Mermaid.
 > **Audiencia:** Desarrolladores que necesitan entender la estructura de la base de datos sin leer todos los `models.py`.
 
 ---
@@ -16,7 +16,7 @@ Usuario base del sistema. Hereda de `AbstractBaseUser`.
 | `idUsuario` | `AutoField` | PK |
 | `nombre` | `CharField(120)` | Nombre completo |
 | `email` | `EmailField(unique)` | Username real (`USERNAME_FIELD`) |
-| `contrasena` | `CharField(200)` | Hash bcrypt |
+| `contrasena` (`password`) | `CharField(255)` | Hash Argon2id (bcrypt solo heredado) |
 | `rol` | `CharField(20, choices)` | `paciente`, `profesional`, `admin` |
 | `fotoPerfil` | `CharField(255, null)` | Ruta relativa del avatar |
 | `estadoCuenta` | `CharField(20, choices)` | `Activa`, `Suspendida` |
@@ -24,10 +24,10 @@ Usuario base del sistema. Hereda de `AbstractBaseUser`.
 | `email_verificado` | `BooleanField(default=False)` | Verificación de correo |
 | `fechaRegistro` | `DateTimeField(auto_now_add)` | |
 
-**Relaciones:**  
-- 1→1 `PerfilPaciente` (related_name=`perfil_paciente`)  
-- 1→1 `PerfilProfesional` (related_name=`perfil_profesional`)  
-- 1→N `Login`, `RecoveryTokens`, `EmailVerificationToken`, `TOTPDevice`, `IntentosFallidos`  
+**Relaciones:**
+- 1→1 `PerfilPaciente` (related_name=`perfil_paciente`)
+- 1→1 `PerfilProfesional` (related_name=`perfil_profesional`)
+- 1→N `Login`, `RecoveryTokens`, `EmailVerificationToken`, `TOTPDevice`, `IntentosFallidos`
 - 1→N `Citas` (paciente/profesional), `Facturas`, `Documentos`, `ConversacionesChatbot`, `MensajesChat`, `Notificaciones`, `AuditoriaAccesos`
 
 ---
@@ -282,7 +282,11 @@ Extensión 1→1 de `Register` para profesionales.
 | `genero` | CharField(20, null) |
 | `edad` | IntegerField(null) |
 | `especialidad` | CharField(120, null) |
-| `licencia` | CharField(120, null) |
+| `tarjetaProfesional` | CharField(120, null) |
+| `numeroRethus` | CharField |
+| `verificado` | BooleanField |
+| `fechaVerificacion` | DateTimeField |
+| `verificadoPor` | FK → `Register` (null) |
 | `experiencia` | TextField(null) |
 | `estado` | CharField(choices: Activo/Inactivo, default=Activo) |
 
@@ -534,7 +538,7 @@ Configuración del prompt y parámetros de Gemini (solo 1 fila activa).
 
 ### `MensajesChat` (tabla `MensajesChat`)
 
-Chat directo paciente–profesional (SSE).
+Chat directo paciente–profesional (sondeo periódico).
 
 | Campo | Tipo |
 |-------|------|
@@ -722,6 +726,15 @@ erDiagram
     ItemsFactura }|--|| Facturas : "líneas"
     DocumentosClinicos }|..| AutorizacionesDocumento : "control acceso"
     ConversacionesChatbot }|..| EvolucionPaciente : "idConversacion"
+    Register ||--o{ ConsentimientoUsuario : "consentimientos"
+    Register ||--o{ SolicitudDerechos : "solicitudes"
+    Register ||--o| ProfessionalPaymentInfo : "datos de pago"
+    Register ||--o{ ConsejoPaciente : "autor o destinatario"
+    Register ||--o{ ReasignacionCaso : "historial"
+    Citas ||--o| CalificacionCita : "calificación"
+    RolPersonalizado ||--o{ Register : "rol asignado"
+    ConfiguracionSeguridad }|..| Register : "administrador"
+    ConfiguracionSistema }|..| Register : "administrador"
 ```
 
 ---
@@ -732,3 +745,47 @@ erDiagram
 - [`frontend.md`](frontend.md) — Cómo se consumen estos modelos desde el frontend
 - [`chatbot-ai.md`](chatbot-ai.md) — Modelos específicos del chatbot
 - [`security.md`](security.md) — Modelos de seguridad (`TOTPDevice`, `RecoveryTokens`, etc.)
+## Modelos adicionales confirmados
+
+### `RolPersonalizado` (`apps/authentication/models.py`)
+
+Catálogo de roles personalizados con nombre/código, descripción, permisos declarados, estado activo y marcas de creación/actualización. Se relaciona con `Register` mediante `rolPersonalizado` cuando se asigna uno.
+
+### `ConsentimientoUsuario` (`apps/authentication/models.py`)
+
+Registro de consentimiento versionado por usuario: tipo, versión legal, aceptación, fecha e información de origen. Permite conservar la evidencia de aceptación de los términos.
+
+### `SolicitudDerechos` (`apps/patients/models.py`)
+
+Solicitud del titular relacionada con el usuario, con tipo, estado, fechas de creación y límite de respuesta, y datos de resolución.
+
+### `ProfessionalPaymentInfo` (`apps/professionals/models.py`)
+
+Información de cobro asociada uno a uno al profesional: imagen QR y mensaje/texto de instrucciones de pago.
+
+### `ConsejoPaciente` (`apps/professionals/models.py`)
+
+Consejo redactado por un profesional para un paciente; guarda autor, destinatario, contenido, estado de lectura y fechas.
+
+### `ReasignacionCaso` (`apps/professionals/models.py`)
+
+Historial de reasignación de paciente entre profesionales, registrado con actor, profesionales involucrados, motivo y fecha.
+
+### `CalificacionCita` (`apps/scheduling/models.py`)
+
+Calificación asociada a una cita, paciente y profesional, con puntuación, comentario y fecha. La cita no admite una calificación duplicada.
+
+### `ConfiguracionSeguridad` y `ConfiguracionSistema` (`apps/admin_panel/models.py`)
+
+Configuración de seguridad administrable (incluye política de contraseña y umbrales de bloqueo) y parámetros generales del sistema, respectivamente.
+
+### Campos agregados a modelos existentes
+
+- `Register`: `rolPersonalizado` (relación con `RolPersonalizado`); `password` es `CharField(255)` y las nuevas contraseñas usan Argon2id.
+- `PerfilPaciente`: `canalNotificacion`, `whatsappConsentimiento`, `whatsappConsentimientoFecha`, `recibirRecordatorioCita`, `recibirConfirmacion`, `recibirMensajePro`, `recibirFacturas` y `recibirNotificacionesAdmin`.
+- `PerfilProfesional`: `tarjetaProfesional`, `numeroRethus`, `verificado`, `fechaVerificacion` y `verificadoPor`; no tiene campo `licencia`.
+- `Notificaciones`: `canal`, `errorDetalle`, `providerMsgId`, `omitidos`, `email_individual` y `enviado_por`.
+- `Facturas`: `recordatoriosEnviados` y `ultimoRecordatorio`.
+- `Citas`: `recordatorio_enviado`.
+- `DocumentosClinicos`: `notasInternas`.
+- `ChatbotConfig`: `prompt_history_window` y `gemini_history_window`, que limitan las ventanas de historial del contexto conversacional.
